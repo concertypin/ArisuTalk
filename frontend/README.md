@@ -1,3 +1,11 @@
+# ArisuTalk Frontend
+
+This is the frontend component of the ArisuTalk AI chat application.
+
+## Technology Stack
+
+*   **Languages**: HTML, CSS, JavaScript
+
 ## 🤝 협업 안내
 
 이 저장소는 공개 오픈소스이며, 협업자는 다음 권한을 가집니다.
@@ -29,4 +37,4 @@
 
 ### License
 이 프로젝트는 Apache License 2.0 라이선스를 따릅니다.  
-자세한 내용은 LICENSE 파일을 참고하세요. 
+자세한 내용은 ../LICENSE 파일과 NOTICE 파일을 참고하세요.
