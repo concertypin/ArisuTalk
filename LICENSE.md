@@ -4,12 +4,7 @@ This repository contains a monorepo with distinct licensing for different parts 
 
 ## Frontend Project
 
-Portions of the frontend project, specifically up to commit `efae6de096c2c084f77e034f926170d6b2aa7940`, were forked from [https://github.com/dkfk5326/ArisuTalk](https://github.com/dkfk5326/ArisuTalk) and are licensed under the Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).
-
-For the full text of the CC BY-NC 4.0 license, please refer to: [https://creativecommons.org/licenses/by-nc/4.0/](https://creativecommons.org/licenses/by-nc/4.0/)
-
-All code in the frontend project from commit `efae6de096c2c084f77e034f926170d6b2aa7940` onwards is licensed under the Apache License, Version 2.0.
-
+There are multiple licenses for the frontend project. Check out the `frontend/NOTICE` for more details.
 ## Backend Project
 
 The entire backend project is licensed under the Apache License, Version 2.0.
