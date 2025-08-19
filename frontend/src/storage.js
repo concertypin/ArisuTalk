@@ -1,3 +1,5 @@
+import { t } from './i18n.js'; // Adjust the path as needed for your project
+
 export async function loadFromBrowserStorage(key, defaultValue) {
   try {
     const value = await loadFromIndexedDB(key);

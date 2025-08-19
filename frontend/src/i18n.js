@@ -12,7 +12,8 @@ export function setLanguage(lang) {
     currentLanguage = lang;
     localStorage.setItem('language', lang);
     document.documentElement.lang = lang;
-    location.reload();
+    // Dispatch a custom event to notify the app of language change
+    window.dispatchEvent(new Event('languageChanged'));
 }
 
 export function getLanguage() {

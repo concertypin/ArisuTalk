@@ -1,5 +1,6 @@
 
 import { debounce } from '../utils.js';
+import { t } from '../i18n.js';
 
 export function handleModalClick(e, app) {
     const summary = e.target.closest('details > summary');
