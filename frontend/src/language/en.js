@@ -31,7 +31,7 @@ export const en = {
         selectAll: 'Select<br>All',
         deleteSelected: 'Delete<br>(<span id="selected-count">0</span>)',
         stickerSupport: 'Supports jpg, gif, png, bmp, webp, webm, mp4, mp3 (max 30MB each)',
-        stickerCount: 'Sticker count: ',
+        stickerCount: 'Stickers: {{count}}',
         totalStorage: 'Total storage usage: ',
         totalSize: 'Total size: ',
         memory: 'Memory',

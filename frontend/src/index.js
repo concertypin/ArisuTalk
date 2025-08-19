@@ -1162,6 +1162,10 @@ class PersonaChatApp {
       stickers: this.state.editingCharacter?.stickers || [],
     };
 
+    console.log("handleSaveCharacter: name", name);
+    console.log("handleSaveCharacter: prompt", prompt);
+    console.log("handleSaveCharacter: characterData", characterData);
+
     const characterDataString = JSON.stringify(characterData);
     const storageCheck = getLocalStorageFallbackUsage(
       characterDataString,
@@ -1203,10 +1207,12 @@ class PersonaChatApp {
 
   handleDeleteCharacter(characterId) {
     const numericCharacterId = Number(characterId);
+    console.log("handleDeleteCharacter: Deleting character with ID:", numericCharacterId);
     this.showConfirmModal(
       t("modal.characterDeleteConfirm.title"),
       t("modal.characterDeleteConfirm.message"),
       () => {
+        console.log("handleDeleteCharacter: Confirmation callback executed for ID:", numericCharacterId);
         const newCharacters = this.state.characters.filter(
           (c) => c.id !== numericCharacterId
         );

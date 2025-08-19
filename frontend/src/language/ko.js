@@ -31,7 +31,7 @@ export const ko = {
         selectAll: '전체<br>선택',
         deleteSelected: '삭제<br>(<span id="selected-count">0</span>)',
         stickerSupport: 'jpg, gif, png, bmp, webp, webm, mp4, mp3 지원 (개당 최대 30MB)',
-        stickerCount: '스티커 개수: ',
+        stickerCount: '스티커: {{count}}개',
         totalStorage: '전체 저장 용량: ',
         totalSize: '총 용량: ',
         memory: '메모리',

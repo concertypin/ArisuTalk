@@ -27,7 +27,7 @@ export function handleModalClick(e, app) {
     if (e.target.closest('#save-prompts')) app.handleSavePrompts();
 
     // Character Modal
-    if (e.target.closest('#close-character-modal')) app.closeCharacterModal();
+    if (e.target.closest('.close-character-modal-btn')) app.closeCharacterModal();
     if (e.target.closest('#save-character')) app.handleSaveCharacter();
     if (e.target.closest('#select-avatar-btn')) document.getElementById('avatar-input').click();
     if (e.target.closest('#load-card-btn')) document.getElementById('card-input').click();
