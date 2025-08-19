@@ -234,6 +234,10 @@ export const ko = {
             title: "프롬프트 불러오기 실패",
             message: "프롬프트 백업 파일이 유효하지 않거나 읽는 중 오류가 발생했습니다."
         },
+        promptRestoreComplete: {
+            title: "프롬프트 불러오기 완료",
+            message: "프롬프트를 성공적으로 불러왔습니다."
+        },
         cancelChanges: {
             title: "변경사항 취소",
             message: "저장되지 않은 변경사항이 있습니다. 정말로 취소하시겠습니까?"

@@ -233,6 +233,10 @@ export const en = {
             title: "Prompt Restore Failed",
             message: "The prompt backup file is invalid or an error occurred while reading it."
         },
+        promptRestoreComplete: {
+            title: "Prompt Restore Complete",
+            message: "The prompt has been restored successfully."
+        },
         cancelChanges: {
             title: "Cancel Changes",
             message: "There are unsaved changes. Are you sure you want to cancel?"

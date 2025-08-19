@@ -2314,8 +2314,8 @@ class PersonaChatApp {
                 settings: { ...this.state.settings, prompts: newPrompts },
                 modal: {
                   isOpen: true,
-                  title: "불러오기 완료",
-                  message: "프롬프트를 성공적으로 불러왔습니다.",
+                  title: t("modal.promptRestoreComplete.title"),
+                  message: t("modal.promptRestoreComplete.message"),
                   onConfirm: null,
                 },
               });
