@@ -91,7 +91,7 @@ function renderUserStickerPanel(app) {
             <div class="p-3">
                 <div class="flex items-center justify-between text-xs text-gray-400 mb-3">
                     <span>${t('characterModal.stickerSupport')}</span>
-                    <span>${t('characterModal.stickerCount')}${userStickers.length}개</span>
+                    <span>${t('characterModal.stickerCount', { count: userStickers.length })}</span>
                 </div>
                 <div class="flex items-center justify-between text-xs text-gray-500 mb-3">
                     <span>${t('characterModal.totalSize')}${formatBytes(currentSize)}</span>

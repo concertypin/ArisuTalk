@@ -110,7 +110,7 @@ export function handleModalInput(e, app) {
     if (e.target.id === 'settings-random-character-count') {
         const count = e.target.value;
         const label = document.getElementById('random-character-count-label');
-        if (label) label.textContent = `${count}${t('settings.characterCountUnit')}`
+        if (label) label.textContent = `${count}${t('settings.characterCountUnit')}`;
     }
 }
 

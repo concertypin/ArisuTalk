@@ -107,6 +107,8 @@ export const en = {
         backup: 'Backup',
         restoreData: 'Restore',
         language: 'Language',
+        languageEnglish: 'English',
+        languageKorean: 'Korean',
     },
     sidebar: {
         startNewChat: 'Start a new chat',

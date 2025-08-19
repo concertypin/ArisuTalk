@@ -241,7 +241,7 @@ export function renderCharacterModal(app) {
                                             </div>
                                             <div class="flex items-center justify-between text-xs text-gray-400 mb-3">
                                                 <span>${t('characterModal.stickerSupport')}</span>
-                                                <span>${t('characterModal.stickerCount', { count: (editingCharacter?.stickers || []).length })}</span>
+                                                <span>${t('characterModal.stickerCount').replace('{count}', (editingCharacter?.stickers || []).length)}</span>
                                             </div>
                                             <div class="flex items-center justify-between text-xs text-gray-500 mb-3">
                                                 <span>${t('characterModal.totalStorage')}${formatBytes(

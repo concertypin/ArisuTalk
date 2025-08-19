@@ -107,6 +107,8 @@ export const ko = {
         backup: '백업하기',
         restoreData: '불러오기',
         language: '언어',
+        languageKorean: '한국어',
+        languageEnglish: '영어'
     },
     sidebar: {
         startNewChat: '새로운 채팅 시작',

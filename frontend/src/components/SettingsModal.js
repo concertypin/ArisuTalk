@@ -116,7 +116,7 @@ export function renderSettingsModal(app) {
                                         <div>
                                             <label class="flex items-center justify-between text-sm font-medium text-gray-300 mb-2">
                                                 <span>${t('settings.characterCount')}</span>
-                                                <span id="random-character-count-label" class="text-blue-400 font-semibold">${settings.randomCharacterCount}명</span>
+                                                <span id="random-character-count-label" class="text-blue-400 font-semibold">${settings.randomCharacterCount}${t('settings.personCountUnit')}</span>
                                             </label>
                                             <input id="settings-random-character-count" type="range" min="1" max="5" step="1" value="${settings.randomCharacterCount}" class="w-full">
                                         </div>
@@ -166,8 +166,8 @@ export function renderSettingsModal(app) {
                                 <div>
                                     <label class="flex items-center text-sm font-medium text-gray-300 mb-2"><i data-lucide="globe" class="w-4 h-4 mr-2"></i>${t('settings.language')}</label>
                                     <div class="flex space-x-2">
-                                        <button onclick="window.personaApp.handleLanguageSelect('en')" class="flex-1 py-2 px-4 rounded-lg transition-colors text-sm ${settings.language === 'en' ? 'bg-blue-600 text-white' : 'bg-gray-700 hover:bg-gray-600'}">English</button>
-                                        <button onclick="window.personaApp.handleLanguageSelect('ko')" class="flex-1 py-2 px-4 rounded-lg transition-colors text-sm ${settings.language === 'ko' ? 'bg-blue-600 text-white' : 'bg-gray-700 hover:bg-gray-600'}">한국어</button>
+                                        <button onclick="window.personaApp.handleLanguageSelect('en')" class="flex-1 py-2 px-4 rounded-lg transition-colors text-sm ${settings.language === 'en' ? 'bg-blue-600 text-white' : 'bg-gray-700 hover:bg-gray-600'}">${t('settings.languageEnglish')}</button>
+                                        <button onclick="window.personaApp.handleLanguageSelect('ko')" class="flex-1 py-2 px-4 rounded-lg transition-colors text-sm ${settings.language === 'ko' ? 'bg-blue-600 text-white' : 'bg-gray-700 hover:bg-gray-600'}">${t('settings.languageKorean')}</button>
                                     </div>
                                 </div>
                             </div>
