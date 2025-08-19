@@ -122,7 +122,7 @@ export function renderCharacterModal(app) {
                     <h3 class="text-xl font-semibold text-white">${
                       isNew ? t('characterModal.addContact') : t('characterModal.editContact')
                     }</h3>
-                    <button id="close-character-modal" class="close-character-modal-btn p-1 hover:bg-gray-700 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
+                    <button id="close-character-modal" class="close-character-modal-btn p-1 hover:bg-gray-700 rounded-full" data-action="close-character-modal"><i data-lucide="x" class="w-5 h-5"></i></button>
                 </div>
                 <div class="p-6 space-y-6 overflow-y-auto">
                     <div class="flex items-center space-x-4">
@@ -340,7 +340,7 @@ export function renderCharacterModal(app) {
                     </details>
                 </div>
                 <div class="p-6 mt-auto border-t border-gray-700 shrink-0 flex justify-end space-x-3">
-                    <button id="cancel-character-modal-btn" class="close-character-modal-btn flex-1 py-2.5 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">${t('common.cancel')}</button>
+                    <button id="cancel-character-modal-btn" class="close-character-modal-btn flex-1 py-2.5 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors" data-action="close-character-modal">${t('common.cancel')}</button>
                     <button id="save-character" class="flex-1 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">${t('common.save')}</button>
                 </div>
             </div>

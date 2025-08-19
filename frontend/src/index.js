@@ -195,6 +195,10 @@ class PersonaChatApp {
         t("modal.cancelChanges.message"),
         () => {
           if (this.initialSettings) {
+            // If the language was changed, revert it
+            if (this.initialSettings.language !== this.state.settings.language) {
+              setLanguage(this.initialSettings.language);
+            }
             this.setState({
               settings: this.initialSettings,
               showSettingsModal: false,

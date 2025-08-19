@@ -170,8 +170,8 @@ export function renderSettingsModal(app) {
                                 <div>
                                     <label class="flex items-center text-sm font-medium text-gray-300 mb-2"><i data-lucide="globe" class="w-4 h-4 mr-2"></i>${t('settings.language')}</label>
                                     <div class="flex space-x-2">
-                                        <button onclick="window.personaApp.handleLanguageSelect('en')" class="flex-1 py-2 px-4 rounded-lg transition-colors text-sm ${settings.language === LANGUAGE_EN ? 'bg-blue-600 text-white' : 'bg-gray-700 hover:bg-gray-600'}">${t('settings.languageEnglish')}</button>
-                                        <button onclick="window.personaApp.handleLanguageSelect('ko')" class="flex-1 py-2 px-4 rounded-lg transition-colors text-sm ${settings.language === LANGUAGE_KO ? 'bg-blue-600 text-white' : 'bg-gray-700 hover:bg-gray-600'}">${t('settings.languageKorean')}</button>
+                                        <button onclick="window.personaApp.handleLanguageSelect('en')" class="flex-1 py-2 px-4 rounded-lg transition-colors text-sm ${settings.language === LANGUAGE_EN ? 'bg-blue-600 text-white' : 'bg-gray-700 hover:bg-gray-600'}">English</button>
+                                        <button onclick="window.personaApp.handleLanguageSelect('ko')" class="flex-1 py-2 px-4 rounded-lg transition-colors text-sm ${settings.language === LANGUAGE_KO ? 'bg-blue-600 text-white' : 'bg-gray-700 hover:bg-gray-600'}">한국어</button>
                                     </div>
                                 </div>
                             </div>
