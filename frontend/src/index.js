@@ -1,5 +1,5 @@
 import { t, setLanguage, getLanguage } from "./i18n.js";
-import { defaultPrompts, defaultCharacters } from "./defauts.js";
+import { defaultPrompts, defaultCharacters } from "./defaults.js";
 import {
   loadFromBrowserStorage,
   saveToBrowserStorage,
@@ -2340,7 +2340,7 @@ class PersonaChatApp {
       "프롬프트 초기화",
       `"${promptName}"을(를) 기본값으로 되돌리시겠습니까?\n현재 설정은 모두 사라집니다.`, // Corrected newline escape sequence
       () => {
-        import("./defauts.js").then(({ defaultPrompts }) => {
+        import("./defaults.js").then(({ defaultPrompts }) => {
           const currentPrompts = { ...this.state.settings.prompts };
 
           if (section === "main") {
