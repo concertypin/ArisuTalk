@@ -1,4 +1,4 @@
-import { language } from "./language.js";
+import { t, setLanguage } from "./i18n.js";
 import { defaultPrompts, defaultCharacters } from "./defauts.js";
 import {
   loadFromBrowserStorage,
@@ -187,8 +187,8 @@ class PersonaChatApp {
 
     if (hasChanges) {
       this.showConfirmModal(
-        "변경사항 취소",
-        "저장되지 않은 변경사항이 있습니다. 정말로 취소하시겠습니까?",
+        t('modal.cancelChanges.title'),
+        t('modal.cancelChanges.message'),
         () => {
           if (this.initialSettings) {
             this.setState({
@@ -284,7 +284,7 @@ class PersonaChatApp {
       this.state.userStickers = userStickers;
       this.state.settingsSnapshots = settingsSnapshots;
     } catch (error) {
-      console.error("데이터 로드 실패:", error);
+      console.error(t('modal.loadFailed.title'), error);
     }
   }
 
@@ -408,7 +408,7 @@ class PersonaChatApp {
         const defaultChatRoom = {
           id: defaultChatRoomId,
           characterId: characterId,
-          name: "기본 채팅",
+          name: t('chat.defaultChatName'),
           createdAt: Date.now(),
           lastActivity: Date.now(),
         };
@@ -438,7 +438,7 @@ class PersonaChatApp {
     return null;
   }
 
-  createNewChatRoom(characterId, chatName = "새 채팅") {
+  createNewChatRoom(characterId, chatName = t('chat.newChat')) {
     const numericCharacterId = Number(characterId);
     const newChatRoomId = `${numericCharacterId}_${Date.now()}_${Math.random()}`;
     const newChatRoom = {
@@ -530,8 +530,8 @@ class PersonaChatApp {
     if (!chatRoom) return;
 
     this.showConfirmModal(
-      "채팅방 삭제",
-      "이 채팅방과 모든 메시지가 삭제됩니다. 계속하시겠습니까?",
+      t('modal.deleteChatRoom.title'),
+      t('modal.deleteChatRoom.message'),
       () => {
         const newChatRooms = { ...this.state.chatRooms };
         const newMessages = { ...this.state.messages };
@@ -695,7 +695,7 @@ class PersonaChatApp {
     const sticker = this.state.userStickers.find((s) => s.id === stickerId);
     if (!sticker) return;
 
-    const newName = prompt("스티커 이름을 입력하세요:", sticker.name);
+    const newName = prompt(t('modal.editStickerName.title'), sticker.name);
     if (newName !== null && newName.trim() !== "") {
       const newStickers = this.state.userStickers.map((s) =>
         s.id === stickerId ? { ...s, name: newName.trim() } : s
@@ -732,12 +732,12 @@ class PersonaChatApp {
         "audio/mp3",
       ];
       if (!allowedTypes.includes(file.type)) {
-        alert(`${file.name}은(는) 지원하지 않는 파일 형식입니다.`);
+        alert(`${file.name}${t('modal.unsupportedFileType.message')}`);
         continue;
       }
 
       if (file.size > 30 * 1024 * 1024) {
-        alert(`${file.name}은(는) 파일 크기가 너무 큽니다. (최대 30MB)`);
+        alert(`${file.name}${t('modal.fileTooLarge.message')}`);
         continue;
       }
 
@@ -751,8 +751,8 @@ class PersonaChatApp {
         const stickerName = file.name.split(".")[0];
         this.addUserStickerWithType(stickerName, dataUrl, file.type);
       } catch (error) {
-        console.error("파일 처리 오류:", error);
-        alert("파일을 처리하는 중 오류가 발생했습니다.");
+        console.error(t('modal.fileProcessingError.title'), error);
+        alert(t('modal.fileProcessingError.message'));
       }
     }
     e.target.value = "";
@@ -782,6 +782,11 @@ class PersonaChatApp {
 
   handleModelSelect(model) {
     this.setState({ settings: { ...this.state.settings, model } });
+  }
+
+  handleLanguageSelect(lang) {
+    setLanguage(lang);
+    this.setState({ settings: { ...this.state.settings, language: lang } });
   }
 
   handleSavePrompts() {
@@ -815,8 +820,8 @@ class PersonaChatApp {
       showPromptModal: false,
       modal: {
         isOpen: true,
-        title: language.modal.promptSaveComplete.title,
-        message: language.modal.promptSaveComplete.message,
+        title: t('modal.promptSaveComplete.title'),
+        message: t('modal.promptSaveComplete.message'),
         onConfirm: null,
       },
     });
@@ -881,8 +886,8 @@ class PersonaChatApp {
 
       if (file.size > 30 * 1024 * 1024) {
         this.showInfoModal(
-          "파일 크기 초과",
-          `${file.name}은(는) 30MB를 초과합니다.`
+          t('modal.fileTooLarge.title'),
+          `${file.name}${t('modal.fileTooLarge.message2')}`
         );
         continue;
       }
@@ -901,8 +906,8 @@ class PersonaChatApp {
       ];
       if (!allowedTypes.includes(file.type)) {
         this.showInfoModal(
-          "지원하지 않는 형식",
-          `${file.name}은(는) 지원하지 않는 파일 형식입니다.`
+          t('modal.unsupportedFileType.title'),
+          `${file.name}${t('modal.unsupportedFileType.message2')}`
         );
         continue;
       }
@@ -938,10 +943,10 @@ class PersonaChatApp {
         };
         newStickers.push(sticker);
       } catch (error) {
-        console.error(`스티커 처리 오류: ${file.name}`, error);
+        console.error(`${t('modal.stickerProcessingError.title')}: ${file.name}`, error);
         this.showInfoModal(
-          "스티커 처리 오류",
-          `${file.name}을(를) 처리하는 중 오류가 발생했습니다.`
+          t('modal.stickerProcessingError.title'),
+          `${file.name}${t('modal.stickerProcessingError.message')}`
         );
       }
     }
@@ -961,7 +966,7 @@ class PersonaChatApp {
       );
 
       if (!storageCheck.canSave) {
-        this.showInfoModal("전체 저장 공간 부족", `저장 공간이 부족합니다.`);
+        this.showInfoModal(t('modal.noSpaceError.title'), t('modal.noSpaceError.message2'));
         return;
       }
 
@@ -986,7 +991,7 @@ class PersonaChatApp {
       const sticker = this.state.editingCharacter.stickers[index];
       if (!sticker) return;
 
-      const newName = prompt("스티커 이름을 입력하세요:", sticker.name);
+      const newName = prompt(t('modal.editStickerName.title'), sticker.name);
       if (newName !== null && newName.trim() !== "") {
         const newStickers = [...this.state.editingCharacter.stickers];
         newStickers[index] = { ...sticker, name: newName.trim() };
@@ -1192,8 +1197,8 @@ class PersonaChatApp {
   handleDeleteCharacter(characterId) {
     const numericCharacterId = Number(characterId);
     this.showConfirmModal(
-      language.modal.characterDeleteConfirm.title,
-      language.modal.characterDeleteConfirm.message,
+      t('modal.characterDeleteConfirm.title'),
+      t('modal.characterDeleteConfirm.message'),
       () => {
         const newCharacters = this.state.characters.filter(
           (c) => c.id !== numericCharacterId
@@ -1241,8 +1246,8 @@ class PersonaChatApp {
 
     if (file.size > 30 * 1024 * 1024) {
       this.showInfoModal(
-        language.modal.imageFileSizeExceeded.title,
-        language.modal.imageFileSizeExceeded.message
+        t('modal.imageFileSizeExceeded.title'),
+        t('modal.imageFileSizeExceeded.message')
       );
       e.target.value = "";
       return;
@@ -1257,8 +1262,8 @@ class PersonaChatApp {
     } catch (error) {
       console.error("Image processing error:", error);
       this.showInfoModal(
-        language.modal.imageProcessingError.title,
-        language.modal.imageProcessingError.message
+        t('modal.imageProcessingError.title'),
+        t('modal.imageProcessingError.message')
       );
     } finally {
       e.target.value = "";
@@ -1276,8 +1281,8 @@ class PersonaChatApp {
 
     if (!settings.apiKey) {
       this.showInfoModal(
-        language.modal.apiKeyRequired.title,
-        language.modal.apiKeyRequired.message
+        t('modal.apiKeyRequired.title'),
+        t('modal.apiKeyRequired.message')
       );
       this.setState({ showSettingsModal: true });
       return;
@@ -1486,7 +1491,7 @@ class PersonaChatApp {
       const errorMessage = {
         id: Date.now() + 1,
         sender: "System",
-        content: response.error || language.chat.messageGenerationError,
+        content: response.error || t('chat.messageGenerationError'),
         time: new Date().toLocaleTimeString("ko-KR", {
           hour: "2-digit",
           minute: "2-digit",
@@ -1572,7 +1577,7 @@ class PersonaChatApp {
     const { apiKey, model, userName, userDescription } = this.state.settings;
     if (!userName.trim() || !userDescription.trim()) {
       console.warn(
-        "Cannot generate random character: User persona is not set."
+        t('modal.cannotGenerateRandomCharacter.message')
       );
       return;
     }
@@ -1585,7 +1590,7 @@ class PersonaChatApp {
         profileCreationPrompt: this.state.settings.prompts.profile_creation
       });
       if (profile.error) {
-        console.error("Failed to generate profile:", profile.error);
+        console.error(t('modal.failedToGenerateProfile.message'), profile.error);
         return;
       }
 
@@ -1595,7 +1600,7 @@ class PersonaChatApp {
         typeof profile.name !== "string" ||
         profile.name.trim() === ""
       ) {
-        console.warn("Generated profile has invalid or empty name:", profile);
+        console.warn(t('modal.invalidProfileName.message'), profile);
         return;
       }
       if (
@@ -1603,7 +1608,7 @@ class PersonaChatApp {
         typeof profile.prompt !== "string" ||
         profile.prompt.trim() === ""
       ) {
-        console.warn("Generated profile has invalid or empty prompt:", profile);
+        console.warn(t('modal.invalidProfilePrompt.message'), profile);
         return;
       }
 
@@ -1634,7 +1639,7 @@ class PersonaChatApp {
         forceSummary: false
       });
       if (response.error) {
-        console.error("Failed to get first message from API:", response.error);
+        console.error(t('modal.failedToGetFirstMessage.message'), response.error);
         return;
       }
       if (
@@ -1642,7 +1647,7 @@ class PersonaChatApp {
         !Array.isArray(response.messages) ||
         response.messages.length === 0
       ) {
-        console.warn("API did not return valid first messages:", response);
+        console.warn(t('modal.invalidFirstMessage.message'), response);
         return;
       }
 
@@ -1662,7 +1667,7 @@ class PersonaChatApp {
       // Create a chat room for the new random character
       const newChatRoomId = this.createNewChatRoom(
         tempCharacter.id,
-        "랜덤 채팅"
+        t('chat.randomChatName')
       ); // This will update this.state.chatRooms and initialize messages[newChatRoomId] = []
 
       // Now, add the first messages to this newly created chat room
@@ -1693,8 +1698,8 @@ class PersonaChatApp {
 
   handleDeleteMessage(lastMessageId) {
     this.showConfirmModal(
-      language.modal.messageGroupDeleteConfirm.title,
-      language.modal.messageGroupDeleteConfirm.message,
+      t('modal.messageGroupDeleteConfirm.title'),
+      t('modal.messageGroupDeleteConfirm.message'),
       () => {
         const currentMessages =
           this.state.messages[this.state.selectedChatId] || [];
@@ -1737,8 +1742,8 @@ class PersonaChatApp {
     const originalMessage = currentMessages[groupInfo.startIndex];
     if (originalMessage.type === "text" && !newContent) {
       this.showInfoModal(
-        language.modal.messageEmptyError.title,
-        language.modal.messageEmptyError.message
+        t('modal.messageEmptyError.title'),
+        t('modal.messageEmptyError.message')
       );
       return;
     }
@@ -1957,8 +1962,8 @@ class PersonaChatApp {
 
     if (textLength > availableDataPixels) {
       this.showInfoModal(
-        language.modal.imageTooSmallOrCharacterInfoTooLong.title,
-        language.modal.imageTooSmallOrCharacterInfoTooLong.message
+        t('modal.imageTooSmallOrCharacterInfoTooLong.title'),
+        t('modal.imageTooSmallOrCharacterInfoTooLong.message')
       );
       return null;
     }

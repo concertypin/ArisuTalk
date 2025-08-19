@@ -1,3 +1,5 @@
+import { getLanguage } from './i18n.js';
+
 export function debounce(func, delay) {
   let timeout;
   return function (...args) {
@@ -50,5 +52,5 @@ export function formatDateSeparator(dateString) {
     day: "numeric",
     weekday: "long",
   };
-  return date.toLocaleDateString("ko-KR", options);
+  return date.toLocaleDateString(getLanguage(), options);
 }

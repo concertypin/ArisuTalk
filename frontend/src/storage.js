@@ -27,7 +27,7 @@ export async function saveToBrowserStorage(key, value) {
       window.localStorage.setItem(key, stringifiedValue);
     } catch (localStorageError) {
       console.error("localStorage fallback also failed:", localStorageError);
-      alert("데이터 저장에 실패했습니다. 브라우저 캐시를 정리해주세요.");
+      alert(t('modal.saveFailed.message'));
     }
   }
 }
