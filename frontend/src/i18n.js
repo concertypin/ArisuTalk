@@ -20,7 +20,7 @@ export function getLanguage() {
     return currentLanguage;
 }
 
-export function t(key) {
+export function t(key, params = {}) {
     const keys = key.split('.');
     let lang = languages[currentLanguage];
     for (const k of keys) {
@@ -29,6 +29,11 @@ export function t(key) {
         } else {
             return key;
         }
+    }
+    if (typeof lang === 'string' && params && Object.keys(params).length > 0) {
+        return lang.replace(/\{(\w+)\}/g, (match, p1) => {
+            return params[p1] !== undefined ? params[p1] : match;
+        });
     }
     return lang;
 }

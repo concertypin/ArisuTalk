@@ -52,7 +52,7 @@ export function renderPromptModal(app) {
                         <div class="content-wrapper">
                             <div class="content-inner p-4 border-t border-gray-700">
                                 <div class="flex items-center gap-2 mb-3">
-                                    <button onclick="window.personaApp.resetPromptToDefault('profile_creation', '', '# 캐릭터 생성 규칙 (Profile Creation Rules)')" class="py-1 px-3 bg-gray-600 hover:bg-gray-500 text-white rounded text-xs flex items-center gap-1">
+                                    <button onclick="window.personaApp.resetPromptToDefault('profile_creation', '', '${t('promptModal.profileCreationRules')}')" class="py-1 px-3 bg-gray-600 hover:bg-gray-500 text-white rounded text-xs flex items-center gap-1">
                                         <i data-lucide="rotate-ccw" class="w-3 h-3"></i> ${t('promptModal.resetToDefault')}
                                     </button>
                                 </div>

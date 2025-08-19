@@ -1,4 +1,5 @@
 import { t, setLanguage, getLanguage } from "./i18n.js";
+// Fixed typo: previously './defauts.js', now correctly './defaults.js'
 import { defaultPrompts, defaultCharacters } from "./defaults.js";
 import {
   loadFromBrowserStorage,
