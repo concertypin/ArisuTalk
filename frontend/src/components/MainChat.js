@@ -1,12 +1,13 @@
 
 import { t } from '../i18n.js';
+import { PersonaChatApp } from '../index.js';
 
 import { formatBytes } from '../storage.js';
 import { findMessageGroup, formatDateSeparator } from '../utils.js';
 import { renderAvatar } from './Avatar.js';
 
 /**
- * @param {any} app todo: describe app type
+ * @param {PersonaChatApp} app
  * @returns {string}
  */
 function renderInputArea(app) {
@@ -76,13 +77,13 @@ function renderInputArea(app) {
 }
 
 /**
- * @param {any} app todo: describe app type
+ * @param {PersonaChatApp} app
  * @returns {string}
  */
 function renderUserStickerPanel(app) {
     const userStickers = app.state.userStickers || [];
     const currentSize = app.calculateUserStickerSize();
-    
+
     return `
         <div class="absolute bottom-full left-0 mb-2 w-80 bg-gray-800 rounded-xl shadow-lg border border-gray-700 animate-fadeIn">
             <div class="p-3 border-b border-gray-700 flex items-center justify-between">
@@ -113,19 +114,19 @@ function renderUserStickerPanel(app) {
                 ` : `
                     <div class="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto">
                         ${userStickers.map(sticker => {
-                            const isVideo = sticker.type && (sticker.type.startsWith('video/') || sticker.type === 'video/mp4' || sticker.type === 'video/webm');
-                            const isAudio = sticker.type && sticker.type.startsWith('audio/');
-                            
-                            let content = '';
-                            if (isAudio) {
-                                content = `<div class="w-full h-full flex items-center justify-center bg-gray-600"><i data-lucide="music" class="w-6 h-6 text-gray-300"></i></div>`;
-                            } else if (isVideo) {
-                                content = `<video class="w-full h-full object-cover" muted><source src="${sticker.data}" type="${sticker.type}"></video>`;
-                            } else {
-                                content = `<img src="${sticker.data}" alt="${sticker.name}" class="w-full h-full object-cover">`;
-                            }
-                            
-                            return `
+        const isVideo = sticker.type && (sticker.type.startsWith('video/') || sticker.type === 'video/mp4' || sticker.type === 'video/webm');
+        const isAudio = sticker.type && sticker.type.startsWith('audio/');
+
+        let content = '';
+        if (isAudio) {
+            content = `<div class="w-full h-full flex items-center justify-center bg-gray-600"><i data-lucide="music" class="w-6 h-6 text-gray-300"></i></div>`;
+        } else if (isVideo) {
+            content = `<video class="w-full h-full object-cover" muted><source src="${sticker.data}" type="${sticker.type}"></video>`;
+        } else {
+            content = `<img src="${sticker.data}" alt="${sticker.name}" class="w-full h-full object-cover">`;
+        }
+
+        return `
                             <div class="relative group">
                                 <button onclick="window.personaApp.sendUserSticker('${sticker.name}', '${sticker.data}', '${sticker.type || 'image/png'}')" 
                                     class="w-full aspect-square bg-gray-700 rounded-lg overflow-hidden hover:bg-gray-600 transition-colors">
@@ -146,7 +147,7 @@ function renderUserStickerPanel(app) {
                                 </div>
                             </div>
                             `;
-                        }).join('')}
+    }).join('')}
                     </div>
                 `}
             </div>
@@ -156,11 +157,11 @@ function renderUserStickerPanel(app) {
 }
 
 /**
- * @param {any} app todo: describe app type
+ * @param {PersonaChatApp} app
  * @returns {string}
  */
 function renderMessages(app) {
-    const messages = app.state.messages[app.state.selectedChatId] || [];
+    const messages = app.state.messages[app.state.selectedChatId || -1 /*Make it undefined*/] || [];
     let html = '';
     for (let i = 0; i < messages.length; i++) {
         const msg = messages[i];
@@ -222,7 +223,7 @@ function renderMessages(app) {
         let messageBodyHtml = '';
         if (msg.type === 'sticker') {
             let stickerData = msg.stickerData;
-            
+
             if (!stickerData) {
                 const selectedChatRoom = app.getCurrentChatRoom();
                 const character = selectedChatRoom ? app.state.characters.find(c => c.id === selectedChatRoom.characterId) : null;
@@ -235,11 +236,11 @@ function renderMessages(app) {
                     return false;
                 });
             }
-            
+
             if (stickerData) {
                 const isVideo = stickerData.type && (stickerData.type.startsWith('video/') || stickerData.type === 'video/mp4' || stickerData.type === 'video/webm');
                 const isAudio = stickerData.type && stickerData.type.startsWith('audio/');
-                
+
                 let stickerHtml = '';
                 if (isAudio) {
                     const audioSrc = stickerData.data || stickerData.dataUrl;
@@ -279,11 +280,11 @@ function renderMessages(app) {
                     const heightStyle = isExpanded ? 'max-height: 720px;' : 'max-height: 240px;';
                     stickerHtml = `<div class="inline-block cursor-pointer transition-all duration-300" onclick="window.personaApp.toggleStickerSize(${msg.id})"><img src="${imgSrc}" alt="${stickerName}" class="${sizeClass} rounded-2xl object-contain" style="${heightStyle}"></div>`;
                 }
-                
-                const hasTextMessage = (msg.hasText && msg.content && msg.content.trim()) || 
-                                      (msg.stickerData && msg.stickerData.hasText && msg.stickerData.textContent && msg.stickerData.textContent.trim()) ||
-                                      (msg.content && msg.content.trim() && !msg.content.includes('[스티커:'));
-                
+
+                const hasTextMessage = (msg.hasText && msg.content && msg.content.trim()) ||
+                    (msg.stickerData && msg.stickerData.hasText && msg.stickerData.textContent && msg.stickerData.textContent.trim()) ||
+                    (msg.content && msg.content.trim() && !msg.content.includes('[스티커:'));
+
                 if (hasTextMessage) {
                     let textContent = '';
                     if (msg.stickerData && msg.stickerData.textContent) {
@@ -291,7 +292,7 @@ function renderMessages(app) {
                     } else if (msg.content && !msg.content.includes('[스티커:')) {
                         textContent = msg.content;
                     }
-                    
+
                     if (textContent.trim()) {
                         const textHtml = `<div class="px-4 py-2 rounded-2xl text-sm md:text-base leading-relaxed ${msg.isMe ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-100'} mb-2"><div class="break-words">${textContent}</div></div>`;
                         messageBodyHtml = `<div class="flex flex-col ${msg.isMe ? 'items-end' : 'items-start'}">${textHtml}${stickerHtml}</div>`;
@@ -376,10 +377,14 @@ function renderMessages(app) {
 }
 
 /**
- * @param {any} app todo: describe app type
+ * @param {PersonaChatApp} app
  * @returns {void}
  */
 export function renderMainChat(app) {
+    /**
+     * @type {HTMLElement}
+     */
+    // @ts-ignore
     const mainChat = document.getElementById('main-chat');
     const selectedChatRoom = app.getCurrentChatRoom();
     const selectedChat = selectedChatRoom ? app.state.characters.find(c => c.id === selectedChatRoom.characterId) : null;

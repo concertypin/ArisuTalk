@@ -1,6 +1,6 @@
 
 /**
- * @param {any} character todo: describe character type
+ * @param {import("../types").Character} character
  * @param {string} size
  * @returns {string}
  */

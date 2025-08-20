@@ -4,16 +4,15 @@
  * allowing for easier management and testing of the prompt engineering aspects.
  */
 import { getSystemPrompt } from './prompts.js';
-import '../types.js';
 
 /**
  * Builds the contents and system prompt for a content generation request.
  * @param {object} params - The parameters for building the prompt.
  * @param {string} params.userName - The user's name.
  * @param {string} params.userDescription - The user's description.
- * @param {Character} params.character - The character object.
- * @param {Message[]} params.history - The conversation history.
- * @param {Prompts} params.prompts - The prompt templates.
+ * @param {import('../types.js').Character} params.character - The character object.
+ * @param {import('../types.js').Message[]} params.history - The conversation history.
+ * @param {import('../types.js').Prompts} params.prompts - The prompt templates.
  * @param {boolean} [params.isProactive=false] - Whether the AI is initiating the conversation.
  * @param {boolean} [params.forceSummary=false] - Whether to force a memory summary.
  * @returns {{contents: Array<object>, systemPrompt: string}} - The generated contents and system prompt. todo
@@ -64,7 +63,7 @@ export function buildContentPrompt({ userName, userDescription, character, histo
 
     const lastMessageTime = history.length > 0 ? new Date(history[history.length - 1].id) : new Date();
     const currentTime = new Date();
-    const timeDiff = Math.round((currentTime - lastMessageTime) / 1000 / 60);
+    const timeDiff = Math.round((currentTime.getMilliseconds() - lastMessageTime.getMilliseconds()) / 1000 / 60);
 
     let timeContext = `(Context: It's currently ${currentTime.toLocaleString('en-US')}.`;
     if (isProactive) {

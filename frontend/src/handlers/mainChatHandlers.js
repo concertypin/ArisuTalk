@@ -1,7 +1,8 @@
+import { PersonaChatApp } from "..";
 
 /**
  * @param {MouseEvent} e
- * @param {any} app todo: describe app type
+ * @param {PersonaChatApp} app
  * @returns {void}
  */
 export function handleMainChatClick(e, app) {
@@ -39,7 +40,7 @@ export function handleMainChatClick(e, app) {
     if (cancelEditButton) {
         app.setState({ editingMessageId: null });
     }
-    
+
     if (e.target.closest('#sticker-btn')) {
         app.toggleUserStickerPanel();
     }
@@ -51,7 +52,7 @@ export function handleMainChatClick(e, app) {
 
 /**
  * @param {Event} e
- * @param {any} app todo: describe app type
+ * @param {PersonaChatApp} app
  * @returns {void}
  */
 export function handleMainChatInput(e, app) {
@@ -71,7 +72,7 @@ export function handleMainChatInput(e, app) {
 
 /**
  * @param {KeyboardEvent} e
- * @param {any} app todo: describe app type
+ * @param {PersonaChatApp} app 
  * @returns {void}
  */
 export function handleMainChatKeypress(e, app) {
@@ -90,7 +91,7 @@ export function handleMainChatKeypress(e, app) {
 
 /**
  * @param {Event} e
- * @param {any} app todo: describe app type
+ * @param {PersonaChatApp} app
  * @returns {void}
  */
 export function handleMainChatChange(e, app) {

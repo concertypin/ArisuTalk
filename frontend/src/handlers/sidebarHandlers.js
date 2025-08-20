@@ -1,7 +1,8 @@
+import { PersonaChatApp } from "..";
 
 /**
- * @param {MouseEvent} e
- * @param {any} app todo: describe app type
+ * @param {MouseEvent|any} e todo suppressing target is possibly null
+ * @param {PersonaChatApp} app
  * @returns {void}
  */
 export function handleSidebarClick(e, app) {
@@ -61,8 +62,8 @@ export function handleSidebarClick(e, app) {
 }
 
 /**
- * @param {Event} e
- * @param {any} app todo: describe app type
+ * @param {InputEvent | any} e todo suppressing target is possibly null
+ * @param {PersonaChatApp} app
  * @returns {void}
  */
 export function handleSidebarInput(e, app) {

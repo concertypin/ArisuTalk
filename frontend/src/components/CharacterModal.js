@@ -1,4 +1,5 @@
 import { t, languages, getLanguage } from '../i18n.js';
+import { PersonaChatApp } from '../index.js';
 
 import { formatBytes, getLocalStorageUsage } from "../storage.js";
 
@@ -118,7 +119,7 @@ function renderStickerGrid(app, stickers) {
 }
 
 /**
- * @param {any} app todo: describe app type
+ * @param {PersonaChatApp} app
  * @returns {string}
  */
 export function renderCharacterModal(app) {

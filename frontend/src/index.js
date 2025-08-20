@@ -423,7 +423,7 @@ export class PersonaChatApp {
   applyFontScale() {
     document.documentElement.style.setProperty(
       "--font-scale",
-      this.state.settings.fontScale
+      this.state.settings.fontScale.toString()
     );
   }
 
@@ -1007,7 +1007,7 @@ export class PersonaChatApp {
   }
 
   /**
-   * @param {string} lang
+   * @param {import("./i18n.js").SupportedLanguage} lang
    * @returns {void}
    */
   handleLanguageSelect(lang) {
@@ -1078,6 +1078,7 @@ export class PersonaChatApp {
    */
   openNewCharacterModal() {
     this.setState({
+      // @ts-ignore
       editingCharacter: { memories: [], proactiveEnabled: true },
       showCharacterModal: true,
       stickerSelectionMode: false,

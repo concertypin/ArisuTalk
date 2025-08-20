@@ -1,20 +1,21 @@
 
 import { t } from '../i18n.js';
+import { PersonaChatApp } from '../index.js';
 
 import { renderAvatar } from './Avatar.js';
 
 /**
- * @param {any} app todo: describe app type
+ * @param {PersonaChatApp} app
  * @param {any} char todo: describe char type
  * @returns {string}
  */
 function renderCharacterItem(app, char) {
     const chatRooms = app.state.chatRooms[char.id] || [];
     const isExpanded = app.state.expandedCharacterId === Number(char.id);
-    
+
     let lastMessage = null;
     let totalUnreadCount = 0;
-    
+
     chatRooms.forEach(chatRoom => {
         const messages = app.state.messages[chatRoom.id] || [];
         const chatRoomLastMessage = messages.slice(-1)[0];
@@ -73,7 +74,7 @@ function renderCharacterItem(app, char) {
 }
 
 /**
- * @param {any} app todo: describe app type
+ * @param {PersonaChatApp} app
  * @param {any} chatRoom todo: describe chatRoom type
  * @returns {string}
  */
@@ -83,7 +84,7 @@ function renderChatRoomItem(app, chatRoom) {
     const isSelected = app.state.selectedChatId === chatRoom.id;
     const isEditing = app.state.editingChatRoomId === chatRoom.id;
     const unreadCount = app.state.unreadCounts[chatRoom.id] || 0;
-    
+
     let lastMessageContent = t('sidebar.startChatting');
     if (lastMessage) {
         if (lastMessage.type === 'image') {
@@ -115,13 +116,13 @@ function renderChatRoomItem(app, chatRoom) {
                <i data-lucide="trash-2" class="w-3 h-3"></i>
            </button>`;
 
-    const metaElement = isEditing 
-        ? '' 
+    const metaElement = isEditing
+        ? ''
         : `<div class="flex items-center gap-2 shrink-0">
             ${unreadCount > 0 ? `<span class="bg-red-500 text-white text-xs font-bold w-4 h-4 flex items-center justify-center rounded-full leading-none">${unreadCount}</span>` : ''}
             <span class="text-xs text-gray-400 shrink-0">${lastMessage?.time || ''}</span>
            </div>`;
-    
+
     return `
         <div class="chat-room-item group p-2 rounded-lg cursor-pointer transition-all duration-200 ${isSelected ? 'bg-blue-600' : 'hover:bg-gray-700'} relative">
             <div onclick="${isEditing ? 'event.stopPropagation()' : `window.personaApp.selectChatRoom('${chatRoom.id}')`}" class="flex items-center justify-between">
@@ -141,7 +142,7 @@ function renderChatRoomItem(app, chatRoom) {
 }
 
 /**
- * @param {any} app todo: describe app type
+ * @param {PersonaChatApp} app
  * @returns {void}
  */
 export function renderSidebar(app) {

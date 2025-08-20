@@ -1,10 +1,11 @@
 
 import { debounce } from '../utils.js';
 import { t } from '../i18n.js';
+import { PersonaChatApp } from '../index.js';
 
 /**
- * @param {MouseEvent} e
- * @param {any} app todo: describe app type
+ * @param {MouseEvent | any} e
+ * @param {PersonaChatApp} app
  * @returns {void}
  */
 export function handleModalClick(e, app) {
@@ -91,6 +92,9 @@ const debouncedUpdateSettings = debounce((app, newSetting) => {
     app.setState({ settings: { ...app.state.settings, ...newSetting } });
 }, 500);
 
+/**
+ * @type {Record<string, (app: PersonaChatApp, value: any) => Record<string, any>>} todo we should type this properly
+ */
 const settingsUpdaters = {
     'settings-font-scale': (app, value) => ({ fontScale: parseFloat(value) }),
     'settings-api-key': (app, value) => ({ apiKey: value }),
@@ -104,8 +108,8 @@ const settingsUpdaters = {
 };
 
 /**
- * @param {Event} e
- * @param {any} app todo: describe app type
+ * @param {InputEvent | any} e todo suppressing target is possibly null
+ * @param {PersonaChatApp} app
  * @returns {void}
  */
 export function handleModalInput(e, app) {
@@ -125,8 +129,8 @@ export function handleModalInput(e, app) {
 }
 
 /**
- * @param {Event} e
- * @param {any} app todo: describe app type
+ * @param {Event|any} e todo suppressing target is possibly null
+ * @param {PersonaChatApp} app
  * @returns {void}
  */
 export function handleModalChange(e, app) {

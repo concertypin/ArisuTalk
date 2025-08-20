@@ -1,12 +1,13 @@
 
 import { t } from '../i18n.js';
+import { PersonaChatApp } from '../index.js';
 
 // Language code constants
 const LANGUAGE_EN = 'en';
 const LANGUAGE_KO = 'ko';
 
 /**
- * @param {any} app todo: describe app type
+ * @param {PersonaChatApp} app
  * @returns {string}
  */
 export function renderSnapshotList(app) {
@@ -25,7 +26,7 @@ export function renderSnapshotList(app) {
 }
 
 /**
- * @param {any} app todo: describe app type
+ * @param {PersonaChatApp} app
  * @returns {string}
  */
 export function renderSettingsModal(app) {

@@ -3,8 +3,8 @@ import '../types.js';
 /**
  * This module contains the template for the system prompt.
  * @param {Object} option 
- * @param {Prompts['main']} option.mainPrompts
- * @param {Character} option.character
+ * @param {import('../types.js').Prompts["main"]} option.mainPrompts
+ * @param {import('../types.js').Character} option.character
  * @param {string?} option.userName 
  * @param {string?} option.userDescription 
  * @param {string} option.guidelines 

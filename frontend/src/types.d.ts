@@ -1,3 +1,5 @@
+import { SupportedLanguage } from "./i18n";
+
 export type Message = {
     id: number,
     sender: string,
@@ -35,7 +37,7 @@ export type Prompts = {
 };
 
 export type State = {
-    settings: any, //todo declare type
+    settings: Settings,
     characters: Character[],
     chatRooms: any, //todo declare type
     messages: Record<string, Message[]>,
@@ -56,10 +58,29 @@ export type State = {
     searchQuery: string,
     modal: any, //todo declare type
     showInputOptions: boolean,
-    imageToSend: any, //todo declare type
+    imageToSend: {
+        dataUrl: string,
+        file: any, //todo declare type
+    }?,
     stickerSelectionMode: boolean,
     selectedStickerIndices: number[],
     showUserStickerPanel: boolean,
     expandedStickers: Set<any>, //todo declare type
     openSettingsSections: string[],
 };
+
+export type Settings = {
+    apiKey: string,
+    model: string,
+    userName: string,
+    userDescription: string,
+    proactiveChatEnabled: boolean,
+    randomFirstMessageEnabled: boolean,
+    randomCharacterCount: number,
+    randomMessageFrequencyMin: number,
+    randomMessageFrequencyMax: number,
+    fontScale: number,
+    snapshotsEnabled: boolean,
+    language: SupportedLanguage,
+    prompts: Prompts,
+}

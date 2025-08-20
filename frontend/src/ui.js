@@ -4,9 +4,10 @@ import { renderSettingsModal, renderSnapshotList } from './components/SettingsMo
 import { renderCharacterModal } from './components/CharacterModal.js';
 import { renderPromptModal } from './components/PromptModal.js';
 import { renderConfirmationModal } from './components/ConfirmationModal.js';
+import { PersonaChatApp } from './index.js';
 
 /**
- * @param {any} app todo: describe app type
+ * @param {PersonaChatApp} app
  * @returns {void}
  */
 function renderModals(app) {
@@ -24,7 +25,7 @@ function renderModals(app) {
 }
 
 /**
- * @param {any} app todo: describe app type
+ * @param {PersonaChatApp} app
  * @returns {void}
  */
 function updateSnapshotList(app) {

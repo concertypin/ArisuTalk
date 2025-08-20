@@ -1,8 +1,9 @@
 
 import { t } from '../i18n.js';
+import { PersonaChatApp } from '../index.js';
 
 /**
- * @param {any} app todo: describe app type
+ * @param {PersonaChatApp} app
  * @returns {string}
  */
 export function renderConfirmationModal(app) {
