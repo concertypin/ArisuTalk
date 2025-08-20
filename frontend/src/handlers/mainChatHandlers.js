@@ -1,4 +1,9 @@
 
+/**
+ * @param {MouseEvent} e
+ * @param {any} app todo: describe app type
+ * @returns {void}
+ */
 export function handleMainChatClick(e, app) {
     if (e.target.closest('#open-input-options-btn')) {
         app.setState({ showInputOptions: !app.state.showInputOptions });
@@ -44,6 +49,11 @@ export function handleMainChatClick(e, app) {
     }
 }
 
+/**
+ * @param {Event} e
+ * @param {any} app todo: describe app type
+ * @returns {void}
+ */
 export function handleMainChatInput(e, app) {
     if (e.target.id === 'new-message-input') {
         const message = e.target.value;
@@ -59,6 +69,11 @@ export function handleMainChatInput(e, app) {
     }
 }
 
+/**
+ * @param {KeyboardEvent} e
+ * @param {any} app todo: describe app type
+ * @returns {void}
+ */
 export function handleMainChatKeypress(e, app) {
     if (e.target.id === 'new-message-input' && e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
@@ -73,6 +88,11 @@ export function handleMainChatKeypress(e, app) {
     }
 }
 
+/**
+ * @param {Event} e
+ * @param {any} app todo: describe app type
+ * @returns {void}
+ */
 export function handleMainChatChange(e, app) {
     if (e.target.id === 'image-upload-input') {
         app.handleImageFileSelect(e);

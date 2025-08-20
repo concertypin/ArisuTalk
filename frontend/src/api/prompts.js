@@ -1,5 +1,16 @@
+import '../types.js';
+
 /**
  * This module contains the template for the system prompt.
+ * @param {Object} option 
+ * @param {Prompts['main']} option.mainPrompts
+ * @param {Character} option.character
+ * @param {string?} option.userName 
+ * @param {string?} option.userDescription 
+ * @param {string} option.guidelines 
+ * @param {string?} option.availableStickers 
+ * @param {string} option.timeContext 
+ * @param {string} option.timeDiff 
  */
 
 export function getSystemPrompt({

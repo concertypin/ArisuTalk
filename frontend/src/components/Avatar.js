@@ -1,4 +1,9 @@
 
+/**
+ * @param {any} character todo: describe character type
+ * @param {string} size
+ * @returns {string}
+ */
 export function renderAvatar(character, size = 'md') {
     const sizeClasses = {
         sm: 'w-10 h-10 text-sm',

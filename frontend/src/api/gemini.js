@@ -1,13 +1,29 @@
 import { buildContentPrompt, buildProfilePrompt } from './promptBuilder.js';
+import '../types.js';
 
 const API_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 export class GeminiClient {
+    /**
+     * @param {string} apiKey 
+     * @param {string} model 
+     */
     constructor(apiKey, model) {
         this.apiKey = apiKey;
         this.model = model;
     }
 
+    /**
+     * @param {object} arg0
+     * @param {string} arg0.userName
+     * @param {string} arg0.userDescription
+     * @param {Character} arg0.character
+     * @param {Message[]} arg0.history
+     * @param {Prompts} arg0.prompts
+     * @param {boolean} [arg0.isProactive]
+     * @param {boolean} [arg0.forceSummary]
+     * @returns {Promise<any>} todo
+     */
     async generateContent({ userName, userDescription, character, history, prompts, isProactive = false, forceSummary = false }) {
         const { contents, systemPrompt } = buildContentPrompt({
             userName,
@@ -93,6 +109,10 @@ export class GeminiClient {
         }
     }
 
+    /**
+     * @param {{userName: string, userDescription: string, profileCreationPrompt: string}} arg0
+     * @returns {Promise<any>}
+     */
     async generateProfile({ userName, userDescription, profileCreationPrompt }) {
         const { systemPrompt, contents } = buildProfilePrompt({ userName, userDescription, profileCreationPrompt });
 

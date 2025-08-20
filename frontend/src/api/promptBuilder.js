@@ -4,18 +4,19 @@
  * allowing for easier management and testing of the prompt engineering aspects.
  */
 import { getSystemPrompt } from './prompts.js';
+import '../types.js';
 
 /**
  * Builds the contents and system prompt for a content generation request.
  * @param {object} params - The parameters for building the prompt.
  * @param {string} params.userName - The user's name.
  * @param {string} params.userDescription - The user's description.
- * @param {object} params.character - The character object.
- * @param {Array<object>} params.history - The conversation history.
- * @param {object} params.prompts - The prompt templates.
+ * @param {Character} params.character - The character object.
+ * @param {Message[]} params.history - The conversation history.
+ * @param {Prompts} params.prompts - The prompt templates.
  * @param {boolean} [params.isProactive=false] - Whether the AI is initiating the conversation.
  * @param {boolean} [params.forceSummary=false] - Whether to force a memory summary.
- * @returns {{contents: Array<object>, systemPrompt: string}} - The generated contents and system prompt.
+ * @returns {{contents: Array<object>, systemPrompt: string}} - The generated contents and system prompt. todo
  */
 export function buildContentPrompt({ userName, userDescription, character, history, prompts, isProactive = false, forceSummary = false }) {
     let contents = [];
@@ -87,10 +88,10 @@ export function buildContentPrompt({ userName, userDescription, character, histo
     }
 
     const mainPrompts = prompts.main;
-    
+
     // 스티커 정보 준비
     const availableStickers = character.stickers?.map(sticker => `${sticker.id} (${sticker.name})`).join(', ') || 'none';
-    
+
     const guidelines = [
         mainPrompts.memory_generation,
         mainPrompts.character_acting,
@@ -110,7 +111,7 @@ export function buildContentPrompt({ userName, userDescription, character, histo
         timeContext,
         timeDiff,
     });
-    
+
     return { contents, systemPrompt };
 }
 

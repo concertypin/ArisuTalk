@@ -5,7 +5,10 @@ import { t } from '../i18n.js';
 const LANGUAGE_EN = 'en';
 const LANGUAGE_KO = 'ko';
 
-
+/**
+ * @param {any} app todo: describe app type
+ * @returns {string}
+ */
 export function renderSnapshotList(app) {
     return `
         ${app.state.settingsSnapshots.map(snapshot => `
@@ -21,6 +24,10 @@ export function renderSnapshotList(app) {
     `;
 }
 
+/**
+ * @param {any} app todo: describe app type
+ * @returns {string}
+ */
 export function renderSettingsModal(app) {
     const { settings } = app.state;
     return `

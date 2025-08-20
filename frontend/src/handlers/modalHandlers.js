@@ -2,6 +2,11 @@
 import { debounce } from '../utils.js';
 import { t } from '../i18n.js';
 
+/**
+ * @param {MouseEvent} e
+ * @param {any} app todo: describe app type
+ * @returns {void}
+ */
 export function handleModalClick(e, app) {
     const summary = e.target.closest('details > summary');
     if (summary) {
@@ -98,6 +103,11 @@ const settingsUpdaters = {
     'settings-random-frequency-max': (app, value) => ({ randomMessageFrequencyMax: parseInt(value, 10) }),
 };
 
+/**
+ * @param {Event} e
+ * @param {any} app todo: describe app type
+ * @returns {void}
+ */
 export function handleModalInput(e, app) {
     const updater = settingsUpdaters[e.target.id];
     if (updater) {
@@ -114,6 +124,11 @@ export function handleModalInput(e, app) {
     }
 }
 
+/**
+ * @param {Event} e
+ * @param {any} app todo: describe app type
+ * @returns {void}
+ */
 export function handleModalChange(e, app) {
     if (e.target.id === 'avatar-input') app.handleAvatarChange(e, false);
     if (e.target.id === 'card-input') app.handleAvatarChange(e, true);

@@ -1,5 +1,10 @@
 import { t } from './i18n.js'; // Adjust the path as needed for your project
 
+/**
+ * @param {string} key 
+ * @param {any} defaultValue todo: This function is designed to be generic and handle any type of data.
+ * @returns {Promise<any>} todo: This function is designed to be generic and handle any type of data.
+ */
 export async function loadFromBrowserStorage(key, defaultValue) {
   try {
     const value = await loadFromIndexedDB(key);
@@ -19,6 +24,11 @@ export async function loadFromBrowserStorage(key, defaultValue) {
   }
 }
 
+/**
+ * @param {string} key 
+ * @param {any} value todo: This function is designed to be generic and handle any type of data.
+ * @returns {Promise<void>}
+ */
 export async function saveToBrowserStorage(key, value) {
   try {
     await saveToIndexedDB(key, value);
@@ -34,6 +44,10 @@ export async function saveToBrowserStorage(key, value) {
   }
 }
 
+/**
+ * @param {string} key
+ * @returns {Promise<any>} todo: This function is designed to be generic and handle any type of data.
+ */
 export async function loadFromIndexedDB(key) {
   return new Promise((resolve, reject) => {
     const dbName = "PersonaChatDB";
@@ -64,6 +78,15 @@ export async function loadFromIndexedDB(key) {
   });
 }
 
+/**
+ * Saves a key-value pair to the "data" object store in IndexedDB.
+ *
+ * @async
+ * @function
+ * @param {any} key - The key to identify the stored value. todo: This function is designed to be generic and handle any type of data.
+ * @param {any} value - The value to store, can be any serializable object. todo: This function is designed to be generic and handle any type of data.
+ * @returns {Promise<void>} Resolves when the data is successfully saved, rejects on error.
+ */
 export async function saveToIndexedDB(key, value) {
   return new Promise((resolve, reject) => {
     const dbName = "PersonaChatDB";
@@ -91,6 +114,12 @@ export async function saveToIndexedDB(key, value) {
   });
 }
 
+/**
+ * Calculates the total size (in bytes) of specific application-related keys stored in localStorage.
+ * The size is determined by summing the lengths of each key and its corresponding value.
+ *
+ * @returns {number} The total size in bytes of the specified localStorage entries.
+ */
 export function getLocalStorageUsage() {
   const appKeys = [
     "personaChat_settings_v16",
@@ -111,6 +140,11 @@ export function getLocalStorageUsage() {
   return totalSize;
 }
 
+/**
+ * @param {string} newData 
+ * @param {string} existingKey 
+ * @returns {{canSave: boolean, current?: string, total?: string}}
+ */
 export function getLocalStorageFallbackUsage(newData = "", existingKey = "") {
   const appKeys = [
     "personaChat_settings_v16",
@@ -155,6 +189,10 @@ export function getLocalStorageFallbackUsage(newData = "", existingKey = "") {
   return { canSave: true };
 }
 
+/**
+ * @param {number} bytes 
+ * @returns {string}
+ */
 export function formatBytes(bytes) {
   if (bytes === 0) return "0 Bytes";
   const k = 1024;

@@ -5,6 +5,10 @@ import { formatBytes } from '../storage.js';
 import { findMessageGroup, formatDateSeparator } from '../utils.js';
 import { renderAvatar } from './Avatar.js';
 
+/**
+ * @param {any} app todo: describe app type
+ * @returns {string}
+ */
 function renderInputArea(app) {
     const { showInputOptions, isWaitingForResponse, imageToSend } = app.state;
     const hasImage = !!imageToSend;
@@ -71,6 +75,10 @@ function renderInputArea(app) {
     `;
 }
 
+/**
+ * @param {any} app todo: describe app type
+ * @returns {string}
+ */
 function renderUserStickerPanel(app) {
     const userStickers = app.state.userStickers || [];
     const currentSize = app.calculateUserStickerSize();
@@ -147,6 +155,10 @@ function renderUserStickerPanel(app) {
     `;
 }
 
+/**
+ * @param {any} app todo: describe app type
+ * @returns {string}
+ */
 function renderMessages(app) {
     const messages = app.state.messages[app.state.selectedChatId] || [];
     let html = '';
@@ -363,6 +375,10 @@ function renderMessages(app) {
     return html;
 }
 
+/**
+ * @param {any} app todo: describe app type
+ * @returns {void}
+ */
 export function renderMainChat(app) {
     const mainChat = document.getElementById('main-chat');
     const selectedChatRoom = app.getCurrentChatRoom();

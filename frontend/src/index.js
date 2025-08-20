@@ -1,9 +1,10 @@
-import { t, setLanguage, getLanguage } from "./i18n.js";
+import { t, setLanguage, getLanguage, lang } from "./i18n.js";
 // Fixed typo: previously './defauts.js', now correctly './defaults.js'
 import { defaultPrompts, defaultCharacters } from "./defaults.js";
 import {
   loadFromBrowserStorage,
   saveToBrowserStorage,
+  // @ts-ignore
   getLocalStorageUsage,
   getLocalStorageFallbackUsage,
 } from "./storage.js";
@@ -25,16 +26,40 @@ import {
   handleModalChange,
 } from "./handlers/modalHandlers.js";
 import { debounce, findMessageGroup } from "./utils.js";
+import './types.js';
+
 
 // --- APP INITIALIZATION ---
 document.addEventListener("DOMContentLoaded", async () => {
+  // @ts-ignore
   window.personaApp = new PersonaChatApp();
+  // @ts-ignore
   await window.personaApp.init();
 });
 
-class PersonaChatApp {
+/**
+ * @class PersonaChatApp
+ * @property {Prompts} defaultPrompts
+ * @property {State} state
+ * @property {State | null} oldState
+ * @property {HTMLElement?} messagesEndRef
+ * @property {number?} proactiveInterval
+ * @property {Set<any>} animatedMessageIds
+ * @property {any} initialSettings
+ * @property {(settings: any) => void} debouncedSaveSettings
+ * @property {(characters: any) => void} debouncedSaveCharacters
+ * @property {(chatRooms: any) => void} debouncedSaveChatRooms
+ * @property {(messages: any) => void} debouncedSaveMessages
+ * @property {(unreadCounts: any) => void} debouncedSaveUnreadCounts
+ * @property {(userStickers: any) => void} debouncedSaveUserStickers
+ * @property {(snapshots: any) => void} debouncedSaveSettingsSnapshots 
+ */
+export class PersonaChatApp {
   constructor() {
     this.defaultPrompts = defaultPrompts;
+    /**
+     * @type {import("./types.js").State}
+     */
     this.state = {
       settings: {
         apiKey: "",
@@ -122,6 +147,9 @@ class PersonaChatApp {
     );
   }
 
+  /**
+   * @returns {void}
+   */
   createSettingsSnapshot() {
     if (!this.state.settings.snapshotsEnabled) return;
 
@@ -138,6 +166,9 @@ class PersonaChatApp {
   }
 
   // --- CORE METHODS ---
+  /**
+   * @returns {Promise<void>}
+   */
   async init() {
     setLanguage(getLanguage()); // Ensure language is set and UI updated on init
     await this.loadAllData();
@@ -164,11 +195,17 @@ class PersonaChatApp {
     }
   }
 
+  /**
+   * @returns {void}
+   */
   openSettingsModal() {
     this.initialSettings = { ...this.state.settings };
     this.setState({ showSettingsModal: true });
   }
 
+  /**
+   * @returns {void}
+   */
   handleSaveSettings() {
     const wasRandomDisabled =
       this.initialSettings && !this.initialSettings.randomFirstMessageEnabled;
@@ -177,6 +214,7 @@ class PersonaChatApp {
     // Create a snapshot of the settings when the user explicitly saves.
     this.createSettingsSnapshot();
 
+    // @ts-ignore
     this.setState({ showSettingsModal: false, initialSettings: null });
 
     if (wasRandomDisabled && isRandomEnabled) {
@@ -184,6 +222,9 @@ class PersonaChatApp {
     }
   }
 
+  /**
+   * @returns {void}
+   */
   handleCancelSettings() {
     const hasChanges =
       JSON.stringify(this.initialSettings) !==
@@ -191,8 +232,8 @@ class PersonaChatApp {
 
     if (hasChanges) {
       this.showConfirmModal(
-        t("modal.cancelChanges.title"),
-        t("modal.cancelChanges.message"),
+        lang.modal.cancelChanges.title,
+        lang.modal.cancelChanges.message,
         () => {
           if (this.initialSettings) {
             // If the language was changed, revert it
@@ -202,6 +243,7 @@ class PersonaChatApp {
             this.setState({
               settings: this.initialSettings,
               showSettingsModal: false,
+              // @ts-ignore
               initialSettings: null,
               modal: { isOpen: false, title: "", message: "", onConfirm: null },
             });
@@ -214,16 +256,25 @@ class PersonaChatApp {
         }
       );
     } else {
+      // @ts-ignore
       this.setState({ showSettingsModal: false, initialSettings: null });
     }
   }
 
+  /**
+   * @param {boolean} enabled
+   * @returns {void}
+   */
   handleToggleSnapshots(enabled) {
     this.setState({
       settings: { ...this.state.settings, snapshotsEnabled: enabled },
     });
   }
 
+  /**
+   * @param {number} timestamp
+   * @returns {void}
+   */
   handleRestoreSnapshot(timestamp) {
     const snapshot = this.state.settingsSnapshots.find(
       (s) => s.timestamp === timestamp
@@ -233,6 +284,10 @@ class PersonaChatApp {
     }
   }
 
+  /**
+   * @param {number} timestamp
+   * @returns {void}
+   */
   handleDeleteSnapshot(timestamp) {
     const newSnapshots = this.state.settingsSnapshots.filter(
       (s) => s.timestamp !== timestamp
@@ -240,6 +295,10 @@ class PersonaChatApp {
     this.setState({ settingsSnapshots: newSnapshots });
   }
 
+  /**
+   * @param {string} section
+   * @returns {void}
+   */
   toggleSettingsSection(section) {
     const openSections = this.state.openSettingsSections || [];
     const newOpenSections = openSections.includes(section)
@@ -248,6 +307,9 @@ class PersonaChatApp {
     this.setState({ openSettingsSections: newOpenSections });
   }
 
+  /**
+   * @returns {Promise<void>}
+   */
   async loadAllData() {
     try {
       const [
@@ -282,6 +344,7 @@ class PersonaChatApp {
         },
       };
 
+      // @ts-ignore
       this.state.characters = characters.map((char) => ({
         ...char,
         id: Number(char.id),
@@ -296,6 +359,10 @@ class PersonaChatApp {
     }
   }
 
+  /**
+   * @param {Partial<import("./types.js").State>} newState
+   * @returns {void}
+   */
   setState(newState) {
     this.oldState = { ...this.state };
     this.state = { ...this.state, ...newState };
@@ -350,6 +417,9 @@ class PersonaChatApp {
     }
   }
 
+  /**
+   * @returns {void}
+   */
   applyFontScale() {
     document.documentElement.style.setProperty(
       "--font-scale",
@@ -358,7 +428,14 @@ class PersonaChatApp {
   }
 
   // --- EVENT LISTENERS ---
+  /**
+   * @returns {void}
+   */
   addEventListeners() {
+    /**
+     * @type {HTMLElement} It must exist in the DOM
+     */
+    //@ts-ignore
     const appElement = document.getElementById("app");
 
     appElement.addEventListener("click", (e) => {
@@ -383,6 +460,7 @@ class PersonaChatApp {
     });
 
     document.addEventListener("click", (e) => {
+      // @ts-ignore
       if (!e.target.closest(".input-area-container")) {
         this.setState({ showInputOptions: false });
       }
@@ -390,6 +468,9 @@ class PersonaChatApp {
   }
 
   // --- CHAT ROOM MANAGEMENT ---
+  /**
+   * @returns {Promise<void>}
+   */
   async migrateChatData() {
     const migrationCompleted = await loadFromBrowserStorage(
       "personaChat_migration_v16",
@@ -436,6 +517,9 @@ class PersonaChatApp {
     saveToBrowserStorage("personaChat_migration_v16", true);
   }
 
+  /**
+   * @returns {string?}
+   */
   getFirstAvailableChatRoom() {
     for (const character of this.state.characters) {
       const chatRooms = this.state.chatRooms[character.id] || [];
@@ -446,6 +530,11 @@ class PersonaChatApp {
     return null;
   }
 
+  /**
+   * @param {number} characterId
+   * @param {string} chatName
+   * @returns {string}
+   */
   createNewChatRoom(characterId, chatName = t("chat.newChat")) {
     const numericCharacterId = Number(characterId);
     const newChatRoomId = `${numericCharacterId}_${Date.now()}_${Math.random()}`;
@@ -476,6 +565,10 @@ class PersonaChatApp {
     return newChatRoomId;
   }
 
+  /**
+   * @param {number | string} characterId
+   * @returns {void}
+   */
   toggleCharacterExpansion(characterId) {
     const numericCharacterId = Number(characterId);
     const newExpandedId =
@@ -485,6 +578,10 @@ class PersonaChatApp {
     this.setState({ expandedCharacterId: newExpandedId });
   }
 
+  /**
+   * @param {number | string} characterId
+   * @returns {void}
+   */
   createNewChatRoomForCharacter(characterId) {
     const numericCharacterId = Number(characterId);
     const newChatRoomId = this.createNewChatRoom(numericCharacterId);
@@ -492,6 +589,10 @@ class PersonaChatApp {
     this.setState({ expandedCharacterId: numericCharacterId });
   }
 
+  /**
+   * @param {string} chatRoomId
+   * @returns {void}
+   */
   selectChatRoom(chatRoomId) {
     const newUnreadCounts = { ...this.state.unreadCounts };
     delete newUnreadCounts[chatRoomId];
@@ -505,6 +606,10 @@ class PersonaChatApp {
     });
   }
 
+  /**
+   * @param {number | string} characterId
+   * @returns {void}
+   */
   editCharacter(characterId) {
     const numericCharacterId = Number(characterId);
     const character = this.state.characters.find(
@@ -515,17 +620,25 @@ class PersonaChatApp {
     }
   }
 
+  /**
+   * @param {number | string} characterId
+   * @returns {void}
+   */
   deleteCharacter(characterId) {
     const numericCharacterId = Number(characterId);
     this.handleDeleteCharacter(numericCharacterId);
   }
 
+  /**
+   * @returns {any | null} todo: describe return type
+   */
   getCurrentChatRoom() {
     if (!this.state.selectedChatId) return null;
 
     for (const characterId in this.state.chatRooms) {
       const chatRooms = this.state.chatRooms[characterId];
       const chatRoom = chatRooms.find(
+        // @ts-ignore
         (room) => room.id === this.state.selectedChatId
       );
       if (chatRoom) return chatRoom;
@@ -533,6 +646,10 @@ class PersonaChatApp {
     return null;
   }
 
+  /**
+   * @param {string} chatRoomId
+   * @returns {void}
+   */
   deleteChatRoom(chatRoomId) {
     const chatRoom = this.getChatRoomById(chatRoomId);
     if (!chatRoom) return;
@@ -547,13 +664,16 @@ class PersonaChatApp {
 
         newChatRooms[chatRoom.characterId] = newChatRooms[
           chatRoom.characterId
+          // @ts-ignore
         ].filter((room) => room.id !== chatRoomId);
 
         delete newMessages[chatRoomId];
+        // @ts-ignore
         delete newUnreadCounts[chatRoomId];
 
         let newSelectedChatId = this.state.selectedChatId;
         if (this.state.selectedChatId === chatRoomId) {
+          // @ts-ignore
           newSelectedChatId = this.getFirstAvailableChatRoom();
         }
 
@@ -568,14 +688,26 @@ class PersonaChatApp {
     );
   }
 
+  /**
+   * @param {string} chatRoomId
+   * @returns {void}
+   */
   startEditingChatRoom(chatRoomId) {
     this.setState({ editingChatRoomId: chatRoomId });
   }
 
+  /**
+   * @returns {void}
+   */
   cancelEditingChatRoom() {
     this.setState({ editingChatRoomId: null });
   }
 
+  /**
+   * @param {string} chatRoomId
+   * @param {string} newName
+   * @returns {void}
+   */
   saveChatRoomName(chatRoomId, newName) {
     const newNameTrimmed = newName.trim();
     if (newNameTrimmed === "") {
@@ -591,6 +723,7 @@ class PersonaChatApp {
     this.setState({
       chatRooms: {
         ...this.state.chatRooms,
+        // @ts-ignore
         [characterId]: this.state.chatRooms[characterId].map((room) =>
           room.id === chatRoomId ? { ...room, name: newNameTrimmed } : room
         ),
@@ -599,6 +732,12 @@ class PersonaChatApp {
     });
   }
 
+  /**
+   * @param {KeyboardEvent} event
+   * @param {string} chatRoomId
+   * @returns {void}
+   */
+  // @ts-ignore
   handleChatRoomNameKeydown(event, chatRoomId) {
     if (event.key === "Escape") {
       event.preventDefault();
@@ -606,9 +745,14 @@ class PersonaChatApp {
     }
   }
 
+  /**
+   * @param {string} chatRoomId
+   * @returns {any | null} todo: describe return type
+   */
   getChatRoomById(chatRoomId) {
     for (const characterId in this.state.chatRooms) {
       const chatRoom = this.state.chatRooms[characterId].find(
+        // @ts-ignore
         (room) => room.id === chatRoomId
       );
       if (chatRoom) return chatRoom;
@@ -617,10 +761,17 @@ class PersonaChatApp {
   }
 
   // --- USER STICKER MANAGEMENT ---
+  /**
+   * @returns {void}
+   */
   toggleUserStickerPanel() {
     this.setState({ showUserStickerPanel: !this.state.showUserStickerPanel });
   }
 
+  /**
+   * @param {number} messageId
+   * @returns {void}
+   */
   toggleStickerSize(messageId) {
     const expandedStickers = new Set(this.state.expandedStickers);
     if (expandedStickers.has(messageId)) {
@@ -631,9 +782,16 @@ class PersonaChatApp {
     this.setState({ expandedStickers });
   }
 
+  /**
+   * @param {string} stickerName
+   * @param {string} stickerData
+   * @param {string} stickerType
+   * @returns {void}
+   */
   sendUserSticker(stickerName, stickerData, stickerType = "image/png") {
     this.setState({
       showUserStickerPanel: false,
+      // @ts-ignore
       stickerToSend: {
         stickerName,
         data: stickerData,
@@ -647,24 +805,37 @@ class PersonaChatApp {
     }
   }
 
+  /**
+   * @returns {void}
+   */
   handleSendMessageWithSticker() {
+    /**
+     * @type {HTMLTextAreaElement?}
+     */
+    // @ts-ignore
     const messageInput = document.getElementById("new-message-input");
+
     const content = messageInput ? messageInput.value : "";
     const hasImage = !!this.state.imageToSend;
+    // @ts-ignore
     const hasStickerToSend = !!this.state.stickerToSend;
 
     if (hasStickerToSend) {
       const messageContent = content.trim();
 
       this.handleSendMessage(messageContent, "sticker", {
+        // @ts-ignore
         stickerName: this.state.stickerToSend.stickerName,
+        // @ts-ignore
         data: this.state.stickerToSend.data,
+        // @ts-ignore
         type: this.state.stickerToSend.type,
         hasText: messageContent.length > 0,
         textContent: messageContent,
       });
 
       this.setState({
+        // @ts-ignore
         stickerToSend: null,
         showInputOptions: false,
       });
@@ -678,6 +849,12 @@ class PersonaChatApp {
     }
   }
 
+  /**
+   * @param {string} name
+   * @param {string} data
+   * @param {string} type
+   * @returns {void}
+   */
   addUserStickerWithType(name, data, type) {
     const newSticker = {
       id: Date.now(),
@@ -690,6 +867,10 @@ class PersonaChatApp {
     this.setState({ userStickers: newStickers });
   }
 
+  /**
+   * @param {number} stickerId
+   * @returns {void}
+   */
   deleteUserSticker(stickerId) {
     const newStickers = this.state.userStickers.filter(
       (s) => s.id !== stickerId
@@ -697,6 +878,10 @@ class PersonaChatApp {
     this.setState({ userStickers: newStickers });
   }
 
+  /**
+   * @param {number} stickerId
+   * @returns {void}
+   */
   editUserStickerName(stickerId) {
     const sticker = this.state.userStickers.find((s) => s.id === stickerId);
     if (!sticker) return;
@@ -710,6 +895,9 @@ class PersonaChatApp {
     }
   }
 
+  /**
+   * @returns {number}
+   */
   calculateUserStickerSize() {
     return this.state.userStickers.reduce((total, sticker) => {
       if (sticker.data) {
@@ -720,7 +908,12 @@ class PersonaChatApp {
     }, 0);
   }
 
+  /**
+   * @param {Event} e
+   * @returns {Promise<void>}
+   */
   async handleUserStickerFileSelect(e) {
+    // @ts-ignore
     const files = Array.from(e.target.files);
     if (!files.length) return;
 
@@ -755,16 +948,21 @@ class PersonaChatApp {
           dataUrl = await this.toBase64(file);
         }
         const stickerName = file.name.split(".")[0];
+        // @ts-ignore
         this.addUserStickerWithType(stickerName, dataUrl, file.type);
       } catch (error) {
         console.error(t("modal.fileProcessingError.title"), error);
         alert(t("modal.fileProcessingError.message"));
       }
     }
+    // @ts-ignore
     e.target.value = "";
   }
 
   // --- HANDLERS & LOGIC ---
+  /**
+   * @returns {void}
+   */
   scrollToBottom() {
     const messagesEnd = document.getElementById("messages-end-ref");
     if (messagesEnd) {
@@ -772,52 +970,94 @@ class PersonaChatApp {
     }
   }
 
+  /**
+   * @param {string} title
+   * @param {string} message
+   * @returns {void}
+   */
   showInfoModal(title, message) {
     this.setState({ modal: { isOpen: true, title, message, onConfirm: null } });
   }
 
+  /**
+   * @param {string} title
+   * @param {string} message
+   * @param {() => void} onConfirm
+   * @returns {void}
+   */
   showConfirmModal(title, message, onConfirm) {
     this.setState({ modal: { isOpen: true, title, message, onConfirm } });
   }
 
+  /**
+   * @returns {void}
+   */
   closeModal() {
     this.setState({
       modal: { isOpen: false, title: "", message: "", onConfirm: null },
     });
   }
 
+  /**
+   * @param {string} model
+   * @returns {void}
+   */
   handleModelSelect(model) {
     this.setState({ settings: { ...this.state.settings, model } });
   }
 
+  /**
+   * @param {string} lang
+   * @returns {void}
+   */
   handleLanguageSelect(lang) {
+    // @ts-ignore
     setLanguage(lang);
     this.setState({ settings: { ...this.state.settings, language: lang } });
   }
 
+  /**
+   * @returns {void}
+   */
   handleSavePrompts() {
     const newPrompts = {
       main: {
+        // @ts-ignore
         system_rules: document.getElementById("prompt-main-system_rules").value,
+        // @ts-ignore
         role_and_objective: document.getElementById(
           "prompt-main-role_and_objective"
+          // @ts-ignore
         ).value,
+        // @ts-ignore
         memory_generation: document.getElementById(
           "prompt-main-memory_generation"
+          // @ts-ignore
         ).value,
+        // @ts-ignore
         character_acting: document.getElementById(
           "prompt-main-character_acting"
+          // @ts-ignore
         ).value,
+        // @ts-ignore
         message_writing: document.getElementById("prompt-main-message_writing")
+          // @ts-ignore
           .value,
+        // @ts-ignore
         language: document.getElementById("prompt-main-language").value,
+        // @ts-ignore
         additional_instructions: document.getElementById(
           "prompt-main-additional_instructions"
+          // @ts-ignore
         ).value,
+        // @ts-ignore
         sticker_usage: document.getElementById("prompt-main-sticker_usage")
+          // @ts-ignore
           .value,
       },
+      // @ts-ignore
       profile_creation: document.getElementById("prompt-profile_creation")
+        // @ts-ignore
         .value,
     };
 
@@ -833,6 +1073,9 @@ class PersonaChatApp {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   openNewCharacterModal() {
     this.setState({
       editingCharacter: { memories: [], proactiveEnabled: true },
@@ -842,6 +1085,10 @@ class PersonaChatApp {
     });
   }
 
+  /**
+   * @param {import("./types.js").Character} character
+   * @returns {void}
+   */
   openEditCharacterModal(character) {
     this.setState({
       editingCharacter: { ...character, memories: character.memories || [] },
@@ -851,6 +1098,9 @@ class PersonaChatApp {
     });
   }
 
+  /**
+   * @returns {void}
+   */
   closeCharacterModal() {
     this.setState({
       showCharacterModal: false,
@@ -860,8 +1110,15 @@ class PersonaChatApp {
     });
   }
 
+  /**
+   * @param {Event} e
+   * @param {boolean} isCard
+   * @returns {void}
+   */
   handleAvatarChange(e, isCard = false) {
+    // @ts-ignore
     if (e.target.files && e.target.files[0]) {
+      // @ts-ignore
       const file = e.target.files[0];
       if (isCard) {
         this.loadCharacterFromImage(file);
@@ -869,6 +1126,7 @@ class PersonaChatApp {
         this.toBase64(file).then((base64) => {
           const currentEditing = this.state.editingCharacter || {};
           this.setState({
+            // @ts-ignore
             editingCharacter: { ...currentEditing, avatar: base64 },
           });
         });
@@ -876,7 +1134,12 @@ class PersonaChatApp {
     }
   }
 
+  /**
+   * @param {Event} e
+   * @returns {Promise<void>}
+   */
   async handleStickerFileSelect(e) {
+    // @ts-ignore
     const files = Array.from(e.target.files);
     if (!files.length) return;
 
@@ -983,21 +1246,32 @@ class PersonaChatApp {
       }
 
       this.shouldSaveCharacters = true;
+      // @ts-ignore
       this.setState({ editingCharacter: updatedCharacterData });
     }
 
+    // @ts-ignore
     e.target.value = "";
   }
 
+  /**
+   * @param {number} index
+   * @returns {void}
+   */
   handleDeleteSticker(index) {
     const currentStickers = this.state.editingCharacter?.stickers || [];
     const updatedStickers = currentStickers.filter((_, i) => i !== index);
     const currentEditing = this.state.editingCharacter || {};
     this.setState({
+      // @ts-ignore
       editingCharacter: { ...currentEditing, stickers: updatedStickers },
     });
   }
 
+  /**
+   * @param {number} index
+   * @returns {void}
+   */
   handleEditStickerName(index) {
     if (this.state.editingCharacter && this.state.editingCharacter.stickers) {
       const sticker = this.state.editingCharacter.stickers[index];
@@ -1017,16 +1291,24 @@ class PersonaChatApp {
     }
   }
 
+  /**
+   * @returns {void}
+   */
   toggleStickerSelectionMode() {
     this.state.stickerSelectionMode = !this.state.stickerSelectionMode;
     this.state.selectedStickerIndices = [];
     this.updateStickerSection();
   }
 
+  /**
+   * @returns {void}
+   */
   updateStickerSection() {
     const stickerContainer = document.getElementById("sticker-container");
     if (stickerContainer) {
       const currentStickers = this.state.editingCharacter?.stickers || [];
+      //todo we need to check if renderStickerGrid is defined. It's any in LSP .
+      // @ts-ignore
       stickerContainer.innerHTML = renderStickerGrid(this, currentStickers);
     }
 
@@ -1048,12 +1330,16 @@ class PersonaChatApp {
                         <span class="text-xs">전체<br>선택</span>
                     </button>
                 `;
+        // @ts-ignore
         toggleButton.insertAdjacentHTML("afterend", selectAllHTML);
       }
     } else {
       if (selectAllButton) selectAllButton.remove();
     }
-
+    /**
+     * @type {HTMLButtonElement?}
+     */
+    // @ts-ignore
     const deleteButton = document.getElementById("delete-selected-stickers");
     if (deleteButton && !this.state.stickerSelectionMode) {
       deleteButton.disabled = true;
@@ -1062,9 +1348,15 @@ class PersonaChatApp {
       if (countSpan) countSpan.textContent = "0";
     }
 
+    // @ts-ignore
     if (window.lucide) window.lucide.createIcons();
   }
 
+  /**
+   * @param {number} index
+   * @param {boolean} isChecked
+   * @returns {void}
+   */
   handleStickerSelection(index, isChecked) {
     const currentSelected = this.state.selectedStickerIndices || [];
     let newSelected = isChecked
@@ -1073,8 +1365,13 @@ class PersonaChatApp {
     this.state.selectedStickerIndices = newSelected;
 
     const countElement = document.getElementById("selected-count");
+    /**
+     * @type {HTMLButtonElement?}
+     */
+    // @ts-ignore
     const deleteButton = document.getElementById("delete-selected-stickers");
 
+    // @ts-ignore
     if (countElement) countElement.textContent = newSelected.length;
 
     if (deleteButton) {
@@ -1088,6 +1385,9 @@ class PersonaChatApp {
     }
   }
 
+  /**
+   * @returns {void}
+   */
   handleSelectAllStickers() {
     const currentStickers = this.state.editingCharacter?.stickers || [];
     const allIndices = currentStickers.map((_, index) => index);
@@ -1095,18 +1395,27 @@ class PersonaChatApp {
 
     document
       .querySelectorAll(".sticker-checkbox")
+      // @ts-ignore
       .forEach((cb) => (cb.checked = true));
 
     const countElement = document.getElementById("selected-count");
+    /**
+     * @type {HTMLButtonElement?}
+     * */
+    // @ts-ignore
     const deleteButton = document.getElementById("delete-selected-stickers");
 
-    if (countElement) countElement.textContent = allIndices.length;
+
+    if (countElement) countElement.textContent = allIndices.length.toString();
     if (deleteButton) {
       deleteButton.disabled = false;
       deleteButton.classList.remove("opacity-50", "cursor-not-allowed");
     }
   }
 
+  /**
+   * @returns {void}
+   */
   handleDeleteSelectedStickers() {
     const selectedIndices = this.state.selectedStickerIndices || [];
     if (selectedIndices.length === 0) return;
@@ -1117,6 +1426,7 @@ class PersonaChatApp {
       (_, index) => !selectedSet.has(index)
     );
 
+    // @ts-ignore
     this.state.editingCharacter = {
       ...this.state.editingCharacter,
       stickers: updatedStickers,
@@ -1127,8 +1437,13 @@ class PersonaChatApp {
     this.updateStickerSection();
   }
 
+  /**
+   * @returns {Promise<void>}
+   */
   async handleSaveCharacter() {
+    // @ts-ignore
     const name = document.getElementById("character-name").value.trim();
+    // @ts-ignore
     const prompt = document.getElementById("character-prompt").value.trim();
 
     if (!name || !prompt) {
@@ -1141,9 +1456,14 @@ class PersonaChatApp {
 
     const memoryNodes = document.querySelectorAll(".memory-input");
     const memories = Array.from(memoryNodes)
+      // @ts-ignore
       .map((input) => input.value.trim())
       .filter(Boolean);
 
+    /**
+     * @type {HTMLInputElement?}
+     */
+    // @ts-ignore
     const proactiveToggle = document.getElementById(
       "character-proactive-toggle"
     );
@@ -1155,9 +1475,13 @@ class PersonaChatApp {
       name,
       prompt,
       avatar: this.state.editingCharacter?.avatar || null,
+      // @ts-ignore
       responseTime: document.getElementById("character-responseTime").value,
+      // @ts-ignore
       thinkingTime: document.getElementById("character-thinkingTime").value,
+      // @ts-ignore
       reactivity: document.getElementById("character-reactivity").value,
+      // @ts-ignore
       tone: document.getElementById("character-tone").value,
       memories,
       proactiveEnabled,
@@ -1182,8 +1506,10 @@ class PersonaChatApp {
       return;
     }
 
+
     if (this.state.editingCharacter && this.state.editingCharacter.id) {
       const updatedCharacters = this.state.characters.map((c) =>
+        // @ts-ignore
         c.id === this.state.editingCharacter.id
           ? { ...c, ...characterData }
           : c
@@ -1212,6 +1538,10 @@ class PersonaChatApp {
     this.closeCharacterModal();
   }
 
+  /**
+   * @param {number} characterId
+   * @returns {void}
+   */
   handleDeleteCharacter(characterId) {
     const numericCharacterId = Number(characterId);
     this.showConfirmModal(
@@ -1227,11 +1557,14 @@ class PersonaChatApp {
         let newSelectedChatId = this.state.selectedChatId;
 
         const characterChatRooms =
+
           this.state.chatRooms[numericCharacterId] || [];
+        // @ts-ignore
         characterChatRooms.forEach((chatRoom) => {
           delete newMessages[chatRoom.id];
           delete newUnreadCounts[chatRoom.id];
         });
+
         delete newChatRooms[numericCharacterId];
 
         const selectedChatRoom = this.getCurrentChatRoom();
@@ -1255,7 +1588,12 @@ class PersonaChatApp {
     );
   }
 
+  /**
+   * @param {Event} e
+   * @returns {Promise<void>}
+   */
   async handleImageFileSelect(e) {
+    // @ts-ignore
     const file = e.target.files[0];
     if (!file) return;
 
@@ -1264,6 +1602,7 @@ class PersonaChatApp {
         t("modal.imageFileSizeExceeded.title"),
         t("modal.imageFileSizeExceeded.message")
       );
+      // @ts-ignore
       e.target.value = "";
       return;
     }
@@ -1281,10 +1620,17 @@ class PersonaChatApp {
         t("modal.imageProcessingError.message")
       );
     } finally {
+      // @ts-ignore
       if (e && e.target) e.target.value = "";
     }
   }
 
+  /**
+   * @param {string} content
+   * @param {string} type
+   * @param {any?} stickerData todo: describe stickerData type
+   * @returns {Promise<void>}
+   */
   async handleSendMessage(content, type = "text", stickerData = null) {
     const { selectedChatId, isWaitingForResponse, settings, imageToSend } =
       this.state;
@@ -1335,6 +1681,7 @@ class PersonaChatApp {
       };
       character.media.push(newImage);
       updatedCharacters[charIndex] = character;
+      // @ts-ignore
       userMessage.imageId = newImage.id;
     }
 
@@ -1350,6 +1697,7 @@ class PersonaChatApp {
     if (type === "text" || type === "image") {
       const messageInput = document.getElementById("new-message-input");
       if (messageInput) {
+        // @ts-ignore
         messageInput.value = "";
         messageInput.style.height = "auto";
       }
@@ -1376,6 +1724,13 @@ class PersonaChatApp {
     this.triggerApiCall(newMessagesState, false, false, forceSummary);
   }
 
+  /**
+   * @param {any} currentMessagesState todo: describe type
+   * @param {boolean} isProactive
+   * @param {boolean} isReroll
+   * @param {boolean} forceSummary
+   * @returns {Promise<void>}
+   */
   async triggerApiCall(
     currentMessagesState,
     isProactive = false,
@@ -1386,6 +1741,7 @@ class PersonaChatApp {
 
     if (isProactive) {
       character = currentMessagesState;
+
       const characterChatRooms = this.state.chatRooms[character.id] || [];
       chatId =
         characterChatRooms.length > 0
@@ -1474,7 +1830,9 @@ class PersonaChatApp {
         };
 
         if (messagePart.sticker) {
+          // @ts-ignore
           botMessage.stickerId = messagePart.sticker;
+          // @ts-ignore
           const foundSticker = character.stickers?.find((s) => {
             if (s.id == messagePart.sticker) return true;
             if (s.name === messagePart.sticker) return true;
@@ -1486,6 +1844,7 @@ class PersonaChatApp {
             if (baseFileName === searchFileName) return true;
             return false;
           });
+          // @ts-ignore
           botMessage.stickerName = foundSticker?.name || "Unknown Sticker";
         }
 
@@ -1525,6 +1884,9 @@ class PersonaChatApp {
     this.setState({ typingCharacterId: null });
   }
 
+  /**
+   * @returns {Promise<void>}
+   */
   async checkAndSendProactiveMessages() {
     if (
       this.state.isWaitingForResponse ||
@@ -1553,18 +1915,25 @@ class PersonaChatApp {
     if (eligibleCharacters.length > 0) {
       const character =
         eligibleCharacters[
-          Math.floor(Math.random() * eligibleCharacters.length)
+        Math.floor(Math.random() * eligibleCharacters.length)
         ];
       console.log(`[Proactive] Sending message from ${character.name}`);
       await this.handleProactiveMessage(character);
     }
   }
 
+  /**
+   * @param {import("./types.js").Character} character
+   * @returns {Promise<void>}
+   */
   async handleProactiveMessage(character) {
     this.setState({ isWaitingForResponse: true });
     await this.triggerApiCall(character, true, false, false);
   }
 
+  /**
+   * @returns {void}
+   */
   scheduleMultipleRandomChats() {
     const {
       randomCharacterCount,
@@ -1578,14 +1947,16 @@ class PersonaChatApp {
       const randomDelay =
         Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
       console.log(
-        `Scheduling random character ${i + 1}/${randomCharacterCount} in ${
-          randomDelay / 1000
+        `Scheduling random character ${i + 1}/${randomCharacterCount} in ${randomDelay / 1000
         }s`
       );
       setTimeout(() => this.initiateSingleRandomCharacter(), randomDelay);
     }
   }
 
+  /**
+   * @returns {Promise<void>}
+   */
   async initiateSingleRandomCharacter() {
     const { apiKey, model, userName, userDescription } = this.state.settings;
     if (!userName.trim() || !userDescription.trim()) {
@@ -1595,6 +1966,8 @@ class PersonaChatApp {
 
     try {
       const geminiClient = new GeminiClient(apiKey, model);
+      //todo It seems there are no generateProfileFromDescription method in GeminiClient
+      // @ts-ignore
       const profile = await geminiClient.generateProfileFromDescription({
         userName: userName,
         userDescription: userDescription,
@@ -1668,6 +2041,7 @@ class PersonaChatApp {
         return;
       }
 
+      // @ts-ignore
       const firstMessages = response.messages.map((msgPart) => ({
         id: Date.now() + Math.random(),
         sender: tempCharacter.name,
@@ -1713,15 +2087,22 @@ class PersonaChatApp {
     }
   }
 
+  /**
+   * @param {number} lastMessageId
+   * @returns {void}
+   */
   handleDeleteMessage(lastMessageId) {
     this.showConfirmModal(
       t("modal.messageGroupDeleteConfirm.title"),
       t("modal.messageGroupDeleteConfirm.message"),
       () => {
         const currentMessages =
+          // @ts-ignore
           this.state.messages[this.state.selectedChatId] || [];
+        // @ts-ignore
         const groupInfo = findMessageGroup(
           currentMessages,
+          // @ts-ignore
           currentMessages.findIndex((msg) => msg.id === lastMessageId)
         );
         if (!groupInfo) return;
@@ -1734,6 +2115,7 @@ class PersonaChatApp {
         this.setState({
           messages: {
             ...this.state.messages,
+            // @ts-ignore
             [this.state.selectedChatId]: updatedMessages,
           },
         });
@@ -1741,7 +2123,14 @@ class PersonaChatApp {
     );
   }
 
+  /**
+   * @param {number} lastMessageId
+   * @returns {Promise<void>}
+   */
   async handleSaveEditedMessage(lastMessageId) {
+    /**
+     * @type {HTMLTextAreaElement?}
+     */
     const textarea = document.querySelector(
       `.edit-message-textarea[data-id="${lastMessageId}"]`
     );
@@ -1749,9 +2138,12 @@ class PersonaChatApp {
     const newContent = textarea.value.trim();
 
     const currentMessages =
+      // @ts-ignore
       this.state.messages[this.state.selectedChatId] || [];
+    // @ts-ignore
     const groupInfo = findMessageGroup(
       currentMessages,
+      // @ts-ignore
       currentMessages.findIndex((msg) => msg.id === lastMessageId)
     );
     if (!groupInfo) return;
@@ -1780,6 +2172,7 @@ class PersonaChatApp {
 
     const newMessagesState = {
       ...this.state.messages,
+      // @ts-ignore
       [this.state.selectedChatId]: updatedMessages,
     };
 
@@ -1792,11 +2185,18 @@ class PersonaChatApp {
     await this.triggerApiCall(updatedMessages, false, true, false);
   }
 
+  /**
+   * @param {number} lastMessageId
+   * @returns {Promise<void>}
+   */
   async handleRerollMessage(lastMessageId) {
     const currentMessages =
+      // @ts-ignore
       this.state.messages[this.state.selectedChatId] || [];
+    // @ts-ignore
     const groupInfo = findMessageGroup(
       currentMessages,
+      // @ts-ignore
       currentMessages.findIndex((msg) => msg.id === lastMessageId)
     );
     if (!groupInfo) return;
@@ -1805,6 +2205,7 @@ class PersonaChatApp {
 
     const newMessagesState = {
       ...this.state.messages,
+      // @ts-ignore
       [this.state.selectedChatId]: truncatedMessages,
     };
 
@@ -1816,24 +2217,40 @@ class PersonaChatApp {
     await this.triggerApiCall(truncatedMessages, false, true, false);
   }
 
+  /**
+   * @param {number} lastMessageId
+   * @returns {void}
+   */
   handleEditMessage(lastMessageId) {
     this.setState({ editingMessageId: lastMessageId });
   }
 
+  /**
+   * @param {File} file
+   * @returns {Promise<string | null>}
+   */
   toBase64 = (file) =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
+      // @ts-ignore since we're using readAsDataURL, it is string 
       reader.onload = () => resolve(reader.result);
       reader.onerror = (error) => reject(error);
     });
 
+  /**
+   * @param {File} file
+   * @param {number} maxWidth
+   * @param {number} maxHeight
+   * @returns {Promise<string>}
+   */
   resizeImage = (file, maxWidth, maxHeight) =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = (event) => {
         const img = new Image();
+        // @ts-ignore
         img.src = event.target.result;
         img.onload = () => {
           const canvas = document.createElement("canvas");
@@ -1854,6 +2271,7 @@ class PersonaChatApp {
           canvas.width = width;
           canvas.height = height;
           const ctx = canvas.getContext("2d");
+          // @ts-ignore
           ctx.drawImage(img, 0, 0, width, height);
           resolve(canvas.toDataURL("image/jpeg", 0.8));
         };
@@ -1862,12 +2280,20 @@ class PersonaChatApp {
       reader.onerror = (error) => reject(error);
     });
 
+  /**
+   * @param {File} file
+   * @param {number} maxWidth
+   * @param {number} maxHeight
+   * @param {number} quality
+   * @returns {Promise<string>}
+   */
   compressImageForSticker = (file, maxWidth, maxHeight, quality) =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = (event) => {
         const img = new Image();
+        // @ts-ignore
         img.src = event.target.result;
         img.onload = () => {
           const canvas = document.createElement("canvas");
@@ -1888,6 +2314,12 @@ class PersonaChatApp {
 
           canvas.width = width;
           canvas.height = height;
+          /**
+           * @type {CanvasRenderingContext2D}
+           * It is literally supported by all browsers, so no need to check
+           * @link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D
+           */
+          // @ts-ignore
           const ctx = canvas.getContext("2d");
 
           ctx.imageSmoothingEnabled = true;
@@ -1907,8 +2339,16 @@ class PersonaChatApp {
       reader.onerror = (error) => reject(error);
     });
 
+  /**
+   * @param {number} ms
+   * @returns {Promise<void>}
+   */
   sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+  /**
+   * @param {import("./types.js").Character} character
+   * @returns {number}
+   */
   calculateCharacterStickerSize(character) {
     if (!character || !character.stickers) return 0;
     return character.stickers.reduce(
@@ -1917,16 +2357,27 @@ class PersonaChatApp {
     );
   }
 
+  /**
+   * @returns {void}
+   */
   addMemoryField() {
     const container = document.getElementById("memory-container");
     if (container) {
+      // @ts-ignore
+      //todo renderMemoryInput is any?
       container.insertAdjacentHTML("beforeend", renderMemoryInput());
+      // @ts-ignore
       lucide.createIcons();
     }
   }
 
+  /**
+   * @param {Event} e
+   * @returns {void}
+   */
   handleDetailsToggle(e) {
     e.preventDefault();
+    // @ts-ignore
     const details = e.target.closest("details");
     if (!details || details.dataset.animating === "true") return;
 
@@ -1970,6 +2421,11 @@ class PersonaChatApp {
     }
   }
 
+  /**
+   * @param {ImageData} imageData
+   * @param {string} text
+   * @returns {ImageData | null}
+   */
   encodeTextInImage(imageData, text) {
     const data = imageData.data;
     const textBytes = new TextEncoder().encode(text);
@@ -2000,6 +2456,10 @@ class PersonaChatApp {
     return imageData;
   }
 
+  /**
+   * @param {ImageData} imageData
+   * @returns {string | null}
+   */
   decodeTextFromImage(imageData) {
     const data = imageData.data;
     const headerSizeInPixels = 8;
@@ -2029,7 +2489,11 @@ class PersonaChatApp {
     }
   }
 
+  /**
+   * @returns {Promise<void>}
+   */
   async handleSaveCharacterToImage() {
+    // @ts-ignore
     const name = document.getElementById("character-name").value.trim();
     if (!name) {
       this.showInfoModal(
@@ -2047,11 +2511,18 @@ class PersonaChatApp {
       return;
     }
 
+    /**
+     * @type {NodeListOf<HTMLInputElement>}
+     */
     const memoryNodes = document.querySelectorAll(".memory-input");
     const memories = Array.from(memoryNodes)
       .map((input) => input.value.trim())
       .filter(Boolean);
 
+    /**
+     * @type {HTMLInputElement?}
+     */
+    // @ts-ignore
     const proactiveToggle = document.getElementById(
       "character-proactive-toggle"
     );
@@ -2061,10 +2532,15 @@ class PersonaChatApp {
 
     const characterData = {
       name: name,
+      // @ts-ignore
       prompt: document.getElementById("character-prompt").value.trim(),
+      // @ts-ignore
       responseTime: document.getElementById("character-responseTime").value,
+      // @ts-ignore
       thinkingTime: document.getElementById("character-thinkingTime").value,
+      // @ts-ignore
       reactivity: document.getElementById("character-reactivity").value,
+      // @ts-ignore
       tone: document.getElementById("character-tone").value,
       source: "PersonaChatAppCharacterCard",
       memories: memories,
@@ -2077,6 +2553,12 @@ class PersonaChatApp {
       const canvas = document.createElement("canvas");
       canvas.width = 512;
       canvas.height = 512;
+      /**
+       * @type {CanvasRenderingContext2D}
+       * It is literally supported by all browsers, so no need to check
+       * @link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2
+       */
+      // @ts-ignore
       const ctx = canvas.getContext("2d");
       ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
@@ -2101,17 +2583,32 @@ class PersonaChatApp {
     image.src = currentAvatar;
   }
 
+  /**
+   * @param {File} file
+   * @returns {Promise<void>}
+   */
   async loadCharacterFromImage(file) {
     const reader = new FileReader();
     reader.onload = (e) => {
+      /**
+        * @type {string} Since we use readAsDataURL, it is string
+       */
+      // @ts-ignore
       const imageSrc = e.target.result;
       const image = new Image();
       image.onload = () => {
         const canvas = document.createElement("canvas");
         canvas.width = image.width;
         canvas.height = image.height;
+        /**
+         * @type {CanvasRenderingContext2D}
+         * It is literally supported by all browsers, so no need to check
+         * @link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2
+         */
+        // @ts-ignore
         const ctx = canvas.getContext("2d");
         ctx.drawImage(image, 0, 0);
+
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
         try {
@@ -2142,6 +2639,7 @@ class PersonaChatApp {
           t("modal.characterCardNoAvatarImageInfo.message")
         );
         this.setState({
+          // @ts-ignore
           editingCharacter: {
             ...(this.state.editingCharacter || {}),
             avatar: imageSrc,
@@ -2153,6 +2651,9 @@ class PersonaChatApp {
     reader.readAsDataURL(file);
   }
 
+  /**
+   * @returns {Promise<void>}
+   */
   async handleBackup() {
     try {
       const backupData = {
@@ -2192,13 +2693,19 @@ class PersonaChatApp {
     }
   }
 
+  /**
+   * @param {Event} e
+   * @returns {void}
+   */
   handleRestore(e) {
+    // @ts-ignore
     const file = e.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
+        // @ts-ignore
         const backupData = JSON.parse(event.target.result);
         if (
           backupData.settings &&
@@ -2251,12 +2758,16 @@ class PersonaChatApp {
           t("modal.restoreFailed.message")
         );
       } finally {
+        // @ts-ignore
         e.target.value = "";
       }
     };
     reader.readAsText(file);
   }
 
+  /**
+   * @returns {void}
+   */
   handleBackupPrompts() {
     try {
       const promptsToBackup = this.state.settings.prompts;
@@ -2284,13 +2795,19 @@ class PersonaChatApp {
     }
   }
 
+  /**
+   * @param {Event} e
+   * @returns {void}
+   */
   handleRestorePrompts(e) {
+    // @ts-ignore
     const file = e.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
+        // @ts-ignore
         const restoredPrompts = JSON.parse(event.target.result);
         if (
           restoredPrompts.main &&
@@ -2331,17 +2848,25 @@ class PersonaChatApp {
           t("modal.promptRestoreFailed.message")
         );
       } finally {
+        // @ts-ignore
         e.target.value = "";
       }
     };
     reader.readAsText(file);
   }
 
+  /**
+   * @param {string} section
+   * @param {string} key
+   * @param {string} promptName
+   * @returns {void}
+   */
   resetPromptToDefault(section, key, promptName) {
     this.showConfirmModal(
       t("modal.promptReset.title"),
       t("modal.promptReset.message", { promptName }),
       () => {
+        //todo Static import is recommended due to vite chunk splitting
         import("./defaults.js").then(({ defaultPrompts }) => {
           const currentPrompts = { ...this.state.settings.prompts };
 
@@ -2357,6 +2882,10 @@ class PersonaChatApp {
             section === "main"
               ? `prompt-main-${key}`
               : "prompt-profile_creation";
+          /**
+           * @type {HTMLTextAreaElement?}
+           */
+          // @ts-ignore
           const textarea = document.getElementById(textareaId);
           if (textarea) {
             textarea.value =

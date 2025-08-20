@@ -3,6 +3,11 @@ import { t } from '../i18n.js';
 
 import { renderAvatar } from './Avatar.js';
 
+/**
+ * @param {any} app todo: describe app type
+ * @param {any} char todo: describe char type
+ * @returns {string}
+ */
 function renderCharacterItem(app, char) {
     const chatRooms = app.state.chatRooms[char.id] || [];
     const isExpanded = app.state.expandedCharacterId === Number(char.id);
@@ -67,6 +72,11 @@ function renderCharacterItem(app, char) {
     `;
 }
 
+/**
+ * @param {any} app todo: describe app type
+ * @param {any} chatRoom todo: describe chatRoom type
+ * @returns {string}
+ */
 function renderChatRoomItem(app, chatRoom) {
     const messages = app.state.messages[chatRoom.id] || [];
     const lastMessage = messages.slice(-1)[0];
@@ -130,6 +140,10 @@ function renderChatRoomItem(app, chatRoom) {
     `;
 }
 
+/**
+ * @param {any} app todo: describe app type
+ * @returns {void}
+ */
 export function renderSidebar(app) {
     const sidebar = document.getElementById('sidebar');
     const sidebarContent = document.getElementById('sidebar-content');

@@ -1,4 +1,9 @@
 
+/**
+ * @param {MouseEvent} e
+ * @param {any} app todo: describe app type
+ * @returns {void}
+ */
 export function handleSidebarClick(e, app) {
     const toggleSidebar = () => app.setState({ sidebarCollapsed: !app.state.sidebarCollapsed });
 
@@ -55,6 +60,11 @@ export function handleSidebarClick(e, app) {
     }
 }
 
+/**
+ * @param {Event} e
+ * @param {any} app todo: describe app type
+ * @returns {void}
+ */
 export function handleSidebarInput(e, app) {
     if (e.target.id === 'search-input') {
         app.setState({ searchQuery: e.target.value });

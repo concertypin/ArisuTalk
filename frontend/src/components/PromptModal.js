@@ -1,7 +1,10 @@
 
 import { t } from '../i18n.js';
 
-
+/**
+ * @param {any} app todo: describe app type
+ * @returns {string}
+ */
 export function renderPromptModal(app) {
     const { prompts } = app.state.settings;
     const mainPromptSections = {

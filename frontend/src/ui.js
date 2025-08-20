@@ -5,7 +5,15 @@ import { renderCharacterModal } from './components/CharacterModal.js';
 import { renderPromptModal } from './components/PromptModal.js';
 import { renderConfirmationModal } from './components/ConfirmationModal.js';
 
+/**
+ * @param {any} app todo: describe app type
+ * @returns {void}
+ */
 function renderModals(app) {
+    /**
+     * @type {HTMLDivElement}
+     */
+    // @ts-ignore
     const container = document.getElementById('modal-container');
     let html = '';
     if (app.state.showSettingsModal) html += renderSettingsModal(app);
@@ -15,16 +23,25 @@ function renderModals(app) {
     container.innerHTML = html;
 }
 
+/**
+ * @param {any} app todo: describe app type
+ * @returns {void}
+ */
 function updateSnapshotList(app) {
     const container = document.getElementById('snapshots-list');
     if (container) {
         container.innerHTML = renderSnapshotList(app);
+        // @ts-ignore
         lucide.createIcons();
     }
 }
 
 // --- MAIN RENDER ORCHESTRATOR ---
 
+/**
+ * @param {import("./index.js").PersonaChatApp} app
+ * @returns {void}
+ */
 export function render(app) {
     const oldState = app.oldState || {};
     const newState = app.state;
@@ -53,12 +70,18 @@ export function render(app) {
         }
     }
 
+    // @ts-ignore
     lucide.createIcons();
     app.scrollToBottom();
 }
 
 // --- RENDER HELPER FUNCTIONS ---
 
+/**
+ * @param {any} oldState todo: describe oldState type
+ * @param {import('./types.js').State} newState
+ * @returns {boolean}
+ */
 function shouldUpdateSidebar(oldState, newState) {
     // This function checks if any state related to the sidebar has changed
     return (
@@ -75,6 +98,11 @@ function shouldUpdateSidebar(oldState, newState) {
     );
 }
 
+/**
+ * @param {any} oldState todo: describe oldState type
+ * @param {import('./types.js').State} newState
+ * @returns {boolean}
+ */
 function shouldUpdateMainChat(oldState, newState) {
     // This function checks if any state related to the main chat has changed
     return (
@@ -92,6 +120,11 @@ function shouldUpdateMainChat(oldState, newState) {
     );
 }
 
+/**
+ * @param {any} oldState todo: describe oldState type
+ * @param {import('./types.js').State} newState
+ * @returns {boolean}
+ */
 function shouldUpdateModals(oldState, newState) {
     // This function checks if any state related to modals has changed
 

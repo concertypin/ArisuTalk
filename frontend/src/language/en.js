@@ -1,3 +1,6 @@
+/**
+ * @type {import("./language").Language}
+ */
 export const en = {
     common: {
         cancel: 'Cancel',

@@ -1,3 +1,6 @@
+/**
+ * @type {import('./language').Language}
+ */
 export const ko = {
     common: {
         cancel: '취소',
