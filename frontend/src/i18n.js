@@ -31,7 +31,7 @@ export function t(key, params = {}) {
         }
     }
     if (typeof lang === 'string' && params && Object.keys(params).length > 0) {
-        return lang.replace(/\{(\w+)\}/g, (match, p1) => {
+        return lang.replace(/\{\{(\w+)\}\}/g, (match, p1) => {
             return params[p1] !== undefined ? params[p1] : match;
         });
     }
