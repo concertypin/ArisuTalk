@@ -1,5 +1,6 @@
 
 import { debounce } from '../utils.js';
+import { t } from '../i18n.js';
 
 export function handleModalClick(e, app) {
     const summary = e.target.closest('details > summary');
@@ -26,7 +27,7 @@ export function handleModalClick(e, app) {
     if (e.target.closest('#save-prompts')) app.handleSavePrompts();
 
     // Character Modal
-    if (e.target.closest('#close-character-modal')) app.closeCharacterModal();
+    if (e.target.closest('[data-action="close-character-modal"]')) app.closeCharacterModal();
     if (e.target.closest('#save-character')) app.handleSaveCharacter();
     if (e.target.closest('#select-avatar-btn')) document.getElementById('avatar-input').click();
     if (e.target.closest('#load-card-btn')) document.getElementById('card-input').click();
@@ -109,7 +110,7 @@ export function handleModalInput(e, app) {
     if (e.target.id === 'settings-random-character-count') {
         const count = e.target.value;
         const label = document.getElementById('random-character-count-label');
-        if (label) label.textContent = `${count}명`;
+        if (label) label.textContent = `${count}${t('settings.characterCountUnit')}`;
     }
 }
 

@@ -70,7 +70,8 @@ function shouldUpdateSidebar(oldState, newState) {
         oldState.selectedChatId !== newState.selectedChatId ||
         JSON.stringify(oldState.unreadCounts) !== JSON.stringify(newState.unreadCounts) ||
         JSON.stringify(oldState.messages) !== JSON.stringify(newState.messages) ||
-        JSON.stringify(oldState.chatRooms) !== JSON.stringify(newState.chatRooms)
+        JSON.stringify(oldState.chatRooms) !== JSON.stringify(newState.chatRooms) ||
+        oldState.settings.language !== newState.settings.language
     );
 }
 
@@ -86,7 +87,8 @@ function shouldUpdateMainChat(oldState, newState) {
         oldState.imageToSend !== newState.imageToSend ||
         oldState.showUserStickerPanel !== newState.showUserStickerPanel ||
         JSON.stringify(oldState.userStickers) !== JSON.stringify(newState.userStickers) ||
-        JSON.stringify([...oldState.expandedStickers]) !== JSON.stringify([...newState.expandedStickers])
+        JSON.stringify([...oldState.expandedStickers]) !== JSON.stringify([...newState.expandedStickers]) ||
+        oldState.settings.language !== newState.settings.language
     );
 }
 
@@ -95,24 +97,19 @@ function shouldUpdateModals(oldState, newState) {
 
     // If the settings modal is open, we don't re-render it just for settings changes.
     // This prevents the modal from resetting while the user is typing in input fields.
-    if (newState.showSettingsModal && oldState.showSettingsModal) {
-        // We need to check for specific state changes that require a re-render
-        // even when the settings modal is open.
-        return (
-            JSON.stringify(oldState.settingsSnapshots) !== JSON.stringify(newState.settingsSnapshots) ||
-            oldState.settings.model !== newState.settings.model ||
-            oldState.showPromptModal !== newState.showPromptModal ||
-            JSON.stringify(oldState.modal) !== JSON.stringify(newState.modal) ||
-            JSON.stringify(oldState.openSettingsSections) !== JSON.stringify(newState.openSettingsSections)
-        );
-    }
-
     return (
         oldState.showSettingsModal !== newState.showSettingsModal ||
         oldState.showCharacterModal !== newState.showCharacterModal ||
         oldState.showPromptModal !== newState.showPromptModal ||
         JSON.stringify(oldState.modal) !== JSON.stringify(newState.modal) ||
         (newState.showCharacterModal && JSON.stringify(oldState.editingCharacter) !== JSON.stringify(newState.editingCharacter)) ||
-        (newState.showPromptModal && JSON.stringify(oldState.settings.prompts) !== JSON.stringify(newState.settings.prompts))
+        (newState.showPromptModal && JSON.stringify(oldState.settings.prompts) !== JSON.stringify(newState.settings.prompts)) ||
+        // Add checks for changes within settings modal when it's open
+        (newState.showSettingsModal && (
+            JSON.stringify(oldState.settingsSnapshots) !== JSON.stringify(newState.settingsSnapshots) ||
+            oldState.settings.model !== newState.settings.model ||
+            oldState.settings.language !== newState.settings.language ||
+            JSON.stringify(oldState.openSettingsSections) !== JSON.stringify(newState.openSettingsSections)
+        ))
     );
 }
