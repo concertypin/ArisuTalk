@@ -1,0 +1,135 @@
+import { renderSidebar } from './components/Sidebar.js';
+import { renderMainChat } from './components/MainChat.js';
+import { renderSettingsModal, renderSnapshotList } from './components/SettingsModal.js';
+import { renderCharacterModal } from './components/CharacterModal.js';
+import { renderPromptModal } from './components/PromptModal.js';
+import { renderConfirmationModal } from './components/ConfirmationModal.js';
+import { renderCreateGroupChatModal, renderCreateOpenChatModal, renderEditGroupChatModal } from './components/GroupChat.js';
+import { renderDebugLogsModal } from './components/DebugLogsModal.js';
+
+function renderModals(app) {
+    const container = document.getElementById('modal-container');
+    let html = '';
+    if (app.state.showSettingsModal) html += renderSettingsModal(app);
+    if (app.state.showCharacterModal) html += renderCharacterModal(app);
+    if (app.state.showPromptModal) html += renderPromptModal(app);
+    if (app.state.showCreateGroupChatModal) html += renderCreateGroupChatModal(app);
+    if (app.state.showCreateOpenChatModal) html += renderCreateOpenChatModal(app);
+    if (app.state.showEditGroupChatModal) html += renderEditGroupChatModal(app);
+    if (app.state.showDebugLogsModal) html += renderDebugLogsModal(app.state);
+    if (app.state.modal.isOpen) html += renderConfirmationModal(app);
+    container.innerHTML = html;
+}
+
+function updateSnapshotList(app) {
+    const container = document.getElementById('snapshots-list');
+    if (container) {
+        container.innerHTML = renderSnapshotList(app);
+        lucide.createIcons();
+    }
+}
+
+// --- MAIN RENDER ORCHESTRATOR ---
+
+export function render(app) {
+    const oldState = app.oldState || {};
+    const newState = app.state;
+    const isFirstRender = !app.oldState;
+
+    // Conditionally render the sidebar to minimize DOM updates
+    if (isFirstRender || shouldUpdateSidebar(oldState, newState)) {
+        renderSidebar(app);
+    }
+
+    // Conditionally render the main chat to minimize DOM updates
+    if (isFirstRender || shouldUpdateMainChat(oldState, newState)) {
+        renderMainChat(app);
+    }
+
+    // Conditionally render modals to minimize DOM updates
+    if (isFirstRender || shouldUpdateModals(oldState, newState)) {
+        const settingsContent = document.getElementById('settings-modal-content');
+        const scrollPosition = settingsContent ? settingsContent.scrollTop : 0;
+
+        renderModals(app);
+
+        const newSettingsContent = document.getElementById('settings-modal-content');
+        if (newSettingsContent) {
+            newSettingsContent.scrollTop = scrollPosition;
+        }
+    }
+
+    lucide.createIcons();
+    app.scrollToBottom();
+}
+
+// --- RENDER HELPER FUNCTIONS ---
+
+function shouldUpdateSidebar(oldState, newState) {
+    // This function checks if any state related to the sidebar has changed
+    return (
+        oldState.sidebarCollapsed !== newState.sidebarCollapsed ||
+        oldState.searchQuery !== newState.searchQuery ||
+        oldState.expandedCharacterId !== newState.expandedCharacterId ||
+        oldState.editingChatRoomId !== newState.editingChatRoomId ||
+        JSON.stringify(oldState.characters) !== JSON.stringify(newState.characters) ||
+        oldState.selectedChatId !== newState.selectedChatId ||
+        JSON.stringify(oldState.unreadCounts) !== JSON.stringify(newState.unreadCounts) ||
+        JSON.stringify(oldState.messages) !== JSON.stringify(newState.messages) ||
+        JSON.stringify(oldState.chatRooms) !== JSON.stringify(newState.chatRooms) ||
+        JSON.stringify(oldState.groupChats) !== JSON.stringify(newState.groupChats) ||
+        JSON.stringify(oldState.openChats) !== JSON.stringify(newState.openChats)
+    );
+}
+
+function shouldUpdateMainChat(oldState, newState) {
+    // This function checks if any state related to the main chat has changed
+    return (
+        oldState.selectedChatId !== newState.selectedChatId ||
+        oldState.editingMessageId !== newState.editingMessageId ||
+        JSON.stringify(oldState.messages) !== JSON.stringify(newState.messages) ||
+        oldState.typingCharacterId !== newState.typingCharacterId ||
+        oldState.isWaitingForResponse !== newState.isWaitingForResponse ||
+        oldState.showInputOptions !== newState.showInputOptions ||
+        oldState.imageToSend !== newState.imageToSend ||
+        oldState.showUserStickerPanel !== newState.showUserStickerPanel ||
+        JSON.stringify(oldState.userStickers) !== JSON.stringify(newState.userStickers) ||
+        JSON.stringify([...oldState.expandedStickers]) !== JSON.stringify([...newState.expandedStickers])
+    );
+}
+
+function shouldUpdateModals(oldState, newState) {
+    // This function checks if any state related to modals has changed
+
+    // If the settings modal is open, we don't re-render it just for settings changes.
+    // This prevents the modal from resetting while the user is typing in input fields.
+    if (newState.showSettingsModal && oldState.showSettingsModal) {
+        // We need to check for specific state changes that require a re-render
+        // even when the settings modal is open.
+        return (
+            JSON.stringify(oldState.settingsSnapshots) !== JSON.stringify(newState.settingsSnapshots) ||
+            oldState.settings.model !== newState.settings.model ||
+            oldState.showPromptModal !== newState.showPromptModal ||
+            JSON.stringify(oldState.modal) !== JSON.stringify(newState.modal) ||
+            JSON.stringify(oldState.openSettingsSections) !== JSON.stringify(newState.openSettingsSections) ||
+            oldState.enableDebugLogs !== newState.enableDebugLogs ||
+            JSON.stringify(oldState.debugLogs) !== JSON.stringify(newState.debugLogs)
+        );
+    }
+
+    return (
+        oldState.showSettingsModal !== newState.showSettingsModal ||
+        oldState.showCharacterModal !== newState.showCharacterModal ||
+        oldState.showPromptModal !== newState.showPromptModal ||
+        oldState.showCreateGroupChatModal !== newState.showCreateGroupChatModal ||
+        oldState.showCreateOpenChatModal !== newState.showCreateOpenChatModal ||
+        oldState.showEditGroupChatModal !== newState.showEditGroupChatModal ||
+        oldState.showDebugLogsModal !== newState.showDebugLogsModal ||
+        JSON.stringify(oldState.modal) !== JSON.stringify(newState.modal) ||
+        (newState.showCharacterModal && JSON.stringify(oldState.editingCharacter) !== JSON.stringify(newState.editingCharacter)) ||
+        (newState.showPromptModal && JSON.stringify(oldState.settings.prompts) !== JSON.stringify(newState.settings.prompts)) ||
+        (newState.showCreateGroupChatModal && JSON.stringify(oldState.characters) !== JSON.stringify(newState.characters)) ||
+        (newState.showEditGroupChatModal && JSON.stringify(oldState.editingGroupChat) !== JSON.stringify(newState.editingGroupChat)) ||
+        (newState.showDebugLogsModal && JSON.stringify(oldState.debugLogs) !== JSON.stringify(newState.debugLogs))
+    );
+}
