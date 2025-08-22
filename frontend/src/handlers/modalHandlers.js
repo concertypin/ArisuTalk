@@ -1,10 +1,10 @@
 
 import { debounce } from '../utils.js';
-import { t } from '../i18n.js';
+import { lang } from '../i18n.js';
 import { PersonaChatApp } from '../index.js';
 
 /**
- * @param {MouseEvent | any} e
+ * @param {MouseEvent | any} e todo suppressing target is possibly null
  * @param {PersonaChatApp} app
  * @returns {void}
  */
@@ -94,7 +94,7 @@ const debouncedUpdateSettings = debounce((app, newSetting) => {
 
 /**
  * @type {Record<string, (app: PersonaChatApp, value: any) => Record<string, any>>} todo we should type this properly
- */
+*/
 const settingsUpdaters = {
     'settings-font-scale': (app, value) => ({ fontScale: parseFloat(value) }),
     'settings-api-key': (app, value) => ({ apiKey: value }),
@@ -124,7 +124,7 @@ export function handleModalInput(e, app) {
     if (e.target.id === 'settings-random-character-count') {
         const count = e.target.value;
         const label = document.getElementById('random-character-count-label');
-        if (label) label.textContent = `${count}${t('settings.characterCountUnit')}`;
+        if (label) label.textContent = `${count}${lang.settings.characterCountUnit}`;
     }
 }
 

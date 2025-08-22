@@ -11,6 +11,8 @@ import '../types.js';
  * @param {string?} option.availableStickers 
  * @param {string} option.timeContext 
  * @param {string} option.timeDiff 
+ * 
+ * @returns {string}
  */
 
 export function getSystemPrompt({

@@ -60,7 +60,10 @@ export function handleMainChatInput(e, app) {
         const message = e.target.value;
         e.target.style.height = 'auto';
         e.target.style.height = (e.target.scrollHeight) + 'px';
-
+        /**
+                 * @type {HTMLButtonElement?}
+                 */
+        // @ts-ignore
         const sendButton = document.getElementById('send-message-btn');
         if (sendButton) {
             const hasText = message.trim() !== '';
@@ -71,13 +74,17 @@ export function handleMainChatInput(e, app) {
 }
 
 /**
- * @param {KeyboardEvent} e
+ * @param {KeyboardEvent | any} e suppressing target is possibly null
  * @param {PersonaChatApp} app 
  * @returns {void}
  */
 export function handleMainChatKeypress(e, app) {
     if (e.target.id === 'new-message-input' && e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
+        /**
+         * @type {HTMLButtonElement?}
+         */
+        // @ts-ignore
         const sendButton = document.getElementById('send-message-btn');
         if (sendButton && !sendButton.disabled) {
             sendButton.click();
@@ -90,7 +97,7 @@ export function handleMainChatKeypress(e, app) {
 }
 
 /**
- * @param {Event} e
+ * @param {Event | any} e todo suppressing target is possibly null
  * @param {PersonaChatApp} app
  * @returns {void}
  */

@@ -15,6 +15,17 @@ export type Message = {
     stickerName?: string,
 };
 
+
+export type Promptlet = {
+    role: "user" | "model",
+    parts: PromptletPart[]
+};
+export type PromptletPart = { text: string } | {
+    inlineData: {
+        mimeType: string,
+        data: string
+    }
+};
 export type Character = {
     id: number,
     name: string,
@@ -42,7 +53,7 @@ export type State = {
     chatRooms: any, //todo declare type
     messages: Record<string, Message[]>,
     unreadCounts: any, //todo declare type
-    userStickers: any[], //todo declare type
+    userStickers: UserSticker[],
     settingsSnapshots: any[], //todo declare type
     selectedChatId: string?,
     expandedCharacterId: number?,
@@ -83,4 +94,16 @@ export type Settings = {
     snapshotsEnabled: boolean,
     language: SupportedLanguage,
     prompts: Prompts,
+}
+export type Sticker = {
+    name: string,
+    type: string, //mime type
+    dataUrl: string
+}
+export type userSticker = {
+    id: number, // by date.now
+    name: string,
+    data: string,
+    type: string,
+    createdAt: number, //by date.now
 }

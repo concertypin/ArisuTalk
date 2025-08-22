@@ -2347,7 +2347,7 @@ export class PersonaChatApp {
   sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   /**
-   * @param {import("./types.js").Character} character
+   * @param {import("./types.js").Character?} character
    * @returns {number}
    */
   calculateCharacterStickerSize(character) {

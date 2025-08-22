@@ -1,7 +1,7 @@
 
 /**
  * @param {import("../types").Character} character
- * @param {string} size
+ * @param {"sm" | "md" | "lg"} size
  * @returns {string}
  */
 export function renderAvatar(character, size = 'md') {

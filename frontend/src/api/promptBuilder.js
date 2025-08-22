@@ -15,12 +15,18 @@ import { getSystemPrompt } from './prompts.js';
  * @param {import('../types.js').Prompts} params.prompts - The prompt templates.
  * @param {boolean} [params.isProactive=false] - Whether the AI is initiating the conversation.
  * @param {boolean} [params.forceSummary=false] - Whether to force a memory summary.
- * @returns {{contents: Array<object>, systemPrompt: string}} - The generated contents and system prompt. todo
+ * @returns {{contents: import('../types.js').Promptlet[], systemPrompt: string}} - The generated contents and system prompt.
  */
 export function buildContentPrompt({ userName, userDescription, character, history, prompts, isProactive = false, forceSummary = false }) {
+    /**
+     * @type {import('../types.js').Promptlet[]}
+     */
     let contents = [];
     for (const msg of history) {
         const role = msg.isMe ? "user" : "model";
+        /**
+         * @type {import('../types.js').PromptletPart[]}
+         */
         let parts = [];
 
         if (msg.isMe && msg.type === 'image' && msg.imageId) {
@@ -63,7 +69,7 @@ export function buildContentPrompt({ userName, userDescription, character, histo
 
     const lastMessageTime = history.length > 0 ? new Date(history[history.length - 1].id) : new Date();
     const currentTime = new Date();
-    const timeDiff = Math.round((currentTime.getMilliseconds() - lastMessageTime.getMilliseconds()) / 1000 / 60);
+    const timeDiff = Math.round((currentTime.getMilliseconds() - lastMessageTime.getMilliseconds()) / 1000 / 60).toString();
 
     let timeContext = `(Context: It's currently ${currentTime.toLocaleString('en-US')}.`;
     if (isProactive) {
@@ -121,13 +127,15 @@ export function buildContentPrompt({ userName, userDescription, character, histo
  * @param {string} params.userName - The user's name.
  * @param {string} params.userDescription - The user's description.
  * @param {string} params.profileCreationPrompt - The template for creating the profile.
- * @returns {{systemPrompt: string, contents: Array<object>}} - The generated system prompt and contents.
+ * @returns {{systemPrompt: string, contents: import('../types.js').Promptlet[]}} - The generated system prompt and contents.
  */
 export function buildProfilePrompt({ userName, userDescription, profileCreationPrompt }) {
     const systemPrompt = profileCreationPrompt
         .replace('{userName}', userName)
         .replace('{userDescription}', userDescription);
-
+    /**
+     * @type {import('../types.js').Promptlet[]}
+     */
     const contents = [{
         role: "user",
         parts: [{ text: "Please generate a character profile based on the instructions." }]

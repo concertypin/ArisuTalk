@@ -1,5 +1,5 @@
 
-import { t } from '../i18n.js';
+import { lang } from '../i18n.js';
 import { PersonaChatApp } from '../index.js';
 
 /**
@@ -18,9 +18,9 @@ export function renderConfirmationModal(app) {
                 <p class="text-sm text-gray-300 mb-6 whitespace-pre-wrap">${message}</p>
                 <div class="flex justify-stretch space-x-3">
                     <button id="modal-cancel" class="flex-1 py-2.5 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
-                        ${onConfirm ? t('confirm.cancel') : t('confirm.confirm')}
+                        ${onConfirm ? lang.confirm.cancel : lang.confirm.confirm}
                     </button>
-                    ${onConfirm ? `<button id="modal-confirm" class="flex-1 py-2.5 px-4 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">${t('common.confirm')}</button>` : ''}
+                    ${onConfirm ? `<button id="modal-confirm" class="flex-1 py-2.5 px-4 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">${lang.common.confirm}</button>` : ''}
                 </div>
             </div>
         </div>

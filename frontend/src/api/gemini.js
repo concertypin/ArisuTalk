@@ -17,9 +17,9 @@ export class GeminiClient {
      * @param {object} arg0
      * @param {string} arg0.userName
      * @param {string} arg0.userDescription
-     * @param {Character} arg0.character
-     * @param {Message[]} arg0.history
-     * @param {Prompts} arg0.prompts
+     * @param {import('../types.js').Character} arg0.character
+     * @param {import('../types.js').Message[]} arg0.history
+     * @param {import('../types.js').Prompts} arg0.prompts
      * @param {boolean} [arg0.isProactive]
      * @param {boolean} [arg0.forceSummary]
      * @returns {Promise<any>} todo
@@ -111,7 +111,7 @@ export class GeminiClient {
 
     /**
      * @param {{userName: string, userDescription: string, profileCreationPrompt: string}} arg0
-     * @returns {Promise<any>}
+     * @returns {Promise<any>} todo
      */
     async generateProfile({ userName, userDescription, profileCreationPrompt }) {
         const { systemPrompt, contents } = buildProfilePrompt({ userName, userDescription, profileCreationPrompt });

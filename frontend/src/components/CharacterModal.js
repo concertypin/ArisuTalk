@@ -1,4 +1,4 @@
-import { t, languages, getLanguage } from '../i18n.js';
+import { t, languages, getLanguage, lang } from '../i18n.js';
 import { PersonaChatApp } from '../index.js';
 
 import { formatBytes, getLocalStorageUsage } from "../storage.js";
@@ -10,7 +10,7 @@ import { formatBytes, getLocalStorageUsage } from "../storage.js";
  * @param {string} description - Text description displayed above the slider.
  * @param {string} left - Label displayed to the left of the slider.
  * @param {string} right - Label displayed to the right of the slider.
- * @param {number} value - Initial value of the slider (between 1 and 10).
+ * @param {number|string} value - Initial value of the slider (between 1 and 10).
  * @returns {string} HTML string representing the slider component.
  */
 function renderSlider(id, description, left, right, value) {
@@ -35,7 +35,7 @@ function renderSlider(id, description, left, right, value) {
 function renderMemoryInput(memoryText = "") {
   return `
         <div class="memory-item flex items-center gap-2">
-            <input type="text" class="memory-input flex-1 px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" value="${memoryText}" placeholder="${t('characterModal.memoryPlaceholder')}">
+            <input type="text" class="memory-input flex-1 px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" value="${memoryText}" placeholder="${lang.characterModal.memoryPlaceholder}">
             <button class="delete-memory-btn p-2 text-gray-400 hover:text-red-400">
                 <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>
             </button>
@@ -46,13 +46,13 @@ function renderMemoryInput(memoryText = "") {
 /**
  * Renders a grid of sticker items as HTML string.
  *
- * @param {Object} app todo
- * @param {Array<Object>} stickers todo
+ * @param {PersonaChatApp} app
+ * @param {import('../types.js').Sticker[]} stickers
  * @returns {string} HTML string representing the sticker grid.
  */
 function renderStickerGrid(app, stickers) {
   if (!stickers || stickers.length === 0) {
-    return `<div class="col-span-4 text-center text-gray-400 text-sm py-4">${t('characterModal.noStickers')}</div>`;
+    return `<div class="col-span-4 text-center text-gray-400 text-sm py-4">${lang.characterModal.noStickers}</div>`;
   }
 
   const isSelectionMode = app.state.stickerSelectionMode;
@@ -103,10 +103,10 @@ function renderStickerGrid(app, stickers) {
         }${content}${!isSelectionMode
           ? `
                 <div class="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                    <button class="edit-sticker-name-btn p-1 bg-blue-600 rounded-full text-white" data-index="${index}" title="${t('characterModal.editStickerName')}">
+                    <button class="edit-sticker-name-btn p-1 bg-blue-600 rounded-full text-white" data-index="${index}" title="${lang.characterModal.editStickerName}">
                         <i data-lucide="edit-3" class="w-2 h-2 pointer-events-none"></i>
                     </button>
-                    <button class="delete-sticker-btn p-1 bg-red-600 rounded-full text-white" data-index="${index}" title="${t('characterModal.deleteSticker')}">
+                    <button class="delete-sticker-btn p-1 bg-red-600 rounded-full text-white" data-index="${index}" title="${lang.characterModal.deleteSticker}">
                         <i data-lucide="x" class="w-3 h-3 pointer-events-none"></i>
                     </button>
                 </div>
@@ -143,7 +143,7 @@ export function renderCharacterModal(app) {
         <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div class="bg-gray-800 rounded-2xl w-full max-w-md mx-auto my-auto flex flex-col" style="max-height: 90vh;">
                 <div class="flex items-center justify-between p-6 border-b border-gray-700 shrink-0">
-                    <h3 class="text-xl font-semibold text-white">${isNew ? t('characterModal.addContact') : t('characterModal.editContact')
+                    <h3 class="text-xl font-semibold text-white">${isNew ? lang.characterModal.addContact : lang.characterModal.editContact
     }</h3>
                     <button id="close-character-modal" class="close-character-modal-btn p-1 hover:bg-gray-700 rounded-full" data-action="close-character-modal"><i data-lucide="x" class="w-5 h-5"></i></button>
                 </div>
@@ -157,26 +157,26 @@ export function renderCharacterModal(app) {
                         </div>
                         <div class="flex flex-col gap-2">
                             <button id="select-avatar-btn" class="py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
-                                <i data-lucide="image" class="w-4 h-4"></i> ${t('characterModal.profileImage')}
+                                <i data-lucide="image" class="w-4 h-4"></i> ${lang.characterModal.profileImage}
                             </button>
                             <button id="load-card-btn" class="py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
-                                <i data-lucide="upload" class="w-4 h-4"></i> ${t('characterModal.importContact')}
+                                <i data-lucide="upload" class="w-4 h-4"></i> ${lang.characterModal.importContact}
                             </button>
                             <button id="save-card-btn" class="py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
-                                <i data-lucide="download" class="w-4 h-4"></i> ${t('characterModal.shareContact')}
+                                <i data-lucide="download" class="w-4 h-4"></i> ${lang.characterModal.shareContact}
                             </button>
                         </div>
                         <input type="file" accept="image/png,image/jpeg" id="avatar-input" class="hidden" />
                         <input type="file" accept="image/png" id="card-input" class="hidden" />
                     </div>
                     <div>
-                        <label class="text-sm font-medium text-gray-300 mb-2 block">${t('characterModal.nameLabel')}</label>
-                        <input id="character-name" type="text" placeholder="${t('characterModal.namePlaceholder')}" value="${char.name
+                        <label class="text-sm font-medium text-gray-300 mb-2 block">${lang.characterModal.nameLabel}</label>
+                        <input id="character-name" type="text" placeholder="${lang.characterModal.namePlaceholder}" value="${char.name
     }" class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" />
                     </div>
                     <div>
-                        <label class="text-sm font-medium text-gray-300 mb-2 block">${t('characterModal.promptLabel')}</label>
-                        <textarea id="character-prompt" placeholder="${t('characterModal.promptPlaceholder')}" class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" rows="6">${char.prompt
+                        <label class="text-sm font-medium text-gray-300 mb-2 block">${lang.characterModal.promptLabel}</label>
+                        <textarea id="character-prompt" placeholder="${lang.characterModal.promptPlaceholder}" class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" rows="6">${char.prompt
     }</textarea>
                     </div>
                     
@@ -184,7 +184,7 @@ export function renderCharacterModal(app) {
       ? `
                     <div class="border-t border-gray-700 pt-4">
                         <label class="flex items-center justify-between text-sm font-medium text-gray-300 cursor-pointer">
-                            <span class="flex items-center"><i data-lucide="message-square-plus" class="w-4 h-4 mr-2"></i>${t('characterModal.proactiveToggle')}</span>
+                            <span class="flex items-center"><i data-lucide="message-square-plus" class="w-4 h-4 mr-2"></i>${lang.characterModal.proactiveToggle}</span>
                             <div class="relative inline-block w-10 align-middle select-none">
                                 <input type="checkbox" name="toggle" id="character-proactive-toggle" ${char.proactiveEnabled ? "checked" : ""
       } class="absolute opacity-0 w-0 h-0 peer"/>
@@ -198,14 +198,14 @@ export function renderCharacterModal(app) {
 
                     <details class="group border-t border-gray-700 pt-4">
                         <summary class="flex items-center justify-between cursor-pointer list-none">
-                            <span class="text-base font-medium text-gray-200">${t('characterModal.advancedSettings')}</span>
+                            <span class="text-base font-medium text-gray-200">${lang.characterModal.advancedSettings}</span>
                             <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"></i>
                         </summary>
                         <div class="content-wrapper">
                             <div class="content-inner pt-6 space-y-6">
                                 <details class="group border-t border-gray-700 pt-2">
                                     <summary class="flex items-center justify-between cursor-pointer list-none py-2">
-                                       <h4 class="text-sm font-medium text-gray-300">${t('characterModal.sticker')}</h4>
+                                       <h4 class="text-sm font-medium text-gray-300">${lang.characterModal.sticker}</h4>
                                        <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"></i>
                                     </summary>
                                     <div class="content-wrapper">
@@ -214,7 +214,7 @@ export function renderCharacterModal(app) {
                                                 <div class="flex items-center gap-2">
                                                     <button id="add-sticker-btn" class="py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm flex flex-col items-center justify-center gap-1">
                                                         <i data-lucide="plus" class="w-4 h-4"></i> 
-                                                        <span class="text-xs">${t('characterModal.addSticker')}</span>
+                                                        <span class="text-xs">${lang.characterModal.addSticker}</span>
                                                     </button>
                                                     <input type="file" accept="image/jpeg,image/jpg,image/gif,image/png,image/bmp,image/webp,video/webm,video/mp4,audio/mpeg,audio/mp3" id="sticker-input" class="hidden" multiple />
                                                 </div>
@@ -230,8 +230,8 @@ export function renderCharacterModal(app) {
                                                         <i data-lucide="check-square" class="w-4 h-4"></i> 
                                                         <span class="toggle-text text-xs">${app.state
         .stickerSelectionMode
-        ? t('characterModal.deselect')
-        : t('characterModal.selectMode')
+        ? lang.characterModal.deselect
+        : lang.characterModal.selectMode
       }</span>
                                                     </button>
                                                     ${app.state
@@ -239,14 +239,14 @@ export function renderCharacterModal(app) {
         ? `
                                                     <button id="select-all-stickers" class="py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm flex flex-col items-center gap-1">
                                                         <i data-lucide="check-circle" class="w-4 h-4"></i> 
-                                                        <span class="text-xs">${t('characterModal.selectAll')}</span>
+                                                        <span class="text-xs">${lang.characterModal.selectAll}</span>
                                                     </button>
                                                     `
         : ""
       }
                                                     <button id="delete-selected-stickers" class="py-2 px-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm flex flex-col items-center gap-1 opacity-50 cursor-not-allowed" disabled>
                                                         <i data-lucide="trash-2" class="w-4 h-4"></i> 
-                                                        <span class="text-xs">${t('characterModal.deleteSelected')}</span>
+                                                        <span class="text-xs">${lang.characterModal.deleteSelected}</span>
                                                     </button>
                                                 </div>
                                                 `
@@ -254,17 +254,15 @@ export function renderCharacterModal(app) {
     }
                                             </div>
                                             <div class="flex items-center justify-between text-xs text-gray-400 mb-3">
-                                                <span>${t('characterModal.stickerSupport')}</span>
+                                                <span>${lang.characterModal.stickerSupport}</span>
                                                 <span>${t('characterModal.stickerCount', { count: (editingCharacter?.stickers || []).length })}</span>
                                             </div>
                                             <div class="flex items-center justify-between text-xs text-gray-500 mb-3">
-                                                <span>${t('characterModal.totalStorage')}${formatBytes(
+                                                <span>${lang.characterModal.totalStorage}${formatBytes(
       getLocalStorageUsage()
     )}</span>
-                                                <span>${t('characterModal.totalSize')}${formatBytes(
-      app.calculateCharacterStickerSize(
-        editingCharacter || {}
-      )
+                                                <span>${lang.characterModal.totalSize}${formatBytes(
+      app.calculateCharacterStickerSize(editingCharacter)
     )}</span>
                                             </div>
                                             <div id="sticker-container" class="grid grid-cols-4 gap-2">
@@ -279,7 +277,7 @@ export function renderCharacterModal(app) {
                                 </details>
                                 <details class="group border-t border-gray-700 pt-2">
                                     <summary class="flex items-center justify-between cursor-pointer list-none py-2">
-                                       <h4 class="text-sm font-medium text-gray-300">${t('characterModal.memory')}</h4>
+                                       <h4 class="text-sm font-medium text-gray-300">${lang.characterModal.memory}</h4>
                                        <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"></i>
                                     </summary>
                                     <div class="content-wrapper">
@@ -294,14 +292,14 @@ export function renderCharacterModal(app) {
       .join("")}
                                             </div>
                                             <button id="add-memory-btn" class="mt-3 text-sm text-blue-400 hover:text-blue-300 flex items-center gap-2">
-                                                <i data-lucide="plus-circle" class="w-4 h-4"></i> ${t('characterModal.addMemory')}
+                                                <i data-lucide="plus-circle" class="w-4 h-4"></i> ${lang.characterModal.addMemory}
                                             </button>
                                         </div>
                                     </div>
                                 </details>
                                 <details class="group border-t border-gray-700 pt-2">
                                     <summary class="flex items-center justify-between cursor-pointer list-none py-2">
-                                       <h4 class="text-sm font-medium text-gray-300">${t('characterModal.responseSpeed')}</h4>
+                                       <h4 class="text-sm font-medium text-gray-300">${lang.characterModal.responseSpeed}</h4>
                                        <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"></i>
                                     </summary>
                                     <div class="content-wrapper">
@@ -354,8 +352,8 @@ export function renderCharacterModal(app) {
                     </details>
                 </div>
                 <div class="p-6 mt-auto border-t border-gray-700 shrink-0 flex justify-end space-x-3">
-                    <button id="cancel-character-modal-btn" class="close-character-modal-btn flex-1 py-2.5 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors" data-action="close-character-modal">${t('common.cancel')}</button>
-                    <button id="save-character" class="flex-1 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">${t('common.save')}</button>
+                    <button id="cancel-character-modal-btn" class="close-character-modal-btn flex-1 py-2.5 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors" data-action="close-character-modal">${lang.common.cancel}</button>
+                    <button id="save-character" class="flex-1 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">${lang.common.save}</button>
                 </div>
             </div>
         </div>

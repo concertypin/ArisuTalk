@@ -1,4 +1,4 @@
-import { t } from './i18n.js'; // Adjust the path as needed for your project
+import { lang } from './i18n.js'; // Adjust the path as needed for your project
 
 /**
  * @param {string} key 
@@ -39,7 +39,7 @@ export async function saveToBrowserStorage(key, value) {
       window.localStorage.setItem(key, stringifiedValue);
     } catch (localStorageError) {
       console.error("localStorage fallback also failed:", localStorageError);
-      alert(t('modal.saveFailed.message'));
+      alert(lang.modal.saveFailed.message);
     }
   }
 }

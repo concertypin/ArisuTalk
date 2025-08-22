@@ -27,7 +27,6 @@ let currentLanguage = localStorage.getItem('language') || 'ko';
  * @param {SupportedLanguage} lang - The language code to set (e.g., 'en', 'fr').
  */
 export function setLanguage(lang) {
-    // @ts-ignore
     currentLanguage = lang;
     localStorage.setItem('language', lang);
     document.documentElement.lang = lang;

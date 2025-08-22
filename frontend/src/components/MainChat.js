@@ -1,5 +1,5 @@
 
-import { t } from '../i18n.js';
+import { lang, t } from '../i18n.js';
 import { PersonaChatApp } from '../index.js';
 
 import { formatBytes } from '../storage.js';
@@ -34,7 +34,7 @@ function renderInputArea(app) {
             ${showInputOptions ? `
                 <div class="absolute bottom-full left-0 mb-2 w-48 bg-gray-700 rounded-xl shadow-lg p-2 animate-fadeIn">
                     <button id="open-image-upload" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-left rounded-lg hover:bg-gray-600">
-                        <i data-lucide="image" class="w-4 h-4"></i> ${t('mainChat.uploadPhoto')}
+                        <i data-lucide="image" class="w-4 h-4"></i> ${lang.mainChat.uploadPhoto}
                     </button>
                 </div>
             ` : ''}
@@ -48,13 +48,13 @@ function renderInputArea(app) {
                     ${app.state.stickerToSend ? `
                         <div class="mb-2 p-2 bg-gray-700 rounded-lg flex items-center gap-2 text-sm text-gray-300">
                             <img src="${app.state.stickerToSend.data}" alt="${app.state.stickerToSend.stickerName}" class="w-6 h-6 rounded object-cover">
-                            <span>${t('mainChat.stickerLabel')}${app.state.stickerToSend.stickerName}</span>
+                            <span>${lang.mainChat.stickerLabel}${app.state.stickerToSend.stickerName}</span>
                             <button onclick="window.personaApp.setState({stickerToSend: null})" class="ml-auto text-gray-400 hover:text-white">
                                 <i data-lucide="x" class="w-3 h-3"></i>
                             </button>
                         </div>
                     ` : ''}
-                    <textarea id="new-message-input" placeholder="${hasImage ? t('mainChat.addCaption') : app.state.stickerToSend ? t('mainChat.stickerMessagePlaceholder') : t('mainChat.messagePlaceholder')}" class="w-full pl-4 pr-20 py-3 bg-gray-800 text-white rounded-2xl border border-gray-700 resize-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 transition-all duration-200 text-sm placeholder-gray-500" rows="1" style="min-height: 48px; max-height: 120px;" ${isWaitingForResponse ? 'disabled' : ''}></textarea>
+                    <textarea id="new-message-input" placeholder="${hasImage ? lang.mainChat.addCaption : app.state.stickerToSend ? lang.mainChat.stickerMessagePlaceholder : lang.mainChat.messagePlaceholder}" class="w-full pl-4 pr-20 py-3 bg-gray-800 text-white rounded-2xl border border-gray-700 resize-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 transition-all duration-200 text-sm placeholder-gray-500" rows="1" style="min-height: 48px; max-height: 120px;" ${isWaitingForResponse ? 'disabled' : ''}></textarea>
                     <div class="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
                         <button id="sticker-btn" 
                             onclick="window.personaApp.toggleUserStickerPanel()" 
@@ -87,29 +87,29 @@ function renderUserStickerPanel(app) {
     return `
         <div class="absolute bottom-full left-0 mb-2 w-80 bg-gray-800 rounded-xl shadow-lg border border-gray-700 animate-fadeIn">
             <div class="p-3 border-b border-gray-700 flex items-center justify-between">
-                <h3 class="text-sm font-medium text-white">${t('mainChat.personaStickers')}</h3>
+                <h3 class="text-sm font-medium text-white">${lang.mainChat.personaStickers}</h3>
                 <div class="flex gap-2">
-                    <button id="add-user-sticker-btn" class="p-1 bg-blue-600 hover:bg-blue-700 text-white rounded" title="${t('mainChat.addSticker')}">
+                    <button id="add-user-sticker-btn" class="p-1 bg-blue-600 hover:bg-blue-700 text-white rounded" title="${lang.mainChat.addSticker}">
                         <i data-lucide="plus" class="w-3 h-3"></i>
                     </button>
-                    <button onclick="window.personaApp.toggleUserStickerPanel()" class="p-1 bg-gray-600 hover:bg-gray-500 text-white rounded" title="${t('common.close')}">
+                    <button onclick="window.personaApp.toggleUserStickerPanel()" class="p-1 bg-gray-600 hover:bg-gray-500 text-white rounded" title="${lang.common.close}">
                         <i data-lucide="x" class="w-3 h-3"></i>
                     </button>
                 </div>
             </div>
             <div class="p-3">
                 <div class="flex items-center justify-between text-xs text-gray-400 mb-3">
-                    <span>${t('characterModal.stickerSupport')}</span>
+                    <span>${lang.characterModal.stickerSupport}</span>
                     <span>${t('characterModal.stickerCount', { count: userStickers.length })}</span>
                 </div>
                 <div class="flex items-center justify-between text-xs text-gray-500 mb-3">
-                    <span>${t('characterModal.totalSize')}${formatBytes(currentSize)}</span>
+                    <span>${lang.characterModal.totalSize}${formatBytes(currentSize)}</span>
                 </div>
                 ${userStickers.length === 0 ? `
                     <div class="text-center text-gray-400 py-8">
                         <i data-lucide="smile" class="w-8 h-8 mx-auto mb-2"></i>
-                        <p class="text-sm">${t('mainChat.addStickerPrompt')}</p>
-                        <button onclick="document.getElementById('add-user-sticker-btn').click()" class="mt-2 text-xs text-blue-400 hover:text-blue-300">${t('mainChat.addStickerButton')}</button>
+                        <p class="text-sm">${lang.mainChat.addStickerPrompt}</p>
+                        <button onclick="document.getElementById('add-user-sticker-btn').click()" class="mt-2 text-xs text-blue-400 hover:text-blue-300">${lang.mainChat.addStickerButton}</button>
                     </div>
                 ` : `
                     <div class="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto">
@@ -134,11 +134,11 @@ function renderUserStickerPanel(app) {
                                 </button>
                                 <div class="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                                     <button onclick="window.personaApp.editUserStickerName(${sticker.id}); event.stopPropagation();" 
-                                        class="w-5 h-5 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center text-xs" title="${t('characterModal.editStickerName')}">
+                                        class="w-5 h-5 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center text-xs" title="${lang.characterModal.editStickerName}">
                                         <i data-lucide="edit-3" class="w-2 h-2"></i>
                                     </button>
                                     <button onclick="window.personaApp.deleteUserSticker(${sticker.id}); event.stopPropagation();" 
-                                        class="w-5 h-5 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center text-xs" title="${t('characterModal.deleteSticker')}">
+                                        class="w-5 h-5 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center text-xs" title="${lang.characterModal.deleteSticker}">
                                         <i data-lucide="x" class="w-3 h-3"></i>
                                     </button>
                                 </div>
@@ -199,8 +199,8 @@ function renderMessages(app) {
                     <div class="flex flex-col ${msg.isMe ? 'items-end' : 'items-start'}">
                         ${editContentHtml}
                         <div class="flex items-center space-x-2 mt-2">
-                            <button data-id="${groupInfo.lastMessageId}" class="cancel-edit-btn text-xs text-gray-400 hover:text-white">${t('common.cancel')}</button>
-                            <button data-id="${groupInfo.lastMessageId}" class="save-edit-btn text-xs text-blue-400 hover:text-blue-300">${t('common.save')}</button>
+                            <button data-id="${groupInfo.lastMessageId}" class="cancel-edit-btn text-xs text-gray-400 hover:text-white">${lang.common.cancel}</button>
+                            <button data-id="${groupInfo.lastMessageId}" class="save-edit-btn text-xs text-blue-400 hover:text-blue-300">${lang.common.save}</button>
                         </div>
                     </div>
                 `;
@@ -244,7 +244,7 @@ function renderMessages(app) {
                 let stickerHtml = '';
                 if (isAudio) {
                     const audioSrc = stickerData.data || stickerData.dataUrl;
-                    const stickerName = stickerData.stickerName || stickerData.name || t('mainChat.audio');
+                    const stickerName = stickerData.stickerName || stickerData.name || lang.mainChat.audio;
                     stickerHtml = `
                         <div class="bg-gray-700 p-3 rounded-2xl max-w-xs">
                             <div class="flex items-center gap-3">
@@ -274,7 +274,7 @@ function renderMessages(app) {
                     `;
                 } else {
                     const imgSrc = stickerData.data || stickerData.dataUrl;
-                    const stickerName = stickerData.stickerName || stickerData.name || t('mainChat.sticker');
+                    const stickerName = stickerData.stickerName || stickerData.name || lang.mainChat.sticker;
                     const isExpanded = app.state.expandedStickers.has(msg.id);
                     const sizeClass = isExpanded ? 'max-w-4xl' : 'max-w-xs';
                     const heightStyle = isExpanded ? 'max-height: 720px;' : 'max-height: 240px;';
@@ -303,7 +303,7 @@ function renderMessages(app) {
                     messageBodyHtml = stickerHtml;
                 }
             } else {
-                messageBodyHtml = `<div class="px-4 py-2 rounded-2xl text-sm md:text-base leading-relaxed bg-gray-700 text-gray-400 italic">${t('mainChat.deletedSticker')}${msg.stickerName || msg.content}]</div>`;
+                messageBodyHtml = `<div class="px-4 py-2 rounded-2xl text-sm md:text-base leading-relaxed bg-gray-700 text-gray-400 italic">${lang.mainChat.deletedSticker}${msg.stickerName || msg.content}]</div>`;
             }
         } else if (msg.type === 'image') {
             const selectedChatRoom = app.getCurrentChatRoom();
@@ -424,8 +424,8 @@ export function renderMainChat(app) {
                 </button>
                 <div>
                     <div class="w-20 h-20 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full flex items-center justify-center mx-auto mb-6"><i data-lucide="bot" class="w-10 h-10 text-white"></i></div>
-                    <h3 class="text-xl md:text-2xl font-semibold text-white mb-3">${t('mainChat.selectCharacter')}</h3>
-                    <p class="text-sm md:text-base text-gray-400 leading-relaxed">${t('mainChat.selectCharacterPrompt')}</p>
+                    <h3 class="text-xl md:text-2xl font-semibold text-white mb-3">${lang.mainChat.selectCharacter}</h3>
+                    <p class="text-sm md:text-base text-gray-400 leading-relaxed">${lang.mainChat.selectCharacterPrompt}</p>
                 </div>
             </div>
         `;
