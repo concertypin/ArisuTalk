@@ -175,16 +175,16 @@ export function renderDebugLogsModal(state) {
                         </div>
                         <div class="flex items-center gap-2">
                             ${logCount > 0 ? `
-                                <button id="export-debug-logs" onclick="window.personaApp.exportDebugLogs()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg flex items-center gap-2 text-sm">
+                                <button id="export-debug-logs" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg flex items-center gap-2 text-sm">
                                     <i data-lucide="download" class="w-4 h-4 pointer-events-none"></i>
                                     내보내기
                                 </button>
-                                <button id="clear-debug-logs" onclick="console.log('모달 내 로그 삭제 버튼 클릭됨'); window.personaApp.clearDebugLogs()" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg flex items-center gap-2 text-sm">
+                                <button id="clear-debug-logs" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg flex items-center gap-2 text-sm">
                                     <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>
                                     전체 삭제
                                 </button>
                             ` : ''}
-                            <button id="close-debug-logs-modal" onclick="window.personaApp.setState({ showDebugLogsModal: false })" class="px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white rounded-lg text-sm">
+                            <button id="close-debug-logs-modal" class="px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white rounded-lg text-sm">
                                 닫기
                             </button>
                         </div>
@@ -219,4 +219,35 @@ export function renderDebugLogsModal(state) {
             </div>
         </div>
     `;
+}
+
+/**
+ * Setup event listeners for Debug Logs Modal
+ * 관심사 분리 원칙에 따라 이벤트 핸들링을 별도 함수로 분리
+ */
+export function setupDebugLogsModalEventListeners() {
+    // Export debug logs button
+    const exportBtn = document.getElementById('export-debug-logs');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', () => {
+            window.personaApp.exportDebugLogs();
+        });
+    }
+
+    // Clear debug logs button  
+    const clearBtn = document.getElementById('clear-debug-logs');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            console.log('모달 내 로그 삭제 버튼 클릭됨');
+            window.personaApp.clearDebugLogs();
+        });
+    }
+
+    // Close modal button
+    const closeBtn = document.getElementById('close-debug-logs-modal');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            window.personaApp.setState({ showDebugLogsModal: false });
+        });
+    }
 }

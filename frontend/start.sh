@@ -4,7 +4,7 @@
 echo "🌟 ArisuTalk을 시작합니다..."
 
 # 포트 확인 및 기존 프로세스 종료
-PORT=1277
+PORT=5173
 PID=$(lsof -ti:$PORT)
 
 if [ ! -z "$PID" ]; then

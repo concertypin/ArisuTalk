@@ -1,47 +1,14 @@
 
 import { language } from '../language.js';
-
-// Provider별 기본 모델 목록
-const providerModels = {
-    gemini: [
-        'gemini-2.5-pro',
-        'gemini-2.5-flash'
-    ],
-    claude: [
-        'claude-opus-4-1-20250805',
-        'claude-opus-4-20250514',
-        'claude-sonnet-4-20250514',
-        'claude-3-7-sonnet-20250219',
-        'claude-3-5-haiku-20241022',
-        'claude-3-haiku-20240307'
-    ],
-    openai: [
-        'gpt-5',
-        'gpt-5-mini',
-        'gpt-5-nano',
-        'o3',
-        'o4-mini',
-        'o3-pro',
-        'gpt-4o',
-        'gpt-4o-mini',
-        'gpt-4.1'
-    ],
-    grok: [
-        'grok-4',
-        'grok-3',
-        'grok-3-mini'
-    ],
-    openrouter: [], // 커스텀 모델만 지원
-    custom_openai: [] // 커스텀 모델만 지원
-};
+import { PROVIDERS, PROVIDER_MODELS, DEFAULT_PROVIDER } from '../constants/providers.js';
 
 function renderCurrentProviderSettings(app) {
     const { settings } = app.state;
-    const provider = settings.apiProvider || 'gemini';
+    const provider = settings.apiProvider || DEFAULT_PROVIDER;
     const config = settings.apiConfigs?.[provider];
     
     // 레거시 호환성 처리 - 기존 apiKey/model을 gemini config로 마이그레이션
-    if (!config && provider === 'gemini') {
+    if (!config && provider === PROVIDERS.GEMINI) {
         const legacyConfig = {
             apiKey: settings.apiKey || '',
             model: settings.model || 'gemini-2.5-flash',
@@ -55,7 +22,7 @@ function renderCurrentProviderSettings(app) {
             apiKey: '',
             model: '',
             customModels: [],
-            baseUrl: provider === 'custom_openai' ? '' : undefined
+            baseUrl: provider === PROVIDERS.CUSTOM_OPENAI ? '' : undefined
         });
     }
     
@@ -63,7 +30,7 @@ function renderCurrentProviderSettings(app) {
 }
 
 function renderProviderConfig(provider, config) {
-    const models = providerModels[provider] || [];
+    const models = PROVIDER_MODELS[provider] || [];
     const customModels = config.customModels || [];
     
     return `
@@ -82,7 +49,7 @@ function renderProviderConfig(provider, config) {
                 />
             </div>
             
-            ${provider === 'custom_openai' ? `
+            ${provider === PROVIDERS.CUSTOM_OPENAI ? `
                 <!-- Custom OpenAI Base URL -->
                 <div>
                     <label class="flex items-center text-sm font-medium text-gray-300 mb-2">
@@ -207,6 +174,8 @@ export function renderSettingsModal(app) {
                                     </select>
                                 </div>
                                 <div class="provider-settings-container">${renderCurrentProviderSettings(app)}</div>
+                                
+                                
                                 <div>
                                     <button id="open-prompt-modal" class="w-full mt-2 py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
                                         <i data-lucide="file-pen-line" class="w-4 h-4"></i> 프롬프트 수정
@@ -342,10 +311,10 @@ export function renderSettingsModal(app) {
                                         <span class="font-mono">${app.state.debugLogs ? app.state.debugLogs.length : 0}/1000</span>
                                     </div>
                                     <div class="flex gap-2">
-                                        <button id="view-debug-logs" onclick="window.personaApp.setState({ showSettingsModal: false, showDebugLogsModal: true })" class="flex-1 py-2 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
+                                        <button id="view-debug-logs" class="flex-1 py-2 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
                                             <i data-lucide="bar-chart-3" class="w-4 h-4 pointer-events-none"></i>로그 보기
                                         </button>
-                                        <button id="clear-debug-logs-btn" onclick="console.log('로그 삭제 버튼 클릭됨'); window.personaApp.clearDebugLogs()" class="flex-1 py-2 px-3 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
+                                        <button id="clear-debug-logs-btn" class="flex-1 py-2 px-3 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
                                             <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>로그 삭제
                                         </button>
                                     </div>
@@ -359,13 +328,35 @@ export function renderSettingsModal(app) {
                             <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"></i>
                         </summary>
                         <div class="content-wrapper">
-                            <div class="content-inner pt-4 space-y-2">
-                                <button id="backup-data-btn" class="w-full py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
-                                    <i data-lucide="download" class="w-4 h-4"></i> 백업하기
-                                </button>
-                                <button id="restore-data-btn" class="w-full py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
-                                    <i data-lucide="upload" class="w-4 h-4"></i> 불러오기
-                                </button>
+                            <div class="content-inner pt-4 space-y-3">
+                                <!-- 백업 및 복원 -->
+                                <div class="space-y-2">
+                                    <button id="backup-data-btn" class="w-full py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
+                                        <i data-lucide="download" class="w-4 h-4"></i> 백업하기
+                                    </button>
+                                    <button id="restore-data-btn" class="w-full py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
+                                        <i data-lucide="upload" class="w-4 h-4"></i> 불러오기
+                                    </button>
+                                </div>
+                                
+                                <!-- 구분선 -->
+                                <div class="border-t border-gray-600"></div>
+                                
+                                <!-- 데이터 초기화 -->
+                                <div class="space-y-2">
+                                    <div class="bg-red-900/20 border border-red-500/30 rounded-lg p-3">
+                                        <div class="flex items-start gap-2">
+                                            <i data-lucide="alert-triangle" class="w-4 h-4 text-red-400 mt-0.5 shrink-0"></i>
+                                            <div class="text-xs text-gray-300">
+                                                <p class="font-medium text-red-400 mb-1">주의사항</p>
+                                                <p>모든 데이터가 삭제됩니다: 캐릭터, 채팅 기록, 설정, API 키</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button id="reset-all-data-btn" class="w-full py-2 px-4 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i> 모든 데이터 초기화
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </details>
@@ -377,4 +368,69 @@ export function renderSettingsModal(app) {
             </div>
         </div>
     `;
+}
+
+
+/**
+ * Setup event listeners for Settings Modal
+ * 관심사 분리 원칙에 따라 이벤트 핸들링을 별도 함수로 분리
+ */
+export function setupSettingsModalEventListeners() {
+    // View debug logs button
+    const viewDebugLogsBtn = document.getElementById('view-debug-logs');
+    if (viewDebugLogsBtn) {
+        viewDebugLogsBtn.addEventListener('click', () => {
+            window.personaApp.setState({ showSettingsModal: false, showDebugLogsModal: true });
+        });
+    }
+
+    // Clear debug logs button in settings
+    const clearDebugLogsBtnSettings = document.getElementById('clear-debug-logs-btn');
+    if (clearDebugLogsBtnSettings) {
+        clearDebugLogsBtnSettings.addEventListener('click', () => {
+            console.log('로그 삭제 버튼 클릭됨');
+            window.personaApp.clearDebugLogs();
+        });
+    }
+
+    // Data management event listeners
+    setupDataManagementEventListeners();
+}
+
+
+function setupDataManagementEventListeners() {
+    // Reset all data button
+    const resetAllDataBtn = document.getElementById('reset-all-data-btn');
+    if (resetAllDataBtn) {
+        resetAllDataBtn.addEventListener('click', async () => {
+            const confirmed = confirm(
+                '모든 데이터를 초기화하시겠습니까?\\n\\n' +
+                '⚠️ 다음 데이터가 모두 삭제됩니다:\\n' +
+                '• 모든 캐릭터 정보\\n' +
+                '• 모든 채팅 기록\\n' +
+                '• 사용자 설정 (API 키 포함)\\n' +
+                '• 스티커 데이터\\n' +
+                '• 디버그 로그\\n\\n' +
+                '이 작업은 되돌릴 수 없습니다!'
+            );
+            
+            if (confirmed) {
+                const doubleConfirmed = confirm(
+                    '정말로 모든 데이터를 삭제하시겠습니까?\\n\\n' +
+                    '백업을 하지 않았다면 모든 데이터를 잃게 됩니다.\\n\\n' +
+                    '마지막 확인: 모든 데이터를 삭제하시겠습니까?'
+                );
+                
+                if (doubleConfirmed) {
+                    try {
+                        await window.personaApp.resetAllData();
+                        alert('모든 데이터가 초기화되었습니다. 페이지를 새로고침합니다.');
+                        location.reload();
+                    } catch (error) {
+                        alert('데이터 초기화에 실패했습니다: ' + error.message);
+                    }
+                }
+            }
+        });
+    }
 }

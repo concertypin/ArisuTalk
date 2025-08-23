@@ -1,11 +1,11 @@
 import { renderSidebar } from './components/Sidebar.js';
-import { renderMainChat } from './components/MainChat.js';
-import { renderSettingsModal, renderSnapshotList } from './components/SettingsModal.js';
+import { renderMainChat, setupMainChatEventListeners } from './components/MainChat.js';
+import { renderSettingsModal, renderSnapshotList, setupSettingsModalEventListeners } from './components/SettingsModal.js';
 import { renderCharacterModal } from './components/CharacterModal.js';
 import { renderPromptModal } from './components/PromptModal.js';
 import { renderConfirmationModal } from './components/ConfirmationModal.js';
 import { renderCreateGroupChatModal, renderCreateOpenChatModal, renderEditGroupChatModal } from './components/GroupChat.js';
-import { renderDebugLogsModal } from './components/DebugLogsModal.js';
+import { renderDebugLogsModal, setupDebugLogsModalEventListeners } from './components/DebugLogsModal.js';
 
 function renderModals(app) {
     const container = document.getElementById('modal-container');
@@ -19,6 +19,14 @@ function renderModals(app) {
     if (app.state.showDebugLogsModal) html += renderDebugLogsModal(app.state);
     if (app.state.modal.isOpen) html += renderConfirmationModal(app);
     container.innerHTML = html;
+    
+    // Setup event listeners for modals after DOM update
+    if (app.state.showDebugLogsModal) {
+        setupDebugLogsModalEventListeners();
+    }
+    if (app.state.showSettingsModal) {
+        setupSettingsModalEventListeners();
+    }
 }
 
 function updateSnapshotList(app) {
@@ -44,6 +52,7 @@ export function render(app) {
     // Conditionally render the main chat to minimize DOM updates
     if (isFirstRender || shouldUpdateMainChat(oldState, newState)) {
         renderMainChat(app);
+        setupMainChatEventListeners();
     }
 
     // Conditionally render modals to minimize DOM updates

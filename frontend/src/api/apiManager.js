@@ -4,6 +4,7 @@ import { OpenAIClient } from './openai.js';
 import { GrokClient } from './grok.js';
 import { OpenRouterClient } from './openrouter.js';
 import { CustomOpenAIClient } from './customopenai.js';
+import { PROVIDERS, SUPPORTED_PROVIDERS, isProviderSupported } from '../constants/providers.js';
 
 /**
  * API Manager that handles multiple AI providers
@@ -15,8 +16,25 @@ export class APIManager {
     }
 
     /**
+     * Resolve actual API key from potentially encrypted placeholder
+     * @param {string} provider - The API provider
+     * @param {string} apiKey - The API key (might be encrypted placeholder)
+     * @returns {Promise<string>} - The actual API key
+     */
+    async resolveApiKey(provider, apiKey) {
+        // If it's an encrypted placeholder, get the real key from PersonaChatApp
+        if (apiKey === '***encrypted***' || !apiKey) {
+            if (window.personaApp) {
+                return await window.personaApp.getApiKey(provider);
+            }
+            throw new Error('API 키를 찾을 수 없습니다. 설정에서 API 키를 확인해주세요.');
+        }
+        return apiKey;
+    }
+
+    /**
      * Creates and returns the appropriate API client based on provider
-     * @param {string} provider - The API provider (gemini, claude, openai, grok, openrouter, custom_openai)
+     * @param {string} provider - The API provider (see PROVIDERS constants)
      * @param {string} apiKey - The API key for the provider
      * @param {string} model - The model to use
      * @param {string} [baseUrl] - Custom base URL (for custom_openai only)
@@ -32,22 +50,22 @@ export class APIManager {
 
         let client;
         switch (provider) {
-            case 'gemini':
+            case PROVIDERS.GEMINI:
                 client = new GeminiClient(apiKey, model);
                 break;
-            case 'claude':
+            case PROVIDERS.CLAUDE:
                 client = new ClaudeClient(apiKey, model);
                 break;
-            case 'openai':
+            case PROVIDERS.OPENAI:
                 client = new OpenAIClient(apiKey, model);
                 break;
-            case 'grok':
+            case PROVIDERS.GROK:
                 client = new GrokClient(apiKey, model);
                 break;
-            case 'openrouter':
+            case PROVIDERS.OPENROUTER:
                 client = new OpenRouterClient(apiKey, model);
                 break;
-            case 'custom_openai':
+            case PROVIDERS.CUSTOM_OPENAI:
                 client = new CustomOpenAIClient(apiKey, model, baseUrl);
                 break;
             default:
@@ -68,7 +86,9 @@ export class APIManager {
      * @returns {Promise<Object>} The generated content response
      */
     async generateContent(provider, apiKey, model, params, baseUrl = null) {
-        const client = this.getClient(provider, apiKey, model, baseUrl);
+        // Resolve actual API key if encrypted
+        const actualApiKey = await this.resolveApiKey(provider, apiKey);
+        const client = this.getClient(provider, actualApiKey, model, baseUrl);
         return await client.generateContent(params);
     }
 
@@ -82,7 +102,9 @@ export class APIManager {
      * @returns {Promise<Object>} The generated profile response
      */
     async generateProfile(provider, apiKey, model, params, baseUrl = null) {
-        const client = this.getClient(provider, apiKey, model, baseUrl);
+        // Resolve actual API key if encrypted
+        const actualApiKey = await this.resolveApiKey(provider, apiKey);
+        const client = this.getClient(provider, actualApiKey, model, baseUrl);
         return await client.generateProfile(params);
     }
 
@@ -98,7 +120,7 @@ export class APIManager {
      * @returns {Array<string>} List of supported provider names
      */
     getSupportedProviders() {
-        return ['gemini', 'claude', 'openai', 'grok', 'openrouter', 'custom_openai'];
+        return SUPPORTED_PROVIDERS;
     }
 
     /**
@@ -107,6 +129,6 @@ export class APIManager {
      * @returns {boolean} Whether the provider is supported
      */
     isProviderSupported(provider) {
-        return this.getSupportedProviders().includes(provider);
+        return isProviderSupported(provider);
     }
 }

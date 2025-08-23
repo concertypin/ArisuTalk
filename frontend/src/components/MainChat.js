@@ -52,7 +52,7 @@ function renderInputArea(app) {
                         <div class="mb-2 p-2 bg-gray-700 rounded-lg flex items-center gap-2 text-sm text-gray-300">
                             <img src="${app.state.stickerToSend.data}" alt="${app.state.stickerToSend.stickerName}" class="w-6 h-6 rounded object-cover">
                             <span>스티커: ${app.state.stickerToSend.stickerName}</span>
-                            <button onclick="window.personaApp.setState({stickerToSend: null})" class="ml-auto text-gray-400 hover:text-white">
+                            <button id="remove-sticker-to-send-btn" class="ml-auto text-gray-400 hover:text-white">
                                 <i data-lucide="x" class="w-3 h-3"></i>
                             </button>
                         </div>
@@ -66,7 +66,6 @@ function renderInputArea(app) {
                                 <i data-lucide="smile" class="w-4 h-4 pointer-events-none"></i>
                             </button>
                             <button id="send-message-btn" 
-                                onclick="window.personaApp.handleSendMessageWithSticker()" 
                                 class="flex-shrink-0 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 w-8 h-8 flex items-center justify-center"
                                 ${isWaitingForResponse ? 'disabled' : ''}>
                                 <i data-lucide="send" class="w-4 h-4"></i>
@@ -109,7 +108,7 @@ function renderUserStickerPanel(app) {
                     <div class="text-center text-gray-400 py-8">
                         <i data-lucide="smile" class="w-8 h-8 mx-auto mb-2"></i>
                         <p class="text-sm">스티커를 추가해보세요</p>
-                        <button onclick="document.getElementById('add-user-sticker-btn').click()" class="mt-2 text-xs text-blue-400 hover:text-blue-300">스티커 추가하기</button>
+                        <button id="trigger-add-sticker-btn" class="mt-2 text-xs text-blue-400 hover:text-blue-300">스티커 추가하기</button>
                     </div>
                 ` : `
                     <div class="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto">
@@ -128,17 +127,17 @@ function renderUserStickerPanel(app) {
                             
                             return `
                             <div class="relative group">
-                                <button onclick="window.personaApp.sendUserSticker('${sticker.name}', '${sticker.data}', '${sticker.type || 'image/png'}')" 
-                                    class="w-full aspect-square bg-gray-700 rounded-lg overflow-hidden hover:bg-gray-600 transition-colors">
+                                <button data-sticker-send='${JSON.stringify({name: sticker.name, data: sticker.data, type: sticker.type || 'image/png'})}' 
+                                    class="user-sticker-send-btn w-full aspect-square bg-gray-700 rounded-lg overflow-hidden hover:bg-gray-600 transition-colors">
                                     ${content}
                                 </button>
                                 <div class="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                                    <button onclick="window.personaApp.editUserStickerName(${sticker.id}); event.stopPropagation();" 
-                                        class="w-5 h-5 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center text-xs" title="이름 변경">
+                                    <button data-sticker-edit="${sticker.id}" 
+                                        class="sticker-edit-btn w-5 h-5 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center text-xs" title="이름 변경">
                                         <i data-lucide="edit-3" class="w-2 h-2"></i>
                                     </button>
-                                    <button onclick="window.personaApp.deleteUserSticker(${sticker.id}); event.stopPropagation();" 
-                                        class="w-5 h-5 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center text-xs" title="삭제">
+                                    <button data-sticker-delete="${sticker.id}" 
+                                        class="sticker-delete-btn w-5 h-5 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center text-xs" title="삭제">
                                         <i data-lucide="x" class="w-3 h-3"></i>
                                     </button>
                                 </div>
@@ -183,7 +182,7 @@ function renderMessages(app) {
             let editContentHtml = '';
             if (msg.type === 'image') {
                 editContentHtml = `
-                        <img src="${msg.imageUrl}" class="max-w-xs max-h-80 rounded-lg object-cover mb-2 cursor-pointer" onclick="window.open('${msg.imageUrl}')">
+                        <img src="${msg.imageUrl}" class="image-open-btn max-w-xs max-h-80 rounded-lg object-cover mb-2 cursor-pointer" data-image-url="${msg.imageUrl}">
                         <textarea data-id="${groupInfo.lastMessageId}" class="edit-message-textarea w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500/50 text-sm" rows="2">${msg.content}</textarea>
                     `;
             } else {
@@ -265,7 +264,7 @@ function renderMessages(app) {
                     const sizeClass = isExpanded ? 'max-w-4xl' : 'max-w-xs';
                     const heightStyle = isExpanded ? 'max-height: 720px;' : 'max-height: 240px;';
                     stickerHtml = `
-                        <div class="inline-block cursor-pointer transition-all duration-300" onclick="window.personaApp.toggleStickerSize(${msg.id})">
+                        <div class="sticker-toggle-btn inline-block cursor-pointer transition-all duration-300" data-message-id="${msg.id}">
                             <video class="${sizeClass} rounded-2xl" style="${heightStyle}" controls muted loop autoplay>
                                 <source src="${videoSrc}" type="${stickerData.type}">
                             </video>
@@ -277,7 +276,7 @@ function renderMessages(app) {
                     const isExpanded = app.state.expandedStickers.has(msg.id);
                     const sizeClass = isExpanded ? 'max-w-4xl' : 'max-w-xs';
                     const heightStyle = isExpanded ? 'max-height: 720px;' : 'max-height: 240px;';
-                    stickerHtml = `<div class="inline-block cursor-pointer transition-all duration-300" onclick="window.personaApp.toggleStickerSize(${msg.id})"><img src="${imgSrc}" alt="${stickerName}" class="${sizeClass} rounded-2xl object-contain" style="${heightStyle}"></div>`;
+                    stickerHtml = `<div class="sticker-toggle-btn inline-block cursor-pointer transition-all duration-300" data-message-id="${msg.id}"><img src="${imgSrc}" alt="${stickerName}" class="${sizeClass} rounded-2xl object-contain" style="${heightStyle}"></div>`;
                 }
                 
                 const hasTextMessage = (msg.hasText && msg.content && msg.content.trim()) || 
@@ -313,7 +312,7 @@ function renderMessages(app) {
             const isExpanded = app.state.expandedStickers.has(msg.id);
             const sizeClass = isExpanded ? 'max-w-4xl' : 'max-w-xs';
             const heightStyle = isExpanded ? 'max-height: 720px;' : 'max-height: 320px;';
-            const imageTag = `<div class="inline-block cursor-pointer transition-all duration-300" onclick="window.personaApp.toggleStickerSize(${msg.id})"><img src="${imageUrl}" class="${sizeClass} rounded-lg object-cover" style="${heightStyle}"></div>`;
+            const imageTag = `<div class="sticker-toggle-btn inline-block cursor-pointer transition-all duration-300" data-message-id="${msg.id}"><img src="${imageUrl}" class="${sizeClass} rounded-lg object-cover" style="${heightStyle}"></div>`;
             const captionTag = msg.content ? `<div class="mt-2 px-4 py-2 rounded-2xl text-sm md:text-base leading-relaxed inline-block ${msg.isMe ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-100'}"><div class="break-words">${msg.content}</div></div>` : '';
             messageBodyHtml = `<div class="flex flex-col ${msg.isMe ? 'items-end' : 'items-start'}">${imageTag}${captionTag}</div>`;
         } else {
@@ -420,7 +419,7 @@ export function renderMainChat(app) {
                 <div class="flex items-center space-x-1 md:space-x-2">
                     <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="phone" class="w-4 h-4 text-gray-300"></i></button>
                     <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="video" class="w-4 h-4 text-gray-300"></i></button>
-                    <button id="chat-debug-logs-btn" onclick="window.personaApp.setState({ showDebugLogsModal: true })" class="p-2 rounded-full bg-gray-800 hover:bg-gray-700" title="디버그 로그 보기"><i data-lucide="bar-chart-3" class="w-4 h-4 text-gray-300 pointer-events-none"></i></button>
+                    <button class="chat-debug-logs-btn p-2 rounded-full bg-gray-800 hover:bg-gray-700" title="디버그 로그 보기"><i data-lucide="bar-chart-3" class="w-4 h-4 text-gray-300 pointer-events-none"></i></button>
                 </div>
             </header>
             <div id="messages-container" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
@@ -456,7 +455,7 @@ export function renderMainChat(app) {
                 <div class="flex items-center space-x-1 md:space-x-2">
                     <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="phone" class="w-4 h-4 text-gray-300"></i></button>
                     <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="video" class="w-4 h-4 text-gray-300"></i></button>
-                    <button id="chat-debug-logs-btn" onclick="window.personaApp.setState({ showDebugLogsModal: true })" class="p-2 rounded-full bg-gray-800 hover:bg-gray-700" title="디버그 로그 보기"><i data-lucide="bar-chart-3" class="w-4 h-4 text-gray-300 pointer-events-none"></i></button>
+                    <button class="chat-debug-logs-btn p-2 rounded-full bg-gray-800 hover:bg-gray-700" title="디버그 로그 보기"><i data-lucide="bar-chart-3" class="w-4 h-4 text-gray-300 pointer-events-none"></i></button>
                 </div>
             </header>
             <div id="messages-container" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
@@ -483,7 +482,7 @@ export function renderMainChat(app) {
                 <div class="flex items-center space-x-1 md:space-x-2">
                     <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="phone" class="w-4 h-4 text-gray-300"></i></button>
                     <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="video" class="w-4 h-4 text-gray-300"></i></button>
-                    <button id="chat-debug-logs-btn" onclick="window.personaApp.setState({ showDebugLogsModal: true })" class="p-2 rounded-full bg-gray-800 hover:bg-gray-700" title="디버그 로그 보기"><i data-lucide="bar-chart-3" class="w-4 h-4 text-gray-300 pointer-events-none"></i></button>
+                    <button class="chat-debug-logs-btn p-2 rounded-full bg-gray-800 hover:bg-gray-700" title="디버그 로그 보기"><i data-lucide="bar-chart-3" class="w-4 h-4 text-gray-300 pointer-events-none"></i></button>
                 </div>
             </header>
             <div id="messages-container" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
@@ -508,4 +507,88 @@ export function renderMainChat(app) {
             </div>
         `;
     }
+}
+
+/**
+ * Setup event listeners for MainChat component
+ * 관심사 분리 원칙에 따라 이벤트 핸들링을 별도 함수로 분리
+ */
+export function setupMainChatEventListeners() {
+    // Remove sticker to send button
+    const removeStickerBtn = document.getElementById('remove-sticker-to-send-btn');
+    if (removeStickerBtn) {
+        removeStickerBtn.addEventListener('click', () => {
+            window.personaApp.setState({stickerToSend: null});
+        });
+    }
+
+    // Send message button
+    const sendBtn = document.getElementById('send-message-btn');
+    if (sendBtn) {
+        sendBtn.addEventListener('click', () => {
+            window.personaApp.handleSendMessageWithSticker();
+        });
+    }
+
+    // Trigger add sticker button
+    const triggerAddStickerBtn = document.getElementById('trigger-add-sticker-btn');
+    if (triggerAddStickerBtn) {
+        triggerAddStickerBtn.addEventListener('click', () => {
+            document.getElementById('add-user-sticker-btn').click();
+        });
+    }
+
+    // User sticker send buttons (dynamically generated)
+    document.addEventListener('click', (event) => {
+        if (event.target.closest('.user-sticker-send-btn')) {
+            const btn = event.target.closest('.user-sticker-send-btn');
+            const stickerData = JSON.parse(btn.dataset.stickerSend);
+            window.personaApp.sendUserSticker(stickerData.name, stickerData.data, stickerData.type);
+        }
+    });
+
+    // Sticker edit buttons (dynamically generated)
+    document.addEventListener('click', (event) => {
+        if (event.target.closest('.sticker-edit-btn')) {
+            event.stopPropagation();
+            const btn = event.target.closest('.sticker-edit-btn');
+            const stickerId = btn.dataset.stickerEdit;
+            window.personaApp.editUserStickerName(parseInt(stickerId));
+        }
+    });
+
+    // Sticker delete buttons (dynamically generated)
+    document.addEventListener('click', (event) => {
+        if (event.target.closest('.sticker-delete-btn')) {
+            event.stopPropagation();
+            const btn = event.target.closest('.sticker-delete-btn');
+            const stickerId = btn.dataset.stickerDelete;
+            window.personaApp.deleteUserSticker(parseInt(stickerId));
+        }
+    });
+
+    // Image open buttons (dynamically generated)
+    document.addEventListener('click', (event) => {
+        if (event.target.closest('.image-open-btn')) {
+            const img = event.target.closest('.image-open-btn');
+            const imageUrl = img.dataset.imageUrl;
+            window.open(imageUrl);
+        }
+    });
+
+    // Sticker toggle buttons (dynamically generated)
+    document.addEventListener('click', (event) => {
+        if (event.target.closest('.sticker-toggle-btn')) {
+            const btn = event.target.closest('.sticker-toggle-btn');
+            const messageId = btn.dataset.messageId;
+            window.personaApp.toggleStickerSize(messageId);
+        }
+    });
+
+    // Chat debug logs buttons (multiple instances)
+    document.addEventListener('click', (event) => {
+        if (event.target.closest('.chat-debug-logs-btn')) {
+            window.personaApp.setState({ showDebugLogsModal: true });
+        }
+    });
 }

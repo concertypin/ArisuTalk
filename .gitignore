@@ -1,1 +1,24 @@
-.DS_Store.claude/
+# macOS system files
+.DS_Store
+**/DS_Store
+
+# Claude AI assistant files
+.claude/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+dist/
+build/
+
+# IDE files
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp

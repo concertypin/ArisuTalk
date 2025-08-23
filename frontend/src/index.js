@@ -6,7 +6,9 @@ import {
   checkIndexedDBQuota,
 } from "./storage.js";
 import { APIManager } from "./api/apiManager.js";
+import { PROVIDERS, PROVIDER_MODELS } from "./constants/providers.js";
 import { render } from "./ui.js";
+import { secureStorage } from "./utils/secureStorage.js";
 import {
   handleSidebarClick,
   handleSidebarInput,
@@ -168,6 +170,7 @@ class PersonaChatApp {
 
   // --- CORE METHODS ---
   async init() {
+    await this.initializeSecureStorage();
     await this.loadAllData();
     this.applyFontScale();
     await this.migrateChatData();
@@ -3979,41 +3982,7 @@ class PersonaChatApp {
   }
 
   generateProviderSettingsHTML(provider, config) {
-    // for_update 라인 3033-3064: Provider별 기본 모델 목록
-    const providerModels = {
-      gemini: [
-        'gemini-2.5-pro',
-        'gemini-2.5-flash'
-      ],
-      claude: [
-        'claude-opus-4-1-20250805',
-        'claude-opus-4-20250514',
-        'claude-sonnet-4-20250514',
-        'claude-3-7-sonnet-20250219',
-        'claude-3-5-haiku-20241022',
-        'claude-3-haiku-20240307'
-      ],
-      openai: [
-        'gpt-5',
-        'gpt-5-mini',
-        'gpt-5-nano',
-        'o3',
-        'o4-mini',
-        'o3-pro',
-        'gpt-4o',
-        'gpt-4o-mini',
-        'gpt-4.1'
-      ],
-      grok: [
-        'grok-4',
-        'grok-3',
-        'grok-3-mini'
-      ],
-      openrouter: [],
-      custom_openai: []
-    };
-    
-    const models = providerModels[provider] || [];
+    const models = PROVIDER_MODELS[provider] || [];
     const customModels = config.customModels || [];
     
     return `
@@ -4032,7 +4001,7 @@ class PersonaChatApp {
           />
         </div>
         
-        ${provider === 'custom_openai' ? `
+        ${provider === PROVIDERS.CUSTOM_OPENAI ? `
           <!-- Custom OpenAI Base URL -->
           <div>
             <label class="flex items-center text-sm font-medium text-gray-300 mb-2">
@@ -4536,5 +4505,111 @@ class PersonaChatApp {
     linkElement.setAttribute('href', dataUri);
     linkElement.setAttribute('download', exportFileDefaultName);
     linkElement.click();
+  }
+
+  // --- SECURE STORAGE METHODS ---
+  
+  /**
+   * Initialize secure storage system
+   */
+  async initializeSecureStorage() {
+    try {
+      await secureStorage.initialize();
+      console.log('Secure storage initialized');
+    } catch (error) {
+      console.error('Failed to initialize secure storage:', error);
+    }
+  }
+
+
+  /**
+   * Save API configs - always encrypted
+   * @param {Object} apiConfigs - API configurations to save
+   */
+  async saveApiConfigs(apiConfigs) {
+    try {
+      // Always save to encrypted storage
+      await secureStorage.saveApiConfigs(apiConfigs);
+      
+      // Update state normally (API manager will handle decryption)
+      this.setState({
+        settings: {
+          ...this.state.settings,
+          apiConfigs: apiConfigs
+        }
+      });
+      
+    } catch (error) {
+      console.error('Failed to save API configs:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get API key for a specific provider (handles decryption)
+   * @param {string} provider - Provider name
+   * @returns {Promise<string|null>} - API key or null if not found
+   */
+  async getApiKey(provider) {
+    try {
+      // Always load from encrypted storage
+      const encryptedConfigs = await secureStorage.loadApiConfigs();
+      return encryptedConfigs?.[provider]?.apiKey || null;
+    } catch (error) {
+      console.error('Failed to get API key:', error);
+      return null;
+    }
+  }
+
+
+
+  // --- DATA MANAGEMENT METHODS ---
+
+  /**
+   * Reset all application data (complete factory reset)
+   */
+  async resetAllData() {
+    try {
+      // List of all storage keys used by the application
+      const storageKeys = [
+        'personaChat_settings_v16',
+        'personaChat_characters_v16',
+        'personaChat_messages_v16',
+        'personaChat_unreadCounts_v16',
+        'personaChat_chatRooms_v16',
+        'personaChat_groupChats_v16',
+        'personaChat_openChats_v16',
+        'personaChat_characterStates_v16',
+        'personaChat_userStickers_v16',
+        'personaChat_settingsSnapshots_v16',
+        'personaChat_debugLogs_v16',
+        'personaChat_migration_v16',
+        // Secure storage keys
+        'personaChat_encryptedApiConfigs_v1',
+        'personaChat_masterPasswordHint_v1',
+        'personaChat_encryptionEnabled_v1'
+      ];
+
+      // Clear all regular storage
+      for (const key of storageKeys) {
+        saveToBrowserStorage(key, null);
+      }
+
+      // Clear encrypted storage - manually clear storage keys
+      secureStorage.encryptionEnabled = false;
+      secureStorage.masterPassword = null;
+
+      // Clear session storage
+      sessionStorage.clear();
+
+      // Clear any cached data in memory
+      this.apiManager.clearClients();
+
+      console.log('All application data has been reset');
+      
+    } catch (error) {
+      console.error('Failed to reset all data:', error);
+      throw new Error('데이터 초기화 중 오류가 발생했습니다: ' + error.message);
+    }
   }
 }
