@@ -63,6 +63,104 @@ function renderProviderConfig(provider, config) {
                         class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm"
                     />
                 </div>
+                
+                <!-- Custom OpenAI Advanced Settings -->
+                <div class="space-y-4 mt-4 p-4 bg-gray-700/30 rounded-xl">
+                    <h4 class="text-sm font-medium text-gray-300 mb-3 flex items-center">
+                        <i data-lucide="settings" class="w-4 h-4 mr-2"></i>고급 설정
+                    </h4>
+                    
+                    <!-- Max Tokens -->
+                    <div>
+                        <label class="flex items-center justify-between text-sm font-medium text-gray-300 mb-2">
+                            <span>최대 토큰 수</span>
+                            <span class="text-blue-400 font-mono text-xs" id="max-tokens-value">${config.maxTokens || 4096}</span>
+                        </label>
+                        <input 
+                            type="range" 
+                            id="settings-max-tokens" 
+                            min="512" 
+                            max="8192" 
+                            step="256" 
+                            value="${config.maxTokens || 4096}" 
+                            class="w-full"
+                        />
+                        <div class="flex justify-between text-xs text-gray-400 mt-1">
+                            <span>512</span>
+                            <span>8192</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Temperature -->
+                    <div>
+                        <label class="flex items-center justify-between text-sm font-medium text-gray-300 mb-2">
+                            <span>창의성 (Temperature)</span>
+                            <span class="text-blue-400 font-mono text-xs" id="temperature-value">${config.temperature !== undefined ? config.temperature : 0.8}</span>
+                        </label>
+                        <input 
+                            type="range" 
+                            id="settings-temperature" 
+                            min="0" 
+                            max="2" 
+                            step="0.1" 
+                            value="${config.temperature !== undefined ? config.temperature : 0.8}" 
+                            class="w-full"
+                        />
+                        <div class="flex justify-between text-xs text-gray-400 mt-1">
+                            <span>보수적 (0.0)</span>
+                            <span>창의적 (2.0)</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Profile Generation Settings -->
+                    <div class="border-t border-gray-600 pt-4 mt-4">
+                        <h5 class="text-xs font-medium text-gray-400 mb-3">프로필 생성 설정</h5>
+                        
+                        <div class="space-y-3">
+                            <!-- Profile Max Tokens -->
+                            <div>
+                                <label class="flex items-center justify-between text-sm font-medium text-gray-300 mb-2">
+                                    <span>프로필 최대 토큰</span>
+                                    <span class="text-blue-400 font-mono text-xs" id="profile-max-tokens-value">${config.profileMaxTokens || 1024}</span>
+                                </label>
+                                <input 
+                                    type="range" 
+                                    id="settings-profile-max-tokens" 
+                                    min="256" 
+                                    max="2048" 
+                                    step="128" 
+                                    value="${config.profileMaxTokens || 1024}" 
+                                    class="w-full"
+                                />
+                                <div class="flex justify-between text-xs text-gray-400 mt-1">
+                                    <span>256</span>
+                                    <span>2048</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Profile Temperature -->
+                            <div>
+                                <label class="flex items-center justify-between text-sm font-medium text-gray-300 mb-2">
+                                    <span>프로필 창의성</span>
+                                    <span class="text-blue-400 font-mono text-xs" id="profile-temperature-value">${config.profileTemperature !== undefined ? config.profileTemperature : 1.2}</span>
+                                </label>
+                                <input 
+                                    type="range" 
+                                    id="settings-profile-temperature" 
+                                    min="0.5" 
+                                    max="2" 
+                                    step="0.1" 
+                                    value="${config.profileTemperature !== undefined ? config.profileTemperature : 1.2}" 
+                                    class="w-full"
+                                />
+                                <div class="flex justify-between text-xs text-gray-400 mt-1">
+                                    <span>일관적 (0.5)</span>
+                                    <span>다양함 (2.0)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             ` : ''}
             
             <!-- 모델 선택 -->
@@ -393,8 +491,49 @@ export function setupSettingsModalEventListeners() {
         });
     }
 
+    // Custom OpenAI advanced settings event listeners
+    setupCustomOpenAIEventListeners();
+
     // Data management event listeners
     setupDataManagementEventListeners();
+}
+
+function setupCustomOpenAIEventListeners() {
+    // Max Tokens slider
+    const maxTokensSlider = document.getElementById('settings-max-tokens');
+    const maxTokensValue = document.getElementById('max-tokens-value');
+    if (maxTokensSlider && maxTokensValue) {
+        maxTokensSlider.addEventListener('input', (e) => {
+            maxTokensValue.textContent = e.target.value;
+        });
+    }
+
+    // Temperature slider
+    const temperatureSlider = document.getElementById('settings-temperature');
+    const temperatureValue = document.getElementById('temperature-value');
+    if (temperatureSlider && temperatureValue) {
+        temperatureSlider.addEventListener('input', (e) => {
+            temperatureValue.textContent = parseFloat(e.target.value).toFixed(1);
+        });
+    }
+
+    // Profile Max Tokens slider
+    const profileMaxTokensSlider = document.getElementById('settings-profile-max-tokens');
+    const profileMaxTokensValue = document.getElementById('profile-max-tokens-value');
+    if (profileMaxTokensSlider && profileMaxTokensValue) {
+        profileMaxTokensSlider.addEventListener('input', (e) => {
+            profileMaxTokensValue.textContent = e.target.value;
+        });
+    }
+
+    // Profile Temperature slider
+    const profileTemperatureSlider = document.getElementById('settings-profile-temperature');
+    const profileTemperatureValue = document.getElementById('profile-temperature-value');
+    if (profileTemperatureSlider && profileTemperatureValue) {
+        profileTemperatureSlider.addEventListener('input', (e) => {
+            profileTemperatureValue.textContent = parseFloat(e.target.value).toFixed(1);
+        });
+    }
 }
 
 

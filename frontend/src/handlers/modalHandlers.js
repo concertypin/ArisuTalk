@@ -137,6 +137,34 @@ const settingsUpdaters = {
         apiConfigs[apiProvider].baseUrl = value;
         return { apiConfigs };
     },
+    'settings-max-tokens': (app, value) => {
+        const apiProvider = app.state.settings.apiProvider || 'gemini';
+        const apiConfigs = { ...app.state.settings.apiConfigs };
+        if (!apiConfigs[apiProvider]) apiConfigs[apiProvider] = {};
+        apiConfigs[apiProvider].maxTokens = parseInt(value, 10);
+        return { apiConfigs };
+    },
+    'settings-temperature': (app, value) => {
+        const apiProvider = app.state.settings.apiProvider || 'gemini';
+        const apiConfigs = { ...app.state.settings.apiConfigs };
+        if (!apiConfigs[apiProvider]) apiConfigs[apiProvider] = {};
+        apiConfigs[apiProvider].temperature = parseFloat(value);
+        return { apiConfigs };
+    },
+    'settings-profile-max-tokens': (app, value) => {
+        const apiProvider = app.state.settings.apiProvider || 'gemini';
+        const apiConfigs = { ...app.state.settings.apiConfigs };
+        if (!apiConfigs[apiProvider]) apiConfigs[apiProvider] = {};
+        apiConfigs[apiProvider].profileMaxTokens = parseInt(value, 10);
+        return { apiConfigs };
+    },
+    'settings-profile-temperature': (app, value) => {
+        const apiProvider = app.state.settings.apiProvider || 'gemini';
+        const apiConfigs = { ...app.state.settings.apiConfigs };
+        if (!apiConfigs[apiProvider]) apiConfigs[apiProvider] = {};
+        apiConfigs[apiProvider].profileTemperature = parseFloat(value);
+        return { apiConfigs };
+    },
     'settings-user-name': (app, value) => ({ userName: value }),
     'settings-user-desc': (app, value) => ({ userDescription: value }),
     'settings-proactive-toggle': (app, checked) => ({ proactiveChatEnabled: checked }),

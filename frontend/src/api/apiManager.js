@@ -38,9 +38,10 @@ export class APIManager {
      * @param {string} apiKey - The API key for the provider
      * @param {string} model - The model to use
      * @param {string} [baseUrl] - Custom base URL (for custom_openai only)
+     * @param {Object} [options] - Additional options for the client (for custom_openai only)
      * @returns {Object} The API client instance
      */
-    getClient(provider, apiKey, model, baseUrl = null) {
+    getClient(provider, apiKey, model, baseUrl = null, options = {}) {
         const clientKey = `${provider}_${model}`;
         
         // Return existing client if available
@@ -66,7 +67,7 @@ export class APIManager {
                 client = new OpenRouterClient(apiKey, model);
                 break;
             case PROVIDERS.CUSTOM_OPENAI:
-                client = new CustomOpenAIClient(apiKey, model, baseUrl);
+                client = new CustomOpenAIClient(apiKey, model, baseUrl, options);
                 break;
             default:
                 throw new Error(`Unsupported API provider: ${provider}`);
@@ -83,12 +84,13 @@ export class APIManager {
      * @param {string} model - The model to use
      * @param {Object} params - Parameters for content generation
      * @param {string} [baseUrl] - Custom base URL (for custom_openai only)
+     * @param {Object} [options] - Additional options for the client (for custom_openai only)
      * @returns {Promise<Object>} The generated content response
      */
-    async generateContent(provider, apiKey, model, params, baseUrl = null) {
+    async generateContent(provider, apiKey, model, params, baseUrl = null, options = {}) {
         // Resolve actual API key if encrypted
         const actualApiKey = await this.resolveApiKey(provider, apiKey);
-        const client = this.getClient(provider, actualApiKey, model, baseUrl);
+        const client = this.getClient(provider, actualApiKey, model, baseUrl, options);
         return await client.generateContent(params);
     }
 
@@ -99,12 +101,13 @@ export class APIManager {
      * @param {string} model - The model to use
      * @param {Object} params - Parameters for profile generation
      * @param {string} [baseUrl] - Custom base URL (for custom_openai only)
+     * @param {Object} [options] - Additional options for the client (for custom_openai only)
      * @returns {Promise<Object>} The generated profile response
      */
-    async generateProfile(provider, apiKey, model, params, baseUrl = null) {
+    async generateProfile(provider, apiKey, model, params, baseUrl = null, options = {}) {
         // Resolve actual API key if encrypted
         const actualApiKey = await this.resolveApiKey(provider, apiKey);
-        const client = this.getClient(provider, actualApiKey, model, baseUrl);
+        const client = this.getClient(provider, actualApiKey, model, baseUrl, options);
         return await client.generateProfile(params);
     }
 

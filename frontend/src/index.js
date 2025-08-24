@@ -1920,6 +1920,14 @@ class PersonaChatApp {
     const currentProvider = settings.apiProvider;
     const currentConfig = settings.apiConfigs?.[currentProvider];
     
+    // Extract CustomOpenAI options if applicable
+    const options = currentProvider === 'custom_openai' ? {
+      maxTokens: currentConfig.maxTokens,
+      temperature: currentConfig.temperature,
+      profileMaxTokens: currentConfig.profileMaxTokens,
+      profileTemperature: currentConfig.profileTemperature
+    } : {};
+    
     // APIManager를 사용한 직접 API 호출
     const response = await this.apiManager.generateContent(
       currentProvider,
@@ -1934,7 +1942,8 @@ class PersonaChatApp {
         isProactive: false,
         forceSummary: false
       },
-      currentConfig.baseUrl
+      currentConfig.baseUrl,
+      options
     );
 
     return response;
@@ -2450,6 +2459,14 @@ class PersonaChatApp {
       return;
     }
 
+    // Extract CustomOpenAI options if applicable
+    const options = apiProvider === 'custom_openai' ? {
+      maxTokens: currentConfig.maxTokens,
+      temperature: currentConfig.temperature,
+      profileMaxTokens: currentConfig.profileMaxTokens,
+      profileTemperature: currentConfig.profileTemperature
+    } : {};
+
     const response = await this.apiManager.generateContent(
       apiProvider,
       currentConfig.apiKey,
@@ -2463,7 +2480,8 @@ class PersonaChatApp {
         isProactive: isProactive,
         forceSummary: forceSummary
       },
-      currentConfig.baseUrl // custom_openai용
+      currentConfig.baseUrl, // custom_openai용
+      options
     );
 
     // 디버그 로그 수집
@@ -2687,6 +2705,14 @@ class PersonaChatApp {
     }
 
     try {
+      // Extract CustomOpenAI options if applicable
+      const options = apiProvider === 'custom_openai' ? {
+        maxTokens: currentConfig.maxTokens,
+        temperature: currentConfig.temperature,
+        profileMaxTokens: currentConfig.profileMaxTokens,
+        profileTemperature: currentConfig.profileTemperature
+      } : {};
+
       const profile = await this.apiManager.generateProfile(
         apiProvider,
         currentConfig.apiKey,
@@ -2696,7 +2722,8 @@ class PersonaChatApp {
           userDescription: userDescription,
           profileCreationPrompt: this.state.settings.prompts.profile_creation
         },
-        currentConfig.baseUrl // custom_openai용
+        currentConfig.baseUrl, // custom_openai용
+        options
       );
       if (profile.error) {
         console.error("Failed to generate profile:", profile.error);
@@ -2738,6 +2765,14 @@ class PersonaChatApp {
         stickers: [],
       };
 
+      // Extract CustomOpenAI options if applicable
+      const options = apiProvider === 'custom_openai' ? {
+        maxTokens: currentConfig.maxTokens,
+        temperature: currentConfig.temperature,
+        profileMaxTokens: currentConfig.profileMaxTokens,
+        profileTemperature: currentConfig.profileTemperature
+      } : {};
+
       const response = await this.apiManager.generateContent(
         apiProvider,
         currentConfig.apiKey,
@@ -2751,7 +2786,8 @@ class PersonaChatApp {
           isProactive: true,
           forceSummary: false
         },
-        currentConfig.baseUrl // custom_openai용
+        currentConfig.baseUrl, // custom_openai용
+        options
       );
       
       // 랜덤 캐릭터 생성 디버그 로그 수집
@@ -4213,6 +4249,14 @@ class PersonaChatApp {
         .replace('{characterDescription}', characterDescription || '기본적인 정보만 제공됨') + 
         `\n\n절대 지켜야 할 규칙:\n- 캐릭터 시트만 작성\n- "안녕하세요", "도움이 되었으면", "이상입니다" 같은 인사말 금지\n- 설명 금지\n- 즉시 ### 기본 정보부터 시작\n- 마크다운 형식 외 다른 포맷 사용 금지`;
 
+      // Extract CustomOpenAI options if applicable
+      const options = apiProvider === 'custom_openai' ? {
+        maxTokens: currentConfig.maxTokens,
+        temperature: currentConfig.temperature,
+        profileMaxTokens: currentConfig.profileMaxTokens,
+        profileTemperature: currentConfig.profileTemperature
+      } : {};
+
       // API Manager를 통한 호출
       const response = await this.apiManager.generateContent(
         apiProvider,
@@ -4227,7 +4271,8 @@ class PersonaChatApp {
           isProactive: false,
           forceSummary: false
         },
-        currentConfig.baseUrl // custom_openai용
+        currentConfig.baseUrl, // custom_openai용
+        options
       );
 
       // 캐릭터 시트 생성 디버그 로그 수집
