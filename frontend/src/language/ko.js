@@ -153,6 +153,44 @@ export const ko = {
     chat: {
         messageGenerationError: 'AI 응답 생성 중 오류가 발생했습니다.'
     },
+    ui: {
+        // Common UI messages
+        discardChanges: '변경사항 취소',
+        unsavedChangesWarning: '저장되지 않은 변경사항이 있습니다. 정말로 취소하시겠습니까?',
+        appStarted: 'ArisuTalk 애플리케이션이 시작되었습니다.',
+        dataLoadFailed: '데이터 로드 실패:',
+        
+        // Chat related
+        defaultChatName: '기본 채팅',
+        newChatName: '새 채팅',
+        deleteChatRoom: '채팅방 삭제',
+        deleteChatRoomConfirm: '이 채팅방과 모든 메시지가 삭제됩니다. 계속하시겠습니까?',
+        startConversation: '대화를 시작해보세요',
+        imageSent: '이미지를 보냈습니다',
+        stickerSent: '스티커를 보냈습니다',
+        
+        // Sticker related  
+        enterStickerName: '스티커 이름을 입력하세요:',
+        fileProcessingError: '파일 처리 오류:',
+        fileProcessingAlert: '파일을 처리하는 중 오류가 발생했습니다.',
+        fileSizeExceeded: '파일 크기 초과',
+        unsupportedFormat: '지원하지 않는 형식',
+        stickerProcessingError: '스티커 처리 오류',
+        storageFull: '전체 저장 공간 부족',
+        storageFullMessage: '저장 공간이 부족합니다.',
+        
+        // Group chat related
+        groupChatNamePlaceholder: '단톡방 이름을 입력하세요',
+        openChatNamePlaceholder: '오픈톡방 이름을 입력하세요',
+        newGroupChat: '새 단톡방',
+        newOpenChat: '새 오픈톡방',
+        edit: '수정',
+        delete: '삭제',
+        
+        // Settings related
+        apiKeyPlaceholder: 'API 키를 입력하세요',
+        customModelPlaceholder: '커스텀 모델명 입력',
+    },
     confirm: {
         cancel: '취소',
         confirm: '확인',

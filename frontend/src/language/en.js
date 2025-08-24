@@ -288,6 +288,44 @@ export const en = {
             message: "Failed to generate and initiate single random character:"
         }
     },
+    ui: {
+        // Common UI messages
+        discardChanges: 'Discard Changes',
+        unsavedChangesWarning: 'There are unsaved changes. Are you sure you want to cancel?',
+        appStarted: 'ArisuTalk application has started.',
+        dataLoadFailed: 'Data load failed:',
+        
+        // Chat related
+        defaultChatName: 'Default Chat',
+        newChatName: 'New Chat',
+        deleteChatRoom: 'Delete Chat Room',
+        deleteChatRoomConfirm: 'This chat room and all messages will be deleted. Continue?',
+        startConversation: 'Start a conversation',
+        imageSent: 'Image sent',
+        stickerSent: 'Sticker sent',
+        
+        // Sticker related  
+        enterStickerName: 'Enter sticker name:',
+        fileProcessingError: 'File processing error:',
+        fileProcessingAlert: 'An error occurred while processing the file.',
+        fileSizeExceeded: 'File Size Exceeded',
+        unsupportedFormat: 'Unsupported Format',
+        stickerProcessingError: 'Sticker Processing Error',
+        storageFull: 'Storage Full',
+        storageFullMessage: 'Not enough storage space.',
+        
+        // Group chat related
+        groupChatNamePlaceholder: 'Enter group chat name',
+        openChatNamePlaceholder: 'Enter open chat name',
+        newGroupChat: 'New Group Chat',
+        newOpenChat: 'New Open Chat',
+        edit: 'Edit',
+        delete: 'Delete',
+        
+        // Settings related
+        apiKeyPlaceholder: 'Enter API key',
+        customModelPlaceholder: 'Enter custom model name',
+    },
     chat: {
         defaultChatName: "Default Chat",
         newChat: "New Chat",

@@ -3,6 +3,8 @@
  * 단톡방 및 오픈톡방 관련 모든 컴포넌트들
  */
 
+import { t } from '../i18n.js';
+
 // ========== 유틸리티 함수들 ==========
 
 function getGroupChatParticipants(app, groupChatId) {
@@ -49,7 +51,7 @@ export function renderCreateGroupChatModal(app) {
                 <div class="p-6 space-y-6 overflow-y-auto">
                     <div>
                         <label class="text-sm font-medium text-gray-300 mb-2 block">단톡방 이름</label>
-                        <input id="group-chat-name" type="text" placeholder="단톡방 이름을 입력하세요" class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" />
+                        <input id="group-chat-name" type="text" placeholder="${t('ui.groupChatNamePlaceholder')}" class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" />
                     </div>
                     
                     <div>

@@ -222,8 +222,8 @@ class PersonaChatApp {
 
     if (hasChanges) {
       this.showConfirmModal(
-        "변경사항 취소",
-        "저장되지 않은 변경사항이 있습니다. 정말로 취소하시겠습니까?",
+        t('ui.discardChanges'),
+        t('ui.unsavedChangesWarning'),
         () => {
           if (this.initialSettings) {
             this.setState({
@@ -341,7 +341,7 @@ class PersonaChatApp {
         {
           id: Date.now(),
           timestamp: Date.now(),
-          message: 'ArisuTalk 애플리케이션이 시작되었습니다.',
+          message: t('ui.appStarted'),
           level: 'info',
           type: 'simple'
         },
@@ -381,7 +381,7 @@ class PersonaChatApp {
         }
       ];
     } catch (error) {
-      console.error("데이터 로드 실패:", error);
+      console.error(t('ui.dataLoadFailed'), error);
     }
   }
 
@@ -643,7 +643,7 @@ class PersonaChatApp {
         const defaultChatRoom = {
           id: defaultChatRoomId,
           characterId: characterId,
-          name: "기본 채팅",
+          name: t('ui.defaultChatName'),
           createdAt: Date.now(),
           lastActivity: Date.now(),
         };
@@ -673,7 +673,8 @@ class PersonaChatApp {
     return null;
   }
 
-  createNewChatRoom(characterId, chatName = "새 채팅") {
+  createNewChatRoom(characterId, chatName = null) {
+    if (!chatName) chatName = t('ui.newChatName');
     const numericCharacterId = Number(characterId);
     const newChatRoomId = `${numericCharacterId}_${Date.now()}_${Math.random()}`;
     const newChatRoom = {
@@ -776,8 +777,8 @@ class PersonaChatApp {
     if (!chatRoom) return;
 
     this.showConfirmModal(
-      "채팅방 삭제",
-      "이 채팅방과 모든 메시지가 삭제됩니다. 계속하시겠습니까?",
+      t('ui.deleteChatRoom'),
+      t('ui.deleteChatRoomConfirm'),
       () => {
         const newChatRooms = { ...this.state.chatRooms };
         const newMessages = { ...this.state.messages };
@@ -947,7 +948,7 @@ class PersonaChatApp {
     const sticker = this.state.userStickers.find((s) => s.id === stickerId);
     if (!sticker) return;
 
-    const newName = prompt("스티커 이름을 입력하세요:", sticker.name);
+    const newName = prompt(t('ui.enterStickerName'), sticker.name);
     if (newName !== null && newName.trim() !== "") {
       const newStickers = this.state.userStickers.map((s) =>
         s.id === stickerId ? { ...s, name: newName.trim() } : s
@@ -1003,8 +1004,8 @@ class PersonaChatApp {
         const stickerName = file.name.split(".")[0];
         this.addUserStickerWithType(stickerName, dataUrl, file.type);
       } catch (error) {
-        console.error("파일 처리 오류:", error);
-        alert("파일을 처리하는 중 오류가 발생했습니다.");
+        console.error(t('ui.fileProcessingError'), error);
+        alert(t('ui.fileProcessingAlert'));
       }
     }
     e.target.value = "";
@@ -1135,7 +1136,7 @@ class PersonaChatApp {
 
       if (file.size > 30 * 1024 * 1024) {
         this.showInfoModal(
-          "파일 크기 초과",
+          t('ui.fileSizeExceeded'),
           `${file.name}은(는) 30MB를 초과합니다.`
         );
         continue;
@@ -1155,7 +1156,7 @@ class PersonaChatApp {
       ];
       if (!allowedTypes.includes(file.type)) {
         this.showInfoModal(
-          "지원하지 않는 형식",
+          t('ui.unsupportedFormat'),
           `${file.name}은(는) 지원하지 않는 파일 형식입니다.`
         );
         continue;
@@ -1194,7 +1195,7 @@ class PersonaChatApp {
       } catch (error) {
         console.error(`스티커 처리 오류: ${file.name}`, error);
         this.showInfoModal(
-          "스티커 처리 오류",
+          t('ui.stickerProcessingError'),
           `${file.name}을(를) 처리하는 중 오류가 발생했습니다.`
         );
       }
@@ -1215,7 +1216,7 @@ class PersonaChatApp {
       );
 
       if (!storageCheck.canSave) {
-        this.showInfoModal("전체 저장 공간 부족", `저장 공간이 부족합니다.`);
+        this.showInfoModal(t('ui.storageFull'), t('ui.storageFullMessage'));
         return;
       }
 
@@ -1240,7 +1241,7 @@ class PersonaChatApp {
       const sticker = this.state.editingCharacter.stickers[index];
       if (!sticker) return;
 
-      const newName = prompt("스티커 이름을 입력하세요:", sticker.name);
+      const newName = prompt(t('ui.enterStickerName'), sticker.name);
       if (newName !== null && newName.trim() !== "") {
         const newStickers = [...this.state.editingCharacter.stickers];
         newStickers[index] = { ...sticker, name: newName.trim() };
@@ -3778,7 +3779,7 @@ class PersonaChatApp {
       "프롬프트 초기화",
       `"${promptName}"을(를) 기본값으로 되돌리시겠습니까?\n현재 설정은 모두 사라집니다.`,
       () => {
-        import("./defauts.js").then(({ defaultPrompts }) => {
+        import("./defaults.js").then(({ defaultPrompts }) => {
           const currentPrompts = { ...this.state.settings.prompts };
 
           if (section === "main") {
@@ -4604,6 +4605,9 @@ class PersonaChatApp {
 
       // Clear any cached data in memory
       this.apiManager.clearClients();
+
+      // Re-initialize secure storage for next use
+      await this.initializeSecureStorage();
 
       console.log('All application data has been reset');
       
