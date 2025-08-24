@@ -3,9 +3,14 @@ import { buildContentPrompt, buildProfilePrompt } from './promptBuilder.js';
 const API_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 export class GeminiClient {
-    constructor(apiKey, model) {
+    constructor(apiKey, model, baseUrl = API_BASE_URL, options = {}) {
         this.apiKey = apiKey;
         this.model = model;
+        this.baseUrl = baseUrl;
+        this.maxOutputTokens = options.maxTokens || 4096;
+        this.temperature = options.temperature || 1.25;
+        this.profileMaxOutputTokens = options.profileMaxTokens || 1024;
+        this.profileTemperature = options.profileTemperature || 1.2;
     }
 
     async generateContent({ userName, userDescription, character, history, prompts, isProactive = false, forceSummary = false }) {
@@ -25,9 +30,10 @@ export class GeminiClient {
                 parts: [{ text: systemPrompt }]
             },
             generationConfig: {
-                temperature: 1.25,
+                temperature: this.temperature,
                 topK: 40,
                 topP: 0.95,
+                maxOutputTokens: this.maxOutputTokens,
                 responseMimeType: "application/json",
                 responseSchema: {
                     type: "OBJECT",
@@ -79,7 +85,7 @@ export class GeminiClient {
         };
 
         try {
-            const response = await fetch(`${API_BASE_URL}/${this.model}:generateContent?key=${this.apiKey}`, {
+            const response = await fetch(`${this.baseUrl}/${this.model}:generateContent?key=${this.apiKey}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -122,7 +128,8 @@ export class GeminiClient {
                 parts: [{ text: systemPrompt }]
             },
             generationConfig: {
-                temperature: 1.2,
+                temperature: this.profileTemperature,
+                maxOutputTokens: this.profileMaxOutputTokens,
                 topP: 0.95,
                 responseMimeType: "application/json",
                 responseSchema: {
@@ -143,7 +150,7 @@ export class GeminiClient {
         };
 
         try {
-            const response = await fetch(`${API_BASE_URL}/${this.model}:generateContent?key=${this.apiKey}`, {
+            const response = await fetch(`${this.baseUrl}/${this.model}:generateContent?key=${this.apiKey}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)

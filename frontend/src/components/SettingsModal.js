@@ -63,8 +63,9 @@ function renderProviderConfig(provider, config) {
                         class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm"
                     />
                 </div>
-                
-                <!-- Custom OpenAI Advanced Settings -->
+            ` : ''}
+            
+            <!-- Advanced Settings for All Providers -->
                 <div class="space-y-4 mt-4 p-4 bg-gray-700/30 rounded-xl">
                     <h4 class="text-sm font-medium text-gray-300 mb-3 flex items-center">
                         <i data-lucide="settings" class="w-4 h-4 mr-2"></i>고급 설정
@@ -161,7 +162,6 @@ function renderProviderConfig(provider, config) {
                         </div>
                     </div>
                 </div>
-            ` : ''}
             
             <!-- 모델 선택 -->
             <div>

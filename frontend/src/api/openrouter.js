@@ -3,9 +3,14 @@ import { buildContentPrompt, buildProfilePrompt } from './promptBuilder.js';
 const API_BASE_URL = 'https://openrouter.ai/api/v1';
 
 export class OpenRouterClient {
-    constructor(apiKey, model) {
+    constructor(apiKey, model, baseUrl = API_BASE_URL, options = {}) {
         this.apiKey = apiKey;
         this.model = model;
+        this.baseUrl = baseUrl;
+        this.maxTokens = options.maxTokens || 4096;
+        this.temperature = options.temperature || 0.8;
+        this.profileMaxTokens = options.profileMaxTokens || 1024;
+        this.profileTemperature = options.profileTemperature || 1.2;
     }
 
     async generateContent({ userName, userDescription, character, history, prompts, isProactive = false, forceSummary = false }) {
@@ -65,13 +70,13 @@ export class OpenRouterClient {
         const requestBody = {
             model: this.model,
             messages: messages,
-            max_tokens: 4096,
-            temperature: 0.8
+            max_tokens: this.maxTokens,
+            temperature: this.temperature
         };
         
         try {
             // for_update 라인 7217-7226: API 호출
-            const response = await fetch(`${API_BASE_URL}/chat/completions`, {
+            const response = await fetch(`${this.baseUrl}/chat/completions`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -120,8 +125,8 @@ export class OpenRouterClient {
 
         const requestBody = {
             model: this.model,
-            max_tokens: 1024,
-            temperature: 1.2,
+            max_tokens: this.profileMaxTokens,
+            temperature: this.profileTemperature,
             messages: [
                 {
                     role: 'system',
@@ -135,7 +140,7 @@ export class OpenRouterClient {
         };
 
         try {
-            const response = await fetch(`${API_BASE_URL}/chat/completions`, {
+            const response = await fetch(`${this.baseUrl}/chat/completions`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

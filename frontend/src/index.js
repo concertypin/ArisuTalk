@@ -1920,13 +1920,13 @@ class PersonaChatApp {
     const currentProvider = settings.apiProvider;
     const currentConfig = settings.apiConfigs?.[currentProvider];
     
-    // Extract CustomOpenAI options if applicable
-    const options = currentProvider === 'custom_openai' ? {
+    // Extract API options for all providers
+    const options = {
       maxTokens: currentConfig.maxTokens,
       temperature: currentConfig.temperature,
       profileMaxTokens: currentConfig.profileMaxTokens,
       profileTemperature: currentConfig.profileTemperature
-    } : {};
+    };
     
     // APIManager를 사용한 직접 API 호출
     const response = await this.apiManager.generateContent(
@@ -2459,13 +2459,13 @@ class PersonaChatApp {
       return;
     }
 
-    // Extract CustomOpenAI options if applicable
-    const options = apiProvider === 'custom_openai' ? {
+    // Extract API options for all providers
+    const options = {
       maxTokens: currentConfig.maxTokens,
       temperature: currentConfig.temperature,
       profileMaxTokens: currentConfig.profileMaxTokens,
       profileTemperature: currentConfig.profileTemperature
-    } : {};
+    };
 
     const response = await this.apiManager.generateContent(
       apiProvider,

@@ -3,9 +3,14 @@ import { buildContentPrompt, buildProfilePrompt } from './promptBuilder.js';
 const API_BASE_URL = 'https://api.anthropic.com/v1';
 
 export class ClaudeClient {
-    constructor(apiKey, model) {
+    constructor(apiKey, model, baseUrl = API_BASE_URL, options = {}) {
         this.apiKey = apiKey;
         this.model = model;
+        this.baseUrl = baseUrl;
+        this.maxTokens = options.maxTokens || 4096;
+        this.temperature = options.temperature || 0.8;
+        this.profileMaxTokens = options.profileMaxTokens || 1024;
+        this.profileTemperature = options.profileTemperature || 1.2;
     }
 
     async generateContent({ userName, userDescription, character, history, prompts, isProactive = false, forceSummary = false }) {
@@ -63,15 +68,15 @@ export class ClaudeClient {
         // for_update 라인 6918-6924: 요청 본문 구성
         const requestBody = {
             model: this.model,
-            max_tokens: 4096,
-            temperature: 0.8,
+            max_tokens: this.maxTokens,
+            temperature: this.temperature,
             system: systemPrompt,
             messages: messages
         };
         
         try {
             // for_update 라인 6927-6936: API 호출
-            const response = await fetch(`${API_BASE_URL}/messages`, {
+            const response = await fetch(`${this.baseUrl}/messages`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -120,8 +125,8 @@ export class ClaudeClient {
 
         const requestBody = {
             model: this.model,
-            max_tokens: 1024,
-            temperature: 1.2,
+            max_tokens: this.profileMaxTokens,
+            temperature: this.profileTemperature,
             system: systemPrompt,
             messages: [
                 {
@@ -132,7 +137,7 @@ export class ClaudeClient {
         };
 
         try {
-            const response = await fetch(`${API_BASE_URL}/messages`, {
+            const response = await fetch(`${this.baseUrl}/messages`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
