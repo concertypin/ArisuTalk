@@ -74,6 +74,7 @@ export const en = {
         profileCreationRules: '# Profile Creation Rules',
         backupPrompts: 'Backup Prompts',
         restorePrompts: 'Restore Prompts',
+        characterSheetGenerationPrompt: 'AI Character Sheet Generation Prompt',
     },
     settings: {
         restore: 'Restore',

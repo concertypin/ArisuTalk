@@ -20,11 +20,11 @@ export function renderPromptModal(app) {
         <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div class="bg-gray-800 rounded-2xl w-full max-w-2xl mx-4 flex flex-col" style="max-height: 90vh;">
                 <div class="flex items-center justify-between p-6 border-b border-gray-700 shrink-0">
-                    <h3 class="text-lg font-semibold text-white">프롬프트 수정</h3>
+                    <h3 class="text-lg font-semibold text-white">${t('promptModal.title')}</h3>
                     <button id="close-prompt-modal" class="p-1 hover:bg-gray-700 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
                 </div>
                 <div class="p-6 space-y-4 overflow-y-auto">
-                    <h4 class="text-base font-semibold text-blue-300 border-b border-blue-300/20 pb-2">메인 채팅 프롬프트</h4>
+                    <h4 class="text-base font-semibold text-blue-300 border-b border-blue-300/20 pb-2">${t('promptModal.mainChatPrompt')}</h4>
                     ${Object.entries(mainPromptSections).map(([title, data]) => `
                         <details class="group bg-gray-900/50 rounded-lg">
                             <summary class="flex items-center justify-between cursor-pointer list-none p-4">
@@ -35,7 +35,7 @@ export function renderPromptModal(app) {
                                 <div class="content-inner p-4 border-t border-gray-700">
                                     <div class="flex items-center gap-2 mb-3">
                                         <button onclick="window.personaApp.resetPromptToDefault('main', '${data.key}', '${title}')" class="py-1 px-3 bg-gray-600 hover:bg-gray-500 text-white rounded text-xs flex items-center gap-1">
-                                            <i data-lucide="rotate-ccw" class="w-3 h-3"></i> 기본값으로 되돌리기
+                                            <i data-lucide="rotate-ccw" class="w-3 h-3"></i> ${t('common.resetToDefault')}
                                         </button>
                                     </div>
                                     <textarea id="prompt-main-${data.key}" class="w-full h-64 p-3 bg-gray-700 text-white rounded-lg text-sm font-mono">${data.content}</textarea>
@@ -44,7 +44,7 @@ export function renderPromptModal(app) {
                         </details>
                     `).join('')}
                     
-                    <h4 class="text-base font-semibold text-blue-300 border-b border-blue-300/20 pb-2 mt-6">랜덤 선톡 캐릭터 생성 프롬프트</h4>
+                    <h4 class="text-base font-semibold text-blue-300 border-b border-blue-300/20 pb-2 mt-6">${t('promptModal.randomFirstMessagePrompt')}</h4>
                     <details class="group bg-gray-900/50 rounded-lg">
                         <summary class="flex items-center justify-between cursor-pointer list-none p-4">
                             <span class="text-base font-medium text-gray-200"># 캐릭터 생성 규칙 (Profile Creation Rules)</span>
@@ -54,7 +54,7 @@ export function renderPromptModal(app) {
                             <div class="content-inner p-4 border-t border-gray-700">
                                 <div class="flex items-center gap-2 mb-3">
                                     <button onclick="window.personaApp.resetPromptToDefault('profile_creation', '', '# 캐릭터 생성 규칙 (Profile Creation Rules)')" class="py-1 px-3 bg-gray-600 hover:bg-gray-500 text-white rounded text-xs flex items-center gap-1">
-                                        <i data-lucide="rotate-ccw" class="w-3 h-3"></i> 기본값으로 되돌리기
+                                        <i data-lucide="rotate-ccw" class="w-3 h-3"></i> ${t('common.resetToDefault')}
                                     </button>
                                 </div>
                                 <textarea id="prompt-profile_creation" class="w-full h-64 p-3 bg-gray-700 text-white rounded-lg text-sm font-mono">${prompts.profile_creation}</textarea>
@@ -62,7 +62,7 @@ export function renderPromptModal(app) {
                         </div>
                     </details>
                     
-                    <h4 class="text-base font-semibold text-green-300 border-b border-green-300/20 pb-2 mt-6">AI 캐릭터 시트 생성 프롬프트</h4>
+                    <h4 class="text-base font-semibold text-green-300 border-b border-green-300/20 pb-2 mt-6">${t('promptModal.characterSheetGenerationPrompt')}</h4>
                     <details class="group bg-gray-900/50 rounded-lg">
                         <summary class="flex items-center justify-between cursor-pointer list-none p-4">
                             <span class="text-base font-medium text-gray-200"># 캐릭터 시트 생성 규칙 (Character Sheet Generation Rules)</span>
@@ -72,7 +72,7 @@ export function renderPromptModal(app) {
                             <div class="content-inner p-4 border-t border-gray-700">
                                 <div class="flex items-center gap-2 mb-3">
                                     <button onclick="window.personaApp.resetPromptToDefault('character_sheet_generation', '', '# 캐릭터 시트 생성 규칙 (Character Sheet Generation Rules)')" class="py-1 px-3 bg-gray-600 hover:bg-gray-500 text-white rounded text-xs flex items-center gap-1">
-                                        <i data-lucide="rotate-ccw" class="w-3 h-3"></i> 기본값으로 되돌리기
+                                        <i data-lucide="rotate-ccw" class="w-3 h-3"></i> ${t('common.resetToDefault')}
                                     </button>
                                 </div>
                                 <textarea id="prompt-character_sheet_generation" class="w-full h-64 p-3 bg-gray-700 text-white rounded-lg text-sm font-mono">${prompts.character_sheet_generation}</textarea>
@@ -83,14 +83,14 @@ export function renderPromptModal(app) {
                 </div>
                 <div class="p-6 mt-auto border-t border-gray-700 shrink-0 flex flex-wrap justify-end gap-3">
                     <button id="backup-prompts-btn" class="py-2 px-4 bg-gray-600 hover:bg-gray-500 text-white rounded-lg transition-colors text-sm flex items-center gap-2">
-                        <i data-lucide="download" class="w-4 h-4"></i> 프롬프트 백업
+                        <i data-lucide="download" class="w-4 h-4"></i> ${t('promptModal.backupPrompts')}
                     </button>
                     <button id="restore-prompts-btn" class="py-2 px-4 bg-gray-600 hover:bg-gray-500 text-white rounded-lg transition-colors text-sm flex items-center gap-2">
-                        <i data-lucide="upload" class="w-4 h-4"></i> 프롬프트 불러오기
+                        <i data-lucide="upload" class="w-4 h-4"></i> ${t('promptModal.restorePrompts')}
                     </button>
                     <div class="flex-grow"></div>
-                    <button id="close-prompt-modal" class="py-2.5 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">취소</button>
-                    <button id="save-prompts" class="py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">저장</button>
+                    <button id="close-prompt-modal" class="py-2.5 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">${t('common.cancel')}</button>
+                    <button id="save-prompts" class="py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">${t('common.save')}</button>
                 </div>
             </div>
         </div>

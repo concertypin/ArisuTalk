@@ -120,7 +120,7 @@ export class APIManager {
 
     /**
      * Get list of supported providers
-     * @returns {Array<string>} List of supported provider names
+     * @returns {import("../constants/providers.js").SUPPORTED_PROVIDERS}
      */
     getSupportedProviders() {
         return SUPPORTED_PROVIDERS;

@@ -243,6 +243,7 @@ export const ko = {
         profileCreationRules: '# 캐릭터 생성 규칙 (Profile Creation Rules)',
         backupPrompts: '프롬프트 백업',
         restorePrompts: '프롬프트 불러오기',
+        characterSheetGenerationPrompt: 'AI 캐릭터 시트 생성 프롬프트',
     },
     settings: {
         restore: '복원',
