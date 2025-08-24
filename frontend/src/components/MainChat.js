@@ -41,9 +41,9 @@ function renderInputArea(app) {
                     </button>
                 </div>
             ` : ''}
-            <div class="flex items-end gap-3">
+            <div class="flex items-start gap-3">
                 ${!hasImage ? `
-                <button id="open-input-options-btn" class="flex-shrink-0 p-3 bg-gray-800 hover:bg-gray-700 text-white rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 min-h-[48px] w-[48px] flex items-center justify-center" ${isWaitingForResponse ? 'disabled' : ''}>
+                <button id="open-input-options-btn" class="flex-shrink-0 p-2 bg-gray-800 hover:bg-gray-700 text-white rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 h-[48px] w-[48px] flex items-center justify-center" ${isWaitingForResponse ? 'disabled' : ''}>
                    <i data-lucide="plus" class="w-5 h-5"></i>
                 </button>
                 ` : ''}
@@ -58,15 +58,15 @@ function renderInputArea(app) {
                         </div>
                     ` : ''}
                     <div class="relative">
-                        <textarea id="new-message-input" placeholder="${hasImage ? '캡션 추가...' : app.state.stickerToSend ? '스티커와 함께 보낼 메시지 (선택사항)...' : '메시지를 입력하세요...'}" class="w-full pl-4 pr-20 py-3 bg-gray-800 text-white rounded-2xl border border-gray-700 resize-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 transition-all duration-200 text-sm placeholder-gray-500" rows="1" style="min-height: 48px; max-height: 120px;" ${isWaitingForResponse ? 'disabled' : ''}></textarea>
-                        <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                        <textarea id="new-message-input" placeholder="${hasImage ? '캡션 추가...' : app.state.stickerToSend ? '스티커와 함께 보낼 메시지 (선택사항)...' : '메시지를 입력하세요...'}" class="w-full pl-4 pr-24 py-3 bg-gray-800 text-white rounded-2xl border border-gray-700 resize-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 transition-all duration-200 text-sm placeholder-gray-500" rows="1" style="min-height: 48px; max-height: 120px;" ${isWaitingForResponse ? 'disabled' : ''}></textarea>
+                        <div class="absolute right-3 flex items-center gap-2" style="top: 50%; transform: translateY(-50%);">
                             <button id="sticker-btn" 
-                                class="flex-shrink-0 p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-full transition-all duration-200 w-8 h-8 flex items-center justify-center"
+                                class="flex-shrink-0 p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-full transition-all duration-200 w-9 h-9 flex items-center justify-center"
                                 ${isWaitingForResponse ? 'disabled' : ''}>
                                 <i data-lucide="smile" class="w-4 h-4 pointer-events-none"></i>
                             </button>
                             <button id="send-message-btn" 
-                                class="flex-shrink-0 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 w-8 h-8 flex items-center justify-center"
+                                class="flex-shrink-0 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 w-9 h-9 flex items-center justify-center"
                                 ${isWaitingForResponse ? 'disabled' : ''}>
                                 <i data-lucide="send" class="w-4 h-4"></i>
                             </button>
