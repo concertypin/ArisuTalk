@@ -1,5 +1,5 @@
 import { buildContentPrompt, buildProfilePrompt } from './promptBuilder.js';
-import { t } from '../language/index.js';
+import { t } from '../i18n.js';
 
 export class CustomOpenAIClient {
     /**
