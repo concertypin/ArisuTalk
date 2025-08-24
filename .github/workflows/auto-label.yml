@@ -1,0 +1,57 @@
+name: Auto Label Issues and PRs
+
+on:
+  issues:
+    types: [opened]
+  pull_request:
+    types: [opened]
+
+jobs:
+  auto-label:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: read
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Install dependencies
+        run: |
+          cd .github/scripts
+          npm install
+          
+      - name: Auto-label issue
+        if: github.event_name == 'issues'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_API_URL: ${{ secrets.OPENAI_API_URL || 'https://api.openai.com/v1' }}
+        run: |
+          node .github/scripts/auto-label.js \
+            --type="issue" \
+            --number="${{ github.event.issue.number }}" \
+            --title="${{ github.event.issue.title }}" \
+            --body="${{ github.event.issue.body }}" \
+            --repo="${{ github.repository }}"
+            
+      - name: Auto-label pull request
+        if: github.event_name == 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_API_URL: ${{ secrets.OPENAI_API_URL || 'https://api.openai.com/v1' }}
+        run: |
+          node .github/scripts/auto-label.js \
+            --type="pull_request" \
+            --number="${{ github.event.pull_request.number }}" \
+            --title="${{ github.event.pull_request.title }}" \
+            --body="${{ github.event.pull_request.body }}" \
+            --repo="${{ github.repository }}"

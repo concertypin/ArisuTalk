@@ -1,0 +1,14 @@
+{
+  "name": "auto-label-scripts",
+  "version": "1.0.0",
+  "description": "Scripts for automated issue and PR labeling",
+  "main": "auto-label.js",
+  "dependencies": {
+    "@octokit/rest": "^21.0.2",
+    "node-fetch": "^3.3.2",
+    "yargs": "^17.7.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
