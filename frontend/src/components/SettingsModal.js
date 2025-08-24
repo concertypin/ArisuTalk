@@ -29,7 +29,7 @@ function renderCurrentProviderSettings(app) {
     return renderProviderConfig(provider, config);
 }
 
-function renderProviderConfig(provider, config) {
+export function renderProviderConfig(provider, config) {
     const models = PROVIDER_MODELS[provider] || [];
     const customModels = config.customModels || [];
     
@@ -498,7 +498,7 @@ export function setupSettingsModalEventListeners() {
     setupDataManagementEventListeners();
 }
 
-function setupAdvancedSettingsEventListeners() {
+export function setupAdvancedSettingsEventListeners() {
     // Max Tokens slider
     const maxTokensSlider = document.getElementById('settings-max-tokens');
     const maxTokensValue = document.getElementById('max-tokens-value');

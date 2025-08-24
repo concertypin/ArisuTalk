@@ -7,6 +7,7 @@ import {
 } from "./storage.js";
 import { APIManager } from "./api/apiManager.js";
 import { PROVIDERS, PROVIDER_MODELS } from "./constants/providers.js";
+import { renderProviderConfig, setupAdvancedSettingsEventListeners } from "./components/SettingsModal.js";
 import { render } from "./ui.js";
 import { secureStorage } from "./utils/secureStorage.js";
 import {
@@ -3864,10 +3865,15 @@ class PersonaChatApp {
     
     // 새 프로바이더 설정이 없으면 기본값으로 초기화
     if (!apiConfigs[newProvider]) {
+      const defaultTemperature = newProvider === 'gemini' ? 1.25 : 0.8;
       apiConfigs[newProvider] = {
         apiKey: '',
         model: '',
-        customModels: []
+        customModels: [],
+        maxTokens: 4096,
+        temperature: defaultTemperature,
+        profileMaxTokens: 1024,
+        profileTemperature: 1.2
       };
       if (newProvider === 'custom_openai') {
         apiConfigs[newProvider].baseUrl = '';
@@ -3975,10 +3981,18 @@ class PersonaChatApp {
     if (currentProvider && currentProvider !== newProvider) {
       const apiKeyInput = document.getElementById('settings-api-key');
       const baseUrlInput = document.getElementById('settings-base-url');
+      const maxTokensInput = document.getElementById('settings-max-tokens');
+      const temperatureInput = document.getElementById('settings-temperature');
+      const profileMaxTokensInput = document.getElementById('settings-profile-max-tokens');
+      const profileTemperatureInput = document.getElementById('settings-profile-temperature');
       
       if (!this.tempSettings[currentProvider]) this.tempSettings[currentProvider] = {};
       if (apiKeyInput) this.tempSettings[currentProvider].apiKey = apiKeyInput.value;
       if (baseUrlInput) this.tempSettings[currentProvider].baseUrl = baseUrlInput.value;
+      if (maxTokensInput) this.tempSettings[currentProvider].maxTokens = parseInt(maxTokensInput.value, 10);
+      if (temperatureInput) this.tempSettings[currentProvider].temperature = parseFloat(temperatureInput.value);
+      if (profileMaxTokensInput) this.tempSettings[currentProvider].profileMaxTokens = parseInt(profileMaxTokensInput.value, 10);
+      if (profileTemperatureInput) this.tempSettings[currentProvider].profileTemperature = parseFloat(profileTemperatureInput.value);
     }
     
     // 새 제공업체의 설정 UI 업데이트
@@ -4002,13 +4016,29 @@ class PersonaChatApp {
     const model = tempConfig.model !== undefined ? tempConfig.model : (finalConfig?.model || '');
     const customModels = tempConfig.customModels !== undefined ? tempConfig.customModels : (finalConfig?.customModels || []);
     
+    // Advanced settings values
+    const defaultTemperature = newProvider === 'gemini' ? 1.25 : 0.8;
+    const maxTokens = tempConfig.maxTokens !== undefined ? tempConfig.maxTokens : (finalConfig?.maxTokens || 4096);
+    const temperature = tempConfig.temperature !== undefined ? tempConfig.temperature : (finalConfig?.temperature || defaultTemperature);
+    const profileMaxTokens = tempConfig.profileMaxTokens !== undefined ? tempConfig.profileMaxTokens : (finalConfig?.profileMaxTokens || 1024);
+    const profileTemperature = tempConfig.profileTemperature !== undefined ? tempConfig.profileTemperature : (finalConfig?.profileTemperature || 1.2);
+    
     // 제공업체별 설정 UI를 다시 렌더링
     const settingsContainer = document.querySelector('#settings-api-provider')?.closest('.content-inner');
     const targetElement = settingsContainer?.querySelector('.provider-settings-container');
     
     if (targetElement) {
       // 새로운 설정 UI로 교체
-      const newSettingsHTML = this.generateProviderSettingsHTML(newProvider, { apiKey, baseUrl, model, customModels });
+      const newSettingsHTML = renderProviderConfig(newProvider, { 
+        apiKey, 
+        baseUrl, 
+        model, 
+        customModels,
+        maxTokens,
+        temperature,
+        profileMaxTokens,
+        profileTemperature
+      });
       targetElement.innerHTML = newSettingsHTML;
     }
     
@@ -4016,6 +4046,9 @@ class PersonaChatApp {
     if (window.lucide) {
       window.lucide.createIcons();
     }
+    
+    // Advanced settings event listeners를 다시 설정
+    setupAdvancedSettingsEventListeners();
   }
 
   generateProviderSettingsHTML(provider, config) {
