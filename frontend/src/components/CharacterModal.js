@@ -1,4 +1,4 @@
-import { language } from "../language.js";
+import { t } from "../i18n.js";
 import { formatBytes } from "../storage.js";
 import { renderAvatar } from "./Avatar.js";
 
@@ -120,7 +120,7 @@ export function renderCharacterModal(app) {
                     <h3 class="text-xl font-semibold text-white">${
                       isNew ? "연락처 추가" : "연락처 수정"
                     }</h3>
-                    <button id="close-character-modal" class="p-1 hover:bg-gray-700 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
+                    <button id="close-character-modal" data-action="close-character-modal" class="p-1 hover:bg-gray-700 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
                 </div>
                 <div class="p-6 space-y-6 overflow-y-auto">
                     <div class="flex items-center space-x-4">
@@ -303,42 +303,30 @@ export function renderCharacterModal(app) {
                                         <div class="content-inner pt-4 space-y-4">
                                             ${renderSlider(
                                               "responseTime",
-                                              language.characterModalSlider
-                                                .responseTime.description,
-                                              language.characterModalSlider
-                                                .responseTime.low,
-                                              language.characterModalSlider
-                                                .responseTime.high,
+                                              t('characterModalSlider.responseTime.description'),
+                                              t('characterModalSlider.responseTime.low'),
+                                              t('characterModalSlider.responseTime.high'),
                                               char.responseTime
                                             )}
                                             ${renderSlider(
                                               "thinkingTime",
-                                              language.characterModalSlider
-                                                .thinkingTime.description,
-                                              language.characterModalSlider
-                                                .thinkingTime.low,
-                                              language.characterModalSlider
-                                                .thinkingTime.high,
+                                              t('characterModalSlider.thinkingTime.description'),
+                                              t('characterModalSlider.thinkingTime.low'),
+                                              t('characterModalSlider.thinkingTime.high'),
                                               char.thinkingTime
                                             )}
                                             ${renderSlider(
                                               "reactivity",
-                                              language.characterModalSlider
-                                                .reactivity.description,
-                                              language.characterModalSlider
-                                                .reactivity.low,
-                                              language.characterModalSlider
-                                                .reactivity.high,
+                                              t('characterModalSlider.reactivity.description'),
+                                              t('characterModalSlider.reactivity.low'),
+                                              t('characterModalSlider.reactivity.high'),
                                               char.reactivity
                                             )}
                                             ${renderSlider(
                                               "tone",
-                                              language.characterModalSlider.tone
-                                                .description,
-                                              language.characterModalSlider.tone
-                                                .low,
-                                              language.characterModalSlider.tone
-                                                .high,
+                                              t('characterModalSlider.tone.description'),
+                                              t('characterModalSlider.tone.low'),
+                                              t('characterModalSlider.tone.high'),
                                               char.tone
                                             )}
                                         </div>
@@ -349,7 +337,7 @@ export function renderCharacterModal(app) {
                     </details>
                 </div>
                 <div class="p-6 mt-auto border-t border-gray-700 shrink-0 flex justify-end space-x-3">
-                    <button id="close-character-modal" class="flex-1 py-2.5 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">취소</button>
+                    <button id="close-character-modal" data-action="close-character-modal" class="flex-1 py-2.5 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">취소</button>
                     <button id="save-character" class="flex-1 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">저장</button>
                 </div>
             </div>

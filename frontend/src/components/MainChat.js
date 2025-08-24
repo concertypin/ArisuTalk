@@ -1,5 +1,5 @@
 
-import { language } from '../language.js';
+import { t } from '../i18n.js';
 import { formatBytes } from '../storage.js';
 import { findMessageGroup, formatDateSeparator } from '../utils.js';
 import { renderAvatar } from './Avatar.js';

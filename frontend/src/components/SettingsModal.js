@@ -1,5 +1,5 @@
 
-import { language } from '../language.js';
+import { t } from '../i18n.js';
 import { PROVIDERS, PROVIDER_MODELS, DEFAULT_PROVIDER } from '../constants/providers.js';
 
 function renderCurrentProviderSettings(app) {

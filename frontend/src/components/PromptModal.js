@@ -1,5 +1,5 @@
 
-import { language } from '../language.js';
+import { t } from '../i18n.js';
 
 export function renderPromptModal(app) {
     const { prompts } = app.state.settings;

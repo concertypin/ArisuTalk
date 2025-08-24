@@ -1,5 +1,6 @@
 
-import { language } from '../language.js';
+import { t } from '../i18n.js';
+
 
 export function renderConfirmationModal(app) {
     const { title, message, onConfirm } = app.state.modal;
@@ -13,9 +14,9 @@ export function renderConfirmationModal(app) {
                 <p class="text-sm text-gray-300 mb-6 whitespace-pre-wrap">${message}</p>
                 <div class="flex justify-stretch space-x-3">
                     <button id="modal-cancel" class="flex-1 py-2.5 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
-                        ${onConfirm ? language.confirm.cancel : language.confirm.confirm}
+                        ${onConfirm ? t('confirm.cancel') : t('confirm.confirm')}
                     </button>
-                    ${onConfirm ? `<button id="modal-confirm" class="flex-1 py-2.5 px-4 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">확인</button>` : ''}
+                    ${onConfirm ? `<button id="modal-confirm" class="flex-1 py-2.5 px-4 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">${t('common.confirm')}</button>` : ''}
                 </div>
             </div>
         </div>
