@@ -153,6 +153,19 @@ export const ko = {
     chat: {
         messageGenerationError: 'AI 응답 생성 중 오류가 발생했습니다.'
     },
+    api: {
+        imageMessage: '이미지를 보냈습니다.',
+        imageUnavailable: '(사용자가 이미지를 보냈지만 더 이상 사용할 수 없습니다)',
+        unknownSticker: 'Unknown Sticker',
+        stickerMessage: '[사용자가 "{{stickerName}}" 스티커를 보냄]',
+        proactiveStart: '(SYSTEM: You are starting this conversation. Please begin.)',
+        customOpenAIError: 'Custom OpenAI API 오류: {{status}} - {{error}}',
+        invalidResponse: 'Custom OpenAI API로부터 유효한 응답을 받지 못했습니다.',
+        requestFailed: 'API 요청 실패: {{status}}',
+        profileParseError: '프로필 응답을 JSON으로 파싱할 수 없습니다.',
+        unknownReason: '알 수 없는 이유',
+        profileNotGenerated: '프로필이 생성되지 않았습니다. (이유: {{reason}})'
+    },
     ui: {
         // Common UI messages
         discardChanges: '변경사항 취소',

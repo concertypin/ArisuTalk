@@ -337,6 +337,19 @@ export const en = {
         imageSent: "Image sent.",
         messageGenerationError: "Failed to generate message.",
     },
+    api: {
+        imageMessage: 'Image sent.',
+        imageUnavailable: '(User sent an image but it is no longer available)',
+        unknownSticker: 'Unknown Sticker',
+        stickerMessage: '[User sent "{{stickerName}}" sticker]',
+        proactiveStart: '(SYSTEM: You are starting this conversation. Please begin.)',
+        customOpenAIError: 'Custom OpenAI API error: {{status}} - {{error}}',
+        invalidResponse: 'Did not receive valid response from Custom OpenAI API.',
+        requestFailed: 'API request failed: {{status}}',
+        profileParseError: 'Cannot parse profile response as JSON.',
+        unknownReason: 'unknown reason',
+        profileNotGenerated: 'Profile was not generated. (reason: {{reason}})'
+    },
     characterModalSlider: {
         responseTime: {
             description: "How quickly do they check your messages?",

@@ -1,12 +1,39 @@
 import { buildContentPrompt, buildProfilePrompt } from './promptBuilder.js';
+import { t } from '../language/index.js';
 
 export class CustomOpenAIClient {
-    constructor(apiKey, model, baseUrl = 'https://api.openai.com/v1') {
+    /**
+     * @param {string} apiKey - OpenAI API key
+     * @param {string} model - Model name to use
+     * @param {string} baseUrl - Base URL for the API
+     * @param {Object} options - Configuration options
+     * @param {number} options.maxTokens - Max tokens for content generation
+     * @param {number} options.temperature - Temperature for content generation
+     * @param {number} options.profileMaxTokens - Max tokens for profile generation
+     * @param {number} options.profileTemperature - Temperature for profile generation
+     */
+    constructor(apiKey, model, baseUrl = 'https://api.openai.com/v1', options = {}) {
         this.apiKey = apiKey;
         this.model = model;
         this.baseUrl = baseUrl;
+        this.maxTokens = options.maxTokens || 4096;
+        this.temperature = options.temperature || 0.8;
+        this.profileMaxTokens = options.profileMaxTokens || 1024;
+        this.profileTemperature = options.profileTemperature || 1.2;
     }
 
+    /**
+     * Generate content using the OpenAI API
+     * @param {Object} params - Generation parameters
+     * @param {string} params.userName - User name
+     * @param {string} params.userDescription - User description
+     * @param {Object} params.character - Character object
+     * @param {Array} params.history - Message history
+     * @param {Object} params.prompts - Prompt configuration
+     * @param {boolean} params.isProactive - Whether this is a proactive message
+     * @param {boolean} params.forceSummary - Whether to force summary
+     * @returns {Promise<Object>} Generated content response
+     */
     async generateContent({ userName, userDescription, character, history, prompts, isProactive = false, forceSummary = false }) {
         const { systemPrompt } = buildContentPrompt({
             userName,
@@ -28,7 +55,7 @@ export class CustomOpenAIClient {
                 const imageData = character?.media?.find(m => m.id === msg.imageId);
                 if (imageData) {
                     content = [
-                        { type: "text", text: content || "이미지를 보냈습니다." },
+                        { type: "text", text: content || t('api.imageMessage') },
                         { 
                             type: "image_url", 
                             image_url: {
@@ -37,11 +64,11 @@ export class CustomOpenAIClient {
                         }
                     ];
                 } else {
-                    content = content || "(사용자가 이미지를 보냈지만 더 이상 사용할 수 없습니다)";
+                    content = content || t('api.imageUnavailable');
                 }
             } else if (msg.isMe && msg.type === 'sticker' && msg.stickerData) {
-                const stickerName = msg.stickerData.stickerName || 'Unknown Sticker';
-                content = `[사용자가 "${stickerName}" 스티커를 보냄]${content ? ` ${content}` : ''}`;
+                const stickerName = msg.stickerData.stickerName || t('api.unknownSticker');
+                content = t('api.stickerMessage', { stickerName }) + (content ? ` ${content}` : '');
             }
             
             if (content) {
@@ -53,7 +80,7 @@ export class CustomOpenAIClient {
         if (isProactive && messages.length === 0) {
             messages.push({
                 role: "user",
-                content: "(SYSTEM: You are starting this conversation. Please begin.)"
+                content: t('api.proactiveStart')
             });
         }
         
@@ -64,8 +91,8 @@ export class CustomOpenAIClient {
         const requestBody = {
             model: this.model,
             messages: messages,
-            max_tokens: 4096,
-            temperature: 0.8
+            max_tokens: this.maxTokens,
+            temperature: this.temperature
         };
         
         try {
@@ -81,7 +108,7 @@ export class CustomOpenAIClient {
             
             if (!response.ok) {
                 const errorData = await response.text();
-                throw new Error(`Custom OpenAI API 오류: ${response.status} - ${errorData}`);
+                throw new Error(t('api.customOpenAIError', { status: response.status, error: errorData }));
             }
             
             const data = await response.json();
@@ -104,7 +131,7 @@ export class CustomOpenAIClient {
                 }
             }
             
-            throw new Error('Custom OpenAI API로부터 유효한 응답을 받지 못했습니다.');
+            throw new Error(t('api.invalidResponse'));
             
         } catch (error) {
             console.error('Custom OpenAI API Error:', error);
@@ -112,13 +139,21 @@ export class CustomOpenAIClient {
         }
     }
 
+    /**
+     * Generate character profile using the OpenAI API
+     * @param {Object} params - Profile generation parameters
+     * @param {string} params.userName - User name
+     * @param {string} params.userDescription - User description  
+     * @param {string} params.profileCreationPrompt - Profile creation prompt
+     * @returns {Promise<Object>} Generated profile response
+     */
     async generateProfile({ userName, userDescription, profileCreationPrompt }) {
         const { systemPrompt } = buildProfilePrompt({ userName, userDescription, profileCreationPrompt });
 
         const requestBody = {
             model: this.model,
-            max_tokens: 1024,
-            temperature: 1.2,
+            max_tokens: this.profileMaxTokens,
+            temperature: this.profileTemperature,
             messages: [
                 {
                     role: 'system',
@@ -145,7 +180,7 @@ export class CustomOpenAIClient {
 
             if (!response.ok) {
                 console.error("Custom OpenAI Profile Gen API Error:", data);
-                const errorMessage = data?.error?.message || `API 요청 실패: ${response.statusText}`;
+                const errorMessage = data?.error?.message || t('api.requestFailed', { status: response.statusText });
                 throw new Error(errorMessage);
             }
 
@@ -154,12 +189,12 @@ export class CustomOpenAIClient {
                     return JSON.parse(data.choices[0].message.content);
                 } catch (parseError) {
                     console.error("Profile JSON 파싱 오류:", parseError);
-                    throw new Error("프로필 응답을 JSON으로 파싱할 수 없습니다.");
+                    throw new Error(t('api.profileParseError'));
                 }
             } else {
-                const reason = data.choices?.[0]?.finish_reason || '알 수 없는 이유';
+                const reason = data.choices?.[0]?.finish_reason || t('api.unknownReason');
                 console.warn("Custom OpenAI Profile Gen API 응답에 유효한 content가 없습니다.", data);
-                throw new Error(`프로필이 생성되지 않았습니다. (이유: ${reason})`);
+                throw new Error(t('api.profileNotGenerated', { reason }));
             }
         } catch (error) {
             console.error("Custom OpenAI 프로필 생성 API 호출 중 오류 발생:", error);
