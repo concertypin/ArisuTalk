@@ -128,10 +128,14 @@ export function renderProviderConfig(provider, config) {
             </div>
             
             <!-- Advanced Settings for All Providers -->
-            <div class="space-y-4 mt-4 p-4 bg-gray-700/30 rounded-xl">
-                <h4 class="text-sm font-medium text-gray-300 mb-3 flex items-center">
-                    <i data-lucide="settings" class="w-4 h-4 mr-2"></i>고급 설정
-                </h4>
+            <details class="group mt-4">
+                <summary class="flex items-center justify-between cursor-pointer list-none p-4 bg-gray-700/30 rounded-xl hover:bg-gray-700/40 transition-colors">
+                    <h4 class="text-sm font-medium text-gray-300 flex items-center">
+                        <i data-lucide="settings" class="w-4 h-4 mr-2"></i>${t('settings.advancedSettings')}
+                    </h4>
+                    <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400 transition-transform duration-300 group-open:rotate-180"></i>
+                </summary>
+                <div class="space-y-4 mt-2 p-4 bg-gray-700/30 rounded-xl">
                 
                 <!-- Max Tokens -->
                 <div>
@@ -223,7 +227,7 @@ export function renderProviderConfig(provider, config) {
                         </div>
                     </div>
                 </div>
-            </div>
+            </details>
         </div>
     `;
 }

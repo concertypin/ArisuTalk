@@ -52,19 +52,19 @@ export class APIManager {
         let client;
         switch (provider) {
             case PROVIDERS.GEMINI:
-                client = new GeminiClient(apiKey, model, baseUrl, options);
+                client = new GeminiClient(apiKey, model, baseUrl || undefined, options);
                 break;
             case PROVIDERS.CLAUDE:
-                client = new ClaudeClient(apiKey, model, baseUrl, options);
+                client = new ClaudeClient(apiKey, model, baseUrl || undefined, options);
                 break;
             case PROVIDERS.OPENAI:
-                client = new OpenAIClient(apiKey, model, baseUrl, options);
+                client = new OpenAIClient(apiKey, model, baseUrl || undefined, options);
                 break;
             case PROVIDERS.GROK:
-                client = new GrokClient(apiKey, model, baseUrl, options);
+                client = new GrokClient(apiKey, model, baseUrl || undefined, options);
                 break;
             case PROVIDERS.OPENROUTER:
-                client = new OpenRouterClient(apiKey, model, baseUrl, options);
+                client = new OpenRouterClient(apiKey, model, baseUrl || undefined, options);
                 break;
             case PROVIDERS.CUSTOM_OPENAI:
                 client = new CustomOpenAIClient(apiKey, model, baseUrl, options);
