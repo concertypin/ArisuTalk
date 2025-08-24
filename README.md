@@ -1,15 +1,33 @@
-# ArisuTalk
+## 🤝 협업 안내
 
-This project is an AI chat frontend application forked from `github.com/dkfk5326/ArisuTalk`.
+이 저장소는 공개 오픈소스이며, 협업자는 다음 권한을 가집니다.
 
-## Key Features
+### ✅ 가능한 작업
+- 브랜치 생성 및 수정
+- Pull Request(PR) 작성 및 리뷰
+- 승인 후 PR 머지
+- 이슈 생성, 수정, 라벨 관리
+- 코드 개선, 버그 수정, 문서화 작업
 
-*   **Bot Management**: Create and manage various bots.
-*   **Multi-Chat Rooms**: Operate multiple chat rooms simultaneously.
-*   **Gemini API Integration**: Supports AI-powered conversations using the Google Gemini API.
-*   **Persona**: Assign diverse personas to bots for a richer conversation experience.
+### 🚫 하면 안 되는 작업
+- `main` 브랜치에 직접 푸시
+- `main` 브랜치 삭제 또는 강제 푸시
+- 저장소 설정 변경, 보호 규칙 해제
+- 라이선스 조건에 어긋나는 코드 사용
 
-For more detailed information, please refer to the following README files:
+### How TO Start Server
 
-*   [Frontend README](./frontend/README.md)
-*   [Backend README](./backend/README.md)
+1. 프로젝트 디렉토리로 이동합니다.
+   ```sh
+   cd arisutalk
+   ```
+2. 서버를 시작합니다.
+   ```sh
+   bash start.sh
+   ```
+
+
+### License
+이 프로젝트는 CC BY-NC 4.0 라이선스를 따릅니다.  
+상업적 이용을 금지하며, 출처 표기가 필요합니다.
+광고·판매·수익창출 목적 사용 불가합니다. 
