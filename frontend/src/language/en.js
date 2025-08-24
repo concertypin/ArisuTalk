@@ -325,6 +325,9 @@ export const en = {
         // Settings related
         apiKeyPlaceholder: 'Enter API key',
         customModelPlaceholder: 'Enter custom model name',
+        
+        // Other UI
+        generate: 'Generate',
     },
     chat: {
         defaultChatName: "Default Chat",

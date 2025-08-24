@@ -190,6 +190,9 @@ export const ko = {
         // Settings related
         apiKeyPlaceholder: 'API 키를 입력하세요',
         customModelPlaceholder: '커스텀 모델명 입력',
+        
+        // Other UI
+        generate: '생성',
     },
     confirm: {
         cancel: '취소',

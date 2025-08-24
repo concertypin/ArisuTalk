@@ -1,3 +1,5 @@
+import { t } from './i18n.js';
+
 export async function loadFromBrowserStorage(key, defaultValue) {
   try {
     const value = await loadFromIndexedDB(key);
@@ -14,7 +16,7 @@ export function saveToBrowserStorage(key, value) {
     console.error(`Error saving to IndexedDB key "${key}":`, error);
     // 중요한 데이터 손실 방지를 위해 사용자에게 알림
     setTimeout(() => {
-      alert("데이터 저장에 실패했습니다. 브라우저를 새로고침하거나 캐시를 정리해주세요.");
+      alert(t('modal.saveFailed.message'));
     }, 100);
   });
 }

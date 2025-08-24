@@ -18,7 +18,7 @@ function renderSlider(id, description, left, right, value) {
 function renderMemoryInput(memoryText = "") {
   return `
         <div class="memory-item flex items-center gap-2">
-            <input type="text" class="memory-input flex-1 px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" value="${memoryText}" placeholder="기억할 내용을 입력하세요...">
+            <input type="text" class="memory-input flex-1 px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" value="${memoryText}" placeholder="${t('characterModal.memoryPlaceholder')}">
             <button class="delete-memory-btn p-2 text-gray-400 hover:text-red-400">
                 <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>
             </button>
@@ -28,7 +28,7 @@ function renderMemoryInput(memoryText = "") {
 
 export function renderStickerGrid(app, stickers) {
   if (!stickers || stickers.length === 0) {
-    return '<div class="col-span-4 text-center text-gray-400 text-sm py-4">아직 스티커가 없습니다.</div>';
+    return `<div class="col-span-4 text-center text-gray-400 text-sm py-4">${t('characterModal.noStickers')}</div>`;
   }
 
   const isSelectionMode = app.state.stickerSelectionMode;
@@ -83,10 +83,10 @@ export function renderStickerGrid(app, stickers) {
         !isSelectionMode
           ? `
                 <div class="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                    <button class="edit-sticker-name-btn p-1 bg-blue-600 rounded-full text-white" data-index="${index}" title="이름 변경">
+                    <button class="edit-sticker-name-btn p-1 bg-blue-600 rounded-full text-white" data-index="${index}" title="${t('characterModal.editStickerName')}">
                         <i data-lucide="edit-3" class="w-2 h-2 pointer-events-none"></i>
                     </button>
-                    <button class="delete-sticker-btn p-1 bg-red-600 rounded-full text-white" data-index="${index}" title="삭제">
+                    <button class="delete-sticker-btn p-1 bg-red-600 rounded-full text-white" data-index="${index}" title="${t('characterModal.deleteSticker')}">
                         <i data-lucide="x" class="w-3 h-3 pointer-events-none"></i>
                     </button>
                 </div>
@@ -118,7 +118,7 @@ export function renderCharacterModal(app) {
             <div class="bg-gray-800 rounded-2xl w-full max-w-md mx-auto my-auto flex flex-col" style="max-height: 90vh;">
                 <div class="flex items-center justify-between p-6 border-b border-gray-700 shrink-0">
                     <h3 class="text-xl font-semibold text-white">${
-                      isNew ? "연락처 추가" : "연락처 수정"
+                      isNew ? t('characterModal.addContact') : t('characterModal.editContact')
                     }</h3>
                     <button id="close-character-modal" data-action="close-character-modal" class="p-1 hover:bg-gray-700 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
                 </div>
@@ -133,32 +133,32 @@ export function renderCharacterModal(app) {
                         </div>
                         <div class="flex flex-col gap-2">
                             <button id="select-avatar-btn" class="py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
-                                <i data-lucide="image" class="w-4 h-4"></i> 프로필 이미지
+                                <i data-lucide="image" class="w-4 h-4"></i> ${t('characterModal.profileImage')}
                             </button>
                             <button id="load-card-btn" class="py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
-                                <i data-lucide="upload" class="w-4 h-4"></i> 연락처 불러오기
+                                <i data-lucide="upload" class="w-4 h-4"></i> ${t('characterModal.importContact')}
                             </button>
                             <button id="save-card-btn" class="py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
-                                <i data-lucide="download" class="w-4 h-4"></i> 연락처 공유하기
+                                <i data-lucide="download" class="w-4 h-4"></i> ${t('characterModal.shareContact')}
                             </button>
                         </div>
                         <input type="file" accept="image/png,image/jpeg" id="avatar-input" class="hidden" />
                         <input type="file" accept="image/png" id="card-input" class="hidden" />
                     </div>
                     <div>
-                        <label class="text-sm font-medium text-gray-300 mb-2 block">이름</label>
-                        <input id="character-name" type="text" placeholder="이름을 입력하세요" value="${
+                        <label class="text-sm font-medium text-gray-300 mb-2 block">${t('characterModal.nameLabel')}</label>
+                        <input id="character-name" type="text" placeholder="${t('characterModal.namePlaceholder')}" value="${
                           char.name
                         }" class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" />
                     </div>
                     <div>
                         <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-medium text-gray-300">인물 정보</label>
+                            <label class="text-sm font-medium text-gray-300">${t('characterModal.promptLabel')}</label>
                             <button id="ai-generate-character-btn" class="py-1 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-xs flex items-center gap-1">
-                                <i data-lucide="sparkles" class="w-3 h-3"></i> AI 생성
+                                <i data-lucide="sparkles" class="w-3 h-3"></i> AI ${t('ui.generate')}
                             </button>
                         </div>
-                        <textarea id="character-prompt" placeholder="특징, 배경, 관계, 기억 등을 자유롭게 서술해주세요. 또는 간단한 정보를 입력하고 AI 생성 버튼을 클릭하세요." class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" rows="6">${
+                        <textarea id="character-prompt" placeholder="${t('characterModal.promptPlaceholder')}" class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" rows="6">${
                           char.prompt
                         }</textarea>
                     </div>
@@ -168,7 +168,7 @@ export function renderCharacterModal(app) {
                         ? `
                     <div class="border-t border-gray-700 pt-4">
                         <label class="flex items-center justify-between text-sm font-medium text-gray-300 cursor-pointer">
-                            <span class="flex items-center"><i data-lucide="message-square-plus" class="w-4 h-4 mr-2"></i>개별 선톡 허용</span>
+                            <span class="flex items-center"><i data-lucide="message-square-plus" class="w-4 h-4 mr-2"></i>${t('characterModal.proactiveToggle')}</span>
                             <div class="relative inline-block w-10 align-middle select-none">
                                 <input type="checkbox" name="toggle" id="character-proactive-toggle" ${
                                   char.proactiveEnabled ? "checked" : ""
@@ -183,14 +183,14 @@ export function renderCharacterModal(app) {
 
                     <details class="group border-t border-gray-700 pt-4">
                         <summary class="flex items-center justify-between cursor-pointer list-none">
-                            <span class="text-base font-medium text-gray-200">추가 설정</span>
+                            <span class="text-base font-medium text-gray-200">${t('characterModal.advancedSettings')}</span>
                             <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"></i>
                         </summary>
                         <div class="content-wrapper">
                             <div class="content-inner pt-6 space-y-6">
                                 <details class="group border-t border-gray-700 pt-2">
                                     <summary class="flex items-center justify-between cursor-pointer list-none py-2">
-                                       <h4 class="text-sm font-medium text-gray-300">스티커</h4>
+                                       <h4 class="text-sm font-medium text-gray-300">${t('characterModal.sticker')}</h4>
                                        <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"></i>
                                     </summary>
                                     <div class="content-wrapper">
@@ -199,7 +199,7 @@ export function renderCharacterModal(app) {
                                                 <div class="flex items-center gap-2">
                                                     <button id="add-sticker-btn" class="py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm flex flex-col items-center justify-center gap-1">
                                                         <i data-lucide="plus" class="w-4 h-4"></i> 
-                                                        <span class="text-xs">스티커<br>추가</span>
+                                                        <span class="text-xs">${t('characterModal.addSticker')}</span>
                                                     </button>
                                                     <input type="file" accept="image/jpeg,image/jpg,image/gif,image/png,image/bmp,image/webp,video/webm,video/mp4,audio/mpeg,audio/mp3" id="sticker-input" class="hidden" multiple />
                                                 </div>
@@ -220,8 +220,8 @@ export function renderCharacterModal(app) {
                                                         <span class="toggle-text text-xs">${
                                                           app.state
                                                             .stickerSelectionMode
-                                                            ? "선택<br>해제"
-                                                            : "선택<br>모드"
+                                                            ? t('characterModal.deselect')
+                                                            : t('characterModal.selectMode')
                                                         }</span>
                                                     </button>
                                                     ${
@@ -230,14 +230,14 @@ export function renderCharacterModal(app) {
                                                         ? `
                                                     <button id="select-all-stickers" class="py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm flex flex-col items-center gap-1">
                                                         <i data-lucide="check-circle" class="w-4 h-4"></i> 
-                                                        <span class="text-xs">전체<br>선택</span>
+                                                        <span class="text-xs">${t('characterModal.selectAll')}</span>
                                                     </button>
                                                     `
                                                         : ""
                                                     }
                                                     <button id="delete-selected-stickers" class="py-2 px-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm flex flex-col items-center gap-1 opacity-50 cursor-not-allowed" disabled>
                                                         <i data-lucide="trash-2" class="w-4 h-4"></i> 
-                                                        <span class="text-xs">삭제<br>(<span id="selected-count">0</span>)</span>
+                                                        <span class="text-xs">${t('characterModal.deleteSelected')}</span>
                                                     </button>
                                                 </div>
                                                 `
@@ -245,17 +245,16 @@ export function renderCharacterModal(app) {
                                                 }
                                             </div>
                                             <div class="flex items-center justify-between text-xs text-gray-400 mb-3">
-                                                <span>jpg, gif, png, bmp, webp, webm, mp4, mp3 지원 (개당 최대 30MB)</span>
-                                                <span>스티커 개수: ${
+                                                <span>${t('characterModal.stickerSupport')}</span>
+                                                <span>${t('characterModal.stickerCount', { count: 
                                                   (
                                                     editingCharacter?.stickers ||
                                                     []
-                                                  ).length
-                                                }개</span>
+                                                  ).length })}</span>
                                             </div>
                                             <div class="flex items-center justify-between text-xs text-gray-500 mb-3">
-                                                <span id="storage-usage-info">전체 저장 용량: 계산 중...</span>
-                                                <span>총 용량: ${formatBytes(
+                                                <span id="storage-usage-info">${t('characterModal.totalStorage')}계산 중...</span>
+                                                <span>${t('characterModal.totalSize')}${formatBytes(
                                                   app.calculateCharacterStickerSize(
                                                     editingCharacter || {}
                                                   )
@@ -273,7 +272,7 @@ export function renderCharacterModal(app) {
                                 </details>
                                 <details class="group border-t border-gray-700 pt-2">
                                     <summary class="flex items-center justify-between cursor-pointer list-none py-2">
-                                       <h4 class="text-sm font-medium text-gray-300">메모리</h4>
+                                       <h4 class="text-sm font-medium text-gray-300">${t('characterModal.memory')}</h4>
                                        <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"></i>
                                     </summary>
                                     <div class="content-wrapper">
@@ -289,14 +288,14 @@ export function renderCharacterModal(app) {
                                                   .join("")}
                                             </div>
                                             <button id="add-memory-btn" class="mt-3 text-sm text-blue-400 hover:text-blue-300 flex items-center gap-2">
-                                                <i data-lucide="plus-circle" class="w-4 h-4"></i> 메모리 추가
+                                                <i data-lucide="plus-circle" class="w-4 h-4"></i> ${t('characterModal.addMemory')}
                                             </button>
                                         </div>
                                     </div>
                                 </details>
                                 <details class="group border-t border-gray-700 pt-2">
                                     <summary class="flex items-center justify-between cursor-pointer list-none py-2">
-                                       <h4 class="text-sm font-medium text-gray-300">메시지 응답성</h4>
+                                       <h4 class="text-sm font-medium text-gray-300">${t('characterModal.responseSpeed')}</h4>
                                        <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"></i>
                                     </summary>
                                     <div class="content-wrapper">
@@ -337,8 +336,8 @@ export function renderCharacterModal(app) {
                     </details>
                 </div>
                 <div class="p-6 mt-auto border-t border-gray-700 shrink-0 flex justify-end space-x-3">
-                    <button id="close-character-modal" data-action="close-character-modal" class="flex-1 py-2.5 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">취소</button>
-                    <button id="save-character" class="flex-1 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">저장</button>
+                    <button id="close-character-modal" data-action="close-character-modal" class="flex-1 py-2.5 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">${t('common.cancel')}</button>
+                    <button id="save-character" class="flex-1 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">${t('common.save')}</button>
                 </div>
             </div>
         </div>
