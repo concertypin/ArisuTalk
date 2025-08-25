@@ -149,7 +149,6 @@ export class GeminiClient {
       );
 
       const data = await response.json();
-      console.log("Full API Response:", JSON.stringify(data, null, 2));
 
       if (!response.ok) {
         console.error("API Error:", data);
@@ -160,9 +159,6 @@ export class GeminiClient {
       }
 
       // API 응답 구조 검증
-      console.log("Candidates exists:", !!data.candidates);
-      console.log("Candidates length:", data.candidates?.length);
-      console.log("First candidate:", data.candidates?.[0]);
 
       if (
         data.candidates &&
@@ -170,7 +166,6 @@ export class GeminiClient {
         data.candidates[0]?.content?.parts?.[0]?.text
       ) {
         const rawResponseText = data.candidates[0].content.parts[0].text;
-        console.log("Raw response text:", rawResponseText);
 
         try {
           // Clean up the response text to handle potential JSON formatting issues
@@ -301,7 +296,6 @@ export class GeminiClient {
       );
 
       const data = await response.json();
-      console.log("Full Profile API Response:", JSON.stringify(data, null, 2));
 
       if (!response.ok) {
         console.error("Profile Gen API Error:", data);
@@ -312,9 +306,6 @@ export class GeminiClient {
       }
 
       // API 응답 구조 검증
-      console.log("Candidates exists:", !!data.candidates);
-      console.log("Candidates length:", data.candidates?.length);
-      console.log("First candidate:", data.candidates?.[0]);
 
       if (
         data.candidates &&
@@ -322,7 +313,6 @@ export class GeminiClient {
         data.candidates[0]?.content?.parts?.[0]?.text
       ) {
         const rawResponseText = data.candidates[0].content.parts[0].text;
-        console.log("Raw profile response:", rawResponseText);
 
         try {
           // Clean up the response text to handle potential JSON formatting issues
@@ -345,8 +335,6 @@ export class GeminiClient {
             .replace(/\\'/g, "\\'") // Escape single quotes
             .replace(/\\"/g, '\\\\"') // Escape double quotes properly
             .trim();
-
-          console.log("Cleaned profile response:", cleanedText);
 
           const parsed = JSON.parse(cleanedText);
           return parsed;
