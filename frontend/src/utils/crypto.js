@@ -144,7 +144,14 @@ export function generateMasterPassword() {
 /**
  * Validate password strength
  * @param {string} password - Password to validate
- * @returns {Object} - Validation result
+ * 
+ * @typedef {Object} ValidationResult
+ * @property {boolean} isValid - Whether the password is valid
+ * @property {boolean} length - Whether the password meets length requirement
+ * @property {number} strength - Strength score (0-4)
+ * @property {string} message - Validation message
+ * 
+ * @returns {ValidationResult} - Validation result
  */
 export function validatePassword(password) {
     const minLength = 8;
