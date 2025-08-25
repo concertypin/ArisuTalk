@@ -1,9 +1,9 @@
 import { t } from "../../../i18n.js";
 
 /**
- * 캐릭터 기본값 설정 패널 렌더링
- * @param {Object} app - 애플리케이션 인스턴스
- * @returns {string} 캐릭터 기본값 설정 패널 HTML
+ * Renders the character defaults settings panel
+ * @param {Object} app - Application instance
+ * @returns {string} Character defaults settings panel HTML
  */
 export function renderCharacterDefaultsPanel(app) {
   const { settings } = app.state;
@@ -30,7 +30,7 @@ export function renderCharacterDefaultsPanel(app) {
                             class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200"
                         />
                         <p class="text-xs text-gray-400 mt-1">${t(
-                          "settings.nameOrNicknameInfo"
+                          "settings.nameOrNicknameInfo",
                         )}</p>
                     </div>
                     <div>
@@ -41,13 +41,13 @@ export function renderCharacterDefaultsPanel(app) {
                         <textarea 
                             id="settings-user-desc" 
                             placeholder="${t(
-                              "settings.selfIntroductionPlaceholder"
+                              "settings.selfIntroductionPlaceholder",
                             )}" 
                             class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 resize-none" 
                             rows="4"
                         >${settings.userDescription || ""}</textarea>
                         <p class="text-xs text-gray-400 mt-1">${t(
-                          "settings.selfIntroductionInfo"
+                          "settings.selfIntroductionInfo",
                         )}</p>
                     </div>
                 </div>
@@ -66,11 +66,11 @@ export function renderCharacterDefaultsPanel(app) {
                             <div class="flex items-center mb-1">
                                 <i data-lucide="users" class="w-4 h-4 mr-2 text-blue-400"></i>
                                 <span class="text-sm font-medium text-white">${t(
-                                  "settings.proactiveChat"
+                                  "settings.proactiveChat",
                                 )}</span>
                             </div>
                             <p class="text-xs text-gray-400">${t(
-                              "settings.proactiveChatInfo"
+                              "settings.proactiveChatInfo",
                             )}</p>
                         </div>
                         <label class="relative inline-block w-12 h-6 cursor-pointer">
@@ -94,11 +94,11 @@ export function renderCharacterDefaultsPanel(app) {
                                 <div class="flex items-center mb-1">
                                     <i data-lucide="shuffle" class="w-4 h-4 mr-2 text-blue-400"></i>
                                     <span class="text-sm font-medium text-white">${t(
-                                      "settings.randomFirstMessage"
+                                      "settings.randomFirstMessage",
                                     )}</span>
                                 </div>
                                 <p class="text-xs text-gray-400">${t(
-                                  "settings.randomFirstMessageInfo"
+                                  "settings.randomFirstMessageInfo",
                                 )}</p>
                             </div>
                             <label class="relative inline-block w-12 h-6 cursor-pointer">
@@ -125,13 +125,13 @@ export function renderCharacterDefaultsPanel(app) {
                                 <div>
                                     <label class="flex items-center justify-between text-sm font-medium text-gray-300 mb-3">
                                         <span>${t(
-                                          "settings.characterCount"
+                                          "settings.characterCount",
                                         )}</span>
                                         <span id="random-character-count-label" class="text-blue-400 font-semibold">${
                                           settings.randomCharacterCount || 3
                                         }${t(
-    "settings.characterCountUnit"
-  )}</span>
+                                          "settings.characterCountUnit",
+                                        )}</span>
                                     </label>
                                     <input 
                                         id="settings-random-character-count" 
@@ -146,24 +146,24 @@ export function renderCharacterDefaultsPanel(app) {
                                     >
                                     <div class="flex justify-between text-xs text-gray-400 mt-2">
                                         <span>1${t(
-                                          "settings.characterCountUnit"
+                                          "settings.characterCountUnit",
                                         )}</span>
                                         <span>3${t(
-                                          "settings.characterCountUnit"
+                                          "settings.characterCountUnit",
                                         )}</span>
                                         <span>5${t(
-                                          "settings.characterCountUnit"
+                                          "settings.characterCountUnit",
                                         )}</span>
                                     </div>
                                 </div>
                                 <div>
                                     <label class="text-sm font-medium text-gray-300 mb-3 block">${t(
-                                      "settings.messageFrequency"
+                                      "settings.messageFrequency",
                                     )}</label>
                                     <div class="grid grid-cols-2 gap-3">
                                         <div>
                                             <label class="text-xs text-gray-400 mb-1 block">${t(
-                                              "settings.minInterval"
+                                              "settings.minInterval",
                                             )}</label>
                                             <input 
                                                 id="settings-random-frequency-min" 
@@ -180,7 +180,7 @@ export function renderCharacterDefaultsPanel(app) {
                                         </div>
                                         <div>
                                             <label class="text-xs text-gray-400 mb-1 block">${t(
-                                              "settings.maxInterval"
+                                              "settings.maxInterval",
                                             )}</label>
                                             <input 
                                                 id="settings-random-frequency-max" 
@@ -197,7 +197,7 @@ export function renderCharacterDefaultsPanel(app) {
                                         </div>
                                     </div>
                                     <p class="text-xs text-gray-400 mt-2">${t(
-                                      "settings.messageFrequencyInfo"
+                                      "settings.messageFrequencyInfo",
                                     )}</p>
                                 </div>
                             </div>

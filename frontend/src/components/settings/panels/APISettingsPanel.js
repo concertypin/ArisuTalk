@@ -7,9 +7,9 @@ import {
 import { t } from "../../../i18n.js";
 
 /**
- * API 설정 패널 렌더링
- * @param {Object} app - 애플리케이션 인스턴스
- * @returns {string} API 설정 패널 HTML
+ * Renders the API settings panel
+ * @param {Object} app - Application instance
+ * @returns {string} API settings panel HTML
  */
 export function renderAPISettingsPanel(app) {
   const { settings } = app.state;
@@ -70,8 +70,8 @@ export function renderAPISettingsPanel(app) {
                 <h4 class="text-lg font-semibold text-white mb-4 flex items-center">
                     <i data-lucide="settings" class="w-5 h-5 mr-3 text-blue-400"></i>
                     ${getProviderDisplayName(provider)} ${t(
-    "settings.providerSettings"
-  )}
+                      "settings.providerSettings",
+                    )}
                 </h4>
                 <div class="provider-settings-container">
                     ${renderProviderConfig(provider, providerConfig)}
@@ -85,7 +85,7 @@ export function renderAPISettingsPanel(app) {
                     ${t("settings.promptManagement")}
                 </h4>
                 <p class="text-gray-300 text-sm mb-4">${t(
-                  "settings.promptInfo"
+                  "settings.promptInfo",
                 )}</p>
                 <button id="open-prompt-modal" class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors flex items-center justify-center gap-2">
                     <i data-lucide="edit" class="w-4 h-4"></i>
@@ -97,9 +97,9 @@ export function renderAPISettingsPanel(app) {
 }
 
 /**
- * 제공업체 표시 이름 반환
- * @param {string} provider - 제공업체 코드
- * @returns {string} 표시 이름
+ * Returns the display name for a provider
+ * @param {string} provider - Provider code
+ * @returns {string} Display name
  */
 function getProviderDisplayName(provider) {
   const displayNames = {

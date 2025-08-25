@@ -98,14 +98,14 @@ export function renderDebugLogsModal(state) {
                         ? `
                         <div class="text-xs text-gray-500">
                             ${t("debugLogs.chatRoom")}: ${
-                            data.metadata.chatId || "N/A"
-                          } | 
+                              data.metadata.chatId || "N/A"
+                            } | 
                             ${t("debugLogs.api")}: ${
-                            data.metadata.apiProvider || "N/A"
-                          } | 
+                              data.metadata.apiProvider || "N/A"
+                            } | 
                             ${t("debugLogs.model")}: ${
-                            data.metadata.model || "N/A"
-                          }
+                              data.metadata.model || "N/A"
+                            }
                         </div>
                     `
                         : ""
@@ -125,7 +125,7 @@ export function renderDebugLogsModal(state) {
                                 <pre class="text-gray-300 overflow-x-auto">${JSON.stringify(
                                   data.personaInput,
                                   null,
-                                  2
+                                  2,
                                 )}</pre>
                             </div>
                         </details>
@@ -145,7 +145,7 @@ export function renderDebugLogsModal(state) {
                                 <pre class="text-gray-300 overflow-x-auto whitespace-pre-wrap">${JSON.stringify(
                                   data.systemPrompt,
                                   null,
-                                  2
+                                  2,
                                 )}</pre>
                             </div>
                         </details>
@@ -165,7 +165,7 @@ export function renderDebugLogsModal(state) {
                                 <pre class="text-gray-300 overflow-x-auto">${JSON.stringify(
                                   data.outputResponse,
                                   null,
-                                  2
+                                  2,
                                 )}</pre>
                             </div>
                         </details>
@@ -185,7 +185,7 @@ export function renderDebugLogsModal(state) {
                                 <pre class="text-gray-300 overflow-x-auto">${JSON.stringify(
                                   data.parameters,
                                   null,
-                                  2
+                                  2,
                                 )}</pre>
                             </div>
                         </details>
@@ -205,7 +205,7 @@ export function renderDebugLogsModal(state) {
                                 <pre class="text-gray-300 overflow-x-auto">${JSON.stringify(
                                   data.metadata,
                                   null,
-                                  2
+                                  2,
                                 )}</pre>
                             </div>
                         </details>
@@ -230,13 +230,15 @@ export function renderDebugLogsModal(state) {
                             </h2>
                             <p class="text-gray-400 text-sm mt-1">
                                 ${t(
-                                  "debugLogs.totalLogItems"
+                                  "debugLogs.totalLogItems",
                                 )} ${logCount}/${maxLogs}${t(
-    "debugLogs.maxLogItems"
-  )} | 
+                                  "debugLogs.maxLogItems",
+                                )} | 
                                 ${t("debugLogs.logCollectionStatus")} ${
-    enableDebugLogs ? t("debugLogs.enabled") : t("debugLogs.disabled")
-  }
+                                  enableDebugLogs
+                                    ? t("debugLogs.enabled")
+                                    : t("debugLogs.disabled")
+                                }
                             </p>
                         </div>
                         <div class="flex items-center gap-2">
@@ -269,7 +271,7 @@ export function renderDebugLogsModal(state) {
                         <div class="flex flex-col items-center justify-center h-full text-gray-400">
                             <i data-lucide="file-x" class="w-16 h-16 mb-4"></i>
                             <h3 class="text-lg font-medium mb-2">${t(
-                              "debugLogs.noLogs"
+                              "debugLogs.noLogs",
                             )}</h3>
                             <p class="text-sm text-center">
                                 ${
@@ -289,7 +291,7 @@ export function renderDebugLogsModal(state) {
                                   .map((log) =>
                                     log.type === "structured"
                                       ? renderStructuredLog(log)
-                                      : renderSimpleLog(log)
+                                      : renderSimpleLog(log),
                                   )
                                   .join("")}
                             </div>

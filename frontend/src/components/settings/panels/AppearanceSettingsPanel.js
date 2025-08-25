@@ -1,9 +1,9 @@
 import { t, getLanguage } from "../../../i18n.js";
 
 /**
- * 외관 설정 패널 렌더링
- * @param {Object} app - 애플리케이션 인스턴스
- * @returns {string} 외관 설정 패널 HTML
+ * Renders the appearance settings panel
+ * @param {Object} app - Application instance
+ * @returns {string} Appearance settings panel HTML
  */
 export function renderAppearanceSettingsPanel(app) {
   const { settings } = app.state;
@@ -22,7 +22,7 @@ export function renderAppearanceSettingsPanel(app) {
                         <label class="flex items-center justify-between text-sm font-medium text-gray-300 mb-3">
                             <span>${t("settings.uiScale")}</span>
                             <span class="text-blue-400 font-mono text-sm" id="font-scale-value">${Math.round(
-                              settings.fontScale * 100
+                              settings.fontScale * 100,
                             )}%</span>
                         </label>
                         <input 
@@ -73,7 +73,7 @@ export function renderAppearanceSettingsPanel(app) {
                             <div class="text-2xl">🇰🇷</div>
                             <div class="text-left">
                                 <div class="font-medium">${t(
-                                  "settings.languageKorean"
+                                  "settings.languageKorean",
                                 )}</div>
                                 <div class="text-xs opacity-75">한국어</div>
                             </div>
@@ -90,7 +90,7 @@ export function renderAppearanceSettingsPanel(app) {
                             <div class="text-2xl">🇺🇸</div>
                             <div class="text-left">
                                 <div class="font-medium">${t(
-                                  "settings.languageEnglish"
+                                  "settings.languageEnglish",
                                 )}</div>
                                 <div class="text-xs opacity-75">English</div>
                             </div>
@@ -115,10 +115,10 @@ export function renderAppearanceSettingsPanel(app) {
                     <div class="bg-gray-600/50 rounded-lg p-4 text-center">
                         <i data-lucide="moon" class="w-8 h-8 text-blue-400 mx-auto mb-2"></i>
                         <p class="text-gray-300 text-sm">${t(
-                          "settings.darkTheme"
+                          "settings.darkTheme",
                         )}</p>
                         <p class="text-xs text-gray-400 mt-1">${t(
-                          "settings.currentTheme"
+                          "settings.currentTheme",
                         )}</p>
                     </div>
                     <div class="bg-gray-600/30 rounded-lg p-3 border border-gray-600/50">

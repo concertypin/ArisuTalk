@@ -2,9 +2,9 @@ import { renderSnapshotList } from "../../MobileSettingsModal.js";
 import { t } from "../../../i18n.js";
 
 /**
- * 데이터 관리 설정 패널 렌더링
- * @param {Object} app - 애플리케이션 인스턴스
- * @returns {string} 데이터 관리 설정 패널 HTML
+ * Renders the data management settings panel
+ * @param {Object} app - Application instance
+ * @returns {string} Data management settings panel HTML
  */
 export function renderDataManagementPanel(app) {
   const { settings } = app.state;
@@ -33,7 +33,7 @@ export function renderDataManagementPanel(app) {
                             <i data-lucide="info" class="w-4 h-4 text-blue-400 mt-0.5 shrink-0"></i>
                             <div class="text-xs text-gray-300">
                                 <p class="font-medium text-blue-400 mb-1">${t(
-                                  "settings.backupInfoTitle"
+                                  "settings.backupInfoTitle",
                                 )}</p>
                                 <p>${t("settings.backupInfo")}</p>
                             </div>
@@ -80,11 +80,11 @@ export function renderDataManagementPanel(app) {
                             <div class="flex items-center mb-1">
                                 <i data-lucide="history" class="w-4 h-4 mr-2 text-blue-400"></i>
                                 <span class="text-sm font-medium text-white">${t(
-                                  "settings.autoSnapshots"
+                                  "settings.autoSnapshots",
                                 )}</span>
                             </div>
                             <p class="text-xs text-gray-400">${t(
-                              "settings.autoSnapshotsInfo"
+                              "settings.autoSnapshotsInfo",
                             )}</p>
                         </div>
                         <label class="relative inline-block w-12 h-6 cursor-pointer">
@@ -105,7 +105,7 @@ export function renderDataManagementPanel(app) {
                     }">
                         <div class="bg-gray-600/20 rounded-lg p-4">
                             <h6 class="text-sm font-medium text-gray-300 mb-3">${t(
-                              "settings.savedSnapshots"
+                              "settings.savedSnapshots",
                             )}</h6>
                             <div class="space-y-2 max-h-48 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-700 scrollbar-thumb-rounded-full">
                                 ${renderSnapshotList(app)}
@@ -137,29 +137,29 @@ export function renderDataManagementPanel(app) {
                             <i data-lucide="trash-2" class="w-5 h-5 text-red-400 mt-0.5 shrink-0"></i>
                             <div class="flex-1">
                                 <h5 class="font-medium text-red-400 mb-2">${t(
-                                  "settings.resetAllData"
+                                  "settings.resetAllData",
                                 )}</h5>
                                 <div class="text-xs text-gray-300 space-y-1">
                                     <p>${t("settings.resetAllDataInfo")}</p>
                                     <ul class="list-disc list-inside space-y-0.5 ml-2">
                                         <li>${t(
-                                          "settings.resetDataList.allCharacters"
+                                          "settings.resetDataList.allCharacters",
                                         )}</li>
                                         <li>${t(
-                                          "settings.resetDataList.allChatHistory"
+                                          "settings.resetDataList.allChatHistory",
                                         )}</li>
                                         <li>${t(
-                                          "settings.resetDataList.userSettings"
+                                          "settings.resetDataList.userSettings",
                                         )}</li>
                                         <li>${t(
-                                          "settings.resetDataList.stickerData"
+                                          "settings.resetDataList.stickerData",
                                         )}</li>
                                         <li>${t(
-                                          "settings.resetDataList.debugLogs"
+                                          "settings.resetDataList.debugLogs",
                                         )}</li>
                                     </ul>
                                     <p class="text-red-300 font-medium mt-2">${t(
-                                      "settings.resetWarning"
+                                      "settings.resetWarning",
                                     )}</p>
                                 </div>
                             </div>

@@ -1,9 +1,9 @@
 import { t } from "../../../i18n.js";
 
 /**
- * 고급 설정 패널 렌더링
- * @param {Object} app - 애플리케이션 인스턴스
- * @returns {string} 고급 설정 패널 HTML
+ * Renders the advanced settings panel
+ * @param {Object} app - Application instance
+ * @returns {string} Advanced settings panel HTML
  */
 export function renderAdvancedSettingsPanel(app) {
   const { settings } = app.state;
@@ -24,11 +24,11 @@ export function renderAdvancedSettingsPanel(app) {
                                 <div class="flex items-center mb-1">
                                     <i data-lucide="activity" class="w-4 h-4 mr-2 text-blue-400"></i>
                                     <span class="text-sm font-medium text-white">${t(
-                                      "settings.enableDebugLogs"
+                                      "settings.enableDebugLogs",
                                     )}</span>
                                 </div>
                                 <p class="text-xs text-gray-400">${t(
-                                  "settings.debugLogsInfo"
+                                  "settings.debugLogsInfo",
                                 )}</p>
                             </div>
                             <label class="relative inline-block w-12 h-6 cursor-pointer">
@@ -49,7 +49,7 @@ export function renderAdvancedSettingsPanel(app) {
                         <div class="bg-gray-600/20 rounded-lg p-4 space-y-4">
                             <div class="flex items-center justify-between text-sm">
                                 <span class="text-gray-300">${t(
-                                  "settings.currentLogCount"
+                                  "settings.currentLogCount",
                                 )}</span>
                                 <span class="font-mono text-blue-400">${
                                   app.state.debugLogs
@@ -100,7 +100,7 @@ export function renderAdvancedSettingsPanel(app) {
                             <i data-lucide="alert-triangle" class="w-4 h-4 text-orange-400 mt-0.5 shrink-0"></i>
                             <div class="text-xs text-gray-300">
                                 <p class="font-medium text-orange-400 mb-1">${t(
-                                  "settings.warningNote"
+                                  "settings.warningNote",
                                 )}</p>
                                 <p>${t("settings.experimentalWarning")}</p>
                             </div>
@@ -125,19 +125,19 @@ export function renderAdvancedSettingsPanel(app) {
                     <div class="bg-gray-600/20 rounded-lg p-4 space-y-2">
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-300">${t(
-                              "settings.appName"
+                              "settings.appName",
                             )}</span>
                             <span class="text-sm font-mono text-blue-400">ArisuTalk</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-300">${t(
-                              "settings.uiMode"
+                              "settings.uiMode",
                             )}</span>
                             <span class="text-sm font-mono text-blue-400">Desktop</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-300">${t(
-                              "settings.browser"
+                              "settings.browser",
                             )}</span>
                             <span class="text-sm font-mono text-blue-400">${navigator.userAgent
                               .split(" ")
@@ -145,7 +145,7 @@ export function renderAdvancedSettingsPanel(app) {
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-300">${t(
-                              "settings.screenResolution"
+                              "settings.screenResolution",
                             )}</span>
                             <span class="text-sm font-mono text-blue-400">${
                               window.screen.width

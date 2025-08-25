@@ -3,7 +3,22 @@ import { t } from "../i18n.js";
 
 const API_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models";
 
+/**
+ * Google Gemini API client class
+ * Provides interface for AI conversation generation and character profile creation using Gemini API.
+ */
 export class GeminiClient {
+  /**
+   * Creates a GeminiClient instance.
+   * @param {string} apiKey - Google Gemini API key
+   * @param {string} model - Gemini model to use (e.g., 'gemini-2.5-flash')
+   * @param {string} [baseUrl=API_BASE_URL] - API base URL
+   * @param {Object} [options={}] - Client options
+   * @param {number} [options.maxTokens=4096] - Maximum output tokens
+   * @param {number} [options.temperature=1.25] - Response creativity control (0.0-2.0)
+   * @param {number} [options.profileMaxTokens=1024] - Maximum tokens for profile generation
+   * @param {number} [options.profileTemperature=1.2] - Temperature setting for profile generation
+   */
   constructor(apiKey, model, baseUrl = API_BASE_URL, options = {}) {
     this.apiKey = apiKey;
     this.model = model;
@@ -14,6 +29,24 @@ export class GeminiClient {
     this.profileTemperature = options.profileTemperature || 1.2;
   }
 
+  /**
+   * Generates conversation content with an AI character.
+   * Creates character responses to user input and returns structured JSON response.
+   * @param {Object} params - Content generation parameters
+   * @param {string} params.userName - User name
+   * @param {string} params.userDescription - User description/persona
+   * @param {Object} params.character - Character information
+   * @param {Array} params.history - Conversation history
+   * @param {Object} params.prompts - Prompt settings
+   * @param {boolean} [params.isProactive=false] - Whether this is a proactive message
+   * @param {boolean} [params.forceSummary=false] - Whether to force summary
+   * @returns {Promise<Object>} Generated response object
+   * @returns {number} returns.reactionDelay - Reaction delay time (milliseconds)
+   * @returns {Array<Object>} returns.messages - Generated message array
+   * @returns {string} [returns.newMemory] - New memory
+   * @returns {Object} [returns.characterState] - Character state
+   * @throws {Error} When API call fails or JSON parsing error occurs
+   */
   async generateContent({
     userName,
     userDescription,
@@ -112,7 +145,7 @@ export class GeminiClient {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
-        }
+        },
       );
 
       const data = await response.json();
@@ -170,7 +203,7 @@ export class GeminiClient {
           console.error("Text length:", rawResponseText.length);
 
           throw new Error(
-            t("api.geminiParsingError", { error: parseError.message })
+            t("api.geminiParsingError", { error: parseError.message }),
           );
         }
       } else {
@@ -181,7 +214,7 @@ export class GeminiClient {
           console.log("First candidate content:", data.candidates[0]?.content);
           console.log(
             "First candidate parts:",
-            data.candidates[0]?.content?.parts
+            data.candidates[0]?.content?.parts,
           );
         }
 
@@ -204,6 +237,19 @@ export class GeminiClient {
     }
   }
 
+  /**
+   * Generates an AI character profile based on user information.
+   * Creates a new character's name and prompt based on the user's name and description.
+   * @param {Object} params - Profile generation parameters
+   * @param {string} params.userName - User name
+   * @param {string} params.userDescription - User description/characteristics
+   * @param {string} params.profileCreationPrompt - Prompt for profile creation
+   * @returns {Promise<Object>} Generated profile information
+   * @returns {string} returns.name - Generated character name
+   * @returns {string} returns.prompt - Generated character prompt
+   * @returns {string} [returns.error] - Error message if error occurs
+   * @throws {Error} When API call fails or JSON parsing error occurs
+   */
   async generateProfile({ userName, userDescription, profileCreationPrompt }) {
     const { systemPrompt, contents } = buildProfilePrompt({
       userName,
@@ -251,7 +297,7 @@ export class GeminiClient {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
-        }
+        },
       );
 
       const data = await response.json();
@@ -310,15 +356,15 @@ export class GeminiClient {
           console.error("Text length:", rawResponseText.length);
           console.error(
             "Character at position 321:",
-            rawResponseText.charAt(320)
+            rawResponseText.charAt(320),
           );
           console.error(
             "Surrounding text:",
-            rawResponseText.substring(310, 330)
+            rawResponseText.substring(310, 330),
           );
 
           throw new Error(
-            t("api.geminiParsingError", { error: parseError.message })
+            t("api.geminiParsingError", { error: parseError.message }),
           );
         }
       } else {
@@ -329,7 +375,7 @@ export class GeminiClient {
           console.log("First candidate content:", data.candidates[0]?.content);
           console.log(
             "First candidate parts:",
-            data.candidates[0]?.content?.parts
+            data.candidates[0]?.content?.parts,
           );
         }
 
@@ -342,7 +388,7 @@ export class GeminiClient {
     } catch (error) {
       console.error(
         t("api.profileGenerationError", { provider: "Gemini" }),
-        error
+        error,
       );
       return { error: error.message };
     }

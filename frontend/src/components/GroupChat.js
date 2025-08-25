@@ -44,7 +44,7 @@ export function renderCreateGroupChatModal(app) {
             <div class="bg-gray-800 rounded-2xl w-full max-w-md mx-auto my-auto flex flex-col" style="max-height: 90vh;">
                 <div class="flex items-center justify-between p-6 border-b border-gray-700 shrink-0">
                     <h3 class="text-xl font-semibold text-white">${t(
-                      "groupChat.createGroupChat"
+                      "groupChat.createGroupChat",
                     )}</h3>
                     <button id="close-create-group-chat-modal" class="p-1 hover:bg-gray-700 rounded-full">
                         <i data-lucide="x" class="w-5 h-5"></i>
@@ -53,16 +53,16 @@ export function renderCreateGroupChatModal(app) {
                 <div class="p-6 space-y-6 overflow-y-auto">
                     <div>
                         <label class="text-sm font-medium text-gray-300 mb-2 block">${t(
-                          "groupChat.groupChatName"
+                          "groupChat.groupChatName",
                         )}</label>
                         <input id="group-chat-name" type="text" placeholder="${t(
-                          "ui.groupChatNamePlaceholder"
+                          "ui.groupChatNamePlaceholder",
                         )}" class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" />
                     </div>
                     
                     <div>
                         <label class="text-sm font-medium text-gray-300 mb-3 block">${t(
-                          "groupChat.selectParticipants"
+                          "groupChat.selectParticipants",
                         )}</label>
                         <div class="space-y-2 max-h-60 overflow-y-auto">
                             ${characters
@@ -91,21 +91,21 @@ export function renderCreateGroupChatModal(app) {
                                         </div>
                                     </div>
                                 </label>
-                            `
+                            `,
                               )
                               .join("")}
                         </div>
                         <p class="text-xs text-gray-500 mt-2">${t(
-                          "groupChat.minimumParticipants"
+                          "groupChat.minimumParticipants",
                         )}</p>
                     </div>
                 </div>
                 <div class="p-6 mt-auto border-t border-gray-700 shrink-0 flex justify-end space-x-3">
                     <button id="close-create-group-chat-modal" class="flex-1 py-2.5 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-center">${t(
-                      "groupChat.cancel"
+                      "groupChat.cancel",
                     )}</button>
                     <button id="create-group-chat-btn" class="flex-1 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-center">${t(
-                      "groupChat.create"
+                      "groupChat.create",
                     )}</button>
                 </div>
             </div>
@@ -125,7 +125,7 @@ export function renderEditGroupChatModal(app) {
                 <div class="sticky top-0 bg-gray-800 px-6 py-4 border-b border-gray-700">
                     <div class="flex items-center justify-between">
                         <h2 class="text-xl font-semibold text-white">${t(
-                          "groupChat.groupChatSettings"
+                          "groupChat.groupChatSettings",
                         )}</h2>
                         <button id="close-edit-group-chat-modal" class="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg">
                             <i data-lucide="x" class="w-5 h-5"></i>
@@ -137,7 +137,7 @@ export function renderEditGroupChatModal(app) {
                     <!-- 기본 정보 -->
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">${t(
-                          "groupChat.groupChatName"
+                          "groupChat.groupChatName",
                         )}</label>
                         <input type="text" id="edit-group-chat-name" value="${
                           groupChat.name
@@ -148,31 +148,31 @@ export function renderEditGroupChatModal(app) {
                     <!-- 전체 설정 -->
                     <div class="space-y-4">
                         <h3 class="text-lg font-semibold text-white">${t(
-                          "groupChat.responseSettings"
+                          "groupChat.responseSettings",
                         )}</h3>
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2">
                                 <span>${t(
-                                  "groupChat.overallResponseFrequency"
+                                  "groupChat.overallResponseFrequency",
                                 )} (</span><span id="response-frequency-label">${Math.round(
-    groupChat.settings.responseFrequency * 100
-  )}</span><span>%)</span>
+                                  groupChat.settings.responseFrequency * 100,
+                                )}</span><span>%)</span>
                             </label>
                             <input type="range" id="edit-response-frequency" min="0" max="100" 
                                    value="${Math.round(
-                                     groupChat.settings.responseFrequency * 100
+                                     groupChat.settings.responseFrequency * 100,
                                    )}"
                                    class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
                                    oninput="document.getElementById('response-frequency-label').textContent = this.value">
                             <p class="text-xs text-gray-400 mt-1">${t(
-                              "groupChat.responseFrequencyInfo"
+                              "groupChat.responseFrequencyInfo",
                             )}</p>
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2">${t(
-                              "groupChat.maxSimultaneousResponders"
+                              "groupChat.maxSimultaneousResponders",
                             )}</label>
                             <select id="edit-max-responding" class="w-full p-3 bg-gray-700 text-white rounded-lg border border-gray-600">
                                 <option value="1" ${
@@ -205,19 +205,19 @@ export function renderEditGroupChatModal(app) {
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2">
                                 <span>${t(
-                                  "groupChat.responseInterval"
+                                  "groupChat.responseInterval",
                                 )} (</span><span id="response-delay-label">${Math.round(
-    groupChat.settings.responseDelay / 1000
-  )}</span><span>${t("groupChat.seconds")})</span>
+                                  groupChat.settings.responseDelay / 1000,
+                                )}</span><span>${t("groupChat.seconds")})</span>
                             </label>
                             <input type="range" id="edit-response-delay" min="1" max="10" 
                                    value="${Math.round(
-                                     groupChat.settings.responseDelay / 1000
+                                     groupChat.settings.responseDelay / 1000,
                                    )}"
                                    class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
                                    oninput="document.getElementById('response-delay-label').textContent = this.value">
                             <p class="text-xs text-gray-400 mt-1">${t(
-                              "groupChat.responseIntervalInfo"
+                              "groupChat.responseIntervalInfo",
                             )}</p>
                         </div>
                     </div>
@@ -225,7 +225,7 @@ export function renderEditGroupChatModal(app) {
                     <!-- 개별 캐릭터 설정 -->
                     <div class="space-y-4">
                         <h3 class="text-lg font-semibold text-white">${t(
-                          "groupChat.individualCharacterSettings"
+                          "groupChat.individualCharacterSettings",
                         )}</h3>
                         <div class="space-y-4">
                             ${participants
@@ -257,21 +257,23 @@ export function renderEditGroupChatModal(app) {
                                             <label for="active-${
                                               participant.id
                                             }" class="text-sm text-gray-300">${t(
-                                  "groupChat.responseEnabled"
-                                )}</label>
+                                              "groupChat.responseEnabled",
+                                            )}</label>
                                         </div>
                                         
                                         <div>
                                             <label class="block text-sm text-gray-300 mb-1">
                                                 <span>${t(
-                                                  "groupChat.individualResponseProbability"
+                                                  "groupChat.individualResponseProbability",
                                                 )} (</span><span id="probability-label-${
-                                  participant.id
-                                }">${Math.round(
-                                  (groupChat.settings.participantSettings[
-                                    participant.id
-                                  ]?.responseProbability || 0.9) * 100
-                                )}</span><span>%)</span>
+                                                  participant.id
+                                                }">${Math.round(
+                                                  (groupChat.settings
+                                                    .participantSettings[
+                                                    participant.id
+                                                  ]?.responseProbability ||
+                                                    0.9) * 100,
+                                                )}</span><span>%)</span>
                                             </label>
                                             <input type="range" id="probability-${
                                               participant.id
@@ -281,7 +283,7 @@ export function renderEditGroupChatModal(app) {
                                                        .participantSettings[
                                                        participant.id
                                                      ]?.responseProbability ||
-                                                       0.9) * 100
+                                                       0.9) * 100,
                                                    )}"
                                                    class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
                                                    oninput="document.getElementById('probability-label-${
@@ -291,7 +293,7 @@ export function renderEditGroupChatModal(app) {
                                         
                                         <div>
                                             <label class="block text-sm text-gray-300 mb-1">${t(
-                                              "groupChat.characterRole"
+                                              "groupChat.characterRole",
                                             )}</label>
                                             <select id="role-${
                                               participant.id
@@ -305,8 +307,8 @@ export function renderEditGroupChatModal(app) {
                                                     ? "selected"
                                                     : ""
                                                 }>${t(
-                                  "groupChat.roleNormal"
-                                )}</option>
+                                                  "groupChat.roleNormal",
+                                                )}</option>
                                                 <option value="leader" ${
                                                   (groupChat.settings
                                                     .participantSettings[
@@ -316,8 +318,8 @@ export function renderEditGroupChatModal(app) {
                                                     ? "selected"
                                                     : ""
                                                 }>${t(
-                                  "groupChat.roleLeader"
-                                )}</option>
+                                                  "groupChat.roleLeader",
+                                                )}</option>
                                                 <option value="quiet" ${
                                                   (groupChat.settings
                                                     .participantSettings[
@@ -327,8 +329,8 @@ export function renderEditGroupChatModal(app) {
                                                     ? "selected"
                                                     : ""
                                                 }>${t(
-                                  "groupChat.roleQuiet"
-                                )}</option>
+                                                  "groupChat.roleQuiet",
+                                                )}</option>
                                                 <option value="active" ${
                                                   (groupChat.settings
                                                     .participantSettings[
@@ -338,8 +340,8 @@ export function renderEditGroupChatModal(app) {
                                                     ? "selected"
                                                     : ""
                                                 }>${t(
-                                  "groupChat.roleActive"
-                                )}</option>
+                                                  "groupChat.roleActive",
+                                                )}</option>
                                             </select>
                                         </div>
                                     </div>
@@ -399,14 +401,14 @@ function renderGroupChatItem(app, groupChat) {
             } transition-opacity duration-200 flex space-x-1 z-20">
                 <button class="edit-group-chat-btn p-2 bg-gray-700 hover:bg-gray-600 rounded text-gray-300 hover:text-white transition-colors" 
                         data-group-id="${groupChat.id}" title="${t(
-    "groupChat.edit"
-  )}">
+                          "groupChat.edit",
+                        )}">
                     <i data-lucide="edit-3" class="w-3 h-3 pointer-events-none"></i>
                 </button>
                 <button class="delete-group-chat-btn p-2 bg-gray-700 hover:bg-red-600 rounded text-gray-300 hover:text-white transition-colors" 
                         data-group-id="${groupChat.id}" title="${t(
-    "groupChat.delete"
-  )}">
+                          "groupChat.delete",
+                        )}">
                     <i data-lucide="trash-2" class="w-3 h-3 pointer-events-none"></i>
                 </button>
             </div>
@@ -453,11 +455,11 @@ export function renderGroupChatList(app) {
                 <div class="flex items-center gap-2">
                     <i data-lucide="users" class="w-4 h-4 text-gray-400"></i>
                     <h3 class="text-sm font-medium text-gray-300">${t(
-                      "groupChat.groupChat"
+                      "groupChat.groupChat",
                     )}</h3>
                 </div>
                 <button id="open-create-group-chat-modal" class="opacity-0 group-hover:opacity-100 transition-opacity p-1 bg-gray-700 hover:bg-blue-600 rounded text-gray-300 hover:text-white transition-colors" title="${t(
-                  "groupChat.newGroupChat"
+                  "groupChat.newGroupChat",
                 )}">
                     <i data-lucide="plus" class="w-3 h-3"></i>
                 </button>
@@ -481,7 +483,7 @@ export function renderCreateOpenChatModal(app) {
             <div class="bg-gray-800 rounded-2xl w-full max-w-md mx-auto my-auto flex flex-col" style="max-height: 90vh;">
                 <div class="flex items-center justify-between p-6 border-b border-gray-700 shrink-0">
                     <h3 class="text-xl font-semibold text-white">${t(
-                      "groupChat.createOpenChat"
+                      "groupChat.createOpenChat",
                     )}</h3>
                     <button id="close-create-open-chat-modal" class="p-1 hover:bg-gray-700 rounded-full">
                         <i data-lucide="x" class="w-5 h-5"></i>
@@ -490,10 +492,10 @@ export function renderCreateOpenChatModal(app) {
                 <div class="p-6 space-y-6 overflow-y-auto">
                     <div>
                         <label class="text-sm font-medium text-gray-300 mb-2 block">${t(
-                          "groupChat.openChatName"
+                          "groupChat.openChatName",
                         )}</label>
                         <input id="open-chat-name" type="text" placeholder="${t(
-                          "groupChat.openChatNamePlaceholder"
+                          "groupChat.openChatNamePlaceholder",
                         )}" class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" />
                     </div>
                     
@@ -502,20 +504,20 @@ export function renderCreateOpenChatModal(app) {
                             <i data-lucide="info" class="w-4 h-4 text-blue-400 mt-0.5 shrink-0"></i>
                             <div>
                                 <h4 class="text-sm font-medium text-blue-300 mb-2">${t(
-                                  "groupChat.openChatInfo"
+                                  "groupChat.openChatInfo",
                                 )}</h4>
                                 <ul class="text-xs text-gray-400 space-y-1">
                                     <li>• ${t(
-                                      "groupChat.openChatAutoManagement"
+                                      "groupChat.openChatAutoManagement",
                                     )}</li>
                                     <li>• ${t(
-                                      "groupChat.charactersMoodBased"
+                                      "groupChat.charactersMoodBased",
                                     )}</li>
                                     <li>• ${t(
-                                      "groupChat.naturalConversation"
+                                      "groupChat.naturalConversation",
                                     )}</li>
                                     <li>• ${t(
-                                      "groupChat.initialParticipants"
+                                      "groupChat.initialParticipants",
                                     )}</li>
                                 </ul>
                             </div>
@@ -526,7 +528,7 @@ export function renderCreateOpenChatModal(app) {
                                 <i data-lucide="users" class="w-4 h-4 text-green-400"></i>
                                 <span class="text-xs text-green-300">${t(
                                   "groupChat.availableCharacters",
-                                  { count: app.state.characters.length }
+                                  { count: app.state.characters.length },
                                 )}</span>
                             </div>
                         </div>
@@ -534,7 +536,7 @@ export function renderCreateOpenChatModal(app) {
                 </div>
                 <div class="p-6 mt-auto border-t border-gray-700 shrink-0 flex justify-end space-x-3">
                     <button id="close-create-open-chat-modal" class="flex-1 py-2.5 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-center">${t(
-                      "groupChat.cancel"
+                      "groupChat.cancel",
                     )}</button>
                     <button id="create-open-chat-btn" class="flex-1 py-2.5 px-4 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-center">
                         ${t("groupChat.create")}
@@ -581,8 +583,8 @@ function renderOpenChatItem(app, openChat) {
             } transition-opacity duration-200 flex space-x-1 z-20">
                 <button class="delete-open-chat-btn p-2 bg-gray-700 hover:bg-red-600 rounded text-gray-300 hover:text-white transition-colors" 
                         data-open-id="${openChat.id}" title="${t(
-    "groupChat.delete"
-  )}">
+                          "groupChat.delete",
+                        )}">
                     <i data-lucide="trash-2" class="w-3 h-3 pointer-events-none"></i>
                 </button>
             </div>
@@ -629,11 +631,11 @@ export function renderOpenChatList(app) {
                 <div class="flex items-center gap-2">
                     <i data-lucide="globe" class="w-4 h-4 text-gray-400"></i>
                     <h3 class="text-sm font-medium text-gray-300">${t(
-                      "groupChat.openChat"
+                      "groupChat.openChat",
                     )}</h3>
                 </div>
                 <button id="open-create-open-chat-modal" class="opacity-0 group-hover:opacity-100 transition-opacity p-1 bg-gray-700 hover:bg-green-600 rounded text-gray-300 hover:text-white transition-colors" title="${t(
-                  "groupChat.newOpenChat"
+                  "groupChat.newOpenChat",
                 )}">
                     <i data-lucide="plus" class="w-3 h-3"></i>
                 </button>

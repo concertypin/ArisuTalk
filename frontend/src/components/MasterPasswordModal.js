@@ -59,7 +59,7 @@ function renderSetupEncryptionModal(app) {
                                 type="password" 
                                 id="setup-master-password" 
                                 placeholder="${t(
-                                  "security.masterPasswordPlaceholder"
+                                  "security.masterPasswordPlaceholder",
                                 )}" 
                                 class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm"
                                 autocomplete="new-password"
@@ -76,7 +76,7 @@ function renderSetupEncryptionModal(app) {
                                 type="password" 
                                 id="setup-master-password-confirm" 
                                 placeholder="${t(
-                                  "security.confirmPasswordPlaceholder"
+                                  "security.confirmPasswordPlaceholder",
                                 )}" 
                                 class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm"
                                 autocomplete="new-password"
@@ -92,7 +92,7 @@ function renderSetupEncryptionModal(app) {
                                 type="text" 
                                 id="setup-password-hint" 
                                 placeholder="${t(
-                                  "security.passwordHintPlaceholder"
+                                  "security.passwordHintPlaceholder",
                                 )}" 
                                 class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm"
                                 maxlength="100"
@@ -147,7 +147,7 @@ export function setupMasterPasswordModalEventListeners(app) {
     setupBtn.addEventListener("click", async () => {
       const password = document.getElementById("setup-master-password").value;
       const confirmPassword = document.getElementById(
-        "setup-master-password-confirm"
+        "setup-master-password-confirm",
       ).value;
       const hint = document.getElementById("setup-password-hint").value;
       const errorDiv = document.getElementById("setup-error-message");
@@ -191,7 +191,7 @@ export function setupMasterPasswordModalEventListeners(app) {
 
       // Show generated password temporarily
       alert(
-        `생성된 마스터 비밀번호:\\n\\n${password}\\n\\n이 비밀번호를 안전한 곳에 저장하세요!`
+        `생성된 마스터 비밀번호:\\n\\n${password}\\n\\n이 비밀번호를 안전한 곳에 저장하세요!`,
       );
     });
   }

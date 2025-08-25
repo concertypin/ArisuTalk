@@ -16,7 +16,7 @@ export class CustomOpenAIClient {
     apiKey,
     model,
     baseUrl = "https://api.openai.com/v1",
-    options = {}
+    options = {},
   ) {
     this.apiKey = apiKey;
     this.model = model;
@@ -128,7 +128,7 @@ export class CustomOpenAIClient {
           t("api.customOpenAIError", {
             status: response.status,
             error: errorData,
-          })
+          }),
         );
       }
 
@@ -233,14 +233,14 @@ export class CustomOpenAIClient {
           data.choices?.[0]?.finish_reason || t("api.unknownReason");
         console.warn(
           "Custom OpenAI Profile Gen API 응답에 유효한 content가 없습니다.",
-          data
+          data,
         );
         throw new Error(t("api.profileNotGenerated", { reason }));
       }
     } catch (error) {
       console.error(
         t("api.profileGenerationError", { provider: "Custom OpenAI" }),
-        error
+        error,
       );
       return { error: error.message };
     }

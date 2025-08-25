@@ -117,7 +117,7 @@ export function render(app) {
     renderModals(app);
 
     const newSettingsContent = document.getElementById(
-      "settings-modal-content"
+      "settings-modal-content",
     );
     if (newSettingsContent) {
       newSettingsContent.scrollTop = scrollPosition;
@@ -135,7 +135,7 @@ function updateInputOptions(app) {
   if (!inputAreaContainer) return;
 
   const existingOptionsPanel = inputAreaContainer.querySelector(
-    ".absolute.bottom-full"
+    ".absolute.bottom-full",
   );
 
   if (app.state.showInputOptions) {

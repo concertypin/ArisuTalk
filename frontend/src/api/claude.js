@@ -105,7 +105,7 @@ export class ClaudeClient {
             provider: "Claude",
             status: response.status,
             error: errorData,
-          })
+          }),
         );
       }
 
@@ -155,7 +155,7 @@ export class ClaudeClient {
         {
           role: "user",
           content: `${t("api.userNameLabel")} ${userName}\n${t(
-            "api.userDescriptionLabel"
+            "api.userDescriptionLabel",
           )} ${userDescription}`,
         },
       ],
@@ -194,14 +194,14 @@ export class ClaudeClient {
         const reason = data.stop_reason || t("api.unknownReason");
         console.warn(
           "Claude Profile Gen API 응답에 유효한 content가 없습니다.",
-          data
+          data,
         );
         throw new Error(t("api.profileNotGenerated", { reason: reason }));
       }
     } catch (error) {
       console.error(
         t("api.profileGenerationError", { provider: "Claude" }),
-        error
+        error,
       );
       return { error: error.message };
     }

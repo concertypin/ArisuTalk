@@ -5,6 +5,14 @@ import {
   DEFAULT_PROVIDER,
 } from "../constants/providers.js";
 
+/**
+ * Renders the current selected API provider settings.
+ * Supports legacy compatibility and migrates existing settings to new structure.
+ * @param {Object} app - Application instance
+ * @param {Object} app.state - Application state
+ * @param {Object} app.state.settings - User settings
+ * @returns {string} Current provider settings HTML
+ */
 function renderCurrentProviderSettings(app) {
   const { settings } = app.state;
   const provider = settings.apiProvider || DEFAULT_PROVIDER;
@@ -32,6 +40,19 @@ function renderCurrentProviderSettings(app) {
   return renderProviderConfig(provider, config);
 }
 
+/**
+ * Renders the configuration UI for a specific API provider.
+ * Includes API key, model selection, and advanced settings.
+ * @param {string} provider - API provider identifier (e.g., 'gemini', 'openai', 'claude')
+ * @param {Object} config - Provider-specific configuration
+ * @param {string} config.apiKey - API key
+ * @param {string} config.model - Selected model
+ * @param {Array<string>} config.customModels - List of custom models
+ * @param {string} [config.baseUrl] - Base URL for Custom OpenAI
+ * @param {number} [config.maxTokens] - Maximum tokens
+ * @param {number} [config.temperature] - Temperature setting
+ * @returns {string} Provider configuration HTML
+ */
 export function renderProviderConfig(provider, config) {
   const models = PROVIDER_MODELS[provider] || [];
   const customModels = config.customModels || [];
@@ -42,7 +63,7 @@ export function renderProviderConfig(provider, config) {
             <div>
                 <label class="flex items-center text-sm font-medium text-gray-300 mb-2">
                     <i data-lucide="key" class="w-4 h-4 mr-2"></i>${t(
-                      "settings.apiKey"
+                      "settings.apiKey",
                     )}
                 </label>
                 <input 
@@ -78,7 +99,7 @@ export function renderProviderConfig(provider, config) {
             <div>
                 <label class="flex items-center text-sm font-medium text-gray-300 mb-2">
                     <i data-lucide="cpu" class="w-4 h-4 mr-2"></i>${t(
-                      "settings.model"
+                      "settings.model",
                     )}
                 </label>
                 
@@ -100,7 +121,7 @@ export function renderProviderConfig(provider, config) {
                             >
                                 ${model}
                             </button>
-                        `
+                        `,
                           )
                           .join("")}
                     </div>
@@ -122,7 +143,7 @@ export function renderProviderConfig(provider, config) {
                         class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm flex items-center gap-1"
                     >
                         <i data-lucide="plus" class="w-4 h-4"></i>${t(
-                          "settings.addModel"
+                          "settings.addModel",
                         )}
                     </button>
                 </div>
@@ -132,7 +153,7 @@ export function renderProviderConfig(provider, config) {
                     ? `
                     <div class="mt-3 space-y-1">
                         <label class="text-xs text-gray-400">${t(
-                          "settings.customModels"
+                          "settings.customModels",
                         )}</label>
                         ${customModels
                           .map(
@@ -157,7 +178,7 @@ export function renderProviderConfig(provider, config) {
                                     <i data-lucide="trash-2" class="w-3 h-3"></i>
                                 </button>
                             </div>
-                        `
+                        `,
                           )
                           .join("")}
                     </div>
@@ -171,7 +192,7 @@ export function renderProviderConfig(provider, config) {
                 <summary class="flex items-center justify-between cursor-pointer list-none p-4 bg-gray-700/30 rounded-xl hover:bg-gray-700/40 transition-colors">
                     <h4 class="text-sm font-medium text-gray-300 flex items-center">
                         <i data-lucide="settings" class="w-4 h-4 mr-2"></i>${t(
-                          "settings.advancedSettings"
+                          "settings.advancedSettings",
                         )}
                     </h4>
                     <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400 transition-transform duration-300 group-open:rotate-180"></i>
@@ -213,8 +234,8 @@ export function renderProviderConfig(provider, config) {
                           config.temperature !== undefined
                             ? config.temperature
                             : provider === "gemini"
-                            ? 1.25
-                            : 0.8
+                              ? 1.25
+                              : 0.8
                         }</span>
                     </label>
                     <input 
@@ -227,8 +248,8 @@ export function renderProviderConfig(provider, config) {
                           config.temperature !== undefined
                             ? config.temperature
                             : provider === "gemini"
-                            ? 1.25
-                            : 0.8
+                              ? 1.25
+                              : 0.8
                         }" 
                         class="w-full"
                     />
@@ -241,7 +262,7 @@ export function renderProviderConfig(provider, config) {
                 <!-- Profile Generation Settings -->
                 <div class="border-t border-gray-600 pt-4 mt-4">
                     <h5 class="text-xs font-medium text-gray-400 mb-3">${t(
-                      "settings.profileGenerationSettings"
+                      "settings.profileGenerationSettings",
                     )}</h5>
                     
                     <div class="space-y-3">
@@ -293,10 +314,10 @@ export function renderProviderConfig(provider, config) {
                             />
                             <div class="flex justify-between text-xs text-gray-400 mt-1">
                                 <span>${t(
-                                  "settings.consistentProfile"
+                                  "settings.consistentProfile",
                                 )} (0.5)</span>
                                 <span>${t(
-                                  "settings.diverseProfile"
+                                  "settings.diverseProfile",
                                 )} (2.0)</span>
                             </div>
                         </div>
@@ -307,6 +328,15 @@ export function renderProviderConfig(provider, config) {
     `;
 }
 
+/**
+ * Renders the settings snapshots list.
+ * Provides restore and delete buttons for each snapshot.
+ * @param {Object} app - Application instance
+ * @param {Object} app.state - Application state
+ * @param {Array<Object>} app.state.settingsSnapshots - List of settings snapshots
+ * @param {number} app.state.settingsSnapshots[].timestamp - Snapshot creation time
+ * @returns {string} Snapshots list HTML
+ */
 export function renderSnapshotList(app) {
   return `
         ${app.state.settingsSnapshots
@@ -314,34 +344,43 @@ export function renderSnapshotList(app) {
             (snapshot) => `
             <div class="flex items-center justify-between bg-gray-700/50 p-3 rounded-lg">
                 <span class="text-sm text-gray-300">${new Date(
-                  snapshot.timestamp
+                  snapshot.timestamp,
                 ).toLocaleString("ko-KR")}</span>
                 <div class="flex items-center gap-2">
                     <button data-timestamp="${
                       snapshot.timestamp
                     }" class="restore-snapshot-btn p-1.5 bg-blue-600 hover:bg-blue-700 rounded text-white transition-colors" title="${t(
-              "settings.restore"
-            )}"><i data-lucide="history" class="w-4 h-4"></i></button>
+                      "settings.restore",
+                    )}"><i data-lucide="history" class="w-4 h-4"></i></button>
                     <button data-timestamp="${
                       snapshot.timestamp
                     }" class="delete-snapshot-btn p-1.5 bg-red-600 hover:bg-red-700 rounded text-white transition-colors" title="${t(
-              "settings.delete"
-            )}"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                      "settings.delete",
+                    )}"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                 </div>
             </div>
-        `
+        `,
           )
           .join("")}
         ${
           app.state.settingsSnapshots.length === 0
             ? `<p class="text-sm text-gray-500 text-center py-2">${t(
-                "settings.noSnapshots"
+                "settings.noSnapshots",
               )}</p>`
             : ""
         }
     `;
 }
 
+/**
+ * Renders the mobile-specific settings modal.
+ * Includes AI settings, UI scale, user persona, proactive chat, appearance settings, and data management.
+ * @param {Object} app - Application instance
+ * @param {Object} app.state - Application state
+ * @param {Object} app.state.settings - User settings
+ * @param {Array<string>} app.state.openSettingsSections - List of open settings sections
+ * @returns {string} Mobile settings modal HTML
+ */
 export function renderSettingsModal(app) {
   const { settings } = app.state;
   return `
@@ -349,7 +388,7 @@ export function renderSettingsModal(app) {
             <div class="bg-gray-800 rounded-2xl w-full max-w-md mx-4 flex flex-col" style="max-height: 90vh;">
                 <div class="flex items-center justify-between p-6 border-b border-gray-700 shrink-0">
                     <h3 class="text-lg font-semibold text-white">${t(
-                      "settings.title"
+                      "settings.title",
                     )}</h3>
                     <button id="close-settings-modal" class="p-1 hover:bg-gray-700 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
                 </div>
@@ -361,7 +400,7 @@ export function renderSettingsModal(app) {
                     }>
                         <summary class="flex items-center justify-between cursor-pointer list-none py-2">
                             <span class="text-base font-medium text-gray-200">${t(
-                              "settings.aiSettings"
+                              "settings.aiSettings",
                             )}</span>
                             <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"></i>
                         </summary>
@@ -369,7 +408,7 @@ export function renderSettingsModal(app) {
                             <div class="content-inner pt-4 space-y-4">
                                 <div>
                                     <label class="flex items-center text-sm font-medium text-gray-300 mb-2"><i data-lucide="globe" class="w-4 h-4 mr-2"></i>${t(
-                                      "settings.aiProvider"
+                                      "settings.aiProvider",
                                     )}</label>
                                     <select id="settings-api-provider" class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm">
                                         <option value="gemini" ${
@@ -411,14 +450,14 @@ export function renderSettingsModal(app) {
                                     </select>
                                 </div>
                                 <div class="provider-settings-container">${renderCurrentProviderSettings(
-                                  app
+                                  app,
                                 )}</div>
                                 
                                 
                                 <div>
                                     <button id="open-prompt-modal" class="w-full mt-2 py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
                                         <i data-lucide="file-pen-line" class="w-4 h-4"></i> ${t(
-                                          "settings.editPrompt"
+                                          "settings.editPrompt",
                                         )}
                                     </button>
                                 </div>
@@ -432,7 +471,7 @@ export function renderSettingsModal(app) {
                     }>
                         <summary class="flex items-center justify-between cursor-pointer list-none py-2">
                             <span class="text-base font-medium text-gray-200">${t(
-                              "settings.scale"
+                              "settings.scale",
                             )}</span>
                             <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"></i>
                         </summary>
@@ -440,16 +479,16 @@ export function renderSettingsModal(app) {
                             <div class="content-inner pt-4 space-y-4">
                                 <div>
                                     <label class="flex items-center text-sm font-medium text-gray-300 mb-2"><i data-lucide="type" class="w-4 h-4 mr-2"></i>${t(
-                                      "settings.uiSize"
+                                      "settings.uiSize",
                                     )}</label>
                                     <input id="settings-font-scale" type="range" min="0.8" max="1.4" step="0.1" value="${
                                       settings.fontScale
                                     }" class="w-full">
                                     <div class="flex justify-between text-xs text-gray-400 mt-1"><span>${t(
-                                      "settings.small"
+                                      "settings.small",
                                     )}</span><span>${t(
-    "settings.large"
-  )}</span></div>
+                                      "settings.large",
+                                    )}</span></div>
                                 </div>
                             </div>
                         </div>
@@ -461,7 +500,7 @@ export function renderSettingsModal(app) {
                     }>
                         <summary class="flex items-center justify-between cursor-pointer list-none py-2">
                             <span class="text-base font-medium text-gray-200">${t(
-                              "settings.yourPersona"
+                              "settings.yourPersona",
                             )}</span>
                             <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"></i>
                         </summary>
@@ -469,23 +508,23 @@ export function renderSettingsModal(app) {
                             <div class="content-inner pt-4 space-y-4">
                                 <div>
                                     <label class="flex items-center text-sm font-medium text-gray-300 mb-2"><i data-lucide="user" class="w-4 h-4 mr-2"></i>${t(
-                                      "settings.yourName"
+                                      "settings.yourName",
                                     )}</label>
                                     <input id="settings-user-name" type="text" placeholder="${t(
-                                      "settings.yourNamePlaceholder"
+                                      "settings.yourNamePlaceholder",
                                     )}" value="${
-    settings.userName
-  }" class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm" />
+                                      settings.userName
+                                    }" class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm" />
                                 </div>
                                 <div>
                                     <label class="flex items-center text-sm font-medium text-gray-300 mb-2"><i data-lucide="brain-circuit" class="w-4 h-4 mr-2"></i>${t(
-                                      "settings.yourDescription"
+                                      "settings.yourDescription",
                                     )}</label>
                                     <textarea id="settings-user-desc" placeholder="${t(
-                                      "settings.yourDescriptionPlaceholder"
+                                      "settings.yourDescriptionPlaceholder",
                                     )}" class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm" rows="3">${
-    settings.userDescription
-  }</textarea>
+                                      settings.userDescription
+                                    }</textarea>
                                 </div>
                             </div>
                         </div>
@@ -497,7 +536,7 @@ export function renderSettingsModal(app) {
                     }>
                         <summary class="flex items-center justify-between cursor-pointer list-none py-2">
                             <span class="text-base font-medium text-gray-200">${t(
-                              "settings.proactiveSettings"
+                              "settings.proactiveSettings",
                             )}</span>
                             <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"></i>
                         </summary>
@@ -506,7 +545,7 @@ export function renderSettingsModal(app) {
                                 <div class="py-2">
                                     <label class="flex items-center justify-between text-sm font-medium text-gray-300 cursor-pointer">
                                         <span class="flex items-center"><i data-lucide="message-square-plus" class="w-4 h-4 mr-2"></i>${t(
-                                          "settings.proactiveChat"
+                                          "settings.proactiveChat",
                                         )}</span>
                                         <div class="relative inline-block w-10 align-middle select-none">
                                             <input type="checkbox" name="toggle" id="settings-proactive-toggle" ${
@@ -522,7 +561,7 @@ export function renderSettingsModal(app) {
                                 <div class="py-2 border-t border-gray-700 mt-2 pt-2">
                                     <label class="flex items-center justify-between text-sm font-medium text-gray-300 cursor-pointer">
                                         <span class="flex items-center"><i data-lucide="shuffle" class="w-4 h-4 mr-2"></i>${t(
-                                          "settings.randomFirstMessage"
+                                          "settings.randomFirstMessage",
                                         )}</span>
                                         <div class="relative inline-block w-10 align-middle select-none">
                                             <input type="checkbox" name="toggle" id="settings-random-first-message-toggle" ${
@@ -542,13 +581,13 @@ export function renderSettingsModal(app) {
                                         <div>
                                             <label class="flex items-center justify-between text-sm font-medium text-gray-300 mb-2">
                                                 <span>${t(
-                                                  "settings.characterCount"
+                                                  "settings.characterCount",
                                                 )}</span>
                                                 <span id="random-character-count-label" class="text-blue-400 font-semibold">${
                                                   settings.randomCharacterCount
                                                 }${t(
-    "settings.characterCountUnit"
-  )}</span>
+                                                  "settings.characterCountUnit",
+                                                )}</span>
                                             </label>
                                             <input id="settings-random-character-count" type="range" min="1" max="5" step="1" value="${
                                               settings.randomCharacterCount
@@ -556,20 +595,20 @@ export function renderSettingsModal(app) {
                                         </div>
                                         <div>
                                             <label class="text-sm font-medium text-gray-300 mb-2 block">${t(
-                                              "settings.messageFrequency"
+                                              "settings.messageFrequency",
                                             )}</label>
                                             <div class="flex items-center gap-2">
                                                 <input id="settings-random-frequency-min" type="number" min="1" class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" placeholder="${t(
-                                                  "settings.min"
+                                                  "settings.min",
                                                 )}" value="${
-    settings.randomMessageFrequencyMin
-  }">
+                                                  settings.randomMessageFrequencyMin
+                                                }">
                                                 <span class="text-gray-400">-</span>
                                                 <input id="settings-random-frequency-max" type="number" min="1" class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" placeholder="${t(
-                                                  "settings.max"
+                                                  "settings.max",
                                                 )}" value="${
-    settings.randomMessageFrequencyMax
-  }">
+                                                  settings.randomMessageFrequencyMax
+                                                }">
                                             </div>
                                         </div>
                                     </div>
@@ -584,7 +623,7 @@ export function renderSettingsModal(app) {
                     }>
                         <summary class="flex items-center justify-between cursor-pointer list-none py-2">
                             <span class="text-base font-medium text-gray-200">${t(
-                              "settings.snapshots"
+                              "settings.snapshots",
                             )}</span>
                             <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"></i>
                         </summary>
@@ -593,7 +632,7 @@ export function renderSettingsModal(app) {
                                 <div class="py-2">
                                     <label class="flex items-center justify-between text-sm font-medium text-gray-300 cursor-pointer">
                                         <span class="flex items-center"><i data-lucide="camera" class="w-4 h-4 mr-2"></i>${t(
-                                          "settings.enableSnapshots"
+                                          "settings.enableSnapshots",
                                         )}</span>
                                         <div class="relative inline-block w-10 align-middle select-none">
                                             <input type="checkbox" name="toggle" id="settings-snapshots-toggle" ${
@@ -621,7 +660,7 @@ export function renderSettingsModal(app) {
                     }>
                         <summary class="flex items-center justify-between cursor-pointer list-none py-2">
                             <span class="text-base font-medium text-gray-200">${t(
-                              "settings.language"
+                              "settings.language",
                             )}</span>
                             <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"></i>
                         </summary>
@@ -640,7 +679,7 @@ export function renderSettingsModal(app) {
                                         <div class="text-xl">🇰🇷</div>
                                         <div class="text-left flex-1">
                                             <div class="font-medium">${t(
-                                              "settings.languageKorean"
+                                              "settings.languageKorean",
                                             )}</div>
                                             <div class="text-xs opacity-75">한국어</div>
                                         </div>
@@ -662,7 +701,7 @@ export function renderSettingsModal(app) {
                                         <div class="text-xl">🇺🇸</div>
                                         <div class="text-left flex-1">
                                             <div class="font-medium">${t(
-                                              "settings.languageEnglish"
+                                              "settings.languageEnglish",
                                             )}</div>
                                             <div class="text-xs opacity-75">English</div>
                                         </div>
@@ -689,7 +728,7 @@ export function renderSettingsModal(app) {
                     }>
                         <summary class="flex items-center justify-between cursor-pointer list-none py-2">
                             <span class="text-base font-medium text-gray-200">${t(
-                              "settings.debugLogs"
+                              "settings.debugLogs",
                             )}</span>
                             <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"></i>
                         </summary>
@@ -698,7 +737,7 @@ export function renderSettingsModal(app) {
                                 <div class="py-2">
                                     <label class="flex items-center justify-between text-sm font-medium text-gray-300 cursor-pointer">
                                         <span class="flex items-center"><i data-lucide="activity" class="w-4 h-4 mr-2"></i>${t(
-                                          "settings.enableDebugLogs"
+                                          "settings.enableDebugLogs",
                                         )}</span>
                                         <div class="relative inline-block w-10 align-middle select-none">
                                             <input type="checkbox" name="toggle" id="settings-enable-debug-logs" ${
@@ -711,13 +750,13 @@ export function renderSettingsModal(app) {
                                         </div>
                                     </label>
                                     <p class="text-xs text-gray-500 mt-2">${t(
-                                      "settings.debugLogsInfo"
+                                      "settings.debugLogsInfo",
                                     )}</p>
                                 </div>
                                 <div class="py-2 border-t border-gray-700 mt-2 pt-2 space-y-2">
                                     <div class="flex items-center justify-between text-sm text-gray-400">
                                         <span>${t(
-                                          "settings.currentLogCount"
+                                          "settings.currentLogCount",
                                         )}</span>
                                         <span class="font-mono">${
                                           app.state.debugLogs
@@ -728,12 +767,12 @@ export function renderSettingsModal(app) {
                                     <div class="flex gap-2">
                                         <button id="view-debug-logs" class="flex-1 py-2 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
                                             <i data-lucide="bar-chart-3" class="w-4 h-4 pointer-events-none"></i>${t(
-                                              "settings.viewLogs"
+                                              "settings.viewLogs",
                                             )}
                                         </button>
                                         <button id="clear-debug-logs-btn" class="flex-1 py-2 px-3 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
                                             <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>${t(
-                                              "settings.clearLogs"
+                                              "settings.clearLogs",
                                             )}
                                         </button>
                                     </div>
@@ -748,7 +787,7 @@ export function renderSettingsModal(app) {
                     }>
                         <summary class="flex items-center justify-between cursor-pointer list-none py-2">
                             <span class="text-base font-medium text-gray-200">${t(
-                              "settings.dataManagement"
+                              "settings.dataManagement",
                             )}</span>
                             <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"></i>
                         </summary>
@@ -758,12 +797,12 @@ export function renderSettingsModal(app) {
                                 <div class="space-y-2">
                                     <button id="backup-data-btn" class="w-full py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
                                         <i data-lucide="download" class="w-4 h-4"></i> ${t(
-                                          "settings.backup"
+                                          "settings.backup",
                                         )}
                                     </button>
                                     <button id="restore-data-btn" class="w-full py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
                                         <i data-lucide="upload" class="w-4 h-4"></i> ${t(
-                                          "settings.restoreData"
+                                          "settings.restoreData",
                                         )}
                                     </button>
                                 </div>
@@ -778,21 +817,21 @@ export function renderSettingsModal(app) {
                                             <i data-lucide="alert-triangle" class="w-4 h-4 text-red-400 mt-0.5 shrink-0"></i>
                                             <div class="text-xs text-gray-300">
                                                 <p class="font-medium text-red-400 mb-1">${t(
-                                                  "settings.warningNote"
+                                                  "settings.warningNote",
                                                 )}</p>
                                                 <p>모든 데이터가 삭제됩니다: ${t(
-                                                  "settings.resetDataList.allCharacters"
+                                                  "settings.resetDataList.allCharacters",
                                                 )}, ${t(
-    "settings.resetDataList.allChatHistory"
-  )}, ${t("settings.resetDataList.userSettings")}, ${t(
-    "settings.resetDataList.stickerData"
-  )}, ${t("settings.resetDataList.debugLogs")}</p>
+                                                  "settings.resetDataList.allChatHistory",
+                                                )}, ${t("settings.resetDataList.userSettings")}, ${t(
+                                                  "settings.resetDataList.stickerData",
+                                                )}, ${t("settings.resetDataList.debugLogs")}</p>
                                             </div>
                                         </div>
                                     </div>
                                     <button id="reset-all-data-btn" class="w-full py-2 px-4 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
                                         <i data-lucide="trash-2" class="w-4 h-4"></i> ${t(
-                                          "settings.resetAllData"
+                                          "settings.resetAllData",
                                         )}
                                     </button>
                                 </div>
@@ -802,10 +841,10 @@ export function renderSettingsModal(app) {
                 </div>
                 <div class="p-6 mt-auto border-t border-gray-700 shrink-0 flex justify-end space-x-3">
                     <button id="close-settings-modal" class="flex-1 py-2.5 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">${t(
-                      "settings.cancel"
+                      "settings.cancel",
                     )}</button>
                     <button id="save-settings" class="flex-1 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">${t(
-                      "settings.done"
+                      "settings.done",
                     )}</button>
                 </div>
             </div>
@@ -814,8 +853,10 @@ export function renderSettingsModal(app) {
 }
 
 /**
- * Setup event listeners for Settings Modal
- * 관심사 분리 원칙에 따라 이벤트 핸들링을 별도 함수로 분리
+ * Sets up event listeners for the mobile settings modal.
+ * Handles debug log viewing, log clearing, advanced settings, and data management events.
+ * Implements separation of concerns by separating event handling into dedicated functions.
+ * @returns {void}
  */
 export function setupSettingsModalEventListeners() {
   // View debug logs button
@@ -831,7 +872,7 @@ export function setupSettingsModalEventListeners() {
 
   // Clear debug logs button in settings
   const clearDebugLogsBtnSettings = document.getElementById(
-    "clear-debug-logs-btn"
+    "clear-debug-logs-btn",
   );
   if (clearDebugLogsBtnSettings) {
     clearDebugLogsBtnSettings.addEventListener("click", () => {
@@ -847,6 +888,11 @@ export function setupSettingsModalEventListeners() {
   setupDataManagementEventListeners();
 }
 
+/**
+ * Sets up event listeners for advanced settings UI elements.
+ * Handles real-time value updates for Max Tokens, Temperature, Profile Max Tokens, and Profile Temperature sliders.
+ * @returns {void}
+ */
 export function setupAdvancedSettingsEventListeners() {
   // Max Tokens slider
   const maxTokensSlider = document.getElementById("settings-max-tokens");
@@ -868,10 +914,10 @@ export function setupAdvancedSettingsEventListeners() {
 
   // Profile Max Tokens slider
   const profileMaxTokensSlider = document.getElementById(
-    "settings-profile-max-tokens"
+    "settings-profile-max-tokens",
   );
   const profileMaxTokensValue = document.getElementById(
-    "profile-max-tokens-value"
+    "profile-max-tokens-value",
   );
   if (profileMaxTokensSlider && profileMaxTokensValue) {
     profileMaxTokensSlider.addEventListener("input", (e) => {
@@ -881,20 +927,25 @@ export function setupAdvancedSettingsEventListeners() {
 
   // Profile Temperature slider
   const profileTemperatureSlider = document.getElementById(
-    "settings-profile-temperature"
+    "settings-profile-temperature",
   );
   const profileTemperatureValue = document.getElementById(
-    "profile-temperature-value"
+    "profile-temperature-value",
   );
   if (profileTemperatureSlider && profileTemperatureValue) {
     profileTemperatureSlider.addEventListener("input", (e) => {
       profileTemperatureValue.textContent = parseFloat(e.target.value).toFixed(
-        1
+        1,
       );
     });
   }
 }
 
+/**
+ * Sets up event listeners for data management features.
+ * Handles the reset all data button click event with double confirmation process.
+ * @returns {void}
+ */
 function setupDataManagementEventListeners() {
   // Reset all data button
   const resetAllDataBtn = document.getElementById("reset-all-data-btn");
@@ -908,14 +959,14 @@ function setupDataManagementEventListeners() {
           `• ${t("settings.resetDataList.userSettings")}\n` +
           `• ${t("settings.resetDataList.stickerData")}\n` +
           `• ${t("settings.resetDataList.debugLogs")}\n\n` +
-          `${t("confirm.resetDataCannotUndo")}`
+          `${t("confirm.resetDataCannotUndo")}`,
       );
 
       if (confirmed) {
         const doubleConfirmed = confirm(
           `${t("confirm.resetDataDoubleConfirm")}\n\n` +
             `${t("confirm.resetDataBackupWarning")}\n\n` +
-            `${t("confirm.resetDataFinalConfirm")}`
+            `${t("confirm.resetDataFinalConfirm")}`,
         );
 
         if (doubleConfirmed) {

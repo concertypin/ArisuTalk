@@ -6,9 +6,9 @@ import { renderAdvancedSettingsPanel } from "./settings/panels/AdvancedSettingsP
 import { setLanguage, t } from "../i18n.js";
 
 /**
- * PC 전용 설정 UI 렌더링
- * @param {Object} app - 애플리케이션 인스턴스
- * @returns {string} PC 설정 UI HTML
+ * Renders the desktop-specific settings UI
+ * @param {Object} app - Application instance
+ * @returns {string} Desktop settings UI HTML
  */
 export function renderDesktopSettingsUI(app) {
   const activePanel = app.state.ui?.desktopSettings?.activePanel || "api";
@@ -44,8 +44,8 @@ export function renderDesktopSettingsUI(app) {
 }
 
 /**
- * 데스크톱 설정 헤더 렌더링
- * @returns {string} 헤더 HTML
+ * Renders the desktop settings header
+ * @returns {string} Header HTML
  */
 function renderDesktopSettingsHeader() {
   return `
@@ -56,10 +56,10 @@ function renderDesktopSettingsHeader() {
                 </div>
                 <div>
                     <h3 class="text-xl font-semibold text-white">${t(
-                      "settings.title"
+                      "settings.title",
                     )}</h3>
                     <p class="text-sm text-gray-400">${t(
-                      "settings.settingsDescription"
+                      "settings.settingsDescription",
                     )}</p>
                 </div>
             </div>
@@ -71,9 +71,9 @@ function renderDesktopSettingsHeader() {
 }
 
 /**
- * 네비게이션 사이드바 렌더링
- * @param {string} activePanel - 현재 활성 패널
- * @returns {string} 네비게이션 HTML
+ * Renders the navigation sidebar
+ * @param {string} activePanel - Currently active panel
+ * @returns {string} Navigation HTML
  */
 function renderDesktopSettingsNavigation(activePanel) {
   const navItems = [
@@ -113,7 +113,7 @@ function renderDesktopSettingsNavigation(activePanel) {
         <div class="w-80 border-r border-gray-700 flex flex-col">
             <div class="p-4 border-b border-gray-700">
                 <h4 class="text-sm font-medium text-gray-400 uppercase tracking-wider">${t(
-                  "settings.settingsCategories"
+                  "settings.settingsCategories",
                 )}</h4>
             </div>
             <nav class="flex-1 p-4 space-y-2">
@@ -139,7 +139,7 @@ function renderDesktopSettingsNavigation(activePanel) {
                             }</div>
                         </div>
                     </button>
-                `
+                `,
                   )
                   .join("")}
             </nav>
@@ -148,9 +148,9 @@ function renderDesktopSettingsNavigation(activePanel) {
 }
 
 /**
- * 콘텐츠 헤더 렌더링
- * @param {string} activePanel - 현재 활성 패널
- * @returns {string} 콘텐츠 헤더 HTML
+ * Renders the content header
+ * @param {string} activePanel - Currently active panel
+ * @returns {string} Content header HTML
  */
 export function renderContentHeader(activePanel) {
   const panelTitles = {
@@ -187,10 +187,10 @@ export function renderContentHeader(activePanel) {
 }
 
 /**
- * 활성 패널 콘텐츠 렌더링
- * @param {Object} app - 애플리케이션 인스턴스
- * @param {string} activePanel - 현재 활성 패널
- * @returns {string} 패널 콘텐츠 HTML
+ * Renders the active panel content
+ * @param {Object} app - Application instance
+ * @param {string} activePanel - Currently active panel
+ * @returns {string} Panel content HTML
  */
 export function renderActivePanel(app, activePanel) {
   switch (activePanel) {
@@ -243,7 +243,7 @@ export function updateDesktopSettingsContent(app, panelId) {
   // 콘텐츠 영역 업데이트
   const contentArea = document.getElementById("desktop-settings-content");
   const contentHeader = document.querySelector(
-    ".border-b.border-gray-700.px-6.py-4"
+    ".border-b.border-gray-700.px-6.py-4",
   );
 
   if (contentArea) {
@@ -253,7 +253,7 @@ export function updateDesktopSettingsContent(app, panelId) {
   if (contentHeader) {
     contentHeader.innerHTML = renderContentHeader(panelId).replace(
       /<div[^>]*>|<\/div>/g,
-      ""
+      "",
     );
   }
 
@@ -328,7 +328,7 @@ export function setupDesktopSettingsEventListeners(app) {
 
     // 랜덤 선톡 토글 처리
     const randomToggle = document.getElementById(
-      "settings-random-first-message-toggle"
+      "settings-random-first-message-toggle",
     );
     const randomOptions = document.getElementById("random-chat-options");
 
@@ -340,7 +340,7 @@ export function setupDesktopSettingsEventListeners(app) {
 
     // 스냅샷 토글 처리
     const snapshotsToggle = document.getElementById(
-      "settings-snapshots-toggle"
+      "settings-snapshots-toggle",
     );
     const snapshotsList = document.getElementById("snapshots-list");
 
@@ -363,10 +363,10 @@ export function setupDesktopSettingsEventListeners(app) {
 
     // 랜덤 캐릭터 카운트 실시간 업데이트
     const characterCountSlider = document.getElementById(
-      "settings-random-character-count"
+      "settings-random-character-count",
     );
     const characterCountLabel = document.getElementById(
-      "random-character-count-label"
+      "random-character-count-label",
     );
 
     if (characterCountSlider && characterCountLabel) {

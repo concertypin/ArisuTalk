@@ -101,7 +101,7 @@ export class GrokClient {
             provider: "Grok",
             status: response.status,
             error: errorData,
-          })
+          }),
         );
       }
 
@@ -198,14 +198,14 @@ export class GrokClient {
           data.choices?.[0]?.finish_reason || t("api.unknownReason");
         console.warn(
           "Grok Profile Gen API 응답에 유효한 content가 없습니다.",
-          data
+          data,
         );
         throw new Error(t("api.profileNotGenerated", { reason: reason }));
       }
     } catch (error) {
       console.error(
         t("api.profileGenerationError", { provider: "Grok" }),
-        error
+        error,
       );
       return { error: error.message };
     }
