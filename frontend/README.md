@@ -1,33 +1,24 @@
-## 🤝 협업 안내
+# ArisuTalk Frontend
 
-이 저장소는 공개 오픈소스이며, 협업자는 다음 권한을 가집니다.
+This is the frontend component of the ArisuTalk AI chat application.
 
-### ✅ 가능한 작업
-- 브랜치 생성 및 수정
-- Pull Request(PR) 작성 및 리뷰
-- 승인 후 PR 머지
-- 이슈 생성, 수정, 라벨 관리
-- 코드 개선, 버그 수정, 문서화 작업
+## Developer's guide
+- Use JSDoc. Migration to TypeScript is planned.
+- Make `id` element. It could be used by plugins.
+- Try to keep your code up to 300 lines.
+- Keep `async` in function declaration even if it can be omitted.
+- Avoid using HTML string in JS file.
+- Use JSDoc. Important thing.
 
-### 🚫 하면 안 되는 작업
-- `main` 브랜치에 직접 푸시
-- `main` 브랜치 삭제 또는 강제 푸시
-- 저장소 설정 변경, 보호 규칙 해제
-- 라이선스 조건에 어긋나는 코드 사용
+## How to Start Server
 
-### How TO Start Server
-
-1. 프로젝트 디렉토리로 이동합니다.
-   ```sh
-   cd arisutalk
-   ```
-2. 서버를 시작합니다.
-   ```sh
-   bash start.sh
-   ```
-
+```bash
+git clone https://github.com/concertypin/ArisuTalk
+cd ArisuTalk/frontend
+pnpm i
+pnpm dev
+```
 
 ### License
-이 프로젝트는 CC BY-NC 4.0 라이선스를 따릅니다.  
-상업적 이용을 금지하며, 출처 표기가 필요합니다.
-광고·판매·수익창출 목적 사용 불가합니다. 
+이 프로젝트는 Apache License 2.0 라이선스를 따릅니다. 포크 이전에 생성된 커밋에 대해서는 CC BY-NC 4.0 라이선스를 따릅니다.
+자세한 내용은 ../LICENSE 파일과 NOTICE 파일을 참고하세요.
