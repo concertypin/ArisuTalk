@@ -515,7 +515,7 @@ export const en = {
       "An error occurred while processing response: {{error}}",
   },
   system: {
-    languageChangeMessage: "Language changed to Korean. Refreshing the page.",
+    languageChangeMessage: "Language has been changed. The page will be refreshed.",
     storageFullTitle: "Storage Full",
     storageFullMessage: "Not enough storage space.",
     selectModeDeselect: "Deselect<br>Mode",

@@ -95,12 +95,7 @@ export function handleModalClick(e, app) {
       setLanguage(selectedLanguage);
 
       // 확인 메시지 표시 후 페이지 새로고침
-      const confirmMessage =
-        selectedLanguage === "ko"
-          ? t("system.languageChangeMessage")
-          : "Language has been changed to English. The page will be refreshed.";
-
-      alert(confirmMessage);
+      alert(t("system.languageChangeMessage"));
 
       // 짧은 지연 후 새로고침
       setTimeout(() => {
