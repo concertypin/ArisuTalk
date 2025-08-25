@@ -2,6 +2,7 @@
 import { t } from '../i18n.js';
 
 import { renderAvatar } from './Avatar.js';
+import { renderGroupChatList, renderOpenChatList, renderEditGroupChatModal } from './GroupChat.js';
 
 function renderCharacterItem(app, char) {
     const chatRooms = app.state.chatRooms[char.id] || [];
@@ -87,9 +88,10 @@ function renderChatRoomItem(app, chatRoom) {
 
     const nameElement = isEditing
         ? `<input type="text" 
+                 id="chat-room-name-input-${chatRoom.id}"
                  value="${chatRoom.name}" 
                  class="flex-grow bg-gray-600 text-white rounded px-1 py-0 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" 
-                 onblur="window.personaApp.cancelEditingChatRoom()" 
+                 onkeydown="window.personaApp.handleChatRoomNameKeydown(event, '${chatRoom.id}')"
                  onclick="event.stopPropagation()" 
                  autofocus>`
         : `<h4 class="text-sm font-medium text-white truncate">${chatRoom.name}</h4>`;
@@ -176,6 +178,8 @@ export function renderSidebar(app) {
                 </button>
             </div>
             <div class="space-y-1 px-3 pb-4">
+                ${renderGroupChatList(app)}
+                ${renderOpenChatList(app)}
                 ${filteredCharacters.map(char => renderCharacterItem(app, char)).join('')}
             </div>
         </div>

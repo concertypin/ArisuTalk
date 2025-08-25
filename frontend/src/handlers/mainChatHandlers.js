@@ -42,6 +42,12 @@ export function handleMainChatClick(e, app) {
     if (e.target.closest('#send-message-btn')) {
         app.handleSendMessageWithSticker();
     }
+
+    if (e.target.closest('#close-sticker-panel-btn')) {
+        app.toggleUserStickerPanel();
+    }
+
+    // 디버그 로그 버튼은 onclick으로 처리됨
 }
 
 export function handleMainChatInput(e, app) {

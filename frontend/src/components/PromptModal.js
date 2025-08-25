@@ -1,7 +1,6 @@
 
 import { t } from '../i18n.js';
 
-
 export function renderPromptModal(app) {
     const { prompts } = app.state.settings;
     const mainPromptSections = {
@@ -13,6 +12,8 @@ export function renderPromptModal(app) {
         [t('promptModal.language')]: { key: 'language', content: prompts.main.language },
         [t('promptModal.additionalInstructions')]: { key: 'additional_instructions', content: prompts.main.additional_instructions },
         [t('promptModal.stickerUsage')]: { key: 'sticker_usage', content: prompts.main.sticker_usage },
+        [t('promptModal.groupChatContext')]: { key: 'group_chat_context', content: prompts.main.group_chat_context },
+        [t('promptModal.openChatContext')]: { key: 'open_chat_context', content: prompts.main.open_chat_context },
     };
 
     return `
@@ -52,7 +53,7 @@ export function renderPromptModal(app) {
                         <div class="content-wrapper">
                             <div class="content-inner p-4 border-t border-gray-700">
                                 <div class="flex items-center gap-2 mb-3">
-                                    <button onclick="window.personaApp.resetPromptToDefault('profile_creation', '', '${t('promptModal.profileCreationRules')}')" class="py-1 px-3 bg-gray-600 hover:bg-gray-500 text-white rounded text-xs flex items-center gap-1">
+                                    <button onclick="window.personaApp.resetPromptToDefault('profile_creation', '', '# 캐릭터 생성 규칙 (Profile Creation Rules)')" class="py-1 px-3 bg-gray-600 hover:bg-gray-500 text-white rounded text-xs flex items-center gap-1">
                                         <i data-lucide="rotate-ccw" class="w-3 h-3"></i> ${t('promptModal.resetToDefault')}
                                     </button>
                                 </div>
@@ -60,6 +61,25 @@ export function renderPromptModal(app) {
                             </div>
                         </div>
                     </details>
+                    
+                    <h4 class="text-base font-semibold text-green-300 border-b border-green-300/20 pb-2 mt-6">${t('promptModal.characterSheetGenerationPrompt')}</h4>
+                    <details class="group bg-gray-900/50 rounded-lg">
+                        <summary class="flex items-center justify-between cursor-pointer list-none p-4">
+                            <span class="text-base font-medium text-gray-200">${t('promptModal.characterSheetGenerationRules')}</span>
+                            <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"></i>
+                        </summary>
+                        <div class="content-wrapper">
+                            <div class="content-inner p-4 border-t border-gray-700">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <button onclick="window.personaApp.resetPromptToDefault('character_sheet_generation', '', '# 캐릭터 시트 생성 규칙 (Character Sheet Generation Rules)')" class="py-1 px-3 bg-gray-600 hover:bg-gray-500 text-white rounded text-xs flex items-center gap-1">
+                                        <i data-lucide="rotate-ccw" class="w-3 h-3"></i> ${t('promptModal.resetToDefault')}
+                                    </button>
+                                </div>
+                                <textarea id="prompt-character_sheet_generation" class="w-full h-64 p-3 bg-gray-700 text-white rounded-lg text-sm font-mono">${prompts.character_sheet_generation}</textarea>
+                            </div>
+                        </div>
+                    </details>
+
                 </div>
                 <div class="p-6 mt-auto border-t border-gray-700 shrink-0 flex flex-wrap justify-end gap-3">
                     <button id="backup-prompts-btn" class="py-2 px-4 bg-gray-600 hover:bg-gray-500 text-white rounded-lg transition-colors text-sm flex items-center gap-2">

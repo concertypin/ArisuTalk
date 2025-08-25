@@ -1,9 +1,11 @@
 import { renderSidebar } from './components/Sidebar.js';
-import { renderMainChat } from './components/MainChat.js';
-import { renderSettingsModal, renderSnapshotList } from './components/SettingsModal.js';
+import { renderMainChat, setupMainChatEventListeners } from './components/MainChat.js';
+import { renderSettingsModal, renderSnapshotList, setupSettingsModalEventListeners } from './components/SettingsModal.js';
 import { renderCharacterModal } from './components/CharacterModal.js';
 import { renderPromptModal } from './components/PromptModal.js';
 import { renderConfirmationModal } from './components/ConfirmationModal.js';
+import { renderCreateGroupChatModal, renderCreateOpenChatModal, renderEditGroupChatModal } from './components/GroupChat.js';
+import { renderDebugLogsModal, setupDebugLogsModalEventListeners } from './components/DebugLogsModal.js';
 
 function renderModals(app) {
     const container = document.getElementById('modal-container');
@@ -11,8 +13,20 @@ function renderModals(app) {
     if (app.state.showSettingsModal) html += renderSettingsModal(app);
     if (app.state.showCharacterModal) html += renderCharacterModal(app);
     if (app.state.showPromptModal) html += renderPromptModal(app);
+    if (app.state.showCreateGroupChatModal) html += renderCreateGroupChatModal(app);
+    if (app.state.showCreateOpenChatModal) html += renderCreateOpenChatModal(app);
+    if (app.state.showEditGroupChatModal) html += renderEditGroupChatModal(app);
+    if (app.state.showDebugLogsModal) html += renderDebugLogsModal(app.state);
     if (app.state.modal.isOpen) html += renderConfirmationModal(app);
     container.innerHTML = html;
+    
+    // Setup event listeners for modals after DOM update
+    if (app.state.showDebugLogsModal) {
+        setupDebugLogsModalEventListeners();
+    }
+    if (app.state.showSettingsModal) {
+        setupSettingsModalEventListeners();
+    }
 }
 
 function updateSnapshotList(app) {
@@ -38,6 +52,7 @@ export function render(app) {
     // Conditionally render the main chat to minimize DOM updates
     if (isFirstRender || shouldUpdateMainChat(oldState, newState)) {
         renderMainChat(app);
+        setupMainChatEventListeners();
     }
 
     // Conditionally render modals to minimize DOM updates
@@ -71,7 +86,8 @@ function shouldUpdateSidebar(oldState, newState) {
         JSON.stringify(oldState.unreadCounts) !== JSON.stringify(newState.unreadCounts) ||
         JSON.stringify(oldState.messages) !== JSON.stringify(newState.messages) ||
         JSON.stringify(oldState.chatRooms) !== JSON.stringify(newState.chatRooms) ||
-        oldState.settings.language !== newState.settings.language
+        JSON.stringify(oldState.groupChats) !== JSON.stringify(newState.groupChats) ||
+        JSON.stringify(oldState.openChats) !== JSON.stringify(newState.openChats)
     );
 }
 
@@ -87,8 +103,7 @@ function shouldUpdateMainChat(oldState, newState) {
         oldState.imageToSend !== newState.imageToSend ||
         oldState.showUserStickerPanel !== newState.showUserStickerPanel ||
         JSON.stringify(oldState.userStickers) !== JSON.stringify(newState.userStickers) ||
-        JSON.stringify([...oldState.expandedStickers]) !== JSON.stringify([...newState.expandedStickers]) ||
-        oldState.settings.language !== newState.settings.language
+        JSON.stringify([...oldState.expandedStickers]) !== JSON.stringify([...newState.expandedStickers])
     );
 }
 
@@ -97,19 +112,33 @@ function shouldUpdateModals(oldState, newState) {
 
     // If the settings modal is open, we don't re-render it just for settings changes.
     // This prevents the modal from resetting while the user is typing in input fields.
+    if (newState.showSettingsModal && oldState.showSettingsModal) {
+        // We need to check for specific state changes that require a re-render
+        // even when the settings modal is open.
+        return (
+            JSON.stringify(oldState.settingsSnapshots) !== JSON.stringify(newState.settingsSnapshots) ||
+            oldState.settings.model !== newState.settings.model ||
+            oldState.showPromptModal !== newState.showPromptModal ||
+            JSON.stringify(oldState.modal) !== JSON.stringify(newState.modal) ||
+            JSON.stringify(oldState.openSettingsSections) !== JSON.stringify(newState.openSettingsSections) ||
+            oldState.enableDebugLogs !== newState.enableDebugLogs ||
+            JSON.stringify(oldState.debugLogs) !== JSON.stringify(newState.debugLogs)
+        );
+    }
+
     return (
         oldState.showSettingsModal !== newState.showSettingsModal ||
         oldState.showCharacterModal !== newState.showCharacterModal ||
         oldState.showPromptModal !== newState.showPromptModal ||
+        oldState.showCreateGroupChatModal !== newState.showCreateGroupChatModal ||
+        oldState.showCreateOpenChatModal !== newState.showCreateOpenChatModal ||
+        oldState.showEditGroupChatModal !== newState.showEditGroupChatModal ||
+        oldState.showDebugLogsModal !== newState.showDebugLogsModal ||
         JSON.stringify(oldState.modal) !== JSON.stringify(newState.modal) ||
         (newState.showCharacterModal && JSON.stringify(oldState.editingCharacter) !== JSON.stringify(newState.editingCharacter)) ||
         (newState.showPromptModal && JSON.stringify(oldState.settings.prompts) !== JSON.stringify(newState.settings.prompts)) ||
-        // Add checks for changes within settings modal when it's open
-        (newState.showSettingsModal && (
-            JSON.stringify(oldState.settingsSnapshots) !== JSON.stringify(newState.settingsSnapshots) ||
-            oldState.settings.model !== newState.settings.model ||
-            oldState.settings.language !== newState.settings.language ||
-            JSON.stringify(oldState.openSettingsSections) !== JSON.stringify(newState.openSettingsSections)
-        ))
+        (newState.showCreateGroupChatModal && JSON.stringify(oldState.characters) !== JSON.stringify(newState.characters)) ||
+        (newState.showEditGroupChatModal && JSON.stringify(oldState.editingGroupChat) !== JSON.stringify(newState.editingGroupChat)) ||
+        (newState.showDebugLogsModal && JSON.stringify(oldState.debugLogs) !== JSON.stringify(newState.debugLogs))
     );
 }

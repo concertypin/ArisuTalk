@@ -11,6 +11,54 @@ export function handleSidebarClick(e, app) {
     if (e.target.closest('#open-new-character-modal')) {
         app.openNewCharacterModal();
     }
+    if (e.target.closest('#open-create-group-chat-modal')) {
+        app.setState({ showCreateGroupChatModal: true });
+    }
+    if (e.target.closest('#open-create-open-chat-modal')) {
+        app.setState({ showCreateOpenChatModal: true });
+    }
+
+    // Handle group chat item click
+    const groupChatItem = e.target.closest('.group-chat-item');
+    if (groupChatItem) {
+        const chatId = groupChatItem.dataset.chatId;
+        if (chatId) {
+            app.setState({ selectedChatId: chatId });
+        }
+    }
+
+    // Handle open chat item click
+    const openChatItem = e.target.closest('.open-chat-item');
+    if (openChatItem) {
+        const chatId = openChatItem.dataset.chatId;
+        if (chatId) {
+            app.setState({ selectedChatId: chatId });
+        }
+    }
+
+    // Handle edit group chat button click
+    const editGroupChatBtn = e.target.closest('.edit-group-chat-btn');
+    if (editGroupChatBtn) {
+        e.stopPropagation();
+        const groupId = editGroupChatBtn.dataset.groupId;
+        app.editGroupChat(groupId);
+    }
+
+    // Handle delete group chat button click
+    const deleteGroupChatBtn = e.target.closest('.delete-group-chat-btn');
+    if (deleteGroupChatBtn) {
+        e.stopPropagation();
+        const groupId = deleteGroupChatBtn.dataset.groupId;
+        app.handleDeleteGroupChat(groupId);
+    }
+
+    // Handle delete open chat button click
+    const deleteOpenChatBtn = e.target.closest('.delete-open-chat-btn');
+    if (deleteOpenChatBtn) {
+        e.stopPropagation();
+        const openId = deleteOpenChatBtn.dataset.openId;
+        app.handleDeleteOpenChat(openId);
+    }
 
     // Handle edit character button click
     const editBtn = e.target.closest('.edit-character-btn');

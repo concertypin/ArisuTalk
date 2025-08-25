@@ -38,6 +38,175 @@ export const ko = {
         addMemory: '메모리 추가',
         responseSpeed: '메시지 응답성',
     },
+    characterModalSlider: {
+        responseTime: {
+            description: '응답 속도',
+            low: '빠름',
+            high: '느림'
+        },
+        thinkingTime: {
+            description: '사고 시간',
+            low: '짧음',
+            high: '김'
+        },
+        reactivity: {
+            description: '반응성',
+            low: '낮음',
+            high: '높음'
+        },
+        tone: {
+            description: '어조',
+            low: '차분함',
+            high: '활발함'
+        }
+    },
+    modal: {
+        promptSaveComplete: {
+            title: '완료',
+            message: '프롬프트가 저장되었습니다.'
+        },
+        characterNameDescriptionNotFulfilled: {
+            title: '입력 오류',
+            message: '이름과 설명을 모두 입력해주세요.'
+        },
+        characterDeleteConfirm: {
+            title: '연락처 삭제',
+            message: '정말로 이 연락처를 삭제하시겠습니까?'
+        },
+        imageFileSizeExceeded: {
+            title: '파일 크기 초과',
+            message: '이미지 파일 크기가 너무 큽니다. (최대 30MB)'
+        },
+        imageProcessingError: {
+            title: '이미지 처리 오류',
+            message: '이미지를 처리하는 중 오류가 발생했습니다.'
+        },
+        apiKeyRequired: {
+            title: 'API 키 필요',
+            message: 'AI 응답을 받으려면 API 키를 설정해주세요.'
+        },
+        messageGroupDeleteConfirm: {
+            title: '메시지 삭제',
+            message: '이 메시지를 삭제하시겠습니까?'
+        },
+        messageEmptyError: {
+            title: '메시지 오류',
+            message: '메시지가 비어있습니다.'
+        },
+        characterCardNoNameError: {
+            title: '이름 오류',
+            message: '연락처 이름이 없어서 저장할 수 없습니다.'
+        },
+        characterCardNoAvatarImageError: {
+            title: '오류',
+            message: '아바타 이미지가 없어서 연락처를 저장할 수 없습니다.'
+        },
+        avatarImageLoadError: {
+            title: '이미지 로드 오류',
+            message: '아바타 이미지를 로드할 수 없습니다.'
+        },
+        avatarLoadSuccess: {
+            title: '성공',
+            message: '아바타가 성공적으로 로드되었습니다.'
+        },
+        characterCardNoAvatarImageInfo: {
+            title: '정보',
+            message: '아바타 이미지가 없습니다.'
+        },
+        backupComplete: {
+            title: '백업 완료',
+            message: '데이터가 성공적으로 백업되었습니다.'
+        },
+        backupFailed: {
+            title: '백업 실패',
+            message: '데이터 백업에 실패했습니다.'
+        },
+        restoreConfirm: {
+            title: '데이터 복원',
+            message: '기존 데이터를 모두 덮어쓰시겠습니까?'
+        },
+        restoreComplete: {
+            title: '복원 완료',
+            message: '데이터가 성공적으로 복원되었습니다.'
+        },
+        restoreFailed: {
+            title: '복원 실패',
+            message: '데이터 복원에 실패했습니다.'
+        },
+        promptBackupComplete: {
+            title: '프롬프트 백업 완료',
+            message: '프롬프트가 성공적으로 백업되었습니다.'
+        },
+        promptBackupFailed: {
+            title: '프롬프트 백업 실패',
+            message: '프롬프트 백업에 실패했습니다.'
+        },
+        promptRestoreConfirm: {
+            title: '프롬프트 복원',
+            message: '기존 프롬프트를 덮어쓰시겠습니까?'
+        },
+        promptRestoreFailed: {
+            title: '프롬프트 복원 실패',
+            message: '프롬프트 복원에 실패했습니다.'
+        }
+    },
+    chat: {
+        messageGenerationError: 'AI 응답 생성 중 오류가 발생했습니다.'
+    },
+    api: {
+        imageMessage: '이미지를 보냈습니다.',
+        imageUnavailable: '(사용자가 이미지를 보냈지만 더 이상 사용할 수 없습니다)',
+        unknownSticker: 'Unknown Sticker',
+        stickerMessage: '[사용자가 "{{stickerName}}" 스티커를 보냄]',
+        proactiveStart: '(SYSTEM: You are starting this conversation. Please begin.)',
+        customOpenAIError: 'Custom OpenAI API 오류: {{status}} - {{error}}',
+        invalidResponse: 'Custom OpenAI API로부터 유효한 응답을 받지 못했습니다.',
+        requestFailed: 'API 요청 실패: {{status}}',
+        profileParseError: '프로필 응답을 JSON으로 파싱할 수 없습니다.',
+        unknownReason: '알 수 없는 이유',
+        profileNotGenerated: '프로필이 생성되지 않았습니다. (이유: {{reason}})'
+    },
+    ui: {
+        // Common UI messages
+        discardChanges: '변경사항 취소',
+        unsavedChangesWarning: '저장되지 않은 변경사항이 있습니다. 정말로 취소하시겠습니까?',
+        appStarted: 'ArisuTalk 애플리케이션이 시작되었습니다.',
+        dataLoadFailed: '데이터 로드 실패:',
+        
+        // Chat related
+        defaultChatName: '기본 채팅',
+        newChatName: '새 채팅',
+        deleteChatRoom: '채팅방 삭제',
+        deleteChatRoomConfirm: '이 채팅방과 모든 메시지가 삭제됩니다. 계속하시겠습니까?',
+        startConversation: '대화를 시작해보세요',
+        imageSent: '이미지를 보냈습니다',
+        stickerSent: '스티커를 보냈습니다',
+        
+        // Sticker related  
+        enterStickerName: '스티커 이름을 입력하세요:',
+        fileProcessingError: '파일 처리 오류:',
+        fileProcessingAlert: '파일을 처리하는 중 오류가 발생했습니다.',
+        fileSizeExceeded: '파일 크기 초과',
+        unsupportedFormat: '지원하지 않는 형식',
+        stickerProcessingError: '스티커 처리 오류',
+        storageFull: '전체 저장 공간 부족',
+        storageFullMessage: '저장 공간이 부족합니다.',
+        
+        // Group chat related
+        groupChatNamePlaceholder: '단톡방 이름을 입력하세요',
+        openChatNamePlaceholder: '오픈톡방 이름을 입력하세요',
+        newGroupChat: '새 단톡방',
+        newOpenChat: '새 오픈톡방',
+        edit: '수정',
+        delete: '삭제',
+        
+        // Settings related
+        apiKeyPlaceholder: 'API 키를 입력하세요',
+        customModelPlaceholder: '커스텀 모델명 입력',
+        
+        // Other UI
+        generate: '생성',
+    },
     confirm: {
         cancel: '취소',
         confirm: '확인',
@@ -69,11 +238,15 @@ export const ko = {
         language: '## 언어 (Language)',
         additionalInstructions: '## 추가 지시사항 (Additional Instructions)',
         stickerUsage: '## 스티커 사용법 (Sticker Usage)',
+        groupChatContext: '## 단톡방 컨텍스트 (Group Chat Context)',
+        openChatContext: '## 오픈톡방 컨텍스트 (Open Chat Context)',
         resetToDefault: '기본값으로 되돌리기',
         randomFirstMessagePrompt: '랜덤 선톡 캐릭터 생성 프롬프트',
         profileCreationRules: '# 캐릭터 생성 규칙 (Profile Creation Rules)',
+        characterSheetGenerationRules: '# 캐릭터 시트 생성 규칙 (Character Sheet Generation Rules)',
         backupPrompts: '프롬프트 백업',
         restorePrompts: '프롬프트 불러오기',
+        characterSheetGenerationPrompt: 'AI 캐릭터 시트 생성 프롬프트',
     },
     settings: {
         restore: '복원',
@@ -81,6 +254,7 @@ export const ko = {
         noSnapshots: '저장된 스냅샷이 없습니다.',
         title: '설정',
         aiSettings: 'AI 설정',
+        advancedSettings: '고급 설정',
         apiKey: 'API 키',
         apiKeyPlaceholder: 'Gemini API 키를 입력하세요',
         aiModel: 'AI 모델',

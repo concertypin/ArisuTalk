@@ -69,11 +69,15 @@ export const en = {
         language: '## Language',
         additionalInstructions: '## Additional Instructions',
         stickerUsage: '## Sticker Usage',
+        groupChatContext: '## Group Chat Context',
+        openChatContext: '## Open Chat Context',
         resetToDefault: 'Reset to Default',
         randomFirstMessagePrompt: 'Random First Message Character Generation Prompt',
         profileCreationRules: '# Profile Creation Rules',
+        characterSheetGenerationRules: '# Character Sheet Generation Rules',
         backupPrompts: 'Backup Prompts',
         restorePrompts: 'Restore Prompts',
+        characterSheetGenerationPrompt: 'AI Character Sheet Generation Prompt',
     },
     settings: {
         restore: 'Restore',
@@ -81,6 +85,7 @@ export const en = {
         noSnapshots: 'No saved snapshots.',
         title: 'Settings',
         aiSettings: 'AI Settings',
+        advancedSettings: 'Advanced Settings',
         apiKey: 'API Key',
         apiKeyPlaceholder: 'Enter your Gemini API key',
         aiModel: 'AI Model',
@@ -288,6 +293,47 @@ export const en = {
             message: "Failed to generate and initiate single random character:"
         }
     },
+    ui: {
+        // Common UI messages
+        discardChanges: 'Discard Changes',
+        unsavedChangesWarning: 'There are unsaved changes. Are you sure you want to cancel?',
+        appStarted: 'ArisuTalk application has started.',
+        dataLoadFailed: 'Data load failed:',
+        
+        // Chat related
+        defaultChatName: 'Default Chat',
+        newChatName: 'New Chat',
+        deleteChatRoom: 'Delete Chat Room',
+        deleteChatRoomConfirm: 'This chat room and all messages will be deleted. Continue?',
+        startConversation: 'Start a conversation',
+        imageSent: 'Image sent',
+        stickerSent: 'Sticker sent',
+        
+        // Sticker related  
+        enterStickerName: 'Enter sticker name:',
+        fileProcessingError: 'File processing error:',
+        fileProcessingAlert: 'An error occurred while processing the file.',
+        fileSizeExceeded: 'File Size Exceeded',
+        unsupportedFormat: 'Unsupported Format',
+        stickerProcessingError: 'Sticker Processing Error',
+        storageFull: 'Storage Full',
+        storageFullMessage: 'Not enough storage space.',
+        
+        // Group chat related
+        groupChatNamePlaceholder: 'Enter group chat name',
+        openChatNamePlaceholder: 'Enter open chat name',
+        newGroupChat: 'New Group Chat',
+        newOpenChat: 'New Open Chat',
+        edit: 'Edit',
+        delete: 'Delete',
+        
+        // Settings related
+        apiKeyPlaceholder: 'Enter API key',
+        customModelPlaceholder: 'Enter custom model name',
+        
+        // Other UI
+        generate: 'Generate',
+    },
     chat: {
         defaultChatName: "Default Chat",
         newChat: "New Chat",
@@ -295,6 +341,19 @@ export const en = {
         startNewChat: "Start a new chat.",
         imageSent: "Image sent.",
         messageGenerationError: "Failed to generate message.",
+    },
+    api: {
+        imageMessage: 'Image sent.',
+        imageUnavailable: '(User sent an image but it is no longer available)',
+        unknownSticker: 'Unknown Sticker',
+        stickerMessage: '[User sent "{{stickerName}}" sticker]',
+        proactiveStart: '(SYSTEM: You are starting this conversation. Please begin.)',
+        customOpenAIError: 'Custom OpenAI API error: {{status}} - {{error}}',
+        invalidResponse: 'Did not receive valid response from Custom OpenAI API.',
+        requestFailed: 'API request failed: {{status}}',
+        profileParseError: 'Cannot parse profile response as JSON.',
+        unknownReason: 'unknown reason',
+        profileNotGenerated: 'Profile was not generated. (reason: {{reason}})'
     },
     characterModalSlider: {
         responseTime: {

@@ -1,12 +1,12 @@
-import { t, languages, getLanguage } from '../i18n.js';
-
-import { formatBytes, getLocalStorageUsage } from "../storage.js";
+import { t } from "../i18n.js";
+import { formatBytes } from "../storage.js";
+import { renderAvatar } from "./Avatar.js";
 
 function renderSlider(id, description, left, right, value) {
   return `
         <div>
             <p class="text-sm font-medium text-gray-300 mb-2">${description}</p>
-            <input id="character-${id}" type="range" min="1" max="10" value="${value}" class="w-full" />
+            <input id="character-${id}" type="range" min="1" max="10" value="${value}" class="w-full">
             <div class="flex justify-between text-xs text-gray-400 mt-1">
                 <span>${left}</span>
                 <span>${right}</span>
@@ -26,7 +26,7 @@ function renderMemoryInput(memoryText = "") {
     `;
 }
 
-function renderStickerGrid(app, stickers) {
+export function renderStickerGrid(app, stickers) {
   if (!stickers || stickers.length === 0) {
     return `<div class="col-span-4 text-center text-gray-400 text-sm py-4">${t('characterModal.noStickers')}</div>`;
   }
@@ -113,8 +113,6 @@ export function renderCharacterModal(app) {
     proactiveEnabled: editingCharacter?.proactiveEnabled !== false,
   };
 
-  const currentLanguage = languages[getLanguage()];
-
   return `
         <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div class="bg-gray-800 rounded-2xl w-full max-w-md mx-auto my-auto flex flex-col" style="max-height: 90vh;">
@@ -122,7 +120,7 @@ export function renderCharacterModal(app) {
                     <h3 class="text-xl font-semibold text-white">${
                       isNew ? t('characterModal.addContact') : t('characterModal.editContact')
                     }</h3>
-                    <button id="close-character-modal" class="close-character-modal-btn p-1 hover:bg-gray-700 rounded-full" data-action="close-character-modal"><i data-lucide="x" class="w-5 h-5"></i></button>
+                    <button id="close-character-modal" data-action="close-character-modal" class="p-1 hover:bg-gray-700 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
                 </div>
                 <div class="p-6 space-y-6 overflow-y-auto">
                     <div class="flex items-center space-x-4">
@@ -154,7 +152,12 @@ export function renderCharacterModal(app) {
                         }" class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" />
                     </div>
                     <div>
-                        <label class="text-sm font-medium text-gray-300 mb-2 block">${t('characterModal.promptLabel')}</label>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="text-sm font-medium text-gray-300">${t('characterModal.promptLabel')}</label>
+                            <button id="ai-generate-character-btn" class="py-1 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-xs flex items-center gap-1">
+                                <i data-lucide="sparkles" class="w-3 h-3"></i> AI ${t('ui.generate')}
+                            </button>
+                        </div>
                         <textarea id="character-prompt" placeholder="${t('characterModal.promptPlaceholder')}" class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" rows="6">${
                           char.prompt
                         }</textarea>
@@ -210,6 +213,8 @@ export function renderCharacterModal(app) {
                                                     <button id="toggle-sticker-selection" class="py-2 px-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm flex flex-col items-center gap-1" data-selection-mode="${
                                                       app.state
                                                         .stickerSelectionMode
+                                                        ? "true"
+                                                        : "false"
                                                     }">
                                                         <i data-lucide="check-square" class="w-4 h-4"></i> 
                                                         <span class="toggle-text text-xs">${
@@ -241,12 +246,14 @@ export function renderCharacterModal(app) {
                                             </div>
                                             <div class="flex items-center justify-between text-xs text-gray-400 mb-3">
                                                 <span>${t('characterModal.stickerSupport')}</span>
-                                                <span>${t('characterModal.stickerCount', { count: (editingCharacter?.stickers || []).length })}</span>
+                                                <span>${t('characterModal.stickerCount', { count: 
+                                                  (
+                                                    editingCharacter?.stickers ||
+                                                    []
+                                                  ).length })}</span>
                                             </div>
                                             <div class="flex items-center justify-between text-xs text-gray-500 mb-3">
-                                                <span>${t('characterModal.totalStorage')}${formatBytes(
-                                                  getLocalStorageUsage()
-                                                )}</span>
+                                                <span id="storage-usage-info">${t('characterModal.totalStorage')}계산 중...</span>
                                                 <span>${t('characterModal.totalSize')}${formatBytes(
                                                   app.calculateCharacterStickerSize(
                                                     editingCharacter || {}
@@ -272,9 +279,10 @@ export function renderCharacterModal(app) {
                                         <div class="content-inner pt-4 space-y-2">
                                             <div id="memory-container" class="space-y-2">
                                                 ${char.memories
-                                                  .map((mem) =>
+                                                  .map((mem, index) =>
                                                     renderMemoryInput(
-                                                      mem
+                                                      mem,
+                                                      index
                                                     )
                                                   )
                                                   .join("")}
@@ -294,42 +302,30 @@ export function renderCharacterModal(app) {
                                         <div class="content-inner pt-4 space-y-4">
                                             ${renderSlider(
                                               "responseTime",
-                                              currentLanguage.characterModalSlider
-                                                .responseTime.description,
-                                              currentLanguage.characterModalSlider
-                                                .responseTime.low,
-                                              currentLanguage.characterModalSlider
-                                                .responseTime.high,
+                                              t('characterModalSlider.responseTime.description'),
+                                              t('characterModalSlider.responseTime.low'),
+                                              t('characterModalSlider.responseTime.high'),
                                               char.responseTime
                                             )}
                                             ${renderSlider(
                                               "thinkingTime",
-                                              currentLanguage.characterModalSlider
-                                                .thinkingTime.description,
-                                              currentLanguage.characterModalSlider
-                                                .thinkingTime.low,
-                                              currentLanguage.characterModalSlider
-                                                .thinkingTime.high,
+                                              t('characterModalSlider.thinkingTime.description'),
+                                              t('characterModalSlider.thinkingTime.low'),
+                                              t('characterModalSlider.thinkingTime.high'),
                                               char.thinkingTime
                                             )}
                                             ${renderSlider(
                                               "reactivity",
-                                              currentLanguage.characterModalSlider
-                                                .reactivity.description,
-                                              currentLanguage.characterModalSlider
-                                                .reactivity.low,
-                                              currentLanguage.characterModalSlider
-                                                .reactivity.high,
+                                              t('characterModalSlider.reactivity.description'),
+                                              t('characterModalSlider.reactivity.low'),
+                                              t('characterModalSlider.reactivity.high'),
                                               char.reactivity
                                             )}
                                             ${renderSlider(
                                               "tone",
-                                              currentLanguage.characterModalSlider.tone
-                                                .description,
-                                              currentLanguage.characterModalSlider.tone
-                                                .low,
-                                              currentLanguage.characterModalSlider.tone
-                                                .high,
+                                              t('characterModalSlider.tone.description'),
+                                              t('characterModalSlider.tone.low'),
+                                              t('characterModalSlider.tone.high'),
                                               char.tone
                                             )}
                                         </div>
@@ -340,7 +336,7 @@ export function renderCharacterModal(app) {
                     </details>
                 </div>
                 <div class="p-6 mt-auto border-t border-gray-700 shrink-0 flex justify-end space-x-3">
-                    <button id="cancel-character-modal-btn" class="close-character-modal-btn flex-1 py-2.5 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors" data-action="close-character-modal">${t('common.cancel')}</button>
+                    <button id="close-character-modal" data-action="close-character-modal" class="flex-1 py-2.5 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">${t('common.cancel')}</button>
                     <button id="save-character" class="flex-1 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">${t('common.save')}</button>
                 </div>
             </div>

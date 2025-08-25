@@ -52,9 +52,21 @@ export function handleModalClick(e, app) {
     }
 
     // Confirmation Modal
-    if (e.target.closest('#modal-cancel')) app.closeModal();
+    if (e.target.closest('#modal-cancel')) {
+        e.preventDefault();
+        e.stopPropagation();
+        app.closeModal();
+        return;
+    }
     if (e.target.closest('#modal-confirm')) {
-        if (app.state.modal.onConfirm) app.state.modal.onConfirm();
+        e.preventDefault();
+        e.stopPropagation();
+        if (app.state.modal.onConfirm) {
+            const onConfirm = app.state.modal.onConfirm;
+            app.closeModal(); // 먼저 모달을 닫고
+            setTimeout(() => onConfirm(), 0); // 비동기로 확인 액션 실행
+        }
+        return;
     }
 
     // User Sticker Panel
@@ -78,6 +90,28 @@ export function handleModalClick(e, app) {
         const timestamp = Number(deleteSnapshotBtn.dataset.timestamp);
         app.handleDeleteSnapshot(timestamp);
     }
+
+    // API Diversification Handlers
+    const modelSelectBtn = e.target.closest('.model-select-btn');
+    if (modelSelectBtn) {
+        app.handleModelSelect(modelSelectBtn.dataset.model);
+    }
+
+    const addCustomModelBtn = e.target.closest('#add-custom-model-btn');
+    if (addCustomModelBtn) {
+        app.handleAddCustomModel();
+    }
+
+    const removeCustomModelBtn = e.target.closest('.remove-custom-model-btn');
+    if (removeCustomModelBtn) {
+        app.handleRemoveCustomModel(parseInt(removeCustomModelBtn.dataset.index));
+    }
+
+    // AI Character Generation Handler
+    if (e.target.closest('#ai-generate-character-btn')) {
+        app.handleAIGenerateCharacter();
+    }
+
 }
 
 // Debounced function to update settings with a 500ms delay.
@@ -88,7 +122,49 @@ const debouncedUpdateSettings = debounce((app, newSetting) => {
 
 const settingsUpdaters = {
     'settings-font-scale': (app, value) => ({ fontScale: parseFloat(value) }),
-    'settings-api-key': (app, value) => ({ apiKey: value }),
+    'settings-api-key': (app, value) => {
+        // Legacy compatibility - also update current provider's API key
+        const apiProvider = app.state.settings.apiProvider || 'gemini';
+        const apiConfigs = { ...app.state.settings.apiConfigs };
+        if (!apiConfigs[apiProvider]) apiConfigs[apiProvider] = {};
+        apiConfigs[apiProvider].apiKey = value;
+        return { apiKey: value, apiConfigs };
+    },
+    'settings-base-url': (app, value) => {
+        const apiProvider = app.state.settings.apiProvider || 'gemini';
+        const apiConfigs = { ...app.state.settings.apiConfigs };
+        if (!apiConfigs[apiProvider]) apiConfigs[apiProvider] = {};
+        apiConfigs[apiProvider].baseUrl = value;
+        return { apiConfigs };
+    },
+    'settings-max-tokens': (app, value) => {
+        const apiProvider = app.state.settings.apiProvider || 'gemini';
+        const apiConfigs = { ...app.state.settings.apiConfigs };
+        if (!apiConfigs[apiProvider]) apiConfigs[apiProvider] = {};
+        apiConfigs[apiProvider].maxTokens = parseInt(value, 10);
+        return { apiConfigs };
+    },
+    'settings-temperature': (app, value) => {
+        const apiProvider = app.state.settings.apiProvider || 'gemini';
+        const apiConfigs = { ...app.state.settings.apiConfigs };
+        if (!apiConfigs[apiProvider]) apiConfigs[apiProvider] = {};
+        apiConfigs[apiProvider].temperature = parseFloat(value);
+        return { apiConfigs };
+    },
+    'settings-profile-max-tokens': (app, value) => {
+        const apiProvider = app.state.settings.apiProvider || 'gemini';
+        const apiConfigs = { ...app.state.settings.apiConfigs };
+        if (!apiConfigs[apiProvider]) apiConfigs[apiProvider] = {};
+        apiConfigs[apiProvider].profileMaxTokens = parseInt(value, 10);
+        return { apiConfigs };
+    },
+    'settings-profile-temperature': (app, value) => {
+        const apiProvider = app.state.settings.apiProvider || 'gemini';
+        const apiConfigs = { ...app.state.settings.apiConfigs };
+        if (!apiConfigs[apiProvider]) apiConfigs[apiProvider] = {};
+        apiConfigs[apiProvider].profileTemperature = parseFloat(value);
+        return { apiConfigs };
+    },
     'settings-user-name': (app, value) => ({ userName: value }),
     'settings-user-desc': (app, value) => ({ userDescription: value }),
     'settings-proactive-toggle': (app, checked) => ({ proactiveChatEnabled: checked }),
@@ -130,4 +206,9 @@ export function handleModalChange(e, app) {
         if (optionsDiv) optionsDiv.style.display = e.target.checked ? 'block' : 'none';
         app.handleToggleSnapshots(e.target.checked);
     }
+    if (e.target.id === 'settings-api-provider') {
+        app.handleAPIProviderChange(e.target.value);
+    }
+    
+    // 디버그 로그 관련 이벤트는 모두 onclick/onchange로 처리됨
 }
