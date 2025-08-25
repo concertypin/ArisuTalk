@@ -1,4 +1,4 @@
-import { getLanguage } from './i18n.js';
+import { getLanguage } from "./i18n.js";
 
 export function debounce(func, delay) {
   let timeout;
@@ -15,7 +15,9 @@ export function findMessageGroup(messages, targetIndex, characterName) {
   }
 
   const targetMessage = messages[targetIndex];
-  const targetSender = targetMessage.isMe ? "user" : (targetMessage.sender || characterName);
+  const targetSender = targetMessage.isMe
+    ? "user"
+    : targetMessage.sender || characterName;
 
   let startIndex = targetIndex;
   let endIndex = targetIndex;
@@ -23,7 +25,9 @@ export function findMessageGroup(messages, targetIndex, characterName) {
   // Find the start of the group
   while (startIndex > 0) {
     const prevMessage = messages[startIndex - 1];
-    const prevSender = prevMessage.isMe ? "user" : (prevMessage.sender || characterName);
+    const prevSender = prevMessage.isMe
+      ? "user"
+      : prevMessage.sender || characterName;
     if (prevSender !== targetSender) break;
     startIndex--;
   }
@@ -31,7 +35,9 @@ export function findMessageGroup(messages, targetIndex, characterName) {
   // Find the end of the group
   while (endIndex < messages.length - 1) {
     const nextMessage = messages[endIndex + 1];
-    const nextSender = nextMessage.isMe ? "user" : (nextMessage.sender || characterName);
+    const nextSender = nextMessage.isMe
+      ? "user"
+      : nextMessage.sender || characterName;
     if (nextSender !== targetSender) break;
     endIndex++;
   }

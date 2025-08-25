@@ -3,24 +3,25 @@
  */
 
 export function getSystemPrompt({
-    mainPrompts,
-    character,
-    userName,
-    userDescription,
-    guidelines,
-    availableStickers,
-    timeContext,
-    timeDiff
+  mainPrompts,
+  character,
+  userName,
+  userDescription,
+  guidelines,
+  availableStickers,
+  timeContext,
+  timeDiff,
 }) {
-    const stickerInfo = character.stickers && character.stickers.length > 0 ?
-        `${character.name} has access to the following stickers that can be used to express emotions and reactions:
-${character.stickers.map(sticker => `- ${sticker.id}: "${sticker.name}" (${sticker.type})`).join('\n')}
+  const stickerInfo =
+    character.stickers && character.stickers.length > 0
+      ? `${character.name} has access to the following stickers that can be used to express emotions and reactions:
+${character.stickers.map((sticker) => `- ${sticker.id}: "${sticker.name}" (${sticker.type})`).join("\n")}
 
 ## Sticker Usage
-${mainPrompts.sticker_usage?.replace('{character.name}', character.name).replace('{availableStickers}', availableStickers) || ''}` :
-        `${character.name} has no stickers available. Use only text-based expressions.`;
+${mainPrompts.sticker_usage?.replace("{character.name}", character.name).replace("{availableStickers}", availableStickers) || ""}`
+      : `${character.name} has no stickers available. Use only text-based expressions.`;
 
-    return `
+  return `
 # System Rules
 ${mainPrompts.system_rules}
 
@@ -32,8 +33,8 @@ The information is composed of the settings and memories of ${character.name}, <
 
 # User Profile
 Information of <user> that user will play.
-- User's Name: ${userName || 'Not specified. You can ask.'}
-- User's Description: ${userDescription || 'No specific information provided about the user.'}
+- User's Name: ${userName || "Not specified. You can ask."}
+- User's Description: ${userDescription || "No specific information provided about the user."}
 
 # Character Profile & Additional Information
 This is the information about the character, ${character.name}, you must act.
@@ -42,7 +43,7 @@ ${character.prompt}
 
 # Memory
 This is a list of key memories the character has. Use them to maintain consistency and recall past events.
-${character.memories && character.memories.length > 0 ? character.memories.map(mem => `- ${mem}`).join('\n') : 'No specific memories recorded yet.'}
+${character.memories && character.memories.length > 0 ? character.memories.map((mem) => `- ${mem}`).join("\n") : "No specific memories recorded yet."}
 
 # Character Personality Sliders (1=Left, 10=Right)
 - 응답시간 (${character.responseTime}/10): "거의 즉시" <-> "전화를 걸어야함". This is the character's general speed to check the user's message. This MUST affect your 'reactionDelay' value. A low value means very fast replies (e.g., 50-2000ms). A high value means very slow replies (e.g., 30000-180000ms), as if busy.
@@ -57,6 +58,9 @@ ${stickerInfo}
 I read all Informations carefully. First, let's remind my Guidelines again.
 
 [## Guidelines]
-${guidelines.replace(/{character.name}/g, character.name).replace('{timeContext}', timeContext).replace('{timeDiff}', timeDiff)}
+${guidelines
+  .replace(/{character.name}/g, character.name)
+  .replace("{timeContext}", timeContext)
+  .replace("{timeDiff}", timeDiff)}
             `;
 }
