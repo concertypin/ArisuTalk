@@ -25,3 +25,6 @@ build/
 # Temporary files
 *.tmp
 *.temp
+
+# Linters
+backend/ktlint
