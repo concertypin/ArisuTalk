@@ -1,3 +1,5 @@
+import { t } from "../i18n.js";
+
 /**
  * Crypto utilities for secure API key storage
  * Uses Web Crypto API for encryption/decryption
@@ -89,7 +91,7 @@ export async function encryptText(text, password) {
     return btoa(String.fromCharCode(...combined));
   } catch (error) {
     console.error("Encryption failed:", error);
-    throw new Error("암호화에 실패했습니다");
+    throw new Error(t("security.encryptionFailed"));
   }
 }
 
@@ -128,7 +130,7 @@ export async function decryptText(encryptedText, password) {
     return decoder.decode(decryptedData);
   } catch (error) {
     console.error("Decryption failed:", error);
-    throw new Error("복호화에 실패했습니다. 비밀번호를 확인해주세요.");
+    throw new Error(t("security.decryptionFailed"));
   }
 }
 

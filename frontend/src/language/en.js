@@ -525,6 +525,8 @@ export const en = {
     masterPasswordPlaceholder: "Enter a secure master password",
     confirmPasswordPlaceholder: "Re-enter password",
     passwordHintPlaceholder: "Hint to help you remember the password",
+    encryptionFailed: "Encryption failed",
+    decryptionFailed: "Decryption failed. Please check your password.",
   },
   characterModalSlider: {
     responseTime: {
