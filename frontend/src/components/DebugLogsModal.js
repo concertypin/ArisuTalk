@@ -38,7 +38,7 @@ export function renderDebugLogsModal(state) {
 
     // 유효한 날짜인지 확인
     if (isNaN(date.getTime())) {
-      return "Invalid Date";
+      return t("debugLogs.invalidDate");
     }
 
     return date.toLocaleString("ko-KR");
