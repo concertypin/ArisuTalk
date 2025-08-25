@@ -371,7 +371,7 @@ export function setupDesktopSettingsEventListeners(app) {
 
     if (characterCountSlider && characterCountLabel) {
       characterCountSlider.addEventListener("input", (e) => {
-        characterCountLabel.textContent = e.target.value + "명";
+        characterCountLabel.textContent = e.target.value + t("settings.characterCountUnit");
       });
     }
 
