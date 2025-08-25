@@ -648,5 +648,6 @@ export const en = {
     logsDisabled:
       'Log collection is disabled.<br/>Please enable "Debug Logs" in settings.',
     unknown: "Unknown",
+    invalidDate: "Invalid Date",
   },
 };
