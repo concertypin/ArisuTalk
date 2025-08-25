@@ -18,12 +18,8 @@
     "node": ">20"
   },
   "devDependencies": {
-<<<<<<< HEAD
+    "prettier": "^3.6.2",
     "vite": "^7.1.2",
     "vite-plugin-pwa": "^1.0.3"
-=======
-    "prettier": "^3.6.2",
-    "vite": "^7.1.2"
->>>>>>> d33943a (docs: Add i18n, architecture documentation and improve code quality, add code formatter)
   }
 }
