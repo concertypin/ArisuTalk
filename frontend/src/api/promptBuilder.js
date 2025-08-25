@@ -65,6 +65,15 @@ export function buildContentPrompt({
     }
   }
 
+  // [FIX] For proactive messages, the conversation history sent to the API
+  // must end with a user turn. If the last message is from the model, remove it.
+  if (isProactive && contents.length > 0) {
+    const lastContent = contents[contents.length - 1];
+    if (lastContent.role === "model") {
+      contents.pop();
+    }
+  }
+
   if (isProactive && contents.length === 0) {
     contents.push({
       role: "user",
