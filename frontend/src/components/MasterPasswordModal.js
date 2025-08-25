@@ -3,22 +3,22 @@
  * 암호화된 API 키 저장소를 위한 마스터 비밀번호 입력/설정 모달
  */
 
-import { validatePassword } from '../utils/crypto.js';
+import { validatePassword } from "../utils/crypto.js";
+import { t } from "../i18n.js";
 
 export function renderMasterPasswordModal(app) {
-    const { state } = app;
-    const { showSetupEncryptionModal } = state;
-    
-    if (!showSetupEncryptionModal) {
-        return '';
-    }
+  const { state } = app;
+  const { showSetupEncryptionModal } = state;
 
-    return renderSetupEncryptionModal(app);
+  if (!showSetupEncryptionModal) {
+    return "";
+  }
+
+  return renderSetupEncryptionModal(app);
 }
 
-
 function renderSetupEncryptionModal(app) {
-    return `
+  return `
         <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div class="bg-gray-800 rounded-lg w-full max-w-lg">
                 <!-- Header -->
@@ -58,7 +58,9 @@ function renderSetupEncryptionModal(app) {
                             <input 
                                 type="password" 
                                 id="setup-master-password" 
-                                placeholder="안전한 마스터 비밀번호를 입력하세요" 
+                                placeholder="${t(
+                                  "security.masterPasswordPlaceholder"
+                                )}" 
                                 class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm"
                                 autocomplete="new-password"
                             />
@@ -73,7 +75,9 @@ function renderSetupEncryptionModal(app) {
                             <input 
                                 type="password" 
                                 id="setup-master-password-confirm" 
-                                placeholder="비밀번호를 다시 입력하세요" 
+                                placeholder="${t(
+                                  "security.confirmPasswordPlaceholder"
+                                )}" 
                                 class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm"
                                 autocomplete="new-password"
                             />
@@ -87,7 +91,9 @@ function renderSetupEncryptionModal(app) {
                             <input 
                                 type="text" 
                                 id="setup-password-hint" 
-                                placeholder="비밀번호를 기억할 수 있는 힌트" 
+                                placeholder="${t(
+                                  "security.passwordHintPlaceholder"
+                                )}" 
                                 class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm"
                                 maxlength="100"
                             />
@@ -135,90 +141,103 @@ function renderSetupEncryptionModal(app) {
  * Setup event listeners for Master Password Modal
  */
 export function setupMasterPasswordModalEventListeners(app) {
-    // Setup encryption
-    const setupBtn = document.getElementById('setup-encryption-btn');
-    if (setupBtn) {
-        setupBtn.addEventListener('click', async () => {
-            const password = document.getElementById('setup-master-password').value;
-            const confirmPassword = document.getElementById('setup-master-password-confirm').value;
-            const hint = document.getElementById('setup-password-hint').value;
-            const errorDiv = document.getElementById('setup-error-message');
-            
-            // Validation
-            if (!password) {
-                showError(errorDiv, '마스터 비밀번호를 입력하세요.');
-                return;
-            }
-            
-            const validation = validatePassword(password);
-            if (!validation.isValid) {
-                showError(errorDiv, validation.message);
-                return;
-            }
-            
-            if (password !== confirmPassword) {
-                showError(errorDiv, '비밀번호가 일치하지 않습니다.');
-                return;
-            }
-            
-            try {
-                await app.setupEncryption(password, hint);
-                app.setState({ showSetupEncryptionModal: false });
-                alert('API 키 암호화가 활성화되었습니다!');
-            } catch (error) {
-                showError(errorDiv, error.message);
-            }
-        });
-    }
-    
-    // Generate master password
-    const generateBtn = document.getElementById('generate-master-password');
-    if (generateBtn) {
-        generateBtn.addEventListener('click', () => {
-            const { generateMasterPassword } = require('../utils/crypto.js');
-            const password = generateMasterPassword();
-            
-            document.getElementById('setup-master-password').value = password;
-            document.getElementById('setup-master-password-confirm').value = password;
-            
-            // Show generated password temporarily
-            alert(`생성된 마스터 비밀번호:\\n\\n${password}\\n\\n이 비밀번호를 안전한 곳에 저장하세요!`);
-        });
-    }
-    
-    // Skip encryption
-    const skipBtn = document.getElementById('skip-encryption-btn');
-    if (skipBtn) {
-        skipBtn.addEventListener('click', () => {
-            app.setState({ showSetupEncryptionModal: false });
-        });
-    }
-    
-    // Password strength indicator
-    const passwordInput = document.getElementById('setup-master-password');
-    if (passwordInput) {
-        passwordInput.addEventListener('input', () => {
-            const password = passwordInput.value;
-            const strengthDiv = document.getElementById('password-strength');
-            
-            if (password) {
-                const validation = validatePassword(password);
-                const colors = ['text-red-400', 'text-yellow-400', 'text-blue-400', 'text-green-400'];
-                const strengthText = ['매우 약함', '약함', '보통', '강함'];
-                
-                strengthDiv.className = `mt-2 text-xs ${colors[Math.min(validation.strength, 3)]}`;
-                strengthDiv.textContent = `비밀번호 강도: ${strengthText[Math.min(validation.strength, 3)]} - ${validation.message}`;
-            } else {
-                strengthDiv.textContent = '';
-            }
-        });
-    }
+  // Setup encryption
+  const setupBtn = document.getElementById("setup-encryption-btn");
+  if (setupBtn) {
+    setupBtn.addEventListener("click", async () => {
+      const password = document.getElementById("setup-master-password").value;
+      const confirmPassword = document.getElementById(
+        "setup-master-password-confirm"
+      ).value;
+      const hint = document.getElementById("setup-password-hint").value;
+      const errorDiv = document.getElementById("setup-error-message");
+
+      // Validation
+      if (!password) {
+        showError(errorDiv, "마스터 비밀번호를 입력하세요.");
+        return;
+      }
+
+      const validation = validatePassword(password);
+      if (!validation.isValid) {
+        showError(errorDiv, validation.message);
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        showError(errorDiv, "비밀번호가 일치하지 않습니다.");
+        return;
+      }
+
+      try {
+        await app.setupEncryption(password, hint);
+        app.setState({ showSetupEncryptionModal: false });
+        alert("API 키 암호화가 활성화되었습니다!");
+      } catch (error) {
+        showError(errorDiv, error.message);
+      }
+    });
+  }
+
+  // Generate master password
+  const generateBtn = document.getElementById("generate-master-password");
+  if (generateBtn) {
+    generateBtn.addEventListener("click", () => {
+      const { generateMasterPassword } = require("../utils/crypto.js");
+      const password = generateMasterPassword();
+
+      document.getElementById("setup-master-password").value = password;
+      document.getElementById("setup-master-password-confirm").value = password;
+
+      // Show generated password temporarily
+      alert(
+        `생성된 마스터 비밀번호:\\n\\n${password}\\n\\n이 비밀번호를 안전한 곳에 저장하세요!`
+      );
+    });
+  }
+
+  // Skip encryption
+  const skipBtn = document.getElementById("skip-encryption-btn");
+  if (skipBtn) {
+    skipBtn.addEventListener("click", () => {
+      app.setState({ showSetupEncryptionModal: false });
+    });
+  }
+
+  // Password strength indicator
+  const passwordInput = document.getElementById("setup-master-password");
+  if (passwordInput) {
+    passwordInput.addEventListener("input", () => {
+      const password = passwordInput.value;
+      const strengthDiv = document.getElementById("password-strength");
+
+      if (password) {
+        const validation = validatePassword(password);
+        const colors = [
+          "text-red-400",
+          "text-yellow-400",
+          "text-blue-400",
+          "text-green-400",
+        ];
+        const strengthText = ["매우 약함", "약함", "보통", "강함"];
+
+        strengthDiv.className = `mt-2 text-xs ${
+          colors[Math.min(validation.strength, 3)]
+        }`;
+        strengthDiv.textContent = `비밀번호 강도: ${
+          strengthText[Math.min(validation.strength, 3)]
+        } - ${validation.message}`;
+      } else {
+        strengthDiv.textContent = "";
+      }
+    });
+  }
 }
 
 function showError(errorDiv, message) {
-    errorDiv.textContent = message;
-    errorDiv.classList.remove('hidden');
-    setTimeout(() => {
-        errorDiv.classList.add('hidden');
-    }, 5000);
+  errorDiv.textContent = message;
+  errorDiv.classList.remove("hidden");
+  setTimeout(() => {
+    errorDiv.classList.add("hidden");
+  }, 5000);
 }

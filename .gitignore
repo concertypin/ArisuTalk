@@ -20,6 +20,7 @@ build/
 # IDE files
 .vscode/
 .idea/
+.qoder/*
 
 # Temporary files
 *.tmp
