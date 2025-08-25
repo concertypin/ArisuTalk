@@ -661,7 +661,7 @@ export const ko = {
   api: {
     imageMessage: "이미지를 보냈습니다.",
     imageUnavailable: "(사용자가 이미지를 보냈지만 더 이상 사용할 수 없습니다)",
-    unknownSticker: "Unknown Sticker",
+    unknownSticker: "알 수 없는 스티커",
     stickerMessage: '[사용자가 "{{stickerName}}" 스티커를 보냄]',
     proactiveStart:
       "(SYSTEM: You are starting this conversation. Please begin.)",
