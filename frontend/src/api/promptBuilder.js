@@ -188,3 +188,40 @@ export function buildCharacterSheetPrompt({
 
   return { systemPrompt, contents };
 }
+
+/**
+ * Builds the system prompt and contents for a profile generation request.
+ * @param {object} params - The parameters for building the prompt.
+ * @param {string} params.userName - The user's name.
+ * @param {string} params.userDescription - The user's description.
+ * @param {string} params.profileCreationPrompt - The template for creating the profile.
+ * @returns {{systemPrompt: string, contents: Array<object>}} - The generated system prompt and contents.
+ */
+export function buildProfilePrompt({
+  userName,
+  userDescription,
+  profileCreationPrompt,
+}) {
+  // Replace variables in the prompt
+  const processedPrompt = profileCreationPrompt
+    .replace("{userName}", userName)
+    .replace("{userDescription}", userDescription);
+
+  // Parse as ChatML (handles both ChatML format and plain text as system messages)
+  const chatMLMessages = parseChatML(processedPrompt);
+  const { systemPrompt, contents } = chatMLToPromptStructure(chatMLMessages);
+  
+  // Add user instruction if no explicit conversation was provided in ChatML
+  if (contents.length === 0) {
+    contents.push({
+      role: "user",
+      parts: [
+        {
+          text: "Please generate a character profile based on the instructions.",
+        },
+      ],
+    });
+  }
+
+  return { systemPrompt, contents };
+}
