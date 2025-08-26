@@ -214,16 +214,24 @@ export function buildChatMLFromTraditionalPrompts(prompts, character, userName =
   // Combine all the traditional prompt sections into a comprehensive system message
   const mainPrompts = prompts.main || {};
   
-  const systemSections = [
-    mainPrompts.system_rules,
-    mainPrompts.role_and_objective,
-    mainPrompts.memory_generation,
-    mainPrompts.character_acting,
-    mainPrompts.message_writing,
-    mainPrompts.language,
-    mainPrompts.additional_instructions,
-    mainPrompts.sticker_usage?.replace('{availableStickers}', context.availableStickers || 'none'),
-  ].filter(section => section && section.trim()); // Filter out empty sections
+  // Include ALL sections from mainPrompts, not just hardcoded ones
+  const systemSections = [];
+  
+  // Process all sections in the order they appear, with special handling for certain sections
+  for (const [key, value] of Object.entries(mainPrompts)) {
+    if (!value || !value.trim()) {
+      continue; // Skip empty sections
+    }
+    
+    let processedValue = value;
+    
+    // Special processing for specific sections
+    if (key === 'sticker_usage') {
+      processedValue = value.replace('{availableStickers}', context.availableStickers || 'none');
+    }
+    
+    systemSections.push(processedValue);
+  }
 
   // Build comprehensive system message
   let systemMessage = systemSections.join('\n\n');
