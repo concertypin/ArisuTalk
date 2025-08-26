@@ -287,7 +287,7 @@ export function updateDesktopSettingsContent(app, panelId) {
  */
 export function setupDesktopSettingsEventListeners(app) {
   // DOM이 완전히 로드될 때까지 기다린 후 이벤트 리스너 설정
-  setTimeout(() => {
+  requestAnimationFrame(() => {
     // 네비게이션 패널 전환
     const panelButtons = document.querySelectorAll("[data-panel]");
     console.log("Found panel buttons:", panelButtons.length); // 디버그 로그
@@ -429,5 +429,5 @@ export function setupDesktopSettingsEventListeners(app) {
         button.dataset.listenerAdded = "true";
       }
     });
-  }, 100); // DOM 로드 대기 시간
+  });
 }
