@@ -1,5 +1,4 @@
 import { t } from "../i18n.js";
-import { getDefaultChatMLTemplate, isValidChatML } from "../api/chatMLParser.js";
 
 export function renderPromptModal(app) {
   const { prompts } = app.state.settings;
@@ -56,47 +55,21 @@ export function renderPromptModal(app) {
                     <button id="close-prompt-modal" class="p-1 hover:bg-gray-700 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
                 </div>
                 <div class="p-6 space-y-4 overflow-y-auto">
-                    <!-- ChatML Section -->
+                    <!-- ChatML Information -->
                     <div class="bg-gradient-to-r from-purple-900/20 to-blue-900/20 rounded-lg p-4 border border-purple-500/20">
-                        <div class="flex items-center justify-between mb-3">
-                            <div>
-                                <h4 class="text-base font-semibold text-purple-300">${t("promptModal.useChatML")}</h4>
-                                <p class="text-xs text-gray-400 mt-1">${t("promptModal.chatMLDescription")}</p>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="use-chatml-toggle" class="sr-only peer" ${prompts.useChatML ? 'checked' : ''}>
-                                <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
-                            </label>
+                        <div class="flex items-center gap-2 mb-3">
+                            <i data-lucide="info" class="w-4 h-4 text-purple-300"></i>
+                            <h4 class="text-sm font-semibold text-purple-300">ChatML Format Enabled</h4>
                         </div>
-                        
-                        <div id="chatml-section" class="${prompts.useChatML ? '' : 'hidden'}">
-                            <div class="mb-3">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <label class="text-sm font-medium text-purple-200">${t("promptModal.chatMLPrompt")}</label>
-                                    <button id="reset-chatml-btn" class="py-1 px-2 bg-purple-600 hover:bg-purple-500 text-white rounded text-xs flex items-center gap-1">
-                                        <i data-lucide="rotate-ccw" class="w-3 h-3"></i> ${t("promptModal.resetToDefault")}
-                                    </button>
-                                    <button id="generate-chatml-template-btn" class="py-1 px-2 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs flex items-center gap-1">
-                                        <i data-lucide="wand-2" class="w-3 h-3"></i> Template
-                                    </button>
-                                </div>
-                                <p class="text-xs text-gray-400 mb-2">${t("promptModal.chatMLSyntaxHelp")}</p>
-                                <textarea id="chatml-prompt-input" 
-                                          class="w-full h-64 p-3 bg-gray-700 text-white rounded-lg text-sm font-mono border-2 border-purple-500/20 focus:border-purple-500/50 transition-colors"
-                                          placeholder="${t("promptModal.chatMLSyntaxHelp")}">${prompts.chatMLPrompt || ''}</textarea>
-                                <div id="chatml-validation" class="text-xs mt-1"></div>
-                            </div>
-                            <div class="text-xs text-yellow-400 bg-yellow-400/10 rounded p-2">
-                                <i data-lucide="info" class="w-3 h-3 inline mr-1"></i>
-                                ${t("promptModal.chatMLToggleHelp")}
-                            </div>
-                        </div>
+                        <p class="text-xs text-gray-300 leading-relaxed">
+                            All prompts now support ChatML format by default. You can use traditional text or ChatML markup (e.g., &lt;|im_start|&gt;system...&lt;|im_end|&gt;) in any prompt section. 
+                            ChatML provides better conversation structure and role-based responses.
+                        </p>
                     </div>
 
                     <h4 class="text-base font-semibold text-blue-300 border-b border-blue-300/20 pb-2">${t(
                       "promptModal.mainChatPrompt",
-                    )} <span class="text-sm font-normal text-gray-400" id="complex-prompt-status">${prompts.useChatML ? '(Disabled - ChatML Active)' : '(Active)'}</span></h4>
-                    <div id="complex-prompts-section" class="${prompts.useChatML ? 'opacity-50 pointer-events-none' : ''}">
+                    )}</h4>
                     ${Object.entries(mainPromptSections)
                       .map(
                         ([title, data]) => `
@@ -127,7 +100,6 @@ export function renderPromptModal(app) {
                     `,
                       )
                       .join("")}
-                    </div>
                     
                     <h4 class="text-base font-semibold text-blue-300 border-b border-blue-300/20 pb-2 mt-6">${t(
                       "promptModal.randomFirstMessagePrompt",

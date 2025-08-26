@@ -1,4 +1,4 @@
-import { buildContentPrompt, buildProfilePrompt } from "./promptBuilder.js";
+import { buildContentPrompt, buildProfilePrompt, buildCharacterSheetPrompt } from "./promptBuilder.js";
 import { t } from "../i18n.js";
 
 const API_BASE_URL = "https://api.x.ai/v1";
@@ -205,6 +205,73 @@ export class GrokClient {
     } catch (error) {
       console.error(
         t("api.profileGenerationError", { provider: "Grok" }),
+        error,
+      );
+      return { error: error.message };
+    }
+  }
+
+  /**
+   * Generates a character sheet using Grok API.
+   */
+  async generateCharacterSheet({ 
+    characterName, 
+    characterDescription, 
+    characterSheetPrompt 
+  }) {
+    const { systemPrompt, contents } = buildCharacterSheetPrompt({
+      characterName,
+      characterDescription,
+      characterSheetPrompt,
+    });
+
+    const messages = [
+      { role: "system", content: systemPrompt },
+      ...contents.map(content => ({
+        role: content.role === "model" ? "assistant" : content.role,
+        content: content.parts.map(part => part.text).join("")
+      }))
+    ];
+
+    const payload = {
+      model: this.model,
+      messages: messages,
+      max_tokens: this.profileMaxOutputTokens,
+      temperature: this.profileTemperature,
+    };
+
+    try {
+      const response = await fetch(`${this.baseUrl}/chat/completions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${this.apiKey}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error("Character Sheet Gen API Error:", data);
+        const errorMessage = data?.error?.message || 
+          t("api.requestFailed", { status: response.statusText });
+        throw new Error(errorMessage);
+      }
+
+      if (data.choices && data.choices.length > 0) {
+        const responseText = data.choices[0].message.content.trim();
+        
+        return {
+          messages: [{ content: responseText }],
+          reactionDelay: 1000,
+        };
+      } else {
+        throw new Error(t("api.profileNotGenerated", { reason: t("api.unknownReason") }));
+      }
+    } catch (error) {
+      console.error(
+        t("api.profileGenerationError", { provider: "Grok" }) + " (Character Sheet)",
         error,
       );
       return { error: error.message };

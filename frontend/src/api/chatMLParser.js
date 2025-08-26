@@ -17,13 +17,22 @@
  */
 
 /**
- * Parses ChatML format text into message objects
- * @param {string} chatMLText - The ChatML formatted text
+ * Parses ChatML format text or plain text into message objects
+ * @param {string} chatMLText - The ChatML formatted text or plain text
  * @returns {Array<{role: string, content: string}>} Array of parsed messages
  */
 export function parseChatML(chatMLText) {
   if (!chatMLText || typeof chatMLText !== 'string') {
     return [];
+  }
+
+  // Check if text contains ChatML tags
+  if (!chatMLText.includes('<|im_start|>')) {
+    // Treat plain text as a system message
+    return [{
+      role: 'system',
+      content: chatMLText.trim()
+    }];
   }
 
   const messages = [];
@@ -188,5 +197,51 @@ You should respond naturally and stay in character. All responses should be in K
 <|im_end|>
 <|im_start|>assistant
 안녕하세요! 만나서 반갑습니다. 어떤 도움이 필요하신가요?
+<|im_end|>`;
+}
+
+/**
+ * Builds ChatML from traditional complex prompt sections
+ * @param {Object} prompts - Traditional prompt sections
+ * @param {Object} character - Character object
+ * @param {string} userName - User name
+ * @param {string} userDescription - User description
+ * @param {Object} context - Additional context (timeContext, availableStickers, etc.)
+ * @returns {string} ChatML formatted text
+ */
+export function buildChatMLFromTraditionalPrompts(prompts, character, userName = '', userDescription = '', context = {}) {
+  // Combine all the traditional prompt sections into a comprehensive system message
+  const mainPrompts = prompts.main || {};
+  
+  const systemSections = [
+    mainPrompts.system_rules,
+    mainPrompts.role_and_objective,
+    mainPrompts.memory_generation,
+    mainPrompts.character_acting,
+    mainPrompts.message_writing,
+    mainPrompts.language,
+    mainPrompts.additional_instructions,
+    mainPrompts.sticker_usage?.replace('{availableStickers}', context.availableStickers || 'none'),
+  ].filter(section => section && section.trim()); // Filter out empty sections
+
+  // Build comprehensive system message
+  let systemMessage = systemSections.join('\n\n');
+  
+  // Add character-specific context
+  if (character) {
+    systemMessage = systemMessage
+      .replace(/{character\.name}/g, character.name)
+      .replace(/{userName}/g, userName)
+      .replace(/{userDescription}/g, userDescription);
+  }
+  
+  // Add contextual information
+  if (context.timeContext) {
+    systemMessage += '\n\n' + context.timeContext;
+  }
+
+  // Return as ChatML format
+  return `<|im_start|>system
+${systemMessage}
 <|im_end|>`;
 }

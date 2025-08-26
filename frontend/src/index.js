@@ -68,8 +68,6 @@ class PersonaChatApp {
           profile_creation: this.defaultPrompts.profile_creation,
           character_sheet_generation:
             this.defaultPrompts.character_sheet_generation,
-          useChatML: false,
-          chatMLPrompt: "",
         },
       },
       characters: defaultCharacters,
@@ -339,8 +337,6 @@ class PersonaChatApp {
           character_sheet_generation:
             settings.prompts?.character_sheet_generation ||
             this.defaultPrompts.character_sheet_generation,
-          useChatML: settings.prompts?.useChatML || false,
-          chatMLPrompt: settings.prompts?.chatMLPrompt || "",
         },
       };
 
@@ -1071,9 +1067,6 @@ class PersonaChatApp {
   }
 
   handleSavePrompts() {
-    const useChatMLElement = document.getElementById("use-chatml-toggle");
-    const chatMLPromptElement = document.getElementById("chatml-prompt-input");
-    
     const newPrompts = {
       main: {
         system_rules: document.getElementById("prompt-main-system_rules").value,
@@ -1102,8 +1095,6 @@ class PersonaChatApp {
       character_sheet_generation: document.getElementById(
         "prompt-character_sheet_generation",
       ).value,
-      useChatML: useChatMLElement ? useChatMLElement.checked : false,
-      chatMLPrompt: chatMLPromptElement ? chatMLPromptElement.value : "",
     };
 
     this.setState({
@@ -1115,97 +1106,6 @@ class PersonaChatApp {
         message: t("modal.promptSaveComplete.message"),
         onConfirm: null,
       },
-    });
-  }
-
-  // ChatML Handlers
-  handleChatMLToggle() {
-    const toggle = document.getElementById("use-chatml-toggle");
-    const chatMLSection = document.getElementById("chatml-section");
-    const complexPromptsSection = document.getElementById("complex-prompts-section");
-    const complexPromptStatus = document.getElementById("complex-prompt-status");
-    
-    if (toggle && chatMLSection && complexPromptsSection && complexPromptStatus) {
-      const isEnabled = toggle.checked;
-      
-      // Show/hide ChatML section
-      chatMLSection.classList.toggle("hidden", !isEnabled);
-      
-      // Enable/disable complex prompts section
-      if (isEnabled) {
-        complexPromptsSection.classList.add("opacity-50", "pointer-events-none");
-        complexPromptStatus.textContent = "(Disabled - ChatML Active)";
-      } else {
-        complexPromptsSection.classList.remove("opacity-50", "pointer-events-none");
-        complexPromptStatus.textContent = "(Active)";
-      }
-    }
-  }
-
-  handleResetChatML() {
-    import("./api/chatMLParser.js").then(({ getDefaultChatMLTemplate }) => {
-      const chatMLInput = document.getElementById("chatml-prompt-input");
-      if (chatMLInput) {
-        // Get current character if available
-        const currentCharacter = this.state.selectedChatId 
-          ? this.state.characters.find(c => c.id === this.state.selectedChatId)
-          : null;
-        
-        chatMLInput.value = getDefaultChatMLTemplate(currentCharacter);
-        this.handleChatMLInput({ target: chatMLInput });
-      }
-    });
-  }
-
-  handleGenerateChatMLTemplate() {
-    import("./api/chatMLParser.js").then(({ getDefaultChatMLTemplate }) => {
-      const chatMLInput = document.getElementById("chatml-prompt-input");
-      if (chatMLInput) {
-        // Get current character if available
-        const currentCharacter = this.state.selectedChatId 
-          ? this.state.characters.find(c => c.id === this.state.selectedChatId)
-          : null;
-        
-        // If input is empty, generate template, otherwise ask for confirmation
-        if (!chatMLInput.value.trim()) {
-          chatMLInput.value = getDefaultChatMLTemplate(currentCharacter);
-          this.handleChatMLInput({ target: chatMLInput });
-        } else {
-          this.showConfirmModal(
-            "Generate Template",
-            "This will replace your current ChatML prompt. Continue?",
-            () => {
-              chatMLInput.value = getDefaultChatMLTemplate(currentCharacter);
-              this.handleChatMLInput({ target: chatMLInput });
-            }
-          );
-        }
-      }
-    });
-  }
-
-  handleChatMLInput(e) {
-    import("./api/chatMLParser.js").then(({ isValidChatML }) => {
-      const validationDiv = document.getElementById("chatml-validation");
-      if (validationDiv) {
-        const text = e.target.value;
-        
-        if (!text.trim()) {
-          validationDiv.innerHTML = "";
-          return;
-        }
-        
-        if (isValidChatML(text)) {
-          validationDiv.innerHTML = '<span class="text-green-400"><i data-lucide="check" class="w-3 h-3 inline mr-1"></i>Valid ChatML format</span>';
-        } else {
-          validationDiv.innerHTML = `<span class="text-red-400"><i data-lucide="alert-circle" class="w-3 h-3 inline mr-1"></i>${t("promptModal.chatMLInvalid")}</span>`;
-        }
-        
-        // Re-initialize Lucide icons
-        if (window.lucide) {
-          window.lucide.createIcons();
-        }
-      }
     });
   }
 
@@ -4755,16 +4655,6 @@ class PersonaChatApp {
         this.state.settings.prompts.character_sheet_generation ||
         this.defaultPrompts.character_sheet_generation;
 
-      // 프롬프트에 변수 치환 및 강화된 지시사항 추가
-      const finalPrompt =
-        generationPrompt
-          .replace("{characterName}", characterName)
-          .replace(
-            "{characterDescription}",
-            characterDescription || "기본적인 정보만 제공됨",
-          ) +
-        `\n\n절대 지켜야 할 규칙:\n- 캐릭터 시트만 작성\n- "안녕하세요", "도움이 되었으면", "이상입니다" 같은 인사말 금지\n- 설명 금지\n- 즉시 ### 기본 정보부터 시작\n- 마크다운 형식 외 다른 포맷 사용 금지`;
-
       // Extract API options for all providers
       const charGenOptions = {
         maxTokens: currentConfig.maxTokens,
@@ -4773,19 +4663,15 @@ class PersonaChatApp {
         profileTemperature: currentConfig.profileTemperature,
       };
 
-      // API Manager를 통한 호출
-      const response = await this.apiManager.generateContent(
+      // API Manager를 통한 캐릭터 시트 생성 호출
+      const response = await this.apiManager.generateCharacterSheet(
         apiProvider,
         currentConfig.apiKey,
         currentConfig.model,
         {
-          userName: "", // userName은 빈 문자열
-          userDescription: "", // userDescription은 빈 문자열
-          character: { name: "AI Assistant", prompt: finalPrompt }, // 임시 캐릭터 객체
-          history: [{ content: finalPrompt, isMe: true, id: Date.now() }], // 단일 메시지 히스토리
-          prompts: this.state.settings.prompts,
-          isProactive: false,
-          forceSummary: false,
+          characterName: characterName,
+          characterDescription: characterDescription,
+          characterSheetPrompt: generationPrompt,
         },
         currentConfig.baseUrl, // custom_openai용
         charGenOptions,
@@ -4799,7 +4685,7 @@ class PersonaChatApp {
           characterMemories: [],
           characterId: "ai_generation",
         },
-        systemPrompt: { character_sheet_generation: finalPrompt },
+        systemPrompt: { character_sheet_generation: generationPrompt },
         outputResponse: {
           messages: response.messages,
           newMemory: response.newMemory,
