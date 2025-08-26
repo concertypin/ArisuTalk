@@ -2,8 +2,6 @@
 .DS_Store
 **/.DS_Store
 
-# Claude AI assistant files
-.claude/
 
 # Node.js
 node_modules/
