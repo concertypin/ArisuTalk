@@ -686,7 +686,7 @@ export const ko = {
   security: {
     masterPasswordPlaceholder: "안전한 마스터 비밀번호를 입력하세요",
     confirmPasswordPlaceholder: "비밀번호를 다시 입력하세요",
-    passwordHintPlaceholder: "비밀번호를 기억할 수 있는 힙트",
+    passwordHintPlaceholder: "비밀번호를 기억할 수 있는 힌트",
     encryptionFailed: "암호화에 실패했습니다",
     decryptionFailed: "복호화에 실패했습니다. 비밀번호를 확인해주세요.",
     passwordTooShort: "비밀번호는 최소 {{minLength}}자 이상이어야 합니다.",
