@@ -89,9 +89,10 @@ export function parseChatML(chatMLText) {
  * @param {Object} character - Character object
  * @param {string} userName - User name
  * @param {string} userDescription - User description
+ * @param {boolean} includeConversation - Whether to include user/assistant messages from ChatML (default: false)
  * @returns {{systemPrompt: string, contents: Array<Object>}} Internal prompt structure
  */
-export function chatMLToPromptStructure(messages, character, userName = '', userDescription = '') {
+export function chatMLToPromptStructure(messages, character, userName = '', userDescription = '', includeConversation = false) {
   let systemPrompt = '';
   const contents = [];
 
@@ -105,10 +106,9 @@ export function chatMLToPromptStructure(messages, character, userName = '', user
       } else {
         systemPrompt = content;
       }
-    } else if (role === 'user' || role === 'assistant') {
-      // Convert to internal format based on API provider
-      // For Gemini: role becomes "user" or "model"
-      // For OpenAI: role stays "user" or "assistant"
+    } else if ((role === 'user' || role === 'assistant') && includeConversation) {
+      // Only include user/assistant messages if explicitly requested
+      // This prevents ChatML prompt examples from interfering with real conversation history
       const internalRole = role === 'assistant' ? 'model' : 'user';
       
       contents.push({
@@ -116,6 +116,7 @@ export function chatMLToPromptStructure(messages, character, userName = '', user
         parts: [{ text: content }]
       });
     }
+    // If includeConversation is false, user/assistant messages from ChatML are ignored
   }
 
   // If no system prompt was found in ChatML, create a basic one

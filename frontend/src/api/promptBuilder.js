@@ -87,11 +87,13 @@ export function buildContentPrompt({
     chatMLMessages,
     character,
     userName,
-    userDescription
+    userDescription,
+    false  // Don't include user/assistant messages from ChatML prompts
   );
   
-  // Add conversation history to ChatML-parsed contents
-  let chatMLContents = [...contents];
+  // Start with empty contents for conversation history
+  // ChatML prompts should only provide system instructions, not conversation examples
+  let chatMLContents = [];
   
   // Add history messages
   for (const msg of history) {
@@ -172,7 +174,13 @@ export function buildCharacterSheetPrompt({
 
   // Parse as ChatML (handles both ChatML format and plain text as system messages)
   const chatMLMessages = parseChatML(processedPrompt);
-  const { systemPrompt, contents } = chatMLToPromptStructure(chatMLMessages);
+  const { systemPrompt, contents } = chatMLToPromptStructure(
+    chatMLMessages, 
+    null, 
+    '', 
+    '', 
+    true  // Allow conversation messages for character sheet generation
+  );
   
   // Add user instruction if no explicit conversation was provided in ChatML
   if (contents.length === 0) {
@@ -209,7 +217,13 @@ export function buildProfilePrompt({
 
   // Parse as ChatML (handles both ChatML format and plain text as system messages)
   const chatMLMessages = parseChatML(processedPrompt);
-  const { systemPrompt, contents } = chatMLToPromptStructure(chatMLMessages);
+  const { systemPrompt, contents } = chatMLToPromptStructure(
+    chatMLMessages, 
+    null, 
+    '', 
+    '', 
+    true  // Allow conversation messages for profile generation
+  );
   
   // Add user instruction if no explicit conversation was provided in ChatML
   if (contents.length === 0) {
