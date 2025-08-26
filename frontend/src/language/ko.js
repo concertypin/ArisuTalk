@@ -41,114 +41,24 @@ export const ko = {
   },
   characterModalSlider: {
     responseTime: {
-      description: "응답 속도",
-      low: "빠름",
-      high: "느림",
+      description: "메시지를 얼마나 빨리 확인하나요?",
+      low: "거의 즉시",
+      high: "전화를 해야 답장이 옴",
     },
     thinkingTime: {
-      description: "사고 시간",
-      low: "짧음",
-      high: "김",
+      description: "메시지를 보낼 때 얼마나 깊게 생각하나요?",
+      low: "생각에 잠김",
+      high: "메시지 보내고 생각함",
     },
     reactivity: {
-      description: "반응성",
-      low: "낮음",
-      high: "높음",
+      description: "대화에 어떻게 반응하나요?",
+      low: "적극적인 JK갸루",
+      high: "무뚝뚝함",
     },
     tone: {
-      description: "어조",
-      low: "차분함",
-      high: "활발함",
-    },
-  },
-  modal: {
-    promptSaveComplete: {
-      title: "완료",
-      message: "프롬프트가 저장되었습니다.",
-    },
-    characterNameDescriptionNotFulfilled: {
-      title: "입력 오류",
-      message: "이름과 설명을 모두 입력해주세요.",
-    },
-    characterDeleteConfirm: {
-      title: "연락처 삭제",
-      message: "정말로 이 연락처를 삭제하시겠습니까?",
-    },
-    imageFileSizeExceeded: {
-      title: "파일 크기 초과",
-      message: "이미지 파일 크기가 너무 큽니다. (최대 30MB)",
-    },
-    imageProcessingError: {
-      title: "이미지 처리 오류",
-      message: "이미지를 처리하는 중 오류가 발생했습니다.",
-    },
-    apiKeyRequired: {
-      title: "API 키 필요",
-      message: "AI 응답을 받으려면 API 키를 설정해주세요.",
-    },
-    messageGroupDeleteConfirm: {
-      title: "메시지 삭제",
-      message: "이 메시지를 삭제하시겠습니까?",
-    },
-    messageEmptyError: {
-      title: "메시지 오류",
-      message: "메시지가 비어있습니다.",
-    },
-    characterCardNoNameError: {
-      title: "이름 오류",
-      message: "연락처 이름이 없어서 저장할 수 없습니다.",
-    },
-    characterCardNoAvatarImageError: {
-      title: "오류",
-      message: "아바타 이미지가 없어서 연락처를 저장할 수 없습니다.",
-    },
-    avatarImageLoadError: {
-      title: "이미지 로드 오류",
-      message: "아바타 이미지를 로드할 수 없습니다.",
-    },
-    avatarLoadSuccess: {
-      title: "성공",
-      message: "아바타가 성공적으로 로드되었습니다.",
-    },
-    characterCardNoAvatarImageInfo: {
-      title: "정보",
-      message: "아바타 이미지가 없습니다.",
-    },
-    backupComplete: {
-      title: "백업 완료",
-      message: "데이터가 성공적으로 백업되었습니다.",
-    },
-    backupFailed: {
-      title: "백업 실패",
-      message: "데이터 백업에 실패했습니다.",
-    },
-    restoreConfirm: {
-      title: "데이터 복원",
-      message: "기존 데이터를 모두 덮어쓰시겠습니까?",
-    },
-    restoreComplete: {
-      title: "복원 완료",
-      message: "데이터가 성공적으로 복원되었습니다.",
-    },
-    restoreFailed: {
-      title: "복원 실패",
-      message: "데이터 복원에 실패했습니다.",
-    },
-    promptBackupComplete: {
-      title: "프롬프트 백업 완료",
-      message: "프롬프트가 성공적으로 백업되었습니다.",
-    },
-    promptBackupFailed: {
-      title: "프롬프트 백업 실패",
-      message: "프롬프트 백업에 실패했습니다.",
-    },
-    promptRestoreConfirm: {
-      title: "프롬프트 복원",
-      message: "기존 프롬프트를 덮어쓰시겠습니까?",
-    },
-    promptRestoreFailed: {
-      title: "프롬프트 복원 실패",
-      message: "프롬프트 복원에 실패했습니다.",
+      description: "당신과 대화할 때 어떤 말투를 사용하나요?",
+      low: "정중하고 예의 바름",
+      high: "무례함",
     },
   },
   confirm: {
@@ -183,7 +93,7 @@ export const ko = {
     stickerSupport: "jpg, gif, png, bmp, webp 지원 (개당 최대 30MB)",
     stickerCount: "스티커 개수: {{count}}개",
     totalSize: "총 용량: {{size}}",
-    audiSticker: "오디오",
+    audiSticker: "오디오", // Note: This key seems to be a typo of 'audioSticker'
     participantsConnected: "{{count}}명 접속중",
     participantsJoined: "{{count}}명 참여",
     debugLogButtonTitle: "디버그 로그 보기",
@@ -277,8 +187,6 @@ export const ko = {
     dangerZone: "위험 구역",
     resetAllData: "모든 데이터 초기화",
     resetAllDataInfo: "다음 데이터가 영구적으로 삭제됩니다:",
-    resetDataList:
-      "모든 캐릭터 정보, 모든 채팅 기록, 사용자 설정 (API 키 포함), 스티커 데이터, 디버그 로그",
     resetWarning: "⚠️ 이 작업은 되돌릴 수 없습니다!",
     language: "언어",
     languageKorean: "한국어",
@@ -381,7 +289,6 @@ export const ko = {
       title: "저장 공간 부족",
       message:
         "브라우저의 저장 공간이 가득 찼습니다. 오래된 대화를 삭제하거나 데이터를 백업 후 초기화해주세요.",
-      message2: "저장 공간이 부족합니다.",
     },
     saveFailed: {
       title: "저장 실패",
@@ -511,7 +418,7 @@ export const ko = {
     },
     fileTooLarge: {
       title: "파일 크기 초과",
-      message2: "은(는) 파일 크기가 너무 큽니다. (최대 30MB)",
+      message: "은(는) 파일 크기가 너무 큽니다. (최대 30MB)",
     },
     fileProcessingError: {
       title: "파일 처리 오류",
@@ -522,8 +429,7 @@ export const ko = {
       message: "을(를) 처리하는 중 오류가 발생했습니다.",
     },
     cannotGenerateRandomCharacter: {
-      message:
-        "랜덤 캐릭터를 생성할 수 없습니다: 사용자 페르소나가 설정되지 않았습니다.",
+      message: "랜덤 캐릭터를 생성할 수 없습니다: 사용자 페르소나가 설정되지 않았습니다.",
     },
     failedToGenerateProfile: {
       message: "프로필 생성 실패:",
@@ -550,6 +456,38 @@ export const ko = {
     resetPromptCompleteMessage:
       '"{{promptName}}"이(가) 기본값으로 되돌려졌습니다.',
   },
+  ui: {
+    discardChanges: "변경사항 취소",
+    unsavedChangesWarning:
+      "저장되지 않은 변경사항이 있습니다. 정말로 취소하시겠습니까?",
+    appStarted: "아리스톡 애플리케이션이 시작되었습니다.",
+    dataLoadFailed: "데이터 로드 실패:",
+    defaultChatName: "기본 채팅",
+    newChatName: "새 채팅",
+    deleteChatRoom: "채팅방 삭제",
+    deleteChatRoomConfirm:
+      "이 채팅방과 모든 메시지가 삭제됩니다. 계속하시겠습니까?",
+    startConversation: "대화를 시작해보세요",
+    imageSent: "사진을 보냈습니다",
+    stickerSent: "스티커를 보냈습니다",
+    enterStickerName: "스티커 이름을 입력하세요:",
+    fileProcessingError: "파일 처리 오류:",
+    fileProcessingAlert: "파일을 처리하는 중 오류가 발생했습니다.",
+    fileSizeExceeded: "파일 크기 초과",
+    unsupportedFormat: "지원하지 않는 형식",
+    stickerProcessingError: "스티커 처리 오류",
+    storageFull: "저장 공간 가득 참",
+    storageFullMessage: "저장 공간이 부족합니다.",
+    groupChatNamePlaceholder: "단톡방 이름을 입력하세요",
+    openChatNamePlaceholder: "오픈톡방 이름을 입력하세요",
+    newGroupChat: "새 단톡방",
+    newOpenChat: "새 오픈톡방",
+    edit: "수정",
+    delete: "삭제",
+    apiKeyPlaceholder: "API 키를 입력하세요",
+    customModelPlaceholder: "커스텀 모델 이름을 입력하세요",
+    generate: "생성하기",
+  },
   chat: {
     defaultChatName: "기본 채팅",
     newChat: "새 채팅",
@@ -571,8 +509,6 @@ export const ko = {
     newGroupChat: "새 단톡방",
     newOpenChat: "새 오픈톡방",
     calculatingStorage: "계산 중...",
-
-    // 그룹 채팅 설정 관련
     responseSettings: "응답 설정",
     overallResponseFrequency: "전체 응답 빈도",
     responseFrequencyInfo: "높을수록 캐릭터들이 더 자주 응답합니다",
@@ -587,22 +523,16 @@ export const ko = {
     roleLeader: "리더",
     roleQuiet: "조용함",
     roleActive: "활발함",
-
-    // 버튼 및 상태
     cancel: "취소",
     save: "저장",
     create: "생성",
     edit: "수정",
     delete: "삭제",
-
-    // 숫자 단위
     people1: "1명",
     people2: "2명",
     people3: "3명",
     people4: "4명",
     seconds: "초",
-
-    // 참여자 및 메시지
     selectParticipants: "참여할 캐릭터 선택",
     minimumParticipants: "최소 2명 이상의 캐릭터를 선택해야 합니다.",
     participantsCount: "명 참여",
@@ -610,21 +540,16 @@ export const ko = {
     startConversation: "대화를 시작해보세요",
     imageSent: "이미지를 보냈습니다",
     stickerSent: "스티커를 보냈습니다",
-
-    // 오픈 채팅 정보
     openChatAutoManagement: "AI가 자동으로 캐릭터들의 입장/퇴장을 관리합니다",
     charactersMoodBased: "캐릭터들은 각자의 기분과 상태에 따라 참여합니다",
     naturalConversation: "자연스러운 대화 흐름이 자동으로 만들어집니다",
     initialParticipants: "처음에는 랜덤하게 2-4명이 입장합니다",
-    // 삭제 확인 메시지
     deleteGroupChatTitle: "단톡방 삭제",
     deleteGroupChatMessage:
       "이 단톡방을 삭제하시겠습니까? 모든 대화 내용이 사라집니다.",
     deleteOpenChatTitle: "오픈톡방 삭제",
     deleteOpenChatMessage:
       "이 오픈톡방을 삭제하시겠습니까? 모든 대화 내용이 사라집니다.",
-
-    // 생성 관련 오류 메시지
     groupChatNameRequired: "단톡방 이름 필요",
     groupChatNameRequiredMessage: "단톡방 이름을 입력해주세요.",
     participantsRequired: "참여자 부족",
@@ -656,7 +581,8 @@ export const ko = {
       "아직 수집된 로그가 없습니다.<br/>채팅을 시작하면 로그가 생성됩니다.",
     logsDisabled:
       '로그 수집이 비활성화되어 있습니다.<br/>설정에서 "디버그 로그 활성화"를 켜주세요.',
-    unknown: "Unknown",
+    unknown: "알 수 없음",
+    invalidDate: "유효하지 않은 날짜",
   },
   api: {
     imageMessage: "이미지를 보냈습니다.",
@@ -664,7 +590,7 @@ export const ko = {
     unknownSticker: "알 수 없는 스티커",
     stickerMessage: '[사용자가 "{{stickerName}}" 스티커를 보냄]',
     proactiveStart:
-      "(SYSTEM: You are starting this conversation. Please begin.)",
+      "(SYSTEM: 당신이 이 대화를 시작합니다. 시작해주세요.)",
     apiError: "{{provider}} API 오류: {{status}} - {{error}}",
     invalidResponse: "{{provider}} API로부터 유효한 응답을 받지 못했습니다.",
     requestFailed: "API 요청 실패: {{status}}",
@@ -674,6 +600,12 @@ export const ko = {
     profileGenerationError: "{{provider}} 프로필 생성 API 호출 중 오류 발생:",
     userNameLabel: "사용자 이름:",
     userDescriptionLabel: "사용자 설명:",
+    geminiParsingError: "응답 파싱 실패: {{error}}",
+    geminiResponseEmpty: "응답이 생성되지 않았습니다. (이유: {{reason}})",
+    geminiLocationNotSupported:
+      "죄송합니다, 현재 국가에서는 Gemini API가 지원되지 않습니다.",
+    geminiProcessingError:
+      "응답 처리 중 오류가 발생했습니다: {{error}}",
     apiKeyNotFound: "API 키를 찾을 수 없습니다. 설정에서 API 키를 확인해주세요.",
   },
   system: {
@@ -710,11 +642,11 @@ export const ko = {
     encryptionEnabledSuccess: "API 키 암호화가 활성화되었습니다!",
     generatedPasswordMessage: "생성된 마스터 비밀번호:\n\n${password}\n\n이 비밀번호를 안전한 곳에 저장하세요!",
     passwordStrength: {
-        veryWeak: "매우 약함",
-        weak: "약함",
-        medium: "보통",
-        strong: "강함",
-        label: "비밀번호 강도: "
+      veryWeak: "매우 약함",
+      weak: "약함",
+      medium: "보통",
+      strong: "강함",
+      label: "비밀번호 강도: "
     }
   },
   secureStorage: {
