@@ -2,6 +2,63 @@
 
 This is the frontend component of the ArisuTalk AI chat application, built with modern JavaScript and featuring a modular, responsive architecture with comprehensive internationalization support.
 
+## Development Guidelines
+
+### Code Standards
+
+- **JSDoc Documentation**: Use JSDoc for all functions and components. You can also use `.d.ts` files.
+  - **No `Object` Type!**: It doesn't provide enough type information.
+- Element IDs: Create `id` attributes for elements (useful for plugins).
+- File Size Limit: Keep files under 300 lines when possible.
+- Async Functions: Always include `async` in function declarations, if the function is asynchronous.
+- HTML Separation: Avoid HTML strings in JS files.
+
+### Internationalization Guidelines
+
+- **Translation Functions**: Use `t()` function for all user-facing text
+- Language Keys: Add new translation keys to both `ko.js` and `en.js`
+- Context Clarity: Use descriptive keys that indicate context
+- Consistency: Maintain consistent terminology across translations
+
+### Event Handling
+
+- Data Attributes: Use `data-listener-added` to prevent duplicate listeners
+- DOM Ready: Ensure DOM elements exist before adding event listeners
+- Cleanup: Remove event listeners when components are destroyed
+
+## Development Setup
+
+### Prerequisites
+
+- Node.js (>20)
+- pnpm (10.14.0+)
+
+### Installation
+
+```bash
+cd frontend
+pnpm install
+```
+
+### Development Server
+
+```bash
+pnpm dev
+```
+
+The development server will start at `http://localhost:5173` with hot reload enabled.
+
+### Build for Production
+
+```bash
+pnpm build
+```
+
+### Testing
+
+```bash
+pnpm test
+```
 
 ## Architecture Overview
 
@@ -10,27 +67,27 @@ This is the frontend component of the ArisuTalk AI chat application, built with 
 
 The application features a completely restructured settings system with device-specific UI components:
 
-- **[DesktopSettingsUI.js](./src/components/DesktopSettingsUI.js)** - Desktop interface with centered layout and tab navigation
-- **[MobileSettingsModal.js](./src/components/MobileSettingsModal.js)** - Mobile-optimized modal interface
-- **[SettingsRouter.js](./src/components/SettingsRouter.js)** - Automatic device detection and UI routing
+- [DesktopSettingsUI.js](./src/components/DesktopSettingsUI.js) - Desktop interface with centered layout and tab navigation
+- [MobileSettingsModal.js](./src/components/MobileSettingsModal.js) - Mobile-optimized modal interface
+- [SettingsRouter.js](./src/components/SettingsRouter.js) - Automatic device detection and UI routing
 
 ### Settings Panels
 
 The settings are organized into five modular panels in `src/components/settings/panels/`:
 
-- **[APISettingsPanel.js](./src/components/settings/panels/APISettingsPanel.js)** - API provider configuration
-- **[AppearanceSettingsPanel.js](./src/components/settings/panels/AppearanceSettingsPanel.js)** - Theme, language, and display settings
-- **[CharacterDefaultsPanel.js](./src/components/settings/panels/CharacterDefaultsPanel.js)** - Default character configurations
-- **[DataManagementPanel.js](./src/components/settings/panels/DataManagementPanel.js)** - Data import/export and management
-- **[AdvancedSettingsPanel.js](./src/components/settings/panels/AdvancedSettingsPanel.js)** - Advanced configuration options
+- [APISettingsPanel.js](./src/components/settings/panels/APISettingsPanel.js) - API provider configuration
+- [AppearanceSettingsPanel.js](./src/components/settings/panels/AppearanceSettingsPanel.js) - Theme, language, and display settings
+- [CharacterDefaultsPanel.js](./src/components/settings/panels/CharacterDefaultsPanel.js) - Default character configurations
+- [DataManagementPanel.js](./src/components/settings/panels/DataManagementPanel.js) - Data import/export and management
+- [AdvancedSettingsPanel.js](./src/components/settings/panels/AdvancedSettingsPanel.js) - Advanced configuration options
 
 ### Internationalization (i18n) System
 
-**Complete i18n Integration**: All hardcoded strings have been replaced with translation functions:
+Complete i18n Integration: All hardcoded strings have been replaced with translation functions:
 
-- **Language Files**: `src/language/ko.js` and `src/language/en.js` with 100+ translation keys
-- **Real-time Switching**: Language changes apply immediately without page refresh
-- **Comprehensive Coverage**: API files, UI components, modals, and system messages are fully internationalized
+- Language Files: `src/language/ko.js` and `src/language/en.js` with 100+ translation keys
+- Real-time Switching: Language changes apply immediately without page refresh
+- Comprehensive Coverage: API files, UI components, modals, and system messages are fully internationalized
 
 ### Component Structure
 
@@ -85,113 +142,25 @@ src/
 
 ### Responsive Design
 
-- **Device Detection**: Automatic detection of desktop vs mobile devices
-- **Adaptive UI**: Different interfaces optimized for each device type
-- **Consistent Experience**: Unified functionality across all devices
+- Device Detection: Automatic detection of desktop vs mobile devices
+- Adaptive UI: Different interfaces optimized for each device type
+- Consistent Experience: Unified functionality across all devices
 
 ### State Management
 
-- **Centralized State**: All application state managed through index.js
-- **Real-time Updates**: Instant UI updates when settings change
-- **Data Persistence**: Automatic saving of user preferences and data
+- Centralized State: All application state managed through index.js
+- Real-time Updates: Instant UI updates when settings change
+- Data Persistence: Automatic saving of user preferences and data
 
 ### Security
 
-- **Encrypted Storage**: API keys and sensitive data are encrypted
-- **Master Password**: Optional master password protection
-- **Secure Communication**: All API communications are secured
-
-## Development Guidelines
-
-### Code Standards
-
-- **JSDoc Documentation**: Use JSDoc for all functions and components. You can also use `.d.ts` files.
-  - **No `Object` Type!**: It doesn't provide enough type information.
-- **Element IDs**: Create `id` attributes for elements (useful for plugins)
-- **File Size Limit**: Keep files under 300 lines when possible
-- **Async Functions**: Always include `async` in function declarations
-- **HTML Separation**: Avoid HTML strings in JS files
-- **Component Modularity**: Maintain clear separation of concerns
-
-### Internationalization Guidelines
-
-- **Translation Functions**: Use `t()` function for all user-facing text
-- **Language Keys**: Add new translation keys to both `ko.js` and `en.js`
-- **Context Clarity**: Use descriptive keys that indicate context
-- **Consistency**: Maintain consistent terminology across translations
-
-### Event Handling
-
-- **Data Attributes**: Use `data-listener-added` to prevent duplicate listeners
-- **DOM Ready**: Ensure DOM elements exist before adding event listeners
-- **Cleanup**: Remove event listeners when components are destroyed
-
-## Development Setup
-
-### Prerequisites
-
-- Node.js (>20)
-- pnpm (10.14.0+)
-
-### Installation
-
-```bash
-cd frontend
-pnpm install
-```
-
-### Development Server
-
-```bash
-pnpm dev
-```
-
-The development server will start at `http://localhost:5173` with hot reload enabled.
-
-### Build for Production
-
-```bash
-pnpm build
-```
-
-### Testing
-
-```bash
-pnpm test
-```
-
-## Recent Major Changes (August 2025)
-
-### UI Architecture Restructure
-
-- Replaced monolithic `SettingsModal.js` with modular panel system
-- Added device-specific UI components for desktop and mobile
-- Implemented automatic device detection and routing
-- Enhanced responsive design and user experience
-
-### Internationalization Integration
-
-- Migrated all hardcoded strings to translation system
-- Added comprehensive Korean and English language support
-- Implemented real-time language switching
-- Enhanced API error messages with internationalization
-
-### Component Improvements
-
-- Enhanced CSS styling with improved responsive design
-- Better event listener management and DOM updates
-- Improved state management for settings panels
-- Added input value preservation during re-renders
+- Encrypted Storage: API keys and sensitive data are encrypted
+- Master Password: Optional master password protection
+- Secure Communication: All API communications are secured
 
 ## Contributing
 
-When contributing to the frontend:
-
-1. Follow the established code standards and guidelines
-2. Add JSDoc documentation for new functions
-3. Include translation keys for any user-facing text
-4. Test on both desktop and mobile interfaces
-5. Ensure proper event listener cleanup
+Contributions are welcome! Please see [CONTRIBUTING.md](../CONTRIBUTING.md) for guidelines.
 
 ### License
 
