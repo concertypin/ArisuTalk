@@ -11,6 +11,9 @@ plugins {
 
     // Apply the application plugin to add support for building a CLI application in Java.
     application
+
+    // ktlint-gradle plugin
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
 }
 
 repositories {

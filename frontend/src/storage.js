@@ -1,4 +1,4 @@
-import { t } from './i18n.js';
+import { t } from "./i18n.js";
 
 export async function loadFromBrowserStorage(key, defaultValue) {
   try {
@@ -12,11 +12,11 @@ export async function loadFromBrowserStorage(key, defaultValue) {
 
 export function saveToBrowserStorage(key, value) {
   // 비동기 처리를 내부적으로 수행하여 기존 코드와 호환성 유지
-  saveToIndexedDB(key, value).catch(error => {
+  saveToIndexedDB(key, value).catch((error) => {
     console.error(`Error saving to IndexedDB key "${key}":`, error);
     // 중요한 데이터 손실 방지를 위해 사용자에게 알림
     setTimeout(() => {
-      alert(t('modal.saveFailed.message'));
+      alert(t("modal.saveFailed.message"));
     }, 100);
   });
 }
@@ -109,11 +109,11 @@ export async function getIndexedDBUsage() {
 export async function checkIndexedDBQuota(newData = "", existingKey = "") {
   // IndexedDB는 일반적으로 수 GB의 용량을 지원하므로 용량 체크를 단순화
   try {
-    if ('storage' in navigator && 'estimate' in navigator.storage) {
+    if ("storage" in navigator && "estimate" in navigator.storage) {
       const estimate = await navigator.storage.estimate();
       const used = estimate.usage || 0;
-      const quota = estimate.quota || (1024 * 1024 * 1024); // 기본 1GB
-      
+      const quota = estimate.quota || 1024 * 1024 * 1024; // 기본 1GB
+
       // Safari Mobile 1GB 제한 고려, 500MB 이상 사용시 경고
       const safeLimit = 500 * 1024 * 1024; // 500MB
       if (used > safeLimit || used / quota > 0.8) {
@@ -124,11 +124,11 @@ export async function checkIndexedDBQuota(newData = "", existingKey = "") {
         };
       }
     }
-    
+
     // 기본적으로 저장 허용
     return { canSave: true };
   } catch (error) {
-    console.warn('Storage quota check failed:', error);
+    console.warn("Storage quota check failed:", error);
     return { canSave: true };
   }
 }

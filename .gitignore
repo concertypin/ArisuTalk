@@ -18,7 +18,11 @@ build/
 # IDE files
 .vscode/
 .idea/
+.qoder/*
 
 # Temporary files
 *.tmp
 *.temp
+
+# Linters
+backend/ktlint
