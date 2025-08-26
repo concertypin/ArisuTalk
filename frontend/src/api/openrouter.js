@@ -56,7 +56,7 @@ export class OpenRouterClient {
         }
       } else if (msg.isMe && msg.type === "sticker" && msg.stickerData) {
         const stickerName = msg.stickerData.stickerName || t("api.unknownSticker");
-        content = t("api.stickerMessage", { stickerName: stickerName });
+        content = t("api.stickerMessage", { stickerName: stickerName }) + (content ? ` ${content}` : "");
       }
 
       if (content) {
