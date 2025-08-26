@@ -1,4 +1,4 @@
-import { t } from "i18next";
+import { t } from "../i18n.js";
 import { GeminiClient } from "./gemini.js";
 import { ClaudeClient } from "./claude.js";
 import { OpenAIClient } from "./openai.js";

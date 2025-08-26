@@ -535,6 +535,29 @@ export const en = {
     passwordNotComplex:
       "Password must contain at least 3 of the following: uppercase, lowercase, numbers, special characters.",
     passwordStrong: "Strong password.",
+    encryptionSetupTitle: "API Key Encryption Setup",
+    encryptionSetupDescription: "Set up encryption to securely protect your API keys.",
+    whyEncryptionIsNeeded: "Why is encryption needed?",
+    encryptionBenefit1: "• API keys are not exposed in plain text in the browser",
+    encryptionBenefit2: "• Protects API keys from malicious extensions",
+    encryptionBenefit3: "• Securely protects API keys from XSS attacks",
+    masterPasswordLabel: "Master Password",
+    confirmPasswordLabel: "Confirm Password",
+    passwordHintLabel: "Password Hint (optional)",
+    passwordHintWarning: "The hint is not encrypted, so do not include the password itself.",
+    generateSecurePassword: "Generate a secure password automatically",
+    setupEncryption: "Setup Encryption",
+    enterMasterPassword: "Please enter a master password.",
+    passwordsDoNotMatch: "Passwords do not match.",
+    encryptionEnabledSuccess: "API key encryption has been enabled!",
+    generatedPasswordMessage: "Generated Master Password:\n\n${password}\n\nPlease save this password in a safe place!",
+    passwordStrength: {
+        veryWeak: "Very Weak",
+        weak: "Weak",
+        medium: "Medium",
+        strong: "Strong",
+        label: "Password Strength: "
+    }
   },
   characterModalSlider: {
     responseTime: {
