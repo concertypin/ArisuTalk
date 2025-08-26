@@ -1,3 +1,4 @@
+/** @type {import('./language.d').LanguageStrings} */
 export const en = {
   common: {
     cancel: "Cancel",
