@@ -689,5 +689,8 @@ export const ko = {
     passwordHintPlaceholder: "비밀번호를 기억할 수 있는 힙트",
     encryptionFailed: "암호화에 실패했습니다",
     decryptionFailed: "복호화에 실패했습니다. 비밀번호를 확인해주세요.",
+    passwordTooShort: "비밀번호는 최소 {{minLength}}자 이상이어야 합니다.",
+    passwordNotComplex: "비밀번호는 대문자, 소문자, 숫자, 특수문자 중 3가지 이상을 포함해야 합니다.",
+    passwordStrong: "강력한 비밀번호입니다.",
   },
 };

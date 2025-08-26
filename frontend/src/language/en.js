@@ -527,6 +527,9 @@ export const en = {
     passwordHintPlaceholder: "Hint to help you remember the password",
     encryptionFailed: "Encryption failed",
     decryptionFailed: "Decryption failed. Please check your password.",
+    passwordTooShort: "Password must be at least {{minLength}} characters long.",
+    passwordNotComplex: "Password must contain at least 3 of the following: uppercase, lowercase, numbers, special characters.",
+    passwordStrong: "Strong password.",
   },
   characterModalSlider: {
     responseTime: {
