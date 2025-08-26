@@ -98,6 +98,13 @@ export const en = {
     backupPrompts: "Backup Prompts",
     restorePrompts: "Restore Prompts",
     characterSheetGenerationPrompt: "AI Character Sheet Generation Prompt",
+    // ChatML Support
+    useChatML: "Use ChatML Format",
+    chatMLPrompt: "ChatML Prompt",
+    chatMLDescription: "ChatML (Chat Markup Language) provides a simpler way to define conversations with specific roles and prefill support.",
+    chatMLToggleHelp: "Enable this to use ChatML format instead of the complex prompt system above",
+    chatMLSyntaxHelp: "Use ChatML syntax: <|im_start|>role\\ncontent<|im_end|>\\nSupported roles: system, user, assistant",
+    chatMLInvalid: "Invalid ChatML format. Please check your syntax.",
   },
   settings: {
     restore: "Restore",

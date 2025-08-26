@@ -68,6 +68,8 @@ class PersonaChatApp {
           profile_creation: this.defaultPrompts.profile_creation,
           character_sheet_generation:
             this.defaultPrompts.character_sheet_generation,
+          useChatML: false,
+          chatMLPrompt: "",
         },
       },
       characters: defaultCharacters,
@@ -337,6 +339,8 @@ class PersonaChatApp {
           character_sheet_generation:
             settings.prompts?.character_sheet_generation ||
             this.defaultPrompts.character_sheet_generation,
+          useChatML: settings.prompts?.useChatML || false,
+          chatMLPrompt: settings.prompts?.chatMLPrompt || "",
         },
       };
 
@@ -1067,6 +1071,9 @@ class PersonaChatApp {
   }
 
   handleSavePrompts() {
+    const useChatMLElement = document.getElementById("use-chatml-toggle");
+    const chatMLPromptElement = document.getElementById("chatml-prompt-input");
+    
     const newPrompts = {
       main: {
         system_rules: document.getElementById("prompt-main-system_rules").value,
@@ -1087,12 +1094,16 @@ class PersonaChatApp {
         ).value,
         sticker_usage: document.getElementById("prompt-main-sticker_usage")
           .value,
+        group_chat_context: document.getElementById("prompt-main-group_chat_context")?.value || this.state.settings.prompts.main.group_chat_context,
+        open_chat_context: document.getElementById("prompt-main-open_chat_context")?.value || this.state.settings.prompts.main.open_chat_context,
       },
       profile_creation: document.getElementById("prompt-profile_creation")
         .value,
       character_sheet_generation: document.getElementById(
         "prompt-character_sheet_generation",
       ).value,
+      useChatML: useChatMLElement ? useChatMLElement.checked : false,
+      chatMLPrompt: chatMLPromptElement ? chatMLPromptElement.value : "",
     };
 
     this.setState({
@@ -1104,6 +1115,97 @@ class PersonaChatApp {
         message: t("modal.promptSaveComplete.message"),
         onConfirm: null,
       },
+    });
+  }
+
+  // ChatML Handlers
+  handleChatMLToggle() {
+    const toggle = document.getElementById("use-chatml-toggle");
+    const chatMLSection = document.getElementById("chatml-section");
+    const complexPromptsSection = document.getElementById("complex-prompts-section");
+    const complexPromptStatus = document.getElementById("complex-prompt-status");
+    
+    if (toggle && chatMLSection && complexPromptsSection && complexPromptStatus) {
+      const isEnabled = toggle.checked;
+      
+      // Show/hide ChatML section
+      chatMLSection.classList.toggle("hidden", !isEnabled);
+      
+      // Enable/disable complex prompts section
+      if (isEnabled) {
+        complexPromptsSection.classList.add("opacity-50", "pointer-events-none");
+        complexPromptStatus.textContent = "(Disabled - ChatML Active)";
+      } else {
+        complexPromptsSection.classList.remove("opacity-50", "pointer-events-none");
+        complexPromptStatus.textContent = "(Active)";
+      }
+    }
+  }
+
+  handleResetChatML() {
+    import("./api/chatMLParser.js").then(({ getDefaultChatMLTemplate }) => {
+      const chatMLInput = document.getElementById("chatml-prompt-input");
+      if (chatMLInput) {
+        // Get current character if available
+        const currentCharacter = this.state.selectedChatId 
+          ? this.state.characters.find(c => c.id === this.state.selectedChatId)
+          : null;
+        
+        chatMLInput.value = getDefaultChatMLTemplate(currentCharacter);
+        this.handleChatMLInput({ target: chatMLInput });
+      }
+    });
+  }
+
+  handleGenerateChatMLTemplate() {
+    import("./api/chatMLParser.js").then(({ getDefaultChatMLTemplate }) => {
+      const chatMLInput = document.getElementById("chatml-prompt-input");
+      if (chatMLInput) {
+        // Get current character if available
+        const currentCharacter = this.state.selectedChatId 
+          ? this.state.characters.find(c => c.id === this.state.selectedChatId)
+          : null;
+        
+        // If input is empty, generate template, otherwise ask for confirmation
+        if (!chatMLInput.value.trim()) {
+          chatMLInput.value = getDefaultChatMLTemplate(currentCharacter);
+          this.handleChatMLInput({ target: chatMLInput });
+        } else {
+          this.showConfirmModal(
+            "Generate Template",
+            "This will replace your current ChatML prompt. Continue?",
+            () => {
+              chatMLInput.value = getDefaultChatMLTemplate(currentCharacter);
+              this.handleChatMLInput({ target: chatMLInput });
+            }
+          );
+        }
+      }
+    });
+  }
+
+  handleChatMLInput(e) {
+    import("./api/chatMLParser.js").then(({ isValidChatML }) => {
+      const validationDiv = document.getElementById("chatml-validation");
+      if (validationDiv) {
+        const text = e.target.value;
+        
+        if (!text.trim()) {
+          validationDiv.innerHTML = "";
+          return;
+        }
+        
+        if (isValidChatML(text)) {
+          validationDiv.innerHTML = '<span class="text-green-400"><i data-lucide="check" class="w-3 h-3 inline mr-1"></i>Valid ChatML format</span>';
+        } else {
+          validationDiv.innerHTML = `<span class="text-red-400"><i data-lucide="alert-circle" class="w-3 h-3 inline mr-1"></i>${t("promptModal.chatMLInvalid")}</span>`;
+        }
+        
+        // Re-initialize Lucide icons
+        if (window.lucide) {
+          window.lucide.createIcons();
+        }
+      }
     });
   }
 

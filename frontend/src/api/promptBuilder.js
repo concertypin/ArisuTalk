@@ -4,6 +4,7 @@
  * allowing for easier management and testing of the prompt engineering aspects.
  */
 import { getSystemPrompt } from "./prompts.js";
+import { parseChatML, chatMLToPromptStructure } from "./chatMLParser.js";
 
 /**
  * Builds the contents and system prompt for a content generation request.
@@ -26,6 +27,80 @@ export function buildContentPrompt({
   isProactive = false,
   forceSummary = false,
 }) {
+  // Check if ChatML mode is enabled
+  if (prompts.useChatML && prompts.chatMLPrompt) {
+    // Parse ChatML and use it instead of the complex prompt system
+    const chatMLMessages = parseChatML(prompts.chatMLPrompt);
+    const { systemPrompt, contents } = chatMLToPromptStructure(
+      chatMLMessages,
+      character,
+      userName,
+      userDescription
+    );
+    
+    // Add conversation history to ChatML-parsed contents
+    let chatMLContents = [...contents];
+    
+    // Add history messages
+    for (const msg of history) {
+      const role = msg.isMe ? "user" : "model";
+      let parts = [];
+
+      if (msg.isMe && msg.type === "image" && msg.imageId) {
+        const imageData = character?.media?.find((m) => m.id === msg.imageId);
+        if (imageData) {
+          let textContent = msg.content || "(User sent an image with no caption)";
+          parts.push({ text: textContent });
+          parts.push({
+            inlineData: {
+              mimeType: imageData.mimeType || "image/jpeg",
+              data: imageData.dataUrl.split(",")[1],
+            },
+          });
+        } else {
+          parts.push({
+            text:
+              msg.content || "(User sent an image that is no longer available)",
+          });
+        }
+      } else if (msg.isMe && msg.type === "sticker" && msg.stickerData) {
+        // 페르소나 스티커: 스티커 이름만 AI에게 전송 (파일 데이터는 전송하지 않음)
+        const stickerName = msg.stickerData.stickerName || "Unknown Sticker";
+        let stickerText = `[사용자가 "${stickerName}" 스티커를 보냄]`;
+        if (msg.content && msg.content.trim()) {
+          stickerText += ` ${msg.content}`;
+        }
+        parts.push({ text: stickerText });
+      } else if (msg.content) {
+        parts.push({ text: msg.content });
+      }
+
+      if (parts.length > 0) {
+        chatMLContents.push({ role, parts });
+      }
+    }
+
+    // Handle proactive messages for ChatML
+    if (isProactive && chatMLContents.length > 0) {
+      const lastContent = chatMLContents[chatMLContents.length - 1];
+      if (lastContent.role === "model") {
+        chatMLContents.pop();
+      }
+    }
+
+    if (isProactive && chatMLContents.length === 0) {
+      chatMLContents.push({
+        role: "user",
+        parts: [
+          { text: "(SYSTEM: You are starting this conversation. Please begin.)" },
+        ],
+      });
+    }
+
+    return { contents: chatMLContents, systemPrompt };
+  }
+
+  // Original complex prompt system (fallback)
   let contents = [];
   for (const msg of history) {
     const role = msg.isMe ? "user" : "model";
