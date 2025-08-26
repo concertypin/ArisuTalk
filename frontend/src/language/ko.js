@@ -93,7 +93,7 @@ export const ko = {
     stickerSupport: "jpg, gif, png, bmp, webp 지원 (개당 최대 30MB)",
     stickerCount: "스티커 개수: {{count}}개",
     totalSize: "총 용량: {{size}}",
-    audiSticker: "오디오", // Note: This key seems to be a typo of 'audioSticker'
+    audioSticker: "오디오",
     participantsConnected: "{{count}}명 접속중",
     participantsJoined: "{{count}}명 참여",
     debugLogButtonTitle: "디버그 로그 보기",
