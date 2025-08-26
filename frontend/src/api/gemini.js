@@ -184,9 +184,8 @@ export class GeminiClient {
 
           // Additional cleanup for common JSON issues
           cleanedText = cleanedText
-            .replace(/\\n/g, "\\\\n") // Escape newlines properly
-            .replace(/\\'/g, "\\'") // Escape single quotes
-            .replace(/\\"/g, '\\\\"') // Escape double quotes properly
+            .replace(/\\n/g, "\\\\n") // Escape newlines properly for JSON.parse
+            .replace(/\\"/g, '\\\\"') // Escape double quotes properly for JSON.parse
             .trim();
 
           const parsed = JSON.parse(cleanedText);
@@ -331,9 +330,8 @@ export class GeminiClient {
 
           // Additional cleanup for common JSON issues
           cleanedText = cleanedText
-            .replace(/\\n/g, "\\\\n") // Escape newlines properly
-            .replace(/\\'/g, "\\'") // Escape single quotes
-            .replace(/\\"/g, '\\\\"') // Escape double quotes properly
+            .replace(/\\n/g, "\\\\n") // Escape newlines properly for JSON.parse
+            .replace(/\\"/g, '\\\\"') // Escape double quotes properly for JSON.parse
             .trim();
 
           const parsed = JSON.parse(cleanedText);
