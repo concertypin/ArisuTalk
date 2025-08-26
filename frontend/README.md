@@ -4,11 +4,13 @@ This is the frontend component of the ArisuTalk AI chat application.
 
 ## Developer's guide
 - Use JSDoc. Migration to TypeScript is planned.
+  - Don't use only `Object` type. Define proper type or interface.
+  - You can use .d.ts files too.
 - Make `id` element. It could be used by plugins.
 - Try to keep your code up to 300 lines.
 - Keep `async` in function declaration even if it can be omitted.
 - Avoid using HTML string in JS file.
-- Use JSDoc. Important thing.
+- Use JSDoc. Said twice for emphasis.
 
 ## How to Start Server
 
