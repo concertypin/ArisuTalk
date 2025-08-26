@@ -6,6 +6,7 @@
   "scripts": {
     "dev:fe": "pnpm --filter frontend dev",
     "build:fe": "pnpm --filter frontend build",
+    "format:fe": "pnpm --filter frontend format",
     "dev:be": "cd backend && ./gradlew run"
   },
   "keywords": [],
