@@ -513,6 +513,7 @@ export const en = {
       "Sorry, Gemini API is not supported in your current country.",
     geminiProcessingError:
       "An error occurred while processing response: {{error}}",
+    apiKeyNotFound: "API key not found. Please check your API key in the settings.",
   },
   system: {
     languageChangeMessage: "Language has been changed. The page will be refreshed.",

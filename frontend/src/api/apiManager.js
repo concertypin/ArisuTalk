@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import { GeminiClient } from "./gemini.js";
 import { ClaudeClient } from "./claude.js";
 import { OpenAIClient } from "./openai.js";
@@ -32,7 +33,7 @@ export class APIManager {
         return await window.personaApp.getApiKey(provider);
       }
       throw new Error(
-        "API 키를 찾을 수 없습니다. 설정에서 API 키를 확인해주세요.",
+        t("api.apiKeyNotFound"),
       );
     }
     return apiKey;

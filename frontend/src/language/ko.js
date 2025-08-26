@@ -674,6 +674,7 @@ export const ko = {
     profileGenerationError: "{{provider}} 프로필 생성 API 호출 중 오류 발생:",
     userNameLabel: "사용자 이름:",
     userDescriptionLabel: "사용자 설명:",
+    apiKeyNotFound: "API 키를 찾을 수 없습니다. 설정에서 API 키를 확인해주세요.",
   },
   system: {
     languageChangeMessage:
