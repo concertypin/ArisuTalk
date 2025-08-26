@@ -177,9 +177,8 @@ export function validatePassword(password) {
     strength: strength,
     message:
       password.length < minLength
-        ? `비밀번호는 최소 ${minLength}자 이상이어야 합니다.`
+        ? t("security.passwordTooShort", { minLength })
         : strength < 3
-          ? "대문자, 소문자, 숫자, 특수문자 중 3개 이상을 포함해야 합니다."
-          : "안전한 비밀번호입니다.",
-  };
+        ? t("security.passwordNotComplex")
+        : t("security.passwordStrong"),
 }
