@@ -181,4 +181,5 @@ export function validatePassword(password) {
         : strength < 3
         ? t("security.passwordNotComplex")
         : t("security.passwordStrong"),
+  };
 }
