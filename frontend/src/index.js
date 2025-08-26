@@ -1,5 +1,9 @@
 import { t, setLanguage, getLanguage } from "./i18n.js";
-import { defaultPrompts, defaultCharacters, defaultAPISettings } from "./defaults.js";
+import {
+  defaultPrompts,
+  defaultCharacters,
+  defaultAPISettings,
+} from "./defaults.js";
 import {
   loadFromBrowserStorage,
   saveToBrowserStorage,
@@ -7,7 +11,10 @@ import {
 } from "./storage.js";
 import { APIManager } from "./api/apiManager.js";
 import { PROVIDERS, PROVIDER_MODELS } from "./constants/providers.js";
-import { renderProviderConfig, setupAdvancedSettingsEventListeners } from "./components/SettingsModal.js";
+import {
+  renderProviderConfig,
+  setupAdvancedSettingsEventListeners,
+} from "./components/MobileSettingsModal.js";
 import { render } from "./ui.js";
 import { secureStorage } from "./utils/secureStorage.js";
 import {
@@ -59,7 +66,8 @@ class PersonaChatApp {
         prompts: {
           main: { ...this.defaultPrompts.main },
           profile_creation: this.defaultPrompts.profile_creation,
-          character_sheet_generation: this.defaultPrompts.character_sheet_generation,
+          character_sheet_generation:
+            this.defaultPrompts.character_sheet_generation,
         },
       },
       characters: defaultCharacters,
@@ -99,7 +107,15 @@ class PersonaChatApp {
       showUserStickerPanel: false,
       stickerToSend: null,
       expandedStickers: new Set(),
-      openSettingsSections: ['ai'],
+      openSettingsSections: ["ai"],
+      // PC 설정 UI 상태
+      ui: {
+        settingsUIMode: null, // 'mobile' | 'desktop' | null (자동 감지)
+        desktopSettings: {
+          activePanel: "api", // 'api' | 'appearance' | 'character' | 'data' | 'advanced'
+          isVisible: false,
+        },
+      },
     };
     this.oldState = null;
     this.messagesEndRef = null;
@@ -109,48 +125,51 @@ class PersonaChatApp {
 
     this.debouncedSaveSettings = debounce(
       (settings) => saveToBrowserStorage("personaChat_settings_v16", settings),
-      500
+      500,
     );
     this.debouncedSaveCharacters = debounce(
       (characters) =>
         saveToBrowserStorage("personaChat_characters_v16", characters),
-      500
+      500,
     );
     this.debouncedSaveChatRooms = debounce(
-      (chatRooms) => saveToBrowserStorage("personaChat_chatRooms_v16", chatRooms),
-      500
+      (chatRooms) =>
+        saveToBrowserStorage("personaChat_chatRooms_v16", chatRooms),
+      500,
     );
     this.debouncedSaveMessages = debounce(
       (messages) => saveToBrowserStorage("personaChat_messages_v16", messages),
-      500
+      500,
     );
     this.debouncedSaveUnreadCounts = debounce(
       (unreadCounts) =>
         saveToBrowserStorage("personaChat_unreadCounts_v16", unreadCounts),
-      500
+      500,
     );
     this.debouncedSaveUserStickers = debounce(
       (userStickers) =>
         saveToBrowserStorage("personaChat_userStickers_v16", userStickers),
-      500
+      500,
     );
     this.debouncedSaveGroupChats = debounce(
-      (groupChats) => saveToBrowserStorage("personaChat_groupChats_v16", groupChats),
-      500
+      (groupChats) =>
+        saveToBrowserStorage("personaChat_groupChats_v16", groupChats),
+      500,
     );
     this.debouncedSaveOpenChats = debounce(
-      (openChats) => saveToBrowserStorage("personaChat_openChats_v16", openChats),
-      500
+      (openChats) =>
+        saveToBrowserStorage("personaChat_openChats_v16", openChats),
+      500,
     );
     this.debouncedSaveSettingsSnapshots = debounce(
       (snapshots) =>
         saveToBrowserStorage("personaChat_settingsSnapshots_v16", snapshots),
-      500
+      500,
     );
     this.debouncedSaveDebugLogs = debounce(
       (debugLogs) =>
         saveToBrowserStorage("personaChat_debugLogs_v16", debugLogs),
-      500
+      500,
     );
   }
 
@@ -164,7 +183,7 @@ class PersonaChatApp {
 
     const newSnapshots = [newSnapshot, ...this.state.settingsSnapshots].slice(
       0,
-      10
+      10,
     );
     this.setState({ settingsSnapshots: newSnapshots });
   }
@@ -188,7 +207,7 @@ class PersonaChatApp {
 
     this.proactiveInterval = setInterval(
       () => this.checkAndSendProactiveMessages(),
-      60000
+      60000,
     );
 
     if (this.state.settings.randomFirstMessageEnabled) {
@@ -223,8 +242,8 @@ class PersonaChatApp {
 
     if (hasChanges) {
       this.showConfirmModal(
-        t('ui.discardChanges'),
-        t('ui.unsavedChangesWarning'),
+        t("ui.discardChanges"),
+        t("ui.unsavedChangesWarning"),
         () => {
           if (this.initialSettings) {
             this.setState({
@@ -239,7 +258,7 @@ class PersonaChatApp {
               modal: { isOpen: false, title: "", message: "", onConfirm: null },
             });
           }
-        }
+        },
       );
     } else {
       this.setState({ showSettingsModal: false, initialSettings: null });
@@ -254,7 +273,7 @@ class PersonaChatApp {
 
   handleRestoreSnapshot(timestamp) {
     const snapshot = this.state.settingsSnapshots.find(
-      (s) => s.timestamp === timestamp
+      (s) => s.timestamp === timestamp,
     );
     if (snapshot) {
       this.setState({ settings: snapshot.settings });
@@ -263,7 +282,7 @@ class PersonaChatApp {
 
   handleDeleteSnapshot(timestamp) {
     const newSnapshots = this.state.settingsSnapshots.filter(
-      (s) => s.timestamp !== timestamp
+      (s) => s.timestamp !== timestamp,
     );
     this.setState({ settingsSnapshots: newSnapshots });
   }
@@ -271,8 +290,8 @@ class PersonaChatApp {
   toggleSettingsSection(section) {
     const openSections = this.state.openSettingsSections || [];
     const newOpenSections = openSections.includes(section)
-        ? openSections.filter(s => s !== section)
-        : [...openSections, section];
+      ? openSections.filter((s) => s !== section)
+      : [...openSections, section];
     this.setState({ openSettingsSections: newOpenSections });
   }
 
@@ -333,56 +352,59 @@ class PersonaChatApp {
       this.state.openChats = openChats;
       this.state.characterStates = characterStates;
       this.state.settingsSnapshots = settingsSnapshots;
-      
+
       // 디버그 로그 설정 로딩
       this.state.enableDebugLogs = settings.enableDebugLogs || false;
-      
+
       // 디버그 로그 로드 (기존 로그가 있으면 사용, 없으면 기본값)
-      this.state.debugLogs = debugLogs.length > 0 ? debugLogs : [
-        {
-          id: Date.now(),
-          timestamp: Date.now(),
-          message: t('ui.appStarted'),
-          level: 'info',
-          type: 'simple'
-        },
-        {
-          id: Date.now() + 1,
-          timestamp: Date.now(),
-          characterName: 'System',
-          chatType: 'system',
-          type: 'structured',
-          data: {
-        personaInput: {
-          characterName: 'System',
-          characterPrompt: 'System initialization',
-          characterMemories: [],
-          characterId: 'system'
-        },
-        systemPrompt: { initialization: 'App startup process' },
-        outputResponse: {
-          messages: [],
-          newMemory: null,
-          characterState: null
-        },
-        parameters: {
-          model: 'system',
-          isProactive: false,
-          forceSummary: false,
-          messageCount: 0
-        },
-        metadata: {
-          chatId: null,
-          chatType: 'system',
-          timestamp: Date.now(),
-          apiProvider: 'system',
-          model: 'system'
-        }
-          }
-        }
-      ];
+      this.state.debugLogs =
+        debugLogs.length > 0
+          ? debugLogs
+          : [
+              {
+                id: Date.now(),
+                timestamp: Date.now(),
+                message: t("ui.appStarted"),
+                level: "info",
+                type: "simple",
+              },
+              {
+                id: Date.now() + 1,
+                timestamp: Date.now(),
+                characterName: "System",
+                chatType: "system",
+                type: "structured",
+                data: {
+                  personaInput: {
+                    characterName: "System",
+                    characterPrompt: "System initialization",
+                    characterMemories: [],
+                    characterId: "system",
+                  },
+                  systemPrompt: { initialization: "App startup process" },
+                  outputResponse: {
+                    messages: [],
+                    newMemory: null,
+                    characterState: null,
+                  },
+                  parameters: {
+                    model: "system",
+                    isProactive: false,
+                    forceSummary: false,
+                    messageCount: 0,
+                  },
+                  metadata: {
+                    chatId: null,
+                    chatType: "system",
+                    timestamp: Date.now(),
+                    apiProvider: "system",
+                    model: "system",
+                  },
+                },
+              },
+            ];
     } catch (error) {
-      console.error(t('ui.dataLoadFailed'), error);
+      console.error(t("ui.dataLoadFailed"), error);
     }
   }
 
@@ -460,11 +482,11 @@ class PersonaChatApp {
 
   // --- CHAT ROOM TYPE MANAGEMENT ---
   isGroupChat(chatId) {
-    return chatId && typeof chatId === 'string' && chatId.startsWith('group_');
+    return chatId && typeof chatId === "string" && chatId.startsWith("group_");
   }
 
   isOpenChat(chatId) {
-    return chatId && typeof chatId === 'string' && chatId.startsWith('open_');
+    return chatId && typeof chatId === "string" && chatId.startsWith("open_");
   }
 
   isRegularChat(chatId) {
@@ -472,19 +494,19 @@ class PersonaChatApp {
   }
 
   getChatType(chatId) {
-    if (this.isGroupChat(chatId)) return 'group';
-    if (this.isOpenChat(chatId)) return 'open';
-    return 'regular';
+    if (this.isGroupChat(chatId)) return "group";
+    if (this.isOpenChat(chatId)) return "open";
+    return "regular";
   }
 
   createGroupChat(name, participantIds) {
-    const groupChatId = 'group_' + Date.now();
+    const groupChatId = "group_" + Date.now();
     const newGroupChat = {
       id: groupChatId,
       name: name,
       participantIds: participantIds,
       createdAt: Date.now(),
-      type: 'group',
+      type: "group",
       settings: {
         responseFrequency: 0.8,
         maxRespondingCharacters: 2,
@@ -493,54 +515,57 @@ class PersonaChatApp {
           acc[id] = {
             isActive: true,
             responseProbability: 0.9,
-            characterRole: 'normal'
+            characterRole: "normal",
           };
           return acc;
-        }, {})
-      }
+        }, {}),
+      },
     };
-    
-    const newGroupChats = { ...this.state.groupChats, [groupChatId]: newGroupChat };
+
+    const newGroupChats = {
+      ...this.state.groupChats,
+      [groupChatId]: newGroupChat,
+    };
     const newMessages = { ...this.state.messages, [groupChatId]: [] };
-    
-    this.setState({ 
+
+    this.setState({
       groupChats: newGroupChats,
       messages: newMessages,
       selectedChatId: groupChatId,
-      showCreateGroupChatModal: false
+      showCreateGroupChatModal: false,
     });
-    
-    saveToBrowserStorage('personaChat_messages_v16', newMessages);
-    saveToBrowserStorage('personaChat_groupChats_v16', newGroupChats);
+
+    saveToBrowserStorage("personaChat_messages_v16", newMessages);
+    saveToBrowserStorage("personaChat_groupChats_v16", newGroupChats);
     return groupChatId;
   }
 
   async createOpenChat(name) {
-    const openChatId = 'open_' + Date.now();
+    const openChatId = "open_" + Date.now();
     const newOpenChat = {
       id: openChatId,
       name: name,
       createdAt: Date.now(),
-      type: 'open',
+      type: "open",
       currentParticipants: [],
       participantHistory: [],
       chatActivity: 0,
-      lastActivity: Date.now()
+      lastActivity: Date.now(),
     };
-    
+
     const newOpenChats = { ...this.state.openChats, [openChatId]: newOpenChat };
     const newMessages = { ...this.state.messages, [openChatId]: [] };
-    
-    this.setState({ 
+
+    this.setState({
       openChats: newOpenChats,
       messages: newMessages,
       selectedChatId: openChatId,
-      showCreateOpenChatModal: false
+      showCreateOpenChatModal: false,
     });
-    
-    saveToBrowserStorage('personaChat_messages_v16', newMessages);
-    saveToBrowserStorage('personaChat_openChats_v16', newOpenChats);
-    
+
+    saveToBrowserStorage("personaChat_messages_v16", newMessages);
+    saveToBrowserStorage("personaChat_openChats_v16", newOpenChats);
+
     await this.initializeAllCharacterStates();
     this.triggerInitialOpenChatJoins(openChatId);
     return openChatId;
@@ -566,21 +591,24 @@ class PersonaChatApp {
             openness: 0.7,
             conscientiousness: 0.5,
             agreeableness: 0.8,
-            neuroticism: 0.3
+            neuroticism: 0.3,
           },
           currentRooms: [],
-          lastActivity: Date.now()
-        }
+          lastActivity: Date.now(),
+        },
       };
       this.setState({ characterStates: newCharacterStates });
-      saveToBrowserStorage('personaChat_characterStates_v16', newCharacterStates);
+      saveToBrowserStorage(
+        "personaChat_characterStates_v16",
+        newCharacterStates,
+      );
     }
   }
 
   applyFontScale() {
     document.documentElement.style.setProperty(
       "--font-scale",
-      this.state.settings.fontScale
+      this.state.settings.fontScale,
     );
   }
 
@@ -621,7 +649,7 @@ class PersonaChatApp {
   async migrateChatData() {
     const migrationCompleted = await loadFromBrowserStorage(
       "personaChat_migration_v16",
-      false
+      false,
     );
     if (migrationCompleted) return;
 
@@ -644,7 +672,7 @@ class PersonaChatApp {
         const defaultChatRoom = {
           id: defaultChatRoomId,
           characterId: characterId,
-          name: t('ui.defaultChatName'),
+          name: t("ui.defaultChatName"),
           createdAt: Date.now(),
           lastActivity: Date.now(),
         };
@@ -675,7 +703,7 @@ class PersonaChatApp {
   }
 
   createNewChatRoom(characterId, chatName = null) {
-    if (!chatName) chatName = t('ui.newChatName');
+    if (!chatName) chatName = t("ui.newChatName");
     const numericCharacterId = Number(characterId);
     const newChatRoomId = `${numericCharacterId}_${Date.now()}_${Math.random()}`;
     const newChatRoom = {
@@ -737,7 +765,7 @@ class PersonaChatApp {
   editCharacter(characterId) {
     const numericCharacterId = Number(characterId);
     const character = this.state.characters.find(
-      (c) => c.id === numericCharacterId
+      (c) => c.id === numericCharacterId,
     );
     if (character) {
       this.openEditCharacterModal(character);
@@ -766,7 +794,7 @@ class PersonaChatApp {
     for (const characterId in this.state.chatRooms) {
       const chatRooms = this.state.chatRooms[characterId];
       const chatRoom = chatRooms.find(
-        (room) => room.id === this.state.selectedChatId
+        (room) => room.id === this.state.selectedChatId,
       );
       if (chatRoom) return chatRoom;
     }
@@ -778,8 +806,8 @@ class PersonaChatApp {
     if (!chatRoom) return;
 
     this.showConfirmModal(
-      t('ui.deleteChatRoom'),
-      t('ui.deleteChatRoomConfirm'),
+      t("ui.deleteChatRoom"),
+      t("ui.deleteChatRoomConfirm"),
       () => {
         const newChatRooms = { ...this.state.chatRooms };
         const newMessages = { ...this.state.messages };
@@ -804,7 +832,7 @@ class PersonaChatApp {
           selectedChatId: newSelectedChatId,
           modal: { isOpen: false, title: "", message: "", onConfirm: null },
         });
-      }
+      },
     );
   }
 
@@ -831,10 +859,8 @@ class PersonaChatApp {
     this.setState({
       chatRooms: {
         ...this.state.chatRooms,
-        [characterId]: this.state.chatRooms[characterId].map(room => 
-            room.id === chatRoomId 
-                ? { ...room, name: newNameTrimmed } 
-                : room
+        [characterId]: this.state.chatRooms[characterId].map((room) =>
+          room.id === chatRoomId ? { ...room, name: newNameTrimmed } : room,
         ),
       },
       editingChatRoomId: null,
@@ -842,12 +868,14 @@ class PersonaChatApp {
   }
 
   handleChatRoomNameKeydown(event, chatRoomId) {
-    if (event.key === 'Escape') {
+    if (event.key === "Escape") {
       event.preventDefault();
       this.cancelEditingChatRoom();
-    } else if (event.key === 'Enter') {
+    } else if (event.key === "Enter") {
       event.preventDefault();
-      const input = document.getElementById(`chat-room-name-input-${chatRoomId}`);
+      const input = document.getElementById(
+        `chat-room-name-input-${chatRoomId}`,
+      );
       if (input) {
         this.saveChatRoomName(chatRoomId, input.value);
       }
@@ -857,7 +885,7 @@ class PersonaChatApp {
   getChatRoomById(chatRoomId) {
     for (const characterId in this.state.chatRooms) {
       const chatRoom = this.state.chatRooms[characterId].find(
-        (room) => room.id === chatRoomId
+        (room) => room.id === chatRoomId,
       );
       if (chatRoom) return chatRoom;
     }
@@ -940,7 +968,7 @@ class PersonaChatApp {
 
   deleteUserSticker(stickerId) {
     const newStickers = this.state.userStickers.filter(
-      (s) => s.id !== stickerId
+      (s) => s.id !== stickerId,
     );
     this.setState({ userStickers: newStickers });
   }
@@ -949,10 +977,10 @@ class PersonaChatApp {
     const sticker = this.state.userStickers.find((s) => s.id === stickerId);
     if (!sticker) return;
 
-    const newName = prompt(t('ui.enterStickerName'), sticker.name);
+    const newName = prompt(t("ui.enterStickerName"), sticker.name);
     if (newName !== null && newName.trim() !== "") {
       const newStickers = this.state.userStickers.map((s) =>
-        s.id === stickerId ? { ...s, name: newName.trim() } : s
+        s.id === stickerId ? { ...s, name: newName.trim() } : s,
       );
       this.setState({ userStickers: newStickers });
     }
@@ -1005,8 +1033,8 @@ class PersonaChatApp {
         const stickerName = file.name.split(".")[0];
         this.addUserStickerWithType(stickerName, dataUrl, file.type);
       } catch (error) {
-        console.error(t('ui.fileProcessingError'), error);
-        alert(t('ui.fileProcessingAlert'));
+        console.error(t("ui.fileProcessingError"), error);
+        alert(t("ui.fileProcessingAlert"));
       }
     }
     e.target.value = "";
@@ -1043,27 +1071,28 @@ class PersonaChatApp {
       main: {
         system_rules: document.getElementById("prompt-main-system_rules").value,
         role_and_objective: document.getElementById(
-          "prompt-main-role_and_objective"
+          "prompt-main-role_and_objective",
         ).value,
         memory_generation: document.getElementById(
-          "prompt-main-memory_generation"
+          "prompt-main-memory_generation",
         ).value,
         character_acting: document.getElementById(
-          "prompt-main-character_acting"
+          "prompt-main-character_acting",
         ).value,
         message_writing: document.getElementById("prompt-main-message_writing")
           .value,
         language: document.getElementById("prompt-main-language").value,
         additional_instructions: document.getElementById(
-          "prompt-main-additional_instructions"
+          "prompt-main-additional_instructions",
         ).value,
         sticker_usage: document.getElementById("prompt-main-sticker_usage")
           .value,
       },
       profile_creation: document.getElementById("prompt-profile_creation")
         .value,
-      character_sheet_generation: document.getElementById("prompt-character_sheet_generation")
-        .value,
+      character_sheet_generation: document.getElementById(
+        "prompt-character_sheet_generation",
+      ).value,
     };
 
     this.setState({
@@ -1071,8 +1100,8 @@ class PersonaChatApp {
       showPromptModal: false,
       modal: {
         isOpen: true,
-        title: t('modal.promptSaveComplete.title'),
-        message: t('modal.promptSaveComplete.message'),
+        title: t("modal.promptSaveComplete.title"),
+        message: t("modal.promptSaveComplete.message"),
         onConfirm: null,
       },
     });
@@ -1137,8 +1166,8 @@ class PersonaChatApp {
 
       if (file.size > 30 * 1024 * 1024) {
         this.showInfoModal(
-          t('ui.fileSizeExceeded'),
-          `${file.name}은(는) 30MB를 초과합니다.`
+          t("ui.fileSizeExceeded"),
+          `${file.name}은(는) 30MB를 초과합니다.`,
         );
         continue;
       }
@@ -1157,8 +1186,8 @@ class PersonaChatApp {
       ];
       if (!allowedTypes.includes(file.type)) {
         this.showInfoModal(
-          t('ui.unsupportedFormat'),
-          `${file.name}은(는) 지원하지 않는 파일 형식입니다.`
+          t("ui.unsupportedFormat"),
+          `${file.name}은(는) 지원하지 않는 파일 형식입니다.`,
         );
         continue;
       }
@@ -1175,7 +1204,7 @@ class PersonaChatApp {
               file,
               1024,
               1024,
-              0.85
+              0.85,
             );
             const compressedBase64 = dataUrl.split(",")[1];
             processedSize = Math.round(compressedBase64.length * 0.75);
@@ -1196,8 +1225,8 @@ class PersonaChatApp {
       } catch (error) {
         console.error(`스티커 처리 오류: ${file.name}`, error);
         this.showInfoModal(
-          t('ui.stickerProcessingError'),
-          `${file.name}을(를) 처리하는 중 오류가 발생했습니다.`
+          t("ui.stickerProcessingError"),
+          `${file.name}을(를) 처리하는 중 오류가 발생했습니다.`,
         );
       }
     }
@@ -1213,11 +1242,11 @@ class PersonaChatApp {
       const characterDataString = JSON.stringify(updatedCharacterData);
       const storageCheck = await checkIndexedDBQuota(
         characterDataString,
-        "personaChat_characters_v16"
+        "personaChat_characters_v16",
       );
 
       if (!storageCheck.canSave) {
-        this.showInfoModal(t('ui.storageFull'), t('ui.storageFullMessage'));
+        this.showInfoModal(t("ui.storageFull"), t("ui.storageFullMessage"));
         return;
       }
 
@@ -1242,7 +1271,7 @@ class PersonaChatApp {
       const sticker = this.state.editingCharacter.stickers[index];
       if (!sticker) return;
 
-      const newName = prompt(t('ui.enterStickerName'), sticker.name);
+      const newName = prompt(t("ui.enterStickerName"), sticker.name);
       if (newName !== null && newName.trim() !== "") {
         const newStickers = [...this.state.editingCharacter.stickers];
         newStickers[index] = { ...sticker, name: newName.trim() };
@@ -1274,8 +1303,8 @@ class PersonaChatApp {
       const textSpan = toggleButton.querySelector(".toggle-text");
       if (textSpan)
         textSpan.innerHTML = this.state.stickerSelectionMode
-          ? "선택<br>해제"
-          : "선택<br>모드";
+          ? t("system.selectModeDeselect")
+          : t("system.selectModeSelect");
     }
 
     let selectAllButton = document.getElementById("select-all-stickers");
@@ -1353,7 +1382,7 @@ class PersonaChatApp {
     const currentStickers = this.state.editingCharacter?.stickers || [];
     const selectedSet = new Set(selectedIndices);
     const updatedStickers = currentStickers.filter(
-      (_, index) => !selectedSet.has(index)
+      (_, index) => !selectedSet.has(index),
     );
 
     this.state.editingCharacter = {
@@ -1372,8 +1401,8 @@ class PersonaChatApp {
 
     if (!name || !prompt) {
       this.showInfoModal(
-        t('modal.characterNameDescriptionNotFulfilled.title'),
-        t('modal.characterNameDescriptionNotFulfilled.message')
+        t("modal.characterNameDescriptionNotFulfilled.title"),
+        t("modal.characterNameDescriptionNotFulfilled.message"),
       );
       return;
     }
@@ -1384,7 +1413,7 @@ class PersonaChatApp {
       .filter(Boolean);
 
     const proactiveToggle = document.getElementById(
-      "character-proactive-toggle"
+      "character-proactive-toggle",
     );
     const proactiveEnabled = proactiveToggle
       ? proactiveToggle.checked
@@ -1409,17 +1438,22 @@ class PersonaChatApp {
     const characterDataString = JSON.stringify(characterData);
     const storageCheck = await checkIndexedDBQuota(
       characterDataString,
-      "personaChat_characters_v16"
+      "personaChat_characters_v16",
     );
 
     if (!storageCheck.canSave) {
-      this.showInfoModal("저장 공간 부족", `저장 공간이 부족합니다.`);
+      this.showInfoModal(
+        t("system.storageFullTitle"),
+        t("system.storageFullMessage"),
+      );
       return;
     }
 
     if (this.state.editingCharacter && this.state.editingCharacter.id) {
       const updatedCharacters = this.state.characters.map((c) =>
-        c.id === this.state.editingCharacter.id ? { ...c, ...characterData } : c
+        c.id === this.state.editingCharacter.id
+          ? { ...c, ...characterData }
+          : c,
       );
       this.shouldSaveCharacters = true;
       this.setState({ characters: updatedCharacters });
@@ -1447,11 +1481,11 @@ class PersonaChatApp {
   handleDeleteCharacter(characterId) {
     const numericCharacterId = Number(characterId);
     this.showConfirmModal(
-      t('modal.characterDeleteConfirm.title'),
-      t('modal.characterDeleteConfirm.message'),
+      t("modal.characterDeleteConfirm.title"),
+      t("modal.characterDeleteConfirm.message"),
       () => {
         const newCharacters = this.state.characters.filter(
-          (c) => c.id !== numericCharacterId
+          (c) => c.id !== numericCharacterId,
         );
         const newMessages = { ...this.state.messages };
         const newChatRooms = { ...this.state.chatRooms };
@@ -1486,7 +1520,7 @@ class PersonaChatApp {
           // Close the confirmation modal after deletion is complete
           modal: { isOpen: false, title: "", message: "", onConfirm: null },
         });
-      }
+      },
     );
   }
 
@@ -1496,8 +1530,8 @@ class PersonaChatApp {
 
     if (file.size > 30 * 1024 * 1024) {
       this.showInfoModal(
-        t('modal.imageFileSizeExceeded.title'),
-        t('modal.imageFileSizeExceeded.message')
+        t("modal.imageFileSizeExceeded.title"),
+        t("modal.imageFileSizeExceeded.message"),
       );
       e.target.value = "";
       return;
@@ -1512,8 +1546,8 @@ class PersonaChatApp {
     } catch (error) {
       console.error("Image processing error:", error);
       this.showInfoModal(
-        t('modal.imageProcessingError.title'),
-        t('modal.imageProcessingError.message')
+        t("modal.imageProcessingError.title"),
+        t("modal.imageProcessingError.message"),
       );
     } finally {
       e.target.value = "";
@@ -1530,14 +1564,20 @@ class PersonaChatApp {
     if (type === "sticker" && !stickerData) return;
 
     // 페르소나 스티커는 API 키가 필요하지 않음 (로컬 스티커이므로)
-    const isPersonaSticker = type === "sticker" && stickerData && !stickerData.requiresAPI;
-    const isGroupOrOpenChat = this.isGroupChat(selectedChatId) || this.isOpenChat(selectedChatId);
-    
+    const isPersonaSticker =
+      type === "sticker" && stickerData && !stickerData.requiresAPI;
+    const isGroupOrOpenChat =
+      this.isGroupChat(selectedChatId) || this.isOpenChat(selectedChatId);
+
     // API 키가 필요한 경우만 체크 (페르소나 스티커나 단체 채팅방의 스티커는 제외)
-    if (!settings.apiKey && !isPersonaSticker && (!isGroupOrOpenChat || type !== "sticker")) {
+    if (
+      !settings.apiKey &&
+      !isPersonaSticker &&
+      (!isGroupOrOpenChat || type !== "sticker")
+    ) {
       this.showInfoModal(
-        t('modal.apiKeyRequired.title'),
-        t('modal.apiKeyRequired.message')
+        t("modal.apiKeyRequired.title"),
+        t("modal.apiKeyRequired.message"),
       );
       this.setState({ showSettingsModal: true });
       return;
@@ -1559,13 +1599,12 @@ class PersonaChatApp {
     // 채팅방 유형에 따른 분기 처리
     const isGroupChatType = this.isGroupChat(selectedChatId);
     const isOpenChatType = this.isOpenChat(selectedChatId);
-    
-    
+
     if (isOpenChatType) {
       // 오픈톡방 메시지 처리
       await this.handleOpenChatMessage(userMessage);
     } else if (isGroupChatType) {
-      // 단톡방 메시지 처리  
+      // 단톡방 메시지 처리
       await this.handleGroupChatMessage(userMessage);
     } else {
       // 개별 채팅방 메시지 처리 (기존 로직)
@@ -1579,7 +1618,7 @@ class PersonaChatApp {
     if (!selectedChatRoom) return;
 
     const charIndex = this.state.characters.findIndex(
-      (c) => c.id === selectedChatRoom.characterId
+      (c) => c.id === selectedChatRoom.characterId,
     );
     if (charIndex === -1) return;
     const updatedCharacters = [...this.state.characters];
@@ -1631,27 +1670,30 @@ class PersonaChatApp {
       characters: updatedCharacters,
       imageToSend: null,
     });
-    
+
     this.triggerApiCall(newMessagesState, false, false, forceSummary);
   }
 
   async handleGroupChatMessage(userMessage) {
     const { selectedChatId, imageToSend } = this.state;
     const { type } = userMessage;
-    
+
     // 이미지 처리 (단톡방에서는 임시로 사용자 메시지에 첨부)
-    if (type === 'image' && imageToSend) {
+    if (type === "image" && imageToSend) {
       userMessage.imageData = {
         id: `img_${Date.now()}`,
         dataUrl: imageToSend.dataUrl,
-        mimeType: imageToSend.file.type
+        mimeType: imageToSend.file.type,
       };
     }
 
     // 단톡방 메시지 추가
     const currentMessages = this.state.messages[selectedChatId] || [];
     const newMessages = [...currentMessages, userMessage];
-    const newMessagesState = { ...this.state.messages, [selectedChatId]: newMessages };
+    const newMessagesState = {
+      ...this.state.messages,
+      [selectedChatId]: newMessages,
+    };
 
     // UI 입력창 초기화
     if (type === "text" || type === "image") {
@@ -1666,16 +1708,16 @@ class PersonaChatApp {
       messages: newMessagesState,
       isWaitingForResponse: true,
       imageToSend: null,
-      stickerToSend: null
+      stickerToSend: null,
     });
-    
+
     // 즉시 저장
-    console.log('Saving group chat messages:', {
+    console.log("Saving group chat messages:", {
       chatId: selectedChatId,
       messageCount: newMessages.length,
-      totalChats: Object.keys(newMessagesState).length
+      totalChats: Object.keys(newMessagesState).length,
     });
-    saveToBrowserStorage('personaChat_messages_v16', newMessagesState);
+    saveToBrowserStorage("personaChat_messages_v16", newMessagesState);
 
     // 단톡방 참여자들의 AI 응답 생성
     await this.triggerGroupChatAIResponse(selectedChatId, newMessages);
@@ -1684,20 +1726,23 @@ class PersonaChatApp {
   async handleOpenChatMessage(userMessage) {
     const { selectedChatId, imageToSend } = this.state;
     const { type } = userMessage;
-    
+
     // 이미지 처리
-    if (type === 'image' && imageToSend) {
+    if (type === "image" && imageToSend) {
       userMessage.imageData = {
         id: `img_${Date.now()}`,
         dataUrl: imageToSend.dataUrl,
-        mimeType: imageToSend.file.type
+        mimeType: imageToSend.file.type,
       };
     }
 
     // 오픈톡방 메시지 추가
     const currentMessages = this.state.messages[selectedChatId] || [];
     const newMessages = [...currentMessages, userMessage];
-    const newMessagesState = { ...this.state.messages, [selectedChatId]: newMessages };
+    const newMessagesState = {
+      ...this.state.messages,
+      [selectedChatId]: newMessages,
+    };
 
     // UI 입력창 초기화
     if (type === "text" || type === "image") {
@@ -1712,16 +1757,16 @@ class PersonaChatApp {
       messages: newMessagesState,
       isWaitingForResponse: true,
       imageToSend: null,
-      stickerToSend: null
+      stickerToSend: null,
     });
-    
+
     // 즉시 저장
-    console.log('Saving open chat messages:', {
+    console.log("Saving open chat messages:", {
       chatId: selectedChatId,
       messageCount: newMessages.length,
-      totalChats: Object.keys(newMessagesState).length
+      totalChats: Object.keys(newMessagesState).length,
     });
-    saveToBrowserStorage('personaChat_messages_v16', newMessagesState);
+    saveToBrowserStorage("personaChat_messages_v16", newMessagesState);
 
     // 오픈톡방 AI 응답 및 동적 참여/이탈 처리
     await this.triggerOpenChatAIResponse(selectedChatId, newMessages);
@@ -1743,9 +1788,10 @@ class PersonaChatApp {
     try {
       const groupSettings = groupChat.settings || {};
       const responseFrequency = groupSettings.responseFrequency || 0.8;
-      const maxRespondingCharacters = groupSettings.maxRespondingCharacters || 2;
+      const maxRespondingCharacters =
+        groupSettings.maxRespondingCharacters || 2;
       const responseDelay = groupSettings.responseDelay || 800;
-      
+
       // 전체 응답 빈도 확인
       const shouldRespond = Math.random() <= responseFrequency;
       if (!shouldRespond) {
@@ -1754,7 +1800,7 @@ class PersonaChatApp {
       }
 
       // 활성 참여자 필터링
-      const activeParticipants = participants.filter(p => {
+      const activeParticipants = participants.filter((p) => {
         const participantSettings = groupSettings.participantSettings?.[p.id];
         return participantSettings ? participantSettings.isActive : true;
       });
@@ -1765,35 +1811,41 @@ class PersonaChatApp {
       }
 
       // 응답할 캐릭터 수 결정
-      const shuffledParticipants = [...activeParticipants].sort(() => Math.random() - 0.5);
+      const shuffledParticipants = [...activeParticipants].sort(
+        () => Math.random() - 0.5,
+      );
       const respondingCount = Math.min(
         Math.ceil(Math.random() * maxRespondingCharacters),
-        activeParticipants.length
+        activeParticipants.length,
       );
-      const respondingCharacters = shuffledParticipants.slice(0, respondingCount);
-
+      const respondingCharacters = shuffledParticipants.slice(
+        0,
+        respondingCount,
+      );
 
       // 각 캐릭터의 응답을 순차적으로 생성
       for (let i = 0; i < respondingCharacters.length; i++) {
         const character = respondingCharacters[i];
-        
+
         // 설정된 응답 지연 시간 적용
         if (i > 0) {
           const baseDelay = responseDelay;
           const randomVariation = Math.random() * 300; // ±0.3초 랜덤
-          await new Promise(resolve => setTimeout(resolve, baseDelay + randomVariation));
+          await new Promise((resolve) =>
+            setTimeout(resolve, baseDelay + randomVariation),
+          );
         }
 
         // 실시간 메시지 상태 가져오기
         const currentMessages = this.state.messages[groupChatId] || [];
-        
+
         // 현재 API 설정 가져오기
         const { settings } = this.state;
         const currentProvider = settings.apiProvider;
         const currentConfig = settings.apiConfigs?.[currentProvider];
-        
+
         if (!currentConfig?.apiKey) {
-          console.error('API key not found for provider:', currentProvider);
+          console.error("API key not found for provider:", currentProvider);
           continue;
         }
 
@@ -1805,11 +1857,15 @@ class PersonaChatApp {
           character,
           currentMessages,
           participants,
-          groupChatId
+          groupChatId,
         );
 
         if (response && !response.error && response.messages) {
-          await this.processGroupChatAIResponse(groupChatId, character, response);
+          await this.processGroupChatAIResponse(
+            groupChatId,
+            character,
+            response,
+          );
         }
       }
     } finally {
@@ -1825,15 +1881,16 @@ class PersonaChatApp {
     }
 
     try {
-      
       // 현재 참여중인 캐릭터들 중에서만 선택
       const currentParticipants = openChat.currentParticipants || [];
       const allCharacters = currentParticipants
-        .map(id => this.state.characters.find(c => c.id === id))
+        .map((id) => this.state.characters.find((c) => c.id === id))
         .filter(Boolean);
 
       if (allCharacters.length === 0) {
-        console.log('No participants in open chat, triggering initial joins...');
+        console.log(
+          "No participants in open chat, triggering initial joins...",
+        );
         await this.triggerInitialOpenChatJoins(openChatId);
         this.setState({ isWaitingForResponse: false });
         return;
@@ -1846,16 +1903,20 @@ class PersonaChatApp {
         return;
       }
 
-      const respondingCharacter = allCharacters[Math.floor(Math.random() * allCharacters.length)];
-      console.log('Selected responding character for open chat:', respondingCharacter.name);
-      
+      const respondingCharacter =
+        allCharacters[Math.floor(Math.random() * allCharacters.length)];
+      console.log(
+        "Selected responding character for open chat:",
+        respondingCharacter.name,
+      );
+
       // 현재 API 설정 가져오기
       const { settings } = this.state;
       const currentProvider = settings.apiProvider;
       const currentConfig = settings.apiConfigs?.[currentProvider];
-      
+
       if (!currentConfig?.apiKey) {
-        console.error('API key not found for provider:', currentProvider);
+        console.error("API key not found for provider:", currentProvider);
         this.setState({ isWaitingForResponse: false });
         return;
       }
@@ -1868,15 +1929,23 @@ class PersonaChatApp {
         respondingCharacter,
         messages,
         allCharacters,
-        openChatId
+        openChatId,
       );
 
       if (response && !response.error && response.messages) {
-        await this.processOpenChatAIResponse(openChatId, respondingCharacter, response);
+        await this.processOpenChatAIResponse(
+          openChatId,
+          respondingCharacter,
+          response,
+        );
       }
 
       // 참여자 상태 업데이트 (입장/퇴장 결정)
-      await this.updateParticipantStates(openChatId, currentParticipants, messages);
+      await this.updateParticipantStates(
+        openChatId,
+        currentParticipants,
+        messages,
+      );
     } finally {
       this.setState({ isWaitingForResponse: false });
     }
@@ -1887,25 +1956,48 @@ class PersonaChatApp {
     if (!groupChat || !groupChat.participantIds) return [];
 
     return groupChat.participantIds
-      .map(id => this.state.characters.find(char => char.id === id))
-      .filter(char => char !== undefined);
+      .map((id) => this.state.characters.find((char) => char.id === id))
+      .filter((char) => char !== undefined);
   }
 
-  async callAIForGroupChat(apiKey, model, userName, userDescription, character, messages, allParticipants, groupChatId, customContext = null) {
+  async callAIForGroupChat(
+    apiKey,
+    model,
+    userName,
+    userDescription,
+    character,
+    messages,
+    allParticipants,
+    groupChatId,
+    customContext = null,
+  ) {
     // 단톡방 정보 가져오기
     const groupChat = this.state.groupChats[groupChatId];
-    const groupChatName = groupChat ? groupChat.name : '단톡방';
-    
+    const groupChatName = groupChat ? groupChat.name : "단톡방";
+
     // 단톡방 맥락을 위한 특별한 프롬프트 구성
-    const otherParticipants = allParticipants.filter(p => p.id !== character.id);
-    
+    const otherParticipants = allParticipants.filter(
+      (p) => p.id !== character.id,
+    );
+
     // 다른 참여자들의 상세 정보 구성
-    const participantDetails = otherParticipants.map(p => {
-      const basicInfo = p.prompt ? p.prompt.split('\n').slice(0, 3).join(' ').replace(/[#*]/g, '').trim() : '';
-      return `- ${p.name}: ${basicInfo || 'Character'}`;
-    }).join('\n');
-    
-    const groupPrompt = this.state.settings.prompts.main.group_chat_context || this.defaultPrompts.main.group_chat_context;
+    const participantDetails = otherParticipants
+      .map((p) => {
+        const basicInfo = p.prompt
+          ? p.prompt
+              .split("\n")
+              .slice(0, 3)
+              .join(" ")
+              .replace(/[#*]/g, "")
+              .trim()
+          : "";
+        return `- ${p.name}: ${basicInfo || "Character"}`;
+      })
+      .join("\n");
+
+    const groupPrompt =
+      this.state.settings.prompts.main.group_chat_context ||
+      this.defaultPrompts.main.group_chat_context;
     const defaultGroupContext = groupPrompt
       .replace(/{participantCount}/g, allParticipants.length + 1)
       .replace(/{userName}/g, userName)
@@ -1915,20 +2007,20 @@ class PersonaChatApp {
 
     // 커스텀 컨텍스트가 있으면 사용, 없으면 기본 단톡방 컨텍스트 사용
     const contextToUse = customContext || defaultGroupContext;
-    const finalUserDescription = userDescription + '\n' + contextToUse;
-    
+    const finalUserDescription = userDescription + "\n" + contextToUse;
+
     const { settings } = this.state;
     const currentProvider = settings.apiProvider;
     const currentConfig = settings.apiConfigs?.[currentProvider];
-    
+
     // Extract API options for all providers
     const options = {
       maxTokens: currentConfig.maxTokens,
       temperature: currentConfig.temperature,
       profileMaxTokens: currentConfig.profileMaxTokens,
-      profileTemperature: currentConfig.profileTemperature
+      profileTemperature: currentConfig.profileTemperature,
     };
-    
+
     // APIManager를 사용한 직접 API 호출
     const response = await this.apiManager.generateContent(
       currentProvider,
@@ -1941,10 +2033,10 @@ class PersonaChatApp {
         history: messages,
         prompts: settings.prompts,
         isProactive: false,
-        forceSummary: false
+        forceSummary: false,
       },
       currentConfig.baseUrl,
-      options
+      options,
     );
 
     return response;
@@ -1958,17 +2050,20 @@ class PersonaChatApp {
           characterName: character.name,
           characterPrompt: character.prompt,
           characterMemories: character.memories || [],
-          characterId: character.id
+          characterId: character.id,
         },
         systemPrompt: {
           system_rules: this.state.settings.prompts.main.system_rules,
-          role_and_objective: this.state.settings.prompts.main.role_and_objective,
+          role_and_objective:
+            this.state.settings.prompts.main.role_and_objective,
           memory_generation: this.state.settings.prompts.main.memory_generation,
           character_acting: this.state.settings.prompts.main.character_acting,
           message_writing: this.state.settings.prompts.main.message_writing,
           language: this.state.settings.prompts.main.language,
-          additional_instructions: this.state.settings.prompts.main.additional_instructions,
-          group_chat_context: this.state.settings.prompts.main.group_chat_context
+          additional_instructions:
+            this.state.settings.prompts.main.additional_instructions,
+          group_chat_context:
+            this.state.settings.prompts.main.group_chat_context,
         },
         outputResponse: response,
         parameters: {
@@ -1976,10 +2071,10 @@ class PersonaChatApp {
           hasMessages: !!response.messages,
           hasNewMemory: !!response.newMemory,
           hasReactionDelay: !!response.reactionDelay,
-          messageCount: response.messages?.length || 0
+          messageCount: response.messages?.length || 0,
         },
         metadata: {
-          chatType: 'group',
+          chatType: "group",
           chatId: groupChatId,
           characterId: character.id,
           hasCharacterState: !!response.characterState,
@@ -1991,47 +2086,63 @@ class PersonaChatApp {
           newMemory: response.newMemory || null,
           timestamp: Date.now(),
           apiProvider: this.state.settings.apiProvider,
-          model: this.state.settings.apiConfigs?.[this.state.settings.apiProvider]?.model
-        }
+          model:
+            this.state.settings.apiConfigs?.[this.state.settings.apiProvider]
+              ?.model,
+        },
       };
-      
-      this.addStructuredLog(groupChatId, 'group', character.name, structuredLogData);
+
+      this.addStructuredLog(
+        groupChatId,
+        "group",
+        character.name,
+        structuredLogData,
+      );
     }
-    
+
     // characterState 응답이 있으면 처리
     if (response.characterState) {
       this.updateCharacterState(character.id, response.characterState);
     } else {
       console.warn(`⚠️ characterState가 응답에 포함되지 않음:`, response);
     }
-    
+
     // 새로운 기억이 있으면 캐릭터에 추가
-    if (response.newMemory && response.newMemory.trim() !== '') {
-      const charIndex = this.state.characters.findIndex(c => c.id === character.id);
+    if (response.newMemory && response.newMemory.trim() !== "") {
+      const charIndex = this.state.characters.findIndex(
+        (c) => c.id === character.id,
+      );
       if (charIndex !== -1) {
         const updatedCharacters = [...this.state.characters];
         updatedCharacters[charIndex] = {
           ...updatedCharacters[charIndex],
-          memories: [...(updatedCharacters[charIndex].memories || []), response.newMemory]
+          memories: [
+            ...(updatedCharacters[charIndex].memories || []),
+            response.newMemory,
+          ],
         };
         this.setState({ characters: updatedCharacters });
-        saveToBrowserStorage('personaChat_characters_v16', updatedCharacters);
+        saveToBrowserStorage("personaChat_characters_v16", updatedCharacters);
       }
     }
 
     // 응답 메시지들을 단톡방에 개별적으로 순차 추가 (for_update 방식)
     if (response.messages && response.messages.length > 0) {
       const currentMessages = this.state.messages[groupChatId] || [];
-      
+
       for (let i = 0; i < response.messages.length; i++) {
         const msgPart = response.messages[i];
-        
+
         // 응답 지연 시뮬레이션
         if (i === 0) {
-          await new Promise(resolve => setTimeout(resolve, response.reactionDelay || 1000));
+          await new Promise((resolve) =>
+            setTimeout(resolve, response.reactionDelay || 1000),
+          );
           this.setState({ typingCharacterId: character.id });
         } else {
-          await new Promise(resolve => setTimeout(resolve, msgPart.delay || 1000));
+          await new Promise((resolve) =>
+            setTimeout(resolve, msgPart.delay || 1000),
+          );
         }
 
         const aiMessage = {
@@ -2039,57 +2150,100 @@ class PersonaChatApp {
           sender: character.name,
           characterId: character.id,
           content: msgPart.content,
-          time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+          time: new Date().toLocaleTimeString("ko-KR", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
           isMe: false,
-          type: msgPart.sticker ? 'sticker' : 'text',
-          ...(msgPart.sticker ? { 
-            sticker: msgPart.sticker,
-            stickerId: msgPart.sticker,
-            stickerData: { stickerName: msgPart.sticker } 
-          } : {})
+          type: msgPart.sticker ? "sticker" : "text",
+          ...(msgPart.sticker
+            ? {
+                sticker: msgPart.sticker,
+                stickerId: msgPart.sticker,
+                stickerData: { stickerName: msgPart.sticker },
+              }
+            : {}),
         };
 
         const newMessages = [...this.state.messages[groupChatId], aiMessage];
-        const newMessagesState = { ...this.state.messages, [groupChatId]: newMessages };
-        
-        this.setState({ 
+        const newMessagesState = {
+          ...this.state.messages,
+          [groupChatId]: newMessages,
+        };
+
+        this.setState({
           messages: newMessagesState,
-          typingCharacterId: null
+          typingCharacterId: null,
         });
-        
+
         // 각 메시지마다 저장
-        saveToBrowserStorage('personaChat_messages_v16', newMessagesState);
+        saveToBrowserStorage("personaChat_messages_v16", newMessagesState);
       }
-      
     }
   }
 
-  async callAIForOpenChat(apiKey, model, userName, userDescription, character, messages, allParticipants, openChatId) {
+  async callAIForOpenChat(
+    apiKey,
+    model,
+    userName,
+    userDescription,
+    character,
+    messages,
+    allParticipants,
+    openChatId,
+  ) {
     // 오픈톡방 정보 가져오기
     const openChat = this.state.openChats[openChatId];
-    const openChatName = openChat ? openChat.name : '오픈톡방';
-    
+    const openChatName = openChat ? openChat.name : "오픈톡방";
+
     // 오픈톡방 맥락을 위한 특별한 프롬프트 구성
-    const otherParticipants = allParticipants.filter(p => p.id !== character.id);
-    
+    const otherParticipants = allParticipants.filter(
+      (p) => p.id !== character.id,
+    );
+
     // 오픈챗 참여자들의 상세 정보 구성
-    const openChatParticipants = otherParticipants.map(p => {
-      const basicInfo = p.prompt ? p.prompt.split('\n').slice(0, 3).join(' ').replace(/[#*]/g, '').trim() : '';
-      return `- ${p.name}: ${basicInfo || 'Character'}`;
-    }).join('\n');
-    
-    const openPrompt = this.state.settings.prompts.main.open_chat_context || this.defaultPrompts.main.open_chat_context;
+    const openChatParticipants = otherParticipants
+      .map((p) => {
+        const basicInfo = p.prompt
+          ? p.prompt
+              .split("\n")
+              .slice(0, 3)
+              .join(" ")
+              .replace(/[#*]/g, "")
+              .trim()
+          : "";
+        return `- ${p.name}: ${basicInfo || "Character"}`;
+      })
+      .join("\n");
+
+    const openPrompt =
+      this.state.settings.prompts.main.open_chat_context ||
+      this.defaultPrompts.main.open_chat_context;
     const openChatContext = openPrompt
       .replace(/{userName}/g, userName)
-      .replace(/{participantDetails}/g, openChatParticipants || '- (No other participants)')
+      .replace(
+        /{participantDetails}/g,
+        openChatParticipants || "- (No other participants)",
+      )
       .replace(/{characterName}/g, character.name)
       .replace(/{openChatName}/g, openChatName);
 
     // message_writing 프롬프트도 포함 (오픈톡에서 characterState 필드 요구)
-    const messageWritingPrompt = this.state.settings.prompts.main.message_writing || this.defaultPrompts.main.message_writing;
-    const combinedContext = messageWritingPrompt + '\n\n' + openChatContext;
+    const messageWritingPrompt =
+      this.state.settings.prompts.main.message_writing ||
+      this.defaultPrompts.main.message_writing;
+    const combinedContext = messageWritingPrompt + "\n\n" + openChatContext;
 
-    return await this.callAIForGroupChat(apiKey, model, userName, userDescription, character, messages, allParticipants, combinedContext);
+    return await this.callAIForGroupChat(
+      apiKey,
+      model,
+      userName,
+      userDescription,
+      character,
+      messages,
+      allParticipants,
+      combinedContext,
+    );
   }
 
   async processOpenChatAIResponse(openChatId, character, response) {
@@ -2100,17 +2254,19 @@ class PersonaChatApp {
           characterName: character.name,
           characterPrompt: character.prompt,
           characterMemories: character.memories || [],
-          characterId: character.id
+          characterId: character.id,
         },
         systemPrompt: {
           system_rules: this.state.settings.prompts.main.system_rules,
-          role_and_objective: this.state.settings.prompts.main.role_and_objective,
+          role_and_objective:
+            this.state.settings.prompts.main.role_and_objective,
           memory_generation: this.state.settings.prompts.main.memory_generation,
           character_acting: this.state.settings.prompts.main.character_acting,
           message_writing: this.state.settings.prompts.main.message_writing,
           language: this.state.settings.prompts.main.language,
-          additional_instructions: this.state.settings.prompts.main.additional_instructions,
-          open_chat_context: this.state.settings.prompts.main.open_chat_context
+          additional_instructions:
+            this.state.settings.prompts.main.additional_instructions,
+          open_chat_context: this.state.settings.prompts.main.open_chat_context,
         },
         outputResponse: response,
         parameters: {
@@ -2118,10 +2274,10 @@ class PersonaChatApp {
           hasMessages: !!response.messages,
           hasNewMemory: !!response.newMemory,
           hasReactionDelay: !!response.reactionDelay,
-          messageCount: response.messages?.length || 0
+          messageCount: response.messages?.length || 0,
         },
         metadata: {
-          chatType: 'open',
+          chatType: "open",
           chatId: openChatId,
           characterId: character.id,
           hasCharacterState: !!response.characterState,
@@ -2133,47 +2289,63 @@ class PersonaChatApp {
           newMemory: response.newMemory || null,
           timestamp: Date.now(),
           apiProvider: this.state.settings.apiProvider,
-          model: this.state.settings.apiConfigs?.[this.state.settings.apiProvider]?.model
-        }
+          model:
+            this.state.settings.apiConfigs?.[this.state.settings.apiProvider]
+              ?.model,
+        },
       };
-      
-      this.addStructuredLog(openChatId, 'open', character.name, structuredLogData);
+
+      this.addStructuredLog(
+        openChatId,
+        "open",
+        character.name,
+        structuredLogData,
+      );
     }
-    
+
     // characterState 응답이 있으면 처리
     if (response.characterState) {
       this.updateCharacterState(character.id, response.characterState);
     } else {
       console.warn(`⚠️ characterState가 응답에 포함되지 않음:`, response);
     }
-    
+
     // 새로운 기억이 있으면 캐릭터에 추가
-    if (response.newMemory && response.newMemory.trim() !== '') {
-      const charIndex = this.state.characters.findIndex(c => c.id === character.id);
+    if (response.newMemory && response.newMemory.trim() !== "") {
+      const charIndex = this.state.characters.findIndex(
+        (c) => c.id === character.id,
+      );
       if (charIndex !== -1) {
         const updatedCharacters = [...this.state.characters];
         updatedCharacters[charIndex] = {
           ...updatedCharacters[charIndex],
-          memories: [...(updatedCharacters[charIndex].memories || []), response.newMemory]
+          memories: [
+            ...(updatedCharacters[charIndex].memories || []),
+            response.newMemory,
+          ],
         };
         this.setState({ characters: updatedCharacters });
-        saveToBrowserStorage('personaChat_characters_v16', updatedCharacters);
+        saveToBrowserStorage("personaChat_characters_v16", updatedCharacters);
       }
     }
 
     // 응답 메시지들을 오픈톡방에 개별적으로 순차 추가 (for_update 방식)
     if (response.messages && response.messages.length > 0) {
       const currentMessages = this.state.messages[openChatId] || [];
-      
+
       for (let i = 0; i < response.messages.length; i++) {
         const msgPart = response.messages[i];
-        
+
         // 응답 지연 시뮬레이션
         if (i === 0) {
-          await new Promise(resolve => setTimeout(resolve, response.reactionDelay || 1000));
+          await new Promise((resolve) =>
+            setTimeout(resolve, response.reactionDelay || 1000),
+          );
           this.setState({ typingCharacterId: character.id });
         } else {
-          await new Promise(resolve => setTimeout(resolve, msgPart.delay || 1000));
+          await new Promise((resolve) =>
+            setTimeout(resolve, msgPart.delay || 1000),
+          );
         }
 
         const aiMessage = {
@@ -2181,28 +2353,35 @@ class PersonaChatApp {
           sender: character.name,
           characterId: character.id,
           content: msgPart.content,
-          time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+          time: new Date().toLocaleTimeString("ko-KR", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
           isMe: false,
-          type: msgPart.sticker ? 'sticker' : 'text',
-          ...(msgPart.sticker ? { 
-            sticker: msgPart.sticker,
-            stickerId: msgPart.sticker,
-            stickerData: { stickerName: msgPart.sticker } 
-          } : {})
+          type: msgPart.sticker ? "sticker" : "text",
+          ...(msgPart.sticker
+            ? {
+                sticker: msgPart.sticker,
+                stickerId: msgPart.sticker,
+                stickerData: { stickerName: msgPart.sticker },
+              }
+            : {}),
         };
 
         const newMessages = [...this.state.messages[openChatId], aiMessage];
-        const newMessagesState = { ...this.state.messages, [openChatId]: newMessages };
-        
-        this.setState({ 
+        const newMessagesState = {
+          ...this.state.messages,
+          [openChatId]: newMessages,
+        };
+
+        this.setState({
           messages: newMessagesState,
-          typingCharacterId: null
+          typingCharacterId: null,
         });
-        
+
         // 각 메시지마다 저장
-        saveToBrowserStorage('personaChat_messages_v16', newMessagesState);
+        saveToBrowserStorage("personaChat_messages_v16", newMessagesState);
       }
-      
     }
   }
 
@@ -2211,8 +2390,11 @@ class PersonaChatApp {
     const availableCharacters = this.state.characters;
     const joinCount = Math.floor(Math.random() * 3) + 2; // 2~4명
     const shuffled = [...availableCharacters].sort(() => Math.random() - 0.5);
-    const initialJoiners = shuffled.slice(0, Math.min(joinCount, availableCharacters.length));
-    
+    const initialJoiners = shuffled.slice(
+      0,
+      Math.min(joinCount, availableCharacters.length),
+    );
+
     for (const character of initialJoiners) {
       setTimeout(() => {
         this.characterJoinOpenChat(openChatId, character.id, true);
@@ -2222,21 +2404,26 @@ class PersonaChatApp {
 
   characterJoinOpenChat(openChatId, characterId, isInitial = false) {
     const openChat = this.state.openChats[openChatId];
-    const character = this.state.characters.find(c => c.id === characterId);
+    const character = this.state.characters.find((c) => c.id === characterId);
     if (!openChat || !character) return;
-    
+
     // 이미 참여중이면 무시
     if (openChat.currentParticipants.includes(characterId)) return;
-    
+
     const newOpenChats = { ...this.state.openChats };
     newOpenChats[openChatId] = {
       ...openChat,
       currentParticipants: [...openChat.currentParticipants, characterId],
-      participantHistory: [...(openChat.participantHistory || []), {
-        characterId, action: 'join', timestamp: Date.now()
-      }]
+      participantHistory: [
+        ...(openChat.participantHistory || []),
+        {
+          characterId,
+          action: "join",
+          timestamp: Date.now(),
+        },
+      ],
     };
-    
+
     // 캐릭터 상태 업데이트
     this.initializeCharacterState(characterId);
     const newCharacterStates = { ...this.state.characterStates };
@@ -2245,123 +2432,156 @@ class PersonaChatApp {
     }
     newCharacterStates[characterId] = {
       ...newCharacterStates[characterId],
-      currentRooms: [...(newCharacterStates[characterId].currentRooms || []), openChatId],
-      lastActivity: Date.now()
+      currentRooms: [
+        ...(newCharacterStates[characterId].currentRooms || []),
+        openChatId,
+      ],
+      lastActivity: Date.now(),
     };
-    
-    this.setState({ 
+
+    this.setState({
       openChats: newOpenChats,
-      characterStates: newCharacterStates
+      characterStates: newCharacterStates,
     });
-    
+
     // 입장 메시지 추가 (초기 입장이 아닌 경우)
     if (!isInitial) {
-      this.addSystemMessage(openChatId, `${character.name}님이 입장했습니다.`, 'join');
+      this.addSystemMessage(
+        openChatId,
+        `${character.name}님이 입장했습니다.`,
+        "join",
+      );
     }
-    
-    saveToBrowserStorage('personaChat_openChats_v16', newOpenChats);
-    saveToBrowserStorage('personaChat_characterStates_v16', newCharacterStates);
+
+    saveToBrowserStorage("personaChat_openChats_v16", newOpenChats);
+    saveToBrowserStorage("personaChat_characterStates_v16", newCharacterStates);
   }
 
-  characterLeaveOpenChat(openChatId, characterId, reason = 'left') {
+  characterLeaveOpenChat(openChatId, characterId, reason = "left") {
     const openChat = this.state.openChats[openChatId];
-    const character = this.state.characters.find(c => c.id === characterId);
+    const character = this.state.characters.find((c) => c.id === characterId);
     if (!openChat || !character) return;
-    
+
     const newOpenChats = { ...this.state.openChats };
     newOpenChats[openChatId] = {
       ...openChat,
-      currentParticipants: openChat.currentParticipants.filter(id => id !== characterId),
-      participantHistory: [...(openChat.participantHistory || []), {
-        characterId, action: 'leave', reason, timestamp: Date.now()
-      }]
+      currentParticipants: openChat.currentParticipants.filter(
+        (id) => id !== characterId,
+      ),
+      participantHistory: [
+        ...(openChat.participantHistory || []),
+        {
+          characterId,
+          action: "leave",
+          reason,
+          timestamp: Date.now(),
+        },
+      ],
     };
-    
+
     // 캐릭터 상태 업데이트
     const newCharacterStates = { ...this.state.characterStates };
     if (newCharacterStates[characterId]) {
       newCharacterStates[characterId] = {
         ...newCharacterStates[characterId],
-        currentRooms: (newCharacterStates[characterId].currentRooms || []).filter(id => id !== openChatId)
+        currentRooms: (
+          newCharacterStates[characterId].currentRooms || []
+        ).filter((id) => id !== openChatId),
       };
     }
-    
-    this.setState({ 
+
+    this.setState({
       openChats: newOpenChats,
-      characterStates: newCharacterStates
+      characterStates: newCharacterStates,
     });
-    
+
     // 퇴장 메시지 추가
-    this.addSystemMessage(openChatId, `${character.name}님이 퇴장했습니다.`, 'leave');
-    
-    saveToBrowserStorage('personaChat_openChats_v16', newOpenChats);
-    saveToBrowserStorage('personaChat_characterStates_v16', newCharacterStates);
+    this.addSystemMessage(
+      openChatId,
+      `${character.name}님이 퇴장했습니다.`,
+      "leave",
+    );
+
+    saveToBrowserStorage("personaChat_openChats_v16", newOpenChats);
+    saveToBrowserStorage("personaChat_characterStates_v16", newCharacterStates);
   }
 
   async updateParticipantStates(openChatId, currentParticipants, messages) {
     const remainingParticipants = [];
-    
+
     for (const participantId of currentParticipants) {
-      const character = this.state.characters.find(c => c.id === participantId);
+      const character = this.state.characters.find(
+        (c) => c.id === participantId,
+      );
       if (!character) continue;
-      
+
       let characterState = this.state.characterStates[participantId];
       if (!characterState) {
         this.initializeCharacterState(participantId);
         characterState = this.state.characterStates[participantId];
         if (!characterState) continue;
       }
-      
+
       // AI가 분석한 characterState를 기반으로 이탈 여부 결정
       const { mood, socialBattery, energy, personality } = characterState;
-      
+
       // AI 분석 결과를 기반으로 이탈 확률 계산
       let leaveChance = 0.1; // 기본 10%
-      
+
       // AI가 분석한 상태값 활용
       if (socialBattery < 0.3) leaveChance += 0.3;
       if (mood < 0.3) leaveChance += 0.2;
       if (energy < 0.4) leaveChance += 0.15;
       leaveChance += (1 - (personality?.extroversion || 0.5)) * 0.2;
-      
+
       if (Math.random() > Math.min(0.8, leaveChance)) {
         remainingParticipants.push(participantId);
       } else {
         console.log(`${character.name} left open chat due to low energy/mood`);
-        this.characterLeaveOpenChat(openChatId, participantId, 'tired');
+        this.characterLeaveOpenChat(openChatId, participantId, "tired");
       }
     }
 
     // 새로운 참여자 추가 가능성
-    const shouldAddNewParticipant = Math.random() < 0.3 && remainingParticipants.length < 6;
+    const shouldAddNewParticipant =
+      Math.random() < 0.3 && remainingParticipants.length < 6;
     if (shouldAddNewParticipant) {
-      const availableCharacters = this.state.characters.filter(c => 
-        !currentParticipants.includes(c.id) && c.id
+      const availableCharacters = this.state.characters.filter(
+        (c) => !currentParticipants.includes(c.id) && c.id,
       );
       if (availableCharacters.length > 0) {
-        const newParticipant = availableCharacters[Math.floor(Math.random() * availableCharacters.length)];
+        const newParticipant =
+          availableCharacters[
+            Math.floor(Math.random() * availableCharacters.length)
+          ];
         console.log(`${newParticipant.name} joined open chat randomly`);
         this.characterJoinOpenChat(openChatId, newParticipant.id, false);
       }
     }
   }
 
-  addSystemMessage(chatId, content, type = 'system') {
+  addSystemMessage(chatId, content, type = "system") {
     const systemMessage = {
       id: Date.now() + Math.random(),
-      sender: 'system',
+      sender: "system",
       content: content,
       type: type,
-      time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
-      isMe: false
+      time: new Date().toLocaleTimeString("ko-KR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      isMe: false,
     };
 
     const currentMessages = this.state.messages[chatId] || [];
     const updatedMessages = [...currentMessages, systemMessage];
-    const updatedMessagesState = { ...this.state.messages, [chatId]: updatedMessages };
+    const updatedMessagesState = {
+      ...this.state.messages,
+      [chatId]: updatedMessages,
+    };
 
     this.setState({ messages: updatedMessagesState });
-    saveToBrowserStorage('personaChat_messages_v16', updatedMessagesState);
+    saveToBrowserStorage("personaChat_messages_v16", updatedMessagesState);
   }
 
   async initializeCharacterState(characterId) {
@@ -2376,36 +2596,39 @@ class PersonaChatApp {
         agreeableness: 0.7,
         conscientiousness: 0.6,
         neuroticism: 0.4,
-        openness: 0.7
+        openness: 0.7,
       },
       currentRooms: [],
-      lastActivity: Date.now()
+      lastActivity: Date.now(),
     };
 
-    const newCharacterStates = { ...this.state.characterStates, [characterId]: defaultState };
+    const newCharacterStates = {
+      ...this.state.characterStates,
+      [characterId]: defaultState,
+    };
     this.setState({ characterStates: newCharacterStates });
-    saveToBrowserStorage('personaChat_characterStates_v16', newCharacterStates);
+    saveToBrowserStorage("personaChat_characterStates_v16", newCharacterStates);
   }
 
   updateCharacterState(characterId, characterState) {
     if (!characterState) return;
-    
+
     const newCharacterStates = { ...this.state.characterStates };
     newCharacterStates[characterId] = {
       ...newCharacterStates[characterId],
       ...characterState,
-      lastActivity: Date.now()
+      lastActivity: Date.now(),
     };
-    
+
     this.setState({ characterStates: newCharacterStates });
-    saveToBrowserStorage('personaChat_characterStates_v16', newCharacterStates);
+    saveToBrowserStorage("personaChat_characterStates_v16", newCharacterStates);
   }
 
   async triggerApiCall(
     currentMessagesState,
     isProactive = false,
     isReroll = false,
-    forceSummary = false
+    forceSummary = false,
   ) {
     let chatId, character;
 
@@ -2442,20 +2665,20 @@ class PersonaChatApp {
     }
 
     // API 설정 가져오기 (레거시 호환성 포함)
-    const apiProvider = this.state.settings.apiProvider || 'gemini';
+    const apiProvider = this.state.settings.apiProvider || "gemini";
     const apiConfigs = this.state.settings.apiConfigs || {};
     let currentConfig = apiConfigs[apiProvider];
-    
+
     // 레거시 호환성: 기존 apiKey/model을 gemini 설정으로 사용
-    if (!currentConfig && apiProvider === 'gemini') {
+    if (!currentConfig && apiProvider === "gemini") {
       currentConfig = {
         apiKey: this.state.settings.apiKey,
-        model: this.state.settings.model
+        model: this.state.settings.model,
       };
     }
-    
+
     if (!currentConfig || !currentConfig.apiKey) {
-      console.error('API configuration not found or API key missing');
+      console.error("API configuration not found or API key missing");
       this.setState({ isWaitingForResponse: false });
       return;
     }
@@ -2465,7 +2688,7 @@ class PersonaChatApp {
       maxTokens: currentConfig.maxTokens,
       temperature: currentConfig.temperature,
       profileMaxTokens: currentConfig.profileMaxTokens,
-      profileTemperature: currentConfig.profileTemperature
+      profileTemperature: currentConfig.profileTemperature,
     };
 
     const response = await this.apiManager.generateContent(
@@ -2479,10 +2702,10 @@ class PersonaChatApp {
         history: history,
         prompts: this.state.settings.prompts,
         isProactive: isProactive,
-        forceSummary: forceSummary
+        forceSummary: forceSummary,
       },
       currentConfig.baseUrl, // custom_openai용
-      options
+      options,
     );
 
     // 디버그 로그 수집
@@ -2491,35 +2714,35 @@ class PersonaChatApp {
         characterName: character.name,
         characterPrompt: character.prompt,
         characterMemories: character.memories,
-        characterId: character.id
+        characterId: character.id,
       },
       systemPrompt: this.state.settings.prompts,
       outputResponse: {
         messages: response.messages,
         newMemory: response.newMemory,
         characterState: response.characterState,
-        reactionDelay: response.reactionDelay
+        reactionDelay: response.reactionDelay,
       },
       parameters: {
         model: currentConfig.model,
         isProactive,
         forceSummary,
-        messageCount: history.length
+        messageCount: history.length,
       },
       metadata: {
         chatId,
-        chatType: 'general',
+        chatType: "general",
         timestamp: new Date().toISOString(),
         apiProvider,
-        model: currentConfig.model
-      }
+        model: currentConfig.model,
+      },
     };
-    
-    this.addStructuredLog(chatId, 'general', character.name, structuredLogData);
+
+    this.addStructuredLog(chatId, "general", character.name, structuredLogData);
 
     if (response.newMemory && response.newMemory.trim() !== "") {
       const charIndex = this.state.characters.findIndex(
-        (c) => c.id === character.id
+        (c) => c.id === character.id,
       );
       if (charIndex !== -1) {
         const updatedCharacters = [...this.state.characters];
@@ -2531,7 +2754,7 @@ class PersonaChatApp {
         console.log(
           `[Memory Added] for ${
             charToUpdate.name
-          }: ${response.newMemory.trim()}`
+          }: ${response.newMemory.trim()}`,
         );
       }
     }
@@ -2573,7 +2796,7 @@ class PersonaChatApp {
             const baseFileName = s.name.replace(/\.[^/.]+$/, "");
             const searchFileName = String(messagePart.sticker).replace(
               /\.[^/.]+$/,
-              ""
+              "",
             );
             if (baseFileName === searchFileName) return true;
             return false;
@@ -2596,7 +2819,7 @@ class PersonaChatApp {
       const errorMessage = {
         id: Date.now() + 1,
         sender: "System",
-        content: response.error || t('chat.messageGenerationError'),
+        content: response.error || t("chat.messageGenerationError"),
         time: new Date().toLocaleTimeString("ko-KR", {
           hour: "2-digit",
           minute: "2-digit",
@@ -2672,7 +2895,7 @@ class PersonaChatApp {
       console.log(
         `Scheduling random character ${i + 1}/${randomCharacterCount} in ${
           randomDelay / 1000
-        } seconds.`
+        } seconds.`,
       );
       setTimeout(() => this.initiateSingleRandomCharacter(), randomDelay);
     }
@@ -2682,26 +2905,28 @@ class PersonaChatApp {
     const { userName, userDescription } = this.state.settings;
     if (!userName.trim() || !userDescription.trim()) {
       console.warn(
-        "Cannot generate random character: User persona is not set."
+        "Cannot generate random character: User persona is not set.",
       );
       return;
     }
 
     // API 설정 가져오기 (레거시 호환성 포함)
-    const apiProvider = this.state.settings.apiProvider || 'gemini';
+    const apiProvider = this.state.settings.apiProvider || "gemini";
     const apiConfigs = this.state.settings.apiConfigs || {};
     let currentConfig = apiConfigs[apiProvider];
-    
+
     // 레거시 호환성: 기존 apiKey/model을 gemini 설정으로 사용
-    if (!currentConfig && apiProvider === 'gemini') {
+    if (!currentConfig && apiProvider === "gemini") {
       currentConfig = {
         apiKey: this.state.settings.apiKey,
-        model: this.state.settings.model
+        model: this.state.settings.model,
       };
     }
-    
+
     if (!currentConfig || !currentConfig.apiKey) {
-      console.error('API configuration not found or API key missing for profile generation');
+      console.error(
+        "API configuration not found or API key missing for profile generation",
+      );
       return;
     }
 
@@ -2711,7 +2936,7 @@ class PersonaChatApp {
         maxTokens: currentConfig.maxTokens,
         temperature: currentConfig.temperature,
         profileMaxTokens: currentConfig.profileMaxTokens,
-        profileTemperature: currentConfig.profileTemperature
+        profileTemperature: currentConfig.profileTemperature,
       };
 
       const profile = await this.apiManager.generateProfile(
@@ -2721,10 +2946,10 @@ class PersonaChatApp {
         {
           userName: userName,
           userDescription: userDescription,
-          profileCreationPrompt: this.state.settings.prompts.profile_creation
+          profileCreationPrompt: this.state.settings.prompts.profile_creation,
         },
         currentConfig.baseUrl, // custom_openai용
-        profileOptions
+        profileOptions,
       );
       if (profile.error) {
         console.error("Failed to generate profile:", profile.error);
@@ -2771,7 +2996,7 @@ class PersonaChatApp {
         maxTokens: currentConfig.maxTokens,
         temperature: currentConfig.temperature,
         profileMaxTokens: currentConfig.profileMaxTokens,
-        profileTemperature: currentConfig.profileTemperature
+        profileTemperature: currentConfig.profileTemperature,
       };
 
       const response = await this.apiManager.generateContent(
@@ -2785,44 +3010,49 @@ class PersonaChatApp {
           history: [],
           prompts: this.state.settings.prompts,
           isProactive: true,
-          forceSummary: false
+          forceSummary: false,
         },
         currentConfig.baseUrl, // custom_openai용
-        apiOptions
+        apiOptions,
       );
-      
+
       // 랜덤 캐릭터 생성 디버그 로그 수집
       const randomCharLogData = {
         personaInput: {
           characterName: tempCharacter.name,
           characterPrompt: tempCharacter.prompt,
           characterMemories: tempCharacter.memories,
-          characterId: tempCharacter.id
+          characterId: tempCharacter.id,
         },
         systemPrompt: this.state.settings.prompts,
         outputResponse: {
           messages: response.messages,
           newMemory: response.newMemory,
           characterState: response.characterState,
-          reactionDelay: response.reactionDelay
+          reactionDelay: response.reactionDelay,
         },
         parameters: {
           model: currentConfig.model,
           isProactive: true,
           forceSummary: false,
-          messageCount: 0
+          messageCount: 0,
         },
         metadata: {
           chatId: null,
-          chatType: 'random_character',
+          chatType: "random_character",
           timestamp: Date.now(),
           apiProvider,
-          model: currentConfig.model
-        }
+          model: currentConfig.model,
+        },
       };
-      
-      this.addStructuredLog(null, 'random_character', tempCharacter.name, randomCharLogData);
-      
+
+      this.addStructuredLog(
+        null,
+        "random_character",
+        tempCharacter.name,
+        randomCharLogData,
+      );
+
       if (response.error) {
         console.error("Failed to get first message from API:", response.error);
         return;
@@ -2852,7 +3082,7 @@ class PersonaChatApp {
       // Create a chat room for the new random character
       const newChatRoomId = this.createNewChatRoom(
         tempCharacter.id,
-        "랜덤 채팅"
+        "랜덤 채팅",
       ); // This will update this.state.chatRooms and initialize messages[newChatRoomId] = []
 
       // Now, add the first messages to this newly created chat room
@@ -2876,21 +3106,21 @@ class PersonaChatApp {
     } catch (error) {
       console.error(
         "Failed to generate and initiate single random character:",
-        error
+        error,
       );
     }
   }
 
   handleDeleteMessage(lastMessageId) {
     this.showConfirmModal(
-      t('modal.messageGroupDeleteConfirm.title'),
-      t('modal.messageGroupDeleteConfirm.message'),
+      t("modal.messageGroupDeleteConfirm.title"),
+      t("modal.messageGroupDeleteConfirm.message"),
       () => {
         const currentMessages =
           this.state.messages[this.state.selectedChatId] || [];
         const groupInfo = findMessageGroup(
           currentMessages,
-          currentMessages.findIndex((msg) => msg.id === lastMessageId)
+          currentMessages.findIndex((msg) => msg.id === lastMessageId),
         );
         if (!groupInfo) return;
 
@@ -2905,13 +3135,13 @@ class PersonaChatApp {
             [this.state.selectedChatId]: updatedMessages,
           },
         });
-      }
+      },
     );
   }
 
   async handleSaveEditedMessage(lastMessageId) {
     const textarea = document.querySelector(
-      `.edit-message-textarea[data-id="${lastMessageId}"]`
+      `.edit-message-textarea[data-id="${lastMessageId}"]`,
     );
     if (!textarea) return;
     const newContent = textarea.value.trim();
@@ -2920,15 +3150,15 @@ class PersonaChatApp {
       this.state.messages[this.state.selectedChatId] || [];
     const groupInfo = findMessageGroup(
       currentMessages,
-      currentMessages.findIndex((msg) => msg.id === lastMessageId)
+      currentMessages.findIndex((msg) => msg.id === lastMessageId),
     );
     if (!groupInfo) return;
 
     const originalMessage = currentMessages[groupInfo.startIndex];
     if (originalMessage.type === "text" && !newContent) {
       this.showInfoModal(
-        t('modal.messageEmptyError.title'),
-        t('modal.messageEmptyError.message')
+        t("modal.messageEmptyError.title"),
+        t("modal.messageEmptyError.message"),
       );
       return;
     }
@@ -2965,7 +3195,7 @@ class PersonaChatApp {
       this.state.messages[this.state.selectedChatId] || [];
     const groupInfo = findMessageGroup(
       currentMessages,
-      currentMessages.findIndex((msg) => msg.id === lastMessageId)
+      currentMessages.findIndex((msg) => msg.id === lastMessageId),
     );
     if (!groupInfo) return;
 
@@ -3081,14 +3311,16 @@ class PersonaChatApp {
     if (!character || !character.stickers) return 0;
     return character.stickers.reduce(
       (total, sticker) => total + (sticker.size || 0),
-      0
+      0,
     );
   }
 
   renderMemoryInput(memoryText = "") {
     return `
         <div class="memory-item flex items-center gap-2">
-            <input type="text" class="memory-input flex-1 px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" value="${memoryText}" placeholder="기억할 내용을 입력하세요...">
+            <input type="text" class="memory-input flex-1 px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" value="${memoryText}" placeholder="${t(
+              "characterModal.memoryPlaceholder",
+            )}">
             <button class="delete-memory-btn p-2 text-gray-400 hover:text-red-400">
                 <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>
             </button>
@@ -3127,7 +3359,7 @@ class PersonaChatApp {
           contentWrapper.style.removeProperty("transition");
           delete details.dataset.animating;
         },
-        { once: true }
+        { once: true },
       );
     } else {
       details.setAttribute("open", "");
@@ -3144,7 +3376,7 @@ class PersonaChatApp {
           contentWrapper.style.removeProperty("transition");
           delete details.dataset.animating;
         },
-        { once: true }
+        { once: true },
       );
     }
   }
@@ -3213,16 +3445,16 @@ class PersonaChatApp {
     const name = document.getElementById("character-name").value.trim();
     if (!name) {
       this.showInfoModal(
-        t('modal.characterCardNoNameError.title'),
-        t('modal.characterCardNoNameError.message')
+        t("modal.characterCardNoNameError.title"),
+        t("modal.characterCardNoNameError.message"),
       );
       return;
     }
     const currentAvatar = this.state.editingCharacter?.avatar;
     if (!currentAvatar) {
       this.showInfoModal(
-        t('modal.characterCardNoAvatarImageError.title'),
-        t('modal.characterCardNoAvatarImageError.message')
+        t("modal.characterCardNoAvatarImageError.title"),
+        t("modal.characterCardNoAvatarImageError.message"),
       );
       return;
     }
@@ -3233,7 +3465,7 @@ class PersonaChatApp {
       .filter(Boolean);
 
     const proactiveToggle = document.getElementById(
-      "character-proactive-toggle"
+      "character-proactive-toggle",
     );
     const proactiveEnabled = proactiveToggle
       ? proactiveToggle.checked
@@ -3253,7 +3485,6 @@ class PersonaChatApp {
       stickers: this.state.editingCharacter?.stickers || [],
     };
 
-
     const image = new Image();
     image.crossOrigin = "Anonymous";
     image.onload = async () => {
@@ -3269,14 +3500,14 @@ class PersonaChatApp {
         // PNG 청크 방식으로 저장 (압축 적용)
         const dataUrl = canvas.toDataURL("image/png");
         const pngData = this.dataUrlToUint8Array(dataUrl);
-        
+
         // gzip 압축 적용
         const characterDataBytes = new TextEncoder().encode(jsonString);
         const compressedData = await this.compressData(characterDataBytes);
-        
+
         const newPngData = this.addPngChunk(pngData, "cChr", compressedData); // 'cChr' = compressed Character
         const newDataUrl = this.uint8ArrayToDataUrl(newPngData);
-        
+
         const link = document.createElement("a");
         link.href = newDataUrl;
         link.download = `${characterData.name}_card.png`;
@@ -3288,8 +3519,8 @@ class PersonaChatApp {
     };
     image.onerror = () =>
       this.showInfoModal(
-        t('modal.avatarImageLoadError.title'),
-        t('modal.avatarImageLoadError.message')
+        t("modal.avatarImageLoadError.title"),
+        t("modal.avatarImageLoadError.message"),
       );
     image.src = currentAvatar;
   }
@@ -3300,29 +3531,36 @@ class PersonaChatApp {
       const dataUrl = canvas.toDataURL("image/png");
       const pngData = this.dataUrlToUint8Array(dataUrl);
       const characterData = new TextEncoder().encode(jsonString);
-      
+
       // PNG 청크 방식으로 데이터 추가
       const newPngData = this.addPngChunk(pngData, "chAr", characterData);
-      
+
       // 새로운 이미지 생성
       const newDataUrl = this.uint8ArrayToDataUrl(newPngData);
-      
+
       // Canvas에 새로운 이미지를 그려서 ImageData 반환
       const tempCanvas = document.createElement("canvas");
       tempCanvas.width = canvas.width;
       tempCanvas.height = canvas.height;
       const tempCtx = tempCanvas.getContext("2d");
-      
+
       const img = new Image();
       img.onload = () => {
         tempCtx.drawImage(img, 0, 0);
-        const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+        const imageData = tempCtx.getImageData(
+          0,
+          0,
+          tempCanvas.width,
+          tempCanvas.height,
+        );
         return imageData;
       };
       img.src = newDataUrl;
-      
+
       // 동기적으로 처리하기 위해 기존 ImageData 반환 (실제로는 dataUrl이 중요)
-      return canvas.getContext("2d").getImageData(0, 0, canvas.width, canvas.height);
+      return canvas
+        .getContext("2d")
+        .getImageData(0, 0, canvas.width, canvas.height);
     } catch (error) {
       console.error("PNG encoding failed:", error);
       return null;
@@ -3330,7 +3568,7 @@ class PersonaChatApp {
   }
 
   dataUrlToUint8Array(dataUrl) {
-    const base64 = dataUrl.split(',')[1];
+    const base64 = dataUrl.split(",")[1];
     const binaryString = atob(base64);
     const bytes = new Uint8Array(binaryString.length);
     for (let i = 0; i < binaryString.length; i++) {
@@ -3340,7 +3578,9 @@ class PersonaChatApp {
   }
 
   uint8ArrayToDataUrl(uint8Array) {
-    const binaryString = Array.from(uint8Array).map(byte => String.fromCharCode(byte)).join('');
+    const binaryString = Array.from(uint8Array)
+      .map((byte) => String.fromCharCode(byte))
+      .join("");
     const base64 = btoa(binaryString);
     return `data:image/png;base64,${base64}`;
   }
@@ -3349,8 +3589,12 @@ class PersonaChatApp {
     // IEND 청크 찾기
     let iendIndex = -1;
     for (let i = 0; i < pngData.length - 7; i++) {
-      if (pngData[i + 4] === 0x49 && pngData[i + 5] === 0x45 && 
-          pngData[i + 6] === 0x4E && pngData[i + 7] === 0x44) {
+      if (
+        pngData[i + 4] === 0x49 &&
+        pngData[i + 5] === 0x45 &&
+        pngData[i + 6] === 0x4e &&
+        pngData[i + 7] === 0x44
+      ) {
         iendIndex = i;
         break;
       }
@@ -3359,9 +3603,18 @@ class PersonaChatApp {
     if (iendIndex === -1) {
       // IEND 청크가 없으면 추가
       const iendChunk = new Uint8Array([
-        0x00, 0x00, 0x00, 0x00, // Length: 0
-        0x49, 0x45, 0x4E, 0x44, // Type: IEND  
-        0xAE, 0x42, 0x60, 0x82  // CRC
+        0x00,
+        0x00,
+        0x00,
+        0x00, // Length: 0
+        0x49,
+        0x45,
+        0x4e,
+        0x44, // Type: IEND
+        0xae,
+        0x42,
+        0x60,
+        0x82, // CRC
       ]);
       iendIndex = pngData.length;
       const newPngData = new Uint8Array(pngData.length + iendChunk.length);
@@ -3374,10 +3627,10 @@ class PersonaChatApp {
     const chunkTypeBytes = new TextEncoder().encode(chunkType);
     const chunkLength = data.length;
     const lengthBytes = new Uint8Array(4);
-    lengthBytes[0] = (chunkLength >>> 24) & 0xFF;
-    lengthBytes[1] = (chunkLength >>> 16) & 0xFF;  
-    lengthBytes[2] = (chunkLength >>> 8) & 0xFF;
-    lengthBytes[3] = chunkLength & 0xFF;
+    lengthBytes[0] = (chunkLength >>> 24) & 0xff;
+    lengthBytes[1] = (chunkLength >>> 16) & 0xff;
+    lengthBytes[2] = (chunkLength >>> 8) & 0xff;
+    lengthBytes[3] = chunkLength & 0xff;
 
     // CRC 계산
     const crcData = new Uint8Array(chunkTypeBytes.length + data.length);
@@ -3385,19 +3638,19 @@ class PersonaChatApp {
     crcData.set(data, chunkTypeBytes.length);
     const crc = this.calculateCRC32(crcData);
     const crcBytes = new Uint8Array(4);
-    crcBytes[0] = (crc >>> 24) & 0xFF;
-    crcBytes[1] = (crc >>> 16) & 0xFF;
-    crcBytes[2] = (crc >>> 8) & 0xFF;
-    crcBytes[3] = crc & 0xFF;
+    crcBytes[0] = (crc >>> 24) & 0xff;
+    crcBytes[1] = (crc >>> 16) & 0xff;
+    crcBytes[2] = (crc >>> 8) & 0xff;
+    crcBytes[3] = crc & 0xff;
 
     // 새 PNG 데이터 생성 (IEND 앞에 청크 삽입)
     // 청크 크기: 4(길이) + 4(타입) + data.length + 4(CRC) = 12 + data.length
     const chunkSize = 12 + data.length;
     const newPngData = new Uint8Array(pngData.length + chunkSize);
-    
+
     // IEND 이전 데이터 복사
     newPngData.set(pngData.slice(0, iendIndex));
-    
+
     // 새 청크 삽입
     let offset = iendIndex;
     newPngData.set(lengthBytes, offset);
@@ -3408,7 +3661,7 @@ class PersonaChatApp {
     offset += data.length;
     newPngData.set(crcBytes, offset);
     offset += 4;
-    
+
     // IEND 청크 및 이후 데이터 복사
     newPngData.set(pngData.slice(iendIndex), offset);
 
@@ -3420,41 +3673,46 @@ class PersonaChatApp {
     for (let i = 0; i < 256; i++) {
       let c = i;
       for (let j = 0; j < 8; j++) {
-        c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+        c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
       }
       crcTable[i] = c;
     }
 
-    let crc = 0xFFFFFFFF;
+    let crc = 0xffffffff;
     for (let i = 0; i < data.length; i++) {
-      crc = crcTable[(crc ^ data[i]) & 0xFF] ^ (crc >>> 8);
+      crc = crcTable[(crc ^ data[i]) & 0xff] ^ (crc >>> 8);
     }
-    return (crc ^ 0xFFFFFFFF) >>> 0;
+    return (crc ^ 0xffffffff) >>> 0;
   }
 
   extractPngChunk(pngData, chunkType) {
     const chunkTypeBytes = new TextEncoder().encode(chunkType);
-    
+
     let index = 8; // PNG 헤더 건너뛰기
     while (index < pngData.length - 8) {
       // 청크 길이 읽기
-      const length = (pngData[index] << 24) | (pngData[index + 1] << 16) | 
-                    (pngData[index + 2] << 8) | pngData[index + 3];
-      
+      const length =
+        (pngData[index] << 24) |
+        (pngData[index + 1] << 16) |
+        (pngData[index + 2] << 8) |
+        pngData[index + 3];
+
       // 청크 타입 읽기
       const type = pngData.slice(index + 4, index + 8);
-      
+
       // 찾는 청크인지 확인
-      if (type.length === chunkTypeBytes.length && 
-          type.every((byte, i) => byte === chunkTypeBytes[i])) {
+      if (
+        type.length === chunkTypeBytes.length &&
+        type.every((byte, i) => byte === chunkTypeBytes[i])
+      ) {
         // 청크 데이터 반환
         return pngData.slice(index + 8, index + 8 + length);
       }
-      
+
       // 다음 청크로 이동 (길이 + 타입 + 데이터 + CRC)
       index += 8 + length + 4;
     }
-    
+
     return null;
   }
 
@@ -3464,15 +3722,15 @@ class PersonaChatApp {
     if (!window.CompressionStream) {
       return data;
     }
-    
+
     try {
-      const stream = new CompressionStream('gzip');
+      const stream = new CompressionStream("gzip");
       const writer = stream.writable.getWriter();
       const reader = stream.readable.getReader();
-      
+
       writer.write(data);
       writer.close();
-      
+
       const chunks = [];
       let done = false;
       while (!done) {
@@ -3482,7 +3740,7 @@ class PersonaChatApp {
           chunks.push(value);
         }
       }
-      
+
       const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
       const result = new Uint8Array(totalLength);
       let offset = 0;
@@ -3490,7 +3748,7 @@ class PersonaChatApp {
         result.set(chunk, offset);
         offset += chunk.length;
       }
-      
+
       return result;
     } catch (error) {
       // 압축 실패시 원본 데이터 반환
@@ -3503,15 +3761,15 @@ class PersonaChatApp {
     if (!window.DecompressionStream) {
       return compressedData;
     }
-    
+
     try {
-      const stream = new DecompressionStream('gzip');
+      const stream = new DecompressionStream("gzip");
       const writer = stream.writable.getWriter();
       const reader = stream.readable.getReader();
-      
+
       writer.write(compressedData);
       writer.close();
-      
+
       const chunks = [];
       let done = false;
       while (!done) {
@@ -3521,7 +3779,7 @@ class PersonaChatApp {
           chunks.push(value);
         }
       }
-      
+
       const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
       const result = new Uint8Array(totalLength);
       let offset = 0;
@@ -3529,7 +3787,7 @@ class PersonaChatApp {
         result.set(chunk, offset);
         offset += chunk.length;
       }
-      
+
       return result;
     } catch (error) {
       return compressedData;
@@ -3552,11 +3810,11 @@ class PersonaChatApp {
         try {
           // PNG 청크에서 데이터 읽기 시도
           const pngData = this.dataUrlToUint8Array(imageSrc);
-          
+
           // 압축된 데이터 시도
           let chunkData = this.extractPngChunk(pngData, "cChr");
           let jsonString;
-          
+
           if (chunkData) {
             // 압축된 데이터 압축해제
             const decompressedData = await this.decompressData(chunkData);
@@ -3568,10 +3826,10 @@ class PersonaChatApp {
               jsonString = new TextDecoder().decode(chunkData);
             }
           }
-          
+
           if (jsonString) {
             const data = JSON.parse(jsonString);
-            
+
             if (data.source === "PersonaChatAppCharacterCard") {
               this.setState({
                 editingCharacter: {
@@ -3581,8 +3839,8 @@ class PersonaChatApp {
                 },
               });
               this.showInfoModal(
-                t('modal.avatarLoadSuccess.title'),
-                t('modal.avatarLoadSuccess.message')
+                t("modal.avatarLoadSuccess.title"),
+                t("modal.avatarLoadSuccess.message"),
               );
               return;
             }
@@ -3600,8 +3858,8 @@ class PersonaChatApp {
                   },
                 });
                 this.showInfoModal(
-                  t('modal.avatarLoadSuccess.title'),
-                  t('modal.avatarLoadSuccess.message')
+                  t("modal.avatarLoadSuccess.title"),
+                  t("modal.avatarLoadSuccess.message"),
                 );
                 return;
               }
@@ -3612,8 +3870,8 @@ class PersonaChatApp {
         }
 
         this.showInfoModal(
-          t('modal.characterCardNoAvatarImageInfo.title'),
-          t('modal.characterCardNoAvatarImageInfo.message')
+          t("modal.characterCardNoAvatarImageInfo.title"),
+          t("modal.characterCardNoAvatarImageInfo.message"),
         );
         this.setState({
           editingCharacter: {
@@ -3654,14 +3912,14 @@ class PersonaChatApp {
       URL.revokeObjectURL(url);
 
       this.showInfoModal(
-        t('modal.backupComplete.title'),
-        t('modal.backupComplete.message')
+        t("modal.backupComplete.title"),
+        t("modal.backupComplete.message"),
       );
     } catch (error) {
       console.error("Backup failed:", error);
       this.showInfoModal(
-        t('modal.backupFailed.title'),
-        t('modal.backupFailed.message')
+        t("modal.backupFailed.title"),
+        t("modal.backupFailed.message"),
       );
     }
   }
@@ -3681,39 +3939,39 @@ class PersonaChatApp {
           backupData.unreadCounts
         ) {
           this.showConfirmModal(
-            t('modal.restoreConfirm.title'),
-            t('modal.restoreConfirm.message'),
+            t("modal.restoreConfirm.title"),
+            t("modal.restoreConfirm.message"),
             () => {
               saveToBrowserStorage(
                 "personaChat_settings_v16",
-                backupData.settings
+                backupData.settings,
               );
               saveToBrowserStorage(
                 "personaChat_characters_v16",
-                backupData.characters
+                backupData.characters,
               );
               saveToBrowserStorage(
                 "personaChat_messages_v16",
-                backupData.messages
+                backupData.messages,
               );
               saveToBrowserStorage(
                 "personaChat_unreadCounts_v16",
-                backupData.unreadCounts
+                backupData.unreadCounts,
               );
               saveToBrowserStorage(
                 "personaChat_chatRooms_v16",
-                backupData.chatRooms || {}
+                backupData.chatRooms || {},
               );
               saveToBrowserStorage(
                 "personaChat_userStickers_v16",
-                backupData.userStickers || []
+                backupData.userStickers || [],
               );
               this.showInfoModal(
-                t('modal.restoreComplete.title'),
-                t('modal.restoreComplete.message')
+                t("modal.restoreComplete.title"),
+                t("modal.restoreComplete.message"),
               );
               setTimeout(() => window.location.reload(), 2000);
-            }
+            },
           );
         } else {
           throw new Error("Invalid backup file format.");
@@ -3721,8 +3979,8 @@ class PersonaChatApp {
       } catch (error) {
         console.error("Restore failed:", error);
         this.showInfoModal(
-          t('modal.restoreFailed.title'),
-          t('modal.restoreFailed.message')
+          t("modal.restoreFailed.title"),
+          t("modal.restoreFailed.message"),
         );
       } finally {
         e.target.value = "";
@@ -3746,14 +4004,14 @@ class PersonaChatApp {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       this.showInfoModal(
-        t('modal.promptBackupComplete.title'),
-        t('modal.promptBackupComplete.message')
+        t("modal.promptBackupComplete.title"),
+        t("modal.promptBackupComplete.message"),
       );
     } catch (error) {
       console.error("Prompt backup failed:", error);
       this.showInfoModal(
-        t('modal.promptBackupFailed.title'),
-        t('modal.promptBackupFailed.message')
+        t("modal.promptBackupFailed.title"),
+        t("modal.promptBackupFailed.message"),
       );
     }
   }
@@ -3772,8 +4030,8 @@ class PersonaChatApp {
           typeof restoredPrompts.main.system_rules === "string"
         ) {
           this.showConfirmModal(
-            t('modal.promptRestoreConfirm.title'),
-            t('modal.promptRestoreConfirm.message'),
+            t("modal.promptRestoreConfirm.title"),
+            t("modal.promptRestoreConfirm.message"),
             () => {
               const newPrompts = {
                 main: {
@@ -3787,13 +4045,13 @@ class PersonaChatApp {
               this.setState({
                 settings: { ...this.state.settings, prompts: newPrompts },
                 modal: {
-                    isOpen: true,
-                    title: "불러오기 완료",
-                    message: "프롬프트를 성공적으로 불러왔습니다.",
-                    onConfirm: null
+                  isOpen: true,
+                  title: t("modal.promptRestoreComplete.title"),
+                  message: t("modal.promptRestoreComplete.message"),
+                  onConfirm: null,
                 },
               });
-            }
+            },
           );
         } else {
           throw new Error("Invalid prompts backup file format.");
@@ -3801,8 +4059,8 @@ class PersonaChatApp {
       } catch (error) {
         console.error("Prompt restore failed:", error);
         this.showInfoModal(
-          t('modal.promptRestoreFailed.title'),
-          t('modal.promptRestoreFailed.message')
+          t("modal.promptRestoreFailed.title"),
+          t("modal.promptRestoreFailed.message"),
         );
       } finally {
         e.target.value = "";
@@ -3813,8 +4071,8 @@ class PersonaChatApp {
 
   resetPromptToDefault(section, key, promptName) {
     this.showConfirmModal(
-      "프롬프트 초기화",
-      `"${promptName}"을(를) 기본값으로 되돌리시겠습니까?\n현재 설정은 모두 사라집니다.`,
+      t("modal.resetPromptTitle"),
+      t("modal.resetPromptMessage").replace("{{promptName}}", promptName),
       () => {
         import("./defaults.js").then(({ defaultPrompts }) => {
           const currentPrompts = { ...this.state.settings.prompts };
@@ -3824,7 +4082,8 @@ class PersonaChatApp {
           } else if (section === "profile_creation") {
             currentPrompts.profile_creation = defaultPrompts.profile_creation;
           } else if (section === "character_sheet_generation") {
-            currentPrompts.character_sheet_generation = defaultPrompts.character_sheet_generation;
+            currentPrompts.character_sheet_generation =
+              defaultPrompts.character_sheet_generation;
           }
 
           this.state.settings.prompts = currentPrompts;
@@ -3837,7 +4096,7 @@ class PersonaChatApp {
           } else if (section === "character_sheet_generation") {
             textareaId = "prompt-character_sheet_generation";
           }
-          
+
           const textarea = document.getElementById(textareaId);
           if (textarea) {
             if (section === "main") {
@@ -3850,11 +4109,14 @@ class PersonaChatApp {
           }
 
           this.showInfoModal(
-            "초기화 완료",
-            `"${promptName}"이(가) 기본값으로 되돌려졌습니다.`
+            t("modal.resetPromptCompleteTitle"),
+            t("modal.resetPromptCompleteMessage").replace(
+              "{{promptName}}",
+              promptName,
+            ),
           );
         });
-      }
+      },
     );
   }
 
@@ -3862,21 +4124,21 @@ class PersonaChatApp {
   handleAPIProviderChange(newProvider) {
     // API 프로바이더 변경 시 UI 업데이트
     const apiConfigs = { ...this.state.settings.apiConfigs };
-    
+
     // 새 프로바이더 설정이 없으면 기본값으로 초기화
     if (!apiConfigs[newProvider]) {
-      const defaultTemperature = newProvider === 'gemini' ? 1.25 : 0.8;
+      const defaultTemperature = newProvider === "gemini" ? 1.25 : 0.8;
       apiConfigs[newProvider] = {
-        apiKey: '',
-        model: '',
+        apiKey: "",
+        model: "",
         customModels: [],
         maxTokens: 4096,
         temperature: defaultTemperature,
         profileMaxTokens: 1024,
-        profileTemperature: 1.2
+        profileTemperature: 1.2,
       };
-      if (newProvider === 'custom_openai') {
-        apiConfigs[newProvider].baseUrl = '';
+      if (newProvider === "custom_openai") {
+        apiConfigs[newProvider].baseUrl = "";
       }
     }
 
@@ -3884,8 +4146,8 @@ class PersonaChatApp {
       settings: {
         ...this.state.settings,
         apiProvider: newProvider,
-        apiConfigs
-      }
+        apiConfigs,
+      },
     });
 
     // UI 즉시 업데이트
@@ -3893,9 +4155,9 @@ class PersonaChatApp {
   }
 
   handleModelSelect(model) {
-    const apiProvider = this.state.settings.apiProvider || 'gemini';
+    const apiProvider = this.state.settings.apiProvider || "gemini";
     const apiConfigs = { ...this.state.settings.apiConfigs };
-    
+
     if (!apiConfigs[apiProvider]) {
       apiConfigs[apiProvider] = {};
     }
@@ -3903,7 +4165,7 @@ class PersonaChatApp {
 
     // 레거시 호환성
     let legacyUpdate = {};
-    if (apiProvider === 'gemini') {
+    if (apiProvider === "gemini") {
       legacyUpdate.model = model;
     }
 
@@ -3911,8 +4173,8 @@ class PersonaChatApp {
       settings: {
         ...this.state.settings,
         ...legacyUpdate,
-        apiConfigs
-      }
+        apiConfigs,
+      },
     });
 
     // UI 즉시 업데이트
@@ -3920,15 +4182,15 @@ class PersonaChatApp {
   }
 
   handleAddCustomModel() {
-    const customModelInput = document.getElementById('custom-model-input');
+    const customModelInput = document.getElementById("custom-model-input");
     if (!customModelInput) return;
 
     const modelName = customModelInput.value.trim();
     if (!modelName) return;
 
-    const apiProvider = this.state.settings.apiProvider || 'gemini';
+    const apiProvider = this.state.settings.apiProvider || "gemini";
     const apiConfigs = { ...this.state.settings.apiConfigs };
-    
+
     if (!apiConfigs[apiProvider]) {
       apiConfigs[apiProvider] = { customModels: [] };
     }
@@ -3942,13 +4204,13 @@ class PersonaChatApp {
     }
 
     apiConfigs[apiProvider].customModels.push(modelName);
-    customModelInput.value = '';
+    customModelInput.value = "";
 
     this.setState({
       settings: {
         ...this.state.settings,
-        apiConfigs
-      }
+        apiConfigs,
+      },
     });
 
     // UI 즉시 업데이트
@@ -3956,9 +4218,9 @@ class PersonaChatApp {
   }
 
   handleRemoveCustomModel(index) {
-    const apiProvider = this.state.settings.apiProvider || 'gemini';
+    const apiProvider = this.state.settings.apiProvider || "gemini";
     const apiConfigs = { ...this.state.settings.apiConfigs };
-    
+
     if (apiConfigs[apiProvider] && apiConfigs[apiProvider].customModels) {
       apiConfigs[apiProvider].customModels.splice(index, 1);
     }
@@ -3966,8 +4228,8 @@ class PersonaChatApp {
     this.setState({
       settings: {
         ...this.state.settings,
-        apiConfigs
-      }
+        apiConfigs,
+      },
     });
 
     // UI 즉시 업데이트
@@ -3977,76 +4239,151 @@ class PersonaChatApp {
   updateProviderSettingsUI(newProvider) {
     // for_update 라인 2995-3030: 현재 설정값을 임시 저장
     this.tempSettings = this.tempSettings || {};
-    const currentProvider = document.getElementById('settings-api-provider')?.value;
+    const currentProvider = document.getElementById(
+      "settings-api-provider",
+    )?.value;
     if (currentProvider && currentProvider !== newProvider) {
-      const apiKeyInput = document.getElementById('settings-api-key');
-      const baseUrlInput = document.getElementById('settings-base-url');
-      const maxTokensInput = document.getElementById('settings-max-tokens');
-      const temperatureInput = document.getElementById('settings-temperature');
-      const profileMaxTokensInput = document.getElementById('settings-profile-max-tokens');
-      const profileTemperatureInput = document.getElementById('settings-profile-temperature');
-      
-      if (!this.tempSettings[currentProvider]) this.tempSettings[currentProvider] = {};
-      if (apiKeyInput) this.tempSettings[currentProvider].apiKey = apiKeyInput.value;
-      if (baseUrlInput) this.tempSettings[currentProvider].baseUrl = baseUrlInput.value;
-      if (maxTokensInput) this.tempSettings[currentProvider].maxTokens = parseInt(maxTokensInput.value, 10);
-      if (temperatureInput) this.tempSettings[currentProvider].temperature = parseFloat(temperatureInput.value);
-      if (profileMaxTokensInput) this.tempSettings[currentProvider].profileMaxTokens = parseInt(profileMaxTokensInput.value, 10);
-      if (profileTemperatureInput) this.tempSettings[currentProvider].profileTemperature = parseFloat(profileTemperatureInput.value);
+      const apiKeyInput = document.getElementById("settings-api-key");
+      const baseUrlInput = document.getElementById("settings-base-url");
+      const maxTokensInput = document.getElementById("settings-max-tokens");
+      const temperatureInput = document.getElementById("settings-temperature");
+      const profileMaxTokensInput = document.getElementById(
+        "settings-profile-max-tokens",
+      );
+      const profileTemperatureInput = document.getElementById(
+        "settings-profile-temperature",
+      );
+
+      if (!this.tempSettings[currentProvider])
+        this.tempSettings[currentProvider] = {};
+      if (apiKeyInput)
+        this.tempSettings[currentProvider].apiKey = apiKeyInput.value;
+      if (baseUrlInput)
+        this.tempSettings[currentProvider].baseUrl = baseUrlInput.value;
+      if (maxTokensInput)
+        this.tempSettings[currentProvider].maxTokens = parseInt(
+          maxTokensInput.value,
+          10,
+        );
+      if (temperatureInput)
+        this.tempSettings[currentProvider].temperature = parseFloat(
+          temperatureInput.value,
+        );
+      if (profileMaxTokensInput)
+        this.tempSettings[currentProvider].profileMaxTokens = parseInt(
+          profileMaxTokensInput.value,
+          10,
+        );
+      if (profileTemperatureInput)
+        this.tempSettings[currentProvider].profileTemperature = parseFloat(
+          profileTemperatureInput.value,
+        );
     }
-    
+
     // 새 제공업체의 설정 UI 업데이트
     const config = this.state.settings.apiConfigs?.[newProvider];
-    if (!config && newProvider !== 'gemini') return;
-    
+    if (!config && newProvider !== "gemini") return;
+
     // 레거시 호환성: gemini의 경우 기존 설정 사용
     let finalConfig = config;
-    if (!config && newProvider === 'gemini') {
+    if (!config && newProvider === "gemini") {
       finalConfig = {
-        apiKey: this.state.settings.apiKey || '',
-        model: this.state.settings.model || 'gemini-2.5-flash',
-        customModels: []
+        apiKey: this.state.settings.apiKey || "",
+        model: this.state.settings.model || "gemini-2.5-flash",
+        customModels: [],
       };
     }
-    
+
     // 임시 설정값이나 실제 설정값 사용
     const tempConfig = this.tempSettings[newProvider] || {};
-    const apiKey = tempConfig.apiKey !== undefined ? tempConfig.apiKey : (finalConfig?.apiKey || '');
-    const baseUrl = tempConfig.baseUrl !== undefined ? tempConfig.baseUrl : (finalConfig?.baseUrl || '');
-    const model = tempConfig.model !== undefined ? tempConfig.model : (finalConfig?.model || '');
-    const customModels = tempConfig.customModels !== undefined ? tempConfig.customModels : (finalConfig?.customModels || []);
-    
+    const apiKey =
+      tempConfig.apiKey !== undefined
+        ? tempConfig.apiKey
+        : finalConfig?.apiKey || "";
+    const baseUrl =
+      tempConfig.baseUrl !== undefined
+        ? tempConfig.baseUrl
+        : finalConfig?.baseUrl || "";
+    const model =
+      tempConfig.model !== undefined
+        ? tempConfig.model
+        : finalConfig?.model || "";
+    const customModels =
+      tempConfig.customModels !== undefined
+        ? tempConfig.customModels
+        : finalConfig?.customModels || [];
+
     // Advanced settings values
-    const defaultTemperature = newProvider === 'gemini' ? 1.25 : 0.8;
-    const maxTokens = tempConfig.maxTokens !== undefined ? tempConfig.maxTokens : (finalConfig?.maxTokens || 4096);
-    const temperature = tempConfig.temperature !== undefined ? tempConfig.temperature : (finalConfig?.temperature || defaultTemperature);
-    const profileMaxTokens = tempConfig.profileMaxTokens !== undefined ? tempConfig.profileMaxTokens : (finalConfig?.profileMaxTokens || 1024);
-    const profileTemperature = tempConfig.profileTemperature !== undefined ? tempConfig.profileTemperature : (finalConfig?.profileTemperature || 1.2);
-    
+    const defaultTemperature = newProvider === "gemini" ? 1.25 : 0.8;
+    const maxTokens =
+      tempConfig.maxTokens !== undefined
+        ? tempConfig.maxTokens
+        : finalConfig?.maxTokens || 4096;
+    const temperature =
+      tempConfig.temperature !== undefined
+        ? tempConfig.temperature
+        : finalConfig?.temperature || defaultTemperature;
+    const profileMaxTokens =
+      tempConfig.profileMaxTokens !== undefined
+        ? tempConfig.profileMaxTokens
+        : finalConfig?.profileMaxTokens || 1024;
+    const profileTemperature =
+      tempConfig.profileTemperature !== undefined
+        ? tempConfig.profileTemperature
+        : finalConfig?.profileTemperature || 1.2;
+
     // 제공업체별 설정 UI를 다시 렌더링
-    const settingsContainer = document.querySelector('#settings-api-provider')?.closest('.content-inner');
-    const targetElement = settingsContainer?.querySelector('.provider-settings-container');
-    
+    const settingsContainer = document
+      .querySelector("#settings-api-provider")
+      ?.closest(".content-inner");
+    const desktopSettingsContainer = document.querySelector(
+      ".provider-settings-container",
+    );
+
+    // 모바일 UI와 데스크톱 UI 모두 지원
+    const targetElement =
+      settingsContainer?.querySelector(".provider-settings-container") ||
+      desktopSettingsContainer;
+
     if (targetElement) {
       // 새로운 설정 UI로 교체
-      const newSettingsHTML = renderProviderConfig(newProvider, { 
-        apiKey, 
-        baseUrl, 
-        model, 
+      const newSettingsHTML = renderProviderConfig(newProvider, {
+        apiKey,
+        baseUrl,
+        model,
         customModels,
         maxTokens,
         temperature,
         profileMaxTokens,
-        profileTemperature
+        profileTemperature,
       });
       targetElement.innerHTML = newSettingsHTML;
+
+      // 데스크톱 UI에서 제목도 업데이트
+      const providerTitleElement =
+        targetElement.parentElement?.querySelector("h4");
+      if (providerTitleElement) {
+        const displayNames = {
+          gemini: "Google Gemini",
+          claude: "Anthropic Claude",
+          openai: "OpenAI ChatGPT",
+          grok: "xAI Grok",
+          openrouter: "OpenRouter",
+          custom_openai: "Custom OpenAI",
+        };
+        const providerDisplayName = displayNames[newProvider] || newProvider;
+        providerTitleElement.innerHTML = `
+          <i data-lucide="settings" class="w-5 h-5 mr-3 text-blue-400"></i>
+          ${providerDisplayName} ${t("settings.providerSettings")}
+        `;
+      }
     }
-    
+
     // 아이콘 다시 생성
     if (window.lucide) {
       window.lucide.createIcons();
     }
-    
+
     // Advanced settings event listeners를 다시 설정
     setupAdvancedSettingsEventListeners();
   }
@@ -4054,7 +4391,7 @@ class PersonaChatApp {
   generateProviderSettingsHTML(provider, config) {
     const models = PROVIDER_MODELS[provider] || [];
     const customModels = config.customModels || [];
-    
+
     return `
       <div class="space-y-4">
         <!-- API 키 입력 -->
@@ -4065,13 +4402,15 @@ class PersonaChatApp {
           <input 
             type="password" 
             id="settings-api-key" 
-            value="${config.apiKey || ''}" 
+            value="${config.apiKey || ""}" 
             placeholder="API 키를 입력하세요" 
             class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm"
           />
         </div>
         
-        ${provider === PROVIDERS.CUSTOM_OPENAI ? `
+        ${
+          provider === PROVIDERS.CUSTOM_OPENAI
+            ? `
           <!-- Custom OpenAI Base URL -->
           <div>
             <label class="flex items-center text-sm font-medium text-gray-300 mb-2">
@@ -4080,12 +4419,14 @@ class PersonaChatApp {
             <input 
               type="text" 
               id="settings-base-url" 
-              value="${config.baseUrl || ''}" 
+              value="${config.baseUrl || ""}" 
               placeholder="https://api.openai.com/v1" 
               class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm"
             />
           </div>
-        ` : ''}
+        `
+            : ""
+        }
         
         <!-- 모델 선택 -->
         <div>
@@ -4093,19 +4434,31 @@ class PersonaChatApp {
             <i data-lucide="cpu" class="w-4 h-4 mr-2"></i>모델
           </label>
           
-          ${models.length > 0 ? `
+          ${
+            models.length > 0
+              ? `
             <div class="grid grid-cols-1 gap-2 mb-3">
-              ${models.map(model => `
+              ${models
+                .map(
+                  (model) => `
                 <button 
                   type="button" 
-                  class="model-select-btn px-3 py-2 text-left text-sm rounded-lg transition-colors ${config.model === model ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}" 
+                  class="model-select-btn px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                    config.model === model
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                  }" 
                   data-model="${model}"
                 >
                   ${model}
                 </button>
-              `).join('')}
+              `,
+                )
+                .join("")}
             </div>
-          ` : ''}
+          `
+              : ""
+          }
           
           <!-- 커스텀 모델 입력 -->
           <div class="flex gap-2">
@@ -4124,14 +4477,22 @@ class PersonaChatApp {
             </button>
           </div>
           
-          ${customModels.length > 0 ? `
+          ${
+            customModels.length > 0
+              ? `
             <div class="mt-3 space-y-1">
               <label class="text-xs text-gray-400">커스텀 모델</label>
-              ${customModels.map((model, index) => `
+              ${customModels
+                .map(
+                  (model, index) => `
                 <div class="flex items-center gap-2">
                   <button 
                     type="button" 
-                    class="model-select-btn flex-1 px-3 py-2 text-left text-sm rounded-lg transition-colors ${config.model === model ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}" 
+                    class="model-select-btn flex-1 px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                      config.model === model
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                    }" 
                     data-model="${model}"
                   >
                     ${model}
@@ -4144,9 +4505,13 @@ class PersonaChatApp {
                     <i data-lucide="trash-2" class="w-3 h-3"></i>
                   </button>
                 </div>
-              `).join('')}
+              `,
+                )
+                .join("")}
             </div>
-          ` : ''}
+          `
+              : ""
+          }
         </div>
       </div>
     `;
@@ -4156,7 +4521,7 @@ class PersonaChatApp {
   editGroupChat(groupChatId) {
     const groupChat = this.state.groupChats[groupChatId];
     if (!groupChat) return;
-    
+
     // 기존 데이터에 설정이 없으면 기본값 추가
     const groupChatWithDefaults = {
       ...groupChat,
@@ -4168,118 +4533,134 @@ class PersonaChatApp {
           acc[id] = {
             isActive: true,
             responseProbability: 0.9,
-            characterRole: 'normal'
+            characterRole: "normal",
           };
           return acc;
-        }, {})
-      }
+        }, {}),
+      },
     };
-    
-    this.setState({ 
+
+    this.setState({
       showEditGroupChatModal: true,
-      editingGroupChat: groupChatWithDefaults
+      editingGroupChat: groupChatWithDefaults,
     });
   }
 
   handleSaveGroupChatSettings() {
     if (!this.state.editingGroupChat) return;
-    
+
     const groupChatId = this.state.editingGroupChat.id;
-    const nameInput = document.getElementById('edit-group-chat-name');
-    const responseFrequencySlider = document.getElementById('edit-response-frequency');
-    const maxRespondingSelect = document.getElementById('edit-max-responding');
-    const responseDelaySlider = document.getElementById('edit-response-delay');
-    
+    const nameInput = document.getElementById("edit-group-chat-name");
+    const responseFrequencySlider = document.getElementById(
+      "edit-response-frequency",
+    );
+    const maxRespondingSelect = document.getElementById("edit-max-responding");
+    const responseDelaySlider = document.getElementById("edit-response-delay");
+
     // 개별 캐릭터 설정 수집
     const participantSettings = {};
-    this.state.editingGroupChat.participantIds.forEach(participantId => {
-        const activeCheckbox = document.getElementById(`active-${participantId}`);
-        const probabilitySlider = document.getElementById(`probability-${participantId}`);
-        const roleSelect = document.getElementById(`role-${participantId}`);
-        
-        participantSettings[participantId] = {
-            isActive: activeCheckbox?.checked || false,
-            responseProbability: parseFloat(probabilitySlider?.value || 50) / 100,
-            characterRole: roleSelect?.value || 'normal'
-        };
+    this.state.editingGroupChat.participantIds.forEach((participantId) => {
+      const activeCheckbox = document.getElementById(`active-${participantId}`);
+      const probabilitySlider = document.getElementById(
+        `probability-${participantId}`,
+      );
+      const roleSelect = document.getElementById(`role-${participantId}`);
+
+      participantSettings[participantId] = {
+        isActive: activeCheckbox?.checked || false,
+        responseProbability: parseFloat(probabilitySlider?.value || 50) / 100,
+        characterRole: roleSelect?.value || "normal",
+      };
     });
-    
+
     // 설정 업데이트
     const updatedGroupChat = {
-        ...this.state.editingGroupChat,
-        name: nameInput?.value?.trim() || this.state.editingGroupChat.name,
-        settings: {
-            responseFrequency: parseFloat(responseFrequencySlider?.value || 70) / 100,
-            maxRespondingCharacters: parseInt(maxRespondingSelect?.value || 2),
-            responseDelay: parseFloat(responseDelaySlider?.value || 3) * 1000,
-            participantSettings: participantSettings
-        }
+      ...this.state.editingGroupChat,
+      name: nameInput?.value?.trim() || this.state.editingGroupChat.name,
+      settings: {
+        responseFrequency:
+          parseFloat(responseFrequencySlider?.value || 70) / 100,
+        maxRespondingCharacters: parseInt(maxRespondingSelect?.value || 2),
+        responseDelay: parseFloat(responseDelaySlider?.value || 3) * 1000,
+        participantSettings: participantSettings,
+      },
     };
-    
+
     // 상태 업데이트
     const newGroupChats = { ...this.state.groupChats };
     newGroupChats[groupChatId] = updatedGroupChat;
-    
-    this.setState({ 
+
+    this.setState({
       groupChats: newGroupChats,
       showEditGroupChatModal: false,
-      editingGroupChat: null
+      editingGroupChat: null,
     });
-    
+
     // 즉시 저장
-    saveToBrowserStorage('personaChat_groupChats_v16', newGroupChats);
+    saveToBrowserStorage("personaChat_groupChats_v16", newGroupChats);
   }
-
-
-
-
 
   // AI Character Generation Methods (for_update 라인 4428-4555)
   async handleAIGenerateCharacter() {
-    const characterName = document.getElementById('character-name').value.trim();
-    const characterDescription = document.getElementById('character-prompt').value.trim();
-    
+    const characterName = document
+      .getElementById("character-name")
+      .value.trim();
+    const characterDescription = document
+      .getElementById("character-prompt")
+      .value.trim();
+
     if (!characterName) {
-      this.showInfoModal('이름 필요', '캐릭터 이름을 먼저 입력해주세요.');
+      this.showInfoModal("이름 필요", "캐릭터 이름을 먼저 입력해주세요.");
       return;
     }
 
     // 현재 선택된 프로바이더의 API 키 확인
-    const apiProvider = this.state.settings.apiProvider || 'gemini';
+    const apiProvider = this.state.settings.apiProvider || "gemini";
     const apiConfigs = this.state.settings.apiConfigs || {};
     let currentConfig = apiConfigs[apiProvider];
-    
+
     // 레거시 호환성: gemini의 경우 기존 설정 사용
-    if (!currentConfig && apiProvider === 'gemini') {
+    if (!currentConfig && apiProvider === "gemini") {
       currentConfig = {
         apiKey: this.state.settings.apiKey,
-        model: this.state.settings.model
+        model: this.state.settings.model,
       };
     }
-    
-    if (!currentConfig || !currentConfig.apiKey || currentConfig.apiKey.trim() === '') {
-      this.showInfoModal('API 키 필요', '설정에서 API 키를 먼저 입력해주세요.');
+
+    if (
+      !currentConfig ||
+      !currentConfig.apiKey ||
+      currentConfig.apiKey.trim() === ""
+    ) {
+      this.showInfoModal("API 키 필요", "설정에서 API 키를 먼저 입력해주세요.");
       this.setState({ showSettingsModal: true });
       return;
     }
 
     // 버튼 비활성화 및 로딩 표시
-    const generateBtn = document.getElementById('ai-generate-character-btn');
+    const generateBtn = document.getElementById("ai-generate-character-btn");
     const originalText = generateBtn.innerHTML;
     generateBtn.disabled = true;
-    generateBtn.innerHTML = '<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> 생성 중...';
+    generateBtn.innerHTML =
+      '<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> 생성 중...';
     if (window.lucide) {
       window.lucide.createIcons();
     }
 
     try {
       // 캐릭터 시트 생성 프롬프트 가져오기
-      const generationPrompt = this.state.settings.prompts.character_sheet_generation || this.defaultPrompts.character_sheet_generation;
-      
+      const generationPrompt =
+        this.state.settings.prompts.character_sheet_generation ||
+        this.defaultPrompts.character_sheet_generation;
+
       // 프롬프트에 변수 치환 및 강화된 지시사항 추가
-      const finalPrompt = generationPrompt
-        .replace('{characterName}', characterName)
-        .replace('{characterDescription}', characterDescription || '기본적인 정보만 제공됨') + 
+      const finalPrompt =
+        generationPrompt
+          .replace("{characterName}", characterName)
+          .replace(
+            "{characterDescription}",
+            characterDescription || "기본적인 정보만 제공됨",
+          ) +
         `\n\n절대 지켜야 할 규칙:\n- 캐릭터 시트만 작성\n- "안녕하세요", "도움이 되었으면", "이상입니다" 같은 인사말 금지\n- 설명 금지\n- 즉시 ### 기본 정보부터 시작\n- 마크다운 형식 외 다른 포맷 사용 금지`;
 
       // Extract API options for all providers
@@ -4287,7 +4668,7 @@ class PersonaChatApp {
         maxTokens: currentConfig.maxTokens,
         temperature: currentConfig.temperature,
         profileMaxTokens: currentConfig.profileMaxTokens,
-        profileTemperature: currentConfig.profileTemperature
+        profileTemperature: currentConfig.profileTemperature,
       };
 
       // API Manager를 통한 호출
@@ -4296,16 +4677,16 @@ class PersonaChatApp {
         currentConfig.apiKey,
         currentConfig.model,
         {
-          userName: '', // userName은 빈 문자열
-          userDescription: '', // userDescription은 빈 문자열
-          character: { name: 'AI Assistant', prompt: finalPrompt }, // 임시 캐릭터 객체
+          userName: "", // userName은 빈 문자열
+          userDescription: "", // userDescription은 빈 문자열
+          character: { name: "AI Assistant", prompt: finalPrompt }, // 임시 캐릭터 객체
           history: [{ content: finalPrompt, isMe: true, id: Date.now() }], // 단일 메시지 히스토리
           prompts: this.state.settings.prompts,
           isProactive: false,
-          forceSummary: false
+          forceSummary: false,
         },
         currentConfig.baseUrl, // custom_openai용
-        charGenOptions
+        charGenOptions,
       );
 
       // 캐릭터 시트 생성 디버그 로그 수집
@@ -4314,87 +4695,102 @@ class PersonaChatApp {
           characterName: characterName,
           characterPrompt: characterDescription,
           characterMemories: [],
-          characterId: 'ai_generation'
+          characterId: "ai_generation",
         },
         systemPrompt: { character_sheet_generation: finalPrompt },
         outputResponse: {
           messages: response.messages,
           newMemory: response.newMemory,
           characterState: response.characterState,
-          reactionDelay: response.reactionDelay
+          reactionDelay: response.reactionDelay,
         },
         parameters: {
           model: currentConfig.model,
           isProactive: false,
           forceSummary: false,
-          messageCount: 1
+          messageCount: 1,
         },
         metadata: {
           chatId: null,
-          chatType: 'character_generation',
+          chatType: "character_generation",
           timestamp: Date.now(),
           apiProvider,
-          model: currentConfig.model
-        }
+          model: currentConfig.model,
+        },
       };
-      
-      this.addStructuredLog(null, 'character_generation', characterName, charGenLogData);
+
+      this.addStructuredLog(
+        null,
+        "character_generation",
+        characterName,
+        charGenLogData,
+      );
 
       if (response && response.messages && response.messages.length > 0) {
         let aiResponse = response.messages[0].content;
-        
+
         // 빈 응답 체크
-        if (!aiResponse || aiResponse.trim() === '') {
-          throw new Error('Empty response received');
+        if (!aiResponse || aiResponse.trim() === "") {
+          throw new Error("Empty response received");
         }
-        
+
         // 응답 정리 (불필요한 래퍼 제거)
         aiResponse = aiResponse.trim();
-        
+
         // 코드 블록이나 JSON 래퍼가 있다면 제거
-        if (aiResponse.startsWith('```')) {
-          aiResponse = aiResponse.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '');
+        if (aiResponse.startsWith("```")) {
+          aiResponse = aiResponse
+            .replace(/^```[\w]*\n?/, "")
+            .replace(/\n?```$/, "");
         }
-        
+
         // JSON 래퍼가 있다면 내용만 추출
-        const jsonMatch = aiResponse.match(/\{\s*"prompt"\s*:\s*"([\s\S]*?)"\s*\}/);
+        const jsonMatch = aiResponse.match(
+          /\{\s*"prompt"\s*:\s*"([\s\S]*?)"\s*\}/,
+        );
         if (jsonMatch) {
-          aiResponse = jsonMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"');
+          aiResponse = jsonMatch[1].replace(/\\n/g, "\n").replace(/\\"/g, '"');
         }
-        
-        const nameInput = document.getElementById('character-name');
-        const promptInput = document.getElementById('character-prompt');
-        
+
+        const nameInput = document.getElementById("character-name");
+        const promptInput = document.getElementById("character-prompt");
+
         if (nameInput && promptInput) {
           // 이름 필드 값을 미리 저장
           const originalName = nameInput.value;
-          
+
           // 상태를 먼저 업데이트하여 모달 재렌더링 시에도 값이 보존되도록 함
           if (this.state.editingCharacter) {
             this.state.editingCharacter.prompt = aiResponse; // 기존 내용 완전 교체
             this.state.editingCharacter.name = originalName; // 이름도 상태에서 보존
           }
-          
+
           // DOM 요소도 업데이트
           promptInput.value = aiResponse;
           nameInput.value = originalName; // 이름 필드 명시적으로 설정
-          
+
           // 상태 업데이트 완료 후 성공 메시지 표시
           setTimeout(() => {
-            this.showInfoModal('AI 생성 완료', `캐릭터 "${characterName}"의 상세 정보가 성공적으로 생성되었습니다!`);
+            this.showInfoModal(
+              "AI 생성 완료",
+              `캐릭터 "${characterName}"의 상세 정보가 성공적으로 생성되었습니다!`,
+            );
           }, 100);
-          
         } else {
-          console.error('Elements not found:', { nameInput, promptInput });
-          throw new Error(`Form elements not found - nameInput: ${!!nameInput}, promptInput: ${!!promptInput}`);
+          console.error("Elements not found:", { nameInput, promptInput });
+          throw new Error(
+            `Form elements not found - nameInput: ${!!nameInput}, promptInput: ${!!promptInput}`,
+          );
         }
       } else {
-        throw new Error('No response received from AI');
+        throw new Error("No response received from AI");
       }
-      
     } catch (error) {
-      console.error('AI character generation error:', error);
-      this.showInfoModal('생성 실패', `캐릭터 생성 중 오류가 발생했습니다: ${error.message}`);
+      console.error("AI character generation error:", error);
+      this.showInfoModal(
+        "생성 실패",
+        `캐릭터 생성 중 오류가 발생했습니다: ${error.message}`,
+      );
     } finally {
       // 버튼 복원
       generateBtn.disabled = false;
@@ -4406,17 +4802,27 @@ class PersonaChatApp {
   }
 
   handleCreateGroupChat() {
-    const name = document.getElementById('group-chat-name').value.trim();
-    const checkboxes = document.querySelectorAll('.group-chat-character-checkbox:checked');
-    const participantIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
+    const name = document.getElementById("group-chat-name").value.trim();
+    const checkboxes = document.querySelectorAll(
+      ".group-chat-character-checkbox:checked",
+    );
+    const participantIds = Array.from(checkboxes).map((cb) =>
+      parseInt(cb.value),
+    );
 
     if (!name) {
-      this.showInfoModal('단톡방 이름 필요', '단톡방 이름을 입력해주세요.');
+      this.showInfoModal(
+        t("groupChat.groupChatNameRequired"),
+        t("groupChat.groupChatNameRequiredMessage"),
+      );
       return;
     }
 
     if (participantIds.length < 2) {
-      this.showInfoModal('참여자 부족', '최소 2명 이상의 캐릭터를 선택해주세요.');
+      this.showInfoModal(
+        t("groupChat.participantsRequired"),
+        t("groupChat.participantsRequiredMessage"),
+      );
       return;
     }
 
@@ -4424,15 +4830,21 @@ class PersonaChatApp {
   }
 
   handleCreateOpenChat() {
-    const name = document.getElementById('open-chat-name').value.trim();
+    const name = document.getElementById("open-chat-name").value.trim();
 
     if (!name) {
-      this.showInfoModal('오픈톡방 이름 필요', '오픈톡방 이름을 입력해주세요.');
+      this.showInfoModal(
+        t("groupChat.openChatNameRequired"),
+        t("groupChat.openChatNameRequiredMessage"),
+      );
       return;
     }
 
     if (this.state.characters.length === 0) {
-      this.showInfoModal('캐릭터 없음', '참여할 캐릭터가 없습니다. 먼저 캐릭터를 추가해주세요.');
+      this.showInfoModal(
+        t("groupChat.noCharactersAvailable"),
+        t("groupChat.noCharactersAvailableMessage"),
+      );
       return;
     }
 
@@ -4441,104 +4853,104 @@ class PersonaChatApp {
 
   handleDeleteGroupChat(groupChatId) {
     this.showConfirmModal(
-      '단톡방 삭제',
-      '이 단톡방을 삭제하시겠습니까? 모든 대화 내용이 사라집니다.',
+      t("groupChat.deleteGroupChatTitle"),
+      t("groupChat.deleteGroupChatMessage"),
       () => {
         // 단톡방 삭제 로직
         const newGroupChats = { ...this.state.groupChats };
         delete newGroupChats[groupChatId];
-        
+
         const newMessages = { ...this.state.messages };
         delete newMessages[groupChatId];
-        
+
         const newUnreadCounts = { ...this.state.unreadCounts };
         delete newUnreadCounts[groupChatId];
-        
+
         // 삭제된 단톡방이 현재 선택된 채팅방인 경우 다른 채팅방으로 이동
         let newSelectedChatId = this.state.selectedChatId;
         if (this.state.selectedChatId === groupChatId) {
           newSelectedChatId = this.getFirstAvailableChatRoom();
         }
-        
+
         // 상태 업데이트
         this.setState({
           groupChats: newGroupChats,
           messages: newMessages,
           unreadCounts: newUnreadCounts,
-          selectedChatId: newSelectedChatId
+          selectedChatId: newSelectedChatId,
         });
-        
+
         // 즉시 저장
-        saveToBrowserStorage('personaChat_groupChats_v16', newGroupChats);
-        saveToBrowserStorage('personaChat_messages_v16', newMessages);
-        saveToBrowserStorage('personaChat_unreadCounts_v16', newUnreadCounts);
-      }
+        saveToBrowserStorage("personaChat_groupChats_v16", newGroupChats);
+        saveToBrowserStorage("personaChat_messages_v16", newMessages);
+        saveToBrowserStorage("personaChat_unreadCounts_v16", newUnreadCounts);
+      },
     );
   }
 
   handleDeleteOpenChat(openChatId) {
     this.showConfirmModal(
-      '오픈톡방 삭제',
-      '이 오픈톡방을 삭제하시겠습니까? 모든 대화 내용이 사라집니다.',
+      t("groupChat.deleteOpenChatTitle"),
+      t("groupChat.deleteOpenChatMessage"),
       () => {
         // 오픈톡방 삭제 로직
         const newOpenChats = { ...this.state.openChats };
         delete newOpenChats[openChatId];
-        
+
         const newMessages = { ...this.state.messages };
         delete newMessages[openChatId];
-        
+
         const newUnreadCounts = { ...this.state.unreadCounts };
         delete newUnreadCounts[openChatId];
-        
+
         // 삭제된 오픈톡방이 현재 선택된 채팅방인 경우 다른 채팅방으로 이동
         let newSelectedChatId = this.state.selectedChatId;
         if (this.state.selectedChatId === openChatId) {
           newSelectedChatId = this.getFirstAvailableChatRoom();
         }
-        
+
         // 상태 업데이트
         this.setState({
           openChats: newOpenChats,
           messages: newMessages,
           unreadCounts: newUnreadCounts,
-          selectedChatId: newSelectedChatId
+          selectedChatId: newSelectedChatId,
         });
-        
+
         // 즉시 저장
-        saveToBrowserStorage('personaChat_openChats_v16', newOpenChats);
-        saveToBrowserStorage('personaChat_messages_v16', newMessages);
-        saveToBrowserStorage('personaChat_unreadCounts_v16', newUnreadCounts);
-      }
+        saveToBrowserStorage("personaChat_openChats_v16", newOpenChats);
+        saveToBrowserStorage("personaChat_messages_v16", newMessages);
+        saveToBrowserStorage("personaChat_unreadCounts_v16", newUnreadCounts);
+      },
     );
   }
 
   // 디버그 로그 시스템
-  addDebugLog(message, level = 'info') {
+  addDebugLog(message, level = "info") {
     if (!this.state.enableDebugLogs) return;
-    
+
     const logEntry = {
       id: Date.now() + Math.random(),
       timestamp: Date.now(),
       message,
       level,
-      type: 'simple'
+      type: "simple",
     };
-    
+
     const newLogs = [...this.state.debugLogs, logEntry].slice(-1000); // 최대 1000개 유지
     this.setState({ debugLogs: newLogs });
   }
 
   addStructuredLog(chatId, chatType, characterName, logData) {
     if (!this.state.enableDebugLogs) return;
-    
+
     const logEntry = {
       id: Date.now() + Math.random(),
       timestamp: Date.now(),
       chatId,
       chatType, // 'general', 'group', 'open'
       characterName,
-      type: 'structured',
+      type: "structured",
       // 구조화된 데이터
       data: {
         personaInput: logData.personaInput || null,
@@ -4549,11 +4961,11 @@ class PersonaChatApp {
           ...logData.metadata,
           chatType: chatType,
           chatId: chatId,
-          characterName: characterName
-        }
-      }
+          characterName: characterName,
+        },
+      },
     };
-    
+
     const newLogs = [...this.state.debugLogs, logEntry].slice(-1000); // 최대 1000개 유지
     this.setState({ debugLogs: newLogs });
   }
@@ -4561,12 +4973,12 @@ class PersonaChatApp {
   clearDebugLogs() {
     this.setState({ debugLogs: [] });
     // 즉시 저장
-    saveToBrowserStorage('personaChat_debugLogs_v16', []);
-    
+    saveToBrowserStorage("personaChat_debugLogs_v16", []);
+
     // 설정 모달이 열려있으면 강제로 다시 렌더링
     if (this.state.showSettingsModal) {
-      this.setState({ 
-        showSettingsModal: false 
+      this.setState({
+        showSettingsModal: false,
       });
       setTimeout(() => {
         this.setState({ showSettingsModal: true });
@@ -4576,30 +4988,32 @@ class PersonaChatApp {
 
   exportDebugLogs() {
     const dataStr = JSON.stringify(this.state.debugLogs, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
-    const exportFileDefaultName = `arisutalk-debug-logs-${new Date().toISOString().split('T')[0]}.json`;
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
+    const dataUri =
+      "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+
+    const exportFileDefaultName = `arisutalk-debug-logs-${
+      new Date().toISOString().split("T")[0]
+    }.json`;
+
+    const linkElement = document.createElement("a");
+    linkElement.setAttribute("href", dataUri);
+    linkElement.setAttribute("download", exportFileDefaultName);
     linkElement.click();
   }
 
   // --- SECURE STORAGE METHODS ---
-  
+
   /**
    * Initialize secure storage system
    */
   async initializeSecureStorage() {
     try {
       await secureStorage.initialize();
-      console.log('Secure storage initialized');
+      console.log("Secure storage initialized");
     } catch (error) {
-      console.error('Failed to initialize secure storage:', error);
+      console.error("Failed to initialize secure storage:", error);
     }
   }
-
 
   /**
    * Save API configs - always encrypted
@@ -4609,17 +5023,16 @@ class PersonaChatApp {
     try {
       // Always save to encrypted storage
       await secureStorage.saveApiConfigs(apiConfigs);
-      
+
       // Update state normally (API manager will handle decryption)
       this.setState({
         settings: {
           ...this.state.settings,
-          apiConfigs: apiConfigs
-        }
+          apiConfigs: apiConfigs,
+        },
       });
-      
     } catch (error) {
-      console.error('Failed to save API configs:', error);
+      console.error("Failed to save API configs:", error);
       throw error;
     }
   }
@@ -4635,12 +5048,10 @@ class PersonaChatApp {
       const encryptedConfigs = await secureStorage.loadApiConfigs();
       return encryptedConfigs?.[provider]?.apiKey || null;
     } catch (error) {
-      console.error('Failed to get API key:', error);
+      console.error("Failed to get API key:", error);
       return null;
     }
   }
-
-
 
   // --- DATA MANAGEMENT METHODS ---
 
@@ -4651,22 +5062,22 @@ class PersonaChatApp {
     try {
       // List of all storage keys used by the application
       const storageKeys = [
-        'personaChat_settings_v16',
-        'personaChat_characters_v16',
-        'personaChat_messages_v16',
-        'personaChat_unreadCounts_v16',
-        'personaChat_chatRooms_v16',
-        'personaChat_groupChats_v16',
-        'personaChat_openChats_v16',
-        'personaChat_characterStates_v16',
-        'personaChat_userStickers_v16',
-        'personaChat_settingsSnapshots_v16',
-        'personaChat_debugLogs_v16',
-        'personaChat_migration_v16',
+        "personaChat_settings_v16",
+        "personaChat_characters_v16",
+        "personaChat_messages_v16",
+        "personaChat_unreadCounts_v16",
+        "personaChat_chatRooms_v16",
+        "personaChat_groupChats_v16",
+        "personaChat_openChats_v16",
+        "personaChat_characterStates_v16",
+        "personaChat_userStickers_v16",
+        "personaChat_settingsSnapshots_v16",
+        "personaChat_debugLogs_v16",
+        "personaChat_migration_v16",
         // Secure storage keys
-        'personaChat_encryptedApiConfigs_v1',
-        'personaChat_masterPasswordHint_v1',
-        'personaChat_encryptionEnabled_v1'
+        "personaChat_encryptedApiConfigs_v1",
+        "personaChat_masterPasswordHint_v1",
+        "personaChat_encryptionEnabled_v1",
       ];
 
       // Clear all regular storage
@@ -4687,11 +5098,10 @@ class PersonaChatApp {
       // Re-initialize secure storage for next use
       await this.initializeSecureStorage();
 
-      console.log('All application data has been reset');
-      
+      console.log("All application data has been reset");
     } catch (error) {
-      console.error('Failed to reset all data:', error);
-      throw new Error('데이터 초기화 중 오류가 발생했습니다: ' + error.message);
+      console.error("Failed to reset all data:", error);
+      throw new Error("데이터 초기화 중 오류가 발생했습니다: " + error.message);
     }
   }
 }

@@ -3,32 +3,32 @@
  * 암호화된 API 키 저장소를 위한 마스터 비밀번호 입력/설정 모달
  */
 
-import { validatePassword } from '../utils/crypto.js';
+import { validatePassword } from "../utils/crypto.js";
+import { t } from "../i18n.js";
 
 export function renderMasterPasswordModal(app) {
-    const { state } = app;
-    const { showSetupEncryptionModal } = state;
-    
-    if (!showSetupEncryptionModal) {
-        return '';
-    }
+  const { state } = app;
+  const { showSetupEncryptionModal } = state;
 
-    return renderSetupEncryptionModal(app);
+  if (!showSetupEncryptionModal) {
+    return "";
+  }
+
+  return renderSetupEncryptionModal(app);
 }
 
-
 function renderSetupEncryptionModal(app) {
-    return `
+  return `
         <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div class="bg-gray-800 rounded-lg w-full max-w-lg">
                 <!-- Header -->
                 <div class="p-6 border-b border-gray-600">
                     <h2 class="text-xl font-bold text-white flex items-center gap-2">
                         <i data-lucide="shield-check" class="w-5 h-5"></i>
-                        API 키 암호화 설정
+                        ${t("security.encryptionSetupTitle")}
                     </h2>
                     <p class="text-gray-400 text-sm mt-1">
-                        API 키를 안전하게 보호하기 위해 암호화를 설정하세요.
+                        ${t("security.encryptionSetupDescription")}
                     </p>
                 </div>
                 
@@ -40,11 +40,13 @@ function renderSetupEncryptionModal(app) {
                             <div class="flex items-start gap-3">
                                 <i data-lucide="info" class="w-5 h-5 text-blue-400 mt-0.5"></i>
                                 <div class="text-sm text-gray-300">
-                                    <p class="font-medium text-blue-400 mb-1">암호화가 필요한 이유</p>
+                                    <p class="font-medium text-blue-400 mb-1">${t(
+                                      "security.whyEncryptionIsNeeded",
+                                    )}</p>
                                     <ul class="space-y-1 text-xs">
-                                        <li>• 브라우저에서 API 키가 평문으로 노출되지 않습니다</li>
-                                        <li>• 악성 확장프로그램으로부터 API 키를 보호합니다</li>
-                                        <li>• XSS 공격으로부터 API 키를 안전하게 보호합니다</li>
+                                        <li>${t("security.encryptionBenefit1")}</li>
+                                        <li>${t("security.encryptionBenefit2")}</li>
+                                        <li>${t("security.encryptionBenefit3")}</li>
                                     </ul>
                                 </div>
                             </div>
@@ -53,12 +55,16 @@ function renderSetupEncryptionModal(app) {
                         <!-- 비밀번호 입력 -->
                         <div>
                             <label class="flex items-center text-sm font-medium text-gray-300 mb-2">
-                                <i data-lucide="key" class="w-4 h-4 mr-2"></i>마스터 비밀번호
+                                <i data-lucide="key" class="w-4 h-4 mr-2"></i>${t(
+                                  "security.masterPasswordLabel",
+                                )}
                             </label>
                             <input 
                                 type="password" 
                                 id="setup-master-password" 
-                                placeholder="안전한 마스터 비밀번호를 입력하세요" 
+                                placeholder="${t(
+                                  "security.masterPasswordPlaceholder",
+                                )}" 
                                 class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm"
                                 autocomplete="new-password"
                             />
@@ -68,12 +74,16 @@ function renderSetupEncryptionModal(app) {
                         <!-- 비밀번호 확인 -->
                         <div>
                             <label class="flex items-center text-sm font-medium text-gray-300 mb-2">
-                                <i data-lucide="check" class="w-4 h-4 mr-2"></i>비밀번호 확인
+                                <i data-lucide="check" class="w-4 h-4 mr-2"></i>${t(
+                                  "security.confirmPasswordLabel",
+                                )}
                             </label>
                             <input 
                                 type="password" 
                                 id="setup-master-password-confirm" 
-                                placeholder="비밀번호를 다시 입력하세요" 
+                                placeholder="${t(
+                                  "security.confirmPasswordPlaceholder",
+                                )}" 
                                 class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm"
                                 autocomplete="new-password"
                             />
@@ -82,16 +92,22 @@ function renderSetupEncryptionModal(app) {
                         <!-- 힌트 (선택사항) -->
                         <div>
                             <label class="flex items-center text-sm font-medium text-gray-300 mb-2">
-                                <i data-lucide="help-circle" class="w-4 h-4 mr-2"></i>비밀번호 힌트 (선택사항)
+                                <i data-lucide="help-circle" class="w-4 h-4 mr-2"></i>${t(
+                                  "security.passwordHintLabel",
+                                )}
                             </label>
                             <input 
                                 type="text" 
                                 id="setup-password-hint" 
-                                placeholder="비밀번호를 기억할 수 있는 힌트" 
+                                placeholder="${t(
+                                  "security.passwordHintPlaceholder",
+                                )}" 
                                 class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm"
                                 maxlength="100"
                             />
-                            <p class="text-xs text-gray-500 mt-1">힌트는 암호화되지 않으므로 비밀번호 자체를 포함하지 마세요.</p>
+                            <p class="text-xs text-gray-500 mt-1">${t(
+                              "security.passwordHintWarning",
+                            )}</p>
                         </div>
                         
                         <!-- 자동 생성 옵션 -->
@@ -101,7 +117,7 @@ function renderSetupEncryptionModal(app) {
                                 class="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-2"
                             >
                                 <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-                                안전한 비밀번호 자동 생성
+                                ${t("security.generateSecurePassword")}
                             </button>
                         </div>
                         
@@ -115,14 +131,14 @@ function renderSetupEncryptionModal(app) {
                         id="skip-encryption-btn"
                         class="px-4 py-2 text-gray-400 hover:text-white transition-colors text-sm"
                     >
-                        나중에 설정
+                        ${t("common.setupLater")}
                     </button>
                     <div class="flex gap-2">
                         <button 
                             id="setup-encryption-btn"
                             class="px-6 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-sm font-medium transition-colors"
                         >
-                            암호화 설정
+                            ${t("security.setupEncryption")}
                         </button>
                     </div>
                 </div>
@@ -135,90 +151,108 @@ function renderSetupEncryptionModal(app) {
  * Setup event listeners for Master Password Modal
  */
 export function setupMasterPasswordModalEventListeners(app) {
-    // Setup encryption
-    const setupBtn = document.getElementById('setup-encryption-btn');
-    if (setupBtn) {
-        setupBtn.addEventListener('click', async () => {
-            const password = document.getElementById('setup-master-password').value;
-            const confirmPassword = document.getElementById('setup-master-password-confirm').value;
-            const hint = document.getElementById('setup-password-hint').value;
-            const errorDiv = document.getElementById('setup-error-message');
-            
-            // Validation
-            if (!password) {
-                showError(errorDiv, '마스터 비밀번호를 입력하세요.');
-                return;
-            }
-            
-            const validation = validatePassword(password);
-            if (!validation.isValid) {
-                showError(errorDiv, validation.message);
-                return;
-            }
-            
-            if (password !== confirmPassword) {
-                showError(errorDiv, '비밀번호가 일치하지 않습니다.');
-                return;
-            }
-            
-            try {
-                await app.setupEncryption(password, hint);
-                app.setState({ showSetupEncryptionModal: false });
-                alert('API 키 암호화가 활성화되었습니다!');
-            } catch (error) {
-                showError(errorDiv, error.message);
-            }
-        });
-    }
-    
-    // Generate master password
-    const generateBtn = document.getElementById('generate-master-password');
-    if (generateBtn) {
-        generateBtn.addEventListener('click', () => {
-            const { generateMasterPassword } = require('../utils/crypto.js');
-            const password = generateMasterPassword();
-            
-            document.getElementById('setup-master-password').value = password;
-            document.getElementById('setup-master-password-confirm').value = password;
-            
-            // Show generated password temporarily
-            alert(`생성된 마스터 비밀번호:\\n\\n${password}\\n\\n이 비밀번호를 안전한 곳에 저장하세요!`);
-        });
-    }
-    
-    // Skip encryption
-    const skipBtn = document.getElementById('skip-encryption-btn');
-    if (skipBtn) {
-        skipBtn.addEventListener('click', () => {
-            app.setState({ showSetupEncryptionModal: false });
-        });
-    }
-    
-    // Password strength indicator
-    const passwordInput = document.getElementById('setup-master-password');
-    if (passwordInput) {
-        passwordInput.addEventListener('input', () => {
-            const password = passwordInput.value;
-            const strengthDiv = document.getElementById('password-strength');
-            
-            if (password) {
-                const validation = validatePassword(password);
-                const colors = ['text-red-400', 'text-yellow-400', 'text-blue-400', 'text-green-400'];
-                const strengthText = ['매우 약함', '약함', '보통', '강함'];
-                
-                strengthDiv.className = `mt-2 text-xs ${colors[Math.min(validation.strength, 3)]}`;
-                strengthDiv.textContent = `비밀번호 강도: ${strengthText[Math.min(validation.strength, 3)]} - ${validation.message}`;
-            } else {
-                strengthDiv.textContent = '';
-            }
-        });
-    }
+  // Setup encryption
+  const setupBtn = document.getElementById("setup-encryption-btn");
+  if (setupBtn) {
+    setupBtn.addEventListener("click", async () => {
+      const password = document.getElementById("setup-master-password").value;
+      const confirmPassword = document.getElementById(
+        "setup-master-password-confirm",
+      ).value;
+      const hint = document.getElementById("setup-password-hint").value;
+      const errorDiv = document.getElementById("setup-error-message");
+
+      // Validation
+      if (!password) {
+        showError(errorDiv, t("security.enterMasterPassword"));
+        return;
+      }
+
+      const validation = validatePassword(password);
+      if (!validation.isValid) {
+        showError(errorDiv, validation.message);
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        showError(errorDiv, t("security.passwordsDoNotMatch"));
+        return;
+      }
+
+      try {
+        await app.setupEncryption(password, hint);
+        app.setState({ showSetupEncryptionModal: false });
+        alert(t("security.encryptionEnabledSuccess"));
+      } catch (error) {
+        showError(errorDiv, error.message);
+      }
+    });
+  }
+
+  // Generate master password
+  const generateBtn = document.getElementById("generate-master-password");
+  if (generateBtn) {
+    generateBtn.addEventListener("click", () => {
+      const { generateMasterPassword } = require("../utils/crypto.js");
+      const password = generateMasterPassword();
+
+      document.getElementById("setup-master-password").value = password;
+      document.getElementById("setup-master-password-confirm").value = password;
+
+      // Show generated password temporarily
+      alert(
+        t("security.generatedPasswordMessage", { password }),
+      );
+    });
+  }
+
+  // Skip encryption
+  const skipBtn = document.getElementById("skip-encryption-btn");
+  if (skipBtn) {
+    skipBtn.addEventListener("click", () => {
+      app.setState({ showSetupEncryptionModal: false });
+    });
+  }
+
+  // Password strength indicator
+  const passwordInput = document.getElementById("setup-master-password");
+  if (passwordInput) {
+    passwordInput.addEventListener("input", () => {
+      const password = passwordInput.value;
+      const strengthDiv = document.getElementById("password-strength");
+
+      if (password) {
+        const validation = validatePassword(password);
+        const colors = [
+          "text-red-400",
+          "text-yellow-400",
+          "text-blue-400",
+          "text-green-400",
+        ];
+        const strengthText = [
+            t("security.passwordStrength.veryWeak"), 
+            t("security.passwordStrength.weak"), 
+            t("security.passwordStrength.medium"), 
+            t("security.passwordStrength.strong")
+        ];
+
+        strengthDiv.className = `mt-2 text-xs ${
+          colors[Math.min(validation.strength, 3)]
+        }`;
+        strengthDiv.textContent = `${t("security.passwordStrength.label")} ${
+          strengthText[Math.min(validation.strength, 3)]
+        } - ${validation.message}`;
+      } else {
+        strengthDiv.textContent = "";
+      }
+    });
+  }
 }
 
 function showError(errorDiv, message) {
-    errorDiv.textContent = message;
-    errorDiv.classList.remove('hidden');
-    setTimeout(() => {
-        errorDiv.classList.add('hidden');
-    }, 5000);
+  errorDiv.textContent = message;
+  errorDiv.classList.remove("hidden");
+  setTimeout(() => {
+    errorDiv.classList.add("hidden");
+  }, 5000);
 }
