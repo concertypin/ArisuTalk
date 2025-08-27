@@ -4,8 +4,8 @@
  */
 
 import { encryptText, decryptText, generateMasterPassword } from "./crypto.js";
-import { loadFromBrowserStorage, saveToBrowserStorage } from "../storage.js";
 import { t } from "../i18n.js";
+import { getStorage } from "../storage/storageHandler.js";
 
 const STORAGE_KEYS = {
   ENCRYPTED_API_CONFIGS: "personaChat_encryptedApiConfigs_v1",
@@ -19,6 +19,7 @@ const STORAGE_KEYS = {
  */
 export class SecureStorageManager {
   constructor() {
+    this.unencryptedStorage = getStorage();
     this.masterPassword = null;
     this.encryptionEnabled = false;
   }
@@ -30,7 +31,7 @@ export class SecureStorageManager {
   async initialize() {
     try {
       // Check if this is first time setup
-      const hasExistingEncryption = await loadFromBrowserStorage(
+      const hasExistingEncryption = await this.unencryptedStorage.load(
         STORAGE_KEYS.ENCRYPTION_ENABLED,
         false,
       );
@@ -88,8 +89,8 @@ export class SecureStorageManager {
       );
 
       // Store hint and encryption flag
-      saveToBrowserStorage(STORAGE_KEYS.MASTER_PASSWORD_HINT, hint);
-      saveToBrowserStorage(STORAGE_KEYS.ENCRYPTION_ENABLED, true);
+      this.unencryptedStorage.save(STORAGE_KEYS.MASTER_PASSWORD_HINT, hint);
+      this.unencryptedStorage.save(STORAGE_KEYS.ENCRYPTION_ENABLED, true);
 
       return true;
     } catch (error) {
@@ -112,7 +113,7 @@ export class SecureStorageManager {
     try {
       const jsonString = JSON.stringify(apiConfigs);
       const encrypted = await encryptText(jsonString, this.masterPassword);
-      saveToBrowserStorage(STORAGE_KEYS.ENCRYPTED_API_CONFIGS, encrypted);
+      this.unencryptedStorage.save(STORAGE_KEYS.ENCRYPTED_API_CONFIGS, encrypted);
     } catch (error) {
       console.error("Failed to save encrypted API configs:", error);
       throw new Error(t("secureStorage.saveApiConfigsFailed"));
@@ -130,7 +131,7 @@ export class SecureStorageManager {
     }
 
     try {
-      const encrypted = await loadFromBrowserStorage(
+      const encrypted = await this.unencryptedStorage.load(
         STORAGE_KEYS.ENCRYPTED_API_CONFIGS,
         null,
       );
@@ -155,7 +156,7 @@ export class SecureStorageManager {
    * @returns {Promise<string>} - Password hint
    */
   async getPasswordHint() {
-    return await loadFromBrowserStorage(STORAGE_KEYS.MASTER_PASSWORD_HINT, "");
+    return await this.unencryptedStorage.load(STORAGE_KEYS.MASTER_PASSWORD_HINT, "");
   }
 
   /**

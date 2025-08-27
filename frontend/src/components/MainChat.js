@@ -1,5 +1,5 @@
 import { t } from "../i18n.js";
-import { formatBytes } from "../storage.js";
+import { formatBytes } from "../storage.ts";
 import { findMessageGroup, formatDateSeparator } from "../utils.js";
 import { renderAvatar } from "./Avatar.js";
 
@@ -33,59 +33,51 @@ function renderInputArea(app) {
   return `
         <div class="input-area-container relative">
             ${imagePreviewHtml}
-            ${
-              showInputOptions
-                ? `
+            ${showInputOptions
+      ? `
                 <div class="absolute bottom-full left-0 mb-2 w-48 bg-gray-700 rounded-xl shadow-lg p-2 animate-fadeIn">
                     <button id="open-image-upload" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-left rounded-lg hover:bg-gray-600">
                         <i data-lucide="image" class="w-4 h-4"></i> ${t(
-                          "mainChat.uploadPhoto",
-                        )}
+        "mainChat.uploadPhoto",
+      )}
                     </button>
                 </div>
             `
-                : ""
-            }
+      : ""
+    }
             <div class="flex items-start gap-3">
-                ${
-                  !hasImage
-                    ? `
-                <button id="open-input-options-btn" class="flex-shrink-0 p-2 bg-gray-800 hover:bg-gray-700 text-white rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 h-[48px] w-[48px] flex items-center justify-center" ${
-                  isWaitingForResponse ? "disabled" : ""
-                }>
+                ${!hasImage
+      ? `
+                <button id="open-input-options-btn" class="flex-shrink-0 p-2 bg-gray-800 hover:bg-gray-700 text-white rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 h-[48px] w-[48px] flex items-center justify-center" ${isWaitingForResponse ? "disabled" : ""
+      }>
                    <i data-lucide="plus" class="w-5 h-5"></i>
                 </button>
                 `
-                    : ""
-                }
+      : ""
+    }
                 <div class="flex-1">
-                    ${
-                      app.state.stickerToSend
-                        ? `
+                    ${app.state.stickerToSend
+      ? `
                         <div class="mb-2 p-2 bg-gray-700 rounded-lg flex items-center gap-2 text-sm text-gray-300">
-                            <img src="${app.state.stickerToSend.data}" alt="${
-                              app.state.stickerToSend.stickerName
-                            }" class="w-6 h-6 rounded object-cover">
-                            <span>${t("mainChat.stickerLabel")}${
-                              app.state.stickerToSend.stickerName
-                            }</span>
+                            <img src="${app.state.stickerToSend.data}" alt="${app.state.stickerToSend.stickerName
+      }" class="w-6 h-6 rounded object-cover">
+                            <span>${t("mainChat.stickerLabel")}${app.state.stickerToSend.stickerName
+      }</span>
                             <button id="remove-sticker-to-send-btn" class="ml-auto text-gray-400 hover:text-white">
                                 <i data-lucide="x" class="w-3 h-3"></i>
                             </button>
                         </div>
                     `
-                        : ""
-                    }
+      : ""
+    }
                     <div class="relative">
-                        <textarea id="new-message-input" placeholder="${
-                          hasImage
-                            ? t("mainChat.addCaption")
-                            : app.state.stickerToSend
-                              ? t("mainChat.stickerMessagePlaceholder")
-                              : t("mainChat.messagePlaceholder")
-                        }" class="w-full pl-4 pr-24 py-3 bg-gray-800 text-white rounded-2xl border border-gray-700 resize-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 transition-all duration-200 text-sm placeholder-gray-500" rows="1" style="min-height: 48px; max-height: 120px;" ${
-                          isWaitingForResponse ? "disabled" : ""
-                        }></textarea>
+                        <textarea id="new-message-input" placeholder="${hasImage
+      ? t("mainChat.addCaption")
+      : app.state.stickerToSend
+        ? t("mainChat.stickerMessagePlaceholder")
+        : t("mainChat.messagePlaceholder")
+    }" class="w-full pl-4 pr-24 py-3 bg-gray-800 text-white rounded-2xl border border-gray-700 resize-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 transition-all duration-200 text-sm placeholder-gray-500" rows="1" style="min-height: 48px; max-height: 120px;" ${isWaitingForResponse ? "disabled" : ""
+    }></textarea>
                         <div class="absolute right-3 flex items-center gap-2" style="top: 50%; transform: translateY(-50%);">
                             <button id="sticker-btn" 
                                 class="flex-shrink-0 p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-full transition-all duration-200 w-9 h-9 flex items-center justify-center"
@@ -98,11 +90,10 @@ function renderInputArea(app) {
                                 <i data-lucide="send" class="w-4 h-4"></i>
                             </button>
                         </div>
-                        ${
-                          app.state.showUserStickerPanel
-                            ? renderUserStickerPanel(app)
-                            : ""
-                        }
+                        ${app.state.showUserStickerPanel
+      ? renderUserStickerPanel(app)
+      : ""
+    }
                     </div>
                 </div>
             </div>
@@ -118,17 +109,17 @@ function renderUserStickerPanel(app) {
         <div class="absolute bottom-full left-0 mb-2 w-80 bg-gray-800 rounded-xl shadow-lg border border-gray-700 animate-fadeIn">
             <div class="p-3 border-b border-gray-700 flex items-center justify-between">
                 <h3 class="text-sm font-medium text-white">${t(
-                  "mainChat.personaStickers",
-                )}</h3>
+    "mainChat.personaStickers",
+  )}</h3>
                 <div class="flex gap-2">
                     <button id="add-user-sticker-btn" class="p-1 bg-blue-600 hover:bg-blue-700 text-white rounded" title="${t(
-                      "mainChat.addSticker",
-                    )}">
+    "mainChat.addSticker",
+  )}">
                         <i data-lucide="plus" class="w-3 h-3"></i>
                     </button>
                     <button id="close-sticker-panel-btn" class="p-1 bg-gray-600 hover:bg-gray-500 text-white rounded" title="${t(
-                      "common.close",
-                    )}">
+    "common.close",
+  )}">
                         <i data-lucide="x" class="w-3 h-3 pointer-events-none"></i>
                     </button>
                 </div>
@@ -137,69 +128,68 @@ function renderUserStickerPanel(app) {
                 <div class="flex items-center justify-between text-xs text-gray-400 mb-3">
                     <span>${t("mainChat.stickerSupport")}</span>
                     <span>${t("mainChat.stickerCount").replace(
-                      "{{count}}",
-                      userStickers.length,
-                    )}</span>
+    "{{count}}",
+    userStickers.length,
+  )}</span>
                 </div>
                 <div class="flex items-center justify-between text-xs text-gray-500 mb-3">
                     <span>${t("mainChat.totalSize").replace(
-                      "{{size}}",
-                      formatBytes(currentSize),
-                    )}</span>
+    "{{size}}",
+    formatBytes(currentSize),
+  )}</span>
                 </div>
-                ${
-                  userStickers.length === 0
-                    ? `
+                ${userStickers.length === 0
+      ? `
                     <div class="text-center text-gray-400 py-8">
                         <i data-lucide="smile" class="w-8 h-8 mx-auto mb-2"></i>
                         <p class="text-sm">${t("mainChat.addStickerPrompt")}</p>
                         <button id="trigger-add-sticker-btn" class="mt-2 text-xs text-blue-400 hover:text-blue-300">${t(
-                          "mainChat.addStickerButton",
-                        )}</button>
+        "mainChat.addStickerButton",
+      )}</button>
                     </div>
                 `
-                    : `
+      : `
                     <div class="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto">
                         ${userStickers
-                          .map((sticker) => {
-                            const isVideo =
-                              sticker.type &&
-                              (sticker.type.startsWith("video/") ||
-                                sticker.type === "video/mp4" ||
-                                sticker.type === "video/webm");
-                            const isAudio =
-                              sticker.type && sticker.type.startsWith("audio/");
+        .map((sticker) => {
+          const isVideo =
+            sticker.type &&
+            (sticker.type.startsWith("video/") ||
+              sticker.type === "video/mp4" ||
+              sticker.type === "video/webm");
+          const isAudio =
+            sticker.type && sticker.type.startsWith("audio/");
 
-                            let content = "";
-                            if (isAudio) {
-                              content = `<div class="w-full h-full flex items-center justify-center bg-gray-600"><i data-lucide="music" class="w-6 h-6 text-gray-300"></i></div>`;
-                            } else if (isVideo) {
-                              content = `<video class="w-full h-full object-cover" muted><source src="${sticker.data}" type="${sticker.type}"></video>`;
-                            } else {
-                              content = `<img src="${sticker.data}" alt="${sticker.name}" class="w-full h-full object-cover">`;
-                            }
+          let content = "";
+          if (isAudio) {
+            content = `<div class="w-full h-full flex items-center justify-center bg-gray-600"><i data-lucide="music" class="w-6 h-6 text-gray-300"></i></div>`;
+          } else if (isVideo) {
+            content = `<video class="w-full h-full object-cover" muted><source src="${sticker.data}" type="${sticker.type}"></video>`;
+          } else {
+            content = `<img src="${sticker.data}" alt="${sticker.name}" class="w-full h-full object-cover">`;
+          }
 
-                            return `
+          return `
                             <div class="relative group">
                                 <button data-sticker-send='${JSON.stringify({
-                                  name: sticker.name,
-                                  data: sticker.data,
-                                  type: sticker.type || "image/png",
-                                })}' 
+            name: sticker.name,
+            data: sticker.data,
+            type: sticker.type || "image/png",
+          })}' 
                                     class="user-sticker-send-btn w-full aspect-square bg-gray-700 rounded-lg overflow-hidden hover:bg-gray-600 transition-colors">
                                     ${content}
                                 </button>
                                 <div class="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                                     <button data-sticker-edit="${sticker.id}" 
                                         class="sticker-edit-btn w-5 h-5 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center text-xs" title="${t(
-                                          "characterModal.editStickerName",
-                                        )}">
+            "characterModal.editStickerName",
+          )}">
                                         <i data-lucide="edit-3" class="w-2 h-2"></i>
                                     </button>
                                     <button data-sticker-delete="${sticker.id}" 
                                         class="sticker-delete-btn w-5 h-5 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center text-xs" title="${t(
-                                          "characterModal.deleteSticker",
-                                        )}">
+            "characterModal.deleteSticker",
+          )}">
                                         <i data-lucide="x" class="w-3 h-3"></i>
                                     </button>
                                 </div>
@@ -208,11 +198,11 @@ function renderUserStickerPanel(app) {
                                 </div>
                             </div>
                             `;
-                          })
-                          .join("")}
+        })
+        .join("")}
                     </div>
                 `
-                }
+    }
             </div>
             <input type="file" accept="image/*,video/*,audio/*" id="user-sticker-input" class="hidden" multiple />
         </div>
@@ -262,21 +252,18 @@ function renderMessages(app) {
       }
 
       html += `
-                    <div class="flex flex-col ${
-                      msg.isMe ? "items-end" : "items-start"
-                    }">
+                    <div class="flex flex-col ${msg.isMe ? "items-end" : "items-start"
+        }">
                         ${editContentHtml}
                         <div class="flex items-center space-x-2 mt-2">
-                            <button data-id="${
-                              groupInfo.lastMessageId
-                            }" class="cancel-edit-btn text-xs text-gray-400 hover:text-white">${t(
-                              "common.cancel",
-                            )}</button>
-                            <button data-id="${
-                              groupInfo.lastMessageId
-                            }" class="save-edit-btn text-xs text-blue-400 hover:text-blue-300">${t(
-                              "common.save",
-                            )}</button>
+                            <button data-id="${groupInfo.lastMessageId
+        }" class="cancel-edit-btn text-xs text-gray-400 hover:text-white">${t(
+          "common.cancel",
+        )}</button>
+                            <button data-id="${groupInfo.lastMessageId
+        }" class="save-edit-btn text-xs text-blue-400 hover:text-blue-300">${t(
+          "common.save",
+        )}</button>
                         </div>
                     </div>
                 `;
@@ -312,8 +299,8 @@ function renderMessages(app) {
         const selectedChatRoom = app.getCurrentChatRoom();
         const character = selectedChatRoom
           ? app.state.characters.find(
-              (c) => c.id === selectedChatRoom.characterId,
-            )
+            (c) => c.id === selectedChatRoom.characterId,
+          )
           : null;
         stickerData = character?.stickers?.find((s) => {
           if (s.id === Number(msg.stickerId)) return true;
@@ -403,12 +390,10 @@ function renderMessages(app) {
           }
 
           if (textContent.trim()) {
-            const textHtml = `<div class="px-4 py-2 rounded-2xl text-sm md:text-base leading-relaxed ${
-              msg.isMe ? "bg-blue-600 text-white" : "bg-gray-700 text-gray-100"
-            } mb-2"><div class="break-words">${textContent}</div></div>`;
-            messageBodyHtml = `<div class="flex flex-col ${
-              msg.isMe ? "items-end" : "items-start"
-            }">${textHtml}${stickerHtml}</div>`;
+            const textHtml = `<div class="px-4 py-2 rounded-2xl text-sm md:text-base leading-relaxed ${msg.isMe ? "bg-blue-600 text-white" : "bg-gray-700 text-gray-100"
+              } mb-2"><div class="break-words">${textContent}</div></div>`;
+            messageBodyHtml = `<div class="flex flex-col ${msg.isMe ? "items-end" : "items-start"
+              }">${textHtml}${stickerHtml}</div>`;
           } else {
             messageBodyHtml = stickerHtml;
           }
@@ -424,8 +409,8 @@ function renderMessages(app) {
       const selectedChatRoom = app.getCurrentChatRoom();
       const character = selectedChatRoom
         ? app.state.characters.find(
-            (c) => c.id === selectedChatRoom.characterId,
-          )
+          (c) => c.id === selectedChatRoom.characterId,
+        )
         : null;
       const imageData = character?.media?.find((m) => m.id === msg.imageId);
       const imageUrl = imageData
@@ -439,17 +424,14 @@ function renderMessages(app) {
         : "max-height: 320px;";
       const imageTag = `<div class="sticker-toggle-btn inline-block cursor-pointer transition-all duration-300" data-message-id="${msg.id}"><img src="${imageUrl}" class="${sizeClass} rounded-lg object-cover" style="${heightStyle}"></div>`;
       const captionTag = msg.content
-        ? `<div class="mt-2 px-4 py-2 rounded-2xl text-sm md:text-base leading-relaxed inline-block ${
-            msg.isMe ? "bg-blue-600 text-white" : "bg-gray-700 text-gray-100"
-          }"><div class="break-words">${msg.content}</div></div>`
+        ? `<div class="mt-2 px-4 py-2 rounded-2xl text-sm md:text-base leading-relaxed inline-block ${msg.isMe ? "bg-blue-600 text-white" : "bg-gray-700 text-gray-100"
+        }"><div class="break-words">${msg.content}</div></div>`
         : "";
-      messageBodyHtml = `<div class="flex flex-col ${
-        msg.isMe ? "items-end" : "items-start"
-      }">${imageTag}${captionTag}</div>`;
+      messageBodyHtml = `<div class="flex flex-col ${msg.isMe ? "items-end" : "items-start"
+        }">${imageTag}${captionTag}</div>`;
     } else {
-      messageBodyHtml = `<div class="px-4 py-2 rounded-2xl text-sm md:text-base leading-relaxed ${
-        msg.isMe ? "bg-blue-600 text-white" : "bg-gray-700 text-gray-100"
-      }"><div class="break-words">${msg.content}</div></div>`;
+      messageBodyHtml = `<div class="px-4 py-2 rounded-2xl text-sm md:text-base leading-relaxed ${msg.isMe ? "bg-blue-600 text-white" : "bg-gray-700 text-gray-100"
+        }"><div class="break-words">${msg.content}</div></div>`;
     }
 
     let actionButtonsHtml = "";
@@ -464,63 +446,51 @@ function renderMessages(app) {
         isLastMessageOverall &&
         !app.state.isWaitingForResponse;
       actionButtonsHtml = `
-                <div class="flex items-center gap-2 mt-1.5 h-5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${
-                  msg.isMe ? "justify-end" : ""
-                }">
-                    ${
-                      canEdit
-                        ? `<button data-id="${msg.id}" class="edit-msg-btn text-gray-500 hover:text-white"><i data-lucide="edit-3" class="w-3 h-3 pointer-events-none"></i></button>`
-                        : ""
-                    }
-                    <button data-id="${
-                      msg.id
-                    }" class="delete-msg-btn text-gray-500 hover:text-white"><i data-lucide="trash-2" class="w-3 h-3 pointer-events-none"></i></button>
-                    ${
-                      canReroll
-                        ? `<button data-id="${msg.id}" class="reroll-msg-btn text-gray-500 hover:text-white"><i data-lucide="refresh-cw" class="w-3 h-3 pointer-events-none"></i></button>`
-                        : ""
-                    }
+                <div class="flex items-center gap-2 mt-1.5 h-5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${msg.isMe ? "justify-end" : ""
+        }">
+                    ${canEdit
+          ? `<button data-id="${msg.id}" class="edit-msg-btn text-gray-500 hover:text-white"><i data-lucide="edit-3" class="w-3 h-3 pointer-events-none"></i></button>`
+          : ""
+        }
+                    <button data-id="${msg.id
+        }" class="delete-msg-btn text-gray-500 hover:text-white"><i data-lucide="trash-2" class="w-3 h-3 pointer-events-none"></i></button>
+                    ${canReroll
+          ? `<button data-id="${msg.id}" class="reroll-msg-btn text-gray-500 hover:text-white"><i data-lucide="refresh-cw" class="w-3 h-3 pointer-events-none"></i></button>`
+          : ""
+        }
                 </div>
                 `;
     }
 
     html += `
-                <div class="group flex w-full items-start gap-3 ${
-                  needsAnimation ? "animate-slideUp" : ""
-                } ${msg.isMe ? "flex-row-reverse" : ""}">
-                    ${
-                      !msg.isMe
-                        ? `<div class="shrink-0 w-10 h-10 mt-1">${
-                            showSenderInfo
-                              ? renderAvatar(selectedChat, "sm")
-                              : ""
-                          }</div>`
-                        : ""
-                    }
-                    <div class="flex flex-col max-w-[85%] sm:max-w-[75%] ${
-                      msg.isMe ? "items-end" : "items-start"
-                    }">
-                        ${
-                          showSenderInfo
-                            ? `<p class="text-sm text-gray-400 mb-1">${msg.sender}</p>`
-                            : ""
-                        }
-                        <div class="flex items-end gap-2 ${
-                          msg.isMe ? "flex-row-reverse" : ""
-                        }">
-                            ${
-                              showUnread
-                                ? `<span class="text-xs text-yellow-400 self-end mb-0.5">1</span>`
-                                : ""
-                            }
+                <div class="group flex w-full items-start gap-3 ${needsAnimation ? "animate-slideUp" : ""
+      } ${msg.isMe ? "flex-row-reverse" : ""}">
+                    ${!msg.isMe
+        ? `<div class="shrink-0 w-10 h-10 mt-1">${showSenderInfo
+          ? renderAvatar(selectedChat, "sm")
+          : ""
+        }</div>`
+        : ""
+      }
+                    <div class="flex flex-col max-w-[85%] sm:max-w-[75%] ${msg.isMe ? "items-end" : "items-start"
+      }">
+                        ${showSenderInfo
+        ? `<p class="text-sm text-gray-400 mb-1">${msg.sender}</p>`
+        : ""
+      }
+                        <div class="flex items-end gap-2 ${msg.isMe ? "flex-row-reverse" : ""
+      }">
+                            ${showUnread
+        ? `<span class="text-xs text-yellow-400 self-end mb-0.5">1</span>`
+        : ""
+      }
                             <div class="message-content-wrapper">
                                 ${messageBodyHtml}
                             </div>
-                            ${
-                              isLastInGroup
-                                ? `<p class="text-xs text-gray-500 shrink-0 self-end">${msg.time}</p>`
-                                : ""
-                            }
+                            ${isLastInGroup
+        ? `<p class="text-xs text-gray-500 shrink-0 self-end">${msg.time}</p>`
+        : ""
+      }
                         </div>
                         ${actionButtonsHtml}
                     </div>
@@ -537,9 +507,9 @@ function renderMessages(app) {
       html += `
                     <div id="${typingIndicatorId}" class="flex items-start gap-3 animate-slideUp">
                         <div class="shrink-0 w-10 h-10 mt-1">${renderAvatar(
-                          selectedChat,
-                          "sm",
-                        )}</div>
+        selectedChat,
+        "sm",
+      )}</div>
                         <div class="px-4 py-3 rounded-2xl bg-gray-700">
                             <div class="flex items-center space-x-1">
                                 <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0s"></span>
@@ -568,16 +538,16 @@ export function renderMainChat(app) {
   // 단톡방 확인
   const selectedGroupChat =
     app.state.selectedChatId &&
-    typeof app.state.selectedChatId === "string" &&
-    app.state.selectedChatId.startsWith("group_")
+      typeof app.state.selectedChatId === "string" &&
+      app.state.selectedChatId.startsWith("group_")
       ? app.state.groupChats[app.state.selectedChatId]
       : null;
 
   // 오픈톡방 확인
   const selectedOpenChat =
     app.state.selectedChatId &&
-    typeof app.state.selectedChatId === "string" &&
-    app.state.selectedChatId.startsWith("open_")
+      typeof app.state.selectedChatId === "string" &&
+      app.state.selectedChatId.startsWith("open_")
       ? app.state.openChats[app.state.selectedChatId]
       : null;
 
@@ -601,19 +571,17 @@ export function renderMainChat(app) {
                         <i data-lucide="globe" class="w-6 h-6 text-white"></i>
                     </div>
                     <div>
-                        <h2 class="font-semibold text-white text-base md:text-lg">${
-                          selectedOpenChat.name
-                        }</h2>
+                        <h2 class="font-semibold text-white text-base md:text-lg">${selectedOpenChat.name
+      }</h2>
                         <p class="text-xs md:text-sm text-gray-400 flex items-center">
                             <i data-lucide="globe" class="w-3 h-3 mr-1.5"></i>
                             ${t("mainChat.participantsConnected").replace(
-                              "{{count}}",
-                              currentParticipants.length,
-                            )}${
-                              participantNames.length > 0
-                                ? ` (${participantNames.join(", ")})`
-                                : ""
-                            }
+        "{{count}}",
+        currentParticipants.length,
+      )}${participantNames.length > 0
+        ? ` (${participantNames.join(", ")})`
+        : ""
+      }
                         </p>
                     </div>
                 </div>
@@ -621,8 +589,8 @@ export function renderMainChat(app) {
                     <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="phone" class="w-4 h-4 text-gray-300"></i></button>
                     <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="video" class="w-4 h-4 text-gray-300"></i></button>
                     <button class="chat-debug-logs-btn p-2 rounded-full bg-gray-800 hover:bg-gray-700" title="${t(
-                      "mainChat.debugLogButtonTitle",
-                    )}"><i data-lucide="bar-chart-3" class="w-4 h-4 text-gray-300 pointer-events-none"></i></button>
+        "mainChat.debugLogButtonTitle",
+      )}"><i data-lucide="bar-chart-3" class="w-4 h-4 text-gray-300 pointer-events-none"></i></button>
                 </div>
             </header>
             <div id="messages-container" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
@@ -648,17 +616,15 @@ export function renderMainChat(app) {
                         <i data-lucide="users" class="w-6 h-6 text-white"></i>
                     </div>
                     <div>
-                        <h2 class="font-semibold text-white text-base md:text-lg">${
-                          selectedGroupChat.name
-                        }</h2>
+                        <h2 class="font-semibold text-white text-base md:text-lg">${selectedGroupChat.name
+      }</h2>
                         <p class="text-xs md:text-sm text-gray-400 flex items-center">
                             <i data-lucide="users" class="w-3 h-3 mr-1.5"></i>
                             ${t("mainChat.participantsJoined").replace(
-                              "{{count}}",
-                              participants.length,
-                            )}${
-                              participantNames ? ` (${participantNames})` : ""
-                            }
+        "{{count}}",
+        participants.length,
+      )}${participantNames ? ` (${participantNames})` : ""
+      }
                         </p>
                     </div>
                 </div>
@@ -666,8 +632,8 @@ export function renderMainChat(app) {
                     <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="phone" class="w-4 h-4 text-gray-300"></i></button>
                     <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="video" class="w-4 h-4 text-gray-300"></i></button>
                     <button class="chat-debug-logs-btn p-2 rounded-full bg-gray-800 hover:bg-gray-700" title="${t(
-                      "mainChat.debugLogButtonTitle",
-                    )}"><i data-lucide="bar-chart-3" class="w-4 h-4 text-gray-300 pointer-events-none"></i></button>
+        "mainChat.debugLogButtonTitle",
+      )}"><i data-lucide="bar-chart-3" class="w-4 h-4 text-gray-300 pointer-events-none"></i></button>
                 </div>
             </header>
             <div id="messages-container" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
@@ -687,20 +653,18 @@ export function renderMainChat(app) {
                     </button>
                     ${renderAvatar(selectedChat, "sm")}
                     <div>
-                        <h2 class="font-semibold text-white text-base md:text-lg">${
-                          selectedChat.name
-                        }</h2>
-                        <p class="text-xs md:text-sm text-gray-400 flex items-center"><i data-lucide="message-circle" class="w-3 h-3 mr-1.5"></i>${
-                          selectedChatRoom.name
-                        }</p>
+                        <h2 class="font-semibold text-white text-base md:text-lg">${selectedChat.name
+      }</h2>
+                        <p class="text-xs md:text-sm text-gray-400 flex items-center"><i data-lucide="message-circle" class="w-3 h-3 mr-1.5"></i>${selectedChatRoom.name
+      }</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-1 md:space-x-2">
                     <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="phone" class="w-4 h-4 text-gray-300"></i></button>
                     <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="video" class="w-4 h-4 text-gray-300"></i></button>
                     <button class="chat-debug-logs-btn p-2 rounded-full bg-gray-800 hover:bg-gray-700" title="${t(
-                      "mainChat.debugLogButtonTitle",
-                    )}"><i data-lucide="bar-chart-3" class="w-4 h-4 text-gray-300 pointer-events-none"></i></button>
+        "mainChat.debugLogButtonTitle",
+      )}"><i data-lucide="bar-chart-3" class="w-4 h-4 text-gray-300 pointer-events-none"></i></button>
                 </div>
             </header>
             <div id="messages-container" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
@@ -720,11 +684,11 @@ export function renderMainChat(app) {
                 <div>
                     <div class="w-20 h-20 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full flex items-center justify-center mx-auto mb-6"><i data-lucide="bot" class="w-10 h-10 text-white"></i></div>
                     <h3 class="text-xl md:text-2xl font-semibold text-white mb-3">${t(
-                      "mainChat.selectCharacter",
-                    )}</h3>
+      "mainChat.selectCharacter",
+    )}</h3>
                     <p class="text-sm md:text-base text-gray-400 leading-relaxed">${t(
-                      "mainChat.selectCharacterPrompt",
-                    )}</p>
+      "mainChat.selectCharacterPrompt",
+    )}</p>
                 </div>
             </div>
         `;

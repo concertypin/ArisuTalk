@@ -65,13 +65,17 @@ src/
 ├── language/                # Internationalization
 │   ├── en.js               # English translations
 │   └── ko.js               # Korean translations
+├── storage/               # Data persistence
+│   ├── storageHandler.ts # Storage management and abstraction
+|   ├── storage.ts          # Storage interface definitions
+│   ├── browser.ts       # Browser IndexedDB implementations
+│   └── backend.ts          # todo
 ├── utils/                   # Utility functions
 │   ├── crypto.js           # Cryptographic utilities
 │   └── secureStorage.js    # Secure data storage
 ├── defaults.js              # Default configurations
 ├── i18n.js                  # Internationalization core
 ├── index.js                 # Application entry point
-├── storage.js               # Data persistence
 ├── ui.js                    # UI rendering utilities
 └── utils.js                 # General utilities
 ```

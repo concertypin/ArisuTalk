@@ -4,11 +4,7 @@ import {
   defaultCharacters,
   defaultAPISettings,
 } from "./defaults.js";
-import {
-  loadFromBrowserStorage,
-  saveToBrowserStorage,
-  checkIndexedDBQuota,
-} from "./storage.js";
+import { getStorage } from "./storage/storageHandler.ts";
 import { APIManager } from "./api/apiManager.js";
 import { PROVIDERS, PROVIDER_MODELS } from "./constants/providers.js";
 import {
@@ -37,6 +33,7 @@ import {
 import { handleGroupChatClick } from "./handlers/groupChatHandlers.js";
 import { debounce, findMessageGroup } from "./utils.js";
 
+const storage = getStorage();
 // --- APP INITIALIZATION ---
 document.addEventListener("DOMContentLoaded", async () => {
   window.personaApp = new PersonaChatApp();
@@ -124,51 +121,51 @@ class PersonaChatApp {
     this.initialSettings = null;
 
     this.debouncedSaveSettings = debounce(
-      (settings) => saveToBrowserStorage("personaChat_settings_v16", settings),
+      (settings) => storage.save("personaChat_settings_v16", settings),
       500,
     );
     this.debouncedSaveCharacters = debounce(
       (characters) =>
-        saveToBrowserStorage("personaChat_characters_v16", characters),
+        storage.save("personaChat_characters_v16", characters),
       500,
     );
     this.debouncedSaveChatRooms = debounce(
       (chatRooms) =>
-        saveToBrowserStorage("personaChat_chatRooms_v16", chatRooms),
+        storage.save("personaChat_chatRooms_v16", chatRooms),
       500,
     );
     this.debouncedSaveMessages = debounce(
-      (messages) => saveToBrowserStorage("personaChat_messages_v16", messages),
+      (messages) => storage.save("personaChat_messages_v16", messages),
       500,
     );
     this.debouncedSaveUnreadCounts = debounce(
       (unreadCounts) =>
-        saveToBrowserStorage("personaChat_unreadCounts_v16", unreadCounts),
+        storage.save("personaChat_unreadCounts_v16", unreadCounts),
       500,
     );
     this.debouncedSaveUserStickers = debounce(
       (userStickers) =>
-        saveToBrowserStorage("personaChat_userStickers_v16", userStickers),
+        storage.save("personaChat_userStickers_v16", userStickers),
       500,
     );
     this.debouncedSaveGroupChats = debounce(
       (groupChats) =>
-        saveToBrowserStorage("personaChat_groupChats_v16", groupChats),
+        storage.save("personaChat_groupChats_v16", groupChats),
       500,
     );
     this.debouncedSaveOpenChats = debounce(
       (openChats) =>
-        saveToBrowserStorage("personaChat_openChats_v16", openChats),
+        storage.save("personaChat_openChats_v16", openChats),
       500,
     );
     this.debouncedSaveSettingsSnapshots = debounce(
       (snapshots) =>
-        saveToBrowserStorage("personaChat_settingsSnapshots_v16", snapshots),
+        storage.save("personaChat_settingsSnapshots_v16", snapshots),
       500,
     );
     this.debouncedSaveDebugLogs = debounce(
       (debugLogs) =>
-        saveToBrowserStorage("personaChat_debugLogs_v16", debugLogs),
+        storage.save("personaChat_debugLogs_v16", debugLogs),
       500,
     );
   }
@@ -310,17 +307,17 @@ class PersonaChatApp {
         settingsSnapshots,
         debugLogs,
       ] = await Promise.all([
-        loadFromBrowserStorage("personaChat_settings_v16", {}),
-        loadFromBrowserStorage("personaChat_characters_v16", defaultCharacters),
-        loadFromBrowserStorage("personaChat_chatRooms_v16", {}),
-        loadFromBrowserStorage("personaChat_messages_v16", {}),
-        loadFromBrowserStorage("personaChat_unreadCounts_v16", {}),
-        loadFromBrowserStorage("personaChat_userStickers_v16", []),
-        loadFromBrowserStorage("personaChat_groupChats_v16", {}),
-        loadFromBrowserStorage("personaChat_openChats_v16", {}),
-        loadFromBrowserStorage("personaChat_characterStates_v16", {}),
-        loadFromBrowserStorage("personaChat_settingsSnapshots_v16", []),
-        loadFromBrowserStorage("personaChat_debugLogs_v16", []),
+        storage.load("personaChat_settings_v16", {}),
+        storage.load("personaChat_characters_v16", defaultCharacters),
+        storage.load("personaChat_chatRooms_v16", {}),
+        storage.load("personaChat_messages_v16", {}),
+        storage.load("personaChat_unreadCounts_v16", {}),
+        storage.load("personaChat_userStickers_v16", []),
+        storage.load("personaChat_groupChats_v16", {}),
+        storage.load("personaChat_openChats_v16", {}),
+        storage.load("personaChat_characterStates_v16", {}),
+        storage.load("personaChat_settingsSnapshots_v16", []),
+        storage.load("personaChat_debugLogs_v16", []),
       ]);
 
       this.state.settings = {
@@ -361,48 +358,48 @@ class PersonaChatApp {
         debugLogs.length > 0
           ? debugLogs
           : [
-              {
-                id: Date.now(),
-                timestamp: Date.now(),
-                message: t("ui.appStarted"),
-                level: "info",
-                type: "simple",
-              },
-              {
-                id: Date.now() + 1,
-                timestamp: Date.now(),
-                characterName: "System",
-                chatType: "system",
-                type: "structured",
-                data: {
-                  personaInput: {
-                    characterName: "System",
-                    characterPrompt: "System initialization",
-                    characterMemories: [],
-                    characterId: "system",
-                  },
-                  systemPrompt: { initialization: "App startup process" },
-                  outputResponse: {
-                    messages: [],
-                    newMemory: null,
-                    characterState: null,
-                  },
-                  parameters: {
-                    model: "system",
-                    isProactive: false,
-                    forceSummary: false,
-                    messageCount: 0,
-                  },
-                  metadata: {
-                    chatId: null,
-                    chatType: "system",
-                    timestamp: Date.now(),
-                    apiProvider: "system",
-                    model: "system",
-                  },
+            {
+              id: Date.now(),
+              timestamp: Date.now(),
+              message: t("ui.appStarted"),
+              level: "info",
+              type: "simple",
+            },
+            {
+              id: Date.now() + 1,
+              timestamp: Date.now(),
+              characterName: "System",
+              chatType: "system",
+              type: "structured",
+              data: {
+                personaInput: {
+                  characterName: "System",
+                  characterPrompt: "System initialization",
+                  characterMemories: [],
+                  characterId: "system",
+                },
+                systemPrompt: { initialization: "App startup process" },
+                outputResponse: {
+                  messages: [],
+                  newMemory: null,
+                  characterState: null,
+                },
+                parameters: {
+                  model: "system",
+                  isProactive: false,
+                  forceSummary: false,
+                  messageCount: 0,
+                },
+                metadata: {
+                  chatId: null,
+                  chatType: "system",
+                  timestamp: Date.now(),
+                  apiProvider: "system",
+                  model: "system",
                 },
               },
-            ];
+            },
+          ];
     } catch (error) {
       console.error(t("ui.dataLoadFailed"), error);
     }
@@ -535,8 +532,8 @@ class PersonaChatApp {
       showCreateGroupChatModal: false,
     });
 
-    saveToBrowserStorage("personaChat_messages_v16", newMessages);
-    saveToBrowserStorage("personaChat_groupChats_v16", newGroupChats);
+    storage.save("personaChat_messages_v16", newMessages);
+    storage.save("personaChat_groupChats_v16", newGroupChats);
     return groupChatId;
   }
 
@@ -563,8 +560,8 @@ class PersonaChatApp {
       showCreateOpenChatModal: false,
     });
 
-    saveToBrowserStorage("personaChat_messages_v16", newMessages);
-    saveToBrowserStorage("personaChat_openChats_v16", newOpenChats);
+    storage.save("personaChat_messages_v16", newMessages);
+    storage.save("personaChat_openChats_v16", newOpenChats);
 
     await this.initializeAllCharacterStates();
     this.triggerInitialOpenChatJoins(openChatId);
@@ -598,7 +595,7 @@ class PersonaChatApp {
         },
       };
       this.setState({ characterStates: newCharacterStates });
-      saveToBrowserStorage(
+      storage.save(
         "personaChat_characterStates_v16",
         newCharacterStates,
       );
@@ -647,7 +644,7 @@ class PersonaChatApp {
 
   // --- CHAT ROOM MANAGEMENT ---
   async migrateChatData() {
-    const migrationCompleted = await loadFromBrowserStorage(
+    const migrationCompleted = await storage.load(
       "personaChat_migration_v16",
       false,
     );
@@ -689,7 +686,7 @@ class PersonaChatApp {
       messages: newMessages,
     });
 
-    saveToBrowserStorage("personaChat_migration_v16", true);
+    storage.save("personaChat_migration_v16", true);
   }
 
   getFirstAvailableChatRoom() {
@@ -1240,7 +1237,7 @@ class PersonaChatApp {
       };
 
       const characterDataString = JSON.stringify(updatedCharacterData);
-      const storageCheck = await checkIndexedDBQuota(
+      const storageCheck = await storage.checkQuota(
         characterDataString,
         "personaChat_characters_v16",
       );
@@ -1436,7 +1433,7 @@ class PersonaChatApp {
     };
 
     const characterDataString = JSON.stringify(characterData);
-    const storageCheck = await checkIndexedDBQuota(
+    const storageCheck = await storage.checkQuota(
       characterDataString,
       "personaChat_characters_v16",
     );
@@ -1717,7 +1714,7 @@ class PersonaChatApp {
       messageCount: newMessages.length,
       totalChats: Object.keys(newMessagesState).length,
     });
-    saveToBrowserStorage("personaChat_messages_v16", newMessagesState);
+    storage.save("personaChat_messages_v16", newMessagesState);
 
     // 단톡방 참여자들의 AI 응답 생성
     await this.triggerGroupChatAIResponse(selectedChatId, newMessages);
@@ -1766,7 +1763,7 @@ class PersonaChatApp {
       messageCount: newMessages.length,
       totalChats: Object.keys(newMessagesState).length,
     });
-    saveToBrowserStorage("personaChat_messages_v16", newMessagesState);
+    storage.save("personaChat_messages_v16", newMessagesState);
 
     // 오픈톡방 AI 응답 및 동적 참여/이탈 처리
     await this.triggerOpenChatAIResponse(selectedChatId, newMessages);
@@ -1985,11 +1982,11 @@ class PersonaChatApp {
       .map((p) => {
         const basicInfo = p.prompt
           ? p.prompt
-              .split("\n")
-              .slice(0, 3)
-              .join(" ")
-              .replace(/[#*]/g, "")
-              .trim()
+            .split("\n")
+            .slice(0, 3)
+            .join(" ")
+            .replace(/[#*]/g, "")
+            .trim()
           : "";
         return `- ${p.name}: ${basicInfo || "Character"}`;
       })
@@ -2122,7 +2119,7 @@ class PersonaChatApp {
           ],
         };
         this.setState({ characters: updatedCharacters });
-        saveToBrowserStorage("personaChat_characters_v16", updatedCharacters);
+        storage.save("personaChat_characters_v16", updatedCharacters);
       }
     }
 
@@ -2158,10 +2155,10 @@ class PersonaChatApp {
           type: msgPart.sticker ? "sticker" : "text",
           ...(msgPart.sticker
             ? {
-                sticker: msgPart.sticker,
-                stickerId: msgPart.sticker,
-                stickerData: { stickerName: msgPart.sticker },
-              }
+              sticker: msgPart.sticker,
+              stickerId: msgPart.sticker,
+              stickerData: { stickerName: msgPart.sticker },
+            }
             : {}),
         };
 
@@ -2177,7 +2174,7 @@ class PersonaChatApp {
         });
 
         // 각 메시지마다 저장
-        saveToBrowserStorage("personaChat_messages_v16", newMessagesState);
+        storage.save("personaChat_messages_v16", newMessagesState);
       }
     }
   }
@@ -2206,11 +2203,11 @@ class PersonaChatApp {
       .map((p) => {
         const basicInfo = p.prompt
           ? p.prompt
-              .split("\n")
-              .slice(0, 3)
-              .join(" ")
-              .replace(/[#*]/g, "")
-              .trim()
+            .split("\n")
+            .slice(0, 3)
+            .join(" ")
+            .replace(/[#*]/g, "")
+            .trim()
           : "";
         return `- ${p.name}: ${basicInfo || "Character"}`;
       })
@@ -2325,7 +2322,7 @@ class PersonaChatApp {
           ],
         };
         this.setState({ characters: updatedCharacters });
-        saveToBrowserStorage("personaChat_characters_v16", updatedCharacters);
+        storage.save("personaChat_characters_v16", updatedCharacters);
       }
     }
 
@@ -2361,10 +2358,10 @@ class PersonaChatApp {
           type: msgPart.sticker ? "sticker" : "text",
           ...(msgPart.sticker
             ? {
-                sticker: msgPart.sticker,
-                stickerId: msgPart.sticker,
-                stickerData: { stickerName: msgPart.sticker },
-              }
+              sticker: msgPart.sticker,
+              stickerId: msgPart.sticker,
+              stickerData: { stickerName: msgPart.sticker },
+            }
             : {}),
         };
 
@@ -2380,7 +2377,7 @@ class PersonaChatApp {
         });
 
         // 각 메시지마다 저장
-        saveToBrowserStorage("personaChat_messages_v16", newMessagesState);
+        storage.save("personaChat_messages_v16", newMessagesState);
       }
     }
   }
@@ -2453,8 +2450,8 @@ class PersonaChatApp {
       );
     }
 
-    saveToBrowserStorage("personaChat_openChats_v16", newOpenChats);
-    saveToBrowserStorage("personaChat_characterStates_v16", newCharacterStates);
+    storage.save("personaChat_openChats_v16", newOpenChats);
+    storage.save("personaChat_characterStates_v16", newCharacterStates);
   }
 
   characterLeaveOpenChat(openChatId, characterId, reason = "left") {
@@ -2502,8 +2499,8 @@ class PersonaChatApp {
       "leave",
     );
 
-    saveToBrowserStorage("personaChat_openChats_v16", newOpenChats);
-    saveToBrowserStorage("personaChat_characterStates_v16", newCharacterStates);
+    storage.save("personaChat_openChats_v16", newOpenChats);
+    storage.save("personaChat_characterStates_v16", newCharacterStates);
   }
 
   async updateParticipantStates(openChatId, currentParticipants, messages) {
@@ -2552,7 +2549,7 @@ class PersonaChatApp {
       if (availableCharacters.length > 0) {
         const newParticipant =
           availableCharacters[
-            Math.floor(Math.random() * availableCharacters.length)
+          Math.floor(Math.random() * availableCharacters.length)
           ];
         console.log(`${newParticipant.name} joined open chat randomly`);
         this.characterJoinOpenChat(openChatId, newParticipant.id, false);
@@ -2581,7 +2578,7 @@ class PersonaChatApp {
     };
 
     this.setState({ messages: updatedMessagesState });
-    saveToBrowserStorage("personaChat_messages_v16", updatedMessagesState);
+    storage.save("personaChat_messages_v16", updatedMessagesState);
   }
 
   async initializeCharacterState(characterId) {
@@ -2607,7 +2604,7 @@ class PersonaChatApp {
       [characterId]: defaultState,
     };
     this.setState({ characterStates: newCharacterStates });
-    saveToBrowserStorage("personaChat_characterStates_v16", newCharacterStates);
+    storage.save("personaChat_characterStates_v16", newCharacterStates);
   }
 
   updateCharacterState(characterId, characterState) {
@@ -2621,7 +2618,7 @@ class PersonaChatApp {
     };
 
     this.setState({ characterStates: newCharacterStates });
-    saveToBrowserStorage("personaChat_characterStates_v16", newCharacterStates);
+    storage.save("personaChat_characterStates_v16", newCharacterStates);
   }
 
   async triggerApiCall(
@@ -2752,8 +2749,7 @@ class PersonaChatApp {
         this.shouldSaveCharacters = true;
         this.setState({ characters: updatedCharacters });
         console.log(
-          `[Memory Added] for ${
-            charToUpdate.name
+          `[Memory Added] for ${charToUpdate.name
           }: ${response.newMemory.trim()}`,
         );
       }
@@ -2868,7 +2864,7 @@ class PersonaChatApp {
     if (eligibleCharacters.length > 0) {
       const character =
         eligibleCharacters[
-          Math.floor(Math.random() * eligibleCharacters.length)
+        Math.floor(Math.random() * eligibleCharacters.length)
         ];
       console.log(`[Proactive] Sending message from ${character.name}`);
       await this.handleProactiveMessage(character);
@@ -2893,8 +2889,7 @@ class PersonaChatApp {
       const randomDelay =
         Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
       console.log(
-        `Scheduling random character ${i + 1}/${randomCharacterCount} in ${
-          randomDelay / 1000
+        `Scheduling random character ${i + 1}/${randomCharacterCount} in ${randomDelay / 1000
         } seconds.`,
       );
       setTimeout(() => this.initiateSingleRandomCharacter(), randomDelay);
@@ -3307,6 +3302,9 @@ class PersonaChatApp {
 
   sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+  /**
+   * @returns {number}
+   */
   calculateCharacterStickerSize(character) {
     if (!character || !character.stickers) return 0;
     return character.stickers.reduce(
@@ -3319,8 +3317,8 @@ class PersonaChatApp {
     return `
         <div class="memory-item flex items-center gap-2">
             <input type="text" class="memory-input flex-1 px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" value="${memoryText}" placeholder="${t(
-              "characterModal.memoryPlaceholder",
-            )}">
+      "characterModal.memoryPlaceholder",
+    )}">
             <button class="delete-memory-btn p-2 text-gray-400 hover:text-red-400">
                 <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>
             </button>
@@ -3942,27 +3940,27 @@ class PersonaChatApp {
             t("modal.restoreConfirm.title"),
             t("modal.restoreConfirm.message"),
             () => {
-              saveToBrowserStorage(
+              storage.save(
                 "personaChat_settings_v16",
                 backupData.settings,
               );
-              saveToBrowserStorage(
+              storage.save(
                 "personaChat_characters_v16",
                 backupData.characters,
               );
-              saveToBrowserStorage(
+              storage.save(
                 "personaChat_messages_v16",
                 backupData.messages,
               );
-              saveToBrowserStorage(
+              storage.save(
                 "personaChat_unreadCounts_v16",
                 backupData.unreadCounts,
               );
-              saveToBrowserStorage(
+              storage.save(
                 "personaChat_chatRooms_v16",
                 backupData.chatRooms || {},
               );
-              saveToBrowserStorage(
+              storage.save(
                 "personaChat_userStickers_v16",
                 backupData.userStickers || [],
               );
@@ -4408,9 +4406,8 @@ class PersonaChatApp {
           />
         </div>
         
-        ${
-          provider === PROVIDERS.CUSTOM_OPENAI
-            ? `
+        ${provider === PROVIDERS.CUSTOM_OPENAI
+        ? `
           <!-- Custom OpenAI Base URL -->
           <div>
             <label class="flex items-center text-sm font-medium text-gray-300 mb-2">
@@ -4425,8 +4422,8 @@ class PersonaChatApp {
             />
           </div>
         `
-            : ""
-        }
+        : ""
+      }
         
         <!-- 모델 선택 -->
         <div>
@@ -4434,31 +4431,29 @@ class PersonaChatApp {
             <i data-lucide="cpu" class="w-4 h-4 mr-2"></i>모델
           </label>
           
-          ${
-            models.length > 0
-              ? `
+          ${models.length > 0
+        ? `
             <div class="grid grid-cols-1 gap-2 mb-3">
               ${models
-                .map(
-                  (model) => `
+          .map(
+            (model) => `
                 <button 
                   type="button" 
-                  class="model-select-btn px-3 py-2 text-left text-sm rounded-lg transition-colors ${
-                    config.model === model
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                  }" 
+                  class="model-select-btn px-3 py-2 text-left text-sm rounded-lg transition-colors ${config.model === model
+                ? "bg-blue-600 text-white"
+                : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+              }" 
                   data-model="${model}"
                 >
                   ${model}
                 </button>
               `,
-                )
-                .join("")}
+          )
+          .join("")}
             </div>
           `
-              : ""
-          }
+        : ""
+      }
           
           <!-- 커스텀 모델 입력 -->
           <div class="flex gap-2">
@@ -4477,22 +4472,20 @@ class PersonaChatApp {
             </button>
           </div>
           
-          ${
-            customModels.length > 0
-              ? `
+          ${customModels.length > 0
+        ? `
             <div class="mt-3 space-y-1">
               <label class="text-xs text-gray-400">커스텀 모델</label>
               ${customModels
-                .map(
-                  (model, index) => `
+          .map(
+            (model, index) => `
                 <div class="flex items-center gap-2">
                   <button 
                     type="button" 
-                    class="model-select-btn flex-1 px-3 py-2 text-left text-sm rounded-lg transition-colors ${
-                      config.model === model
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                    }" 
+                    class="model-select-btn flex-1 px-3 py-2 text-left text-sm rounded-lg transition-colors ${config.model === model
+                ? "bg-blue-600 text-white"
+                : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+              }" 
                     data-model="${model}"
                   >
                     ${model}
@@ -4506,12 +4499,12 @@ class PersonaChatApp {
                   </button>
                 </div>
               `,
-                )
-                .join("")}
+          )
+          .join("")}
             </div>
           `
-              : ""
-          }
+        : ""
+      }
         </div>
       </div>
     `;
@@ -4597,7 +4590,7 @@ class PersonaChatApp {
     });
 
     // 즉시 저장
-    saveToBrowserStorage("personaChat_groupChats_v16", newGroupChats);
+    storage.save("personaChat_groupChats_v16", newGroupChats);
   }
 
   // AI Character Generation Methods (for_update 라인 4428-4555)
@@ -4881,9 +4874,9 @@ class PersonaChatApp {
         });
 
         // 즉시 저장
-        saveToBrowserStorage("personaChat_groupChats_v16", newGroupChats);
-        saveToBrowserStorage("personaChat_messages_v16", newMessages);
-        saveToBrowserStorage("personaChat_unreadCounts_v16", newUnreadCounts);
+        storage.save("personaChat_groupChats_v16", newGroupChats);
+        storage.save("personaChat_messages_v16", newMessages);
+        storage.save("personaChat_unreadCounts_v16", newUnreadCounts);
       },
     );
   }
@@ -4918,9 +4911,9 @@ class PersonaChatApp {
         });
 
         // 즉시 저장
-        saveToBrowserStorage("personaChat_openChats_v16", newOpenChats);
-        saveToBrowserStorage("personaChat_messages_v16", newMessages);
-        saveToBrowserStorage("personaChat_unreadCounts_v16", newUnreadCounts);
+        storage.save("personaChat_openChats_v16", newOpenChats);
+        storage.save("personaChat_messages_v16", newMessages);
+        storage.save("personaChat_unreadCounts_v16", newUnreadCounts);
       },
     );
   }
@@ -4973,7 +4966,7 @@ class PersonaChatApp {
   clearDebugLogs() {
     this.setState({ debugLogs: [] });
     // 즉시 저장
-    saveToBrowserStorage("personaChat_debugLogs_v16", []);
+    storage.save("personaChat_debugLogs_v16", []);
 
     // 설정 모달이 열려있으면 강제로 다시 렌더링
     if (this.state.showSettingsModal) {
@@ -4991,9 +4984,8 @@ class PersonaChatApp {
     const dataUri =
       "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
 
-    const exportFileDefaultName = `arisutalk-debug-logs-${
-      new Date().toISOString().split("T")[0]
-    }.json`;
+    const exportFileDefaultName = `arisutalk-debug-logs-${new Date().toISOString().split("T")[0]
+      }.json`;
 
     const linkElement = document.createElement("a");
     linkElement.setAttribute("href", dataUri);
@@ -5082,7 +5074,7 @@ class PersonaChatApp {
 
       // Clear all regular storage
       for (const key of storageKeys) {
-        saveToBrowserStorage(key, null);
+        storage.save(key, null);
       }
 
       // Clear encrypted storage - manually clear storage keys
