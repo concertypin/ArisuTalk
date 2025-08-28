@@ -35,7 +35,7 @@ jobs:
         run: pnpm install
 
       - name: Install OIDC Client from Core Package
-        run: npm install @actions/core@1.6.0 @actions/http-client
+        run: pnpm add @actions/core@1.6.0 @actions/http-client
 
       - name: Get Id Token
         uses: actions/github-script@v6
@@ -61,3 +61,4 @@ jobs:
           api_location: ""
           output_location: ""
           github_id_token: ${{ steps.idtoken.outputs.result }}
+
