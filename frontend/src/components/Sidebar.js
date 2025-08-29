@@ -7,9 +7,41 @@ import {
   renderEditGroupChatModal,
 } from "./GroupChat.js";
 
+/**
+ * Calculates and applies the correct horizontal position for the tree-like connector lines.
+ * It uses a CSS variable to dynamically style the lines based on the avatar's position.
+ * @param {number | string} characterId - The ID of the character whose tree line needs updating.
+ */
+function updateTreeLine(characterId) {
+  const characterGroup = document.querySelector(
+    `.character-group[data-id='${characterId}']`,
+  );
+  if (!characterGroup) return;
+
+  const avatar = characterGroup.querySelector(".character-avatar");
+
+  if (!avatar) {
+    characterGroup.style.removeProperty("--tree-trunk-left");
+    return;
+  }
+
+  const groupRect = characterGroup.getBoundingClientRect();
+  const avatarRect = avatar.getBoundingClientRect();
+
+  // Alignment: Calculate the avatar center and apply a small manual correction based on screenshot visuals.
+  const alignmentCorrection = -2; // Nudge 2px to the left
+  const trunkLeft =
+    avatarRect.left -
+    groupRect.left +
+    avatarRect.width / 2 +
+    alignmentCorrection;
+
+  characterGroup.style.setProperty("--tree-trunk-left", `${trunkLeft}px`);
+}
+
 function renderCharacterItem(app, char) {
   const chatRooms = app.state.chatRooms[char.id] || [];
-  const isExpanded = app.state.expandedCharacterId === Number(char.id);
+  const isExpanded = app.state.expandedCharacterIds.has(Number(char.id));
 
   let lastMessage = null;
   let totalUnreadCount = 0;
@@ -36,7 +68,7 @@ function renderCharacterItem(app, char) {
   }
 
   return `
-        <div class="character-group">
+        <div class="character-group ${isExpanded ? "is-expanded" : ""}" data-id="${char.id}">
             <div onclick="window.personaApp.toggleCharacterExpansion(${
               char.id
             })" class="character-header group p-3 md:p-4 rounded-xl cursor-pointer transition-all duration-200 relative hover:bg-gray-800/50">
@@ -64,7 +96,9 @@ function renderCharacterItem(app, char) {
                     </button>
                 </div>
                 <div class="flex items-center space-x-3 md:space-x-4">
-                    ${renderAvatar(char, "md")}
+                    <div class="character-avatar relative">
+                         ${renderAvatar(char, "md")}
+                    </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center justify-between mb-1">
                             <h3 class="font-semibold text-white text-sm truncate">${
@@ -98,7 +132,7 @@ function renderCharacterItem(app, char) {
             ${
               isExpanded
                 ? `
-                <div class="ml-6 space-y-1 pb-2">
+                <div class="ml-2 space-y-1 pb-2 chat-room-list">
                     ${chatRooms
                       .map((chatRoom) => renderChatRoomItem(app, chatRoom))
                       .join("")}
@@ -129,12 +163,12 @@ function renderChatRoomItem(app, chatRoom) {
   }
 
   const nameElement = isEditing
-    ? `<input type="text" 
+    ? `<input type="text"
                  id="chat-room-name-input-${chatRoom.id}"
-                 value="${chatRoom.name}" 
-                 class="flex-grow bg-gray-600 text-white rounded px-1 py-0 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" 
+                 value="${chatRoom.name}"
+                 class="flex-grow bg-gray-600 text-white rounded px-1 py-0 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                  onkeydown="window.personaApp.handleChatRoomNameKeydown(event, '${chatRoom.id}')"
-                 onclick="event.stopPropagation()" 
+                 onclick="event.stopPropagation()"
                  autofocus>`
     : `<h4 class="text-sm font-medium text-white truncate">${chatRoom.name}</h4>`;
 
@@ -175,14 +209,9 @@ function renderChatRoomItem(app, chatRoom) {
            </div>`;
 
   return `
-        <div class="chat-room-item group p-2 rounded-lg cursor-pointer transition-all duration-200 ${
-          isSelected ? "bg-blue-600" : "hover:bg-gray-700"
-        } relative">
-            <div onclick="${
-              isEditing
-                ? "event.stopPropagation()"
-                : `window.personaApp.selectChatRoom('${chatRoom.id}')`
-            }" class="flex items-center justify-between">
+    <div class="chat-room-list-item-wrapper">
+        <div onclick="${isEditing ? "event.stopPropagation()" : `window.personaApp.selectChatRoom('${chatRoom.id}')`}" class="chat-room-item group p-2 rounded-lg cursor-pointer transition-all duration-200 w-full ${isSelected ? "bg-blue-600" : "hover:bg-gray-700"}">
+            <div class="flex items-center justify-between">
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between mb-1 gap-2">
                         ${nameElement}
@@ -191,12 +220,11 @@ function renderChatRoomItem(app, chatRoom) {
                     <p class="text-xs text-gray-400 truncate">${lastMessageContent}</p>
                 </div>
             </div>
-            <div class="absolute top-1 right-1 ${
-              isEditing ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-            } transition-opacity duration-200 flex items-center space-x-1">
+            <div class="mt-1 flex justify-end items-center space-x-1 ${isEditing ? "opacity-100" : "opacity-0 group-hover:opacity-100"} transition-opacity duration-200">
                 ${actionButtons}
             </div>
         </div>
+    </div>
     `;
 }
 
@@ -264,4 +292,11 @@ export function renderSidebar(app) {
             </div>
         </div>
     `;
+
+  // After rendering, update the tree lines for all expanded characters
+  requestAnimationFrame(() => {
+    app.state.expandedCharacterIds.forEach((id) => {
+      updateTreeLine(id);
+    });
+  });
 }

@@ -4,6 +4,7 @@ import { renderCharacterDefaultsPanel } from "./settings/panels/CharacterDefault
 import { renderDataManagementPanel } from "./settings/panels/DataManagementPanel.js";
 import { renderAdvancedSettingsPanel } from "./settings/panels/AdvancedSettingsPanel.js";
 import { setLanguage, t } from "../i18n.js";
+import { renderInputArea, setupMainChatEventListeners } from "./MainChat.js";
 
 /**
  * Renders the desktop-specific settings UI
@@ -18,24 +19,24 @@ export function renderDesktopSettingsUI(app) {
             <div class="bg-gray-800 rounded-2xl w-full max-w-6xl h-full max-h-[90vh] flex flex-col shadow-2xl border border-gray-700">
                 <!-- 헤더 -->
                 ${renderDesktopSettingsHeader()}
-                
+
                 <!-- 메인 콘텐츠 -->
                 <div class="flex flex-1 min-h-0">
                     <!-- 사이드바 네비게이션 -->
                     ${renderDesktopSettingsNavigation(activePanel)}
-                    
+
                     <!-- 콘텐츠 영역 -->
                     <div class="flex-1 flex flex-col min-w-0">
                         <!-- 콘텐츠 헤더 -->
                         ${renderContentHeader(activePanel)}
-                        
+
                         <!-- 패널 콘텐츠 -->
                         <div class="flex-1 overflow-y-auto p-6" id="desktop-settings-content">
                             ${renderActivePanel(app, activePanel)}
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- 푸터 -->
                 ${renderDesktopSettingsFooter()}
             </div>
@@ -120,7 +121,7 @@ function renderDesktopSettingsNavigation(activePanel) {
                 ${navItems
                   .map(
                     (item) => `
-                    <button 
+                    <button
                         class="w-full text-left p-3 rounded-lg transition-all duration-200 flex items-start gap-3 ${
                           activePanel === item.id
                             ? "bg-blue-600/20 border border-blue-500/30 text-blue-400"
@@ -371,7 +372,8 @@ export function setupDesktopSettingsEventListeners(app) {
 
     if (characterCountSlider && characterCountLabel) {
       characterCountSlider.addEventListener("input", (e) => {
-        characterCountLabel.textContent = e.target.value + t("settings.characterCountUnit");
+        characterCountLabel.textContent =
+          e.target.value + t("settings.characterCountUnit");
       });
     }
 

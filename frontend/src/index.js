@@ -80,7 +80,7 @@ class PersonaChatApp {
       userStickers: [],
       settingsSnapshots: [],
       selectedChatId: null,
-      expandedCharacterId: null,
+      expandedCharacterIds: new Set(),
       isWaitingForResponse: false,
       typingCharacterId: null,
       sidebarCollapsed: window.innerWidth < 768,
@@ -197,13 +197,6 @@ class PersonaChatApp {
 
     render(this);
     this.addEventListeners();
-
-    const initialChatId = this.getFirstAvailableChatRoom();
-    if (this.state.characters.length > 0 && !this.state.selectedChatId) {
-      this.setState({ selectedChatId: initialChatId });
-    } else {
-      render(this);
-    }
 
     this.proactiveInterval = setInterval(
       () => this.checkAndSendProactiveMessages(),
@@ -735,18 +728,22 @@ class PersonaChatApp {
 
   toggleCharacterExpansion(characterId) {
     const numericCharacterId = Number(characterId);
-    const newExpandedId =
-      this.state.expandedCharacterId === numericCharacterId
-        ? null
-        : numericCharacterId;
-    this.setState({ expandedCharacterId: newExpandedId });
+    const newExpandedIds = new Set(this.state.expandedCharacterIds);
+    if (newExpandedIds.has(numericCharacterId)) {
+      newExpandedIds.delete(numericCharacterId);
+    } else {
+      newExpandedIds.add(numericCharacterId);
+    }
+    this.setState({ expandedCharacterIds: newExpandedIds });
   }
 
   createNewChatRoomForCharacter(characterId) {
     const numericCharacterId = Number(characterId);
     const newChatRoomId = this.createNewChatRoom(numericCharacterId);
     this.selectChatRoom(newChatRoomId);
-    this.setState({ expandedCharacterId: numericCharacterId });
+    const newExpandedIds = new Set(this.state.expandedCharacterIds);
+    newExpandedIds.add(numericCharacterId);
+    this.setState({ expandedCharacterIds: newExpandedIds });
   }
 
   selectChatRoom(chatRoomId) {
@@ -760,6 +757,7 @@ class PersonaChatApp {
       sidebarCollapsed:
         window.innerWidth < 768 ? true : this.state.sidebarCollapsed,
     });
+    this.scrollToBottom();
   }
 
   editCharacter(characterId) {
@@ -1312,7 +1310,7 @@ class PersonaChatApp {
       if (!selectAllButton) {
         const selectAllHTML = `
                     <button id="select-all-stickers" class="py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm flex flex-col items-center gap-1">
-                        <i data-lucide="check-circle" class="w-4 h-4"></i> 
+                        <i data-lucide="check-circle" class="w-4 h-4"></i>
                         <span class="text-xs">전체<br>선택</span>
                     </button>
                 `;
@@ -1510,13 +1508,16 @@ class PersonaChatApp {
           newSelectedChatId = this.getFirstAvailableChatRoom();
         }
 
+        const newExpandedIds = new Set(this.state.expandedCharacterIds);
+        newExpandedIds.delete(numericCharacterId);
+
         this.setState({
           characters: newCharacters,
           messages: newMessages,
           chatRooms: newChatRooms,
           unreadCounts: newUnreadCounts,
           selectedChatId: newSelectedChatId,
-          expandedCharacterId: null,
+          expandedCharacterIds: newExpandedIds,
           // Close the confirmation modal after deletion is complete
           modal: { isOpen: false, title: "", message: "", onConfirm: null },
         });
@@ -1670,6 +1671,7 @@ class PersonaChatApp {
       characters: updatedCharacters,
       imageToSend: null,
     });
+    this.scrollToBottom();
 
     this.triggerApiCall(newMessagesState, false, false, forceSummary);
   }
@@ -1710,6 +1712,7 @@ class PersonaChatApp {
       imageToSend: null,
       stickerToSend: null,
     });
+    this.scrollToBottom();
 
     // 즉시 저장
     console.log("Saving group chat messages:", {
@@ -1759,6 +1762,7 @@ class PersonaChatApp {
       imageToSend: null,
       stickerToSend: null,
     });
+    this.scrollToBottom();
 
     // 즉시 저장
     console.log("Saving open chat messages:", {
@@ -2175,6 +2179,7 @@ class PersonaChatApp {
           messages: newMessagesState,
           typingCharacterId: null,
         });
+        this.scrollToBottom();
 
         // 각 메시지마다 저장
         saveToBrowserStorage("personaChat_messages_v16", newMessagesState);
@@ -2378,6 +2383,7 @@ class PersonaChatApp {
           messages: newMessagesState,
           typingCharacterId: null,
         });
+        this.scrollToBottom();
 
         // 각 메시지마다 저장
         saveToBrowserStorage("personaChat_messages_v16", newMessagesState);
@@ -2814,6 +2820,7 @@ class PersonaChatApp {
           messages: { ...this.state.messages, [chatId]: currentChatMessages },
           unreadCounts: newUnreadCounts,
         });
+        this.scrollToBottom();
       }
     } else {
       const errorMessage = {
@@ -4399,15 +4406,15 @@ class PersonaChatApp {
           <label class="flex items-center text-sm font-medium text-gray-300 mb-2">
             <i data-lucide="key" class="w-4 h-4 mr-2"></i>API 키
           </label>
-          <input 
-            type="password" 
-            id="settings-api-key" 
-            value="${config.apiKey || ""}" 
-            placeholder="API 키를 입력하세요" 
+          <input
+            type="password"
+            id="settings-api-key"
+            value="${config.apiKey || ""}"
+            placeholder="API 키를 입력하세요"
             class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm"
           />
         </div>
-        
+
         ${
           provider === PROVIDERS.CUSTOM_OPENAI
             ? `
@@ -4416,24 +4423,24 @@ class PersonaChatApp {
             <label class="flex items-center text-sm font-medium text-gray-300 mb-2">
               <i data-lucide="link" class="w-4 h-4 mr-2"></i>Base URL
             </label>
-            <input 
-              type="text" 
-              id="settings-base-url" 
-              value="${config.baseUrl || ""}" 
-              placeholder="https://api.openai.com/v1" 
+            <input
+              type="text"
+              id="settings-base-url"
+              value="${config.baseUrl || ""}"
+              placeholder="https://api.openai.com/v1"
               class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm"
             />
           </div>
         `
             : ""
         }
-        
+
         <!-- 모델 선택 -->
         <div>
           <label class="flex items-center text-sm font-medium text-gray-300 mb-2">
             <i data-lucide="cpu" class="w-4 h-4 mr-2"></i>모델
           </label>
-          
+
           ${
             models.length > 0
               ? `
@@ -4441,13 +4448,13 @@ class PersonaChatApp {
               ${models
                 .map(
                   (model) => `
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   class="model-select-btn px-3 py-2 text-left text-sm rounded-lg transition-colors ${
                     config.model === model
                       ? "bg-blue-600 text-white"
                       : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                  }" 
+                  }"
                   data-model="${model}"
                 >
                   ${model}
@@ -4459,24 +4466,24 @@ class PersonaChatApp {
           `
               : ""
           }
-          
+
           <!-- 커스텀 모델 입력 -->
           <div class="flex gap-2">
-            <input 
-              type="text" 
-              id="custom-model-input" 
-              placeholder="커스텀 모델명 입력" 
+            <input
+              type="text"
+              id="custom-model-input"
+              placeholder="커스텀 모델명 입력"
               class="flex-1 px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm"
             />
-            <button 
-              type="button" 
-              id="add-custom-model-btn" 
+            <button
+              type="button"
+              id="add-custom-model-btn"
               class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm flex items-center gap-1"
             >
               <i data-lucide="plus" class="w-4 h-4"></i>추가
             </button>
           </div>
-          
+
           ${
             customModels.length > 0
               ? `
@@ -4486,20 +4493,20 @@ class PersonaChatApp {
                 .map(
                   (model, index) => `
                 <div class="flex items-center gap-2">
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     class="model-select-btn flex-1 px-3 py-2 text-left text-sm rounded-lg transition-colors ${
                       config.model === model
                         ? "bg-blue-600 text-white"
                         : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                    }" 
+                    }"
                     data-model="${model}"
                   >
                     ${model}
                   </button>
-                  <button 
-                    type="button" 
-                    class="remove-custom-model-btn px-2 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm" 
+                  <button
+                    type="button"
+                    class="remove-custom-model-btn px-2 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm"
                     data-index="${index}"
                   >
                     <i data-lucide="trash-2" class="w-3 h-3"></i>

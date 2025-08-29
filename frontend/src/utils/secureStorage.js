@@ -142,10 +142,7 @@ export class SecureStorageManager {
       const jsonString = await decryptText(encrypted, this.masterPassword);
       return JSON.parse(jsonString);
     } catch (error) {
-      console.error(
-        t("secureStorage.loadApiConfigsFailed"),
-        error,
-      );
+      console.error(t("secureStorage.loadApiConfigsFailed"), error);
       return {};
     }
   }

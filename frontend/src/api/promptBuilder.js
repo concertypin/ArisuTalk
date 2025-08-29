@@ -65,11 +65,42 @@ export function buildContentPrompt({
     }
   }
 
-  // [FIX] For proactive messages, the conversation history sent to the API
-  // must end with a user turn. If the last message is from the model, remove it.
-  if (isProactive && contents.length > 0) {
-    const lastContent = contents[contents.length - 1];
-    if (lastContent.role === "model") {
+  // [FIX] Gemini API requires alternating user/model roles.
+  // 1. Merge consecutive messages from the same role.
+  if (contents.length > 1) {
+    const mergedContents = [contents[0]];
+    for (let i = 1; i < contents.length; i++) {
+      const lastMessage = mergedContents[mergedContents.length - 1];
+      const currentMessage = contents[i];
+      if (lastMessage.role === currentMessage.role) {
+        // For model messages, add a separator to distinguish them.
+        if (lastMessage.role === "model") {
+          lastMessage.parts.push({ text: "\n\n---\n\n" });
+        }
+        lastMessage.parts.push(...currentMessage.parts);
+      } else {
+        mergedContents.push(currentMessage);
+      }
+    }
+    contents = mergedContents;
+  }
+
+  // 2. Handle the end of the conversation history for the API call.
+  if (contents.length > 0 && contents[contents.length - 1].role === "model") {
+    if (isProactive) {
+      // For proactive messages, add a system message to prompt the AI to continue.
+      // This preserves the context of the last AI message.
+      contents.push({
+        role: "user",
+        parts: [
+          {
+            text: "(SYSTEM: The user has not responded. Please continue the conversation based on the context. You could ask a question, or introduce a new topic.)",
+          },
+        ],
+      });
+    } else {
+      // For other cases like rerolls, the last model message must be removed.
+      // The context of this message is implicitly what's being rerolled.
       contents.pop();
     }
   }
