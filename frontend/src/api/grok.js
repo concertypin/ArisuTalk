@@ -38,6 +38,7 @@ export class GrokClient {
       content: c.parts.map(p => p.text).join('')
     }));
 
+
     messages.unshift({ role: "system", content: systemPrompt });
 
     // for_update 라인 7113-7118: 요청 본문 구성

@@ -38,6 +38,7 @@ export class OpenRouterClient {
       content: c.parts.map(p => p.text).join('')
     }));
 
+
     messages.unshift({ role: "system", content: systemPrompt });
 
     // for_update 라인 7209-7214: 요청 본문 구성

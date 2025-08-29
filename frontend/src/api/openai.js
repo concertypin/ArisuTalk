@@ -71,6 +71,7 @@ export class OpenAIClient {
       content: c.parts.map(p => p.text).join('')
     }));
 
+
     messages.unshift({ role: "system", content: systemPrompt });
 
     // for_update 라인 7017-7022: 요청 본문 구성

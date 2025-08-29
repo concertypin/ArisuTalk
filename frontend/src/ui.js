@@ -74,18 +74,42 @@ export async function render(app) {
 
   // Conditionally render the sidebar to minimize DOM updates
   if (isFirstRender || shouldUpdateSidebar(oldState, newState)) {
+    const sidebarScrollContainer = document.querySelector(
+      "#sidebar-content > .overflow-y-auto",
+    );
+    const scrollPosition = sidebarScrollContainer
+      ? sidebarScrollContainer.scrollTop
+      : 0;
+
     renderSidebar(app);
+
+    const newSidebarScrollContainer = document.querySelector(
+      "#sidebar-content > .overflow-y-auto",
+    );
+    if (newSidebarScrollContainer) {
+      newSidebarScrollContainer.scrollTop = scrollPosition;
+    }
   }
 
   // Conditionally render the main chat to minimize DOM updates
   if (isFirstRender || shouldUpdateMainChat(oldState, newState)) {
-    // 재렌더링 전에 입력창 값 보존
+    // 재렌더링 전에 입력창 값과 스크롤 위치 보존
     const messageInput = document.getElementById("new-message-input");
     const inputValue = messageInput ? messageInput.value : "";
     const inputHeight = messageInput ? messageInput.style.height : "auto";
 
+    const messagesContainer = document.getElementById("messages-container");
+    const scrollPosition = messagesContainer ? messagesContainer.scrollTop : 0;
+
     renderMainChat(app);
     setupMainChatEventListeners();
+    setupConditionalBlur();
+
+    // 재렌더링 후 스크롤 위치 복원
+    const newMessagesContainer = document.getElementById("messages-container");
+    if (newMessagesContainer) {
+      newMessagesContainer.scrollTop = scrollPosition;
+    }
 
     // 재렌더링 후 입력창 값 복원
     const newMessageInput = document.getElementById("new-message-input");
@@ -128,7 +152,6 @@ export async function render(app) {
   }
 
   lucide.createIcons();
-  app.scrollToBottom();
 }
 
 // --- RENDER HELPER FUNCTIONS ---
@@ -169,7 +192,8 @@ function shouldUpdateSidebar(oldState, newState) {
   return (
     oldState.sidebarCollapsed !== newState.sidebarCollapsed ||
     oldState.searchQuery !== newState.searchQuery ||
-    oldState.expandedCharacterId !== newState.expandedCharacterId ||
+    JSON.stringify(Array.from(oldState.expandedCharacterIds || [])) !==
+      JSON.stringify(Array.from(newState.expandedCharacterIds || [])) ||
     oldState.editingChatRoomId !== newState.editingChatRoomId ||
     JSON.stringify(oldState.characters) !==
       JSON.stringify(newState.characters) ||
@@ -257,4 +281,43 @@ function shouldUpdateModals(oldState, newState) {
     (newState.showDebugLogsModal &&
       JSON.stringify(oldState.debugLogs) !== JSON.stringify(newState.debugLogs))
   );
+}
+
+// --- New function for conditional blur ---
+function setupConditionalBlur() {
+  const messagesContainer = document.getElementById("messages-container");
+  const inputAreaWrapper = document.getElementById("input-area-wrapper");
+
+  if (!messagesContainer || !inputAreaWrapper) {
+    return; // If elements aren't here, do nothing. It will be called again on next render.
+  }
+
+  // To prevent multiple listeners on the same element if re-renders happen without DOM replacement
+  if (messagesContainer._scrollHandler) {
+    messagesContainer.removeEventListener(
+      "scroll",
+      messagesContainer._scrollHandler,
+    );
+  }
+
+  const handleScroll = () => {
+    // Check if scrolled to the bottom
+    const isAtBottom =
+      messagesContainer.scrollHeight -
+        messagesContainer.scrollTop -
+        messagesContainer.clientHeight <
+      5;
+
+    if (isAtBottom) {
+      inputAreaWrapper.classList.add("scrolled-to-bottom");
+    } else {
+      inputAreaWrapper.classList.remove("scrolled-to-bottom");
+    }
+  };
+
+  messagesContainer.addEventListener("scroll", handleScroll);
+  messagesContainer._scrollHandler = handleScroll; // Store reference to the handler
+
+  // Initial check
+  handleScroll();
 }
