@@ -55,6 +55,18 @@ export function renderPromptModal(app) {
                     <button id="close-prompt-modal" class="p-1 hover:bg-gray-700 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
                 </div>
                 <div class="p-6 space-y-4 overflow-y-auto">
+                    <!-- ChatML Information -->
+                    <div class="bg-gradient-to-r from-purple-900/20 to-blue-900/20 rounded-lg p-4 border border-purple-500/20">
+                        <div class="flex items-center gap-2 mb-3">
+                            <i data-lucide="info" class="w-4 h-4 text-purple-300"></i>
+                            <h4 class="text-sm font-semibold text-purple-300">ChatML Format Enabled</h4>
+                        </div>
+                        <p class="text-xs text-gray-300 leading-relaxed">
+                            All prompts now support ChatML format by default. You can use traditional text or ChatML markup (e.g., &lt;|im_start|&gt;system...&lt;|im_end|&gt;) in any prompt section. 
+                            ChatML provides better conversation structure and role-based responses.
+                        </p>
+                    </div>
+
                     <h4 class="text-base font-semibold text-blue-300 border-b border-blue-300/20 pb-2">${t(
                       "promptModal.mainChatPrompt",
                     )}</h4>

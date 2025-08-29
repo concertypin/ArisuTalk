@@ -4,6 +4,7 @@
  * allowing for easier management and testing of the prompt engineering aspects.
  */
 import { getSystemPrompt } from "./prompts.js";
+import { parseChatML, chatMLToPromptStructure, buildChatMLFromTraditionalPrompts } from "./chatMLParser.js";
 
 /**
  * Builds the contents and system prompt for a content generation request.
@@ -26,7 +27,75 @@ export function buildContentPrompt({
   isProactive = false,
   forceSummary = false,
 }) {
-  let contents = [];
+  // Always use ChatML parsing approach
+  let chatMLText = '';
+  
+  // Check if user has provided explicit ChatML prompt
+  if (prompts.chatMLPrompt && prompts.chatMLPrompt.trim()) {
+    chatMLText = prompts.chatMLPrompt;
+  } else {
+    // Build ChatML from traditional complex prompt sections
+    const lastMessageTime =
+      history.length > 0 ? new Date(history[history.length - 1].id) : new Date();
+    const currentTime = new Date();
+    const timeDiff = Math.round((currentTime - lastMessageTime) / 1000 / 60);
+
+    let timeContext = `(Context: It's currently ${currentTime.toLocaleString("en-US",)}.`;
+    if (isProactive) {
+      const isFirstContactEver = history.length === 0;
+      if (character.isRandom && isFirstContactEver) {
+        timeContext += ` You are initiating contact for the very first time. You found the user's profile interesting and decided to reach out. Your first message MUST reflect this. Greet them and explain why you're contacting them, referencing their persona. This is a special instruction just for this one time.)`;
+      } else if (isFirstContactEver) {
+        timeContext += ` You are starting this conversation for the first time. Greet the user and start a friendly conversation.)`;
+      } else {
+        timeContext += ` It's been ${timeDiff} minutes since the conversation paused. You MUST initiate a new conversation topic. Ask a question or make an observation completely unrelated to the last few messages. Your goal is to re-engage the user with something fresh. Do not continue the previous train of thought.)`;
+      }
+    } else {
+      if (history.length > 0) {
+        timeContext += ` The last message was sent ${timeDiff} minutes ago.)`;
+      } else {
+        timeContext += ` This is the beginning of the conversation.)`;
+      }
+    }
+    if (forceSummary) {
+      timeContext += ` (summarize_memory: true)`;
+    }
+
+    // Prepare sticker information
+    const availableStickers =
+      character.stickers
+        ?.map((sticker) => `${sticker.id} (${sticker.name})`)
+        .join(", ") || "none";
+
+    // Build ChatML from traditional prompts
+    chatMLText = buildChatMLFromTraditionalPrompts(
+      prompts, 
+      character, 
+      userName, 
+      userDescription, 
+      { 
+        timeContext, 
+        availableStickers, 
+        timeDiff 
+      }
+    );
+  }
+  
+  // Parse ChatML (handles both explicit ChatML and plain text as system messages)
+  const chatMLMessages = parseChatML(chatMLText);
+  const { systemPrompt, contents } = chatMLToPromptStructure(
+    chatMLMessages,
+    character,
+    userName,
+    userDescription,
+    false  // Don't include user/assistant messages from ChatML prompts
+  );
+  
+  // Start with empty contents for conversation history
+  // ChatML prompts should only provide system instructions, not conversation examples
+  let chatMLContents = [];
+  
+  // Add history messages
   for (const msg of history) {
     const role = msg.isMe ? "user" : "model";
     let parts = [];
@@ -61,21 +130,20 @@ export function buildContentPrompt({
     }
 
     if (parts.length > 0) {
-      contents.push({ role, parts });
+      chatMLContents.push({ role, parts });
     }
   }
 
-  // [FIX] For proactive messages, the conversation history sent to the API
-  // must end with a user turn. If the last message is from the model, remove it.
-  if (isProactive && contents.length > 0) {
-    const lastContent = contents[contents.length - 1];
+  // Handle proactive messages for ChatML
+  if (isProactive && chatMLContents.length > 0) {
+    const lastContent = chatMLContents[chatMLContents.length - 1];
     if (lastContent.role === "model") {
-      contents.pop();
+      chatMLContents.pop();
     }
   }
 
-  if (isProactive && contents.length === 0) {
-    contents.push({
+  if (isProactive && chatMLContents.length === 0) {
+    chatMLContents.push({
       role: "user",
       parts: [
         { text: "(SYSTEM: You are starting this conversation. Please begin.)" },
@@ -83,66 +151,50 @@ export function buildContentPrompt({
     });
   }
 
-  const lastMessageTime =
-    history.length > 0 ? new Date(history[history.length - 1].id) : new Date();
-  const currentTime = new Date();
-  const timeDiff = Math.round((currentTime - lastMessageTime) / 1000 / 60);
+  return { contents: chatMLContents, systemPrompt };
+}
 
-  let timeContext = `(Context: It's currently ${currentTime.toLocaleString(
-    "en-US",
-  )}.`;
-  if (isProactive) {
-    const isFirstContactEver = history.length === 0;
-    if (character.isRandom && isFirstContactEver) {
-      timeContext += ` You are initiating contact for the very first time. You found the user's profile interesting and decided to reach out. Your first message MUST reflect this. Greet them and explain why you're contacting them, referencing their persona. This is a special instruction just for this one time.)`;
-    } else if (isFirstContactEver) {
-      timeContext += ` You are starting this conversation for the first time. Greet the user and start a friendly conversation.)`;
-    } else {
-      timeContext += ` It's been ${timeDiff} minutes since the conversation paused. You MUST initiate a new conversation topic. Ask a question or make an observation completely unrelated to the last few messages. Your goal is to re-engage the user with something fresh. Do not continue the previous train of thought.)`;
-    }
-  } else {
-    if (history.length > 0) {
-      timeContext += ` The last message was sent ${timeDiff} minutes ago.)`;
-    } else {
-      timeContext += ` This is the beginning of the conversation.)`;
-    }
+/**
+ * Builds the system prompt and contents for a character sheet generation request.
+ * @param {object} params - The parameters for building the prompt.
+ * @param {string} params.characterName - The character's name.
+ * @param {string} params.characterDescription - The character's description.
+ * @param {string} params.characterSheetPrompt - The template for creating the character sheet.
+ * @returns {{systemPrompt: string, contents: Array<object>}} - The generated system prompt and contents.
+ */
+export function buildCharacterSheetPrompt({
+  characterName,
+  characterDescription,
+  characterSheetPrompt,
+}) {
+  // Replace variables in the prompt
+  const processedPrompt = characterSheetPrompt
+    .replace("{characterName}", characterName)
+    .replace("{characterDescription}", characterDescription || "기본적인 정보만 제공됨");
+
+  // Parse as ChatML (handles both ChatML format and plain text as system messages)
+  const chatMLMessages = parseChatML(processedPrompt);
+  const { systemPrompt, contents } = chatMLToPromptStructure(
+    chatMLMessages, 
+    null, 
+    '', 
+    '', 
+    true  // Allow conversation messages for character sheet generation
+  );
+  
+  // Add user instruction if no explicit conversation was provided in ChatML
+  if (contents.length === 0) {
+    contents.push({
+      role: "user",
+      parts: [
+        {
+          text: "Please create a character sheet based on the instructions.",
+        },
+      ],
+    });
   }
-  if (forceSummary) {
-    timeContext += ` (summarize_memory: true)`;
-  }
 
-  const mainPrompts = prompts.main;
-
-  // 스티커 정보 준비
-  const availableStickers =
-    character.stickers
-      ?.map((sticker) => `${sticker.id} (${sticker.name})`)
-      .join(", ") || "none";
-
-  const guidelines = [
-    mainPrompts.memory_generation,
-    mainPrompts.character_acting,
-    mainPrompts.message_writing,
-    mainPrompts.language,
-    mainPrompts.additional_instructions,
-    mainPrompts.sticker_usage?.replace(
-      "{availableStickers}",
-      availableStickers,
-    ) || "",
-  ].join("\n\n");
-
-  const systemPrompt = getSystemPrompt({
-    mainPrompts,
-    character,
-    userName,
-    userDescription,
-    guidelines,
-    availableStickers,
-    timeContext,
-    timeDiff,
-  });
-
-  return { contents, systemPrompt };
+  return { systemPrompt, contents };
 }
 
 /**
@@ -158,20 +210,32 @@ export function buildProfilePrompt({
   userDescription,
   profileCreationPrompt,
 }) {
-  const systemPrompt = profileCreationPrompt
+  // Replace variables in the prompt
+  const processedPrompt = profileCreationPrompt
     .replace("{userName}", userName)
     .replace("{userDescription}", userDescription);
 
-  const contents = [
-    {
+  // Parse as ChatML (handles both ChatML format and plain text as system messages)
+  const chatMLMessages = parseChatML(processedPrompt);
+  const { systemPrompt, contents } = chatMLToPromptStructure(
+    chatMLMessages, 
+    null, 
+    '', 
+    '', 
+    true  // Allow conversation messages for profile generation
+  );
+  
+  // Add user instruction if no explicit conversation was provided in ChatML
+  if (contents.length === 0) {
+    contents.push({
       role: "user",
       parts: [
         {
           text: "Please generate a character profile based on the instructions.",
         },
       ],
-    },
-  ];
+    });
+  }
 
   return { systemPrompt, contents };
 }

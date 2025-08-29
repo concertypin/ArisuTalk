@@ -29,6 +29,11 @@ export function handleModalClick(e, app) {
     app.setState({ showPromptModal: false });
   if (e.target.closest("#save-prompts")) app.handleSavePrompts();
 
+  // ChatML handlers
+  if (e.target.closest("#use-chatml-toggle")) app.handleChatMLToggle();
+  if (e.target.closest("#reset-chatml-btn")) app.handleResetChatML();
+  if (e.target.closest("#generate-chatml-template-btn")) app.handleGenerateChatMLTemplate();
+
   // Character Modal
   if (e.target.closest('[data-action="close-character-modal"]'))
     app.closeCharacterModal();
@@ -286,6 +291,7 @@ export function handleModalChange(e, app) {
 
   if (e.target.id === "restore-file-input") app.handleRestore(e);
   if (e.target.id === "restore-prompts-input") app.handleRestorePrompts(e);
+  if (e.target.id === "chatml-prompt-input") app.handleChatMLInput(e);
   if (e.target.id === "settings-snapshots-toggle") {
     const optionsDiv = document.getElementById("snapshots-list");
     if (optionsDiv)

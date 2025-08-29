@@ -1,4 +1,4 @@
-import { buildContentPrompt, buildProfilePrompt } from "./promptBuilder.js";
+import { buildContentPrompt, buildProfilePrompt, buildCharacterSheetPrompt } from "./promptBuilder.js";
 import { t } from "../i18n.js";
 
 const API_BASE_URL = "https://api.anthropic.com/v1";
@@ -201,6 +201,75 @@ export class ClaudeClient {
     } catch (error) {
       console.error(
         t("api.profileGenerationError", { provider: "Claude" }),
+        error,
+      );
+      return { error: error.message };
+    }
+  }
+
+  /**
+   * Generates a character sheet using Claude API.
+   * @param {object} params - Generation parameters
+   * @param {string} params.characterName - Character name
+   * @param {string} params.characterDescription - Character description
+   * @param {string} params.characterSheetPrompt - Template for character sheet generation
+   * @returns {Promise<Object>} Promise resolving to character sheet text response
+   */
+  async generateCharacterSheet({ 
+    characterName, 
+    characterDescription, 
+    characterSheetPrompt 
+  }) {
+    const { systemPrompt, contents } = buildCharacterSheetPrompt({
+      characterName,
+      characterDescription,
+      characterSheetPrompt,
+    });
+
+    const payload = {
+      model: this.model,
+      max_tokens: this.profileMaxOutputTokens,
+      temperature: this.profileTemperature,
+      system: systemPrompt,
+      messages: contents.map(content => ({
+        role: content.role === "model" ? "assistant" : content.role,
+        content: content.parts.map(part => part.text).join("")
+      }))
+    };
+
+    try {
+      const response = await fetch(`${this.baseUrl}/messages`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": this.apiKey,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error("Character Sheet Gen API Error:", data);
+        const errorMessage = data?.error?.message || 
+          t("api.requestFailed", { status: response.statusText });
+        throw new Error(errorMessage);
+      }
+
+      if (data.content && data.content.length > 0) {
+        const responseText = data.content.map(item => item.text).join("").trim();
+        
+        return {
+          messages: [{ content: responseText }],
+          reactionDelay: 1000,
+        };
+      } else {
+        throw new Error(t("api.profileNotGenerated", { reason: data.stop_reason || t("api.unknownReason") }));
+      }
+    } catch (error) {
+      console.error(
+        t("api.profileGenerationError", { provider: "Claude" }) + " (Character Sheet)",
         error,
       );
       return { error: error.message };

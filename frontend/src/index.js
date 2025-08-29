@@ -1087,6 +1087,8 @@ class PersonaChatApp {
         ).value,
         sticker_usage: document.getElementById("prompt-main-sticker_usage")
           .value,
+        group_chat_context: document.getElementById("prompt-main-group_chat_context")?.value || this.state.settings.prompts.main.group_chat_context,
+        open_chat_context: document.getElementById("prompt-main-open_chat_context")?.value || this.state.settings.prompts.main.open_chat_context,
       },
       profile_creation: document.getElementById("prompt-profile_creation")
         .value,
@@ -4653,16 +4655,6 @@ class PersonaChatApp {
         this.state.settings.prompts.character_sheet_generation ||
         this.defaultPrompts.character_sheet_generation;
 
-      // 프롬프트에 변수 치환 및 강화된 지시사항 추가
-      const finalPrompt =
-        generationPrompt
-          .replace("{characterName}", characterName)
-          .replace(
-            "{characterDescription}",
-            characterDescription || "기본적인 정보만 제공됨",
-          ) +
-        `\n\n절대 지켜야 할 규칙:\n- 캐릭터 시트만 작성\n- "안녕하세요", "도움이 되었으면", "이상입니다" 같은 인사말 금지\n- 설명 금지\n- 즉시 ### 기본 정보부터 시작\n- 마크다운 형식 외 다른 포맷 사용 금지`;
-
       // Extract API options for all providers
       const charGenOptions = {
         maxTokens: currentConfig.maxTokens,
@@ -4671,19 +4663,15 @@ class PersonaChatApp {
         profileTemperature: currentConfig.profileTemperature,
       };
 
-      // API Manager를 통한 호출
-      const response = await this.apiManager.generateContent(
+      // API Manager를 통한 캐릭터 시트 생성 호출
+      const response = await this.apiManager.generateCharacterSheet(
         apiProvider,
         currentConfig.apiKey,
         currentConfig.model,
         {
-          userName: "", // userName은 빈 문자열
-          userDescription: "", // userDescription은 빈 문자열
-          character: { name: "AI Assistant", prompt: finalPrompt }, // 임시 캐릭터 객체
-          history: [{ content: finalPrompt, isMe: true, id: Date.now() }], // 단일 메시지 히스토리
-          prompts: this.state.settings.prompts,
-          isProactive: false,
-          forceSummary: false,
+          characterName: characterName,
+          characterDescription: characterDescription,
+          characterSheetPrompt: generationPrompt,
         },
         currentConfig.baseUrl, // custom_openai용
         charGenOptions,
@@ -4697,7 +4685,7 @@ class PersonaChatApp {
           characterMemories: [],
           characterId: "ai_generation",
         },
-        systemPrompt: { character_sheet_generation: finalPrompt },
+        systemPrompt: { character_sheet_generation: generationPrompt },
         outputResponse: {
           messages: response.messages,
           newMemory: response.newMemory,

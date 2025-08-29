@@ -150,6 +150,36 @@ export class APIManager {
   }
 
   /**
+   * Generate a character sheet using the specified provider
+   * @param {string} provider - The API provider
+   * @param {string} apiKey - The API key
+   * @param {string} model - The model to use
+   * @param {Object} params - Parameters for character sheet generation
+   * @param {string} [baseUrl] - Custom base URL (for custom_openai only)
+   * @param {Object} [options] - Additional options for the client (for custom_openai only)
+   * @returns {Promise<Object>} The generated character sheet response
+   */
+  async generateCharacterSheet(
+    provider,
+    apiKey,
+    model,
+    params,
+    baseUrl = null,
+    options = {},
+  ) {
+    // Resolve actual API key if encrypted
+    const actualApiKey = await this.resolveApiKey(provider, apiKey);
+    const client = this.getClient(
+      provider,
+      actualApiKey,
+      model,
+      baseUrl,
+      options,
+    );
+    return await client.generateCharacterSheet(params);
+  }
+
+  /**
    * Clear cached clients (useful when API keys change)
    */
   clearClients() {
