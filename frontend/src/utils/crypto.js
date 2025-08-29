@@ -179,7 +179,7 @@ export function validatePassword(password) {
       password.length < minLength
         ? t("security.passwordTooShort", { minLength })
         : strength < 3
-        ? t("security.passwordNotComplex")
-        : t("security.passwordStrong"),
+          ? t("security.passwordNotComplex")
+          : t("security.passwordStrong"),
   };
 }
