@@ -32,9 +32,7 @@ export class APIManager {
       if (window.personaApp) {
         return await window.personaApp.getApiKey(provider);
       }
-      throw new Error(
-        t("api.apiKeyNotFound"),
-      );
+      throw new Error(t("api.apiKeyNotFound"));
     }
     return apiKey;
   }

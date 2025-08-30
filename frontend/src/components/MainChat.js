@@ -2,6 +2,10 @@ import { t } from "../i18n.js";
 import { formatBytes } from "../storage.js";
 import { findMessageGroup, formatDateSeparator } from "../utils.js";
 import { renderAvatar } from "./Avatar.js";
+import {
+  renderLandingPage,
+  setupLandingPageEventListeners,
+} from "./LandingPage.js";
 
 function getGroupChatParticipants(app, groupChatId) {
   const groupChat = app.state.groupChats[groupChatId];
@@ -31,12 +35,12 @@ function renderInputArea(app) {
   }
 
   return `
-        <div class="input-area-container relative">
+        <div class="input-area-container experimental relative">
             ${imagePreviewHtml}
             ${
               showInputOptions
                 ? `
-                <div class="absolute bottom-full left-0 mb-2 w-48 bg-gray-700 rounded-xl shadow-lg p-2 animate-fadeIn">
+                <div class="absolute bottom-full left-0 mb-2 w-48 rounded-xl shadow-lg p-2 animate-fadeIn floating-panel">
                     <button id="open-image-upload" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-left rounded-lg hover:bg-gray-600">
                         <i data-lucide="image" class="w-4 h-4"></i> ${t(
                           "mainChat.uploadPhoto",
@@ -46,66 +50,39 @@ function renderInputArea(app) {
             `
                 : ""
             }
-            <div class="flex items-start gap-3">
+            <div class="flex items-center gap-3">
                 ${
                   !hasImage
                     ? `
-                <button id="open-input-options-btn" class="flex-shrink-0 p-2 bg-gray-800 hover:bg-gray-700 text-white rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 h-[48px] w-[48px] flex items-center justify-center" ${
+                <button id="open-input-options-btn" class="flex-shrink-0 bg-gray-700 hover:bg-gray-600 text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 h-[44px] w-[44px] flex items-center justify-center" ${
                   isWaitingForResponse ? "disabled" : ""
-                }>
-                   <i data-lucide="plus" class="w-5 h-5"></i>
+                }> 
+                   <i data-lucide="plus" class="w-5 h-5 pointer-events-none"></i>
                 </button>
                 `
                     : ""
                 }
-                <div class="flex-1">
-                    ${
-                      app.state.stickerToSend
-                        ? `
-                        <div class="mb-2 p-2 bg-gray-700 rounded-lg flex items-center gap-2 text-sm text-gray-300">
-                            <img src="${app.state.stickerToSend.data}" alt="${
-                              app.state.stickerToSend.stickerName
-                            }" class="w-6 h-6 rounded object-cover">
-                            <span>${t("mainChat.stickerLabel")}${
-                              app.state.stickerToSend.stickerName
-                            }</span>
-                            <button id="remove-sticker-to-send-btn" class="ml-auto text-gray-400 hover:text-white">
-                                <i data-lucide="x" class="w-3 h-3"></i>
-                            </button>
-                        </div>
-                    `
-                        : ""
-                    }
-                    <div class="relative">
-                        <textarea id="new-message-input" placeholder="${
-                          hasImage
-                            ? t("mainChat.addCaption")
-                            : app.state.stickerToSend
-                              ? t("mainChat.stickerMessagePlaceholder")
-                              : t("mainChat.messagePlaceholder")
-                        }" class="w-full pl-4 pr-24 py-3 bg-gray-800 text-white rounded-2xl border border-gray-700 resize-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 transition-all duration-200 text-sm placeholder-gray-500" rows="1" style="min-height: 48px; max-height: 120px;" ${
-                          isWaitingForResponse ? "disabled" : ""
-                        }></textarea>
-                        <div class="absolute right-3 flex items-center gap-2" style="top: 50%; transform: translateY(-50%);">
-                            <button id="sticker-btn" 
-                                class="flex-shrink-0 p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-full transition-all duration-200 w-9 h-9 flex items-center justify-center"
-                                ${isWaitingForResponse ? "disabled" : ""}>
-                                <i data-lucide="smile" class="w-4 h-4 pointer-events-none"></i>
-                            </button>
-                            <button id="send-message-btn" 
-                                class="flex-shrink-0 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 w-9 h-9 flex items-center justify-center"
-                                ${isWaitingForResponse ? "disabled" : ""}>
-                                <i data-lucide="send" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                        ${
-                          app.state.showUserStickerPanel
-                            ? renderUserStickerPanel(app)
-                            : ""
-                        }
-                    </div>
-                </div>
+                <textarea id="new-message-input" placeholder="${
+                  hasImage
+                    ? t("mainChat.addCaption")
+                    : app.state.stickerToSend
+                      ? t("mainChat.stickerMessagePlaceholder")
+                      : t("mainChat.messagePlaceholder")
+                }" class="relative flex-1 self-center pl-5 pr-5 py-3 bg-gray-700 text-white rounded-full border border-transparent focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 transition-all duration-200 text-sm placeholder-gray-500 resize-none" rows="1" style="min-height: 44px; max-height: 120px;" ${
+                  isWaitingForResponse ? "disabled" : ""
+                }></textarea>
+                <button id="sticker-btn"
+                    class="flex-shrink-0 bg-gray-700 hover:bg-gray-600 text-white rounded-full transition-all duration-200 w-[44px] h-[44px] flex items-center justify-center"
+                    ${isWaitingForResponse ? "disabled" : ""}>
+                    <i data-lucide="smile" class="w-5 h-5 pointer-events-none"></i>
+                </button>
+                <button id="send-message-btn"
+                    class="flex-shrink-0 bg-blue-600 hover:bg-blue-700 text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 w-[44px] h-[44px] flex items-center justify-center"
+                    ${isWaitingForResponse ? "disabled" : ""}>
+                    <i data-lucide="send" class="w-5 h-5"></i>
+                </button>
             </div>
+            ${app.state.showUserStickerPanel ? renderUserStickerPanel(app) : ""}
         </div>
     `;
 }
@@ -115,7 +92,7 @@ function renderUserStickerPanel(app) {
   const currentSize = app.calculateUserStickerSize();
 
   return `
-        <div class="absolute bottom-full left-0 mb-2 w-80 bg-gray-800 rounded-xl shadow-lg border border-gray-700 animate-fadeIn">
+        <div class="absolute bottom-full right-0 z-20 mb-2 w-80 bg-gray-800 rounded-xl shadow-lg border border-gray-700 animate-fadeIn floating-panel">
             <div class="p-3 border-b border-gray-700 flex items-center justify-between">
                 <h3 class="text-sm font-medium text-white">${t(
                   "mainChat.personaStickers",
@@ -185,18 +162,18 @@ function renderUserStickerPanel(app) {
                                   name: sticker.name,
                                   data: sticker.data,
                                   type: sticker.type || "image/png",
-                                })}' 
+                                })}'
                                     class="user-sticker-send-btn w-full aspect-square bg-gray-700 rounded-lg overflow-hidden hover:bg-gray-600 transition-colors">
                                     ${content}
                                 </button>
                                 <div class="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                                    <button data-sticker-edit="${sticker.id}" 
+                                    <button data-sticker-edit="${sticker.id}"
                                         class="sticker-edit-btn w-5 h-5 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center text-xs" title="${t(
                                           "characterModal.editStickerName",
                                         )}">
                                         <i data-lucide="edit-3" class="w-2 h-2"></i>
                                     </button>
-                                    <button data-sticker-delete="${sticker.id}" 
+                                    <button data-sticker-delete="${sticker.id}"
                                         class="sticker-delete-btn w-5 h-5 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center text-xs" title="${t(
                                           "characterModal.deleteSticker",
                                         )}">
@@ -250,7 +227,7 @@ function renderMessages(app) {
       let editContentHtml = "";
       if (msg.type === "image") {
         editContentHtml = `
-                        <img src="${msg.imageUrl}" class="image-open-btn max-w-xs max-h-80 rounded-lg object-cover mb-2 cursor-pointer" data-image-url="${msg.imageUrl}">
+                        <img src="${msg.imageUrl}" class="image-open-btn max-w-xs max-height-80 rounded-lg object-cover mb-2 cursor-pointer" data-image-url="${msg.imageUrl}">
                         <textarea data-id="${groupInfo.lastMessageId}" class="edit-message-textarea w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500/50 text-sm" rows="2">${msg.content}</textarea>
                     `;
       } else {
@@ -629,7 +606,7 @@ export function renderMainChat(app) {
                 ${renderMessages(app)}
                 <div id="messages-end-ref"></div>
             </div>
-            <div class="p-4 bg-gray-900 border-t border-gray-800">
+            <div id="input-area-wrapper" class="px-4 pb-4 glass-effect experimental-input-parent">
                 ${renderInputArea(app)}
             </div>
         `;
@@ -674,7 +651,7 @@ export function renderMainChat(app) {
                 ${renderMessages(app)}
                 <div id="messages-end-ref"></div>
             </div>
-            <div class="p-4 bg-gray-900 border-t border-gray-800">
+            <div id="input-area-wrapper" class="px-4 pb-4 glass-effect experimental-input-parent">
                 ${renderInputArea(app)}
             </div>
         `;
@@ -707,27 +684,12 @@ export function renderMainChat(app) {
                 ${renderMessages(app)}
                 <div id="messages-end-ref"></div>
             </div>
-            <div class="p-4 bg-gray-900 border-t border-gray-800">
+            <div id="input-area-wrapper" class="px-4 pb-4 glass-effect experimental-input-parent">
                 ${renderInputArea(app)}
             </div>
         `;
   } else {
-    mainChat.innerHTML = `
-            <div class="flex-1 flex items-center justify-center text-center p-4">
-                <button id="mobile-sidebar-toggle" class="absolute top-4 left-4 p-2 rounded-full hover:bg-gray-700 md:hidden">
-                    <i data-lucide="menu" class="h-5 w-5 text-gray-300"></i>
-                </button>
-                <div>
-                    <div class="w-20 h-20 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full flex items-center justify-center mx-auto mb-6"><i data-lucide="bot" class="w-10 h-10 text-white"></i></div>
-                    <h3 class="text-xl md:text-2xl font-semibold text-white mb-3">${t(
-                      "mainChat.selectCharacter",
-                    )}</h3>
-                    <p class="text-sm md:text-base text-gray-400 leading-relaxed">${t(
-                      "mainChat.selectCharacterPrompt",
-                    )}</p>
-                </div>
-            </div>
-        `;
+    mainChat.innerHTML = renderLandingPage();
   }
 }
 
@@ -736,6 +698,8 @@ export function renderMainChat(app) {
  * 관심사 분리 원칙에 따라 이벤트 핸들링을 별도 함수로 분리
  */
 export function setupMainChatEventListeners() {
+  setupLandingPageEventListeners();
+
   // Remove sticker to send button
   const removeStickerBtn = document.getElementById(
     "remove-sticker-to-send-btn",
