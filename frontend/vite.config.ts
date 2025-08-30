@@ -3,7 +3,9 @@ import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
     server: {
-        open: "index.html",
+        allowedHosts: process.env.ALLOWED_HOSTS?.split(","),
+        // in a Docker environment, browser will not open.
+        open: process.env.IS_DOCKER ? false : "index.html",
     },
     build: {
         outDir: "dist",
