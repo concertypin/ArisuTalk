@@ -102,6 +102,15 @@ export async function render(app) {
     const scrollPosition = messagesContainer ? messagesContainer.scrollTop : 0;
 
     renderMainChat(app);
+
+    // Add a class after a short delay to enable transitions, preventing flicker on render
+    setTimeout(() => {
+      const inputAreaWrapper = document.getElementById("input-area-wrapper");
+      if (inputAreaWrapper) {
+        inputAreaWrapper.classList.add("transitions-enabled");
+      }
+    }, 50);
+
     setupMainChatEventListeners();
     setupConditionalBlur();
 
@@ -128,14 +137,6 @@ export async function render(app) {
     }
   }
 
-  // showInputOptions 상태 변화 시 입력 옵션 영역만 업데이트
-  if (
-    !isFirstRender &&
-    oldState.showInputOptions !== newState.showInputOptions
-  ) {
-    updateInputOptions(app);
-  }
-
   // Conditionally render modals to minimize DOM updates
   if (isFirstRender || shouldUpdateModals(oldState, newState)) {
     const settingsContent = document.getElementById("settings-modal-content");
@@ -155,35 +156,6 @@ export async function render(app) {
 }
 
 // --- RENDER HELPER FUNCTIONS ---
-
-function updateInputOptions(app) {
-  const inputAreaContainer = document.querySelector(".input-area-container");
-  if (!inputAreaContainer) return;
-
-  const existingOptionsPanel = inputAreaContainer.querySelector(
-    ".absolute.bottom-full",
-  );
-
-  if (app.state.showInputOptions) {
-    // 옵션 패널이 없으면 추가
-    if (!existingOptionsPanel) {
-      const optionsHtml = `
-        <div class="absolute bottom-full left-0 mb-2 w-48 bg-gray-700 rounded-xl shadow-lg p-2 animate-fadeIn">
-          <button id="open-image-upload" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-left rounded-lg hover:bg-gray-600">
-            <i data-lucide="image" class="w-4 h-4"></i> 사진 업로드
-          </button>
-        </div>
-      `;
-      inputAreaContainer.insertAdjacentHTML("afterbegin", optionsHtml);
-      if (window.lucide) window.lucide.createIcons();
-    }
-  } else {
-    // 옵션 패널이 있으면 제거
-    if (existingOptionsPanel) {
-      existingOptionsPanel.remove();
-    }
-  }
-}
 
 // --- RENDER HELPER FUNCTIONS ---
 
@@ -218,6 +190,7 @@ function shouldUpdateMainChat(oldState, newState) {
     oldState.isWaitingForResponse !== newState.isWaitingForResponse ||
     oldState.imageToSend !== newState.imageToSend ||
     oldState.showUserStickerPanel !== newState.showUserStickerPanel ||
+    oldState.showInputOptions !== newState.showInputOptions ||
     oldState.stickerToSend !== newState.stickerToSend ||
     JSON.stringify(oldState.userStickers) !==
       JSON.stringify(newState.userStickers) ||
