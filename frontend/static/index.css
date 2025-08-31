@@ -180,7 +180,11 @@ details .content-wrapper {
   mask-image: linear-gradient(to top, black 20%, transparent 100%);
   -webkit-mask-image: linear-gradient(to top, black 20%, transparent 100%);
   pointer-events: none; /* Allow clicks to pass through */
-  transition: all 0.3s ease-in-out; /* Add transition for smooth change */
+}
+
+/* Enable transitions only after initial render to prevent flickering */
+#input-area-wrapper.transitions-enabled::before {
+  transition: all 0.3s ease-in-out;
 }
 
 /* Less blur when scrolled to the bottom */
