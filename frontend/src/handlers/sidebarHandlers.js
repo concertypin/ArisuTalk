@@ -107,7 +107,7 @@ export function handleSidebarClick(e, app) {
 }
 
 export function handleSidebarInput(e, app) {
-  if (e.target.id === "search-input") {
-    app.setState({ searchQuery: e.target.value });
+  if (e.target.id === "search-input" || e.target.id === "search-input-mobile" || e.target.id === "search-modal-input") {
+    app.debouncedSetSearchQuery(e.target.value);
   }
 }

@@ -381,7 +381,7 @@ function renderMessages(app) {
 
           if (textContent.trim()) {
             const textHtml = `<div class="px-4 py-2 rounded-2xl text-sm md:text-base leading-relaxed ${
-              msg.isMe ? "bg-blue-600 text-white" : "bg-gray-700 text-gray-100"
+              msg.isMe ? 'text-white' : 'text-gray-100'}" style="background-color: ${msg.isMe ? 'rgba(37, 99, 235, 0.7)' : 'rgba(35, 42, 55, 0.7)'};
             } mb-2"><div class="break-words">${textContent}</div></div>`;
             messageBodyHtml = `<div class="flex flex-col ${
               msg.isMe ? "items-end" : "items-start"
@@ -417,7 +417,7 @@ function renderMessages(app) {
       const imageTag = `<div class="sticker-toggle-btn inline-block cursor-pointer transition-all duration-300" data-message-id="${msg.id}"><img src="${imageUrl}" class="${sizeClass} rounded-lg object-cover" style="${heightStyle}"></div>`;
       const captionTag = msg.content
         ? `<div class="mt-2 px-4 py-2 rounded-2xl text-sm md:text-base leading-relaxed inline-block ${
-            msg.isMe ? "bg-blue-600 text-white" : "bg-gray-700 text-gray-100"
+            msg.isMe ? 'text-white' : 'text-gray-100'}" style="background-color: ${msg.isMe ? 'rgba(37, 99, 235, 0.7)' : 'rgba(35, 42, 55, 0.7)'};
           }"><div class="break-words">${msg.content}</div></div>`
         : "";
       messageBodyHtml = `<div class="flex flex-col ${
@@ -425,7 +425,7 @@ function renderMessages(app) {
       }">${imageTag}${captionTag}</div>`;
     } else {
       messageBodyHtml = `<div class="px-4 py-2 rounded-2xl text-sm md:text-base leading-relaxed ${
-        msg.isMe ? "bg-blue-600 text-white" : "bg-gray-700 text-gray-100"
+        msg.isMe ? 'text-white' : 'text-gray-100'}" style="background-color: ${msg.isMe ? 'rgba(37, 99, 235, 0.7)' : 'rgba(35, 42, 55, 0.7)'};
       }"><div class="break-words">${msg.content}</div></div>`;
     }
 
@@ -474,7 +474,7 @@ function renderMessages(app) {
                           }</div>`
                         : ""
                     }
-                    <div class="flex flex-col max-w-[85%] sm:max-w-[75%] ${
+                    <div class="flex flex-col ${msg.isMe ? 'max-w-[85%] sm:max-w-[75%]' : 'max-w-[70%] sm:max-w-[75%]'} ${
                       msg.isMe ? "items-end" : "items-start"
                     }">
                         ${
@@ -659,8 +659,8 @@ export function renderMainChat(app) {
     mainChat.innerHTML = `
             <header class="p-4 bg-gray-900/80 border-b border-gray-800 glass-effect flex items-center justify-between z-10">
                 <div class="flex items-center space-x-2 md:space-x-4">
-                    <button id="mobile-sidebar-toggle" class="p-2 -ml-2 rounded-full hover:bg-gray-700 md:hidden">
-                        <i data-lucide="menu" class="h-5 w-5 text-gray-300"></i>
+                    <button id="back-to-char-list" class="p-2 -ml-2 rounded-full hover:bg-gray-700 md:hidden">
+                        <i data-lucide="arrow-left" class="h-5 w-5 text-gray-300"></i>
                     </button>
                     ${renderAvatar(selectedChat, "sm")}
                     <div>
@@ -699,6 +699,13 @@ export function renderMainChat(app) {
  */
 export function setupMainChatEventListeners() {
   setupLandingPageEventListeners();
+
+  const backBtn = document.getElementById("back-to-char-list");
+  if (backBtn) {
+    backBtn.addEventListener("click", () => {
+      window.personaApp.setState({ selectedChatId: null });
+    });
+  }
 
   // Remove sticker to send button
   const removeStickerBtn = document.getElementById(

@@ -22,6 +22,18 @@ import {
   renderDebugLogsModal,
   setupDebugLogsModalEventListeners,
 } from "./components/DebugLogsModal.js";
+import { renderCharacterListPage, renderCharacterList } from "./components/CharacterListPage.js";
+import { renderSearchModal } from "./components/SearchModal.js";
+
+export function adjustMessageContainerPadding() {
+  const messagesContainer = document.getElementById("messages-container");
+  const inputAreaWrapper = document.getElementById("input-area-wrapper");
+
+  if (messagesContainer && inputAreaWrapper) {
+    const inputHeight = inputAreaWrapper.offsetHeight;
+    messagesContainer.style.paddingBottom = `${inputHeight + 8}px`;
+  }
+}
 
 function renderModals(app) {
   const container = document.getElementById("modal-container");
@@ -34,6 +46,7 @@ function renderModals(app) {
   if (app.state.showCreateOpenChatModal) html += renderCreateOpenChatModal(app);
   if (app.state.showEditGroupChatModal) html += renderEditGroupChatModal(app);
   if (app.state.showDebugLogsModal) html += renderDebugLogsModal(app.state);
+  if (app.state.showMobileSearch) html += renderSearchModal(app);
   if (app.state.modal.isOpen) html += renderConfirmationModal(app);
   container.innerHTML = html;
 
@@ -68,93 +81,88 @@ export function render(app) {
   const oldState = app.oldState || {};
   const newState = app.state;
   const isFirstRender = !app.oldState;
+  const isMobile = window.innerWidth < 768;
 
-  // Conditionally render the sidebar to minimize DOM updates
-  if (isFirstRender || shouldUpdateSidebar(oldState, newState)) {
-    const sidebarScrollContainer = document.querySelector(
-      "#sidebar-content > .overflow-y-auto",
-    );
-    const scrollPosition = sidebarScrollContainer
-      ? sidebarScrollContainer.scrollTop
-      : 0;
+  const mainContainer = document.getElementById("main-chat");
+  const listContainer = document.getElementById("character-list-page-container");
+  const sidebarContainer = document.getElementById("sidebar");
 
-    renderSidebar(app);
+  // Main Content Rendering
+  if (isMobile) {
+    sidebarContainer.classList.add("hidden");
+    if (newState.selectedChatId) {
+      mainContainer.classList.remove("hidden");
+      listContainer.classList.add("hidden");
+      if (isFirstRender || shouldUpdateMainChat(oldState, newState)) {
+        renderMainChat(app);
+        setupMainChatEventListeners();
+      }
+    } else {
+      mainContainer.classList.add("hidden");
+      listContainer.classList.remove("hidden");
+      if (isFirstRender || shouldUpdateCharacterList(oldState, newState)) {
+        const isListAlreadyRendered = !!listContainer.querySelector("header");
+        if (!isListAlreadyRendered || oldState.showFabMenu !== newState.showFabMenu) {
+            renderCharacterListPage(app);
+        } else {
+            const listItemsContainer = listContainer.querySelector('#character-list-items');
+            if (listItemsContainer) {
+                renderCharacterList(app, listItemsContainer);
+            }
+        }
+      }
+    }
+  } else {
+    // Desktop layout
+    sidebarContainer.classList.remove("hidden");
+    mainContainer.classList.remove("hidden");
+    listContainer.classList.add("hidden");
 
-    const newSidebarScrollContainer = document.querySelector(
-      "#sidebar-content > .overflow-y-auto",
-    );
-    if (newSidebarScrollContainer) {
-      newSidebarScrollContainer.scrollTop = scrollPosition;
+    if (isFirstRender || shouldUpdateSidebar(oldState, newState)) {
+      const sidebarScrollContainer = document.querySelector(
+        "#sidebar-content > .overflow-y-auto",
+      );
+      const scrollPosition = sidebarScrollContainer
+        ? sidebarScrollContainer.scrollTop
+        : 0;
+
+      renderSidebar(app);
+
+      const newSidebarScrollContainer = document.querySelector(
+        "#sidebar-content > .overflow-y-auto",
+      );
+      if (newSidebarScrollContainer) {
+        newSidebarScrollContainer.scrollTop = scrollPosition;
+      }
+    }
+    if (isFirstRender || shouldUpdateMainChat(oldState, newState)) {
+      renderMainChat(app);
+      setupMainChatEventListeners();
     }
   }
 
-  // Conditionally render the main chat to minimize DOM updates
-  if (isFirstRender || shouldUpdateMainChat(oldState, newState)) {
-    // 재렌더링 전에 입력창 값과 스크롤 위치 보존
-    const messageInput = document.getElementById("new-message-input");
-    const inputValue = messageInput ? messageInput.value : "";
-    const inputHeight = messageInput ? messageInput.style.height : "auto";
-
-    const messagesContainer = document.getElementById("messages-container");
-    const scrollPosition = messagesContainer ? messagesContainer.scrollTop : 0;
-
-    renderMainChat(app);
-
-    // Add a class after a short delay to enable transitions, preventing flicker on render
-    setTimeout(() => {
-      const inputAreaWrapper = document.getElementById("input-area-wrapper");
-      if (inputAreaWrapper) {
-        inputAreaWrapper.classList.add("transitions-enabled");
-      }
-    }, 50);
-
-    setupMainChatEventListeners();
-    setupConditionalBlur();
-
-    // 재렌더링 후 스크롤 위치 복원
-    const newMessagesContainer = document.getElementById("messages-container");
-    if (newMessagesContainer) {
-      newMessagesContainer.scrollTop = scrollPosition;
-    }
-
-    // 재렌더링 후 입력창 값 복원
-    const newMessageInput = document.getElementById("new-message-input");
-    if (newMessageInput && inputValue) {
-      newMessageInput.value = inputValue;
-      newMessageInput.style.height = inputHeight;
-
-      // 전송 버튼 상태도 업데이트
-      const sendButton = document.getElementById("send-message-btn");
-      if (sendButton) {
-        const hasText = inputValue.trim() !== "";
-        const hasImage = !!app.state.imageToSend;
-        sendButton.disabled =
-          (!hasText && !hasImage) || app.state.isWaitingForResponse;
-      }
-    }
-  }
-
-  // Conditionally render modals to minimize DOM updates
+  // Modal Rendering (always runs, independent of main content)
   if (isFirstRender || shouldUpdateModals(oldState, newState)) {
-    const settingsContent = document.getElementById("settings-modal-content");
-    const scrollPosition = settingsContent ? settingsContent.scrollTop : 0;
-
     renderModals(app);
-
-    const newSettingsContent = document.getElementById(
-      "settings-modal-content",
-    );
-    if (newSettingsContent) {
-      newSettingsContent.scrollTop = scrollPosition;
-    }
   }
 
   lucide.createIcons();
+  setupConditionalBlur();
+  adjustMessageContainerPadding();
 }
 
 // --- RENDER HELPER FUNCTIONS ---
 
-// --- RENDER HELPER FUNCTIONS ---
+function shouldUpdateCharacterList(oldState, newState) {
+  return (
+    oldState.showFabMenu !== newState.showFabMenu ||
+    oldState.showMobileSearch !== newState.showMobileSearch ||
+    oldState.searchQuery !== newState.searchQuery ||
+    JSON.stringify(oldState.characters) !== JSON.stringify(newState.characters) ||
+    JSON.stringify(oldState.unreadCounts) !== JSON.stringify(newState.unreadCounts) ||
+    JSON.stringify(oldState.messages) !== JSON.stringify(newState.messages)
+  );
+}
 
 function shouldUpdateSidebar(oldState, newState) {
   // This function checks if any state related to the sidebar has changed
@@ -230,6 +238,7 @@ function shouldUpdateModals(oldState, newState) {
   return (
     oldState.showSettingsModal !== newState.showSettingsModal ||
     oldState.showCharacterModal !== newState.showCharacterModal ||
+    oldState.showMobileSearch !== newState.showMobileSearch ||
     oldState.showPromptModal !== newState.showPromptModal ||
     oldState.showCreateGroupChatModal !== newState.showCreateGroupChatModal ||
     oldState.showCreateOpenChatModal !== newState.showCreateOpenChatModal ||
@@ -249,7 +258,8 @@ function shouldUpdateModals(oldState, newState) {
       JSON.stringify(oldState.editingGroupChat) !==
         JSON.stringify(newState.editingGroupChat)) ||
     (newState.showDebugLogsModal &&
-      JSON.stringify(oldState.debugLogs) !== JSON.stringify(newState.debugLogs))
+      JSON.stringify(oldState.debugLogs) !== JSON.stringify(newState.debugLogs)) ||
+    (newState.showMobileSearch && oldState.searchQuery !== newState.searchQuery)
   );
 }
 

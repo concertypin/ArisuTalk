@@ -15,7 +15,7 @@ import {
   renderProviderConfig,
   setupAdvancedSettingsEventListeners,
 } from "./components/MobileSettingsModal.js";
-import { render } from "./ui.js";
+import { render, adjustMessageContainerPadding } from "./ui.js";
 import { secureStorage } from "./utils/secureStorage.js";
 import {
   handleSidebarClick,
@@ -94,6 +94,8 @@ class PersonaChatApp {
       editingCharacter: null,
       editingMessageId: null,
       editingChatRoomId: null,
+      showMobileSearch: false,
+      showFabMenu: false,
       searchQuery: "",
       modal: { isOpen: false, title: "", message: "", onConfirm: null },
       showInputOptions: false,
@@ -170,6 +172,11 @@ class PersonaChatApp {
       (debugLogs) =>
         saveToBrowserStorage("personaChat_debugLogs_v16", debugLogs),
       500,
+    );
+
+    this.debouncedSetSearchQuery = debounce(
+        (query) => this.setState({ searchQuery: query }),
+        300,
     );
   }
 
@@ -614,12 +621,27 @@ class PersonaChatApp {
       handleMainChatClick(e, this);
       handleModalClick(e, this);
       handleGroupChatClick(e, this);
+
+      if (e.target.closest('#fab-menu-toggle')) {
+        this.setState({ showFabMenu: !this.state.showFabMenu });
+      }
+
+      if (e.target.closest('#toggle-mobile-search-btn')) {
+        this.setState({ showMobileSearch: !this.state.showMobileSearch });
+      }
+
+      if (e.target.closest('#close-search-modal-btn') || e.target.id === 'search-modal-backdrop') {
+        this.setState({ showMobileSearch: false });
+      }
     });
 
     appElement.addEventListener("input", (e) => {
       handleSidebarInput(e, this);
       handleMainChatInput(e, this);
       handleModalInput(e, this);
+      if (e.target.id === 'new-message-input') {
+        adjustMessageContainerPadding();
+      }
     });
 
     appElement.addEventListener("change", (e) => {
@@ -634,6 +656,11 @@ class PersonaChatApp {
     document.addEventListener("click", (e) => {
       if (!e.target.closest(".input-area-container")) {
         this.setState({ showInputOptions: false });
+      }
+
+      // Close FAB menu if clicked outside
+      if (this.state.showFabMenu && !e.target.closest('#fab-menu-toggle') && !e.target.closest('.fab-menu')) {
+        this.setState({ showFabMenu: false });
       }
     });
   }

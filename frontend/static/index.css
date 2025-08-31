@@ -36,9 +36,47 @@ html {
   animation: fadeIn 0.3s ease-in-out;
 }
 
-/* 유리 효과 */
-.glass-effect {
-  /* backdrop-filter is now handled by the pseudo-element */
+@keyframes fab-menu-in {
+  from {
+    transform: scale(0.95) translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-fab-menu-in {
+  animation: fab-menu-in 0.2s ease-out forwards;
+}
+
+@keyframes slide-down {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-down {
+  animation: slide-down 0.3s ease-out forwards;
+}
+
+@keyframes slide-down-fast {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-down-fast {
+    animation: slide-down-fast 0.3s ease-out forwards;
 }
 
 /* 스크롤바 숨기기 */
@@ -50,35 +88,6 @@ textarea,
 textarea::-webkit-scrollbar,
 .overflow-y-auto::-webkit-scrollbar {
   display: none;
-}
-
-/* 스냅샷 목록용 커스텀 스크롤바 */
-.scrollbar-thin {
-  scrollbar-width: thin;
-  scrollbar-color: #6b7280 transparent; /* 핸들 색상, 트랙 투명 */
-}
-
-.scrollbar-thin::-webkit-scrollbar {
-  display: block !important;
-  width: 6px;
-}
-
-.scrollbar-track-gray-700::-webkit-scrollbar-track {
-  background: transparent; /* 배경 제거 */
-  border-radius: 3px;
-}
-
-.scrollbar-thumb-gray-500::-webkit-scrollbar-thumb {
-  background: #6b7280; /* gray-500 */
-  border-radius: 3px;
-}
-
-.scrollbar-thumb-gray-500::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af; /* gray-400 */
-}
-
-.scrollbar-thumb-rounded-full::-webkit-scrollbar-thumb {
-  border-radius: 9999px;
 }
 
 /* 로딩 스피너 */
@@ -98,315 +107,6 @@ textarea::-webkit-scrollbar,
   word-break: break-word;
 }
 
-/* 커스텀 슬라이더 스타일 */
-input[type="range"] {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  height: 6px;
-  background: #4a5568;
-  /* gray-700 */
-  border-radius: 5px;
-  outline: none;
-  opacity: 0.7;
-  transition: opacity 0.2s;
-}
-
-input[type="range"]:hover {
-  opacity: 1;
-}
-
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  background: #4299e1;
-  /* blue-400 */
-  border-radius: 50%;
-  cursor: pointer;
-}
-
-input[type="range"]::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  background: #4299e1;
-  /* blue-400 */
-  border-radius: 50%;
-  cursor: pointer;
-}
-
-/* 접기/펴기 애니메이션 (JS 기반으로 변경) */
-details > summary {
-  list-style: none;
-  /* 기본 마커 제거 */
-}
-
-details > summary::-webkit-details-marker {
-  display: none;
-  /* Safari 기본 마커 제거 */
-}
-
-details .content-wrapper {
-  overflow: hidden;
-}
-
-/* Main chat layout adjustment */
-#main-chat {
-  position: relative;
-}
-
-/* 메시지 입력창 스타일 */
-#input-area-wrapper {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
-  padding-bottom: 1rem; /* Add some padding at the bottom */
-}
-
-/* Gradient blur effect */
-#input-area-wrapper::before {
-  content: "";
-  position: absolute;
-  top: -200px; /* Extend blur upwards */
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: -1; /* Behind the input elements */
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  mask-image: linear-gradient(to top, black 20%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to top, black 20%, transparent 100%);
-  pointer-events: none; /* Allow clicks to pass through */
-}
-
-/* Enable transitions only after initial render to prevent flickering */
-#input-area-wrapper.transitions-enabled::before {
-  transition: all 0.3s ease-in-out;
-}
-
-/* Less blur when scrolled to the bottom */
-#input-area-wrapper.scrolled-to-bottom::before {
-    top: -100px;
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    mask-image: linear-gradient(to top, black 5%, transparent 70%);
-    -webkit-mask-image: linear-gradient(to top, black 5%, transparent 70%);
-}
-
-#new-message-input {
-  transition: all 0.2s ease-in-out;
-}
-
-#new-message-input:focus {
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); /* focus:ring-blue-500/50 */
-}
-
-/* 스티커 패널 스타일 */
-.user-sticker-send-btn video {
-  pointer-events: none;
-}
-
-/* 다크 모드 스크롤바 (전체) */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #1f2937; /* bg-gray-800 */
-}
-
-::-webkit-scrollbar-thumb {
-  background: #4b5563; /* bg-gray-600 */
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #6b7280; /* bg-gray-500 */
-}
-
-/* 사이드바 스크롤바 */
-#sidebar-scroll-container::-webkit-scrollbar {
-  width: 6px;
-}
-
-#sidebar-scroll-container::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-#sidebar-scroll-container::-webkit-scrollbar-thumb {
-  background: #4b5563; /* bg-gray-600 */
-  border-radius: 3px;
-}
-
-#sidebar-scroll-container:hover::-webkit-scrollbar-thumb {
-  background: #6b7280; /* bg-gray-500 */
-}
-
-/* 메시지 컨테이너 스크롤바 */
-#messages-container::-webkit-scrollbar {
-  width: 8px;
-}
-
-#messages-container::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-#messages-container::-webkit-scrollbar-thumb {
-  background: rgba(75, 85, 99, 0.5); /* bg-gray-600/50 */
-  border-radius: 4px;
-}
-
-#messages-container:hover::-webkit-scrollbar-thumb {
-  background: rgba(107, 114, 128, 0.7); /* bg-gray-500/70 */
-}
-
-/* 모달 스크롤바 */
-.modal-body::-webkit-scrollbar {
-  width: 6px;
-}
-
-.modal-body::-webkit-scrollbar-track {
-  background: #1f2937; /* bg-gray-800 */
-}
-
-.modal-body::-webkit-scrollbar-thumb {
-  background: #4b5563; /* bg-gray-600 */
-  border-radius: 3px;
-}
-
-.modal-body::-webkit-scrollbar-thumb:hover {
-  background: #6b7280; /* bg-gray-500 */
-}
-
-/* 툴팁 스타일 */
-[data-tooltip] {
-  position: relative;
-}
-
-[data-tooltip]:before {
-  content: attr(data-tooltip);
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%) translateY(-8px);
-  background-color: #1f2937; /* bg-gray-800 */
-  color: #fff;
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 12px;
-  white-space: nowrap;
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    opacity 0.2s,
-    visibility 0.2s;
-  z-index: 1000;
-}
-
-[data-tooltip]:after {
-  content: "";
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%) translateY(0px);
-  border: 6px solid transparent;
-  border-top-color: #1f2937; /* bg-gray-800 */
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    opacity 0.2s,
-    visibility 0.2s;
-  z-index: 1000;
-}
-
-[data-tooltip]:hover:before,
-[data-tooltip]:hover:after {
-  opacity: 1;
-  visibility: visible;
-}
-
-/* 체크박스 스타일 */
-.custom-checkbox {
-  appearance: none;
-  background-color: #374151; /* bg-gray-700 */
-  border: 1px solid #4b5563; /* border-gray-600 */
-  border-radius: 0.25rem;
-  width: 1.25rem;
-  height: 1.25rem;
-  display: inline-block;
-  position: relative;
-  cursor: pointer;
-  transition:
-    background-color 0.2s,
-    border-color 0.2s;
-}
-
-.custom-checkbox:checked {
-  background-color: #2563eb; /* bg-blue-600 */
-  border-color: #2563eb; /* border-blue-600 */
-}
-
-.custom-checkbox:checked:after {
-  content: "";
-  position: absolute;
-  left: 0.375rem;
-  top: 0.125rem;
-  width: 0.375rem;
-  height: 0.75rem;
-  border: solid white;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-}
-
-/* 토글 스위치 스타일 */
-.toggle-switch {
-  position: relative;
-  display: inline-block;
-  width: 40px;
-  height: 24px;
-}
-
-.toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.toggle-slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #4b5563; /* bg-gray-600 */
-  transition: 0.4s;
-  border-radius: 24px;
-}
-
-.toggle-slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: 0.4s;
-  border-radius: 50%;
-}
-
-input:checked + .toggle-slider {
-  background-color: #2563eb; /* bg-blue-600 */
-}
-
-input:checked + .toggle-slider:before {
-  transform: translateX(16px);
-}
 
 /* 모달 배경 */
 .modal-backdrop {
@@ -445,21 +145,6 @@ input:checked + .toggle-slider:before {
   flex-direction: column;
 }
 
-/* 모바일 설정 모달 */
-@media (max-width: 768px) {
-  .modal.mobile-settings-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
-    max-width: 100%;
-    max-height: 100%;
-    border-radius: 0;
-  }
-}
 
 /* 메시지 그룹 스타일 */
 .message-content-wrapper {
@@ -467,112 +152,124 @@ input:checked + .toggle-slider:before {
   flex-direction: column;
 }
 
-/* 비디오 스티커 컨트롤 숨기기 */
-.sticker-toggle-btn video::-webkit-media-controls {
-  display: none !important;
-}
-
-.sticker-toggle-btn video::-webkit-media-controls-enclosure {
-  display: none !important;
-}
-
-.sticker-toggle-btn video::-webkit-media-controls-panel {
-  display: none !important;
-}
-
-.sticker-toggle-btn video::-webkit-media-controls-play-button {
-  display: none !important;
-}
-
-.sticker-toggle-btn video::-webkit-media-controls-timeline {
-  display: none !important;
-}
-
-.sticker-toggle-btn video::-webkit-media-controls-current-time-display {
-  display: none !important;
-}
-
-.sticker-toggle-btn video::-webkit-media-controls-time-remaining-display {
-  display: none !important;
-}
-
-.sticker-toggle-btn video::-webkit-media-controls-mute-button {
-  display: none !important;
-}
-
-.sticker-toggle-btn video::-webkit-media-controls-volume-slider {
-  display: none !important;
-}
-
-.sticker-toggle-btn video::-webkit-media-controls-fullscreen-button {
-  display: none !important;
-}
-
-/* 오디오 컨트롤 스타일 */
-audio {
-  filter: invert(1) sepia(1) saturate(0) hue-rotate(0deg);
-}
-
-audio::-webkit-media-controls-panel {
-  background-color: #4a5568;
-}
-
-audio::-webkit-media-controls-play-button {
-  color: white;
-}
-
-audio::-webkit-media-controls-current-time-display,
-audio::-webkit-media-controls-time-remaining-display {
-  color: white;
-}
-
-audio::-webkit-media-controls-timeline {
-  background-color: #2d3748;
-  border-radius: 25px;
-}
-
-audio::-webkit-media-controls-volume-slider {
-  background-color: #2d3748;
-  border-radius: 25px;
-}
-
-audio::-webkit-media-controls-mute-button {
-  color: white;
-}
-
 /* Floating Input Area Styles */
-#messages-container {
-  padding-bottom: 50px !important;
-}
-
 #input-area-wrapper #new-message-input {
-  background-color: rgba(25, 32, 45, 0.7) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background-color: rgba(25, 32, 45, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 #input-area-wrapper #open-input-options-btn,
 #input-area-wrapper #sticker-btn {
-  background-color: rgba(25, 32, 45, 0.7) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background-color: rgba(25, 32, 45, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 #input-area-wrapper #send-message-btn {
-  background-color: rgba(
-    59,
-    130,
-    246,
-    0.7
-  ) !important; /* semi-transparent blue */
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background-color: rgba(59, 130, 246, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* Floating Panel Styles */
 .floating-panel {
-  background-color: rgba(25, 32, 45, 0.7) !important;
+  background-color: rgba(25, 32, 45, 0.7);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 0 25px 5px rgba(100, 120, 200, 0.1);
+}
+
+#main-chat {
+    position: relative;
+}
+
+#input-area-wrapper {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  padding-bottom: 1rem; 
+}
+
+#input-area-wrapper::before {
+  content: "";
+  position: absolute;
+  top: -200px; 
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1; 
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  mask-image: linear-gradient(to top, black 20%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to top, black 20%, transparent 100%);
+  pointer-events: none; 
+}
+
+#input-area-wrapper.transitions-enabled::before {
+  transition: all 0.3s ease-in-out;
+}
+
+#input-area-wrapper.scrolled-to-bottom::before {
+    top: -100px;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    mask-image: linear-gradient(to top, black 5%, transparent 70%);
+    -webkit-mask-image: linear-gradient(to top, black 5%, transparent 70%);
+}
+
+#new-message-input {
+  transition: all 0.2s ease-in-out;
+}
+
+#new-message-input:focus {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); 
+}
+
+
+/* --- Mobile First Layout --- */
+
+
+#app {
+  display: flex;
+  flex-direction: row;
+}
+
+#sidebar {
+  display: none; /* Hidden by default on mobile */
+}
+
+#character-list-page-container,
+#main-chat {
+  width: 100%;
+  height: 100vh;
+  display: flex; /* Use flex for children */
+  flex-direction: column;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* --- Desktop Layout --- */
+@media (min-width: 768px) {
+  #app {
+    flex-direction: row;
+  }
+
+  #sidebar {
+    display: flex; /* Show sidebar on desktop */
+    width: 320px; /* Or your preferred width */
+    flex-shrink: 0;
+  }
+
+  #character-list-page-container {
+    display: none; /* Hide character list page on desktop */
+  }
+
+  #main-chat {
+    flex: 1;
+    display: flex; /* Ensure it's a flex container */
+  }
 }
 
 /* Tree-like structure for chat room list */
@@ -584,8 +281,6 @@ audio::-webkit-media-controls-mute-button {
   position: relative;
 }
 
-/* This pseudo-element draws the vertical line connecting from the avatar
-   down to the first item's corner. Its geometry is set by JS. */
 .character-group.is-expanded::before {
   content: "";
   position: absolute;
@@ -597,32 +292,27 @@ audio::-webkit-media-controls-mute-button {
   transition: height 0.2s ease-out;
 }
 
-/* This wrapper provides the relative context for the corner and vertical lines */
 .chat-room-list-item-wrapper {
   position: relative;
-  /* Adjust padding to make space for the corner graphic */
-  padding-left: calc(var(--tree-trunk-left) + 15px); /* left var + corner width + gap */
+  padding-left: calc(var(--tree-trunk-left) + 15px);
 }
 
-/* The rounded '└' corner for each item, created with borders */
 .chat-room-list-item-wrapper::before {
   content: "";
   position: absolute;
   top: 0;
   left: var(--tree-trunk-left);
-  width: 12px;  /* Horizontal part of the corner */
-  height: 50%;  /* Vertical part of the corner, reaches the item's vertical center */
+  width: 12px;
+  height: 50%;
   border: 2px solid #4a5568;
-  /* This trick creates the shape by only coloring the bottom and left borders */
   border-color: transparent transparent #4a5568 #4a5568;
-  border-bottom-left-radius: 8px; /* This creates the curve */
+  border-bottom-left-radius: 8px;
 }
 
-/* The continuing vertical line for all items EXCEPT the last one */
 .chat-room-list-item-wrapper:not(:last-child)::after {
   content: "";
   position: absolute;
-  top: 50%; /* Start from the item's vertical center */
+  top: 50%;
   bottom: 0;
   left: var(--tree-trunk-left);
   width: 2px;

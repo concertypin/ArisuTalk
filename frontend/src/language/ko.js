@@ -673,4 +673,8 @@ export const ko = {
       "복호화에 사용할 마스터 비밀번호가 없습니다.",
     loadApiConfigsFailed: "암호화된 API 설정을 불러오는데 실패했습니다:",
   },
+  search: {
+    prompt: "이름으로 캐릭터를 검색해보세요.",
+    noResults: "검색된 캐릭터가 없습니다."
+  }
 };

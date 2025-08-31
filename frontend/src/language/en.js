@@ -681,4 +681,8 @@ export const en = {
       "No master password available for decryption",
     loadApiConfigsFailed: "Failed to load encrypted API configs:",
   },
+  search: {
+    prompt: "Search for characters by name.",
+    noResults: "No characters found."
+  }
 };
