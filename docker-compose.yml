@@ -9,17 +9,3 @@ services:
     restart: unless-stopped
     ports:
       - "5173:5173"
-    volumes:
-      # Mount the local frontend directory into the container
-      # This allows for hot-reloading when you change files
-      - ./frontend:/app/frontend
-      # Use a volume for node_modules to prevent it from being overwritten
-      # by the local empty node_modules directory.
-      - /app/frontend/node_modules
-    environment:
-      # Prevent to open browser when starting.
-      - IS_DOCKER=true
-      # This helps ensure file changes are detected correctly for hot-reloading in Docker.
-      - WATCHPACK_POLLING=true
-      # Add other hosts you wish to access from. Separate them with commas (,).
-      - ALLOWED_HOSTS=localhost,dev.arisutalk.moe
