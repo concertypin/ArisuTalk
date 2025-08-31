@@ -1,4 +1,5 @@
 # ArisuTalk
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/concertypin/ArisuTalk)
 
 This project is an AI chat frontend application forked from `github.com/dkfk5326/ArisuTalk`. ArisuTalk provides a modern, responsive AI chat interface with comprehensive internationalization support and modular architecture.
 
