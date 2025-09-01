@@ -307,6 +307,7 @@ class PersonaChatApp {
         characterStates,
         settingsSnapshots,
         debugLogs,
+        selectedChatId,
       ] = await Promise.all([
         loadFromBrowserStorage("personaChat_settings_v16", {}),
         loadFromBrowserStorage("personaChat_characters_v16", defaultCharacters),
@@ -319,6 +320,7 @@ class PersonaChatApp {
         loadFromBrowserStorage("personaChat_characterStates_v16", {}),
         loadFromBrowserStorage("personaChat_settingsSnapshots_v16", []),
         loadFromBrowserStorage("personaChat_debugLogs_v16", []),
+        loadFromBrowserStorage("personaChat_selectedChatId_v16", null),
       ]);
 
       this.state.settings = {
@@ -338,6 +340,7 @@ class PersonaChatApp {
       this.state.openChats = openChats;
       this.state.characterStates = characterStates;
       this.state.settingsSnapshots = settingsSnapshots;
+      this.state.selectedChatId = selectedChatId;
 
       // Load prompts
       this.state.settings.prompts = await getAllPrompts();
@@ -398,10 +401,31 @@ class PersonaChatApp {
   }
 
   async setState(newState) {
+    const messagesContainerOld = document.getElementById('messages-container');
+    let scrollInfo = null;
+    const oldMessages = this.state.messages[this.state.selectedChatId];
+    const oldMessageCount = oldMessages ? oldMessages.length : 0;
+
+    if (messagesContainerOld) {
+      scrollInfo = {
+        scrollTop: messagesContainerOld.scrollTop
+      };
+    }
+
     this.oldState = { ...this.state };
     this.state = { ...this.state, ...newState };
 
     await render(this);
+
+    const newMessages = this.state.messages[this.state.selectedChatId];
+    const newMessageCount = newMessages ? newMessages.length : 0;
+
+    if (scrollInfo && oldMessageCount === newMessageCount) {
+        const messagesContainerNew = document.getElementById('messages-container');
+        if (messagesContainerNew) {
+            messagesContainerNew.scrollTop = scrollInfo.scrollTop;
+        }
+    }
 
     if (
       JSON.stringify(this.oldState.settings) !==
@@ -466,6 +490,9 @@ class PersonaChatApp {
       JSON.stringify(this.state.debugLogs)
     ) {
       this.debouncedSaveDebugLogs(this.state.debugLogs);
+    }
+    if (this.oldState.selectedChatId !== this.state.selectedChatId) {
+      saveToBrowserStorage("personaChat_selectedChatId_v16", this.state.selectedChatId);
     }
   }
 
@@ -713,8 +740,18 @@ class PersonaChatApp {
 
         newChatRooms[characterId] = [defaultChatRoom];
         newMessages[defaultChatRoomId] = oldMessagesForChar;
-      } else {
-        newChatRooms[characterId] = [];
+      } else if (!newChatRooms[characterId] || newChatRooms[characterId].length === 0) {
+        // Create a default chat room if none exist for the character
+        const defaultChatRoomId = `${characterId}_default_${Date.now()}`;
+        const defaultChatRoom = {
+          id: defaultChatRoomId,
+          characterId: characterId,
+          name: t("ui.defaultChatName"),
+          createdAt: Date.now(),
+          lastActivity: Date.now(),
+        };
+        newChatRooms[characterId] = [defaultChatRoom];
+        newMessages[defaultChatRoomId] = [];
       }
     });
 
@@ -799,7 +836,7 @@ class PersonaChatApp {
       sidebarCollapsed:
         window.innerWidth < 768 ? true : this.state.sidebarCollapsed,
     });
-    this.scrollToBottom();
+    setTimeout(() => this.scrollToBottom(), 0);
   }
 
   editCharacter(characterId) {

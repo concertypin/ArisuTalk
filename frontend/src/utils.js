@@ -63,3 +63,26 @@ export function formatDateSeparator(dateString) {
   };
   return date.toLocaleDateString(getLanguage(), options);
 }
+
+export function formatTimestamp(timestamp) {
+  if (!timestamp) return "";
+
+  const now = new Date();
+  const date = new Date(timestamp);
+
+  const nowDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+  const diffTime = nowDay.getTime() - dateDay.getTime();
+  const diffDays = diffTime / (1000 * 3600 * 24);
+
+  const lang = getLanguage();
+
+  if (diffDays < 1) { // Today
+    return date.toLocaleTimeString(lang, { hour: 'numeric', minute: '2-digit' });
+  } else if (diffDays < 7) { // Within a week
+    return date.toLocaleDateString(lang, { weekday: 'long' });
+  } else { // More than a week ago
+    return date.toLocaleDateString(lang, { month: 'numeric', day: 'numeric' });
+  }
+}

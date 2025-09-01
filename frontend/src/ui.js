@@ -168,6 +168,7 @@ export async function render(app) {
 
 function shouldUpdateCharacterList(oldState, newState) {
   return (
+    oldState.selectedChatId !== newState.selectedChatId ||
     oldState.showFabMenu !== newState.showFabMenu ||
     oldState.showMobileSearch !== newState.showMobileSearch ||
     oldState.searchQuery !== newState.searchQuery ||
@@ -311,6 +312,7 @@ function setupConditionalBlur() {
   messagesContainer.addEventListener("scroll", handleScroll);
   messagesContainer._scrollHandler = handleScroll; // Store reference to the handler
 
-  // Initial check
-  handleScroll();
+  // Initial check, deferred for accurate layout calculation
+  setTimeout(handleScroll, 0);
 }
+

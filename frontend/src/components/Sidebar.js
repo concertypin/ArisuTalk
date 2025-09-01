@@ -1,4 +1,5 @@
 import { t } from "../i18n.js";
+import { formatTimestamp } from "../utils.js";
 
 import { renderAvatar } from "./Avatar.js";
 import {
@@ -95,7 +96,7 @@ function renderCharacterItem(app, char) {
                         <i data-lucide="trash-2" class="w-3 h-3"></i>
                     </button>
                 </div>
-                <div class="flex items-center space-x-3 md:space-x-4">
+                <div class="flex items-center space-x-4 md:space-x-5">
                     <div class="character-avatar relative">
                          ${renderAvatar(char, "md")}
                     </div>
@@ -110,8 +111,8 @@ function renderCharacterItem(app, char) {
                                     ? `<span class="bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full leading-none">${totalUnreadCount}</span>`
                                     : ""
                                 }
-                                <span class="text-xs text-gray-500 shrink-0">${
-                                  lastMessage?.time || ""
+                                <span class="text-sm text-gray-500 shrink-0">${
+                                  formatTimestamp(lastMessage?.id)
                                 }</span>
                                 <i data-lucide="chevron-${
                                   isExpanded ? "down" : "right"
