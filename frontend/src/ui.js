@@ -1,3 +1,4 @@
+
 import { renderSidebar } from "./components/Sidebar.js";
 import {
   renderMainChat,
@@ -5,11 +6,11 @@ import {
 } from "./components/MainChat.js";
 import { renderSettingsUI } from "./components/SettingsRouter.js";
 import {
-  renderSnapshotList,
-  setupSettingsModalEventListeners,
-} from "./components/MobileSettingsModal.js";
+  renderMobileSettingsUI,
+  setupMobileSettingsUIEventListeners,
+} from "./components/MobileSettingsUI.js";
 import { setupDesktopSettingsEventListeners } from "./components/DesktopSettingsUI.js";
-import { getCurrentSettingsUIMode } from "./components/SettingsRouter.js";
+
 import { renderCharacterModal } from "./components/CharacterModal.js";
 import { renderPromptModal, setupPromptModalEventListeners } from "./components/PromptModal.js";
 import { renderConfirmationModal } from "./components/ConfirmationModal.js";
@@ -38,7 +39,6 @@ export function adjustMessageContainerPadding() {
 async function renderModals(app) {
   const container = document.getElementById("modal-container");
   let html = "";
-  if (app.state.showSettingsModal) html += renderSettingsUI(app);
   if (app.state.showCharacterModal) html += renderCharacterModal(app);
   if (app.state.showPromptModal) html += await renderPromptModal(app);
   if (app.state.showCreateGroupChatModal)
@@ -53,17 +53,6 @@ async function renderModals(app) {
   // Setup event listeners for modals after DOM update
   if (app.state.showDebugLogsModal) {
     setupDebugLogsModalEventListeners();
-  }
-  if (app.state.showSettingsModal) {
-    const uiMode = getCurrentSettingsUIMode(app);
-    if (uiMode === "desktop") {
-      // DOM이 완전히 업데이트된 후 이벤트 리스너 설정
-      requestAnimationFrame(() => {
-        setupDesktopSettingsEventListeners(app);
-      });
-    } else {
-      setupSettingsModalEventListeners();
-    }
   }
   if (app.state.showPromptModal) {
     setupPromptModalEventListeners(app);
@@ -88,6 +77,7 @@ export async function render(app) {
 
   const mainContainer = document.getElementById("main-chat");
   const listContainer = document.getElementById("character-list-page-container");
+  const settingsContainer = document.getElementById("settings-page-container");
   const sidebarContainer = document.getElementById("sidebar");
 
   // Main Content Rendering
@@ -95,43 +85,43 @@ export async function render(app) {
     const transitionContainer = document.getElementById('page-transition-container');
     
     // --- Visibility & Animation Control ---
-    // On mobile, sidebar is always hidden.
     sidebarContainer.classList.add('hidden');
-    // Containers for list and chat should be visible to allow CSS transform animations.
-    // The 'hidden' class (display: none) is removed to prevent it from breaking transitions.
     listContainer.classList.remove('hidden');
     mainContainer.classList.remove('hidden');
+    settingsContainer.classList.remove('hidden');
 
     // --- View Switching Logic ---
-    if (newState.selectedChatId) {
-      // If switching to a new chat, clear the container immediately to prevent showing stale content during animation.
-      // A loading spinner is shown as a placeholder.
+    if (newState.showSettingsUI) {
+      transitionContainer.classList.add('show-settings');
+      transitionContainer.classList.remove('show-chat');
+      if (isFirstRender || oldState.showSettingsUI !== newState.showSettingsUI) {
+        const settingsContainer = document.getElementById('settings-page-container');
+        if (settingsContainer) {
+            settingsContainer.innerHTML = renderMobileSettingsUI(app);
+        }
+        setupMobileSettingsUIEventListeners(app);
+      }
+      setTimeout(() => {
+        if (!window.personaApp.state.selectedChatId) {
+          mainContainer.innerHTML = '';
+        }
+      }, 600);
+    } else if (newState.selectedChatId) {
       if (oldState.selectedChatId !== newState.selectedChatId) {
         mainContainer.innerHTML = '<div class="flex-1 flex items-center justify-center"><div class="w-6 h-6 border-4 border-gray-700 border-t-blue-500 rounded-full animate-spin"></div></div>';
       }
 
-      // Show Chat View
       transitionContainer.classList.add('show-chat');
+      transitionContainer.classList.remove('show-settings');
 
-      // Wait for the animation to complete before rendering the content.
-      // This prevents the DOM update from interrupting the CSS transition, which causes flickering.
-      // The 600ms timeout matches the transition duration in index.css.
       setTimeout(() => {
-        // After the delay, only render if we are still in the same chat view.
-        // This prevents rendering if the user quickly navigates back.
         if (window.personaApp.state.selectedChatId === newState.selectedChatId) {
             if (isFirstRender || shouldUpdateMainChat(oldState, newState)) {
                 renderMainChat(app);
                 setupMainChatEventListeners();
-                // This function forces a reflow, so it must be called after the animation is complete.
                 adjustMessageContainerPadding();
-                // Call createIcons again after the chat content is actually rendered.
                 lucide.createIcons();
-
-                // Setup scroll-based UI effects after content is rendered
                 setupConditionalBlur();
-
-                // Scroll to the bottom to show the latest messages
                 const messagesContainer = document.getElementById('messages-container');
                 if (messagesContainer) {
                     messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -140,10 +130,8 @@ export async function render(app) {
         }
       }, 600);
     } else {
-      // Show Character List View
-      transitionContainer.classList.remove('show-chat');
+      transitionContainer.classList.remove('show-chat', 'show-settings');
 
-      // Render the character list content immediately
       if (isFirstRender || shouldUpdateCharacterList(oldState, newState)) {
         const isListAlreadyRendered = !!listContainer.querySelector('header');
         if (!isListAlreadyRendered || oldState.showFabMenu !== newState.showFabMenu) {
@@ -156,13 +144,14 @@ export async function render(app) {
         }
       }
 
-      // After the slide-out animation finishes, destroy the chat content to save memory.
       setTimeout(() => {
-        // Only clear the content if we are still on the character list view.
         if (!window.personaApp.state.selectedChatId) {
           mainContainer.innerHTML = '';
         }
-      }, 600); // This must match the animation duration in index.css
+        if (!window.personaApp.state.showSettingsUI) {
+            settingsContainer.innerHTML = '';
+        }
+      }, 600); 
     }
   } else {
     // --- Desktop Layout ---

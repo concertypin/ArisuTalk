@@ -1,6 +1,5 @@
 import { debounce } from "../utils.js";
 import { t, setLanguage } from "../i18n.js";
-import { getCurrentSettingsUIMode } from "../components/SettingsRouter.js";
 import { setupDesktopSettingsEventListeners } from "../components/DesktopSettingsUI.js";
 
 export function handleModalClick(e, app) {
@@ -19,8 +18,8 @@ export function handleModalClick(e, app) {
 
   // Settings Modal
   if (e.target.closest("#open-settings-modal") || e.target.closest("#open-settings-modal-mobile")) app.openSettingsModal();
-  if (e.target.closest("#close-settings-modal")) app.handleCancelSettings();
-  if (e.target.closest("#save-settings")) app.handleSaveSettings();
+  if (e.target.closest("#close-settings-modal") || e.target.closest("#close-settings-ui")) app.handleCancelSettings();
+  if (e.target.closest("#save-settings") || e.target.closest("#save-settings-ui")) app.handleSaveSettings();
 
   // Character Modal
   if (e.target.closest('#open-new-character-modal-mobile')) app.openNewCharacterModal();
@@ -270,12 +269,7 @@ export function handleModalChange(e, app) {
     const optionsDiv = document.getElementById("random-chat-options");
     if (optionsDiv) {
       // 모바일 UI에서는 style.display 사용
-      if (getCurrentSettingsUIMode(window.personaApp) === "mobile") {
-        optionsDiv.style.display = e.target.checked ? "block" : "none";
-      } else {
-        // 데스크톱 UI에서는 클래스 토글 사용
-        optionsDiv.classList.toggle("hidden", !e.target.checked);
-      }
+      optionsDiv.style.display = e.target.checked ? "block" : "none";
     }
   }
 
@@ -283,12 +277,7 @@ export function handleModalChange(e, app) {
     const snapshotsList = document.getElementById("snapshots-list");
     if (snapshotsList) {
       // 모바일 UI에서는 style.display 사용
-      if (getCurrentSettingsUIMode(window.personaApp) === "mobile") {
-        snapshotsList.style.display = e.target.checked ? "block" : "none";
-      } else {
-        // 데스크톱 UI에서는 클래스 토글 사용
-        snapshotsList.classList.toggle("hidden", !e.target.checked);
-      }
+      snapshotsList.style.display = e.target.checked ? "block" : "none";
     }
   }
 
