@@ -1,7 +1,7 @@
 import { t } from '../i18n.js';
 import { renderCharacterItem } from './CharacterListPage.js';
 
-export function renderSearchModal(app) {
+function renderSearchResults(app) {
   const searchQuery = app.state.searchQuery.toLowerCase().trim();
   const filteredCharacters = searchQuery
     ? app.state.characters.filter((char) =>
@@ -9,25 +9,28 @@ export function renderSearchModal(app) {
       )
     : [];
 
-  let resultsHtml = ``;
+  let resultsHtml = '';
   if (searchQuery) {
     if (filteredCharacters.length > 0) {
-      resultsHtml = filteredCharacters.map((char) => renderCharacterItem(app, char)).join("");
+      resultsHtml = filteredCharacters.map((char) => renderCharacterItem(app, char)).join('');
     } else {
       resultsHtml = `
-        <div class="text-center text-gray-400 py-12">
+        <div class="text-center text-gray-400 py-12 animate-fadeIn">
             <i data-lucide="search-x" class="w-12 h-12 mx-auto mb-4"></i>
             <p>${t("search.noResults")}</p>
         </div>`;
     }
   } else {
     resultsHtml = `
-        <div class="text-center text-gray-400 py-12">
+        <div class="text-center text-gray-400 py-12 animate-fadeIn">
             <i data-lucide="search" class="w-12 h-12 mx-auto mb-4"></i>
             <p>${t("search.prompt")}</p>
         </div>`;
   }
+    return `<div class="character-list space-y-2 p-2">${resultsHtml}</div>`;
+}
 
+export function renderSearchModal(app) {
   return `
     <div id="search-modal-backdrop" class="modal-backdrop animate-fadeIn"></div>
     <div class="search-modal-container p-4 pt-16 md:pt-24 fixed inset-0 z-50 overflow-y-auto animate-fadeIn">
@@ -41,11 +44,57 @@ export function renderSearchModal(app) {
                 </button>
             </header>
             <div class="search-results-container flex-1 overflow-y-auto p-2">
-                <div class="character-list space-y-2 p-2">
-                    ${resultsHtml}
-                </div>
+                ${renderSearchResults(app)}
             </div>
         </div>
     </div>
   `;
+}
+
+export function updateSearchResults(app) {
+    const modalContent = document.querySelector('.search-modal-content');
+    const container = document.querySelector('.search-results-container');
+
+    if (app.isSearchModalAnimating) {
+        app.pendingSearchUpdate = true;
+        return;
+    }
+
+    if (container && modalContent) {
+        requestAnimationFrame(() => {
+            const oldHeight = modalContent.offsetHeight;
+
+            container.innerHTML = renderSearchResults(app);
+            lucide.createIcons();
+
+            const scrollHeight = modalContent.scrollHeight;
+            const vh85 = window.innerHeight * 0.85;
+            const newHeight = Math.min(scrollHeight, vh85);
+
+            if (Math.abs(oldHeight - newHeight) < 5) {
+                if (modalContent.style.height) modalContent.style.height = '';
+                return;
+            }
+
+            app.isSearchModalAnimating = true;
+
+            modalContent.style.transition = 'none';
+            modalContent.style.height = `${oldHeight}px`;
+            modalContent.offsetHeight; // Force reflow
+
+            modalContent.style.transition = `height 0.4s cubic-bezier(0.4, 0, 0.2, 1)`;
+            modalContent.style.height = `${newHeight}px`;
+
+            setTimeout(() => {
+                app.isSearchModalAnimating = false;
+                modalContent.style.transition = '';
+                modalContent.style.height = ''; // Reset height to allow natural flow
+                
+                if (app.pendingSearchUpdate) {
+                    app.pendingSearchUpdate = false;
+                    Promise.resolve().then(() => updateSearchResults(app));
+                }
+            }, 450);
+        });
+    }
 }

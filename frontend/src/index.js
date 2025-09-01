@@ -121,6 +121,8 @@ class PersonaChatApp {
     this.proactiveInterval = null;
     this.animatedMessageIds = new Set();
     this.initialSettings = null;
+    this.isSearchModalAnimating = false;
+    this.pendingSearchUpdate = false;
 
     this.debouncedSaveSettings = debounce(
       (settings) => saveToBrowserStorage("personaChat_settings_v16", settings),
@@ -647,7 +649,7 @@ class PersonaChatApp {
       }
 
       if (e.target.closest('#close-search-modal-btn') || e.target.id === 'search-modal-backdrop') {
-        this.setState({ showMobileSearch: false });
+        this.setState({ showMobileSearch: false, searchQuery: '' });
       }
     });
 

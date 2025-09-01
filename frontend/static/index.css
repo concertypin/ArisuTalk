@@ -79,6 +79,10 @@ html {
     animation: slide-down-fast 0.3s ease-out forwards;
 }
 
+.height-transition {
+    transition: max-height 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
