@@ -230,23 +230,22 @@ function renderChatRoomItem(app, chatRoom) {
 }
 
 export function renderSidebar(app) {
-  const sidebar = document.getElementById("sidebar");
+  const appElement = document.getElementById("app");
+  if (appElement) {
+    if (app.state.sidebarCollapsed) {
+      appElement.classList.add("sidebar-collapsed");
+    } else {
+      appElement.classList.remove("sidebar-collapsed");
+    }
+  }
+
   const sidebarContent = document.getElementById("sidebar-content");
-  const backdrop = document.getElementById("sidebar-backdrop");
   const desktopToggle = document.getElementById("desktop-sidebar-toggle");
 
-  if (app.state.sidebarCollapsed) {
-    sidebar.classList.add("-translate-x-full", "md:w-0");
-    sidebar.classList.remove("translate-x-0", "md:w-80");
-    backdrop.classList.add("hidden");
-    if (desktopToggle)
-      desktopToggle.innerHTML = `<i data-lucide="chevron-right" class="w-5 h-5 text-gray-300"></i>`;
-  } else {
-    sidebar.classList.remove("-translate-x-full", "md:w-0");
-    sidebar.classList.add("translate-x-0", "md:w-80");
-    backdrop.classList.remove("hidden");
-    if (desktopToggle)
-      desktopToggle.innerHTML = `<i data-lucide="chevron-left" class="w-5 h-5 text-gray-300"></i>`;
+  if (desktopToggle) {
+    desktopToggle.innerHTML = app.state.sidebarCollapsed
+      ? `<i data-lucide="chevron-right" class="w-5 h-5 text-gray-300"></i>`
+      : `<i data-lucide="chevron-left" class="w-5 h-5 text-gray-300"></i>`;
   }
 
   const filteredCharacters = app.state.characters.filter((char) =>

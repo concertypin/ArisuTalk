@@ -326,3 +326,13 @@ textarea::-webkit-scrollbar,
   background-color: #4a5568;
 }
 
+@media (min-width: 768px) {
+  #sidebar {
+    transition: width 0.3s ease-in-out;
+  }
+
+  .sidebar-collapsed #sidebar {
+    width: 0;
+  }
+}
+
