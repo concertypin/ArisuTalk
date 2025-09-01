@@ -38,7 +38,7 @@ export function renderCharacterItem(app, char) {
   const primaryChatRoom = chatRooms[0];
 
   return `
-    <div class="character-list-item p-3 rounded-2xl cursor-pointer hover:bg-gray-800/60 transition-colors duration-200" 
+    <div class="character-list-item p-3 rounded-full cursor-pointer hover:bg-gray-800/60 transition-colors duration-200" 
          onclick="window.personaApp.selectChatRoom('${primaryChatRoom?.id}')">
         <div class="flex items-center space-x-5">
             <div class="character-avatar relative">
@@ -73,7 +73,7 @@ export function renderCharacterListPage(app) {
   if (!container) return;
 
   container.innerHTML = `
-    <header class="px-6 py-4 border-b border-gray-800 sticky top-0 bg-gray-900 z-10">
+    <header class="px-6 py-4  sticky top-0 bg-gray-950 z-10">
         <div class="flex items-center justify-between">
             <h1 class="text-3xl text-white">${t("sidebar.title")}</h1>
             <div class="flex items-center gap-2">
@@ -86,7 +86,7 @@ export function renderCharacterListPage(app) {
             </div>
         </div>
     </header>
-    <div class="flex-1 overflow-y-auto p-4">
+    <div class="flex-1 overflow-y-auto p-4 bg-gray-900 rounded-t-[3rem]" style="scroll-behavior: smooth;">
         <div id="character-list-items" class="character-list space-y-4">
             <!-- Character items will be rendered here by renderCharacterList -->
         </div>
