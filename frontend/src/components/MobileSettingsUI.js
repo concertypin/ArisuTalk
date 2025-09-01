@@ -14,8 +14,8 @@ import {
 export function renderMobileSettingsUI(app) {
   const { settings } = app.state;
   return `
-    <div class="flex flex-col h-full">
-      <header class="px-6 py-4 bg-gray-950 flex items-center justify-between z-10 shrink-0">
+    <div class="flex flex-col h-full relative">
+      <header class="absolute top-0 left-0 right-0 p-4 bg-gray-900/80 border-b border-gray-800 flex items-center justify-between z-10" style="backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
           <div class="flex items-center space-x-2">
               <button id="close-settings-ui" class="p-2 -ml-2 rounded-full hover:bg-gray-700">
                   <i data-lucide="arrow-left" class="h-6 w-6 text-gray-300"></i>
@@ -28,7 +28,7 @@ export function renderMobileSettingsUI(app) {
             "settings.done",
           )}</button>
       </header>
-      <div class="p-6 space-y-4 overflow-y-auto bg-gray-900 rounded-t-[3rem]" id="settings-ui-content">
+      <div class="flex-1 overflow-y-auto space-y-4 pt-[64px]" id="settings-ui-content">
           <details data-section="ai" class="group border-b border-gray-700 pb-3" ${app.state.openSettingsSections.includes("ai") ? "open" : ""}>
               <summary class="flex items-center justify-between cursor-pointer list-none py-3">
                   <span class="text-lg font-medium text-gray-200">${t(
@@ -42,7 +42,7 @@ export function renderMobileSettingsUI(app) {
                           <label class="flex items-center text-base font-medium text-gray-300 mb-2"><i data-lucide="globe" class="w-5 h-5 mr-3"></i>${t(
                             "settings.aiProvider",
                           )}</label>
-                          <select id="settings-api-provider" class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-base">
+                          <select id="settings-api-provider" class="w-full px-3 py-2 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-base">
                               <option value="gemini" ${ (settings.apiProvider || "gemini") === "gemini" ? "selected" : ""}>Google Gemini</option>
                               <option value="claude" ${ (settings.apiProvider || "gemini") === "claude" ? "selected" : ""}>Anthropic Claude</option>
                               <option value="openai" ${ (settings.apiProvider || "gemini") === "openai" ? "selected" : ""}>OpenAI ChatGPT</option>
@@ -55,7 +55,7 @@ export function renderMobileSettingsUI(app) {
                         app,
                       )}</div>
                       <div>
-                          <button id="open-prompt-modal" class="w-full mt-3 py-3 px-5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-base flex items-center justify-center gap-3">
+                          <button id="open-prompt-modal" class="w-full mt-3 py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-base flex items-center justify-center gap-3">
                               <i data-lucide="file-pen-line" class="w-5 h-5"></i> ${t(
                                 "settings.editPrompt",
                               )}
@@ -102,7 +102,7 @@ export function renderMobileSettingsUI(app) {
                           )}</label>
                           <input id="settings-user-name" type="text" placeholder="${t(
                             "settings.yourNamePlaceholder",
-                          )}" value="${settings.userName}" class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-base" />
+                          )}" value="${settings.userName}" class="w-full px-3 py-2 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-base" />
                       </div>
                       <div>
                           <label class="flex items-center text-base font-medium text-gray-300 mb-2"><i data-lucide="brain-circuit" class="w-5 h-5 mr-3"></i>${t(
@@ -110,7 +110,7 @@ export function renderMobileSettingsUI(app) {
                           )}</label>
                           <textarea id="settings-user-desc" placeholder="${t(
                             "settings.yourDescriptionPlaceholder",
-                          )}" class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-base" rows="3">${settings.userDescription}</textarea>
+                          )}" class="w-full px-3 py-2 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-base" rows="3">${settings.userDescription}</textarea>
                       </div>
                   </div>
               </div>
@@ -217,10 +217,10 @@ export function renderMobileSettingsUI(app) {
                       <div class="space-y-3">
                           <button 
                               id="language-korean" 
-                              class="language-select-btn w-full p-4 rounded-lg border transition-all duration-200 flex items-center gap-4 ${ getLanguage() === "ko" ? "bg-blue-600/20 border-blue-500 text-blue-400" : "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"}"
+                              class="language-select-btn w-full p-3 rounded-lg border transition-all duration-200 flex items-center gap-3 ${ getLanguage() === "ko" ? "bg-blue-600/20 border-blue-500 text-blue-400" : "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"}"
                               data-language="ko"
                           >
-                              <div class="text-2xl">🇰🇷</div>
+                              <div class="text-xl">🇰🇷</div>
                               <div class="text-left flex-1">
                                   <div class="font-medium text-base">${t(
                                     "settings.languageKorean",
@@ -231,10 +231,10 @@ export function renderMobileSettingsUI(app) {
                           </button>
                           <button 
                               id="language-english" 
-                              class="language-select-btn w-full p-4 rounded-lg border transition-all duration-200 flex items-center gap-4 ${ getLanguage() === "en" ? "bg-blue-600/20 border-blue-500 text-blue-400" : "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"}"
+                              class="language-select-btn w-full p-3 rounded-lg border transition-all duration-200 flex items-center gap-3 ${ getLanguage() === "en" ? "bg-blue-600/20 border-blue-500 text-blue-400" : "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"}"
                               data-language="en"
                           >
-                              <div class="text-2xl">🇺🇸</div>
+                              <div class="text-xl">🇺🇸</div>
                               <div class="text-left flex-1">
                                   <div class="font-medium text-base">${t(
                                     "settings.languageEnglish",
@@ -244,7 +244,7 @@ export function renderMobileSettingsUI(app) {
                               ${ getLanguage() === "en" ? '<i data-lucide="check" class="w-5 h-5 text-blue-400"></i>' : ""}
                           </button>
                       </div>
-                      <div class="bg-gray-600/50 rounded-lg p-4">
+                      <div class="bg-gray-600/50 rounded-lg p-3">
                           <p class="text-sm text-gray-300">
                               <i data-lucide="info" class="w-4 h-4 inline mr-2"></i>
                               언어를 변경하면 페이지가 새로고침됩니다.
@@ -285,12 +285,12 @@ export function renderMobileSettingsUI(app) {
                               <span class="font-mono">${ app.state.debugLogs ? app.state.debugLogs.length : 0}/1000</span>
                           </div>
                           <div class="flex gap-3">
-                              <button id="view-debug-logs" class="flex-1 py-3 px-4 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors text-base flex items-center justify-center gap-3">
+                              <button id="view-debug-logs" class="flex-1 py-2 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors text-base flex items-center justify-center gap-3">
                                   <i data-lucide="bar-chart-3" class="w-5 h-5 pointer-events-none"></i>${t(
                                     "settings.viewLogs",
                                   )}
                               </button>
-                              <button id="clear-debug-logs-btn" class="flex-1 py-3 px-4 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-colors text-base flex items-center justify-center gap-3">
+                              <button id="clear-debug-logs-btn" class="flex-1 py-2 px-3 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-colors text-base flex items-center justify-center gap-3">
                                   <i data-lucide="trash-2" class="w-5 h-5 pointer-events-none"></i>${t(
                                     "settings.clearLogs",
                                   )}
@@ -311,12 +311,12 @@ export function renderMobileSettingsUI(app) {
                   <div class="content-inner pt-4 space-y-4">
                       <!-- 백업 및 복원 -->
                       <div class="space-y-3">
-                          <button id="backup-data-btn" class="w-full py-3 px-5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-base flex items-center justify-center gap-3">
+                          <button id="backup-data-btn" class="w-full py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-base flex items-center justify-center gap-3">
                               <i data-lucide="download" class="w-5 h-5"></i> ${t(
                                 "settings.backup",
                               )}
                           </button>
-                          <button id="restore-data-btn" class="w-full py-3 px-5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-base flex items-center justify-center gap-3">
+                          <button id="restore-data-btn" class="w-full py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-base flex items-center justify-center gap-3">
                               <i data-lucide="upload" class="w-5 h-5"></i> ${t(
                                 "settings.restoreData",
                               )}
@@ -328,7 +328,7 @@ export function renderMobileSettingsUI(app) {
                       
                       <!-- 데이터 초기화 -->
                       <div class="space-y-3">
-                          <div class="bg-red-900/20 border border-red-500/30 rounded-lg p-4">
+                          <div class="bg-red-900/20 border border-red-500/30 rounded-lg p-3">
                               <div class="flex items-start gap-3">
                                   <i data-lucide="alert-triangle" class="w-5 h-5 text-red-400 mt-0.5 shrink-0"></i>
                                   <div class="text-sm text-gray-300">
@@ -349,7 +349,7 @@ export function renderMobileSettingsUI(app) {
                                   </div>
                               </div>
                           </div>
-                          <button id="reset-all-data-btn" class="w-full py-3 px-5 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-colors text-base flex items-center justify-center gap-3">
+                          <button id="reset-all-data-btn" class="w-full py-2 px-4 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-colors text-base flex items-center justify-center gap-3">
                               <i data-lucide="trash-2" class="w-5 h-5"></i> ${t(
                                 "settings.resetAllData",
                               )}
