@@ -14,7 +14,7 @@ import { PROVIDERS, PROVIDER_MODELS } from "./constants/providers.js";
 import {
   renderProviderConfig,
   setupAdvancedSettingsEventListeners,
-} from "./components/MobileSettingsModal.js";
+} from "./components/MobileSettingsUI.js";
 import { render, adjustMessageContainerPadding } from "./ui.js";
 import { secureStorage } from "./utils/secureStorage.js";
 import {
@@ -85,6 +85,7 @@ class PersonaChatApp {
       typingCharacterId: null,
       sidebarCollapsed: window.innerWidth < 768,
       showSettingsModal: false,
+      showSettingsUI: false,
       showCharacterModal: false,
       showPromptModal: false,
       showCreateGroupChatModal: false,
@@ -219,7 +220,12 @@ class PersonaChatApp {
 
   openSettingsModal() {
     this.initialSettings = { ...this.state.settings };
-    this.setState({ showSettingsModal: true });
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) {
+      this.setState({ showSettingsUI: true });
+    } else {
+      this.setState({ showSettingsModal: true });
+    }
   }
 
   handleSaveSettings() {
@@ -230,7 +236,7 @@ class PersonaChatApp {
     // Create a snapshot of the settings when the user explicitly saves.
     this.createSettingsSnapshot();
 
-    this.setState({ showSettingsModal: false, initialSettings: null });
+    this.setState({ showSettingsModal: false, showSettingsUI: false, initialSettings: null });
 
     if (wasRandomDisabled && isRandomEnabled) {
       this.scheduleMultipleRandomChats();
@@ -251,19 +257,21 @@ class PersonaChatApp {
             this.setState({
               settings: this.initialSettings,
               showSettingsModal: false,
+              showSettingsUI: false,
               initialSettings: null,
               modal: { isOpen: false, title: "", message: "", onConfirm: null },
             });
           } else {
             this.setState({
               showSettingsModal: false,
+              showSettingsUI: false,
               modal: { isOpen: false, title: "", message: "", onConfirm: null },
             });
           }
         },
       );
     } else {
-      this.setState({ showSettingsModal: false, initialSettings: null });
+      this.setState({ showSettingsModal: false, showSettingsUI: false, initialSettings: null });
     }
   }
 
