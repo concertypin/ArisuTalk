@@ -127,6 +127,15 @@ export async function render(app) {
                 adjustMessageContainerPadding();
                 // Call createIcons again after the chat content is actually rendered.
                 lucide.createIcons();
+
+                // Setup scroll-based UI effects after content is rendered
+                setupConditionalBlur();
+
+                // Scroll to the bottom to show the latest messages
+                const messagesContainer = document.getElementById('messages-container');
+                if (messagesContainer) {
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }
             }
         }
       }, 600);
