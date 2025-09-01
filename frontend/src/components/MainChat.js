@@ -462,9 +462,7 @@ function renderMessages(app) {
     }
 
     html += `
-                <div class="group flex w-full items-start gap-3 ${
-                  needsAnimation ? "animate-slideUp" : ""
-                } ${msg.isMe ? "flex-row-reverse" : ""}">
+                <div class="group flex w-full items-start gap-3  ${msg.isMe ? "flex-row-reverse" : ""}">
                     ${
                       !msg.isMe
                         ? `<div class="shrink-0 w-10 h-10 mt-1">${
