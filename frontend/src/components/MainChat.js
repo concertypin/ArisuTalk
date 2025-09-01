@@ -92,7 +92,7 @@ function renderUserStickerPanel(app) {
   const currentSize = app.calculateUserStickerSize();
 
   return `
-        <div class="absolute bottom-full right-0 z-20 mb-2 w-80 bg-gray-800 rounded-xl shadow-lg border border-gray-700 animate-fadeIn floating-panel">
+        <div class="absolute bottom-full right-0 z-20 mb-2 w-80 rounded-xl shadow-lg border border-gray-700 animate-fadeIn floating-panel">
             <div class="p-3 border-b border-gray-700 flex items-center justify-between">
                 <h3 class="text-sm font-medium text-white">${t(
                   "mainChat.personaStickers",

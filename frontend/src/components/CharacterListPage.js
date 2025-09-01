@@ -1,5 +1,6 @@
 import { t } from "../i18n.js";
 import { renderAvatar } from "./Avatar.js";
+import { formatTimestamp } from "../utils.js";
 
 export function renderCharacterItem(app, char) {
   // Simplified version of the character item for the list page.
@@ -37,21 +38,23 @@ export function renderCharacterItem(app, char) {
   const primaryChatRoom = chatRooms[0];
 
   return `
-    <div class="character-list-item p-3 bg-gray-800 rounded-2xl cursor-pointer hover:bg-gray-700/80 transition-colors duration-200" 
+    <div class="character-list-item p-3 rounded-2xl cursor-pointer hover:bg-gray-800/60 transition-colors duration-200" 
          onclick="window.personaApp.selectChatRoom('${primaryChatRoom?.id}')">
-        <div class="flex items-center space-x-4">
+        <div class="flex items-center space-x-5">
             <div class="character-avatar relative">
-                ${renderAvatar(char, "md")}
+                ${renderAvatar(char, "lg")}
             </div>
             <div class="flex-1 min-w-0">
-                <div class="flex items-center justify-between mb-1">
-                    <h3 class="font-semibold text-white text-sm truncate">${char.name || t("sidebar.unknownCharacter")}</h3>
-                    <div class="flex items-center gap-2">
+                <div class="flex items-center mb-1">
+                    <h3 class="font-semibold text-white text-lg truncate">${char.name || t("sidebar.unknownCharacter")}</h3>
+                    <div class="flex items-center gap-2 shrink-0 ml-auto">
                         ${totalUnreadCount > 0 ? `<span class="bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full leading-none">${totalUnreadCount}</span>` : ""}
-                        <span class="text-xs text-gray-500 shrink-0">${lastMessage?.time || ""}</span>
                     </div>
                 </div>
-                <p class="text-sm truncate ${lastMessage?.isError ? "text-red-400" : "text-gray-400"}">${lastMessageContent}</p>
+                <div class="flex justify-between items-start">
+                    <p class="text-base line-clamp-2 ${lastMessage?.isError ? "text-red-400" : "text-gray-400"} pr-4">${lastMessageContent}</p>
+                    <span class="text-sm text-gray-500 shrink-0">${formatTimestamp(lastMessage?.id)}</span>
+                </div>
             </div>
         </div>
     </div>
@@ -70,21 +73,21 @@ export function renderCharacterListPage(app) {
   if (!container) return;
 
   container.innerHTML = `
-    <header class="p-6 border-b border-gray-800 sticky top-0 bg-gray-900 z-10">
+    <header class="px-6 py-4 border-b border-gray-800 sticky top-0 bg-gray-900 z-10">
         <div class="flex items-center justify-between">
-            <h1 class="text-3xl font-bold text-white">${t("sidebar.title")}</h1>
+            <h1 class="text-3xl text-white">${t("sidebar.title")}</h1>
             <div class="flex items-center gap-2">
-                <button id="toggle-mobile-search-btn" class="p-2 rounded-full hover:bg-gray-700 transition-colors">
-                    <i data-lucide="search" class="w-5 h-5 text-gray-300"></i>
+                <button id="toggle-mobile-search-btn" class="p-3 rounded-full hover:bg-gray-700 transition-colors">
+                    <i data-lucide="search" class="w-6 h-6 text-gray-100"></i>
                 </button>
-                <button id="open-settings-modal-mobile" class="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
-                    <i data-lucide="settings" class="w-5 h-5 text-gray-300"></i>
+                <button id="open-settings-modal-mobile" class="p-3 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
+                    <i data-lucide="settings" class="w-6 h-6 text-gray-100"></i>
                 </button>
             </div>
         </div>
     </header>
     <div class="flex-1 overflow-y-auto p-4">
-        <div id="character-list-items" class="character-list space-y-3">
+        <div id="character-list-items" class="character-list space-y-4">
             <!-- Character items will be rendered here by renderCharacterList -->
         </div>
     </div>

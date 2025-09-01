@@ -12,7 +12,7 @@
 </head>
 
 <body class="bg-gray-950 text-white">
-  <div id="app" class="relative flex h-screen overflow-hidden">
+  <div id="app" class="relative flex overflow-hidden">
     <!-- Sidebar -->
     <aside id="sidebar"
       class="fixed inset-y-0 left-0 z-30 flex w-full flex-col bg-gray-900 transition-all duration-300 ease-in-out md:relative md:w-80 md:border-r md:border-gray-800">
@@ -47,6 +47,16 @@
   </script>
 
   <script type="module" src="src/index.js"></script>
+  <script>
+    function setAppHeight() {
+      const app = document.getElementById('app');
+      if (app) {
+        app.style.height = `${window.innerHeight}px`;
+      }
+    }
+    window.addEventListener('resize', setAppHeight);
+    setAppHeight(); // Initial set
+  </script>
 </body>
 
 </html>
