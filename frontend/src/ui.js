@@ -92,38 +92,83 @@ export async function render(app) {
 
   // Main Content Rendering
   if (isMobile) {
-    sidebarContainer.classList.add("hidden");
+    const transitionContainer = document.getElementById('page-transition-container');
+    
+    // --- Visibility & Animation Control ---
+    // On mobile, sidebar is always hidden.
+    sidebarContainer.classList.add('hidden');
+    // Containers for list and chat should be visible to allow CSS transform animations.
+    // The 'hidden' class (display: none) is removed to prevent it from breaking transitions.
+    listContainer.classList.remove('hidden');
+    mainContainer.classList.remove('hidden');
+
+    // --- View Switching Logic ---
     if (newState.selectedChatId) {
-      mainContainer.classList.remove("hidden");
-      listContainer.classList.add("hidden");
-      if (isFirstRender || shouldUpdateMainChat(oldState, newState)) {
-        renderMainChat(app);
-        setupMainChatEventListeners();
+      // If switching to a new chat, clear the container immediately to prevent showing stale content during animation.
+      // A loading spinner is shown as a placeholder.
+      if (oldState.selectedChatId !== newState.selectedChatId) {
+        mainContainer.innerHTML = '<div class="flex-1 flex items-center justify-center"><div class="w-6 h-6 border-4 border-gray-700 border-t-blue-500 rounded-full animate-spin"></div></div>';
       }
-    } else {
-      mainContainer.classList.add("hidden");
-      listContainer.classList.remove("hidden");
-      if (isFirstRender || shouldUpdateCharacterList(oldState, newState)) {
-        const isListAlreadyRendered = !!listContainer.querySelector("header");
-        if (!isListAlreadyRendered || oldState.showFabMenu !== newState.showFabMenu) {
-            renderCharacterListPage(app);
-        } else {
-            const listItemsContainer = listContainer.querySelector('#character-list-items');
-            if (listItemsContainer) {
-                renderCharacterList(app, listItemsContainer);
+
+      // Show Chat View
+      transitionContainer.classList.add('show-chat');
+
+      // Wait for the animation to complete before rendering the content.
+      // This prevents the DOM update from interrupting the CSS transition, which causes flickering.
+      // The 600ms timeout matches the transition duration in index.css.
+      setTimeout(() => {
+        // After the delay, only render if we are still in the same chat view.
+        // This prevents rendering if the user quickly navigates back.
+        if (window.personaApp.state.selectedChatId === newState.selectedChatId) {
+            if (isFirstRender || shouldUpdateMainChat(oldState, newState)) {
+                renderMainChat(app);
+                setupMainChatEventListeners();
+                // This function forces a reflow, so it must be called after the animation is complete.
+                adjustMessageContainerPadding();
+                // Call createIcons again after the chat content is actually rendered.
+                lucide.createIcons();
             }
         }
+      }, 600);
+    } else {
+      // Show Character List View
+      transitionContainer.classList.remove('show-chat');
+
+      // Render the character list content immediately
+      if (isFirstRender || shouldUpdateCharacterList(oldState, newState)) {
+        const isListAlreadyRendered = !!listContainer.querySelector('header');
+        if (!isListAlreadyRendered || oldState.showFabMenu !== newState.showFabMenu) {
+          renderCharacterListPage(app);
+        } else {
+          const listItemsContainer = listContainer.querySelector('#character-list-items');
+          if (listItemsContainer) {
+            renderCharacterList(app, listItemsContainer);
+          }
+        }
       }
+
+      // After the slide-out animation finishes, destroy the chat content to save memory.
+      setTimeout(() => {
+        // Only clear the content if we are still on the character list view.
+        if (!window.personaApp.state.selectedChatId) {
+          mainContainer.innerHTML = '';
+        }
+      }, 600); // This must match the animation duration in index.css
     }
   } else {
-    // Desktop layout
-    sidebarContainer.classList.remove("hidden");
-    mainContainer.classList.remove("hidden");
-    listContainer.classList.add("hidden");
+    // --- Desktop Layout ---
+    const transitionContainer = document.getElementById('page-transition-container');
+    
+    // Setup desktop-specific visibility
+    sidebarContainer.classList.remove('hidden');
+    mainContainer.classList.remove('hidden');
+    listContainer.classList.add('hidden'); // Character list page is not used on desktop
+    transitionContainer.classList.remove('show-chat'); // Ensure animation state is reset for desktop
 
+    // Render sidebar and main chat content
     if (isFirstRender || shouldUpdateSidebar(oldState, newState)) {
       const sidebarScrollContainer = document.querySelector(
-        "#sidebar-content > .overflow-y-auto",
+        '#sidebar-content > .overflow-y-auto',
       );
       const scrollPosition = sidebarScrollContainer
         ? sidebarScrollContainer.scrollTop
@@ -132,7 +177,7 @@ export async function render(app) {
       renderSidebar(app);
 
       const newSidebarScrollContainer = document.querySelector(
-        "#sidebar-content > .overflow-y-auto",
+        '#sidebar-content > .overflow-y-auto',
       );
       if (newSidebarScrollContainer) {
         newSidebarScrollContainer.scrollTop = scrollPosition;
@@ -161,7 +206,6 @@ export async function render(app) {
 
   lucide.createIcons();
   setupConditionalBlur();
-  adjustMessageContainerPadding();
 }
 
 // --- RENDER HELPER FUNCTIONS ---
