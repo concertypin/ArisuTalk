@@ -22,11 +22,13 @@
       <div id="sidebar-content" class="flex h-full flex-col overflow-hidden"></div>
     </aside>
 
-    <!-- Character List Page (for Mobile) -->
-    <div id="character-list-page-container" class="flex-1 flex-col bg-gray-950 hidden"></div>
+    <div id="page-transition-container" class="flex-1 relative">
+      <!-- Character List Page (for Mobile) -->
+      <div id="character-list-page-container" class="w-full h-full absolute top-0 left-0 flex-col bg-gray-950"></div>
 
-    <!-- Main Chat Area -->
-    <main id="main-chat" class="flex-1 flex flex-col bg-gray-950"></main>
+      <!-- Main Chat Area -->
+      <main id="main-chat" class="w-full h-full absolute top-0 left-0 flex flex-col bg-gray-950"></main>
+    </div>
 
     <!-- Sidebar Backdrop for Mobile -->
     <div id="sidebar-backdrop" class="fixed inset-0 z-20 hidden bg-black/50 md:hidden"></div>
