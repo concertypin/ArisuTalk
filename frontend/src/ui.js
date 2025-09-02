@@ -1,4 +1,3 @@
-
 import { renderSidebar } from "./components/Sidebar.js";
 import {
   renderMainChat,
@@ -7,6 +6,7 @@ import {
 import { renderSettingsUI } from "./components/SettingsRouter.js";
 import {
   renderMobileSettingsUI,
+  renderAiSettingsPage, // Import the new function
   setupMobileSettingsUIEventListeners,
 } from "./components/MobileSettingsUI.js";
 import { setupDesktopSettingsEventListeners } from "./components/DesktopSettingsUI.js";
@@ -75,6 +75,7 @@ export function render(app) {
   const mainContainer = document.getElementById("main-chat");
   const listContainer = document.getElementById("character-list-page-container");
   const settingsContainer = document.getElementById("settings-page-container");
+  const aiSettingsContainer = document.getElementById("ai-settings-page-container");
   const sidebarContainer = document.getElementById("sidebar");
 
   // Main Content Rendering
@@ -86,16 +87,21 @@ export function render(app) {
     listContainer.classList.remove('hidden');
     mainContainer.classList.remove('hidden');
     settingsContainer.classList.remove('hidden');
+    aiSettingsContainer.classList.remove('hidden');
 
     // --- View Switching Logic ---
-    if (newState.showSettingsUI) {
-      transitionContainer.classList.add('show-settings');
-      transitionContainer.classList.remove('show-chat');
-      if (isFirstRender || oldState.showSettingsUI !== newState.showSettingsUI) {
-        const settingsContainer = document.getElementById('settings-page-container');
-        if (settingsContainer) {
-            settingsContainer.innerHTML = renderMobileSettingsUI(app);
+    if (newState.showAiSettingsUI) {
+        transitionContainer.classList.add('show-ai-settings');
+        transitionContainer.classList.remove('show-chat', 'show-settings');
+        if (isFirstRender || oldState.showAiSettingsUI !== newState.showAiSettingsUI) {
+            aiSettingsContainer.innerHTML = renderAiSettingsPage(app);
+            setupMobileSettingsUIEventListeners(app); // Re-use listeners for back button etc.
         }
+    } else if (newState.showSettingsUI) {
+      transitionContainer.classList.add('show-settings');
+      transitionContainer.classList.remove('show-chat', 'show-ai-settings');
+      if (isFirstRender || oldState.showSettingsUI !== newState.showSettingsUI || oldState.mobileSettingsPage !== newState.mobileSettingsPage) {
+        settingsContainer.innerHTML = renderMobileSettingsUI(app);
         setupMobileSettingsUIEventListeners(app);
       }
       setTimeout(() => {
@@ -109,7 +115,7 @@ export function render(app) {
       }
 
       transitionContainer.classList.add('show-chat');
-      transitionContainer.classList.remove('show-settings');
+      transitionContainer.classList.remove('show-settings', 'show-ai-settings');
 
       setTimeout(() => {
         if (window.personaApp.state.selectedChatId === newState.selectedChatId) {
@@ -127,7 +133,7 @@ export function render(app) {
         }
       }, 600);
     } else {
-      transitionContainer.classList.remove('show-chat', 'show-settings');
+      transitionContainer.classList.remove('show-chat', 'show-settings', 'show-ai-settings');
 
       if (isFirstRender || shouldUpdateCharacterList(oldState, newState)) {
         const isListAlreadyRendered = !!listContainer.querySelector('header');
@@ -148,6 +154,9 @@ export function render(app) {
         if (!window.personaApp.state.showSettingsUI) {
             settingsContainer.innerHTML = '';
         }
+        if (!window.personaApp.state.showAiSettingsUI) {
+            aiSettingsContainer.innerHTML = '';
+        }
       }, 600); 
     }
   } else {
@@ -158,7 +167,7 @@ export function render(app) {
     sidebarContainer.classList.remove('hidden');
     mainContainer.classList.remove('hidden');
     listContainer.classList.add('hidden'); // Character list page is not used on desktop
-    transitionContainer.classList.remove('show-chat'); // Ensure animation state is reset for desktop
+    transitionContainer.classList.remove('show-chat', 'show-settings', 'show-ai-settings'); // Ensure animation state is reset for desktop
 
     // Render sidebar and main chat content
     if (isFirstRender || shouldUpdateSidebar(oldState, newState)) {

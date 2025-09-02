@@ -119,6 +119,7 @@ class PersonaChatApp {
           isVisible: false,
         },
       },
+      showAiSettingsUI: false,
     };
     this.oldState = null;
     this.messagesEndRef = null;
@@ -236,7 +237,7 @@ class PersonaChatApp {
     // Create a snapshot of the settings when the user explicitly saves.
     this.createSettingsSnapshot();
 
-    this.setState({ showSettingsModal: false, showSettingsUI: false, initialSettings: null });
+    this.setState({ showSettingsModal: false, showSettingsUI: false, showAiSettingsUI: false, initialSettings: null });
 
     if (wasRandomDisabled && isRandomEnabled) {
       this.scheduleMultipleRandomChats();
@@ -658,6 +659,14 @@ class PersonaChatApp {
       handleMainChatClick(e, this);
       handleModalClick(e, this);
       handleGroupChatClick(e, this);
+
+      if (e.target.closest('#navigate-to-ai-settings')) {
+        this.setState({ showAiSettingsUI: true });
+      }
+
+      if (e.target.closest('#close-ai-settings-ui')) {
+        this.setState({ showAiSettingsUI: false });
+      }
 
       if (e.target.closest('#fab-menu-toggle')) {
         this.setState({ showFabMenu: !this.state.showFabMenu });
