@@ -33,7 +33,7 @@ export function adjustMessageContainerPadding() {
 
   if (messagesContainer && inputAreaWrapper) {
     const inputHeight = inputAreaWrapper.offsetHeight;
-    messagesContainer.style.paddingBottom = `${inputHeight + 8}px`;
+    messagesContainer.style.paddingBottom = `${inputHeight + 4}px`;
   }
 }
 
@@ -182,7 +182,8 @@ export async function render(app) {
     sidebarContainer.classList.remove('hidden');
     mainContainer.classList.remove('hidden');
     listContainer.classList.add('hidden'); // Character list page is not used on desktop
-    transitionContainer.classList.remove('show-chat', 'show-settings', 'show-ai-settings'); // Ensure animation state is reset for desktop
+    transitionContainer.classList.add('show-chat');
+    transitionContainer.classList.remove('show-settings', 'show-ai-settings'); // Ensure animation state is reset for desktop
 
     // Render sidebar and main chat content
     if (isFirstRender || shouldUpdateSidebar(oldState, newState)) {
@@ -205,6 +206,11 @@ export async function render(app) {
     if (isFirstRender || shouldUpdateMainChat(oldState, newState)) {
       renderMainChat(app);
       setupMainChatEventListeners();
+      adjustMessageContainerPadding();
+      const messagesContainer = document.getElementById('messages-container');
+      if (messagesContainer) {
+          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
     }
   }
 
