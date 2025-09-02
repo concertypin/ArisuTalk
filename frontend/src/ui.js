@@ -15,6 +15,7 @@ import { setupDesktopSettingsEventListeners } from "./components/DesktopSettings
 import { renderCharacterModal } from "./components/CharacterModal.js";
 import { renderPromptModal } from "./components/PromptModal.js";
 import { renderConfirmationModal } from "./components/ConfirmationModal.js";
+import { renderChatSelectionModal } from "./components/ChatSelectionModal.js";
 import {
   renderCreateGroupChatModal,
   renderCreateOpenChatModal,
@@ -48,7 +49,16 @@ function renderModals(app) {
   if (app.state.showEditGroupChatModal) html += renderEditGroupChatModal(app);
   if (app.state.showDebugLogsModal) html += renderDebugLogsModal(app.state);
   if (app.state.showMobileSearch) html += renderSearchModal(app);
-  if (app.state.modal.isOpen) html += renderConfirmationModal(app);
+  if (app.state.modal.isOpen) {
+    switch (app.state.modal.type) {
+      case 'confirmation':
+        html += renderConfirmationModal(app);
+        break;
+      case 'chatSelection':
+        html += renderChatSelectionModal(app);
+        break;
+    }
+  }
   container.innerHTML = html;
 
   // Setup event listeners for modals after DOM update

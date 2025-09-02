@@ -182,6 +182,23 @@ class PersonaChatApp {
     );
   }
 
+  handleCharacterSelect(characterId) {
+    const numericCharacterId = Number(characterId);
+    const character = this.state.characters.find(c => c.id === numericCharacterId);
+    if (!character) return;
+
+    const chatRooms = this.state.chatRooms[numericCharacterId] || [];
+
+    if (chatRooms.length > 1) {
+      this.showModal('chatSelection', { character });
+    } else if (chatRooms.length === 1) {
+      this.selectChatRoom(chatRooms[0].id);
+    } else {
+      const newChatRoomId = this.createNewChatRoom(numericCharacterId);
+      this.selectChatRoom(newChatRoomId);
+    }
+  }
+
   handleSettingChange(key, value) {
     this.setState({
         settings: { ...this.state.settings, [key]: value }
@@ -665,6 +682,15 @@ class PersonaChatApp {
       if (e.target.closest('#close-search-modal-btn') || e.target.id === 'search-modal-backdrop') {
         this.setState({ showMobileSearch: false, searchQuery: '' });
       }
+
+      if (e.target.id === 'create-new-chat-room-modal') {
+        const { character } = this.state.modal;
+        if (character) {
+            const newChatRoomId = this.createNewChatRoomForCharacter(character.id);
+            this.selectChatRoom(newChatRoomId);
+            this.hideModal();
+        }
+      }
     });
 
     appElement.addEventListener("input", (e) => {
@@ -1120,13 +1146,19 @@ class PersonaChatApp {
   }
 
   showConfirmModal(title, message, onConfirm) {
-    this.setState({ modal: { isOpen: true, title, message, onConfirm } });
+    this.setState({ modal: { isOpen: true, type: 'confirmation', title, message, onConfirm } });
   }
 
-  closeModal() {
-    this.setState({
-      modal: { isOpen: false, title: "", message: "", onConfirm: null },
-    });
+  showModal(type, data) {
+    this.setState({ modal: { isOpen: true, type, ...data } });
+  }
+
+  hideModal(event) {
+    // Prevent closing when clicking inside the modal content
+    if (event && event.target.closest('[data-modal-content]')) {
+        return;
+    }
+    this.setState({ modal: { isOpen: false, title: "", message: "", onConfirm: null } });
   }
 
   handleModelSelect(model) {

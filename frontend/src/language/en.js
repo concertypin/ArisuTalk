@@ -465,6 +465,10 @@ export const en = {
     resetPromptCompleteTitle: "Reset Complete",
     resetPromptCompleteMessage:
       '"{{promptName}}" has been reset to default values.',
+    selectChat: {
+      message: "Select a chat room to continue the conversation.",
+      newChat: "New Chat"
+    }
   },
   ui: {
     discardChanges: "Discard Changes",

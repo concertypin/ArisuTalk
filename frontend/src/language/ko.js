@@ -462,6 +462,10 @@ export const ko = {
     resetPromptCompleteTitle: "초기화 완료",
     resetPromptCompleteMessage:
       '"{{promptName}}"이(가) 기본값으로 되돌려졌습니다.',
+    selectChat: {
+      message: "대화를 이어갈 채팅방을 선택해주세요.",
+      newChat: "새로운 채팅"
+    }
   },
   ui: {
     discardChanges: "변경사항 취소",
