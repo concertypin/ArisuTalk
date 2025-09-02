@@ -1,3 +1,4 @@
+/** @type {import('./language.d').LanguageStrings} */
 export const en = {
   common: {
     cancel: "Cancel",
@@ -39,6 +40,28 @@ export const en = {
     memory: "Memory",
     addMemory: "Add Memory",
     responseSpeed: "Message Responsiveness",
+  },
+  characterModalSlider: {
+    responseTime: {
+      description: "How quickly do they check your messages?",
+      low: "Almost instantly",
+      high: "You have to call them",
+    },
+    thinkingTime: {
+      description: "How deeply do they think when sending a message?",
+      low: "Lost in thought",
+      high: "Sends a message and then thinks",
+    },
+    reactivity: {
+      description: "How do they react to the chat?",
+      low: "Active JK gal",
+      high: "Blunt",
+    },
+    tone: {
+      description: "What kind of tone do they use when chatting with you?",
+      low: "Polite and courteous",
+      high: "Rude",
+    },
   },
   confirm: {
     cancel: "Cancel",
@@ -173,8 +196,6 @@ export const en = {
     dangerZone: "Danger Zone",
     resetAllData: "Reset All Data",
     resetAllDataInfo: "The following data will be permanently deleted:",
-    resetDataList:
-      "All character info, all chat history, user settings (including API keys), sticker data, debug logs",
     resetWarning: "⚠️ This action cannot be undone!",
     language: "Language",
     languageEnglish: "English",
@@ -448,14 +469,11 @@ export const en = {
       '"{{promptName}}" has been reset to default values.',
   },
   ui: {
-    // Common UI messages
     discardChanges: "Discard Changes",
     unsavedChangesWarning:
       "There are unsaved changes. Are you sure you want to cancel?",
     appStarted: "ArisuTalk application has started.",
     dataLoadFailed: "Data load failed:",
-
-    // Chat related
     defaultChatName: "Default Chat",
     newChatName: "New Chat",
     deleteChatRoom: "Delete Chat Room",
@@ -464,8 +482,6 @@ export const en = {
     startConversation: "Start a conversation",
     imageSent: "Image sent",
     stickerSent: "Sticker sent",
-
-    // Sticker related
     enterStickerName: "Enter sticker name:",
     fileProcessingError: "File processing error:",
     fileProcessingAlert: "An error occurred while processing the file.",
@@ -474,20 +490,14 @@ export const en = {
     stickerProcessingError: "Sticker Processing Error",
     storageFull: "Storage Full",
     storageFullMessage: "Not enough storage space.",
-
-    // Group chat related
     groupChatNamePlaceholder: "Enter group chat name",
     openChatNamePlaceholder: "Enter open chat name",
     newGroupChat: "New Group Chat",
     newOpenChat: "New Open Chat",
     edit: "Edit",
     delete: "Delete",
-
-    // Settings related
     apiKeyPlaceholder: "Enter API key",
     customModelPlaceholder: "Enter custom model name",
-
-    // Other UI
     generate: "Generate",
   },
   chat: {
@@ -497,6 +507,95 @@ export const en = {
     startNewChat: "Start a new chat.",
     imageSent: "Image sent.",
     messageGenerationError: "Failed to generate message.",
+  },
+  groupChat: {
+    groupChat: "Group Chat",
+    openChat: "Open Chat",
+    createGroupChat: "Create Group Chat",
+    createOpenChat: "Create Open Chat",
+    groupChatName: "Group Chat Name",
+    openChatName: "Open Chat Name",
+    openChatNamePlaceholder: "Enter open chat name",
+    groupChatSettings: "Group Chat Settings",
+    openChatInfo: "What is Open Chat?",
+    newGroupChat: "New Group Chat",
+    newOpenChat: "New Open Chat",
+    calculatingStorage: "Calculating...",
+    responseSettings: "Response Settings",
+    overallResponseFrequency: "Overall Response Frequency",
+    responseFrequencyInfo:
+      "Higher values make characters respond more frequently",
+    maxSimultaneousResponders: "Max Simultaneous Responders",
+    responseInterval: "Response Interval",
+    responseIntervalInfo: "Delay time between character responses",
+    individualCharacterSettings: "Individual Character Settings",
+    responseEnabled: "Response Enabled",
+    individualResponseProbability: "Individual Response Probability",
+    characterRole: "Character Role",
+    roleNormal: "Normal",
+    roleLeader: "Leader",
+    roleQuiet: "Quiet",
+    roleActive: "Active",
+    cancel: "Cancel",
+    save: "Save",
+    create: "Create",
+    edit: "Edit",
+    delete: "Delete",
+    people1: "1 person",
+    people2: "2 people",
+    people3: "3 people",
+    people4: "4 people",
+    seconds: "sec",
+    selectParticipants: "Select Participating Characters",
+    minimumParticipants: "You must select at least 2 characters.",
+    participantsCount: " participants",
+    participantsConnected: " connected",
+    startConversation: "Start a conversation",
+    imageSent: "Image sent",
+    stickerSent: "Sticker sent",
+    openChatAutoManagement: "AI automatically manages character entry and exit",
+    charactersMoodBased: "Characters participate based on their mood and state",
+    naturalConversation: "Natural conversation flow is automatically created",
+    initialParticipants: "Initially, 2-4 characters randomly enter",
+    deleteGroupChatTitle: "Delete Group Chat",
+    deleteGroupChatMessage:
+      "Are you sure you want to delete this group chat? All conversation history will be lost.",
+    deleteOpenChatTitle: "Delete Open Chat",
+    deleteOpenChatMessage:
+      "Are you sure you want to delete this open chat? All conversation history will be lost.",
+    groupChatNameRequired: "Group Chat Name Required",
+    groupChatNameRequiredMessage: "Please enter a group chat name.",
+    participantsRequired: "Insufficient Participants",
+    participantsRequiredMessage: "Please select at least 2 characters.",
+    openChatNameRequired: "Open Chat Name Required",
+    openChatNameRequiredMessage: "Please enter an open chat name.",
+    noCharactersAvailable: "No Characters",
+    noCharactersAvailableMessage:
+      "No characters available to participate. Please add characters first.",
+  },
+  debugLogs: {
+    systemDebugLogs: "System Debug Logs",
+    groupChatType: "Group Chat",
+    openChatType: "Open Chat",
+    normalChatType: "Normal Chat",
+    totalLogItems: "Total",
+    maxLogItems: "log items",
+    logCollectionStatus: "Log Collection:",
+    enabled: "Enabled",
+    disabled: "Disabled",
+    chatRoom: "Chat Room",
+    api: "API",
+    model: "Model",
+    export: "Export",
+    clearAll: "Clear All",
+    close: "Close",
+    noLogs: "No logs",
+    noLogsCollected:
+      "No logs collected yet.<br/>Logs will be generated when you start chatting.",
+    logsDisabled:
+      'Log collection is disabled.<br/>Please enable "Debug Logs" in settings.',
+    unknown: "Unknown",
+    invalidDate: "Invalid Date",
   },
   api: {
     imageMessage: "Image sent.",
@@ -565,130 +664,6 @@ export const en = {
         strong: "Strong",
         label: "Password Strength: "
     }
-  },
-  characterModalSlider: {
-    responseTime: {
-      description: "How quickly do they check your messages?",
-      low: "Almost instantly",
-      high: "You have to call them",
-    },
-    thinkingTime: {
-      description: "How deeply do they think when sending a message?",
-      low: "Lost in thought",
-      high: "Sends a message and then thinks",
-    },
-    reactivity: {
-      description: "How do they react to the chat?",
-      low: "Active JK gal",
-      high: "Blunt",
-    },
-    tone: {
-      description: "What kind of tone do they use when chatting with you?",
-      low: "Polite and courteous",
-      high: "Rude",
-    },
-  },
-  groupChat: {
-    groupChat: "Group Chat",
-    openChat: "Open Chat",
-    createGroupChat: "Create Group Chat",
-    createOpenChat: "Create Open Chat",
-    groupChatName: "Group Chat Name",
-    openChatName: "Open Chat Name",
-    openChatNamePlaceholder: "Enter open chat name",
-    groupChatSettings: "Group Chat Settings",
-    openChatInfo: "What is Open Chat?",
-    newGroupChat: "New Group Chat",
-    newOpenChat: "New Open Chat",
-    calculatingStorage: "Calculating...",
-
-    // Group chat settings
-    responseSettings: "Response Settings",
-    overallResponseFrequency: "Overall Response Frequency",
-    responseFrequencyInfo:
-      "Higher values make characters respond more frequently",
-    maxSimultaneousResponders: "Max Simultaneous Responders",
-    responseInterval: "Response Interval",
-    responseIntervalInfo: "Delay time between character responses",
-    individualCharacterSettings: "Individual Character Settings",
-    responseEnabled: "Response Enabled",
-    individualResponseProbability: "Individual Response Probability",
-    characterRole: "Character Role",
-    roleNormal: "Normal",
-    roleLeader: "Leader",
-    roleQuiet: "Quiet",
-    roleActive: "Active",
-
-    // Buttons and states
-    cancel: "Cancel",
-    save: "Save",
-    create: "Create",
-    edit: "Edit",
-    delete: "Delete",
-
-    // Number units
-    people1: "1 person",
-    people2: "2 people",
-    people3: "3 people",
-    people4: "4 people",
-    seconds: "sec",
-
-    // Participants and messages
-    selectParticipants: "Select Participating Characters",
-    minimumParticipants: "You must select at least 2 characters.",
-    participantsCount: " participants",
-    participantsConnected: " connected",
-    startConversation: "Start a conversation",
-    imageSent: "Image sent",
-    stickerSent: "Sticker sent",
-
-    // Open chat info
-    openChatAutoManagement: "AI automatically manages character entry and exit",
-    charactersMoodBased: "Characters participate based on their mood and state",
-    naturalConversation: "Natural conversation flow is automatically created",
-    initialParticipants: "Initially, 2-4 characters randomly enter",
-    // Delete confirmation messages
-    deleteGroupChatTitle: "Delete Group Chat",
-    deleteGroupChatMessage:
-      "Are you sure you want to delete this group chat? All conversation history will be lost.",
-    deleteOpenChatTitle: "Delete Open Chat",
-    deleteOpenChatMessage:
-      "Are you sure you want to delete this open chat? All conversation history will be lost.",
-
-    // Creation error messages
-    groupChatNameRequired: "Group Chat Name Required",
-    groupChatNameRequiredMessage: "Please enter a group chat name.",
-    participantsRequired: "Insufficient Participants",
-    participantsRequiredMessage: "Please select at least 2 characters.",
-    openChatNameRequired: "Open Chat Name Required",
-    openChatNameRequiredMessage: "Please enter an open chat name.",
-    noCharactersAvailable: "No Characters",
-    noCharactersAvailableMessage:
-      "No characters available to participate. Please add characters first.",
-  },
-  debugLogs: {
-    systemDebugLogs: "System Debug Logs",
-    groupChatType: "Group Chat",
-    openChatType: "Open Chat",
-    normalChatType: "Normal Chat",
-    totalLogItems: "Total",
-    maxLogItems: "log items",
-    logCollectionStatus: "Log Collection:",
-    enabled: "Enabled",
-    disabled: "Disabled",
-    chatRoom: "Chat Room",
-    api: "API",
-    model: "Model",
-    export: "Export",
-    clearAll: "Clear All",
-    close: "Close",
-    noLogs: "No logs",
-    noLogsCollected:
-      "No logs collected yet.<br/>Logs will be generated when you start chatting.",
-    logsDisabled:
-      'Log collection is disabled.<br/>Please enable "Debug Logs" in settings.',
-    unknown: "Unknown",
-    invalidDate: "Invalid Date",
   },
   secureStorage: {
     autoGeneratedHint: "Auto-generated for security",

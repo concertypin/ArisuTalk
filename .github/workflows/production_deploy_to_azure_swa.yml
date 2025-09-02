@@ -1,0 +1,64 @@
+name: Azure Static Web Apps CI/CD
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  build_and_deploy_prod_job:
+    runs-on: ubuntu-latest
+    name: Build and Deploy as production
+    permissions:
+       id-token: write
+       contents: read
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+          lfs: false
+      
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          package_json_file: "frontend/package.json"
+          run_install: false
+    
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: "frontend/package.json"
+          cache: 'pnpm'
+    
+      - name: Install deps
+        run: pnpm install
+
+      - name: Install OIDC Client from Core Package
+        run: pnpm add @actions/core@1.6.0 @actions/http-client
+
+      - name: Get Id Token
+        uses: actions/github-script@v6
+        id: idtoken
+        with:
+           script: |
+               const coredemo = require('@actions/core')
+               return await coredemo.getIDToken()
+           result-encoding: string
+
+      - name: Build
+        run: pnpm run build:fe
+
+      - name: Deploy
+        id: deploy
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_SALMON_GROUND_0BB667400 }}
+          action: "upload"
+          app_location: "frontend/dist"
+          skip_api_build: true
+          skip_app_build: true
+          api_location: ""
+          output_location: ""
+          github_id_token: ${{ steps.idtoken.outputs.result }}
+
