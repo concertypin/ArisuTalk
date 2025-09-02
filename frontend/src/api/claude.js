@@ -23,7 +23,7 @@ export class ClaudeClient {
     isProactive = false,
     forceSummary = false,
   }) {
-    const { systemPrompt } = buildContentPrompt({
+    const { systemPrompt, contents } = await buildContentPrompt({
       userName,
       userDescription,
       character,
@@ -33,48 +33,10 @@ export class ClaudeClient {
       forceSummary,
     });
 
-    // for_update 라인 6876-6906: 히스토리를 Claude 형식으로 변환
-    const messages = [];
-    for (const msg of history) {
-      const role = msg.isMe ? "user" : "assistant";
-      let content = msg.content || "";
-
-      if (msg.isMe && msg.type === "image" && msg.imageId) {
-        const imageData = character?.media?.find((m) => m.id === msg.imageId);
-        if (imageData) {
-          content = [
-            { type: "text", text: content || t("api.imageMessage") },
-            {
-              type: "image",
-              source: {
-                type: "base64",
-                media_type: imageData.mimeType || "image/jpeg",
-                data: imageData.dataUrl.split(",")[1],
-              },
-            },
-          ];
-        } else {
-          content = content || t("api.imageUnavailable");
-        }
-      } else if (msg.isMe && msg.type === "sticker" && msg.stickerData) {
-        const stickerName = msg.stickerData.stickerName || t("api.unknownSticker");
-        content = `${t("api.stickerMessage", { stickerName: stickerName })}${
-          content ? ` ${content}` : ""
-        }`;
-      }
-
-      if (content) {
-        messages.push({ role, content });
-      }
-    }
-
-    // for_update 라인 6908-6913: Proactive 모드 처리
-    if (isProactive && messages.length === 0) {
-      messages.push({
-        role: "user",
-        content: "(SYSTEM: You are starting this conversation. Please begin.)",
-      });
-    }
+    const messages = contents.map(c => ({
+        role: c.role === 'model' ? 'assistant' : c.role,
+        content: c.parts.map(p => p.text).join('')
+    }));
 
     // for_update 라인 6918-6924: 요청 본문 구성
     const requestBody = {

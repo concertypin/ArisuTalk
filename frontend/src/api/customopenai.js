@@ -48,7 +48,7 @@ export class CustomOpenAIClient {
     isProactive = false,
     forceSummary = false,
   }) {
-    const { systemPrompt } = buildContentPrompt({
+    const { systemPrompt, contents } = await buildContentPrompt({
       userName,
       userDescription,
       character,
@@ -58,49 +58,11 @@ export class CustomOpenAIClient {
       forceSummary,
     });
 
-    // for_update 라인 7265-7295: 히스토리를 Custom OpenAI 형식으로 변환
-    const messages = [];
-    for (const msg of history) {
-      const role = msg.isMe ? "user" : "assistant";
-      let content = msg.content || "";
+    const messages = contents.map(c => ({
+      role: c.role === 'model' ? 'assistant' : c.role,
+      content: c.parts.map(p => p.text).join('')
+    }));
 
-      if (msg.isMe && msg.type === "image" && msg.imageId) {
-        const imageData = character?.media?.find((m) => m.id === msg.imageId);
-        if (imageData) {
-          content = [
-            { type: "text", text: content || t("api.imageMessage") },
-            {
-              type: "image_url",
-              image_url: {
-                url: imageData.dataUrl,
-              },
-            },
-          ];
-        } else {
-          content = content || t("api.imageUnavailable");
-        }
-      } else if (msg.isMe && msg.type === "sticker" && msg.stickerData) {
-        const stickerName =
-          msg.stickerData.stickerName || t("api.unknownSticker");
-        content =
-          t("api.stickerMessage", { stickerName }) +
-          (content ? ` ${content}` : "");
-      }
-
-      if (content) {
-        messages.push({ role, content });
-      }
-    }
-
-    // for_update 라인 7297-7302: Proactive 모드 처리
-    if (isProactive && messages.length === 0) {
-      messages.push({
-        role: "user",
-        content: t("api.proactiveStart"),
-      });
-    }
-
-    // for_update 라인 7308: 시스템 메시지 추가
     messages.unshift({ role: "system", content: systemPrompt });
 
     // for_update 라인 7310-7315: 요청 본문 구성
@@ -249,12 +211,12 @@ export class CustomOpenAIClient {
   /**
    * Generates a character sheet using Custom OpenAI API.
    */
-  async generateCharacterSheet({ 
-    characterName, 
-    characterDescription, 
-    characterSheetPrompt 
+  async generateCharacterSheet({
+    characterName,
+    characterDescription,
+    characterSheetPrompt
   }) {
-    const { systemPrompt, contents } = buildCharacterSheetPrompt({
+    const { systemPrompt, contents } = await buildCharacterSheetPrompt({
       characterName,
       characterDescription,
       characterSheetPrompt,
@@ -289,14 +251,14 @@ export class CustomOpenAIClient {
 
       if (!response.ok) {
         console.error("Character Sheet Gen API Error:", data);
-        const errorMessage = data?.error?.message || 
+        const errorMessage = data?.error?.message ||
           t("api.requestFailed", { status: response.statusText });
         throw new Error(errorMessage);
       }
 
       if (data.choices && data.choices.length > 0) {
         const responseText = data.choices[0].message.content.trim();
-        
+
         return {
           messages: [{ content: responseText }],
           reactionDelay: 1000,

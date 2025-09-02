@@ -23,7 +23,7 @@ export async function renderPromptModal(app) {
   };
 
   return `
-    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" id="prompt-modal-root">
         <div class="bg-gray-800 rounded-2xl w-full max-w-4xl mx-4 flex flex-col" style="max-height: 90vh;">
             <div class="flex items-center justify-between p-6 border-b border-gray-700 shrink-0">
                 <h3 class="text-lg font-semibold text-white">${t("promptModal.title")}</h3>
@@ -58,12 +58,12 @@ export async function renderPromptModal(app) {
 }
 
 export function setupPromptModalEventListeners(app) {
-  const modal = document.querySelector('.fixed.inset-0');
+  const modal = document.getElementById('prompt-modal-root');
   if (!modal) return;
 
   modal.addEventListener('click', (e) => {
     if (e.target.id === 'close-prompt-modal' || e.target.id === 'close-prompt-modal-secondary' || e.target === modal) {
-      modal.remove();
+      app.setState({ showPromptModal: false });
     }
   });
 
@@ -74,7 +74,7 @@ export function setupPromptModalEventListeners(app) {
       profileCreation: document.getElementById('prompt-profileCreation').value,
     };
     await saveAllPrompts(newPrompts);
-    modal.remove();
+    app.setState({ showPromptModal: false });
     // Optionally, show a success notification
   });
 

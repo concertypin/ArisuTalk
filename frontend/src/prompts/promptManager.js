@@ -55,7 +55,7 @@ export async function savePrompt(type, content) {
 export async function saveAllPrompts(prompts) {
   const customPrompts = (await loadFromBrowserStorage(PROMPT_STORAGE_KEY)) || {};
   Object.assign(customPrompts, prompts);
-  await saveToBrowserStorage(PROMPT_STORAGE_KEY, customPrompts);
+  saveToBrowserStorage(PROMPT_STORAGE_KEY, customPrompts);
 }
 
 /**

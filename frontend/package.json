@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "serve": "pnpx serve -l 5173 dist/",
+    "serve": "pnpx http-server -p 5173 -c-1 dist/",
     "format": "prettier --write 'src/**/*.{js,ts,jsx,tsx}'"
   },
   "keywords": [],

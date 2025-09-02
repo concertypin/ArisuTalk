@@ -56,7 +56,7 @@ export class OpenAIClient {
     isProactive = false,
     forceSummary = false,
   }) {
-    const { systemPrompt } = buildContentPrompt({
+    const { systemPrompt, contents } = await buildContentPrompt({
       userName,
       userDescription,
       character,
@@ -66,46 +66,11 @@ export class OpenAIClient {
       forceSummary,
     });
 
-    // for_update 라인 6974-7002: 히스토리를 OpenAI 형식으로 변환
-    const messages = [];
-    for (const msg of history) {
-      const role = msg.isMe ? "user" : "assistant";
-      let content = msg.content || "";
+    const messages = contents.map(c => ({
+        role: c.role === 'model' ? 'assistant' : c.role,
+        content: c.parts.map(p => p.text).join('')
+    }));
 
-      if (msg.isMe && msg.type === "image" && msg.imageId) {
-        const imageData = character?.media?.find((m) => m.id === msg.imageId);
-        if (imageData) {
-          content = [
-            { type: "text", text: content || t("api.imageMessage") },
-            {
-              type: "image_url",
-              image_url: {
-                url: imageData.dataUrl,
-              },
-            },
-          ];
-        } else {
-          content = content || t("api.imageUnavailable");
-        }
-      } else if (msg.isMe && msg.type === "sticker" && msg.stickerData) {
-        const stickerName = msg.stickerData.stickerName || t("api.unknownSticker");
-        content = t("api.stickerMessage", { stickerName: stickerName }) + (content ? ` ${content}` : "");
-      }
-
-      if (content) {
-        messages.push({ role, content });
-      }
-    }
-
-    // for_update 라인 7004-7009: Proactive 모드 처리
-    if (isProactive && messages.length === 0) {
-      messages.push({
-        role: "user",
-        content: "(SYSTEM: You are starting this conversation. Please begin.)",
-      });
-    }
-
-    // for_update 라인 7015: 시스템 메시지 추가
     messages.unshift({ role: "system", content: systemPrompt });
 
     // for_update 라인 7017-7022: 요청 본문 구성

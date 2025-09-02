@@ -3,8 +3,9 @@ import { t, setLanguage, getLanguage } from "./i18n.js";
 import {
   defaultCharacters,
   defaultAPISettings,
+  defaultPrompts,
 } from "./defaults.js";
-import { saveAllPrompts } from "./prompts/promptManager.js";
+import { getAllPrompts, saveAllPrompts } from "./prompts/promptManager.js";
 
 import {
   loadFromBrowserStorage,
@@ -48,6 +49,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 class PersonaChatApp {
   constructor() {
     this.apiManager = new APIManager();
+    this.defaultPrompts = defaultPrompts;
     this.state = {
       settings: {
         // 레거시 호환성 유지
@@ -335,6 +337,9 @@ class PersonaChatApp {
       this.state.openChats = openChats;
       this.state.characterStates = characterStates;
       this.state.settingsSnapshots = settingsSnapshots;
+
+      // Load prompts
+      this.state.settings.prompts = await getAllPrompts();
 
       // 디버그 로그 설정 로딩
       this.state.enableDebugLogs = settings.enableDebugLogs || false;
@@ -2653,6 +2658,10 @@ class PersonaChatApp {
       profileTemperature: currentConfig.profileTemperature,
     };
 
+    if (!this.state.settings.prompts) {
+      this.state.settings.prompts = await getAllPrompts();
+    }
+
     const response = await this.apiManager.generateContent(
       apiProvider,
       currentConfig.apiKey,
@@ -4604,6 +4613,9 @@ class PersonaChatApp {
 
     try {
       // 캐릭터 시트 생성 프롬프트 가져오기
+      if (!this.state.settings.prompts) {
+        this.state.settings.prompts = await getAllPrompts();
+      }
       const generationPrompt =
         this.state.settings.prompts.character_sheet_generation ||
         this.defaultPrompts.character_sheet_generation;

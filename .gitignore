@@ -26,3 +26,6 @@ build/
 
 # Linters
 backend/ktlint
+
+# Local files
+TODO.md

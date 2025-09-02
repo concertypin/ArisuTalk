@@ -106,7 +106,7 @@ export function chatMLToPromptStructure(messages, character, userName = '', user
       } else {
         systemPrompt = content;
       }
-    } else if ((role === 'user' || role === 'assistant') && includeConversation) {
+    } else if (role === 'user' || role === 'assistant') {
       // Only include user/assistant messages if explicitly requested
       // This prevents ChatML prompt examples from interfering with real conversation history
       const internalRole = role === 'assistant' ? 'model' : 'user';

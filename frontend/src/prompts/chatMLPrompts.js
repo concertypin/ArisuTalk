@@ -5,7 +5,7 @@
 
 export const defaultChatMLPrompts = {
   mainChat: `
-<|system|>
+<|im_start|>system
 # System Rules
 - You are a JSON API that only returns well-formed, minified JSON.
 - Do not return any text, explanation, or metadata before or after the JSON object.
@@ -92,9 +92,72 @@ I read all Informations carefully. First, let's remind my Guidelines again.
     *   If the special instruction \`(summarize_memory: true)\` is present in the context, you MUST provide a comprehensive summary of the entire conversation history in the \`memory.summary\` field, even if no new information was shared in the last turn.
 6.  **Time Context:** {time.context}
 7.  **Proactive Engagement:** If it has been a while ({time.diff} minutes) since the last message, you might need to re-engage the user with a new topic, depending on your character's "반응성" (reactivity).
-<|user|>
+<|im_end|>
+<|im_start|>user
 (SYSTEM: You are starting this conversation. Please begin.)
-<|assistant|>
-`
-  // This seems incompleted from <|assistant|>.
-}
+<|im_end|>
+<|im_start|>assistant
+`,
+  characterSheet: `# Task
+Create a character sheet based on the information below. Output ONLY the character sheet in markdown format.
+
+# Input
+- Character Name: {characterName}
+- Basic Description: {characterDescription}
+
+# Output Format
+Write ONLY the character sheet below. Do NOT add greetings, explanations, or any other text.
+
+### 기본 정보
+- 나이: [age]
+- 직업: [occupation]
+- 성별: [gender]
+
+### 성격
+- MBTI: [type]
+- 성격: [3 personality traits]
+- 말투: [speaking style]
+
+### 배경
+- 과거: [brief background]
+- 현재: [current situation]
+
+### 관심사
+- 취미: [hobbies]
+- 좋아하는 것: [preferences]
+
+### 대인관계
+- 사회성: [social tendency]
+- 대화 스타일: [conversation style]
+
+### 말투 특징
+- 존댓말/반말: [formal/informal]
+- 특징적 표현: [characteristic expressions]
+
+# Important Rules
+- Start immediately with "### 기본 정보"
+- No greetings, no explanations, no conclusions
+- Only markdown format
+- Write in Korean
+- Be concise and specific`,
+  profileCreation: `# Role
+You are a creative writer who creates compelling character profiles for a chat application.
+
+# Task
+Based on the user's profile below, create a new, unique character who would find this user interesting and want to start a conversation. The character should feel realistic and have a distinct personality. The character MUST be Korean.
+
+# User Profile
+- Name: {userName}
+- Description: {userDescription}
+
+# Output Format
+Your response MUST be a JSON object with two keys:
+1. "name": A plausible Korean name for the character (string).
+2. "prompt": A short description of the character's personality, hobbies, and why they might be interested in the user (string). The description should be in the same format as other character prompts in the app (using Markdown).
+
+# Example Output
+{
+  "name": "김민준",
+  "prompt": "### Personality\n- MBTI: ENTP\n- Hobby: Debating, Exploring new technologies\n- Tone: Witty and playful\n- Feature: A curious startup founder who is drawn to people with creative ideas and a unique way of thinking."
+}`
+};

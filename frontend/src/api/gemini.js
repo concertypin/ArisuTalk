@@ -56,7 +56,7 @@ export class GeminiClient {
     isProactive = false,
     forceSummary = false,
   }) {
-    const { contents, systemPrompt } = buildContentPrompt({
+    const { contents, systemPrompt } = await buildContentPrompt({
       userName,
       userDescription,
       character,
