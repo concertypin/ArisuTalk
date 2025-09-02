@@ -11,10 +11,7 @@ import {
 } from "./storage.js";
 import { APIManager } from "./api/apiManager.js";
 import { PROVIDERS, PROVIDER_MODELS } from "./constants/providers.js";
-import {
-  renderProviderConfig,
-  setupAdvancedSettingsEventListeners,
-} from "./components/MobileSettingsUI.js";
+import { renderProviderConfig } from "./components/MobileSettingsUI.js";
 import { render, adjustMessageContainerPadding } from "./ui.js";
 import { secureStorage } from "./utils/secureStorage.js";
 import {
@@ -184,6 +181,29 @@ class PersonaChatApp {
     );
   }
 
+  handleSettingChange(key, value) {
+    this.setState({
+        settings: { ...this.state.settings, [key]: value }
+    });
+  }
+
+  handleProviderConfigChange(key, value) {
+      const provider = this.state.settings.apiProvider || DEFAULT_PROVIDER;
+      const newConfig = {
+          ...(this.state.settings.apiConfigs?.[provider] || {}),
+          [key]: value
+      };
+      this.setState({
+          settings: {
+              ...this.state.settings,
+              apiConfigs: {
+                  ...this.state.settings.apiConfigs,
+                  [provider]: newConfig
+              }
+          }
+      });
+  }
+
   createSettingsSnapshot() {
     if (!this.state.settings.snapshotsEnabled) return;
 
@@ -229,52 +249,9 @@ class PersonaChatApp {
     }
   }
 
-  handleSaveSettings() {
-    const wasRandomDisabled =
-      this.initialSettings && !this.initialSettings.randomFirstMessageEnabled;
-    const isRandomEnabled = this.state.settings.randomFirstMessageEnabled;
+  
 
-    // Create a snapshot of the settings when the user explicitly saves.
-    this.createSettingsSnapshot();
-
-    this.setState({ showSettingsModal: false, showSettingsUI: false, showAiSettingsUI: false, initialSettings: null });
-
-    if (wasRandomDisabled && isRandomEnabled) {
-      this.scheduleMultipleRandomChats();
-    }
-  }
-
-  handleCancelSettings() {
-    const hasChanges =
-      JSON.stringify(this.initialSettings) !==
-      JSON.stringify(this.state.settings);
-
-    if (hasChanges) {
-      this.showConfirmModal(
-        t("ui.discardChanges"),
-        t("ui.unsavedChangesWarning"),
-        () => {
-          if (this.initialSettings) {
-            this.setState({
-              settings: this.initialSettings,
-              showSettingsModal: false,
-              showSettingsUI: false,
-              initialSettings: null,
-              modal: { isOpen: false, title: "", message: "", onConfirm: null },
-            });
-          } else {
-            this.setState({
-              showSettingsModal: false,
-              showSettingsUI: false,
-              modal: { isOpen: false, title: "", message: "", onConfirm: null },
-            });
-          }
-        },
-      );
-    } else {
-      this.setState({ showSettingsModal: false, showSettingsUI: false, initialSettings: null });
-    }
-  }
+  
 
   handleToggleSnapshots(enabled) {
     this.setState({
