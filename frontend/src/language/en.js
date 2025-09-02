@@ -128,6 +128,7 @@ export const en = {
     noSnapshots: "No saved snapshots.",
     title: "Settings",
     aiSettings: "AI Settings",
+    scaleSettings: "Scale Settings",
     advancedSettings: "Advanced Settings",
     apiKey: "API Key",
     apiKeyPlaceholder: "Enter your API key",
@@ -269,6 +270,8 @@ export const en = {
       stickerData: "Sticker data",
       debugLogs: "Debug logs",
     },
+    uiSizePreviewMessage1: "Hello! I'll help you adjust the UI size.",
+    uiSizePreviewMessage2: "Yes, the preview is nice!",
   },
   sidebar: {
     startNewChat: "Start a new chat",

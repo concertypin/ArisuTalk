@@ -127,6 +127,7 @@ export const ko = {
     noSnapshots: "저장된 스냅샷이 없습니다.",
     title: "설정",
     aiSettings: "AI 설정",
+    scaleSettings: "크기 설정",
     advancedSettings: "고급 설정",
     apiKey: "API 키",
     apiKeyPlaceholder: "API 키를 입력하세요",
@@ -268,6 +269,8 @@ export const ko = {
       stickerData: "스티커 데이터",
       debugLogs: "디버그 로그",
     },
+    uiSizePreviewMessage1: "안녕하세요! UI 크기 조절을 도와드릴게요.",
+    uiSizePreviewMessage2: "네, 미리보기 좋네요!",
   },
   sidebar: {
     startNewChat: "새로운 채팅 시작",
