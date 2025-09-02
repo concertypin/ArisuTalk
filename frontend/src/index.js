@@ -5,7 +5,7 @@ import {
   defaultAPISettings,
   defaultPrompts,
 } from "./defaults.js";
-import { getAllPrompts, saveAllPrompts } from "./prompts/promptManager.js";
+import { getAllPrompts, saveAllPrompts } from "./prompts/promptManager.ts";
 
 import {
   loadFromBrowserStorage,

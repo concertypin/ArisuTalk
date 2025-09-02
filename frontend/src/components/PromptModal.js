@@ -1,5 +1,5 @@
 import { t } from "../i18n.js";
-import { getAllPrompts, saveAllPrompts, resetAllPrompts } from '../prompts/promptManager.js';
+import { getAllPrompts, saveAllPrompts, resetAllPrompts } from '../prompts/promptManager.ts';
 
 export async function renderPromptModal(app) {
   const prompts = await getAllPrompts();

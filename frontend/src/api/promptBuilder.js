@@ -2,7 +2,7 @@
  * This module is responsible for building the prompts for the various API clients.
  * It uses the new promptManager to fetch ChatML prompts and then populates them with dynamic data.
  */
-import { getPrompt } from '../prompts/promptManager.js';
+import { getPrompt } from '../prompts/promptManager.ts';
 import { parseChatML, chatMLToPromptStructure } from './chatMLParser.js';
 
 /**
@@ -39,13 +39,13 @@ function populateTemplate(template, data) {
  * @param {boolean} [params.forceSummary=false] - Whether to force a memory summary.
  * @returns {Promise<{contents: Array<object>, systemPrompt: string}>} - The generated contents and system prompt.
  */
-export async function buildContentPrompt({ 
-  userName, 
-  userDescription, 
-  character, 
-  history, 
-  isProactive = false, 
-  forceSummary = false 
+export async function buildContentPrompt({
+  userName,
+  userDescription,
+  character,
+  history,
+  isProactive = false,
+  forceSummary = false
 }) {
   const chatMLTemplate = await getPrompt('mainChat');
 
@@ -79,8 +79,8 @@ export async function buildContentPrompt({
     ? `The character has access to the following stickers: ${availableStickers}`
     : 'The character has no stickers.';
 
-  const memories = character.memories && character.memories.length > 0 
-    ? character.memories.map(mem => `- ${mem}`).join('\n') 
+  const memories = character.memories && character.memories.length > 0
+    ? character.memories.map(mem => `- ${mem}`).join('\n')
     : 'No specific memories recorded yet.';
 
   const data = {
@@ -170,7 +170,7 @@ export async function buildContentPrompt({
  */
 export async function buildCharacterSheetPrompt({ characterName, characterDescription }) {
   const chatMLTemplate = await getPrompt('characterSheet');
-  
+
   const data = {
     character: {
       name: characterName,
@@ -181,10 +181,10 @@ export async function buildCharacterSheetPrompt({ characterName, characterDescri
   const populatedPrompt = populateTemplate(chatMLTemplate, data);
   const chatMLMessages = parseChatML(populatedPrompt);
   const { systemPrompt, contents } = chatMLToPromptStructure(
-    chatMLMessages, 
-    null, 
-    '', 
-    '', 
+    chatMLMessages,
+    null,
+    '',
+    '',
     true // Allow conversation messages for character sheet generation
   );
 
@@ -211,10 +211,10 @@ export async function buildProfilePrompt({ userName, userDescription }) {
   const populatedPrompt = populateTemplate(chatMLTemplate, data);
   const chatMLMessages = parseChatML(populatedPrompt);
   const { systemPrompt, contents } = chatMLToPromptStructure(
-    chatMLMessages, 
-    null, 
-    '', 
-    '', 
+    chatMLMessages,
+    null,
+    '',
+    '',
     true // Allow conversation messages for profile generation
   );
 
