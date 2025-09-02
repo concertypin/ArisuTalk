@@ -7,6 +7,7 @@
     "dev:fe": "pnpm --filter frontend dev",
     "build:fe": "pnpm --filter frontend build",
     "format:fe": "pnpm --filter frontend format",
+    "serve:fe": "pnpm --filter frontend serve",
     "dev:be": "cd backend && ./gradlew run"
   },
   "keywords": [],

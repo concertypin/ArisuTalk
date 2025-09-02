@@ -9,6 +9,7 @@ export default defineConfig({
         outDir: "dist",
         sourcemap: true,
     },
+    clearScreen: false,
     publicDir: "static",
     plugins: [
         VitePWA({
