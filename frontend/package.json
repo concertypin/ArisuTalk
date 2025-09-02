@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
+    "prepreview": "pnpm run build",
+    "preview": "pnpm run serve",
     "serve": "pnpx http-server -p 5173 -c-1 dist/",
     "format": "prettier --write 'src/**/*.{js,ts,jsx,tsx}'"
   },

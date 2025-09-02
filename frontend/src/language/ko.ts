@@ -1,5 +1,6 @@
-/** @type {import('./language.d').LanguageStrings} */
-export const ko = {
+import { LanguageStrings } from "./language";
+
+export const ko: LanguageStrings = {
   common: {
     cancel: "취소",
     save: "저장",
@@ -8,6 +9,7 @@ export const ko = {
     delete: "삭제",
     edit: "수정",
     done: "완료",
+    setupLater: "나중에 설정",
   },
   characterModal: {
     memoryPlaceholder: "기억할 내용을 입력하세요...",
@@ -115,11 +117,16 @@ export const ko = {
     resetToDefault: "기본값으로 되돌리기",
     randomFirstMessagePrompt: "랜덤 선톡 캐릭터 생성 프롬프트",
     profileCreationRules: "# 캐릭터 생성 규칙 (Profile Creation Rules)",
-    characterSheetGenerationRules:
-      "# 캐릭터 시트 생성 규칙 (Character Sheet Generation Rules)",
+    characterSheetGenerationRules: "# 캐릭터 시트 생성 규칙 (Character Sheet Generation Rules)",
     backupPrompts: "프롬프트 백업",
     restorePrompts: "프롬프트 불러오기",
     characterSheetGenerationPrompt: "AI 캐릭터 시트 생성 프롬프트",
+    characterSheetGenerationPromptDescription: "이 프롬프트는 새로운 캐릭터 시트를 생성할 때 사용됩니다.",
+    mainChatPromptDescription: "이 프롬프트는 메인 채팅 대화에서 사용됩니다. AI의 행동 방식과 응답 스타일을 안내합니다.",
+    randomFirstMessagePromptDescription: "이 프롬프트는 새로운 첫 메시지를 생성할 때 사용됩니다.",
+    resetAllPrompts: "프롬프트 초기화!",
+    resetAllPromptsConfirmation: "모든 프롬프트를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+    restoreFailed: "프롬프트 불러오기에 실패했습니다: ",
   },
   settings: {
     restore: "복원",
