@@ -25,7 +25,10 @@ import {
   renderDebugLogsModal,
   setupDebugLogsModalEventListeners,
 } from "./components/DebugLogsModal.js";
-import { renderCharacterListPage, renderCharacterList } from "./components/CharacterListPage.js";
+import {
+  renderCharacterListPage,
+  renderCharacterList,
+} from "./components/CharacterListPage.js";
 import { renderSearchModal } from "./components/SearchModal.js";
 
 export function adjustMessageContainerPadding() {
@@ -51,10 +54,10 @@ function renderModals(app) {
   if (app.state.showMobileSearch) html += renderSearchModal(app);
   if (app.state.modal.isOpen) {
     switch (app.state.modal.type) {
-      case 'confirmation':
+      case "confirmation":
         html += renderConfirmationModal(app);
         break;
-      case 'chatSelection':
+      case "chatSelection":
         html += renderChatSelectionModal(app);
         break;
     }
@@ -84,82 +87,130 @@ export function render(app) {
   const isMobile = window.innerWidth < 768;
 
   const mainContainer = document.getElementById("main-chat");
-  const listContainer = document.getElementById("character-list-page-container");
+  const listContainer = document.getElementById(
+    "character-list-page-container",
+  );
   const settingsContainer = document.getElementById("settings-page-container");
-  const aiSettingsContainer = document.getElementById("ai-settings-page-container");
-  const scaleSettingsContainer = document.getElementById("scale-settings-page-container");
+  const aiSettingsContainer = document.getElementById(
+    "ai-settings-page-container",
+  );
+  const scaleSettingsContainer = document.getElementById(
+    "scale-settings-page-container",
+  );
   const sidebarContainer = document.getElementById("sidebar");
 
   // Main Content Rendering
   if (isMobile) {
-    const transitionContainer = document.getElementById('page-transition-container');
-    
+    const transitionContainer = document.getElementById(
+      "page-transition-container",
+    );
+
     // --- Visibility & Animation Control ---
-    sidebarContainer.classList.add('hidden');
-    listContainer.classList.remove('hidden');
-    mainContainer.classList.remove('hidden');
-    settingsContainer.classList.remove('hidden');
-    aiSettingsContainer.classList.remove('hidden');
+    sidebarContainer.classList.add("hidden");
+    listContainer.classList.remove("hidden");
+    mainContainer.classList.remove("hidden");
+    settingsContainer.classList.remove("hidden");
+    aiSettingsContainer.classList.remove("hidden");
 
     // --- View Switching Logic ---
     if (newState.showAiSettingsUI) {
-        transitionContainer.classList.add('show-ai-settings');
-        transitionContainer.classList.remove('show-chat', 'show-settings', 'show-scale-settings');
-        if (isFirstRender || oldState.showAiSettingsUI !== newState.showAiSettingsUI) {
-            aiSettingsContainer.innerHTML = renderAiSettingsPage(app);
-            setupMobileSettingsUIEventListeners(app); // Re-use listeners for back button etc.
-        }
+      transitionContainer.classList.add("show-ai-settings");
+      transitionContainer.classList.remove(
+        "show-chat",
+        "show-settings",
+        "show-scale-settings",
+      );
+      if (
+        isFirstRender ||
+        oldState.showAiSettingsUI !== newState.showAiSettingsUI
+      ) {
+        aiSettingsContainer.innerHTML = renderAiSettingsPage(app);
+        setupMobileSettingsUIEventListeners(app); // Re-use listeners for back button etc.
+      }
     } else if (newState.showScaleSettingsUI) {
-        transitionContainer.classList.add('show-scale-settings');
-        transitionContainer.classList.remove('show-chat', 'show-settings', 'show-ai-settings');
-        if (isFirstRender || oldState.showScaleSettingsUI !== newState.showScaleSettingsUI) {
-            scaleSettingsContainer.innerHTML = renderScaleSettingsPage(app);
-            setupMobileSettingsUIEventListeners(app); // Re-use listeners for back button etc.
-        }
+      transitionContainer.classList.add("show-scale-settings");
+      transitionContainer.classList.remove(
+        "show-chat",
+        "show-settings",
+        "show-ai-settings",
+      );
+      if (
+        isFirstRender ||
+        oldState.showScaleSettingsUI !== newState.showScaleSettingsUI
+      ) {
+        scaleSettingsContainer.innerHTML = renderScaleSettingsPage(app);
+        setupMobileSettingsUIEventListeners(app); // Re-use listeners for back button etc.
+      }
     } else if (newState.showSettingsUI) {
-      transitionContainer.classList.add('show-settings');
-      transitionContainer.classList.remove('show-chat', 'show-ai-settings', 'show-scale-settings');
-      if (isFirstRender || oldState.showSettingsUI !== newState.showSettingsUI || oldState.mobileSettingsPage !== newState.mobileSettingsPage) {
+      transitionContainer.classList.add("show-settings");
+      transitionContainer.classList.remove(
+        "show-chat",
+        "show-ai-settings",
+        "show-scale-settings",
+      );
+      if (
+        isFirstRender ||
+        oldState.showSettingsUI !== newState.showSettingsUI ||
+        oldState.mobileSettingsPage !== newState.mobileSettingsPage
+      ) {
         settingsContainer.innerHTML = renderMobileSettingsUI(app);
         setupMobileSettingsUIEventListeners(app);
       }
       setTimeout(() => {
         if (!window.personaApp.state.selectedChatId) {
-          mainContainer.innerHTML = '';
+          mainContainer.innerHTML = "";
         }
       }, 600);
     } else if (newState.selectedChatId) {
       if (oldState.selectedChatId !== newState.selectedChatId) {
-        mainContainer.innerHTML = '<div class="flex-1 flex items-center justify-center"><div class="w-6 h-6 border-4 border-gray-700 border-t-blue-500 rounded-full animate-spin"></div></div>';
+        mainContainer.innerHTML =
+          '<div class="flex-1 flex items-center justify-center"><div class="w-6 h-6 border-4 border-gray-700 border-t-blue-500 rounded-full animate-spin"></div></div>';
       }
 
-      transitionContainer.classList.add('show-chat');
-      transitionContainer.classList.remove('show-settings', 'show-ai-settings', 'show-scale-settings');
+      transitionContainer.classList.add("show-chat");
+      transitionContainer.classList.remove(
+        "show-settings",
+        "show-ai-settings",
+        "show-scale-settings",
+      );
 
       setTimeout(() => {
-        if (window.personaApp.state.selectedChatId === newState.selectedChatId) {
-            if (isFirstRender || shouldUpdateMainChat(oldState, newState)) {
-                renderMainChat(app);
-                setupMainChatEventListeners();
-                adjustMessageContainerPadding();
-                lucide.createIcons();
-                setupConditionalBlur();
-                const messagesContainer = document.getElementById('messages-container');
-                if (messagesContainer) {
-                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                }
+        if (
+          window.personaApp.state.selectedChatId === newState.selectedChatId
+        ) {
+          if (isFirstRender || shouldUpdateMainChat(oldState, newState)) {
+            renderMainChat(app);
+            setupMainChatEventListeners();
+            adjustMessageContainerPadding();
+            lucide.createIcons();
+            setupConditionalBlur();
+            const messagesContainer =
+              document.getElementById("messages-container");
+            if (messagesContainer) {
+              messagesContainer.scrollTop = messagesContainer.scrollHeight;
             }
+          }
         }
       }, 600);
     } else {
-      transitionContainer.classList.remove('show-chat', 'show-settings', 'show-ai-settings', 'show-scale-settings');
+      transitionContainer.classList.remove(
+        "show-chat",
+        "show-settings",
+        "show-ai-settings",
+        "show-scale-settings",
+      );
 
       if (isFirstRender || shouldUpdateCharacterList(oldState, newState)) {
-        const isListAlreadyRendered = !!listContainer.querySelector('header');
-        if (!isListAlreadyRendered || oldState.showFabMenu !== newState.showFabMenu) {
+        const isListAlreadyRendered = !!listContainer.querySelector("header");
+        if (
+          !isListAlreadyRendered ||
+          oldState.showFabMenu !== newState.showFabMenu
+        ) {
           renderCharacterListPage(app);
         } else {
-          const listItemsContainer = listContainer.querySelector('#character-list-items');
+          const listItemsContainer = listContainer.querySelector(
+            "#character-list-items",
+          );
           if (listItemsContainer) {
             renderCharacterList(app, listItemsContainer);
           }
@@ -168,34 +219,36 @@ export function render(app) {
 
       setTimeout(() => {
         if (!window.personaApp.state.selectedChatId) {
-          mainContainer.innerHTML = '';
+          mainContainer.innerHTML = "";
         }
         if (!window.personaApp.state.showSettingsUI) {
-            settingsContainer.innerHTML = '';
+          settingsContainer.innerHTML = "";
         }
         if (!window.personaApp.state.showAiSettingsUI) {
-            aiSettingsContainer.innerHTML = '';
+          aiSettingsContainer.innerHTML = "";
         }
         if (!window.personaApp.state.showScaleSettingsUI) {
-            scaleSettingsContainer.innerHTML = '';
+          scaleSettingsContainer.innerHTML = "";
         }
-      }, 600); 
+      }, 600);
     }
   } else {
     // --- Desktop Layout ---
-    const transitionContainer = document.getElementById('page-transition-container');
-    
+    const transitionContainer = document.getElementById(
+      "page-transition-container",
+    );
+
     // Setup desktop-specific visibility
-    sidebarContainer.classList.remove('hidden');
-    mainContainer.classList.remove('hidden');
-    listContainer.classList.add('hidden'); // Character list page is not used on desktop
-    transitionContainer.classList.add('show-chat');
-    transitionContainer.classList.remove('show-settings', 'show-ai-settings'); // Ensure animation state is reset for desktop
+    sidebarContainer.classList.remove("hidden");
+    mainContainer.classList.remove("hidden");
+    listContainer.classList.add("hidden"); // Character list page is not used on desktop
+    transitionContainer.classList.add("show-chat");
+    transitionContainer.classList.remove("show-settings", "show-ai-settings"); // Ensure animation state is reset for desktop
 
     // Render sidebar and main chat content
     if (isFirstRender || shouldUpdateSidebar(oldState, newState)) {
       const sidebarScrollContainer = document.querySelector(
-        '#sidebar-content > .overflow-y-auto',
+        "#sidebar-content > .overflow-y-auto",
       );
       const scrollPosition = sidebarScrollContainer
         ? sidebarScrollContainer.scrollTop
@@ -204,7 +257,7 @@ export function render(app) {
       renderSidebar(app);
 
       const newSidebarScrollContainer = document.querySelector(
-        '#sidebar-content > .overflow-y-auto',
+        "#sidebar-content > .overflow-y-auto",
       );
       if (newSidebarScrollContainer) {
         newSidebarScrollContainer.scrollTop = scrollPosition;
@@ -214,9 +267,9 @@ export function render(app) {
       renderMainChat(app);
       setupMainChatEventListeners();
       adjustMessageContainerPadding();
-      const messagesContainer = document.getElementById('messages-container');
+      const messagesContainer = document.getElementById("messages-container");
       if (messagesContainer) {
-          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
       }
     }
   }
@@ -238,8 +291,10 @@ function shouldUpdateCharacterList(oldState, newState) {
     oldState.showFabMenu !== newState.showFabMenu ||
     oldState.showMobileSearch !== newState.showMobileSearch ||
     oldState.searchQuery !== newState.searchQuery ||
-    JSON.stringify(oldState.characters) !== JSON.stringify(newState.characters) ||
-    JSON.stringify(oldState.unreadCounts) !== JSON.stringify(newState.unreadCounts) ||
+    JSON.stringify(oldState.characters) !==
+      JSON.stringify(newState.characters) ||
+    JSON.stringify(oldState.unreadCounts) !==
+      JSON.stringify(newState.unreadCounts) ||
     JSON.stringify(oldState.messages) !== JSON.stringify(newState.messages)
   );
 }
@@ -338,7 +393,8 @@ function shouldUpdateModals(oldState, newState) {
       JSON.stringify(oldState.editingGroupChat) !==
         JSON.stringify(newState.editingGroupChat)) ||
     (newState.showDebugLogsModal &&
-      JSON.stringify(oldState.debugLogs) !== JSON.stringify(newState.debugLogs)) ||
+      JSON.stringify(oldState.debugLogs) !==
+        JSON.stringify(newState.debugLogs)) ||
     (newState.showMobileSearch && oldState.searchQuery !== newState.searchQuery)
   );
 }

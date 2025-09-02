@@ -75,11 +75,17 @@ export function formatTimestamp(timestamp) {
 
   const lang = getLanguage();
 
-  if (diffDays < 1) { // Today
-    return date.toLocaleTimeString(lang, { hour: 'numeric', minute: '2-digit' });
-  } else if (diffDays < 7) { // Within a week
-    return date.toLocaleDateString(lang, { weekday: 'long' });
-  } else { // More than a week ago
-    return date.toLocaleDateString(lang, { month: 'numeric', day: 'numeric' });
+  if (diffDays < 1) {
+    // Today
+    return date.toLocaleTimeString(lang, {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  } else if (diffDays < 7) {
+    // Within a week
+    return date.toLocaleDateString(lang, { weekday: "long" });
+  } else {
+    // More than a week ago
+    return date.toLocaleDateString(lang, { month: "numeric", day: "numeric" });
   }
 }

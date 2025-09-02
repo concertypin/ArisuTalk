@@ -17,12 +17,25 @@ export function handleModalClick(e, app) {
   }
 
   // Settings Modal
-  if (e.target.closest("#open-settings-modal") || e.target.closest("#open-settings-modal-mobile")) app.openSettingsModal();
-  if (e.target.closest("#close-settings-modal") || e.target.closest("#close-settings-ui")) app.handleCancelSettings();
-  if (e.target.closest("#save-settings") || e.target.closest("#save-settings-ui")) app.handleSaveSettings();
+  if (
+    e.target.closest("#open-settings-modal") ||
+    e.target.closest("#open-settings-modal-mobile")
+  )
+    app.openSettingsModal();
+  if (
+    e.target.closest("#close-settings-modal") ||
+    e.target.closest("#close-settings-ui")
+  )
+    app.handleCancelSettings();
+  if (
+    e.target.closest("#save-settings") ||
+    e.target.closest("#save-settings-ui")
+  )
+    app.handleSaveSettings();
 
   // Character Modal
-  if (e.target.closest('#open-new-character-modal-mobile')) app.openNewCharacterModal();
+  if (e.target.closest("#open-new-character-modal-mobile"))
+    app.openNewCharacterModal();
 
   // Prompt Modal
   if (e.target.closest("#open-prompt-modal"))

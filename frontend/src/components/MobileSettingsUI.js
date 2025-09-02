@@ -316,8 +316,8 @@ export function renderMobileSettingsUI(app) {
 }
 
 export function renderAiSettingsPage(app) {
-    const { settings } = app.state;
-    return `
+  const { settings } = app.state;
+  return `
     <div class="flex flex-col h-full relative">
       <header class="absolute top-0 left-0 right-0 px-6 py-4 bg-gray-900/80 flex items-center justify-between z-10" style="backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
           <div class="flex items-center space-x-2">
@@ -335,12 +335,12 @@ export function renderAiSettingsPage(app) {
               "settings.aiProvider",
             )}</label>
             <select id="settings-api-provider" class="w-full px-3 py-2 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-base" onchange="window.personaApp.handleSettingChange('apiProvider', this.value)">
-                <option value="gemini" ${ (settings.apiProvider || "gemini") === "gemini" ? "selected" : ""}>Google Gemini</option>
-                <option value="claude" ${ (settings.apiProvider || "gemini") === "claude" ? "selected" : ""}>Anthropic Claude</option>
-                <option value="openai" ${ (settings.apiProvider || "gemini") === "openai" ? "selected" : ""}>OpenAI ChatGPT</option>
-                <option value="grok" ${ (settings.apiProvider || "gemini") === "grok" ? "selected" : ""}>xAI Grok</option>
-                <option value="openrouter" ${ (settings.apiProvider || "gemini") === "openrouter" ? "selected" : ""}>OpenRouter</option>
-                <option value="custom_openai" ${ (settings.apiProvider || "gemini") === "custom_openai" ? "selected" : ""}>Custom OpenAI</option>
+                <option value="gemini" ${(settings.apiProvider || "gemini") === "gemini" ? "selected" : ""}>Google Gemini</option>
+                <option value="claude" ${(settings.apiProvider || "gemini") === "claude" ? "selected" : ""}>Anthropic Claude</option>
+                <option value="openai" ${(settings.apiProvider || "gemini") === "openai" ? "selected" : ""}>OpenAI ChatGPT</option>
+                <option value="grok" ${(settings.apiProvider || "gemini") === "grok" ? "selected" : ""}>xAI Grok</option>
+                <option value="openrouter" ${(settings.apiProvider || "gemini") === "openrouter" ? "selected" : ""}>OpenRouter</option>
+                <option value="custom_openai" ${(settings.apiProvider || "gemini") === "custom_openai" ? "selected" : ""}>Custom OpenAI</option>
             </select>
         </div>
         <div class="provider-settings-container">${renderCurrentProviderSettings(
@@ -359,8 +359,8 @@ export function renderAiSettingsPage(app) {
 }
 
 export function renderScaleSettingsPage(app) {
-    const { settings } = app.state;
-    return `
+  const { settings } = app.state;
+  return `
     <div class="flex flex-col h-full relative">
       <header class="absolute top-0 left-0 right-0 px-6 py-4 bg-gray-900/80 flex items-center justify-between z-10" style="backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
           <div class="flex items-center space-x-2">
@@ -421,13 +421,12 @@ export function renderScaleSettingsPage(app) {
  * @param {Object} app - The application instance.
  */
 export function setupMobileSettingsUIEventListeners(app) {
-  const closeButton = document.getElementById('close-settings-ui');
-  if (closeButton) {
-    const newButton = closeButton.cloneNode(true);
-    closeButton.parentNode.replaceChild(newButton, closeButton);
-    newButton.addEventListener('click', () => {
+  const closeButton = document.getElementById("close-settings-ui");
+  if (closeButton && !closeButton.dataset.listenerAdded) {
+    closeButton.addEventListener("click", () => {
       app.setState({ showSettingsUI: false });
     });
+    closeButton.dataset.listenerAdded = "true";
   }
 
   setupSettingsModalEventListeners(app);
@@ -483,7 +482,7 @@ export function renderProviderConfig(provider, config) {
                 />
             </div>
 
-            ${ 
+            ${
               provider === PROVIDERS.CUSTOM_OPENAI
                 ? `
                 <!-- Custom OpenAI Base URL -->
@@ -512,7 +511,7 @@ export function renderProviderConfig(provider, config) {
                     )}
                 </label>
 
-                ${ 
+                ${
                   models.length > 0
                     ? `
                     <div class="grid grid-cols-1 gap-2 mb-3">
@@ -521,7 +520,7 @@ export function renderProviderConfig(provider, config) {
                             (model) => `
                             <button
                                 type="button"
-                                class="model-select-btn px-3 py-2 text-left text-sm rounded-lg transition-colors ${ 
+                                class="model-select-btn px-3 py-2 text-left text-sm rounded-lg transition-colors ${
                                   config.model === model
                                     ? "bg-blue-600 text-white"
                                     : "bg-gray-700 text-gray-300 hover:bg-gray-600"
@@ -558,7 +557,7 @@ export function renderProviderConfig(provider, config) {
                     </button>
                 </div>
 
-                ${ 
+                ${
                   customModels.length > 0
                     ? `
                     <div class="mt-3 space-y-1">
@@ -571,7 +570,7 @@ export function renderProviderConfig(provider, config) {
                             <div class="flex items-center gap-2">
                                 <button
                                     type="button"
-                                    class="model-select-btn flex-1 px-3 py-2 text-left text-sm rounded-lg transition-colors ${ 
+                                    class="model-select-btn flex-1 px-3 py-2 text-left text-sm rounded-lg transition-colors ${
                                       config.model === model
                                         ? "bg-blue-600 text-white"
                                         : "bg-gray-700 text-gray-300 hover:bg-gray-600"
@@ -636,7 +635,7 @@ export function renderProviderConfig(provider, config) {
                 <div>
                     <label class="flex items-center justify-between text-sm font-medium text-gray-300 mb-2">
                         <span>${t("settings.temperature")}</span>
-                        <span class="text-blue-400 font-mono text-xs" id="temperature-value">${ 
+                        <span class="text-blue-400 font-mono text-xs" id="temperature-value">${
                           config.temperature !== undefined
                             ? config.temperature
                             : provider === "gemini"
@@ -651,7 +650,7 @@ export function renderProviderConfig(provider, config) {
                         min="0"
                         max="2"
                         step="0.1"
-                        value="${ 
+                        value="${
                           config.temperature !== undefined
                             ? config.temperature
                             : provider === "gemini"
@@ -700,7 +699,7 @@ export function renderProviderConfig(provider, config) {
                         <div>
                             <label class="flex items-center justify-between text-sm font-medium text-gray-300 mb-2">
                                 <span>${t("settings.profileTemperature")}</span>
-                                <span class="text-blue-400 font-mono text-xs" id="profile-temperature-value">${ 
+                                <span class="text-blue-400 font-mono text-xs" id="profile-temperature-value">${
                                   config.profileTemperature !== undefined
                                     ? config.profileTemperature
                                     : 1.2
@@ -713,7 +712,7 @@ export function renderProviderConfig(provider, config) {
                                 min="0.5"
                                 max="2"
                                 step="0.1"
-                                value="${ 
+                                value="${
                                   config.profileTemperature !== undefined
                                     ? config.profileTemperature
                                     : 1.2
@@ -754,7 +753,7 @@ export function renderSnapshotList(app) {
         `,
           )
           .join("")}
-        ${ 
+        ${
           app.state.settingsSnapshots.length === 0
             ? `<p class="text-sm text-gray-500 text-center py-2">${t(
                 "settings.noSnapshots",

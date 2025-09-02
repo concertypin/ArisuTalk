@@ -380,9 +380,7 @@ function renderMessages(app) {
           }
 
           if (textContent.trim()) {
-            const textHtml = `<div class="px-4 py-2 rounded-2xl text-sm md:text-base leading-relaxed ${
-              msg.isMe ? 'text-white' : 'text-gray-100'}" style="background-color: ${msg.isMe ? 'rgba(37, 99, 235, 0.7)' : 'rgba(35, 42, 55, 0.7)'};
-            } mb-2"><div class="break-words">${textContent}</div></div>`;
+            const textHtml = `<div class="px-4 py-2 rounded-2xl text-sm md:text-base leading-relaxed ${msg.isMe ? "text-white" : "text-gray-100"} mb-2" style="background-color: ${msg.isMe ? "rgba(37, 99, 235, 0.7)" : "rgba(35, 42, 55, 0.7)"};"><div class="break-words">${textContent}</div></div>`;
             messageBodyHtml = `<div class="flex flex-col ${
               msg.isMe ? "items-end" : "items-start"
             }">${textHtml}${stickerHtml}</div>`;
@@ -416,17 +414,13 @@ function renderMessages(app) {
         : "max-height: 320px;";
       const imageTag = `<div class="sticker-toggle-btn inline-block cursor-pointer transition-all duration-300" data-message-id="${msg.id}"><img src="${imageUrl}" class="${sizeClass} rounded-lg object-cover" style="${heightStyle}"></div>`;
       const captionTag = msg.content
-        ? `<div class="mt-2 px-4 py-2 rounded-2xl text-sm md:text-base leading-relaxed inline-block ${
-            msg.isMe ? 'text-white' : 'text-gray-100'}" style="background-color: ${msg.isMe ? 'rgba(37, 99, 235, 0.7)' : 'rgba(35, 42, 55, 0.7)'};
-          }"><div class="break-words">${msg.content}</div></div>`
+        ? `<div class="mt-2 px-4 py-2 rounded-2xl text-sm md:text-base leading-relaxed inline-block ${msg.isMe ? "text-white" : "text-gray-100"}" style="background-color: ${msg.isMe ? "rgba(37, 99, 235, 0.7)" : "rgba(35, 42, 55, 0.7)"};"><div class="break-words">${msg.content}</div></div>`
         : "";
       messageBodyHtml = `<div class="flex flex-col ${
         msg.isMe ? "items-end" : "items-start"
       }">${imageTag}${captionTag}</div>`;
     } else {
-      messageBodyHtml = `<div class="px-4 py-2 rounded-2xl text-sm md:text-base leading-relaxed ${
-        msg.isMe ? 'text-white' : 'text-gray-100'}" style="background-color: ${msg.isMe ? 'rgba(37, 99, 235, 0.7)' : 'rgba(35, 42, 55, 0.7)'};
-      }"><div class="break-words">${msg.content}</div></div>`;
+      messageBodyHtml = `<div class="px-4 py-2 rounded-2xl text-sm md:text-base leading-relaxed ${msg.isMe ? "text-white" : "text-gray-100"}" style="background-color: ${msg.isMe ? "rgba(37, 99, 235, 0.7)" : "rgba(35, 42, 55, 0.7)"};"><div class="break-words">${msg.content}</div></div>`;
     }
 
     let actionButtonsHtml = "";
@@ -472,7 +466,7 @@ function renderMessages(app) {
                           }</div>`
                         : ""
                     }
-                    <div class="flex flex-col ${msg.isMe ? 'max-w-[85%] sm:max-w-[75%]' : 'max-w-[70%] sm:max-w-[75%]'} ${
+                    <div class="flex flex-col ${msg.isMe ? "max-w-[85%] sm:max-w-[75%]" : "max-w-[70%] sm:max-w-[75%]"} ${
                       msg.isMe ? "items-end" : "items-start"
                     }">
                         ${

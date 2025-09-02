@@ -177,20 +177,22 @@ class PersonaChatApp {
     );
 
     this.debouncedSetSearchQuery = debounce(
-        (query) => this.setState({ searchQuery: query }),
-        300,
+      (query) => this.setState({ searchQuery: query }),
+      300,
     );
   }
 
   handleCharacterSelect(characterId) {
     const numericCharacterId = Number(characterId);
-    const character = this.state.characters.find(c => c.id === numericCharacterId);
+    const character = this.state.characters.find(
+      (c) => c.id === numericCharacterId,
+    );
     if (!character) return;
 
     const chatRooms = this.state.chatRooms[numericCharacterId] || [];
 
     if (chatRooms.length > 1) {
-      this.showModal('chatSelection', { character });
+      this.showModal("chatSelection", { character });
     } else if (chatRooms.length === 1) {
       this.selectChatRoom(chatRooms[0].id);
     } else {
@@ -201,25 +203,25 @@ class PersonaChatApp {
 
   handleSettingChange(key, value) {
     this.setState({
-        settings: { ...this.state.settings, [key]: value }
+      settings: { ...this.state.settings, [key]: value },
     });
   }
 
   handleProviderConfigChange(key, value) {
-      const provider = this.state.settings.apiProvider || DEFAULT_PROVIDER;
-      const newConfig = {
-          ...(this.state.settings.apiConfigs?.[provider] || {}),
-          [key]: value
-      };
-      this.setState({
-          settings: {
-              ...this.state.settings,
-              apiConfigs: {
-                  ...this.state.settings.apiConfigs,
-                  [provider]: newConfig
-              }
-          }
-      });
+    const provider = this.state.settings.apiProvider || DEFAULT_PROVIDER;
+    const newConfig = {
+      ...(this.state.settings.apiConfigs?.[provider] || {}),
+      [key]: value,
+    };
+    this.setState({
+      settings: {
+        ...this.state.settings,
+        apiConfigs: {
+          ...this.state.settings.apiConfigs,
+          [provider]: newConfig,
+        },
+      },
+    });
   }
 
   createSettingsSnapshot() {
@@ -266,10 +268,6 @@ class PersonaChatApp {
       this.setState({ showSettingsModal: true });
     }
   }
-
-  
-
-  
 
   handleToggleSnapshots(enabled) {
     this.setState({
@@ -418,14 +416,17 @@ class PersonaChatApp {
   }
 
   setState(newState) {
-    const messagesContainerOld = document.getElementById('messages-container');
+    const messagesContainerOld = document.getElementById("messages-container");
     let scrollInfo = null;
-    const oldMessages = this.state.messages[this.state.selectedChatId];
-    const oldMessageCount = oldMessages ? oldMessages.length : 0;
-
     if (messagesContainerOld) {
+      const isAtBottom =
+        messagesContainerOld.scrollHeight -
+          messagesContainerOld.scrollTop -
+          messagesContainerOld.clientHeight <
+        10;
       scrollInfo = {
-        scrollTop: messagesContainerOld.scrollTop
+        isAtBottom,
+        scrollTop: messagesContainerOld.scrollTop,
       };
     }
 
@@ -434,14 +435,16 @@ class PersonaChatApp {
 
     render(this);
 
-    const newMessages = this.state.messages[this.state.selectedChatId];
-    const newMessageCount = newMessages ? newMessages.length : 0;
-
-    if (scrollInfo && oldMessageCount === newMessageCount) {
-        const messagesContainerNew = document.getElementById('messages-container');
-        if (messagesContainerNew) {
-            messagesContainerNew.scrollTop = scrollInfo.scrollTop;
+    if (scrollInfo) {
+      const messagesContainerNew =
+        document.getElementById("messages-container");
+      if (messagesContainerNew) {
+        if (scrollInfo.isAtBottom) {
+          this.scrollToBottom();
+        } else {
+          messagesContainerNew.scrollTop = scrollInfo.scrollTop;
         }
+      }
     }
 
     if (
@@ -509,7 +512,10 @@ class PersonaChatApp {
       this.debouncedSaveDebugLogs(this.state.debugLogs);
     }
     if (this.oldState.selectedChatId !== this.state.selectedChatId) {
-      saveToBrowserStorage("personaChat_selectedChatId_v16", this.state.selectedChatId);
+      saveToBrowserStorage(
+        "personaChat_selectedChatId_v16",
+        this.state.selectedChatId,
+      );
     }
   }
 
@@ -655,40 +661,45 @@ class PersonaChatApp {
       handleModalClick(e, this);
       handleGroupChatClick(e, this);
 
-      if (e.target.closest('#navigate-to-ai-settings')) {
+      if (e.target.closest("#navigate-to-ai-settings")) {
         this.setState({ showAiSettingsUI: true });
       }
 
-      if (e.target.closest('#navigate-to-scale-settings')) {
+      if (e.target.closest("#navigate-to-scale-settings")) {
         this.setState({ showScaleSettingsUI: true });
       }
 
-      if (e.target.closest('#close-ai-settings-ui')) {
+      if (e.target.closest("#close-ai-settings-ui")) {
         this.setState({ showAiSettingsUI: false });
       }
 
-      if (e.target.closest('#close-scale-settings-ui')) {
+      if (e.target.closest("#close-scale-settings-ui")) {
         this.setState({ showScaleSettingsUI: false });
       }
 
-      if (e.target.closest('#fab-menu-toggle')) {
+      if (e.target.closest("#fab-menu-toggle")) {
         this.setState({ showFabMenu: !this.state.showFabMenu });
       }
 
-      if (e.target.closest('#toggle-mobile-search-btn')) {
+      if (e.target.closest("#toggle-mobile-search-btn")) {
         this.setState({ showMobileSearch: !this.state.showMobileSearch });
       }
 
-      if (e.target.closest('#close-search-modal-btn') || e.target.id === 'search-modal-backdrop') {
-        this.setState({ showMobileSearch: false, searchQuery: '' });
+      if (
+        e.target.closest("#close-search-modal-btn") ||
+        e.target.id === "search-modal-backdrop"
+      ) {
+        this.setState({ showMobileSearch: false, searchQuery: "" });
       }
 
-      if (e.target.id === 'create-new-chat-room-modal') {
+      if (e.target.id === "create-new-chat-room-modal") {
         const { character } = this.state.modal;
         if (character) {
-            const newChatRoomId = this.createNewChatRoomForCharacter(character.id);
-            this.selectChatRoom(newChatRoomId);
-            this.hideModal();
+          const newChatRoomId = this.createNewChatRoomForCharacter(
+            character.id,
+          );
+          this.selectChatRoom(newChatRoomId);
+          this.hideModal();
         }
       }
     });
@@ -697,7 +708,7 @@ class PersonaChatApp {
       handleSidebarInput(e, this);
       handleMainChatInput(e, this);
       handleModalInput(e, this);
-      if (e.target.id === 'new-message-input') {
+      if (e.target.id === "new-message-input") {
         adjustMessageContainerPadding();
       }
     });
@@ -717,7 +728,11 @@ class PersonaChatApp {
       }
 
       // Close FAB menu if clicked outside
-      if (this.state.showFabMenu && !e.target.closest('#fab-menu-toggle') && !e.target.closest('.fab-menu')) {
+      if (
+        this.state.showFabMenu &&
+        !e.target.closest("#fab-menu-toggle") &&
+        !e.target.closest(".fab-menu")
+      ) {
         this.setState({ showFabMenu: false });
       }
     });
@@ -757,7 +772,10 @@ class PersonaChatApp {
 
         newChatRooms[characterId] = [defaultChatRoom];
         newMessages[defaultChatRoomId] = oldMessagesForChar;
-      } else if (!newChatRooms[characterId] || newChatRooms[characterId].length === 0) {
+      } else if (
+        !newChatRooms[characterId] ||
+        newChatRooms[characterId].length === 0
+      ) {
         // Create a default chat room if none exist for the character
         const defaultChatRoomId = `${characterId}_default_${Date.now()}`;
         const defaultChatRoom = {
@@ -1146,7 +1164,9 @@ class PersonaChatApp {
   }
 
   showConfirmModal(title, message, onConfirm) {
-    this.setState({ modal: { isOpen: true, type: 'confirmation', title, message, onConfirm } });
+    this.setState({
+      modal: { isOpen: true, type: "confirmation", title, message, onConfirm },
+    });
   }
 
   showModal(type, data) {
@@ -1155,10 +1175,12 @@ class PersonaChatApp {
 
   hideModal(event) {
     // Prevent closing when clicking inside the modal content
-    if (event && event.target.closest('[data-modal-content]')) {
-        return;
+    if (event && event.target.closest("[data-modal-content]")) {
+      return;
     }
-    this.setState({ modal: { isOpen: false, title: "", message: "", onConfirm: null } });
+    this.setState({
+      modal: { isOpen: false, title: "", message: "", onConfirm: null },
+    });
   }
 
   handleModelSelect(model) {

@@ -8,5 +8,3 @@ import { renderDesktopSettingsUI } from "./DesktopSettingsUI.js";
 export function renderSettingsUI(app) {
   return renderDesktopSettingsUI(app);
 }
-
-

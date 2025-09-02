@@ -467,8 +467,8 @@ export const en = {
       '"{{promptName}}" has been reset to default values.',
     selectChat: {
       message: "Select a chat room to continue the conversation.",
-      newChat: "New Chat"
-    }
+      newChat: "New Chat",
+    },
   },
   ui: {
     discardChanges: "Discard Changes",
@@ -690,6 +690,6 @@ export const en = {
   },
   search: {
     prompt: "Search for characters by name.",
-    noResults: "No characters found."
-  }
+    noResults: "No characters found.",
+  },
 };

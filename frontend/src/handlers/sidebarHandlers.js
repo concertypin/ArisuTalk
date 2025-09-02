@@ -1,4 +1,4 @@
-import { updateSearchResults } from '../components/SearchModal.js';
+import { updateSearchResults } from "../components/SearchModal.js";
 
 export function handleSidebarClick(e, app) {
   const toggleSidebar = () =>
