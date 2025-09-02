@@ -33,28 +33,14 @@ export function renderMobileSettingsUI(app) {
                 <i data-lucide="chevron-right" class="w-6 h-6 text-gray-400"></i>
             </div>
           </div>
-          <details data-section="scale" class="group border-b border-gray-700 pb-3" ${app.state.openSettingsSections.includes("scale") ? "open" : ""}>
-              <summary class="flex items-center justify-between cursor-pointer list-none py-3">
-                  <span class="text-lg font-medium text-gray-200">${t(
-                    "settings.scale",
-                  )}</span>
-                  <i data-lucide="chevron-down" class="w-6 h-6 text-gray-400 transition-transform duration-300 group-open:rotate-180"></i>
-              </summary>
-              <div class="content-wrapper">
-                  <div class="content-inner pt-4 space-y-4">
-                      <div>
-                          <label class="flex items-center text-base font-medium text-gray-300 mb-2"><i data-lucide="type" class="w-5 h-5 mr-3"></i>${t(
-                            "settings.uiSize",
-                          )}</label>
-                          <input id="settings-font-scale" type="range" min="0.8" max="1.4" step="0.1" value="${settings.fontScale}" class="w-full" oninput="window.personaApp.handleSettingChange('fontScale', parseFloat(this.value))">
-                          <div class="flex justify-between text-sm text-gray-400 mt-1"><span>${t(
-                            "settings.small",
-                          )}</span><span>${t("settings.large")}
-                          </span></div>
-                      </div>
-                  </div>
-              </div>
-          </details>
+          <div id="navigate-to-scale-settings" class="group border-b border-gray-700 pb-3 cursor-pointer">
+            <div class="flex items-center justify-between list-none py-3">
+                <span class="text-lg font-medium text-gray-200">${t(
+                  "settings.scale",
+                )}</span>
+                <i data-lucide="chevron-right" class="w-6 h-6 text-gray-400"></i>
+            </div>
+          </div>
           <details data-section="persona" class="group border-b border-gray-700 pb-3" ${app.state.openSettingsSections.includes("persona") ? "open" : ""}>
               <summary class="flex items-center justify-between cursor-pointer list-none py-3">
                   <span class="text-lg font-medium text-gray-200">${t(
@@ -366,6 +352,64 @@ export function renderAiSettingsPage(app) {
                   "settings.editPrompt",
                 )}
             </button>
+        </div>
+      </div>
+    </div>
+    `;
+}
+
+export function renderScaleSettingsPage(app) {
+    const { settings } = app.state;
+    return `
+    <div class="flex flex-col h-full relative">
+      <header class="absolute top-0 left-0 right-0 px-6 py-4 bg-gray-900/80 flex items-center justify-between z-10" style="backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
+          <div class="flex items-center space-x-2">
+              <button id="close-scale-settings-ui" class="p-3 -ml-2 rounded-full hover:bg-gray-700">
+                  <i data-lucide="arrow-left" class="h-6 w-6 text-gray-300"></i>
+              </button>
+              <h2 class="font-semibold text-white text-3xl">${t(
+                "settings.scaleSettings",
+              )}</h2>
+          </div>
+      </header>
+      <div class="flex-1 overflow-y-auto space-y-4 mt-[88px] px-6 mx-4 bg-gray-900 rounded-t-2xl" id="scale-settings-ui-content">
+        <div>
+            <label class="flex items-center text-base font-medium text-gray-300 mb-2"><i data-lucide="type" class="w-5 h-5 mr-3"></i>${t(
+              "settings.uiSize",
+            )}</label>
+            <div class="my-4 p-4 rounded-lg bg-gray-800 space-y-4">
+                <!-- Character Message -->
+                <div class="flex w-full items-start gap-3">
+                    <div class="shrink-0 w-8 h-8 rounded-full bg-gray-600"></div>
+                    <div class="flex flex-col max-w-[75%] items-start">
+                        <div class="flex items-end gap-2">
+                            <div class="message-content-wrapper">
+                                <div class="px-3 py-2 rounded-xl text-sm leading-relaxed text-gray-100" style="background-color: rgba(55, 65, 81, 0.7);">
+                                    <div class="break-words">${t("settings.uiSizePreviewMessage1")}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- User Message -->
+                <div class="flex w-full items-start gap-3 flex-row-reverse">
+                    <div class="flex flex-col max-w-[75%] items-end">
+                        <div class="flex items-end gap-2 flex-row-reverse">
+                            <div class="message-content-wrapper">
+                                <div class="px-3 py-2 rounded-xl text-sm leading-relaxed text-white" style="background-color: rgba(37, 99, 235, 0.7);">
+                                    <div class="break-words">${t("settings.uiSizePreviewMessage2")}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <input id="settings-font-scale" type="range" min="0.8" max="1.4" step="0.1" value="${settings.fontScale}" class="w-full" oninput="window.personaApp.handleSettingChange('fontScale', parseFloat(this.value))">
+            <div class="flex justify-between text-sm text-gray-400 mt-1 relative">
+                <span>80%</span>
+                <span class="absolute" style="left: 33.33%; transform: translateX(-50%);">100%</span>
+                <span>140%</span>
+            </div>
         </div>
       </div>
     </div>

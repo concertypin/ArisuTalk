@@ -114,6 +114,7 @@ class PersonaChatApp {
         },
       },
       showAiSettingsUI: false,
+      showScaleSettingsUI: false,
     };
     this.oldState = null;
     this.messagesEndRef = null;
@@ -630,8 +631,16 @@ class PersonaChatApp {
         this.setState({ showAiSettingsUI: true });
       }
 
+      if (e.target.closest('#navigate-to-scale-settings')) {
+        this.setState({ showScaleSettingsUI: true });
+      }
+
       if (e.target.closest('#close-ai-settings-ui')) {
         this.setState({ showAiSettingsUI: false });
+      }
+
+      if (e.target.closest('#close-scale-settings-ui')) {
+        this.setState({ showScaleSettingsUI: false });
       }
 
       if (e.target.closest('#fab-menu-toggle')) {

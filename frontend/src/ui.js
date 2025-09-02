@@ -7,6 +7,7 @@ import { renderSettingsUI } from "./components/SettingsRouter.js";
 import {
   renderMobileSettingsUI,
   renderAiSettingsPage, // Import the new function
+  renderScaleSettingsPage,
   setupMobileSettingsUIEventListeners,
 } from "./components/MobileSettingsUI.js";
 import { setupDesktopSettingsEventListeners } from "./components/DesktopSettingsUI.js";
@@ -79,6 +80,7 @@ export async function render(app) {
   const listContainer = document.getElementById("character-list-page-container");
   const settingsContainer = document.getElementById("settings-page-container");
   const aiSettingsContainer = document.getElementById("ai-settings-page-container");
+  const scaleSettingsContainer = document.getElementById("scale-settings-page-container");
   const sidebarContainer = document.getElementById("sidebar");
 
   // Main Content Rendering
@@ -95,14 +97,21 @@ export async function render(app) {
     // --- View Switching Logic ---
     if (newState.showAiSettingsUI) {
         transitionContainer.classList.add('show-ai-settings');
-        transitionContainer.classList.remove('show-chat', 'show-settings');
+        transitionContainer.classList.remove('show-chat', 'show-settings', 'show-scale-settings');
         if (isFirstRender || oldState.showAiSettingsUI !== newState.showAiSettingsUI) {
             aiSettingsContainer.innerHTML = renderAiSettingsPage(app);
             setupMobileSettingsUIEventListeners(app); // Re-use listeners for back button etc.
         }
+    } else if (newState.showScaleSettingsUI) {
+        transitionContainer.classList.add('show-scale-settings');
+        transitionContainer.classList.remove('show-chat', 'show-settings', 'show-ai-settings');
+        if (isFirstRender || oldState.showScaleSettingsUI !== newState.showScaleSettingsUI) {
+            scaleSettingsContainer.innerHTML = renderScaleSettingsPage(app);
+            setupMobileSettingsUIEventListeners(app); // Re-use listeners for back button etc.
+        }
     } else if (newState.showSettingsUI) {
       transitionContainer.classList.add('show-settings');
-      transitionContainer.classList.remove('show-chat', 'show-ai-settings');
+      transitionContainer.classList.remove('show-chat', 'show-ai-settings', 'show-scale-settings');
       if (isFirstRender || oldState.showSettingsUI !== newState.showSettingsUI || oldState.mobileSettingsPage !== newState.mobileSettingsPage) {
         settingsContainer.innerHTML = renderMobileSettingsUI(app);
         setupMobileSettingsUIEventListeners(app);
@@ -118,7 +127,7 @@ export async function render(app) {
       }
 
       transitionContainer.classList.add('show-chat');
-      transitionContainer.classList.remove('show-settings', 'show-ai-settings');
+      transitionContainer.classList.remove('show-settings', 'show-ai-settings', 'show-scale-settings');
 
       setTimeout(() => {
         if (window.personaApp.state.selectedChatId === newState.selectedChatId) {
@@ -136,7 +145,7 @@ export async function render(app) {
         }
       }, 600);
     } else {
-      transitionContainer.classList.remove('show-chat', 'show-settings', 'show-ai-settings');
+      transitionContainer.classList.remove('show-chat', 'show-settings', 'show-ai-settings', 'show-scale-settings');
 
       if (isFirstRender || shouldUpdateCharacterList(oldState, newState)) {
         const isListAlreadyRendered = !!listContainer.querySelector('header');
@@ -159,6 +168,9 @@ export async function render(app) {
         }
         if (!window.personaApp.state.showAiSettingsUI) {
             aiSettingsContainer.innerHTML = '';
+        }
+        if (!window.personaApp.state.showScaleSettingsUI) {
+            scaleSettingsContainer.innerHTML = '';
         }
       }, 600); 
     }
