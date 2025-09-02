@@ -471,8 +471,8 @@ export const ko: LanguageStrings = {
       '"{{promptName}}"이(가) 기본값으로 되돌려졌습니다.',
     selectChat: {
       message: "대화를 이어갈 채팅방을 선택해주세요.",
-      newChat: "새로운 채팅"
-    }
+      newChat: "새로운 채팅",
+    },
   },
   ui: {
     discardChanges: "변경사항 취소",
@@ -689,6 +689,6 @@ export const ko: LanguageStrings = {
   },
   search: {
     prompt: "이름으로 캐릭터를 검색해보세요.",
-    noResults: "검색된 캐릭터가 없습니다."
-  }
+    noResults: "검색된 캐릭터가 없습니다.",
+  },
 };

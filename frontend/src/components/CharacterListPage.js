@@ -65,7 +65,9 @@ export function renderCharacterList(app, container) {
   const filteredCharacters = app.state.characters.filter((char) =>
     char.name.toLowerCase().includes(app.state.searchQuery.toLowerCase()),
   );
-  container.innerHTML = filteredCharacters.map((char) => renderCharacterItem(app, char)).join("");
+  container.innerHTML = filteredCharacters
+    .map((char) => renderCharacterItem(app, char))
+    .join("");
 }
 
 export function renderCharacterListPage(app) {
@@ -93,21 +95,25 @@ export function renderCharacterListPage(app) {
     </div>
 
     <!-- FAB Menu (conditionally rendered) -->
-    ${app.state.showFabMenu ? `
+    ${
+      app.state.showFabMenu
+        ? `
     <div class="fab-menu fixed bottom-24 right-6 w-48 bg-gray-700 rounded-2xl shadow-lg z-20 animate-fab-menu-in">
         <button id="open-new-character-modal-mobile" class="w-full flex items-center gap-3 px-4 py-3 text-white text-sm text-left rounded-2xl hover:bg-gray-600">
             <i data-lucide="user-plus" class="w-5 h-5"></i>
             <span>${t("sidebar.invite")}</span>
         </button>
     </div>
-    ` : ''}
+    `
+        : ""
+    }
 
     <!-- FAB Toggle -->
     <button id="fab-menu-toggle" class="fixed bottom-6 right-6 bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 transition-all duration-200 transform-gpu hover:scale-110 active:scale-95 z-30">
-        <i data-lucide="${app.state.showFabMenu ? 'x' : 'plus'}" class="w-8 h-8 transition-transform duration-300 ease-in-out ${app.state.showFabMenu ? 'rotate-45' : ''}"></i>
+        <i data-lucide="${app.state.showFabMenu ? "x" : "plus"}" class="w-8 h-8 transition-transform duration-300 ease-in-out ${app.state.showFabMenu ? "rotate-45" : ""}"></i>
     </button>
   `;
 
-  const listContainer = container.querySelector('#character-list-items');
+  const listContainer = container.querySelector("#character-list-items");
   renderCharacterList(app, listContainer);
 }

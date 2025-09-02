@@ -26,22 +26,23 @@ export function renderChatSelectionModal(app) {
         </div>
         <p class="text-sm text-gray-300 mb-4">${t("modal.selectChat.message")}</p>
         <div class="max-h-60 overflow-y-auto space-y-2 pr-2">
-          ${chatRooms.map(chatRoom => {
-            const messages = app.state.messages[chatRoom.id] || [];
-            const lastMessage = messages.slice(-1)[0];
-            let lastMessageContent = t("sidebar.startNewChat");
-            if (lastMessage) {
+          ${chatRooms
+            .map((chatRoom) => {
+              const messages = app.state.messages[chatRoom.id] || [];
+              const lastMessage = messages.slice(-1)[0];
+              let lastMessageContent = t("sidebar.startNewChat");
+              if (lastMessage) {
                 if (lastMessage.type === "image") {
-                    lastMessageContent = t("sidebar.imageSent");
+                  lastMessageContent = t("sidebar.imageSent");
                 } else if (lastMessage.type === "sticker") {
-                    lastMessageContent = t("sidebar.stickerSent");
+                  lastMessageContent = t("sidebar.stickerSent");
                 } else {
-                    lastMessageContent = lastMessage.content;
+                  lastMessageContent = lastMessage.content;
                 }
-            }
-            const unreadCount = app.state.unreadCounts[chatRoom.id] || 0;
+              }
+              const unreadCount = app.state.unreadCounts[chatRoom.id] || 0;
 
-            return `
+              return `
               <div class="chat-room-item p-3 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors" onclick="window.personaApp.selectChatRoom('${chatRoom.id}'); window.personaApp.hideModal();">
                 <div class="flex justify-between items-center">
                     <div class="flex-1 min-w-0">
@@ -52,7 +53,8 @@ export function renderChatSelectionModal(app) {
                 </div>
               </div>
             `;
-          }).join('')}
+            })
+            .join("")}
         </div>
         <button id="create-new-chat-room-modal" class="w-full mt-4 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2">
           <i data-lucide="plus-circle" class="w-5 h-5"></i>

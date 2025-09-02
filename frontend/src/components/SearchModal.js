@@ -1,5 +1,5 @@
-import { t } from '../i18n.js';
-import { renderCharacterItem } from './CharacterListPage.js';
+import { t } from "../i18n.js";
+import { renderCharacterItem } from "./CharacterListPage.js";
 
 function renderSearchResults(app) {
   const searchQuery = app.state.searchQuery.toLowerCase().trim();
@@ -9,10 +9,12 @@ function renderSearchResults(app) {
       )
     : [];
 
-  let resultsHtml = '';
+  let resultsHtml = "";
   if (searchQuery) {
     if (filteredCharacters.length > 0) {
-      resultsHtml = filteredCharacters.map((char) => renderCharacterItem(app, char)).join('');
+      resultsHtml = filteredCharacters
+        .map((char) => renderCharacterItem(app, char))
+        .join("");
     } else {
       resultsHtml = `
         <div class="text-center text-gray-400 py-12 animate-fadeIn">
@@ -27,7 +29,7 @@ function renderSearchResults(app) {
             <p>${t("search.prompt")}</p>
         </div>`;
   }
-    return `<div class="character-list space-y-2 p-2">${resultsHtml}</div>`;
+  return `<div class="character-list space-y-2 p-2">${resultsHtml}</div>`;
 }
 
 export function renderSearchModal(app) {
@@ -52,49 +54,49 @@ export function renderSearchModal(app) {
 }
 
 export function updateSearchResults(app) {
-    const modalContent = document.querySelector('.search-modal-content');
-    const container = document.querySelector('.search-results-container');
+  const modalContent = document.querySelector(".search-modal-content");
+  const container = document.querySelector(".search-results-container");
 
-    if (app.isSearchModalAnimating) {
-        app.pendingSearchUpdate = true;
+  if (app.isSearchModalAnimating) {
+    app.pendingSearchUpdate = true;
+    return;
+  }
+
+  if (container && modalContent) {
+    requestAnimationFrame(() => {
+      const oldHeight = modalContent.offsetHeight;
+
+      container.innerHTML = renderSearchResults(app);
+      lucide.createIcons();
+
+      const scrollHeight = modalContent.scrollHeight;
+      const vh85 = window.innerHeight * 0.85;
+      const newHeight = Math.min(scrollHeight, vh85);
+
+      if (Math.abs(oldHeight - newHeight) < 5) {
+        if (modalContent.style.height) modalContent.style.height = "";
         return;
-    }
+      }
 
-    if (container && modalContent) {
-        requestAnimationFrame(() => {
-            const oldHeight = modalContent.offsetHeight;
+      app.isSearchModalAnimating = true;
 
-            container.innerHTML = renderSearchResults(app);
-            lucide.createIcons();
+      modalContent.style.transition = "none";
+      modalContent.style.height = `${oldHeight}px`;
+      modalContent.offsetHeight; // Force reflow
 
-            const scrollHeight = modalContent.scrollHeight;
-            const vh85 = window.innerHeight * 0.85;
-            const newHeight = Math.min(scrollHeight, vh85);
+      modalContent.style.transition = `height 0.4s cubic-bezier(0.4, 0, 0.2, 1)`;
+      modalContent.style.height = `${newHeight}px`;
 
-            if (Math.abs(oldHeight - newHeight) < 5) {
-                if (modalContent.style.height) modalContent.style.height = '';
-                return;
-            }
+      setTimeout(() => {
+        app.isSearchModalAnimating = false;
+        modalContent.style.transition = "";
+        modalContent.style.height = ""; // Reset height to allow natural flow
 
-            app.isSearchModalAnimating = true;
-
-            modalContent.style.transition = 'none';
-            modalContent.style.height = `${oldHeight}px`;
-            modalContent.offsetHeight; // Force reflow
-
-            modalContent.style.transition = `height 0.4s cubic-bezier(0.4, 0, 0.2, 1)`;
-            modalContent.style.height = `${newHeight}px`;
-
-            setTimeout(() => {
-                app.isSearchModalAnimating = false;
-                modalContent.style.transition = '';
-                modalContent.style.height = ''; // Reset height to allow natural flow
-                
-                if (app.pendingSearchUpdate) {
-                    app.pendingSearchUpdate = false;
-                    Promise.resolve().then(() => updateSearchResults(app));
-                }
-            }, 450);
-        });
-    }
+        if (app.pendingSearchUpdate) {
+          app.pendingSearchUpdate = false;
+          Promise.resolve().then(() => updateSearchResults(app));
+        }
+      }, 450);
+    });
+  }
 }

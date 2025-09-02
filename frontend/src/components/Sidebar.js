@@ -111,9 +111,9 @@ function renderCharacterItem(app, char) {
                                     ? `<span class="bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full leading-none">${totalUnreadCount}</span>`
                                     : ""
                                 }
-                                <span class="text-sm text-gray-500 shrink-0">${
-                                  formatTimestamp(lastMessage?.id)
-                                }</span>
+                                <span class="text-sm text-gray-500 shrink-0">${formatTimestamp(
+                                  lastMessage?.id,
+                                )}</span>
                                 <i data-lucide="chevron-${
                                   isExpanded ? "down" : "right"
                                 }" class="w-4 h-4 text-gray-400"></i>
