@@ -6,8 +6,7 @@ import {
 } from "../constants/providers.js";
 
 /**
- * Renders the mobile-specific settings UI page.
- * This is not a modal, but a full page view for mobile.
+ * Renders the main mobile settings UI page (the list of settings).
  * @param {Object} app - Application instance
  * @returns {string} Mobile settings UI HTML
  */
@@ -15,12 +14,12 @@ export function renderMobileSettingsUI(app) {
   const { settings } = app.state;
   return `
     <div class="flex flex-col h-full relative">
-      <header class="absolute top-0 left-0 right-0 p-4 bg-gray-900/80 border-b border-gray-800 flex items-center justify-between z-10" style="backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
+      <header class="absolute top-0 left-0 right-0 px-6 py-4 bg-gray-900/80 flex items-center justify-between z-10" style="backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
           <div class="flex items-center space-x-2">
-              <button id="close-settings-ui" class="p-2 -ml-2 rounded-full hover:bg-gray-700">
+              <button id="close-settings-ui" class="p-3 -ml-2 rounded-full hover:bg-gray-700">
                   <i data-lucide="arrow-left" class="h-6 w-6 text-gray-300"></i>
               </button>
-              <h2 class="font-semibold text-white text-2xl">${t(
+              <h2 class="font-semibold text-white text-3xl">${t(
                 "settings.title",
               )}</h2>
           </div>
@@ -28,42 +27,15 @@ export function renderMobileSettingsUI(app) {
             "settings.done",
           )}</button>
       </header>
-      <div class="flex-1 overflow-y-auto space-y-4 pt-[64px]" id="settings-ui-content">
-          <details data-section="ai" class="group border-b border-gray-700 pb-3" ${app.state.openSettingsSections.includes("ai") ? "open" : ""}>
-              <summary class="flex items-center justify-between cursor-pointer list-none py-3">
-                  <span class="text-lg font-medium text-gray-200">${t(
-                    "settings.aiSettings",
-                  )}</span>
-                  <i data-lucide="chevron-down" class="w-6 h-6 text-gray-400 transition-transform duration-300 group-open:rotate-180"></i>
-              </summary>
-              <div class="content-wrapper">
-                  <div class="content-inner pt-4 space-y-4">
-                      <div>
-                          <label class="flex items-center text-base font-medium text-gray-300 mb-2"><i data-lucide="globe" class="w-5 h-5 mr-3"></i>${t(
-                            "settings.aiProvider",
-                          )}</label>
-                          <select id="settings-api-provider" class="w-full px-3 py-2 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-base">
-                              <option value="gemini" ${ (settings.apiProvider || "gemini") === "gemini" ? "selected" : ""}>Google Gemini</option>
-                              <option value="claude" ${ (settings.apiProvider || "gemini") === "claude" ? "selected" : ""}>Anthropic Claude</option>
-                              <option value="openai" ${ (settings.apiProvider || "gemini") === "openai" ? "selected" : ""}>OpenAI ChatGPT</option>
-                              <option value="grok" ${ (settings.apiProvider || "gemini") === "grok" ? "selected" : ""}>xAI Grok</option>
-                              <option value="openrouter" ${ (settings.apiProvider || "gemini") === "openrouter" ? "selected" : ""}>OpenRouter</option>
-                              <option value="custom_openai" ${ (settings.apiProvider || "gemini") === "custom_openai" ? "selected" : ""}>Custom OpenAI</option>
-                          </select>
-                      </div>
-                      <div class="provider-settings-container">${renderCurrentProviderSettings(
-                        app,
-                      )}</div>
-                      <div>
-                          <button id="open-prompt-modal" class="w-full mt-3 py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-base flex items-center justify-center gap-3">
-                              <i data-lucide="file-pen-line" class="w-5 h-5"></i> ${t(
-                                "settings.editPrompt",
-                              )}
-                          </button>
-                      </div>
-                  </div>
-              </div>
-          </details>
+      <div class="flex-1 overflow-y-auto space-y-4 mt-[88px] px-6 mx-4 bg-gray-900 rounded-t-2xl" id="settings-ui-content">
+          <div id="navigate-to-ai-settings" class="group border-b border-gray-700 pb-3 cursor-pointer">
+            <div class="flex items-center justify-between list-none py-3">
+                <span class="text-lg font-medium text-gray-200">${t(
+                  "settings.aiSettings",
+                )}</span>
+                <i data-lucide="chevron-right" class="w-6 h-6 text-gray-400"></i>
+            </div>
+          </div>
           <details data-section="scale" class="group border-b border-gray-700 pb-3" ${app.state.openSettingsSections.includes("scale") ? "open" : ""}>
               <summary class="flex items-center justify-between cursor-pointer list-none py-3">
                   <span class="text-lg font-medium text-gray-200">${t(
@@ -80,9 +52,7 @@ export function renderMobileSettingsUI(app) {
                           <input id="settings-font-scale" type="range" min="0.8" max="1.4" step="0.1" value="${settings.fontScale}" class="w-full">
                           <div class="flex justify-between text-sm text-gray-400 mt-1"><span>${t(
                             "settings.small",
-                          )}</span><span>${t(
-                            "settings.large",
-                          )}</span></div>
+                          )}</span><span>${t("settings.large")}</span></div>
                       </div>
                   </div>
               </div>
@@ -130,7 +100,7 @@ export function renderMobileSettingsUI(app) {
                                 "settings.proactiveChat",
                               )}</span>
                               <div class="relative inline-block w-10 align-middle select-none">
-                                  <input type="checkbox" name="toggle" id="settings-proactive-toggle" ${ settings.proactiveChatEnabled ? "checked" : ""} class="absolute opacity-0 w-0 h-0 peer"/>
+                                  <input type="checkbox" name="toggle" id="settings-proactive-toggle" ${settings.proactiveChatEnabled ? "checked" : ""} class="absolute opacity-0 w-0 h-0 peer"/>
                                   <label for="settings-proactive-toggle" class="block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer peer-checked:bg-blue-600"></label>
                                   <span class="absolute left-0.5 top-0.5 block w-5 h-5 rounded-full bg-white transition-transform duration-200 ease-in-out peer-checked:translate-x-4"></span>
                               </div>
@@ -142,22 +112,22 @@ export function renderMobileSettingsUI(app) {
                                 "settings.randomFirstMessage",
                               )}</span>
                               <div class="relative inline-block w-10 align-middle select-none">
-                                  <input type="checkbox" name="toggle" id="settings-random-first-message-toggle" ${ settings.randomFirstMessageEnabled ? "checked" : ""} class="absolute opacity-0 w-0 h-0 peer"/>
+                                  <input type="checkbox" name="toggle" id="settings-random-first-message-toggle" ${settings.randomFirstMessageEnabled ? "checked" : ""} class="absolute opacity-0 w-0 h-0 peer"/>
                                   <label for="settings-random-first-message-toggle" class="block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer peer-checked:bg-blue-600"></label>
                                   <span class="absolute left-0.5 top-0.5 block w-5 h-5 rounded-full bg-white transition-transform duration-200 ease-in-out peer-checked:translate-x-4"></span>
                               </div>
                           </label>
-                          <div id="random-chat-options" class="mt-4 space-y-4" style="display: ${ settings.randomFirstMessageEnabled ? "block" : "none"}">
+                          <div id="random-chat-options" class="mt-4 space-y-4" style="display: ${settings.randomFirstMessageEnabled ? "block" : "none"}">
                               <div>
                                   <label class="flex items-center justify-between text-base font-medium text-gray-300 mb-2">
                                       <span>${t(
                                         "settings.characterCount",
                                       )}</span>
-                                      <span id="random-character-count-label" class="text-blue-400 font-semibold">${ settings.randomCharacterCount}${t(
+                                      <span id="random-character-count-label" class="text-blue-400 font-semibold">${settings.randomCharacterCount}${t(
                                         "settings.characterCountUnit",
                                       )}</span>
                                   </label>
-                                  <input id="settings-random-character-count" type="range" min="1" max="5" step="1" value="${ settings.randomCharacterCount}" class="w-full">
+                                  <input id="settings-random-character-count" type="range" min="1" max="5" step="1" value="${settings.randomCharacterCount}" class="w-full">
                               </div>
                               <div>
                                   <label class="text-base font-medium text-gray-300 mb-2 block">${t(
@@ -166,11 +136,11 @@ export function renderMobileSettingsUI(app) {
                                   <div class="flex items-center gap-3">
                                       <input id="settings-random-frequency-min" type="number" min="1" class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-base" placeholder="${t(
                                         "settings.min",
-                                      )}" value="${ settings.randomMessageFrequencyMin}">
+                                      )}" value="${settings.randomMessageFrequencyMin}">
                                       <span class="text-gray-400">-</span>
                                       <input id="settings-random-frequency-max" type="number" min="1" class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-base" placeholder="${t(
                                         "settings.max",
-                                      )}" value="${ settings.randomMessageFrequencyMax}">
+                                      )}" value="${settings.randomMessageFrequencyMax}">
                                   </div>
                               </div>
                           </div>
@@ -193,13 +163,13 @@ export function renderMobileSettingsUI(app) {
                                 "settings.enableSnapshots",
                               )}</span>
                               <div class="relative inline-block w-10 align-middle select-none">
-                                  <input type="checkbox" name="toggle" id="settings-snapshots-toggle" ${ settings.snapshotsEnabled ? "checked" : ""} class="absolute opacity-0 w-0 h-0 peer"/>
+                                  <input type="checkbox" name="toggle" id="settings-snapshots-toggle" ${settings.snapshotsEnabled ? "checked" : ""} class="absolute opacity-0 w-0 h-0 peer"/>
                                   <label for="settings-snapshots-toggle" class="block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer peer-checked:bg-blue-600"></label>
                                   <span class="absolute left-0.5 top-0.5 block w-5 h-5 rounded-full bg-white transition-transform duration-200 ease-in-out peer-checked:translate-x-4"></span>
                               </div>
                           </label>
                       </div>
-                      <div id="snapshots-list" class="space-y-3" style="display: ${ settings.snapshotsEnabled ? "block" : "none"}">
+                      <div id="snapshots-list" class="space-y-3" style="display: ${settings.snapshotsEnabled ? "block" : "none"}">
                           ${renderSnapshotList(app)}
                       </div>
                   </div>
@@ -215,9 +185,9 @@ export function renderMobileSettingsUI(app) {
               <div class="content-wrapper">
                   <div class="content-inner pt-4 space-y-4">
                       <div class="space-y-3">
-                          <button 
-                              id="language-korean" 
-                              class="language-select-btn w-full p-3 rounded-lg border transition-all duration-200 flex items-center gap-3 ${ getLanguage() === "ko" ? "bg-blue-600/20 border-blue-500 text-blue-400" : "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"}"
+                          <button
+                              id="language-korean"
+                              class="language-select-btn w-full p-3 rounded-lg border transition-all duration-200 flex items-center gap-3 ${getLanguage() === "ko" ? "bg-blue-600/20 border-blue-500 text-blue-400" : "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"}"
                               data-language="ko"
                           >
                               <div class="text-xl">🇰🇷</div>
@@ -227,11 +197,11 @@ export function renderMobileSettingsUI(app) {
                                   )}</div>
                                   <div class="text-sm opacity-75">한국어</div>
                               </div>
-                              ${ getLanguage() === "ko" ? '<i data-lucide="check" class="w-5 h-5 text-blue-400"></i>' : ""}
+                              ${getLanguage() === "ko" ? '<i data-lucide="check" class="w-5 h-5 text-blue-400"></i>' : ""}
                           </button>
-                          <button 
-                              id="language-english" 
-                              class="language-select-btn w-full p-3 rounded-lg border transition-all duration-200 flex items-center gap-3 ${ getLanguage() === "en" ? "bg-blue-600/20 border-blue-500 text-blue-400" : "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"}"
+                          <button
+                              id="language-english"
+                              class="language-select-btn w-full p-3 rounded-lg border transition-all duration-200 flex items-center gap-3 ${getLanguage() === "en" ? "bg-blue-600/20 border-blue-500 text-blue-400" : "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"}"
                               data-language="en"
                           >
                               <div class="text-xl">🇺🇸</div>
@@ -241,7 +211,7 @@ export function renderMobileSettingsUI(app) {
                                   )}</div>
                                   <div class="text-sm opacity-75">English</div>
                               </div>
-                              ${ getLanguage() === "en" ? '<i data-lucide="check" class="w-5 h-5 text-blue-400"></i>' : ""}
+                              ${getLanguage() === "en" ? '<i data-lucide="check" class="w-5 h-5 text-blue-400"></i>' : ""}
                           </button>
                       </div>
                       <div class="bg-gray-600/50 rounded-lg p-3">
@@ -268,7 +238,7 @@ export function renderMobileSettingsUI(app) {
                                 "settings.enableDebugLogs",
                               )}</span>
                               <div class="relative inline-block w-10 align-middle select-none">
-                                  <input type="checkbox" name="toggle" id="settings-enable-debug-logs" ${ app.state.enableDebugLogs ? "checked" : ""} onchange="window.personaApp.setState({ enableDebugLogs: this.checked, settings: { ...window.personaApp.state.settings, enableDebugLogs: this.checked } })" class="absolute opacity-0 w-0 h-0 peer"/>
+                                  <input type="checkbox" name="toggle" id="settings-enable-debug-logs" ${app.state.enableDebugLogs ? "checked" : ""} onchange="window.personaApp.setState({ enableDebugLogs: this.checked, settings: { ...window.personaApp.state.settings, enableDebugLogs: this.checked } })" class="absolute opacity-0 w-0 h-0 peer"/>
                                   <label for="settings-enable-debug-logs" class="block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer peer-checked:bg-blue-600"></label>
                                   <span class="absolute left-0.5 top-0.5 block w-5 h-5 rounded-full bg-white transition-transform duration-200 ease-in-out peer-checked:translate-x-4"></span>
                               </div>
@@ -279,10 +249,8 @@ export function renderMobileSettingsUI(app) {
                       </div>
                       <div class="py-3 border-t border-gray-700 mt-2 pt-3 space-y-3">
                           <div class="flex items-center justify-between text-base text-gray-400">
-                              <span>${t(
-                                "settings.currentLogCount",
-                              )}</span>
-                              <span class="font-mono">${ app.state.debugLogs ? app.state.debugLogs.length : 0}/1000</span>
+                              <span>${t("settings.currentLogCount")}</span>
+                              <span class="font-mono">${app.state.debugLogs ? app.state.debugLogs.length : 0}/1000</span>
                           </div>
                           <div class="flex gap-3">
                               <button id="view-debug-logs" class="flex-1 py-2 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors text-base flex items-center justify-center gap-3">
@@ -322,10 +290,10 @@ export function renderMobileSettingsUI(app) {
                               )}
                           </button>
                       </div>
-                      
+
                       <!-- 구분선 -->
                       <div class="border-t border-gray-600"></div>
-                      
+
                       <!-- 데이터 초기화 -->
                       <div class="space-y-3">
                           <div class="bg-red-900/20 border border-red-500/30 rounded-lg p-3">
@@ -361,6 +329,52 @@ export function renderMobileSettingsUI(app) {
       </div>
     </div>
   `;
+}
+
+export function renderAiSettingsPage(app) {
+    const { settings } = app.state;
+    return `
+    <div class="flex flex-col h-full relative">
+      <header class="absolute top-0 left-0 right-0 px-6 py-4 bg-gray-900/80 flex items-center justify-between z-10" style="backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
+          <div class="flex items-center space-x-2">
+              <button id="close-ai-settings-ui" class="p-3 -ml-2 rounded-full hover:bg-gray-700">
+                  <i data-lucide="arrow-left" class="h-6 w-6 text-gray-300"></i>
+              </button>
+              <h2 class="font-semibold text-white text-3xl">${t(
+                "settings.aiSettings",
+              )}</h2>
+          </div>
+          <button id="save-settings-ui" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium">${t(
+            "settings.done",
+          )}</button>
+      </header>
+      <div class="flex-1 overflow-y-auto space-y-4 mt-[88px] px-6 mx-4 bg-gray-900 rounded-t-2xl" id="ai-settings-ui-content">
+        <div>
+            <label class="flex items-center text-base font-medium text-gray-300 mb-2"><i data-lucide="globe" class="w-5 h-5 mr-3"></i>${t(
+              "settings.aiProvider",
+            )}</label>
+            <select id="settings-api-provider" class="w-full px-3 py-2 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-base">
+                <option value="gemini" ${(settings.apiProvider || "gemini") === "gemini" ? "selected" : ""}>Google Gemini</option>
+                <option value="claude" ${(settings.apiProvider || "gemini") === "claude" ? "selected" : ""}>Anthropic Claude</option>
+                <option value="openai" ${(settings.apiProvider || "gemini") === "openai" ? "selected" : ""}>OpenAI ChatGPT</option>
+                <option value="grok" ${(settings.apiProvider || "gemini") === "grok" ? "selected" : ""}>xAI Grok</option>
+                <option value="openrouter" ${(settings.apiProvider || "gemini") === "openrouter" ? "selected" : ""}>OpenRouter</option>
+                <option value="custom_openai" ${(settings.apiProvider || "gemini") === "custom_openai" ? "selected" : ""}>Custom OpenAI</option>
+            </select>
+        </div>
+        <div class="provider-settings-container">${renderCurrentProviderSettings(
+          app,
+        )}</div>
+        <div>
+            <button id="open-prompt-modal" class="w-full mt-3 py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-base flex items-center justify-center gap-3">
+                <i data-lucide="file-pen-line" class="w-5 h-5"></i> ${t(
+                  "settings.editPrompt",
+                )}
+            </button>
+        </div>
+      </div>
+    </div>
+    `;
 }
 
 /**
@@ -411,34 +425,35 @@ export function renderProviderConfig(provider, config) {
                       "settings.apiKey",
                     )}
                 </label>
-                <input 
-                    type="password" 
-                    id="settings-api-key" 
-                    value="${config.apiKey || ""}" 
-                    placeholder="${t("settings.apiKeyPlaceholder")}" 
+                <input
+                    type="password"
+                    id="settings-api-key"
+                    value="${config.apiKey || ""}"
+                    placeholder="${t("settings.apiKeyPlaceholder")}"
                     class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm"
                 />
             </div>
-            
-            ${ provider === PROVIDERS.CUSTOM_OPENAI
-              ? `
+
+            ${
+              provider === PROVIDERS.CUSTOM_OPENAI
+                ? `
                 <!-- Custom OpenAI Base URL -->
                 <div>
                     <label class="flex items-center text-sm font-medium text-gray-300 mb-2">
                         <i data-lucide="link" class="w-4 h-4 mr-2"></i>Base URL
                     </label>
-                    <input 
-                        type="text" 
-                        id="settings-base-url" 
-                        value="${config.baseUrl || ""}" 
-                        placeholder="https://api.openai.com/v1" 
+                    <input
+                        type="text"
+                        id="settings-base-url"
+                        value="${config.baseUrl || ""}"
+                        placeholder="https://api.openai.com/v1"
                         class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm"
                     />
                 </div>
             `
-              : ""
+                : ""
             }
-            
+
             <!-- 모델 선택 -->
             <div>
                 <label class="flex items-center text-sm font-medium text-gray-300 mb-2">
@@ -446,18 +461,21 @@ export function renderProviderConfig(provider, config) {
                       "settings.model",
                     )}
                 </label>
-                
-                ${ models.length > 0
-                  ? `
+
+                ${
+                  models.length > 0
+                    ? `
                     <div class="grid grid-cols-1 gap-2 mb-3">
                         ${models
                           .map(
                             (model) => `
-                            <button 
-                                type="button" 
-                                class="model-select-btn px-3 py-2 text-left text-sm rounded-lg transition-colors ${ config.model === model
-                                  ? "bg-blue-600 text-white"
-                                  : "bg-gray-700 text-gray-300 hover:bg-gray-600"}" 
+                            <button
+                                type="button"
+                                class="model-select-btn px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                                  config.model === model
+                                    ? "bg-blue-600 text-white"
+                                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                                }"
                                 data-model="${model}"
                             >
                                 ${model}
@@ -467,20 +485,20 @@ export function renderProviderConfig(provider, config) {
                           .join("")}
                     </div>
                 `
-                  : ""
+                    : ""
                 }
-                
+
                 <!-- 커스텀 모델 입력 -->
                 <div class="flex gap-2">
-                    <input 
-                        type="text" 
-                        id="custom-model-input" 
-                        placeholder="${t("settings.customModel")}" 
+                    <input
+                        type="text"
+                        id="custom-model-input"
+                        placeholder="${t("settings.customModel")}"
                         class="flex-1 px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm"
                     />
-                    <button 
-                        type="button" 
-                        id="add-custom-model-btn" 
+                    <button
+                        type="button"
+                        id="add-custom-model-btn"
                         class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm flex items-center gap-1"
                     >
                         <i data-lucide="plus" class="w-4 h-4"></i>${t(
@@ -488,9 +506,10 @@ export function renderProviderConfig(provider, config) {
                         )}
                     </button>
                 </div>
-                
-                ${ customModels.length > 0
-                  ? `
+
+                ${
+                  customModels.length > 0
+                    ? `
                     <div class="mt-3 space-y-1">
                         <label class="text-xs text-gray-400">${t(
                           "settings.customModels",
@@ -499,18 +518,20 @@ export function renderProviderConfig(provider, config) {
                           .map(
                             (model, index) => `
                             <div class="flex items-center gap-2">
-                                <button 
-                                    type="button" 
-                                    class="model-select-btn flex-1 px-3 py-2 text-left text-sm rounded-lg transition-colors ${ config.model === model
-                                      ? "bg-blue-600 text-white"
-                                      : "bg-gray-700 text-gray-300 hover:bg-gray-600"}" 
+                                <button
+                                    type="button"
+                                    class="model-select-btn flex-1 px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                                      config.model === model
+                                        ? "bg-blue-600 text-white"
+                                        : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                                    }"
                                     data-model="${model}"
                                 >
                                     ${model}
                                 </button>
-                                <button 
-                                    type="button" 
-                                    class="remove-custom-model-btn px-2 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm" 
+                                <button
+                                    type="button"
+                                    class="remove-custom-model-btn px-2 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm"
                                     data-index="${index}"
                                 >
                                     <i data-lucide="trash-2" class="w-3 h-3"></i>
@@ -521,10 +542,10 @@ export function renderProviderConfig(provider, config) {
                           .join("")}
                     </div>
                 `
-                  : ""
+                    : ""
                 }
             </div>
-            
+
             <!-- Advanced Settings for All Providers -->
             <details class="group mt-4">
                 <summary class="flex items-center justify-between cursor-pointer list-none p-4 bg-gray-700/30 rounded-xl hover:bg-gray-700/40 transition-colors">
@@ -536,20 +557,20 @@ export function renderProviderConfig(provider, config) {
                     <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400 transition-transform duration-300 group-open:rotate-180"></i>
                 </summary>
                 <div class="space-y-4 mt-2 p-4 bg-gray-700/30 rounded-xl">
-                
+
                 <!-- Max Tokens -->
                 <div>
                     <label class="flex items-center justify-between text-sm font-medium text-gray-300 mb-2">
                         <span>${t("settings.maxTokens")}</span>
-                        <span class="text-blue-400 font-mono text-xs" id="max-tokens-value">${ config.maxTokens || (provider === "gemini" ? 4096 : 4096)}</span>
+                        <span class="text-blue-400 font-mono text-xs" id="max-tokens-value">${config.maxTokens || (provider === "gemini" ? 4096 : 4096)}</span>
                     </label>
-                    <input 
-                        type="range" 
-                        id="settings-max-tokens" 
-                        min="512" 
-                        max="8192" 
-                        step="256" 
-                        value="${ config.maxTokens || (provider === "gemini" ? 4096 : 4096)}" 
+                    <input
+                        type="range"
+                        id="settings-max-tokens"
+                        min="512"
+                        max="8192"
+                        step="256"
+                        value="${config.maxTokens || (provider === "gemini" ? 4096 : 4096)}"
                         class="w-full"
                     />
                     <div class="flex justify-between text-xs text-gray-400 mt-1">
@@ -557,29 +578,33 @@ export function renderProviderConfig(provider, config) {
                         <span>8192</span>
                     </div>
                 </div>
-                
+
                 <!-- Temperature -->
                 <div>
                     <label class="flex items-center justify-between text-sm font-medium text-gray-300 mb-2">
                         <span>${t("settings.temperature")}</span>
-                        <span class="text-blue-400 font-mono text-xs" id="temperature-value">${ config.temperature !== undefined
-                          ? config.temperature
-                          : provider === "gemini"
-                          ? 1.25
-                          : 0.8}
+                        <span class="text-blue-400 font-mono text-xs" id="temperature-value">${
+                          config.temperature !== undefined
+                            ? config.temperature
+                            : provider === "gemini"
+                              ? 1.25
+                              : 0.8
+                        }
                         </span>
                     </label>
-                    <input 
-                        type="range" 
-                        id="settings-temperature" 
+                    <input
+                        type="range"
+                        id="settings-temperature"
                         min="0"
                         max="2"
                         step="0.1"
-                        value="${ config.temperature !== undefined
-                          ? config.temperature
-                          : provider === "gemini"
-                          ? 1.25
-                          : 0.8}" 
+                        value="${
+                          config.temperature !== undefined
+                            ? config.temperature
+                            : provider === "gemini"
+                              ? 1.25
+                              : 0.8
+                        }"
                         class="w-full"
                     />
                     <div class="flex justify-between text-xs text-gray-400 mt-1">
@@ -587,27 +612,27 @@ export function renderProviderConfig(provider, config) {
                         <span>${t("settings.creativeTemp")} (2.0)</span>
                     </div>
                 </div>
-                
+
                 <!-- Profile Generation Settings -->
                 <div class="border-t border-gray-600 pt-4 mt-4">
                     <h5 class="text-xs font-medium text-gray-400 mb-3">${t(
                       "settings.profileGenerationSettings",
                     )}</h5>
-                    
+
                     <div class="space-y-3">
                         <!-- Profile Max Tokens -->
                         <div>
                             <label class="flex items-center justify-between text-sm font-medium text-gray-300 mb-2">
                                 <span>${t("settings.profileMaxTokens")}</span>
-                                <span class="text-blue-400 font-mono text-xs" id="profile-max-tokens-value">${ config.profileMaxTokens || 1024}</span>
+                                <span class="text-blue-400 font-mono text-xs" id="profile-max-tokens-value">${config.profileMaxTokens || 1024}</span>
                             </label>
-                            <input 
-                                type="range" 
-                                id="settings-profile-max-tokens" 
-                                min="256" 
-                                max="2048" 
-                                step="128" 
-                                value="${ config.profileMaxTokens || 1024}" 
+                            <input
+                                type="range"
+                                id="settings-profile-max-tokens"
+                                min="256"
+                                max="2048"
+                                step="128"
+                                value="${config.profileMaxTokens || 1024}"
                                 class="w-full"
                             />
                             <div class="flex justify-between text-xs text-gray-400 mt-1">
@@ -615,25 +640,29 @@ export function renderProviderConfig(provider, config) {
                                 <span>2048</span>
                             </div>
                         </div>
-                        
+
                         <!-- Profile Temperature -->
                         <div>
                             <label class="flex items-center justify-between text-sm font-medium text-gray-300 mb-2">
                                 <span>${t("settings.profileTemperature")}</span>
-                                <span class="text-blue-400 font-mono text-xs" id="profile-temperature-value">${ config.profileTemperature !== undefined
-                                  ? config.profileTemperature
-                                  : 1.2}
+                                <span class="text-blue-400 font-mono text-xs" id="profile-temperature-value">${
+                                  config.profileTemperature !== undefined
+                                    ? config.profileTemperature
+                                    : 1.2
+                                }
                                 </span>
                             </label>
-                            <input 
-                                type="range" 
-                                id="settings-profile-temperature" 
+                            <input
+                                type="range"
+                                id="settings-profile-temperature"
                                 min="0.5"
                                 max="2"
                                 step="0.1"
-                                value="${ config.profileTemperature !== undefined
-                                  ? config.profileTemperature
-                                  : 1.2}" 
+                                value="${
+                                  config.profileTemperature !== undefined
+                                    ? config.profileTemperature
+                                    : 1.2
+                                }"
                                 class="w-full"
                             />
                             <div class="flex justify-between text-xs text-gray-400 mt-1">
@@ -658,10 +687,10 @@ export function renderSnapshotList(app) {
                   snapshot.timestamp,
                 ).toLocaleString("ko-KR")}</span>
                 <div class="flex items-center gap-2">
-                    <button data-timestamp="${ snapshot.timestamp}" class="restore-snapshot-btn p-1.5 bg-blue-600 hover:bg-blue-700 rounded text-white transition-colors" title="${t(
+                    <button data-timestamp="${snapshot.timestamp}" class="restore-snapshot-btn p-1.5 bg-blue-600 hover:bg-blue-700 rounded text-white transition-colors" title="${t(
                       "settings.restore",
                     )}"><i data-lucide="history" class="w-4 h-4"></i></button>
-                    <button data-timestamp="${ snapshot.timestamp}" class="delete-snapshot-btn p-1.5 bg-red-600 hover:bg-red-700 rounded text-white transition-colors" title="${t(
+                    <button data-timestamp="${snapshot.timestamp}" class="delete-snapshot-btn p-1.5 bg-red-600 hover:bg-red-700 rounded text-white transition-colors" title="${t(
                       "settings.delete",
                     )}"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                 </div>
@@ -669,11 +698,12 @@ export function renderSnapshotList(app) {
         `,
           )
           .join("")}
-        ${ app.state.settingsSnapshots.length === 0
-          ? `<p class="text-sm text-gray-500 text-center py-2">${t(
-              "settings.noSnapshots",
-            )}</p>`
-          : ""
+        ${
+          app.state.settingsSnapshots.length === 0
+            ? `<p class="text-sm text-gray-500 text-center py-2">${t(
+                "settings.noSnapshots",
+              )}</p>`
+            : ""
         }
     `;
 }
@@ -762,20 +792,33 @@ function setupDataManagementEventListeners() {
   if (resetAllDataBtn) {
     resetAllDataBtn.addEventListener("click", async () => {
       const confirmed = confirm(
-        `${t("confirm.resetDataConfirm")}\n\n` +
-          `${t("confirm.resetDataWarning")}\n` +
-          `• ${t("settings.resetDataList.allCharacters")}\n` +
-          `• ${t("settings.resetDataList.allChatHistory")}\n` +
-          `• ${t("settings.resetDataList.userSettings")}\n` +
-          `• ${t("settings.resetDataList.stickerData")}\n` +
-          `• ${t("settings.resetDataList.debugLogs")}\n\n` +
+        `${t("confirm.resetDataConfirm")}
+
+` +
+          `${t("confirm.resetDataWarning")}
+` +
+          `• ${t("settings.resetDataList.allCharacters")}
+` +
+          `• ${t("settings.resetDataList.allChatHistory")}
+` +
+          `• ${t("settings.resetDataList.userSettings")}
+` +
+          `• ${t("settings.resetDataList.stickerData")}
+` +
+          `• ${t("settings.resetDataList.debugLogs")}
+
+` +
           `${t("confirm.resetDataCannotUndo")}`,
       );
 
       if (confirmed) {
         const doubleConfirmed = confirm(
-          `${t("confirm.resetDataDoubleConfirm")}\n\n` +
-            `${t("confirm.resetDataBackupWarning")}\n\n` +
+          `${t("confirm.resetDataDoubleConfirm")}
+
+` +
+            `${t("confirm.resetDataBackupWarning")}
+
+` +
             `${t("confirm.resetDataFinalConfirm")}`,
         );
 
