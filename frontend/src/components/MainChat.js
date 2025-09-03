@@ -227,7 +227,7 @@ function renderMessages(app) {
       let editContentHtml = "";
       if (msg.type === "image") {
         editContentHtml = `
-                        <img src="${msg.imageUrl}" class="image-open-btn max-w-xs max-height-80 rounded-lg object-cover mb-2 cursor-pointer" data-image-url="${msg.imageUrl}">
+                        <img src="${msg.imageUrl}" class="image-open-btn max-w-xs max-h-80 rounded-lg object-cover mb-2 cursor-pointer" data-image-url="${msg.imageUrl}">
                         <textarea data-id="${groupInfo.lastMessageId}" class="edit-message-textarea w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500/50 text-sm" rows="2">${msg.content}</textarea>
                     `;
       } else {
