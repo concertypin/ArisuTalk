@@ -47,6 +47,23 @@ export function handleModalClick(e, app) {
   // Character Modal
   if (e.target.closest('[data-action="close-character-modal"]'))
     app.closeCharacterModal();
+
+  // Chat Selection Modal
+  const closeChatSelection = e.target.closest('[data-action="close-chat-selection"]');
+  if (closeChatSelection) {
+    app.hideModal();
+  }
+
+  const selectChat = e.target.closest('[data-action="select-chat"]');
+  if (selectChat) {
+    const chatRoomId = selectChat.dataset.chatRoomId;
+    app.selectChatRoom(chatRoomId);
+    app.hideModal();
+  }
+
+  if (e.target.closest('#create-new-chat-room-modal')) {
+    app.handleCreateNewChatRoom();
+  }
   if (e.target.closest("#save-character")) app.handleSaveCharacter();
   if (e.target.closest("#select-avatar-btn"))
     document.getElementById("avatar-input").click();

@@ -15,12 +15,12 @@ export function renderChatSelectionModal(app) {
   });
 
   return `
-    <div id="chat-selection-modal-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50" onclick="window.personaApp.hideModal(event)">
+    <div id="chat-selection-modal-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50" data-action="close-chat-selection">
       <div class="bg-gray-800 rounded-2xl p-6 w-full max-w-sm mx-4" data-modal-content>
         <div class="flex items-center mb-4">
           ${renderAvatar(character, "md")}
           <h3 class="text-lg font-semibold text-white ml-4">${character.name}</h3>
-          <button id="modal-close" class="ml-auto p-2 rounded-full hover:bg-gray-700" onclick="window.personaApp.hideModal()">
+          <button id="modal-close" class="ml-auto p-2 rounded-full hover:bg-gray-700" data-action="close-chat-selection">
             <i data-lucide="x" class="w-5 h-5 text-gray-300"></i>
           </button>
         </div>
@@ -43,7 +43,7 @@ export function renderChatSelectionModal(app) {
               const unreadCount = app.state.unreadCounts[chatRoom.id] || 0;
 
               return `
-              <div class="chat-room-item p-3 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors" onclick="window.personaApp.selectChatRoom('${chatRoom.id}'); window.personaApp.hideModal();">
+              <div class="chat-room-item p-3 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors" data-action="select-chat" data-chat-room-id="${chatRoom.id}">
                 <div class="flex justify-between items-center">
                     <div class="flex-1 min-w-0">
                         <p class="font-semibold text-white truncate">${chatRoom.name || t("sidebar.defaultChatName")}</p>
