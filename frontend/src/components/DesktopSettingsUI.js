@@ -4,7 +4,6 @@ import { renderCharacterDefaultsPanel } from "./settings/panels/CharacterDefault
 import { renderDataManagementPanel } from "./settings/panels/DataManagementPanel.js";
 import { renderAdvancedSettingsPanel } from "./settings/panels/AdvancedSettingsPanel.js";
 import { setLanguage, t } from "../i18n.js";
-import { renderInputArea, setupMainChatEventListeners } from "./MainChat.js";
 
 /**
  * Renders the desktop-specific settings UI
