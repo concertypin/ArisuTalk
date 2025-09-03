@@ -44,6 +44,7 @@ export function adjustMessageContainerPadding() {
 function renderModals(app) {
   const container = document.getElementById("modal-container");
   let html = "";
+  if (app.state.showSettingsModal) html += renderSettingsUI(app);
   if (app.state.showCharacterModal) html += renderCharacterModal(app);
   if (app.state.showPromptModal) html += renderPromptModal(app);
   if (app.state.showCreateGroupChatModal)
@@ -65,6 +66,9 @@ function renderModals(app) {
   container.innerHTML = html;
 
   // Setup event listeners for modals after DOM update
+  if (app.state.showSettingsModal) {
+    setupDesktopSettingsEventListeners(app);
+  }
   if (app.state.showDebugLogsModal) {
     setupDebugLogsModalEventListeners();
   }
