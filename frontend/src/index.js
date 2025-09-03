@@ -697,6 +697,14 @@ class PersonaChatApp {
       handleModalClick(e, this);
       handleGroupChatClick(e, this);
 
+      const characterListItem = e.target.closest('.character-list-item');
+      if (characterListItem) {
+        const characterId = characterListItem.dataset.characterId;
+        if (characterId) {
+          this.handleCharacterSelect(characterId);
+        }
+      }
+
       if (e.target.closest("#navigate-to-ai-settings")) {
         this.setState({ showAiSettingsUI: true });
       }
