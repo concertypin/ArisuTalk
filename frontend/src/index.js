@@ -236,8 +236,20 @@ class PersonaChatApp {
     this.setState({ settingsSnapshots: newSnapshots });
   }
 
+  setupAppHeight() {
+    const setHeight = () => {
+      const app = document.getElementById('app');
+      if (app) {
+        app.style.height = `${window.innerHeight}px`;
+      }
+    };
+    window.addEventListener('resize', setHeight);
+    setHeight();
+  }
+
   // --- CORE METHODS ---
   async init() {
+    this.setupAppHeight();
     await this.initializeSecureStorage();
     await this.loadAllData();
     this.applyFontScale();
