@@ -87,7 +87,78 @@ function updateSnapshotList(app) {
 
 // --- MAIN RENDER ORCHESTRATOR ---
 
-export async function render(app) {
+function setupTransitionHandler(transitionContainer) {
+  if (transitionContainer.dataset.handlerAttached) return;
+
+  transitionContainer.addEventListener("transitionend", (event) => {
+    if (event.target === transitionContainer && event.propertyName === "transform") {
+      const app = window.personaApp;
+      const { oldState, state: newState } = app;
+      const isFirstRender = !oldState;
+
+      // After a transition to the chat view, render the content
+      if (
+        newState.selectedChatId &&
+        transitionContainer.classList.contains("show-chat")
+      ) {
+        // Check if we are already showing the correct chat
+        const isChatAlreadyRendered = document.getElementById("messages-container");
+        if (!isChatAlreadyRendered || shouldUpdateMainChat(oldState, newState)) {
+          renderMainChat(app);
+          setupMainChatEventListeners();
+          adjustMessageContainerPadding();
+          lucide.createIcons();
+          setupConditionalBlur();
+          const messagesContainer =
+            document.getElementById("messages-container");
+          if (messagesContainer) {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+          }
+        }
+      }
+
+      // After transitioning away from a view, clear its content to save memory
+      const mainContainer = document.getElementById("main-chat");
+      if (
+        mainContainer &&
+        !transitionContainer.classList.contains("show-chat")
+      ) {
+        mainContainer.innerHTML = "";
+      }
+
+      const settingsContainer = document.getElementById("settings-page-container");
+      if (
+        settingsContainer &&
+        !transitionContainer.classList.contains("show-settings")
+      ) {
+        settingsContainer.innerHTML = "";
+      }
+
+      const aiSettingsContainer = document.getElementById(
+        "ai-settings-page-container",
+      );
+      if (
+        aiSettingsContainer &&
+        !transitionContainer.classList.contains("show-ai-settings")
+      ) {
+        aiSettingsContainer.innerHTML = "";
+      }
+
+      const scaleSettingsContainer = document.getElementById(
+        "scale-settings-page-container",
+      );
+      if (
+        scaleSettingsContainer &&
+        !transitionContainer.classList.contains("show-scale-settings")
+      ) {
+        scaleSettingsContainer.innerHTML = "";
+      }
+    }
+  });
+  transitionContainer.dataset.handlerAttached = "true";
+}
+
+export function render(app) {
   const oldState = app.oldState || {};
   const newState = app.state;
   const isFirstRender = !app.oldState;
@@ -111,6 +182,11 @@ export async function render(app) {
     const transitionContainer = document.getElementById(
       "page-transition-container",
     );
+
+    // Setup handler on first render
+    if (isFirstRender) {
+      setupTransitionHandler(transitionContainer);
+    }
 
     // --- Visibility & Animation Control ---
     sidebarContainer.classList.add("hidden");
@@ -163,13 +239,9 @@ export async function render(app) {
         settingsContainer.innerHTML = renderMobileSettingsUI(app);
         setupMobileSettingsUIEventListeners(app);
       }
-      setTimeout(() => {
-        if (!window.personaApp.state.selectedChatId) {
-          mainContainer.innerHTML = "";
-        }
-      }, 600);
     } else if (newState.selectedChatId) {
       if (oldState.selectedChatId !== newState.selectedChatId) {
+        // Show loading spinner immediately
         mainContainer.innerHTML =
           '<div class="flex-1 flex items-center justify-center"><div class="w-6 h-6 border-4 border-gray-700 border-t-blue-500 rounded-full animate-spin"></div></div>';
       }
@@ -180,25 +252,6 @@ export async function render(app) {
         "show-ai-settings",
         "show-scale-settings",
       );
-
-      setTimeout(() => {
-        if (
-          window.personaApp.state.selectedChatId === newState.selectedChatId
-        ) {
-          if (isFirstRender || shouldUpdateMainChat(oldState, newState)) {
-            renderMainChat(app);
-            setupMainChatEventListeners();
-            adjustMessageContainerPadding();
-            lucide.createIcons();
-            setupConditionalBlur();
-            const messagesContainer =
-              document.getElementById("messages-container");
-            if (messagesContainer) {
-              messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            }
-          }
-        }
-      }, 600);
     } else {
       transitionContainer.classList.remove(
         "show-chat",
@@ -223,21 +276,6 @@ export async function render(app) {
           }
         }
       }
-
-      setTimeout(() => {
-        if (!window.personaApp.state.selectedChatId) {
-          mainContainer.innerHTML = "";
-        }
-        if (!window.personaApp.state.showSettingsUI) {
-          settingsContainer.innerHTML = "";
-        }
-        if (!window.personaApp.state.showAiSettingsUI) {
-          aiSettingsContainer.innerHTML = "";
-        }
-        if (!window.personaApp.state.showScaleSettingsUI) {
-          scaleSettingsContainer.innerHTML = "";
-        }
-      }, 600);
     }
   } else {
     // --- Desktop Layout ---
