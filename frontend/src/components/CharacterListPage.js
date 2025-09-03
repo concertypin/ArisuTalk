@@ -39,7 +39,7 @@ export function renderCharacterItem(app, char) {
 
   return `
     <div class="character-list-item p-3 rounded-full cursor-pointer hover:bg-gray-800/60 transition-colors duration-200" 
-         onclick="window.personaApp.handleCharacterSelect('${char.id}')">
+         data-character-id="${char.id}">
         <div class="flex items-center space-x-5">
             <div class="character-avatar relative">
                 ${renderAvatar(char, "lg")}
