@@ -258,12 +258,59 @@ class PersonaChatApp {
   }
 
   openSettingsModal() {
-    this.initialSettings = { ...this.state.settings };
+    this.initialSettings = JSON.parse(JSON.stringify(this.state.settings));
     const isMobile = window.innerWidth < 768;
     if (isMobile) {
       this.setState({ showSettingsUI: true });
     } else {
       this.setState({ showSettingsModal: true });
+    }
+  }
+
+  handleSaveSettings() {
+    const wasRandomDisabled =
+      this.initialSettings && !this.initialSettings.randomFirstMessageEnabled;
+    const isRandomEnabled = this.state.settings.randomFirstMessageEnabled;
+
+    // Create a snapshot of the settings when the user explicitly saves.
+    this.createSettingsSnapshot();
+
+    this.setState({ showSettingsModal: false, showSettingsUI: false, initialSettings: null });
+
+    if (wasRandomDisabled && isRandomEnabled) {
+      this.scheduleMultipleRandomChats();
+    }
+  }
+
+  handleCancelSettings() {
+    const hasChanges =
+      JSON.stringify(this.initialSettings) !==
+      JSON.stringify(this.state.settings);
+
+    if (hasChanges) {
+      this.showConfirmModal(
+        t("ui.discardChanges"),
+        t("ui.unsavedChangesWarning"),
+        () => {
+          if (this.initialSettings) {
+            this.setState({
+              settings: this.initialSettings,
+              showSettingsModal: false,
+              showSettingsUI: false,
+              initialSettings: null,
+              modal: { isOpen: false, title: "", message: "", onConfirm: null },
+            });
+          } else {
+            this.setState({
+              showSettingsModal: false,
+              showSettingsUI: false,
+              modal: { isOpen: false, title: "", message: "", onConfirm: null },
+            });
+          }
+        },
+      );
+    } else {
+      this.setState({ showSettingsModal: false, showSettingsUI: false, initialSettings: null });
     }
   }
 

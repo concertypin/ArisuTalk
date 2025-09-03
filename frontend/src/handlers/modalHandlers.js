@@ -86,7 +86,7 @@ export function handleModalClick(e, app) {
   if (e.target.closest("#modal-cancel")) {
     e.preventDefault();
     e.stopPropagation();
-    app.closeModal();
+    app.hideModal();
     return;
   }
   if (e.target.closest("#modal-confirm")) {
@@ -94,7 +94,7 @@ export function handleModalClick(e, app) {
     e.stopPropagation();
     if (app.state.modal.onConfirm) {
       const onConfirm = app.state.modal.onConfirm;
-      app.closeModal(); // 먼저 모달을 닫고
+      app.hideModal(); // 먼저 모달을 닫고
       setTimeout(() => onConfirm(), 0); // 비동기로 확인 액션 실행
     }
     return;
