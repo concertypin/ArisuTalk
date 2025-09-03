@@ -229,6 +229,10 @@ function renderChatRoomItem(app, chatRoom) {
     `;
 }
 
+/**
+ * Renders the entire sidebar, including the header, search, character list, and group/open chats.
+ * @param {object} app - The main application object.
+ */
 export function renderSidebar(app) {
   const appElement = document.getElementById("app");
   if (appElement) {

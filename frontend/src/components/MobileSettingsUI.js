@@ -315,6 +315,11 @@ export function renderMobileSettingsUI(app) {
   `;
 }
 
+/**
+ * Renders the AI settings page for mobile view.
+ * @param {Object} app - Application instance
+ * @returns {string} AI settings page HTML
+ */
 export function renderAiSettingsPage(app) {
   const { settings } = app.state;
   return `
@@ -358,6 +363,11 @@ export function renderAiSettingsPage(app) {
     `;
 }
 
+/**
+ * Renders the scale settings page for mobile view.
+ * @param {Object} app - Application instance
+ * @returns {string} Scale settings page HTML
+ */
 export function renderScaleSettingsPage(app) {
   const { settings } = app.state;
   return `
@@ -605,6 +615,13 @@ function renderCurrentProviderSettings(app) {
   return renderProviderConfig(provider, config);
 }
 
+/**
+ * Renders the configuration UI for a specific API provider.
+ * Includes API key, model selection, and advanced settings.
+ * @param {string} provider - API provider identifier (e.g., 'gemini', 'openai', 'claude')
+ * @param {Object} config - Provider-specific configuration
+ * @returns {string} Provider configuration HTML
+ */
 export function renderProviderConfig(provider, config) {
   const models = PROVIDER_MODELS[provider] || [];
   const customModels = config.customModels || [];
@@ -870,6 +887,11 @@ export function renderProviderConfig(provider, config) {
     `;
 }
 
+/**
+ * Renders the list of settings snapshots.
+ * @param {Object} app - The application instance.
+ * @returns {string} The HTML for the snapshot list.
+ */
 export function renderSnapshotList(app) {
   return `
         ${app.state.settingsSnapshots
