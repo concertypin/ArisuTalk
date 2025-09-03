@@ -17,7 +17,8 @@ function getGroupChatParticipants(app, groupChatId) {
 }
 
 function renderInputArea(app) {
-  const { showInputOptions, isWaitingForResponse, imageToSend } = app.state;
+  const { showInputOptions, isWaitingForResponse, imageToSend, stickerToSend } =
+    app.state;
   const hasImage = !!imageToSend;
 
   let imagePreviewHtml = "";
@@ -25,7 +26,9 @@ function renderInputArea(app) {
     imagePreviewHtml = `
             <div class="p-2 border-b border-gray-700 mb-2">
                 <div class="relative w-20 h-20">
-                    <img src="${imageToSend.dataUrl}" class="w-full h-full object-cover rounded-lg">
+                    <img src="${
+                      imageToSend.dataUrl
+                    }" class="w-full h-full object-cover rounded-lg">
                     <button id="cancel-image-preview" class="absolute -top-2 -right-2 p-1 bg-gray-900 rounded-full text-white hover:bg-red-500 transition-colors">
                         <i data-lucide="x" class="w-4 h-4 pointer-events-none"></i>
                     </button>
@@ -34,9 +37,25 @@ function renderInputArea(app) {
         `;
   }
 
+  let stickerPreviewHtml = "";
+  if (stickerToSend) {
+    stickerPreviewHtml = `
+      <div class="mb-2 p-2 bg-gray-700 rounded-lg flex items-center gap-2 text-sm text-gray-300">
+          <img src="${stickerToSend.data}" alt="${
+            stickerToSend.stickerName
+          }" class="w-6 h-6 rounded object-cover">
+          <span>${t("mainChat.stickerLabel")}${stickerToSend.stickerName}</span>
+          <button id="remove-sticker-to-send-btn" class="ml-auto text-gray-400 hover:text-white">
+              <i data-lucide="x" class="w-3 h-3"></i>
+          </button>
+      </div>
+    `;
+  }
+
   return `
         <div class="input-area-container experimental relative">
             ${imagePreviewHtml}
+            ${stickerPreviewHtml}
             ${
               showInputOptions
                 ? `
@@ -65,7 +84,7 @@ function renderInputArea(app) {
                 <textarea id="new-message-input" placeholder="${
                   hasImage
                     ? t("mainChat.addCaption")
-                    : app.state.stickerToSend
+                    : stickerToSend
                       ? t("mainChat.stickerMessagePlaceholder")
                       : t("mainChat.messagePlaceholder")
                 }" class="relative flex-1 self-center pl-5 pr-5 py-3 bg-gray-700 text-white rounded-full border border-transparent focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 transition-all duration-200 text-sm placeholder-gray-500 resize-none" rows="1" style="min-height: 44px; max-height: 120px;" ${
