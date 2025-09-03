@@ -56,7 +56,7 @@ export function renderMobileSettingsUI(app) {
                           )}</label>
                           <input id="settings-user-name" type="text" placeholder="${t(
                             "settings.yourNamePlaceholder",
-                          )}" value="${settings.userName}" class="w-full px-3 py-2 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-base" oninput="window.personaApp.handleSettingChange('userName', this.value)" />
+                          )}" value="${settings.userName}" class="w-full px-3 py-2 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-base" />
                       </div>
                       <div>
                           <label class="flex items-center text-base font-medium text-gray-300 mb-2"><i data-lucide="brain-circuit" class="w-5 h-5 mr-3"></i>${t(
@@ -64,7 +64,7 @@ export function renderMobileSettingsUI(app) {
                           )}</label>
                           <textarea id="settings-user-desc" placeholder="${t(
                             "settings.yourDescriptionPlaceholder",
-                          )}" class="w-full px-3 py-2 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-base" rows="3" oninput="window.personaApp.handleSettingChange('userDescription', this.value)">${settings.userDescription}</textarea>
+                          )}" class="w-full px-3 py-2 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-base" rows="3">${settings.userDescription}</textarea>
                       </div>
                   </div>
               </div>
@@ -84,7 +84,7 @@ export function renderMobileSettingsUI(app) {
                                 "settings.proactiveChat",
                               )}</span>
                               <div class="relative inline-block w-10 align-middle select-none">
-                                  <input type="checkbox" name="toggle" id="settings-proactive-toggle" ${settings.proactiveChatEnabled ? "checked" : ""} class="absolute opacity-0 w-0 h-0 peer" onchange="window.personaApp.handleSettingChange('proactiveChatEnabled', this.checked)"/>
+                                  <input type="checkbox" name="toggle" id="settings-proactive-toggle" ${settings.proactiveChatEnabled ? "checked" : ""} class="absolute opacity-0 w-0 h-0 peer" />
                                   <label for="settings-proactive-toggle" class="block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer peer-checked:bg-blue-600"></label>
                                   <span class="absolute left-0.5 top-0.5 block w-5 h-5 rounded-full bg-white transition-transform duration-200 ease-in-out peer-checked:translate-x-4"></span>
                               </div>
@@ -96,7 +96,7 @@ export function renderMobileSettingsUI(app) {
                                 "settings.randomFirstMessage",
                               )}</span>
                               <div class="relative inline-block w-10 align-middle select-none">
-                                  <input type="checkbox" name="toggle" id="settings-random-first-message-toggle" ${settings.randomFirstMessageEnabled ? "checked" : ""} class="absolute opacity-0 w-0 h-0 peer" onchange="window.personaApp.handleSettingChange('randomFirstMessageEnabled', this.checked)"/>
+                                  <input type="checkbox" name="toggle" id="settings-random-first-message-toggle" ${settings.randomFirstMessageEnabled ? "checked" : ""} class="absolute opacity-0 w-0 h-0 peer" />
                                   <label for="settings-random-first-message-toggle" class="block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer peer-checked:bg-blue-600"></label>
                                   <span class="absolute left-0.5 top-0.5 block w-5 h-5 rounded-full bg-white transition-transform duration-200 ease-in-out peer-checked:translate-x-4"></span>
                               </div>
@@ -111,7 +111,7 @@ export function renderMobileSettingsUI(app) {
                                         "settings.characterCountUnit",
                                       )}</span>
                                   </label>
-                                  <input id="settings-random-character-count" type="range" min="1" max="5" step="1" value="${settings.randomCharacterCount}" class="w-full" oninput="window.personaApp.handleSettingChange('randomCharacterCount', parseInt(this.value))">
+                                  <input id="settings-random-character-count" type="range" min="1" max="5" step="1" value="${settings.randomCharacterCount}" class="w-full">
                               </div>
                               <div>
                                   <label class="text-base font-medium text-gray-300 mb-2 block">${t(
@@ -120,11 +120,11 @@ export function renderMobileSettingsUI(app) {
                                   <div class="flex items-center gap-3">
                                       <input id="settings-random-frequency-min" type="number" min="1" class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-base" placeholder="${t(
                                         "settings.min",
-                                      )}" value="${settings.randomMessageFrequencyMin}" oninput="window.personaApp.handleSettingChange('randomMessageFrequencyMin', parseInt(this.value))">
+                                      )}" value="${settings.randomMessageFrequencyMin}">
                                       <span class="text-gray-400">-</span>
                                       <input id="settings-random-frequency-max" type="number" min="1" class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-base" placeholder="${t(
                                         "settings.max",
-                                      )}" value="${settings.randomMessageFrequencyMax}" oninput="window.personaApp.handleSettingChange('randomMessageFrequencyMax', parseInt(this.value))">
+                                      )}" value="${settings.randomMessageFrequencyMax}">
                                   </div>
                               </div>
                           </div>
@@ -147,7 +147,7 @@ export function renderMobileSettingsUI(app) {
                                 "settings.enableSnapshots",
                               )}</span>
                               <div class="relative inline-block w-10 align-middle select-none">
-                                  <input type="checkbox" name="toggle" id="settings-snapshots-toggle" ${settings.snapshotsEnabled ? "checked" : ""} class="absolute opacity-0 w-0 h-0 peer" onchange="window.personaApp.handleSettingChange('snapshotsEnabled', this.checked)"/>
+                                  <input type="checkbox" name="toggle" id="settings-snapshots-toggle" ${settings.snapshotsEnabled ? "checked" : ""} class="absolute opacity-0 w-0 h-0 peer" />
                                   <label for="settings-snapshots-toggle" class="block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer peer-checked:bg-blue-600"></label>
                                   <span class="absolute left-0.5 top-0.5 block w-5 h-5 rounded-full bg-white transition-transform duration-200 ease-in-out peer-checked:translate-x-4"></span>
                               </div>
@@ -222,7 +222,7 @@ export function renderMobileSettingsUI(app) {
                                 "settings.enableDebugLogs",
                               )}</span>
                               <div class="relative inline-block w-10 align-middle select-none">
-                                  <input type="checkbox" name="toggle" id="settings-enable-debug-logs" ${app.state.enableDebugLogs ? "checked" : ""} onchange="window.personaApp.handleSettingChange('enableDebugLogs', this.checked)" class="absolute opacity-0 w-0 h-0 peer"/>
+                                  <input type="checkbox" name="toggle" id="settings-enable-debug-logs" ${app.state.enableDebugLogs ? "checked" : ""} class="absolute opacity-0 w-0 h-0 peer"/>
                                   <label for="settings-enable-debug-logs" class="block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer peer-checked:bg-blue-600"></label>
                                   <span class="absolute left-0.5 top-0.5 block w-5 h-5 rounded-full bg-white transition-transform duration-200 ease-in-out peer-checked:translate-x-4"></span>
                               </div>
@@ -334,13 +334,13 @@ export function renderAiSettingsPage(app) {
             <label class="flex items-center text-base font-medium text-gray-300 mb-2"><i data-lucide="globe" class="w-5 h-5 mr-3"></i>${t(
               "settings.aiProvider",
             )}</label>
-            <select id="settings-api-provider" class="w-full px-3 py-2 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-base" onchange="window.personaApp.handleSettingChange('apiProvider', this.value)">
-                <option value="gemini" ${(settings.apiProvider || "gemini") === "gemini" ? "selected" : ""}>Google Gemini</option>
-                <option value="claude" ${(settings.apiProvider || "gemini") === "claude" ? "selected" : ""}>Anthropic Claude</option>
-                <option value="openai" ${(settings.apiProvider || "gemini") === "openai" ? "selected" : ""}>OpenAI ChatGPT</option>
-                <option value="grok" ${(settings.apiProvider || "gemini") === "grok" ? "selected" : ""}>xAI Grok</option>
-                <option value="openrouter" ${(settings.apiProvider || "gemini") === "openrouter" ? "selected" : ""}>OpenRouter</option>
-                <option value="custom_openai" ${(settings.apiProvider || "gemini") === "custom_openai" ? "selected" : ""}>Custom OpenAI</option>
+            <select id="settings-api-provider" class="w-full px-3 py-2 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-base">
+                <option value="gemini" ${ (settings.apiProvider || "gemini") === "gemini" ? "selected" : ""}>Google Gemini</option>
+                <option value="claude" ${ (settings.apiProvider || "gemini") === "claude" ? "selected" : ""}>Anthropic Claude</option>
+                <option value="openai" ${ (settings.apiProvider || "gemini") === "openai" ? "selected" : ""}>OpenAI ChatGPT</option>
+                <option value="grok" ${ (settings.apiProvider || "gemini") === "grok" ? "selected" : ""}>xAI Grok</option>
+                <option value="openrouter" ${ (settings.apiProvider || "gemini") === "openrouter" ? "selected" : ""}>OpenRouter</option>
+                <option value="custom_openai" ${ (settings.apiProvider || "gemini") === "custom_openai" ? "selected" : ""}>Custom OpenAI</option>
             </select>
         </div>
         <div class="provider-settings-container">${renderCurrentProviderSettings(
@@ -404,7 +404,7 @@ export function renderScaleSettingsPage(app) {
                     </div>
                 </div>
             </div>
-            <input id="settings-font-scale" type="range" min="0.8" max="1.4" step="0.1" value="${settings.fontScale}" class="w-full" oninput="window.personaApp.handleSettingChange('fontScale', parseFloat(this.value))">
+            <input id="settings-font-scale" type="range" min="0.8" max="1.4" step="0.1" value="${settings.fontScale}" class="w-full">
             <div class="flex justify-between text-sm text-gray-400 mt-1 relative">
                 <span>80%</span>
                 <span class="absolute" style="left: 33.33%; transform: translateX(-50%);">100%</span>
@@ -427,6 +427,152 @@ export function setupMobileSettingsUIEventListeners(app) {
       app.setState({ showSettingsUI: false });
     });
     closeButton.dataset.listenerAdded = "true";
+  }
+
+  const userNameInput = document.getElementById("settings-user-name");
+  if (userNameInput) {
+    userNameInput.addEventListener("input", (e) => {
+      app.handleSettingChange("userName", e.target.value);
+    });
+  }
+
+  const userDescTextarea = document.getElementById("settings-user-desc");
+  if (userDescTextarea) {
+    userDescTextarea.addEventListener("input", (e) => {
+      app.handleSettingChange("userDescription", e.target.value);
+    });
+  }
+
+  const proactiveToggle = document.getElementById("settings-proactive-toggle");
+  if (proactiveToggle) {
+    proactiveToggle.addEventListener("change", (e) => {
+      app.handleSettingChange("proactiveChatEnabled", e.target.checked);
+    });
+  }
+
+  const randomFirstMessageToggle = document.getElementById(
+    "settings-random-first-message-toggle",
+  );
+  if (randomFirstMessageToggle) {
+    randomFirstMessageToggle.addEventListener("change", (e) => {
+      app.handleSettingChange("randomFirstMessageEnabled", e.target.checked);
+    });
+  }
+
+  const randomCharacterCount = document.getElementById(
+    "settings-random-character-count",
+  );
+  if (randomCharacterCount) {
+    randomCharacterCount.addEventListener("input", (e) => {
+      app.handleSettingChange("randomCharacterCount", parseInt(e.target.value));
+    });
+  }
+
+  const randomFrequencyMin = document.getElementById(
+    "settings-random-frequency-min",
+  );
+  if (randomFrequencyMin) {
+    randomFrequencyMin.addEventListener("input", (e) => {
+      app.handleSettingChange("randomMessageFrequencyMin", parseInt(e.target.value));
+    });
+  }
+
+  const randomFrequencyMax = document.getElementById(
+    "settings-random-frequency-max",
+  );
+  if (randomFrequencyMax) {
+    randomFrequencyMax.addEventListener("input", (e) => {
+      app.handleSettingChange("randomMessageFrequencyMax", parseInt(e.target.value));
+    });
+  }
+
+  const snapshotsToggle = document.getElementById("settings-snapshots-toggle");
+  if (snapshotsToggle) {
+    snapshotsToggle.addEventListener("change", (e) => {
+      app.handleSettingChange("snapshotsEnabled", e.target.checked);
+    });
+  }
+
+  const enableDebugLogs = document.getElementById("settings-enable-debug-logs");
+  if (enableDebugLogs) {
+    enableDebugLogs.addEventListener("change", (e) => {
+      app.handleSettingChange("enableDebugLogs", e.target.checked);
+    });
+  }
+
+  const apiProvider = document.getElementById("settings-api-provider");
+  if (apiProvider) {
+    apiProvider.addEventListener("change", (e) => {
+      app.handleSettingChange("apiProvider", e.target.value);
+    });
+  }
+
+  const fontScale = document.getElementById("settings-font-scale");
+  if (fontScale) {
+    fontScale.addEventListener("input", (e) => {
+      app.handleSettingChange("fontScale", parseFloat(e.target.value));
+    });
+  }
+
+  const apiKey = document.getElementById("settings-api-key");
+  if (apiKey) {
+    apiKey.addEventListener("input", (e) => {
+      app.handleProviderConfigChange("apiKey", e.target.value);
+    });
+  }
+
+  const baseUrl = document.getElementById("settings-base-url");
+  if (baseUrl) {
+    baseUrl.addEventListener("input", (e) => {
+      app.handleProviderConfigChange("baseUrl", e.target.value);
+    });
+  }
+
+  const modelSelectBtns = document.querySelectorAll(".model-select-btn");
+  modelSelectBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      app.handleProviderConfigChange("model", btn.dataset.model);
+    });
+  });
+
+  const maxTokens = document.getElementById("settings-max-tokens");
+  if (maxTokens) {
+    maxTokens.addEventListener("input", (e) => {
+      app.handleProviderConfigChange("maxTokens", parseInt(e.target.value));
+      document.getElementById("max-tokens-value").textContent = e.target.value;
+    });
+  }
+
+  const temperature = document.getElementById("settings-temperature");
+  if (temperature) {
+    temperature.addEventListener("input", (e) => {
+      app.handleProviderConfigChange("temperature", parseFloat(e.target.value));
+      document.getElementById("temperature-value").textContent = parseFloat(
+        e.target.value,
+      ).toFixed(1);
+    });
+  }
+
+  const profileMaxTokens = document.getElementById("settings-profile-max-tokens");
+  if (profileMaxTokens) {
+    profileMaxTokens.addEventListener("input", (e) => {
+      app.handleProviderConfigChange("profileMaxTokens", parseInt(e.target.value));
+      document.getElementById("profile-max-tokens-value").textContent =
+        e.target.value;
+    });
+  }
+
+  const profileTemperature = document.getElementById("settings-profile-temperature");
+  if (profileTemperature) {
+    profileTemperature.addEventListener("input", (e) => {
+      app.handleProviderConfigChange(
+        "profileTemperature",
+        parseFloat(e.target.value),
+      );
+      document.getElementById("profile-temperature-value").textContent = parseFloat(
+        e.target.value,
+      ).toFixed(1);
+    });
   }
 
   setupSettingsModalEventListeners(app);
@@ -478,11 +624,10 @@ export function renderProviderConfig(provider, config) {
                     value="${config.apiKey || ""}"
                     placeholder="${t("settings.apiKeyPlaceholder")}"
                     class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm"
-                    oninput="window.personaApp.handleProviderConfigChange('apiKey', this.value)"
                 />
             </div>
 
-            ${
+            ${ 
               provider === PROVIDERS.CUSTOM_OPENAI
                 ? `
                 <!-- Custom OpenAI Base URL -->
@@ -496,7 +641,6 @@ export function renderProviderConfig(provider, config) {
                         value="${config.baseUrl || ""}"
                         placeholder="https://api.openai.com/v1"
                         class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm"
-                        oninput="window.personaApp.handleProviderConfigChange('baseUrl', this.value)"
                     />
                 </div>
             `
@@ -511,7 +655,7 @@ export function renderProviderConfig(provider, config) {
                     )}
                 </label>
 
-                ${
+                ${ 
                   models.length > 0
                     ? `
                     <div class="grid grid-cols-1 gap-2 mb-3">
@@ -520,13 +664,12 @@ export function renderProviderConfig(provider, config) {
                             (model) => `
                             <button
                                 type="button"
-                                class="model-select-btn px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                                class="model-select-btn px-3 py-2 text-left text-sm rounded-lg transition-colors ${ 
                                   config.model === model
                                     ? "bg-blue-600 text-white"
                                     : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                                 }"
                                 data-model="${model}"
-                                onclick="window.personaApp.handleProviderConfigChange('model', this.dataset.model)"
                             >
                                 ${model}
                             </button>
@@ -557,7 +700,7 @@ export function renderProviderConfig(provider, config) {
                     </button>
                 </div>
 
-                ${
+                ${ 
                   customModels.length > 0
                     ? `
                     <div class="mt-3 space-y-1">
@@ -570,13 +713,12 @@ export function renderProviderConfig(provider, config) {
                             <div class="flex items-center gap-2">
                                 <button
                                     type="button"
-                                    class="model-select-btn flex-1 px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                                    class="model-select-btn flex-1 px-3 py-2 text-left text-sm rounded-lg transition-colors ${ 
                                       config.model === model
                                         ? "bg-blue-600 text-white"
                                         : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                                     }"
                                     data-model="${model}"
-                                    onclick="window.personaApp.handleProviderConfigChange('model', this.dataset.model)"
                                 >
                                     ${model}
                                 </button>
@@ -623,7 +765,6 @@ export function renderProviderConfig(provider, config) {
                         step="256"
                         value="${config.maxTokens || (provider === "gemini" ? 4096 : 4096)}"
                         class="w-full"
-                        oninput="window.personaApp.handleProviderConfigChange('maxTokens', parseInt(this.value)); document.getElementById('max-tokens-value').textContent = this.value;"
                     />
                     <div class="flex justify-between text-xs text-gray-400 mt-1">
                         <span>512</span>
@@ -635,7 +776,7 @@ export function renderProviderConfig(provider, config) {
                 <div>
                     <label class="flex items-center justify-between text-sm font-medium text-gray-300 mb-2">
                         <span>${t("settings.temperature")}</span>
-                        <span class="text-blue-400 font-mono text-xs" id="temperature-value">${
+                        <span class="text-blue-400 font-mono text-xs" id="temperature-value">${ 
                           config.temperature !== undefined
                             ? config.temperature
                             : provider === "gemini"
@@ -650,7 +791,7 @@ export function renderProviderConfig(provider, config) {
                         min="0"
                         max="2"
                         step="0.1"
-                        value="${
+                        value="${ 
                           config.temperature !== undefined
                             ? config.temperature
                             : provider === "gemini"
@@ -658,7 +799,6 @@ export function renderProviderConfig(provider, config) {
                               : 0.8
                         }"
                         class="w-full"
-                        oninput="window.personaApp.handleProviderConfigChange('temperature', parseFloat(this.value)); document.getElementById('temperature-value').textContent = parseFloat(this.value).toFixed(1);"
                     />
                     <div class="flex justify-between text-xs text-gray-400 mt-1">
                         <span>${t("settings.conservativeTemp")} (0.0)</span>
@@ -687,7 +827,6 @@ export function renderProviderConfig(provider, config) {
                                 step="128"
                                 value="${config.profileMaxTokens || 1024}"
                                 class="w-full"
-                                oninput="window.personaApp.handleProviderConfigChange('profileMaxTokens', parseInt(this.value)); document.getElementById('profile-max-tokens-value').textContent = this.value;"
                             />
                             <div class="flex justify-between text-xs text-gray-400 mt-1">
                                 <span>256</span>
@@ -699,7 +838,7 @@ export function renderProviderConfig(provider, config) {
                         <div>
                             <label class="flex items-center justify-between text-sm font-medium text-gray-300 mb-2">
                                 <span>${t("settings.profileTemperature")}</span>
-                                <span class="text-blue-400 font-mono text-xs" id="profile-temperature-value">${
+                                <span class="text-blue-400 font-mono text-xs" id="profile-temperature-value">${ 
                                   config.profileTemperature !== undefined
                                     ? config.profileTemperature
                                     : 1.2
@@ -712,13 +851,12 @@ export function renderProviderConfig(provider, config) {
                                 min="0.5"
                                 max="2"
                                 step="0.1"
-                                value="${
+                                value="${ 
                                   config.profileTemperature !== undefined
                                     ? config.profileTemperature
                                     : 1.2
                                 }"
                                 class="w-full"
-                                oninput="window.personaApp.handleProviderConfigChange('profileTemperature', parseFloat(this.value)); document.getElementById('profile-temperature-value').textContent = parseFloat(this.value).toFixed(1);"
                             />
                             <div class="flex justify-between text-xs text-gray-400 mt-1">
                                 <span>${t("settings.consistentProfile")} (0.5)</span>
@@ -753,7 +891,7 @@ export function renderSnapshotList(app) {
         `,
           )
           .join("")}
-        ${
+        ${ 
           app.state.settingsSnapshots.length === 0
             ? `<p class="text-sm text-gray-500 text-center py-2">${t(
                 "settings.noSnapshots",
