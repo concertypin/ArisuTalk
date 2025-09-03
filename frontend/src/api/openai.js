@@ -1,4 +1,4 @@
-import { buildContentPrompt, buildProfilePrompt, buildCharacterSheetPrompt } from "./promptBuilder.js";
+import { buildContentPrompt, buildProfilePrompt, buildCharacterSheetPrompt } from "../prompts/builder/promptBuilder.js";
 import { t } from "../i18n.js";
 
 const API_BASE_URL = "https://api.openai.com/v1";
@@ -67,8 +67,8 @@ export class OpenAIClient {
     });
 
     const messages = contents.map(c => ({
-        role: c.role === 'model' ? 'assistant' : c.role,
-        content: c.parts.map(p => p.text).join('')
+      role: c.role === 'model' ? 'assistant' : c.role,
+      content: c.parts.map(p => p.text).join('')
     }));
 
     messages.unshift({ role: "system", content: systemPrompt });
@@ -225,10 +225,10 @@ export class OpenAIClient {
   /**
    * Generates a character sheet using OpenAI API.
    */
-  async generateCharacterSheet({ 
-    characterName, 
-    characterDescription, 
-    characterSheetPrompt 
+  async generateCharacterSheet({
+    characterName,
+    characterDescription,
+    characterSheetPrompt
   }) {
     const { systemPrompt, contents } = buildCharacterSheetPrompt({
       characterName,
@@ -265,14 +265,14 @@ export class OpenAIClient {
 
       if (!response.ok) {
         console.error("Character Sheet Gen API Error:", data);
-        const errorMessage = data?.error?.message || 
+        const errorMessage = data?.error?.message ||
           t("api.requestFailed", { status: response.statusText });
         throw new Error(errorMessage);
       }
 
       if (data.choices && data.choices.length > 0) {
         const responseText = data.choices[0].message.content.trim();
-        
+
         return {
           messages: [{ content: responseText }],
           reactionDelay: 1000,

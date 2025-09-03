@@ -1,4 +1,4 @@
-import { buildContentPrompt, buildProfilePrompt, buildCharacterSheetPrompt } from "./promptBuilder.js";
+import { buildContentPrompt, buildProfilePrompt, buildCharacterSheetPrompt } from "../prompts/builder/promptBuilder.js";
 import { t } from "../i18n.js";
 
 const API_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models";
@@ -391,10 +391,10 @@ export class GeminiClient {
    * @returns {string} [returns.error] - Error message if error occurs
    * @throws {Error} When API call fails or response processing error occurs
    */
-  async generateCharacterSheet({ 
-    characterName, 
-    characterDescription, 
-    characterSheetPrompt 
+  async generateCharacterSheet({
+    characterName,
+    characterDescription,
+    characterSheetPrompt
   }) {
     const { systemPrompt, contents } = buildCharacterSheetPrompt({
       characterName,
@@ -409,7 +409,7 @@ export class GeminiClient {
       },
       generationConfig: {
         temperature: this.profileTemperature, // Use profile temperature for consistency
-        maxOutputTokens: this.profileMaxOutputTokens, 
+        maxOutputTokens: this.profileMaxOutputTokens,
         topP: 0.95,
         responseMimeType: "text/plain", // Character sheet should be plain text markdown
       },
@@ -454,7 +454,7 @@ export class GeminiClient {
         data.candidates[0]?.content?.parts?.[0]?.text
       ) {
         const responseText = data.candidates[0].content.parts[0].text.trim();
-        
+
         // Return in the same format as generateContent for consistency
         return {
           messages: [{ content: responseText }],

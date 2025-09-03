@@ -20,6 +20,7 @@
     "node": ">20"
   },
   "devDependencies": {
+    "@nyariv/sandboxjs": "^0.8.25",
     "prettier": "^3.6.2",
     "vite": "^7.1.2",
     "vite-plugin-pwa": "^1.0.3"

@@ -1,4 +1,4 @@
-import { buildContentPrompt, buildProfilePrompt, buildCharacterSheetPrompt } from "./promptBuilder.js";
+import { buildContentPrompt, buildProfilePrompt, buildCharacterSheetPrompt } from "../prompts/builder/promptBuilder.js";
 import { t } from "../i18n.js";
 
 export class CustomOpenAIClient {

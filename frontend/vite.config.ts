@@ -30,7 +30,7 @@ export default defineConfig({
     },
     build: {
         outDir: "dist",
-        sourcemap: true,
+        sourcemap: "inline",
     },
     clearScreen: false,
     publicDir: "static",

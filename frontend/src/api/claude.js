@@ -1,4 +1,4 @@
-import { buildContentPrompt, buildProfilePrompt, buildCharacterSheetPrompt } from "./promptBuilder.js";
+import { buildContentPrompt, buildProfilePrompt, buildCharacterSheetPrompt } from "../prompts/builder/promptBuilder.js";
 import { t } from "../i18n.js";
 
 const API_BASE_URL = "https://api.anthropic.com/v1";
@@ -34,8 +34,8 @@ export class ClaudeClient {
     });
 
     const messages = contents.map(c => ({
-        role: c.role === 'model' ? 'assistant' : c.role,
-        content: c.parts.map(p => p.text).join('')
+      role: c.role === 'model' ? 'assistant' : c.role,
+      content: c.parts.map(p => p.text).join('')
     }));
 
     // for_update 라인 6918-6924: 요청 본문 구성
@@ -177,10 +177,10 @@ export class ClaudeClient {
    * @param {string} params.characterSheetPrompt - Template for character sheet generation
    * @returns {Promise<Object>} Promise resolving to character sheet text response
    */
-  async generateCharacterSheet({ 
-    characterName, 
-    characterDescription, 
-    characterSheetPrompt 
+  async generateCharacterSheet({
+    characterName,
+    characterDescription,
+    characterSheetPrompt
   }) {
     const { systemPrompt, contents } = buildCharacterSheetPrompt({
       characterName,
@@ -214,14 +214,14 @@ export class ClaudeClient {
 
       if (!response.ok) {
         console.error("Character Sheet Gen API Error:", data);
-        const errorMessage = data?.error?.message || 
+        const errorMessage = data?.error?.message ||
           t("api.requestFailed", { status: response.statusText });
         throw new Error(errorMessage);
       }
 
       if (data.content && data.content.length > 0) {
         const responseText = data.content.map(item => item.text).join("").trim();
-        
+
         return {
           messages: [{ content: responseText }],
           reactionDelay: 1000,

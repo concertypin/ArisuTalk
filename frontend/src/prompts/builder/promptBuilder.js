@@ -2,29 +2,45 @@
  * This module is responsible for building the prompts for the various API clients.
  * It uses the new promptManager to fetch ChatML prompts and then populates them with dynamic data.
  */
-import { getPrompt } from '../prompts/promptManager.ts';
-import { parseChatML, chatMLToPromptStructure } from './chatMLParser.js';
+import { getPrompt } from '../promptManager.ts';
+import { parseChatML, chatMLToPromptStructure } from '../../api/chatMLParser.js';
+import { parseMagicPatterns } from './magicPatternParser.js';
 
 /**
- * Replaces placeholders in a string with values from a given data object.
- * @param {string} template - The string template with placeholders like {key.name}.
- * @param {object} data - The object containing the data to fill in.
- * @returns {string} The populated string.
+ * Populates a template with magic patterns.
+ * It also makes the context safe by deep copying objects to avoid mutations.
+ * 
+ * @param {string} template - The string template with magic patterns.
+ * @param {object} context - The context to be available in the sandbox.
+ * @returns {Promise<string>} The populated string.
  */
-function populateTemplate(template, data) {
-  if (!template) return '';
-  return template.replace(/\{(\w+(?:\.\w+)*)\}/g, (match, key) => {
-    const keys = key.split('.');
-    let value = data;
-    for (const k of keys) {
-      if (value && typeof value === 'object' && k in value) {
-        value = value[k];
-      } else {
-        return match; // Keep placeholder if key not found
+async function populateTemplate(template, context) {
+  const defaultContext = {
+    sessionStorage: window.sessionStorage,
+    console: { log: console.log },
+  }
+  const allowed = { ...defaultContext }
+  for (const key in context) {
+    try {
+      // Merge primpitive context property with default context
+      if (context[key] === null || (typeof context[key] !== 'object' && typeof context[key] !== 'function')) {
+        allowed[key] = context[key];
       }
+      //Functions can't be deepcopied, so we merge them directly
+      if (typeof context[key] === 'function') {
+        allowed[key] = context[key];
+      }
+      // Object values are deepcopied in the magic pattern parser
+      if (typeof context[key] === 'object' && context[key] !== null) {
+        allowed[key] = structuredClone(context[key]);
+      }
+
+    } catch (e) {
+      //fallback to JSON-copy value if deep copy fails
+      allowed[key] = JSON.parse(JSON.stringify(context[key]));
     }
-    return value;
-  });
+  }
+  return await parseMagicPatterns(template, allowed);
 }
 
 
@@ -83,23 +99,54 @@ export async function buildContentPrompt({
     ? character.memories.map(mem => `- ${mem}`).join('\n')
     : 'No specific memories recorded yet.';
 
+  const chat = (a, b) => {
+    // Create a reversed copy of the history array to make indexing easier.
+    const reversedHistory = [...history].reverse();
+    const historyLength = history.length;
+
+    // Helper to clamp index to the valid range.
+    const clamp = (index, length) => Math.max(0, Math.min(length - 1, index));
+
+    // Adjust for negative indices.
+    const resolveIndex = (index, length) => {
+      if (index >= 0) {
+        return clamp(index, length);
+      } else {
+        return clamp(length + index, length);
+      }
+    }
+
+    let start = resolveIndex(a, historyLength);
+    let end = resolveIndex(b, historyLength);
+
+    let result = [];
+    if (start <= end) {
+      for (let i = start; i <= end; i++) {
+        result.push(reversedHistory[i]);
+      }
+    } else {
+      for (let i = start; i >= end; i--) {
+        result.push(reversedHistory[i]);
+      }
+    }
+
+    return result;
+  };
+
   const data = {
-    user: {
-      name: userName || 'Not specified',
-      description: userDescription || 'Not specified',
-    },
-    character: {
-      ...character,
-      stickers: stickerInfo,
-      memories: memories,
-    },
+    character: character,
+    persona: { name: userName, description: userDescription },
     time: {
       context: timeContext,
       diff: timeDiff,
     },
-  };
+    chat: chat,
 
-  const populatedPrompt = populateTemplate(chatMLTemplate, data);
+  };
+  data.char = data.character.name;
+  data.user = data.persona.name;
+
+  const populatedPrompt = await populateTemplate(chatMLTemplate, data);
   const chatMLMessages = parseChatML(populatedPrompt);
   const { systemPrompt, contents: promptContents } = chatMLToPromptStructure(
     chatMLMessages,
@@ -174,11 +221,14 @@ export async function buildCharacterSheetPrompt({ characterName, characterDescri
   const data = {
     character: {
       name: characterName,
-      description: characterDescription || 'No description provided.',
+      description: characterDescription || undefined,
     },
+    persona: {},
   };
+  data.char = data.character.name;
+  data.user = data.persona.name;
 
-  const populatedPrompt = populateTemplate(chatMLTemplate, data);
+  const populatedPrompt = await populateTemplate(chatMLTemplate, data);
   const chatMLMessages = parseChatML(populatedPrompt);
   const { systemPrompt, contents } = chatMLToPromptStructure(
     chatMLMessages,
@@ -202,13 +252,16 @@ export async function buildProfilePrompt({ userName, userDescription }) {
   const chatMLTemplate = await getPrompt('profileCreation');
 
   const data = {
-    user: {
+    character: {},
+    persona: {
       name: userName,
       description: userDescription,
     },
   };
+  data.char = data.character.name;
+  data.user = data.persona.name;
 
-  const populatedPrompt = populateTemplate(chatMLTemplate, data);
+  const populatedPrompt = await populateTemplate(chatMLTemplate, data);
   const chatMLMessages = parseChatML(populatedPrompt);
   const { systemPrompt, contents } = chatMLToPromptStructure(
     chatMLMessages,
