@@ -1,10 +1,10 @@
 import { renderDesktopSettingsUI } from "./DesktopSettingsUI.js";
 
 /**
- * Router that returns appropriate settings UI
+ * Renders the desktop settings modal.
  * @param {Object} app - Application instance
- * @returns {string} Rendered settings UI HTML
+ * @returns {string} Rendered settings modal HTML
  */
-export function renderSettingsUI(app) {
+export function renderDesktopSettingsModal(app) {
   return renderDesktopSettingsUI(app);
 }
