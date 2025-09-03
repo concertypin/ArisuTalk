@@ -2,6 +2,12 @@ import { t } from "../i18n.js";
 import { renderAvatar } from "./Avatar.js";
 import { formatTimestamp } from "../utils.js";
 
+/**
+ * Renders a single character item for the character list page.
+ * @param {object} app - The main application object.
+ * @param {object} char - The character object to render.
+ * @returns {string} The HTML string for the character item.
+ */
 export function renderCharacterItem(app, char) {
   // Simplified version of the character item for the list page.
   // It won't have chat rooms or expansion logic, just a direct link to the chat.
@@ -61,6 +67,11 @@ export function renderCharacterItem(app, char) {
   `;
 }
 
+/**
+ * Renders the list of characters into a container.
+ * @param {object} app - The main application object.
+ * @param {HTMLElement} container - The container element to render the list into.
+ */
 export function renderCharacterList(app, container) {
   const filteredCharacters = app.state.characters.filter((char) =>
     char.name.toLowerCase().includes(app.state.searchQuery.toLowerCase()),
@@ -70,6 +81,10 @@ export function renderCharacterList(app, container) {
     .join("");
 }
 
+/**
+ * Renders the entire character list page for mobile view.
+ * @param {object} app - The main application object.
+ */
 export function renderCharacterListPage(app) {
   const container = document.getElementById("character-list-page-container");
   if (!container) return;

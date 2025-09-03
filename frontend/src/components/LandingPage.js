@@ -1,5 +1,9 @@
 import { t } from "../i18n.js";
 
+/**
+ * Renders the landing page shown when no chat is selected.
+ * @returns {string} The HTML string for the landing page.
+ */
 export function renderLandingPage() {
   return `
     <div class="flex-1 flex flex-col items-center justify-center text-center p-4 bg-gray-950">
@@ -23,6 +27,9 @@ export function renderLandingPage() {
   `;
 }
 
+/**
+ * Sets up event listeners for the landing page buttons.
+ */
 export function setupLandingPageEventListeners() {
   const newCharacterBtn = document.getElementById("landing-new-character-btn");
   if (newCharacterBtn) {

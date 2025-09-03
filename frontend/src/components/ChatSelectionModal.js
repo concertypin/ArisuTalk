@@ -1,6 +1,11 @@
 import { t } from "../i18n.js";
 import { renderAvatar } from "./Avatar.js";
 
+/**
+ * Renders the chat selection modal for a character with multiple chat rooms.
+ * @param {object} app - The main application object.
+ * @returns {string} The HTML string for the chat selection modal.
+ */
 export function renderChatSelectionModal(app) {
   const { character } = app.state.modal;
   const chatRooms = app.state.chatRooms[character.id] || [];

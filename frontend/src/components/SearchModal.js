@@ -32,6 +32,11 @@ function renderSearchResults(app) {
   return `<div class="character-list space-y-2 p-2">${resultsHtml}</div>`;
 }
 
+/**
+ * Renders the search modal.
+ * @param {object} app - The main application object.
+ * @returns {string} The HTML string for the search modal.
+ */
 export function renderSearchModal(app) {
   return `
     <div id="search-modal-backdrop" class="modal-backdrop animate-fadeIn"></div>
@@ -53,6 +58,10 @@ export function renderSearchModal(app) {
   `;
 }
 
+/**
+ * Updates the search results in the search modal with animation.
+ * @param {object} app - The main application object.
+ */
 export function updateSearchResults(app) {
   const modalContent = document.querySelector(".search-modal-content");
   const container = document.querySelector(".search-results-container");

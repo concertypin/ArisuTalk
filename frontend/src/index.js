@@ -179,6 +179,12 @@ class PersonaChatApp {
     );
   }
 
+  /**
+   * Handles character selection from the list.
+   * If the character has multiple chat rooms, it shows a selection modal.
+   * Otherwise, it directly opens the chat room.
+   * @param {string | number} characterId - The ID of the selected character.
+   */
   handleCharacterSelect(characterId) {
     const numericCharacterId = Number(characterId);
     const character = this.state.characters.find(
@@ -198,12 +204,22 @@ class PersonaChatApp {
     }
   }
 
+  /**
+   * Handles changes to a specific setting.
+   * @param {string} key - The key of the setting to change.
+   * @param {*} value - The new value for the setting.
+   */
   handleSettingChange(key, value) {
     this.setState({
       settings: { ...this.state.settings, [key]: value },
     });
   }
 
+  /**
+   * Handles changes to the configuration of the current API provider.
+   * @param {string} key - The key of the config to change.
+   * @param {*} value - The new value for the config.
+   */
   handleProviderConfigChange(key, value) {
     const provider = this.state.settings.apiProvider || DEFAULT_PROVIDER;
     const newConfig = {
@@ -236,6 +252,10 @@ class PersonaChatApp {
     this.setState({ settingsSnapshots: newSnapshots });
   }
 
+  /**
+   * Sets up the application height to match the window's inner height.
+   * This is to prevent the UI from being pushed up by the on-screen keyboard on mobile devices.
+   */
   setupAppHeight() {
     const setHeight = () => {
       const app = document.getElementById('app');
