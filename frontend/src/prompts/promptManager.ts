@@ -3,8 +3,8 @@
  * It handles loading prompts from local storage and falling back to the default prompts.
  */
 
-import { defaultChatMLPrompts } from './chatMLPrompts.ts';
-import { loadFromBrowserStorage, saveToBrowserStorage } from '../storage.js';
+import { defaultChatMLPrompts } from './chatMLPrompts';
+import { loadFromBrowserStorage, saveToBrowserStorage } from "../storage";
 
 const PROMPT_STORAGE_KEY = 'chatMLPrompts';
 

@@ -40,7 +40,7 @@ export async function renderPromptModal(app) {
                                     <h5 class="font-bold mb-2">Magic Patterns</h5>
                                     <p>Magic Patterns are special patterns that can be used in the prompt to access character properties and current chatting log.</p>
                                     <p>Patterns start with <code>{|</code> and ends with <code>|}</code>. Inner text is command. Multi-line is supported.</p>
-                                    <p>All patterns are interpreted, executed on sandboxed JavsaScript engine, which means you can use any valid JavaScript syntax as long as it doesn't access outside of the sandbox.</p>
+                                    <p>All patterns are interpreted, executed on sandboxed JavaScript engine, which means you can use any valid JavaScript syntax as long as it doesn't access outside of the sandbox.</p>
                                     <p>After you write the pattern, you MUST use <code>return</code> statement to make the pattern return something! If you don't, it will return empty string.</p>
                                     <p>There are no escape mechanism, and all <code>{|</code> and <code>|}</code> patterns will be treated as magic patterns.</p>
                                     <p>All properties are read-only, and you can't modify them.</p>
