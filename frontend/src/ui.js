@@ -87,7 +87,7 @@ function updateSnapshotList(app) {
 
 // --- MAIN RENDER ORCHESTRATOR ---
 
-export function render(app) {
+export async function render(app) {
   const oldState = app.oldState || {};
   const newState = app.state;
   const isFirstRender = !app.oldState;
