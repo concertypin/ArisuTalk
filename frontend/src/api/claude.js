@@ -33,12 +33,48 @@ export class ClaudeClient {
       forceSummary,
     });
 
-    const messages = contents.map(c => ({
-      role: c.role === 'model' ? 'assistant' : c.role,
-      content: c.parts.map(p => p.text).join('')
-    }));
+    const messages = [];
+    for (const msg of history) {
+      const role = msg.isMe ? "user" : "assistant";
+      let content = msg.content || "";
 
-    // for_update 라인 6918-6924: 요청 본문 구성
+      if (msg.isMe && msg.type === "image" && msg.imageId) {
+        const imageData = character?.media?.find((m) => m.id === msg.imageId);
+        if (imageData) {
+          content = [
+            { type: "text", text: content || t("api.imageMessage") },
+            {
+              type: "image",
+              source: {
+                type: "base64",
+                media_type: imageData.mimeType || "image/jpeg",
+                data: imageData.dataUrl.split(",")[1],
+              },
+            },
+          ];
+        } else {
+          content = content || t("api.imageUnavailable");
+        }
+      } else if (msg.isMe && msg.type === "sticker" && msg.stickerData) {
+        const stickerName =
+          msg.stickerData.stickerName || t("api.unknownSticker");
+        content = `${t("api.stickerMessage", { stickerName: stickerName })}${
+          content ? ` ${content}` : ""
+        }`;
+      }
+
+      if (content) {
+        messages.push({ role, content });
+      }
+    }
+
+    if (isProactive && messages.length === 0) {
+      messages.push({
+        role: "user",
+        content: "(SYSTEM: You are starting this conversation. Please begin.)",
+      });
+    }
+
     const requestBody = {
       model: this.model,
       max_tokens: this.maxTokens,
@@ -48,7 +84,6 @@ export class ClaudeClient {
     };
 
     try {
-      // for_update 라인 6927-6936: API 호출
       const response = await fetch(`${this.baseUrl}/messages`, {
         method: "POST",
         headers: {
@@ -73,7 +108,6 @@ export class ClaudeClient {
 
       const data = await response.json();
 
-      // for_update 라인 6945-6960: 응답 처리
       if (data.content && data.content.length > 0) {
         const textContent = data.content[0].text;
 

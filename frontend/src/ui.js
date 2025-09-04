@@ -353,7 +353,7 @@ function shouldUpdateMainChat(oldState, newState) {
       JSON.stringify(newState.userStickers) ||
     JSON.stringify([...oldState.expandedStickers]) !==
       JSON.stringify([...newState.expandedStickers]) ||
-    // 그룹채팅/오픈채팅 관련 상태 변화
+    // Group/open chat related state changes
     JSON.stringify(oldState.groupChats) !==
       JSON.stringify(newState.groupChats) ||
     JSON.stringify(oldState.openChats) !== JSON.stringify(newState.openChats)
@@ -379,10 +379,10 @@ function shouldUpdateModals(oldState, newState) {
       oldState.enableDebugLogs !== newState.enableDebugLogs ||
       JSON.stringify(oldState.debugLogs) !==
         JSON.stringify(newState.debugLogs) ||
-      // 데스크톱 설정 UI의 활성 패널 변경 감지
+      // Detect active panel change in desktop settings UI
       oldState.ui?.desktopSettings?.activePanel !==
         newState.ui?.desktopSettings?.activePanel ||
-      // 설정 UI 모드 변경 감지
+      // Detect settings UI mode change
       oldState.ui?.settingsUIMode !== newState.ui?.settingsUIMode
   );
   }

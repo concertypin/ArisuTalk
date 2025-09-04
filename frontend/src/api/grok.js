@@ -33,15 +33,48 @@ export class GrokClient {
       forceSummary,
     });
 
-    const messages = contents.map(c => ({
-      role: c.role === 'model' ? 'assistant' : c.role,
-      content: c.parts.map(p => p.text).join('')
-    }));
+    const messages = [];
+    for (const msg of history) {
+      const role = msg.isMe ? "user" : "assistant";
+      let content = msg.content || "";
 
+      if (msg.isMe && msg.type === "image" && msg.imageId) {
+        const imageData = character?.media?.find((m) => m.id === msg.imageId);
+        if (imageData) {
+          content = [
+            { type: "text", text: content || t("api.imageMessage") },
+            {
+              type: "image_url",
+              image_url: {
+                url: imageData.dataUrl,
+              },
+            },
+          ];
+        } else {
+          content = content || t("api.imageUnavailable");
+        }
+      } else if (msg.isMe && msg.type === "sticker" && msg.stickerData) {
+        const stickerName =
+          msg.stickerData.stickerName || t("api.unknownSticker");
+        content =
+          t("api.stickerMessage", { stickerName: stickerName }) +
+          (content ? ` ${content}` : "");
+      }
+
+      if (content) {
+        messages.push({ role, content });
+      }
+    }
+
+    if (isProactive && messages.length === 0) {
+      messages.push({
+        role: "user",
+        content: "(SYSTEM: You are starting this conversation. Please begin.)",
+      });
+    }
 
     messages.unshift({ role: "system", content: systemPrompt });
 
-    // for_update 라인 7113-7118: 요청 본문 구성
     const requestBody = {
       model: this.model,
       messages: messages,
@@ -50,7 +83,6 @@ export class GrokClient {
     };
 
     try {
-      // for_update 라인 7121-7128: API 호출
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: "POST",
         headers: {
@@ -73,7 +105,6 @@ export class GrokClient {
 
       const data = await response.json();
 
-      // for_update 라인 7137-7152: 응답 처리
       if (data.choices && data.choices.length > 0) {
         const textContent = data.choices[0].message.content;
 
