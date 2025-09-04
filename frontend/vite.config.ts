@@ -35,6 +35,6 @@ export default defineConfig({
     clearScreen: false,
     publicDir: "static",
     plugins: [
-        ...(prodOnlyPlugin.map(i => ({ ...i, apply: "build" })))
+        prodOnlyPlugin
     ]
 });
