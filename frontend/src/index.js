@@ -641,11 +641,19 @@ class PersonaChatApp {
       "personaChat_migration_v17",
       false,
     );
-    if (migrationCompleted) return;
+    
+    // Check if prompts need migration (old format detection)
+    const oldSettings = await loadFromBrowserStorage("personaChat_settings_v16", {});
+    const hasOldPrompts = oldSettings && oldSettings.prompts && 
+                          oldSettings.prompts.main && 
+                          typeof oldSettings.prompts.main === 'object' &&
+                          oldSettings.prompts.main.system_rules;
+
+    // Run migration if not completed OR if old prompts are detected (backup restoration case)
+    if (migrationCompleted && !hasOldPrompts) return;
 
     // Migrate old prompts
-    const oldSettings = await loadFromBrowserStorage("personaChat_settings_v16", {});
-    if (oldSettings && oldSettings.prompts) {
+    if (hasOldPrompts) {
       const newPrompts = {
         mainChat: Object.values(oldSettings.prompts.main).join('\n\n'),
         characterSheet: oldSettings.prompts.character_sheet_generation,
