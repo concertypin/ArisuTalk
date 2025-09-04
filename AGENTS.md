@@ -44,7 +44,7 @@ This project is an AI chat frontend application forked from [`github.com/dkfk532
 - Create `id` attributes for elements.
 - Keep files under 300 lines when possible.
 - Use `async/await` syntax for asynchronous functions.
-- Avoid HTML strings in JS files.
+- Avoid HTML strings in JS files. You can write HTML strings in separated file and load it via `import somethingName from "./thatfile.txt?raw";`.
 - Do not disable Git hooks unless there's a special reason.
 
 ### Internationalization
