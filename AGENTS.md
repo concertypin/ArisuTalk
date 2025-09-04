@@ -43,7 +43,7 @@ This project is an AI chat frontend application forked from `github.com/dkfk5326
 - Do not use the `Object` type as it does not provide enough type information.
 - Create `id` attributes for elements.
 - Keep files under 300 lines when possible.
-- Always include `async` in async function declarations.
+- Use `async/await` syntax for asynchronous functions.
 - Avoid HTML strings in JS files.
 - Do not disable Git hooks unless there's a special reason.
 
