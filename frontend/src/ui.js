@@ -11,7 +11,7 @@ import {
 import { setupDesktopSettingsEventListeners } from "./components/DesktopSettingsUI.js";
 import { getCurrentSettingsUIMode } from "./components/SettingsRouter.js";
 import { renderCharacterModal } from "./components/CharacterModal.js";
-import { renderPromptModal } from "./components/PromptModal.js";
+import { renderPromptModal, setupPromptModalEventListeners } from "./components/PromptModal.js";
 import { renderConfirmationModal } from "./components/ConfirmationModal.js";
 import {
   renderCreateGroupChatModal,
@@ -23,12 +23,12 @@ import {
   setupDebugLogsModalEventListeners,
 } from "./components/DebugLogsModal.js";
 
-function renderModals(app) {
+async function renderModals(app) {
   const container = document.getElementById("modal-container");
   let html = "";
   if (app.state.showSettingsModal) html += renderSettingsUI(app);
   if (app.state.showCharacterModal) html += renderCharacterModal(app);
-  if (app.state.showPromptModal) html += renderPromptModal(app);
+  if (app.state.showPromptModal) html += await renderPromptModal(app);
   if (app.state.showCreateGroupChatModal)
     html += renderCreateGroupChatModal(app);
   if (app.state.showCreateOpenChatModal) html += renderCreateOpenChatModal(app);
@@ -52,6 +52,9 @@ function renderModals(app) {
       setupSettingsModalEventListeners();
     }
   }
+  if (app.state.showPromptModal) {
+    setupPromptModalEventListeners(app);
+  }
 }
 
 function updateSnapshotList(app) {
@@ -64,7 +67,7 @@ function updateSnapshotList(app) {
 
 // --- MAIN RENDER ORCHESTRATOR ---
 
-export function render(app) {
+export async function render(app) {
   const oldState = app.oldState || {};
   const newState = app.state;
   const isFirstRender = !app.oldState;
@@ -114,7 +117,7 @@ export function render(app) {
     const settingsContent = document.getElementById("settings-modal-content");
     const scrollPosition = settingsContent ? settingsContent.scrollTop : 0;
 
-    renderModals(app);
+    await renderModals(app);
 
     const newSettingsContent = document.getElementById(
       "settings-modal-content",
@@ -227,7 +230,7 @@ function shouldUpdateModals(oldState, newState) {
         newState.ui?.desktopSettings?.activePanel ||
       // 설정 UI 모드 변경 감지
       oldState.ui?.settingsUIMode !== newState.ui?.settingsUIMode
-    );
+  );
   }
 
   return (

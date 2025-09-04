@@ -52,6 +52,9 @@ export function findMessageGroup(messages, targetIndex, characterName) {
 
 export function formatDateSeparator(dateString) {
   const date = new Date(dateString);
+  /**
+   * @type {Intl.DateTimeFormatOptions}
+   */
   const options = {
     year: "numeric",
     month: "long",

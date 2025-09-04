@@ -7,7 +7,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
+    "prepreview": "pnpm run build",
+    "preview": "pnpm run serve",
+    "serve": "pnpx http-server -p 5173 -c-1 dist/",
     "format": "prettier --write 'src/**/*.{js,ts,jsx,tsx}'"
   },
   "keywords": [],
@@ -18,6 +20,7 @@
     "node": ">20"
   },
   "devDependencies": {
+    "@nyariv/sandboxjs": "^0.8.25",
     "prettier": "^3.6.2",
     "vite": "^7.1.2",
     "vite-plugin-pwa": "^1.0.3"

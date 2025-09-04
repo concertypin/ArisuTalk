@@ -1,9 +1,12 @@
+
 import { t, setLanguage, getLanguage } from "./i18n.js";
 import {
-  defaultPrompts,
   defaultCharacters,
   defaultAPISettings,
+  defaultPrompts,
 } from "./defaults.js";
+import { getAllPrompts, saveAllPrompts } from "./prompts/promptManager.ts";
+
 import {
   loadFromBrowserStorage,
   saveToBrowserStorage,
@@ -45,8 +48,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 class PersonaChatApp {
   constructor() {
-    this.defaultPrompts = defaultPrompts;
     this.apiManager = new APIManager();
+    this.defaultPrompts = defaultPrompts;
     this.state = {
       settings: {
         // 레거시 호환성 유지
@@ -63,12 +66,6 @@ class PersonaChatApp {
         randomMessageFrequencyMax: 120,
         fontScale: 1.0,
         snapshotsEnabled: true,
-        prompts: {
-          main: { ...this.defaultPrompts.main },
-          profile_creation: this.defaultPrompts.profile_creation,
-          character_sheet_generation:
-            this.defaultPrompts.character_sheet_generation,
-        },
       },
       characters: defaultCharacters,
       chatRooms: {},
@@ -195,14 +192,14 @@ class PersonaChatApp {
     this.applyFontScale();
     await this.migrateChatData();
 
-    render(this);
+    await render(this);
     this.addEventListeners();
 
     const initialChatId = this.getFirstAvailableChatRoom();
     if (this.state.characters.length > 0 && !this.state.selectedChatId) {
-      this.setState({ selectedChatId: initialChatId });
+      await this.setState({ selectedChatId: initialChatId });
     } else {
-      render(this);
+      await render(this);
     }
 
     this.proactiveInterval = setInterval(
@@ -326,18 +323,6 @@ class PersonaChatApp {
       this.state.settings = {
         ...this.state.settings,
         ...settings,
-        prompts: {
-          main: {
-            ...this.defaultPrompts.main,
-            ...(settings.prompts?.main || {}),
-          },
-          profile_creation:
-            settings.prompts?.profile_creation ||
-            this.defaultPrompts.profile_creation,
-          character_sheet_generation:
-            settings.prompts?.character_sheet_generation ||
-            this.defaultPrompts.character_sheet_generation,
-        },
       };
 
       this.state.characters = characters.map((char) => ({
@@ -353,6 +338,9 @@ class PersonaChatApp {
       this.state.characterStates = characterStates;
       this.state.settingsSnapshots = settingsSnapshots;
 
+      // Load prompts
+      this.state.settings.prompts = await getAllPrompts();
+
       // 디버그 로그 설정 로딩
       this.state.enableDebugLogs = settings.enableDebugLogs || false;
 
@@ -361,58 +349,58 @@ class PersonaChatApp {
         debugLogs.length > 0
           ? debugLogs
           : [
-              {
-                id: Date.now(),
-                timestamp: Date.now(),
-                message: t("ui.appStarted"),
-                level: "info",
-                type: "simple",
-              },
-              {
-                id: Date.now() + 1,
-                timestamp: Date.now(),
-                characterName: "System",
-                chatType: "system",
-                type: "structured",
-                data: {
-                  personaInput: {
-                    characterName: "System",
-                    characterPrompt: "System initialization",
-                    characterMemories: [],
-                    characterId: "system",
-                  },
-                  systemPrompt: { initialization: "App startup process" },
-                  outputResponse: {
-                    messages: [],
-                    newMemory: null,
-                    characterState: null,
-                  },
-                  parameters: {
-                    model: "system",
-                    isProactive: false,
-                    forceSummary: false,
-                    messageCount: 0,
-                  },
-                  metadata: {
-                    chatId: null,
-                    chatType: "system",
-                    timestamp: Date.now(),
-                    apiProvider: "system",
-                    model: "system",
-                  },
+            {
+              id: Date.now(),
+              timestamp: Date.now(),
+              message: t("ui.appStarted"),
+              level: "info",
+              type: "simple",
+            },
+            {
+              id: Date.now() + 1,
+              timestamp: Date.now(),
+              characterName: "System",
+              chatType: "system",
+              type: "structured",
+              data: {
+                personaInput: {
+                  characterName: "System",
+                  characterPrompt: "System initialization",
+                  characterMemories: [],
+                  characterId: "system",
+                },
+                systemPrompt: { initialization: "App startup process" },
+                outputResponse: {
+                  messages: [],
+                  newMemory: null,
+                  characterState: null,
+                },
+                parameters: {
+                  model: "system",
+                  isProactive: false,
+                  forceSummary: false,
+                  messageCount: 0,
+                },
+                metadata: {
+                  chatId: null,
+                  chatType: "system",
+                  timestamp: Date.now(),
+                  apiProvider: "system",
+                  model: "system",
                 },
               },
-            ];
+            },
+          ];
     } catch (error) {
       console.error(t("ui.dataLoadFailed"), error);
     }
   }
 
-  setState(newState) {
+  async setState(newState) {
     this.oldState = { ...this.state };
     this.state = { ...this.state, ...newState };
 
-    render(this);
+    await render(this);
 
     if (
       JSON.stringify(this.oldState.settings) !==
@@ -645,13 +633,38 @@ class PersonaChatApp {
     });
   }
 
+
+
   // --- CHAT ROOM MANAGEMENT ---
   async migrateChatData() {
     const migrationCompleted = await loadFromBrowserStorage(
-      "personaChat_migration_v16",
+      "personaChat_migration_v17",
       false,
     );
-    if (migrationCompleted) return;
+    
+    // Check if prompts need migration (old format detection)
+    const oldSettings = await loadFromBrowserStorage("personaChat_settings_v16", {});
+    const hasOldPrompts = oldSettings && oldSettings.prompts && 
+                          oldSettings.prompts.main && 
+                          typeof oldSettings.prompts.main === 'object' &&
+                          oldSettings.prompts.main.system_rules;
+
+    // Run migration if not completed OR if old prompts are detected (backup restoration case)
+    if (migrationCompleted && !hasOldPrompts) return;
+
+    // Migrate old prompts
+    if (hasOldPrompts) {
+      const newPrompts = {
+        mainChat: Object.values(oldSettings.prompts.main).join('\n\n'),
+        characterSheet: oldSettings.prompts.character_sheet_generation,
+        profileCreation: oldSettings.prompts.profile_creation,
+      };
+      await saveAllPrompts(newPrompts);
+
+      delete oldSettings.prompts;
+      await saveToBrowserStorage("personaChat_settings_v16", oldSettings);
+    }
+
 
     const oldMessages = { ...this.state.messages };
     const newChatRooms = { ...this.state.chatRooms };
@@ -689,8 +702,9 @@ class PersonaChatApp {
       messages: newMessages,
     });
 
-    saveToBrowserStorage("personaChat_migration_v16", true);
+    saveToBrowserStorage("personaChat_migration_v17", true);
   }
+
 
   getFirstAvailableChatRoom() {
     for (const character of this.state.characters) {
@@ -1066,46 +1080,7 @@ class PersonaChatApp {
     this.setState({ settings: { ...this.state.settings, model } });
   }
 
-  handleSavePrompts() {
-    const newPrompts = {
-      main: {
-        system_rules: document.getElementById("prompt-main-system_rules").value,
-        role_and_objective: document.getElementById(
-          "prompt-main-role_and_objective",
-        ).value,
-        memory_generation: document.getElementById(
-          "prompt-main-memory_generation",
-        ).value,
-        character_acting: document.getElementById(
-          "prompt-main-character_acting",
-        ).value,
-        message_writing: document.getElementById("prompt-main-message_writing")
-          .value,
-        language: document.getElementById("prompt-main-language").value,
-        additional_instructions: document.getElementById(
-          "prompt-main-additional_instructions",
-        ).value,
-        sticker_usage: document.getElementById("prompt-main-sticker_usage")
-          .value,
-      },
-      profile_creation: document.getElementById("prompt-profile_creation")
-        .value,
-      character_sheet_generation: document.getElementById(
-        "prompt-character_sheet_generation",
-      ).value,
-    };
 
-    this.setState({
-      settings: { ...this.state.settings, prompts: newPrompts },
-      showPromptModal: false,
-      modal: {
-        isOpen: true,
-        title: t("modal.promptSaveComplete.title"),
-        message: t("modal.promptSaveComplete.message"),
-        onConfirm: null,
-      },
-    });
-  }
 
   openNewCharacterModal() {
     this.setState({
@@ -1985,11 +1960,11 @@ class PersonaChatApp {
       .map((p) => {
         const basicInfo = p.prompt
           ? p.prompt
-              .split("\n")
-              .slice(0, 3)
-              .join(" ")
-              .replace(/[#*]/g, "")
-              .trim()
+            .split("\n")
+            .slice(0, 3)
+            .join(" ")
+            .replace(/[#*]/g, "")
+            .trim()
           : "";
         return `- ${p.name}: ${basicInfo || "Character"}`;
       })
@@ -2158,10 +2133,10 @@ class PersonaChatApp {
           type: msgPart.sticker ? "sticker" : "text",
           ...(msgPart.sticker
             ? {
-                sticker: msgPart.sticker,
-                stickerId: msgPart.sticker,
-                stickerData: { stickerName: msgPart.sticker },
-              }
+              sticker: msgPart.sticker,
+              stickerId: msgPart.sticker,
+              stickerData: { stickerName: msgPart.sticker },
+            }
             : {}),
         };
 
@@ -2206,11 +2181,11 @@ class PersonaChatApp {
       .map((p) => {
         const basicInfo = p.prompt
           ? p.prompt
-              .split("\n")
-              .slice(0, 3)
-              .join(" ")
-              .replace(/[#*]/g, "")
-              .trim()
+            .split("\n")
+            .slice(0, 3)
+            .join(" ")
+            .replace(/[#*]/g, "")
+            .trim()
           : "";
         return `- ${p.name}: ${basicInfo || "Character"}`;
       })
@@ -2361,10 +2336,10 @@ class PersonaChatApp {
           type: msgPart.sticker ? "sticker" : "text",
           ...(msgPart.sticker
             ? {
-                sticker: msgPart.sticker,
-                stickerId: msgPart.sticker,
-                stickerData: { stickerName: msgPart.sticker },
-              }
+              sticker: msgPart.sticker,
+              stickerId: msgPart.sticker,
+              stickerData: { stickerName: msgPart.sticker },
+            }
             : {}),
         };
 
@@ -2552,7 +2527,7 @@ class PersonaChatApp {
       if (availableCharacters.length > 0) {
         const newParticipant =
           availableCharacters[
-            Math.floor(Math.random() * availableCharacters.length)
+          Math.floor(Math.random() * availableCharacters.length)
           ];
         console.log(`${newParticipant.name} joined open chat randomly`);
         this.characterJoinOpenChat(openChatId, newParticipant.id, false);
@@ -2691,6 +2666,10 @@ class PersonaChatApp {
       profileTemperature: currentConfig.profileTemperature,
     };
 
+    if (!this.state.settings.prompts) {
+      this.state.settings.prompts = await getAllPrompts();
+    }
+
     const response = await this.apiManager.generateContent(
       apiProvider,
       currentConfig.apiKey,
@@ -2752,8 +2731,7 @@ class PersonaChatApp {
         this.shouldSaveCharacters = true;
         this.setState({ characters: updatedCharacters });
         console.log(
-          `[Memory Added] for ${
-            charToUpdate.name
+          `[Memory Added] for ${charToUpdate.name
           }: ${response.newMemory.trim()}`,
         );
       }
@@ -2868,7 +2846,7 @@ class PersonaChatApp {
     if (eligibleCharacters.length > 0) {
       const character =
         eligibleCharacters[
-          Math.floor(Math.random() * eligibleCharacters.length)
+        Math.floor(Math.random() * eligibleCharacters.length)
         ];
       console.log(`[Proactive] Sending message from ${character.name}`);
       await this.handleProactiveMessage(character);
@@ -2893,8 +2871,7 @@ class PersonaChatApp {
       const randomDelay =
         Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
       console.log(
-        `Scheduling random character ${i + 1}/${randomCharacterCount} in ${
-          randomDelay / 1000
+        `Scheduling random character ${i + 1}/${randomCharacterCount} in ${randomDelay / 1000
         } seconds.`,
       );
       setTimeout(() => this.initiateSingleRandomCharacter(), randomDelay);
@@ -3319,8 +3296,8 @@ class PersonaChatApp {
     return `
         <div class="memory-item flex items-center gap-2">
             <input type="text" class="memory-input flex-1 px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" value="${memoryText}" placeholder="${t(
-              "characterModal.memoryPlaceholder",
-            )}">
+      "characterModal.memoryPlaceholder",
+    )}">
             <button class="delete-memory-btn p-2 text-gray-400 hover:text-red-400">
                 <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>
             </button>
@@ -4408,9 +4385,8 @@ class PersonaChatApp {
           />
         </div>
         
-        ${
-          provider === PROVIDERS.CUSTOM_OPENAI
-            ? `
+        ${provider === PROVIDERS.CUSTOM_OPENAI
+        ? `
           <!-- Custom OpenAI Base URL -->
           <div>
             <label class="flex items-center text-sm font-medium text-gray-300 mb-2">
@@ -4425,8 +4401,8 @@ class PersonaChatApp {
             />
           </div>
         `
-            : ""
-        }
+        : ""
+      }
         
         <!-- 모델 선택 -->
         <div>
@@ -4434,31 +4410,29 @@ class PersonaChatApp {
             <i data-lucide="cpu" class="w-4 h-4 mr-2"></i>모델
           </label>
           
-          ${
-            models.length > 0
-              ? `
+          ${models.length > 0
+        ? `
             <div class="grid grid-cols-1 gap-2 mb-3">
               ${models
-                .map(
-                  (model) => `
+          .map(
+            (model) => `
                 <button 
                   type="button" 
-                  class="model-select-btn px-3 py-2 text-left text-sm rounded-lg transition-colors ${
-                    config.model === model
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                  }" 
+                  class="model-select-btn px-3 py-2 text-left text-sm rounded-lg transition-colors ${config.model === model
+                ? "bg-blue-600 text-white"
+                : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+              }" 
                   data-model="${model}"
                 >
                   ${model}
                 </button>
               `,
-                )
-                .join("")}
+          )
+          .join("")}
             </div>
           `
-              : ""
-          }
+        : ""
+      }
           
           <!-- 커스텀 모델 입력 -->
           <div class="flex gap-2">
@@ -4477,22 +4451,20 @@ class PersonaChatApp {
             </button>
           </div>
           
-          ${
-            customModels.length > 0
-              ? `
+          ${customModels.length > 0
+        ? `
             <div class="mt-3 space-y-1">
               <label class="text-xs text-gray-400">커스텀 모델</label>
               ${customModels
-                .map(
-                  (model, index) => `
+          .map(
+            (model, index) => `
                 <div class="flex items-center gap-2">
                   <button 
                     type="button" 
-                    class="model-select-btn flex-1 px-3 py-2 text-left text-sm rounded-lg transition-colors ${
-                      config.model === model
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                    }" 
+                    class="model-select-btn flex-1 px-3 py-2 text-left text-sm rounded-lg transition-colors ${config.model === model
+                ? "bg-blue-600 text-white"
+                : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+              }" 
                     data-model="${model}"
                   >
                     ${model}
@@ -4506,12 +4478,12 @@ class PersonaChatApp {
                   </button>
                 </div>
               `,
-                )
-                .join("")}
+          )
+          .join("")}
             </div>
           `
-              : ""
-          }
+        : ""
+      }
         </div>
       </div>
     `;
@@ -4649,19 +4621,12 @@ class PersonaChatApp {
 
     try {
       // 캐릭터 시트 생성 프롬프트 가져오기
+      if (!this.state.settings.prompts) {
+        this.state.settings.prompts = await getAllPrompts();
+      }
       const generationPrompt =
         this.state.settings.prompts.character_sheet_generation ||
         this.defaultPrompts.character_sheet_generation;
-
-      // 프롬프트에 변수 치환 및 강화된 지시사항 추가
-      const finalPrompt =
-        generationPrompt
-          .replace("{characterName}", characterName)
-          .replace(
-            "{characterDescription}",
-            characterDescription || "기본적인 정보만 제공됨",
-          ) +
-        `\n\n절대 지켜야 할 규칙:\n- 캐릭터 시트만 작성\n- "안녕하세요", "도움이 되었으면", "이상입니다" 같은 인사말 금지\n- 설명 금지\n- 즉시 ### 기본 정보부터 시작\n- 마크다운 형식 외 다른 포맷 사용 금지`;
 
       // Extract API options for all providers
       const charGenOptions = {
@@ -4671,19 +4636,15 @@ class PersonaChatApp {
         profileTemperature: currentConfig.profileTemperature,
       };
 
-      // API Manager를 통한 호출
-      const response = await this.apiManager.generateContent(
+      // API Manager를 통한 캐릭터 시트 생성 호출
+      const response = await this.apiManager.generateCharacterSheet(
         apiProvider,
         currentConfig.apiKey,
         currentConfig.model,
         {
-          userName: "", // userName은 빈 문자열
-          userDescription: "", // userDescription은 빈 문자열
-          character: { name: "AI Assistant", prompt: finalPrompt }, // 임시 캐릭터 객체
-          history: [{ content: finalPrompt, isMe: true, id: Date.now() }], // 단일 메시지 히스토리
-          prompts: this.state.settings.prompts,
-          isProactive: false,
-          forceSummary: false,
+          characterName: characterName,
+          characterDescription: characterDescription,
+          characterSheetPrompt: generationPrompt,
         },
         currentConfig.baseUrl, // custom_openai용
         charGenOptions,
@@ -4697,7 +4658,7 @@ class PersonaChatApp {
           characterMemories: [],
           characterId: "ai_generation",
         },
-        systemPrompt: { character_sheet_generation: finalPrompt },
+        systemPrompt: { character_sheet_generation: generationPrompt },
         outputResponse: {
           messages: response.messages,
           newMemory: response.newMemory,
@@ -4991,9 +4952,8 @@ class PersonaChatApp {
     const dataUri =
       "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
 
-    const exportFileDefaultName = `arisutalk-debug-logs-${
-      new Date().toISOString().split("T")[0]
-    }.json`;
+    const exportFileDefaultName = `arisutalk-debug-logs-${new Date().toISOString().split("T")[0]
+      }.json`;
 
     const linkElement = document.createElement("a");
     linkElement.setAttribute("href", dataUri);

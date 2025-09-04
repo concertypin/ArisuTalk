@@ -1,5 +1,6 @@
-/** @type {import('./language.d').LanguageStrings} */
-export const en = {
+import { LanguageStrings } from "./language";
+
+export const en: LanguageStrings = {
   common: {
     cancel: "Cancel",
     save: "Save",
@@ -8,6 +9,7 @@ export const en = {
     delete: "Delete",
     edit: "Edit",
     done: "Done",
+    setupLater: "Set up later",
   },
   characterModal: {
     memoryPlaceholder: "Enter something to remember...",
@@ -114,13 +116,18 @@ export const en = {
     groupChatContext: "## Group Chat Context",
     openChatContext: "## Open Chat Context",
     resetToDefault: "Reset to Default",
-    randomFirstMessagePrompt:
-      "Random First Message Character Generation Prompt",
+    randomFirstMessagePrompt: "Random First Message Character Generation Prompt",
     profileCreationRules: "# Profile Creation Rules",
     characterSheetGenerationRules: "# Character Sheet Generation Rules",
     backupPrompts: "Backup Prompts",
     restorePrompts: "Restore Prompts",
     characterSheetGenerationPrompt: "AI Character Sheet Generation Prompt",
+    characterSheetGenerationPromptDescription: "This prompt is used when generating a new character sheet.",
+    mainChatPromptDescription: "This prompt is used in main chat conversations. It will guide the AI's behavior and response style.",
+    randomFirstMessagePromptDescription: "This prompt is used when generating a new first message.",
+    resetAllPrompts: "Reset All Prompts",
+    resetAllPromptsConfirmation: "Are you really sure you want to reset all prompts? This action cannot be undone.",
+    restoreFailed: "Failed to restore prompts: ",
   },
   settings: {
     restore: "Restore",
@@ -651,11 +658,11 @@ export const en = {
     encryptionEnabledSuccess: "API key encryption has been enabled!",
     generatedPasswordMessage: "Generated Master Password:\n\n${password}\n\nPlease save this password in a safe place!",
     passwordStrength: {
-        veryWeak: "Very Weak",
-        weak: "Weak",
-        medium: "Medium",
-        strong: "Strong",
-        label: "Password Strength: "
+      veryWeak: "Very Weak",
+      weak: "Weak",
+      medium: "Medium",
+      strong: "Strong",
+      label: "Password Strength: "
     }
   },
   secureStorage: {

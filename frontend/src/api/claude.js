@@ -1,4 +1,4 @@
-import { buildContentPrompt, buildProfilePrompt } from "./promptBuilder.js";
+import { buildContentPrompt, buildProfilePrompt, buildCharacterSheetPrompt } from "../prompts/builder/promptBuilder.js";
 import { t } from "../i18n.js";
 
 const API_BASE_URL = "https://api.anthropic.com/v1";
@@ -23,7 +23,7 @@ export class ClaudeClient {
     isProactive = false,
     forceSummary = false,
   }) {
-    const { systemPrompt } = buildContentPrompt({
+    const { systemPrompt, contents } = await buildContentPrompt({
       userName,
       userDescription,
       character,
@@ -33,48 +33,10 @@ export class ClaudeClient {
       forceSummary,
     });
 
-    // for_update 라인 6876-6906: 히스토리를 Claude 형식으로 변환
-    const messages = [];
-    for (const msg of history) {
-      const role = msg.isMe ? "user" : "assistant";
-      let content = msg.content || "";
-
-      if (msg.isMe && msg.type === "image" && msg.imageId) {
-        const imageData = character?.media?.find((m) => m.id === msg.imageId);
-        if (imageData) {
-          content = [
-            { type: "text", text: content || t("api.imageMessage") },
-            {
-              type: "image",
-              source: {
-                type: "base64",
-                media_type: imageData.mimeType || "image/jpeg",
-                data: imageData.dataUrl.split(",")[1],
-              },
-            },
-          ];
-        } else {
-          content = content || t("api.imageUnavailable");
-        }
-      } else if (msg.isMe && msg.type === "sticker" && msg.stickerData) {
-        const stickerName = msg.stickerData.stickerName || t("api.unknownSticker");
-        content = `${t("api.stickerMessage", { stickerName: stickerName })}${
-          content ? ` ${content}` : ""
-        }`;
-      }
-
-      if (content) {
-        messages.push({ role, content });
-      }
-    }
-
-    // for_update 라인 6908-6913: Proactive 모드 처리
-    if (isProactive && messages.length === 0) {
-      messages.push({
-        role: "user",
-        content: "(SYSTEM: You are starting this conversation. Please begin.)",
-      });
-    }
+    const messages = contents.map(c => ({
+      role: c.role === 'model' ? 'assistant' : c.role,
+      content: c.parts.map(p => p.text).join('')
+    }));
 
     // for_update 라인 6918-6924: 요청 본문 구성
     const requestBody = {
@@ -201,6 +163,75 @@ export class ClaudeClient {
     } catch (error) {
       console.error(
         t("api.profileGenerationError", { provider: "Claude" }),
+        error,
+      );
+      return { error: error.message };
+    }
+  }
+
+  /**
+   * Generates a character sheet using Claude API.
+   * @param {object} params - Generation parameters
+   * @param {string} params.characterName - Character name
+   * @param {string} params.characterDescription - Character description
+   * @param {string} params.characterSheetPrompt - Template for character sheet generation
+   * @returns {Promise<Object>} Promise resolving to character sheet text response
+   */
+  async generateCharacterSheet({
+    characterName,
+    characterDescription,
+    characterSheetPrompt
+  }) {
+    const { systemPrompt, contents } = buildCharacterSheetPrompt({
+      characterName,
+      characterDescription,
+      characterSheetPrompt,
+    });
+
+    const payload = {
+      model: this.model,
+      max_tokens: this.profileMaxOutputTokens,
+      temperature: this.profileTemperature,
+      system: systemPrompt,
+      messages: contents.map(content => ({
+        role: content.role === "model" ? "assistant" : content.role,
+        content: content.parts.map(part => part.text).join("")
+      }))
+    };
+
+    try {
+      const response = await fetch(`${this.baseUrl}/messages`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": this.apiKey,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error("Character Sheet Gen API Error:", data);
+        const errorMessage = data?.error?.message ||
+          t("api.requestFailed", { status: response.statusText });
+        throw new Error(errorMessage);
+      }
+
+      if (data.content && data.content.length > 0) {
+        const responseText = data.content.map(item => item.text).join("").trim();
+
+        return {
+          messages: [{ content: responseText }],
+          reactionDelay: 1000,
+        };
+      } else {
+        throw new Error(t("api.profileNotGenerated", { reason: data.stop_reason || t("api.unknownReason") }));
+      }
+    } catch (error) {
+      console.error(
+        t("api.profileGenerationError", { provider: "Claude" }) + " (Character Sheet)",
         error,
       );
       return { error: error.message };

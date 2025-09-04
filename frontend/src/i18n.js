@@ -1,5 +1,5 @@
-import { en } from "./language/en.js";
-import { ko } from "./language/ko.js";
+import { en } from "./language/en.ts";
+import { ko } from "./language/ko.ts";
 
 export const languages = {
   en,

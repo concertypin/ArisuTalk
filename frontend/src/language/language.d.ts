@@ -1,4 +1,4 @@
-export interface LanguageStrings {
+export type LanguageStrings = {
   common: {
     cancel: string;
     save: string;
@@ -7,6 +7,7 @@ export interface LanguageStrings {
     delete: string;
     edit: string;
     done: string;
+    setupLater: string;
   };
   characterModal: {
     memoryPlaceholder: string;
@@ -115,6 +116,12 @@ export interface LanguageStrings {
     backupPrompts: string;
     restorePrompts: string;
     characterSheetGenerationPrompt: string;
+    characterSheetGenerationPromptDescription: string;
+    mainChatPromptDescription: string;
+    randomFirstMessagePromptDescription: string;
+    resetAllPrompts: string;
+    resetAllPromptsConfirmation: string;
+    restoreFailed: string;
   };
   settings: {
     restore: string;
