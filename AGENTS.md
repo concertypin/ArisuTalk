@@ -73,7 +73,7 @@ This project is an AI chat frontend application forked from [`github.com/dkfk532
 
 - Write or run tests to ensure your changes work well without breaking existing functionality.
 - For the frontend, run tests using `pnpm test`.
-- For the backend, use JUnit 5 for unit tests. You can run tests using `./gradlew test` in the `backend` directory.
+- For the backend, use JUnit 5 for unit tests. You can run tests using `cd backend && ./gradlew test`.
 
 ## Security Considerations
 
