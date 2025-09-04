@@ -4,7 +4,7 @@ This file provides guidance for AI coding agents working on this project.
 
 ## Project Overview
 
-This project is an AI chat frontend application forked from `github.com/dkfk5326/ArisuTalk`. ArisuTalk provides a modern, responsive AI chat interface with comprehensive internationalization support and modular architecture.
+This project is an AI chat frontend application forked from [`github.com/dkfk5326/ArisuTalk`](https://github.com/dkfk5326/ArisuTalk). ArisuTalk provides a modern, responsive AI chat interface with comprehensive internationalization support and modular architecture.
 
 ### Key Features
 
