@@ -4,7 +4,7 @@
  */
 import { getPrompt } from '../promptManager.ts';
 import { parseChatML, chatMLToPromptStructure } from '../../api/chatMLParser.js';
-import { parseMagicPatterns } from './magicPatternParser.js';
+import { parseMagicPatterns } from './magicPatternParser.ts';
 
 /**
  * Populates a template with magic patterns.
