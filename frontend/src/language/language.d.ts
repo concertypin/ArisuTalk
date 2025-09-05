@@ -635,4 +635,4 @@ export type LanguageStrings = {
     noMasterPasswordForDecryption: string;
     loadApiConfigsFailed: string;
   };
-}
+};

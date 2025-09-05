@@ -43,20 +43,23 @@ export function handleModalClick(e, app) {
   // ChatML handlers
   if (e.target.closest("#use-chatml-toggle")) app.handleChatMLToggle();
   if (e.target.closest("#reset-chatml-btn")) app.handleResetChatML();
-  if (e.target.closest("#generate-chatml-template-btn")) app.handleGenerateChatMLTemplate();
+  if (e.target.closest("#generate-chatml-template-btn"))
+    app.handleGenerateChatMLTemplate();
 
   // Character Modal
   if (e.target.closest('[data-action="close-character-modal"]'))
     app.closeCharacterModal();
 
   // Chat Selection Modal
-  if (e.target.closest('#create-new-chat-room-modal')) {
+  if (e.target.closest("#create-new-chat-room-modal")) {
     e.stopPropagation();
     app.handleCreateNewChatRoom();
     return;
   }
 
-  const closeChatSelection = e.target.closest('[data-action="close-chat-selection"]');
+  const closeChatSelection = e.target.closest(
+    '[data-action="close-chat-selection"]',
+  );
   if (closeChatSelection) {
     app.hideModal();
   }
@@ -68,7 +71,7 @@ export function handleModalClick(e, app) {
     app.hideModal();
   }
 
-  if (e.target.closest('#create-new-chat-room-modal')) {
+  if (e.target.closest("#create-new-chat-room-modal")) {
     e.stopPropagation();
     app.handleCreateNewChatRoom();
   }

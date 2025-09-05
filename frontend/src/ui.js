@@ -13,7 +13,10 @@ import {
 import { setupDesktopSettingsEventListeners } from "./components/DesktopSettingsUI.js";
 
 import { renderCharacterModal } from "./components/CharacterModal.js";
-import { renderPromptModal, setupPromptModalEventListeners } from "./components/PromptModal.js";
+import {
+  renderPromptModal,
+  setupPromptModalEventListeners,
+} from "./components/PromptModal.js";
 import { renderConfirmationModal } from "./components/ConfirmationModal.js";
 import { renderChatSelectionModal } from "./components/ChatSelectionModal.js";
 import {
@@ -386,7 +389,7 @@ function shouldUpdateModals(oldState, newState) {
         newState.ui?.desktopSettings?.activePanel ||
       // Detect settings UI mode change
       oldState.ui?.settingsUIMode !== newState.ui?.settingsUIMode
-  );
+    );
   }
 
   return (

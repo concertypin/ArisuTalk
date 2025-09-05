@@ -76,8 +76,10 @@ export const ko: LanguageStrings = {
     resetDataComplete:
       "모든 데이터가 초기화되었습니다. 페이지를 새로고침합니다.",
     resetDataFailed: "데이터 초기화에 실패했습니다: ",
-    restoreSnapshotConfirm: "이 스냅샷을 복원하시겠습니까? 현재 설정은 덮어씌워집니다.",
-    deleteSnapshotConfirm: "이 스냅샷을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+    restoreSnapshotConfirm:
+      "이 스냅샷을 복원하시겠습니까? 현재 설정은 덮어씌워집니다.",
+    deleteSnapshotConfirm:
+      "이 스냅샷을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
   },
   mainChat: {
     uploadPhoto: "사진 업로드",
@@ -119,15 +121,20 @@ export const ko: LanguageStrings = {
     resetToDefault: "기본값으로 되돌리기",
     randomFirstMessagePrompt: "랜덤 선톡 캐릭터 생성 프롬프트",
     profileCreationRules: "# 캐릭터 생성 규칙 (Profile Creation Rules)",
-    characterSheetGenerationRules: "# 캐릭터 시트 생성 규칙 (Character Sheet Generation Rules)",
+    characterSheetGenerationRules:
+      "# 캐릭터 시트 생성 규칙 (Character Sheet Generation Rules)",
     characterSheetGenerationPrompt: "AI 캐릭터 시트 생성 프롬프트",
     backupPrompts: "프롬프트 백업",
     restorePrompts: "프롬프트 불러오기",
-    characterSheetGenerationPromptDescription: "이 프롬프트는 새로운 캐릭터 시트를 생성할 때 사용됩니다.",
-    mainChatPromptDescription: "이 프롬프트는 메인 채팅 대화에서 사용됩니다. AI의 행동 방식과 응답 스타일을 안내합니다.",
-    randomFirstMessagePromptDescription: "이 프롬프트는 새로운 첫 메시지를 생성할 때 사용됩니다.",
+    characterSheetGenerationPromptDescription:
+      "이 프롬프트는 새로운 캐릭터 시트를 생성할 때 사용됩니다.",
+    mainChatPromptDescription:
+      "이 프롬프트는 메인 채팅 대화에서 사용됩니다. AI의 행동 방식과 응답 스타일을 안내합니다.",
+    randomFirstMessagePromptDescription:
+      "이 프롬프트는 새로운 첫 메시지를 생성할 때 사용됩니다.",
     resetAllPrompts: "프롬프트 초기화!",
-    resetAllPromptsConfirmation: "모든 프롬프트를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+    resetAllPromptsConfirmation:
+      "모든 프롬프트를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
     restoreFailed: "프롬프트 불러오기에 실패했습니다: ",
   },
   settings: {

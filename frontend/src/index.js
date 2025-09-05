@@ -276,12 +276,12 @@ class PersonaChatApp {
    */
   setupAppHeight() {
     const setHeight = () => {
-      const app = document.getElementById('app');
+      const app = document.getElementById("app");
       if (app) {
         app.style.height = `${window.innerHeight}px`;
       }
     };
-    window.addEventListener('resize', setHeight);
+    window.addEventListener("resize", setHeight);
     setHeight();
   }
 
@@ -321,7 +321,11 @@ class PersonaChatApp {
       this.initialSettings && !this.initialSettings.randomFirstMessageEnabled;
     const isRandomEnabled = this.state.settings.randomFirstMessageEnabled;
 
-    this.setState({ showSettingsModal: false, showSettingsUI: false, initialSettings: null });
+    this.setState({
+      showSettingsModal: false,
+      showSettingsUI: false,
+      initialSettings: null,
+    });
 
     if (wasRandomDisabled && isRandomEnabled) {
       this.scheduleMultipleRandomChats();
@@ -356,7 +360,11 @@ class PersonaChatApp {
         },
       );
     } else {
-      this.setState({ showSettingsModal: false, showSettingsUI: false, initialSettings: null });
+      this.setState({
+        showSettingsModal: false,
+        showSettingsUI: false,
+        initialSettings: null,
+      });
     }
   }
 
@@ -524,7 +532,9 @@ class PersonaChatApp {
       desktopScrollTop = desktopSettingsContent.scrollTop;
     }
 
-    const mobileSettingsContent = document.getElementById("settings-ui-content");
+    const mobileSettingsContent = document.getElementById(
+      "settings-ui-content",
+    );
     let mobileScrollTop = null;
     if (mobileSettingsContent) {
       mobileScrollTop = mobileSettingsContent.scrollTop;
@@ -556,8 +566,9 @@ class PersonaChatApp {
       }
     }
     if (mobileScrollTop !== null) {
-      const newMobileSettingsContent =
-        document.getElementById("settings-ui-content");
+      const newMobileSettingsContent = document.getElementById(
+        "settings-ui-content",
+      );
       if (newMobileSettingsContent) {
         newMobileSettingsContent.scrollTop = mobileScrollTop;
       }
@@ -777,7 +788,7 @@ class PersonaChatApp {
       handleModalClick(e, this);
       handleGroupChatClick(e, this);
 
-      const characterListItem = e.target.closest('.character-list-item');
+      const characterListItem = e.target.closest(".character-list-item");
       if (characterListItem) {
         const characterId = characterListItem.dataset.characterId;
         if (characterId) {
@@ -815,8 +826,7 @@ class PersonaChatApp {
       ) {
         this.setState({ showMobileSearch: false, searchQuery: "" });
       }
-
-      });
+    });
 
     appElement.addEventListener("input", (e) => {
       handleSidebarInput(e, this);
@@ -852,21 +862,24 @@ class PersonaChatApp {
     });
   }
 
-
-
   // --- CHAT ROOM MANAGEMENT ---
   async migrateChatData() {
     const migrationCompleted = await loadFromBrowserStorage(
       "personaChat_migration_v17",
       false,
     );
-    
+
     // Check if prompts need migration (old format detection)
-    const oldSettings = await loadFromBrowserStorage("personaChat_settings_v16", {});
-    const hasOldPrompts = oldSettings && oldSettings.prompts && 
-                          oldSettings.prompts.main && 
-                          typeof oldSettings.prompts.main === 'object' &&
-                          oldSettings.prompts.main.system_rules;
+    const oldSettings = await loadFromBrowserStorage(
+      "personaChat_settings_v16",
+      {},
+    );
+    const hasOldPrompts =
+      oldSettings &&
+      oldSettings.prompts &&
+      oldSettings.prompts.main &&
+      typeof oldSettings.prompts.main === "object" &&
+      oldSettings.prompts.main.system_rules;
 
     // Run migration if not completed OR if old prompts are detected (backup restoration case)
     if (migrationCompleted && !hasOldPrompts) return;
@@ -874,20 +887,19 @@ class PersonaChatApp {
     // Migrate old prompts
     if (hasOldPrompts) {
       const newPrompts = {
-        mainChat: Object.values(oldSettings.prompts.main).join('\n\n'),
+        mainChat: Object.values(oldSettings.prompts.main).join("\n\n"),
         characterSheet: oldSettings.prompts.character_sheet_generation,
         profileCreation: oldSettings.prompts.profile_creation,
       };
-      
+
       const filteredPrompts = Object.fromEntries(
-          Object.entries(newPrompts).filter(([, v]) => v !== undefined)
+        Object.entries(newPrompts).filter(([, v]) => v !== undefined),
       );
       await saveAllPrompts(filteredPrompts);
 
       delete oldSettings.prompts;
       await saveToBrowserStorage("personaChat_settings_v16", oldSettings);
     }
-
 
     const oldMessages = { ...this.state.messages };
     const newChatRooms = { ...this.state.chatRooms };
@@ -940,7 +952,6 @@ class PersonaChatApp {
 
     saveToBrowserStorage("personaChat_migration_v17", true);
   }
-
 
   getFirstAvailableChatRoom() {
     for (const character of this.state.characters) {
@@ -1344,8 +1355,6 @@ class PersonaChatApp {
     this.setState({ settings: { ...this.state.settings, model } });
   }
 
-
-
   openNewCharacterModal() {
     this.setState({
       editingCharacter: { memories: [], proactiveEnabled: true },
@@ -1406,7 +1415,7 @@ class PersonaChatApp {
       if (file.size > 30 * 1024 * 1024) {
         this.showInfoModal(
           t("ui.fileSizeExceeded"),
-          `${file.name} exceeds 30MB.`, 
+          `${file.name} exceeds 30MB.`,
         );
         continue;
       }
@@ -1426,7 +1435,7 @@ class PersonaChatApp {
       if (!allowedTypes.includes(file.type)) {
         this.showInfoModal(
           t("ui.unsupportedFormat"),
-          `${file.name} is not a supported file format.`, 
+          `${file.name} is not a supported file format.`,
         );
         continue;
       }
@@ -1465,7 +1474,7 @@ class PersonaChatApp {
         console.error(`Sticker processing error: ${file.name}`, error);
         this.showInfoModal(
           t("ui.stickerProcessingError"),
-          `An error occurred while processing ${file.name}.`, 
+          `An error occurred while processing ${file.name}.`,
         );
       }
     }
@@ -2230,11 +2239,11 @@ class PersonaChatApp {
       .map((p) => {
         const basicInfo = p.prompt
           ? p.prompt
-            .split("\n")
-            .slice(0, 3)
-            .join(" ")
-            .replace(/[#*]/g, "")
-            .trim()
+              .split("\n")
+              .slice(0, 3)
+              .join(" ")
+              .replace(/[#*]/g, "")
+              .trim()
           : "";
         return `- ${p.name}: ${basicInfo || "Character"}`;
       })
@@ -2403,10 +2412,10 @@ class PersonaChatApp {
           type: msgPart.sticker ? "sticker" : "text",
           ...(msgPart.sticker
             ? {
-              sticker: msgPart.sticker,
-              stickerId: msgPart.sticker,
-              stickerData: { stickerName: msgPart.sticker },
-            }
+                sticker: msgPart.sticker,
+                stickerId: msgPart.sticker,
+                stickerData: { stickerName: msgPart.sticker },
+              }
             : {}),
         };
 
@@ -2452,11 +2461,11 @@ class PersonaChatApp {
       .map((p) => {
         const basicInfo = p.prompt
           ? p.prompt
-            .split("\n")
-            .slice(0, 3)
-            .join(" ")
-            .replace(/[#*]/g, "")
-            .trim()
+              .split("\n")
+              .slice(0, 3)
+              .join(" ")
+              .replace(/[#*]/g, "")
+              .trim()
           : "";
         return `- ${p.name}: ${basicInfo || "Character"}`;
       })
@@ -2607,10 +2616,10 @@ class PersonaChatApp {
           type: msgPart.sticker ? "sticker" : "text",
           ...(msgPart.sticker
             ? {
-              sticker: msgPart.sticker,
-              stickerId: msgPart.sticker,
-              stickerData: { stickerName: msgPart.sticker },
-            }
+                sticker: msgPart.sticker,
+                stickerId: msgPart.sticker,
+                stickerData: { stickerName: msgPart.sticker },
+              }
             : {}),
         };
 
@@ -2743,11 +2752,7 @@ class PersonaChatApp {
     });
 
     // Add leave message
-    this.addSystemMessage(
-      openChatId,
-      `${character.name} has left.`,
-      "leave",
-    );
+    this.addSystemMessage(openChatId, `${character.name} has left.`, "leave");
 
     saveToBrowserStorage("personaChat_openChats_v16", newOpenChats);
     saveToBrowserStorage("personaChat_characterStates_v16", newCharacterStates);
@@ -2799,7 +2804,7 @@ class PersonaChatApp {
       if (availableCharacters.length > 0) {
         const newParticipant =
           availableCharacters[
-          Math.floor(Math.random() * availableCharacters.length)
+            Math.floor(Math.random() * availableCharacters.length)
           ];
         console.log(`${newParticipant.name} joined open chat randomly`);
         this.characterJoinOpenChat(openChatId, newParticipant.id, false);
@@ -3003,7 +3008,8 @@ class PersonaChatApp {
         this.shouldSaveCharacters = true;
         this.setState({ characters: updatedCharacters });
         console.log(
-          `[Memory Added] for ${charToUpdate.name
+          `[Memory Added] for ${
+            charToUpdate.name
           }: ${response.newMemory.trim()}`,
         );
       }
@@ -3045,7 +3051,8 @@ class PersonaChatApp {
             if (s.name === messagePart.sticker) return true;
             const baseFileName = s.name.replace(/\.[^/.]+$/, "");
             const searchFileName = String(messagePart.sticker).replace(
-              /\.[^/.]+$/, "",
+              /\.[^/.]+$/,
+              "",
             );
             if (baseFileName === searchFileName) return true;
             return false;
@@ -3124,7 +3131,7 @@ class PersonaChatApp {
     if (eligibleCharacters.length > 0) {
       const character =
         eligibleCharacters[
-        Math.floor(Math.random() * eligibleCharacters.length)
+          Math.floor(Math.random() * eligibleCharacters.length)
         ];
       console.log(`[Proactive] Sending message from ${character.name}`);
       await this.handleProactiveMessage(character);
@@ -3149,8 +3156,9 @@ class PersonaChatApp {
       const randomDelay =
         Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
       console.log(
-        `Scheduling random character ${i + 1}/${randomCharacterCount} in ${randomDelay / 1000
-        } seconds.`, 
+        `Scheduling random character ${i + 1}/${randomCharacterCount} in ${
+          randomDelay / 1000
+        } seconds.`,
       );
       setTimeout(() => this.initiateSingleRandomCharacter(), randomDelay);
     }
@@ -3574,8 +3582,8 @@ class PersonaChatApp {
     return `
         <div class="memory-item flex items-center gap-2">
             <input type="text" class="memory-input flex-1 px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" value="${memoryText}" placeholder="${t(
-      "characterModal.memoryPlaceholder",
-    )}">
+              "characterModal.memoryPlaceholder",
+            )}">
             <button class="delete-memory-btn p-2 text-gray-400 hover:text-red-400">
                 <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>
             </button>
@@ -4663,7 +4671,7 @@ class PersonaChatApp {
           />
         </div>
 
-        ${ 
+        ${
           provider === PROVIDERS.CUSTOM_OPENAI
             ? `
           <!-- Custom OpenAI Base URL -->
@@ -4689,7 +4697,7 @@ class PersonaChatApp {
             <i data-lucide="cpu" class="w-4 h-4 mr-2"></i>Model
           </label>
 
-          ${ 
+          ${
             models.length > 0
               ? `
             <div class="grid grid-cols-1 gap-2 mb-3">
@@ -4698,7 +4706,7 @@ class PersonaChatApp {
                   (model) => `
                 <button
                   type="button"
-                  class="model-select-btn px-3 py-2 text-left text-sm rounded-lg transition-colors ${ 
+                  class="model-select-btn px-3 py-2 text-left text-sm rounded-lg transition-colors ${
                     config.model === model
                       ? "bg-blue-600 text-white"
                       : "bg-gray-700 text-gray-300 hover:bg-gray-600"
@@ -4732,7 +4740,7 @@ class PersonaChatApp {
             </button>
           </div>
 
-          ${ 
+          ${
             customModels.length > 0
               ? `
             <div class="mt-3 space-y-1">
@@ -4743,7 +4751,7 @@ class PersonaChatApp {
                 <div class="flex items-center gap-2">
                   <button
                     type="button"
-                    class="model-select-btn flex-1 px-3 py-2 text-left text-sm rounded-lg transition-colors ${ 
+                    class="model-select-btn flex-1 px-3 py-2 text-left text-sm rounded-lg transition-colors ${
                       config.model === model
                         ? "bg-blue-600 text-white"
                         : "bg-gray-700 text-gray-300 hover:bg-gray-600"
@@ -4865,7 +4873,10 @@ class PersonaChatApp {
       .value.trim();
 
     if (!characterName) {
-      this.showInfoModal("Name required", "Please enter a character name first.");
+      this.showInfoModal(
+        "Name required",
+        "Please enter a character name first.",
+      );
       return;
     }
 
@@ -4887,7 +4898,10 @@ class PersonaChatApp {
       !currentConfig.apiKey ||
       currentConfig.apiKey.trim() === ""
     ) {
-      this.showInfoModal("API Key Required", "Please enter your API key in the settings first.");
+      this.showInfoModal(
+        "API Key Required",
+        "Please enter your API key in the settings first.",
+      );
       this.setState({ showSettingsModal: true });
       return;
     }
@@ -5225,8 +5239,9 @@ class PersonaChatApp {
     const dataUri =
       "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
 
-    const exportFileDefaultName = `arisutalk-debug-logs-${new Date().toISOString().split("T")[0]
-      }.json`;
+    const exportFileDefaultName = `arisutalk-debug-logs-${
+      new Date().toISOString().split("T")[0]
+    }.json`;
 
     const linkElement = document.createElement("a");
     linkElement.setAttribute("href", dataUri);
@@ -5334,7 +5349,9 @@ class PersonaChatApp {
       console.log("All application data has been reset");
     } catch (error) {
       console.error("Failed to reset all data:", error);
-      throw new Error("An error occurred while resetting data: " + error.message);
+      throw new Error(
+        "An error occurred while resetting data: " + error.message,
+      );
     }
   }
 }

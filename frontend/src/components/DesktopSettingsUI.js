@@ -4,7 +4,10 @@ import { renderCharacterDefaultsPanel } from "./settings/panels/CharacterDefault
 import { renderDataManagementPanel } from "./settings/panels/DataManagementPanel.js";
 import { renderAdvancedSettingsPanel } from "./settings/panels/AdvancedSettingsPanel.js";
 import { setLanguage, t } from "../i18n.js";
-import { handleModalChange, handleModalInput } from "../handlers/modalHandlers.js";
+import {
+  handleModalChange,
+  handleModalInput,
+} from "../handlers/modalHandlers.js";
 
 /**
  * Renders the desktop-specific settings UI
@@ -299,7 +302,13 @@ export function setupDesktopSettingsEventListeners(app) {
         const panelId = e.currentTarget.dataset.panel;
         if (panelId) {
           app.setState({
-            ui: { ...app.state.ui, desktopSettings: { ...app.state.ui?.desktopSettings, activePanel: panelId } },
+            ui: {
+              ...app.state.ui,
+              desktopSettings: {
+                ...app.state.ui?.desktopSettings,
+                activePanel: panelId,
+              },
+            },
           });
           updateDesktopSettingsContent(app, panelId);
         }
@@ -312,16 +321,16 @@ export function setupDesktopSettingsEventListeners(app) {
     if (contentArea && !contentArea.dataset.listenersAdded) {
       // 입력 필드 변경 핸들러 (debounced)
       contentArea.addEventListener("input", (e) => {
-        if (e.target.id === 'settings-font-scale') {
-            const value = parseFloat(e.target.value);
-            const fontScaleValueEl = document.getElementById('font-scale-value');
-            if (fontScaleValueEl) {
-                fontScaleValueEl.textContent = Math.round(value * 100) + '%';
-            }
+        if (e.target.id === "settings-font-scale") {
+          const value = parseFloat(e.target.value);
+          const fontScaleValueEl = document.getElementById("font-scale-value");
+          if (fontScaleValueEl) {
+            fontScaleValueEl.textContent = Math.round(value * 100) + "%";
+          }
         }
-        handleModalInput(e, app)
+        handleModalInput(e, app);
       });
-      
+
       // 체크박스, 셀렉트 등 즉시 변경이 필요한 경우
       contentArea.addEventListener("change", (e) => handleModalChange(e, app));
 

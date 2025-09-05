@@ -54,7 +54,7 @@ export async function loadFromIndexedDB(key) {
   });
 }
 /**
- * @param {any} value 
+ * @param {any} value
  * @returns {Promise<void>}
  */
 export async function saveToIndexedDB(key, value) {

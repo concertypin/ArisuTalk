@@ -77,8 +77,10 @@ export const en: LanguageStrings = {
       "Final confirmation: Do you want to delete all data?",
     resetDataComplete: "All data has been reset. The page will refresh.",
     resetDataFailed: "Failed to reset data: ",
-    restoreSnapshotConfirm: "Are you sure you want to restore this snapshot? Current settings will be overwritten.",
-    deleteSnapshotConfirm: "Are you sure you want to delete this snapshot? This action cannot be undone.",
+    restoreSnapshotConfirm:
+      "Are you sure you want to restore this snapshot? Current settings will be overwritten.",
+    deleteSnapshotConfirm:
+      "Are you sure you want to delete this snapshot? This action cannot be undone.",
   },
   mainChat: {
     uploadPhoto: "Upload Photo",
@@ -118,17 +120,22 @@ export const en: LanguageStrings = {
     groupChatContext: "## Group Chat Context",
     openChatContext: "## Open Chat Context",
     resetToDefault: "Reset to Default",
-    randomFirstMessagePrompt: "Random First Message Character Generation Prompt",
+    randomFirstMessagePrompt:
+      "Random First Message Character Generation Prompt",
     profileCreationRules: "# Profile Creation Rules",
     characterSheetGenerationRules: "# Character Sheet Generation Rules",
     backupPrompts: "Backup Prompts",
     restorePrompts: "Restore Prompts",
     characterSheetGenerationPrompt: "AI Character Sheet Generation Prompt",
-    characterSheetGenerationPromptDescription: "This prompt is used when generating a new character sheet.",
-    mainChatPromptDescription: "This prompt is used in main chat conversations. It will guide the AI's behavior and response style.",
-    randomFirstMessagePromptDescription: "This prompt is used when generating a new first message.",
+    characterSheetGenerationPromptDescription:
+      "This prompt is used when generating a new character sheet.",
+    mainChatPromptDescription:
+      "This prompt is used in main chat conversations. It will guide the AI's behavior and response style.",
+    randomFirstMessagePromptDescription:
+      "This prompt is used when generating a new first message.",
     resetAllPrompts: "Reset All Prompts",
-    resetAllPromptsConfirmation: "Are you really sure you want to reset all prompts? This action cannot be undone.",
+    resetAllPromptsConfirmation:
+      "Are you really sure you want to reset all prompts? This action cannot be undone.",
     restoreFailed: "Failed to restore prompts: ",
   },
   settings: {

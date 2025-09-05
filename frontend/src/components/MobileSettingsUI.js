@@ -341,12 +341,12 @@ export function renderAiSettingsPage(app) {
               "settings.aiProvider",
             )}</label>
             <select id="settings-api-provider" class="w-full px-3 py-2 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-base">
-                <option value="gemini" ${ (settings.apiProvider || "gemini") === "gemini" ? "selected" : ""}>Google Gemini</option>
-                <option value="claude" ${ (settings.apiProvider || "gemini") === "claude" ? "selected" : ""}>Anthropic Claude</option>
-                <option value="openai" ${ (settings.apiProvider || "gemini") === "openai" ? "selected" : ""}>OpenAI ChatGPT</option>
-                <option value="grok" ${ (settings.apiProvider || "gemini") === "grok" ? "selected" : ""}>xAI Grok</option>
-                <option value="openrouter" ${ (settings.apiProvider || "gemini") === "openrouter" ? "selected" : ""}>OpenRouter</option>
-                <option value="custom_openai" ${ (settings.apiProvider || "gemini") === "custom_openai" ? "selected" : ""}>Custom OpenAI</option>
+                <option value="gemini" ${(settings.apiProvider || "gemini") === "gemini" ? "selected" : ""}>Google Gemini</option>
+                <option value="claude" ${(settings.apiProvider || "gemini") === "claude" ? "selected" : ""}>Anthropic Claude</option>
+                <option value="openai" ${(settings.apiProvider || "gemini") === "openai" ? "selected" : ""}>OpenAI ChatGPT</option>
+                <option value="grok" ${(settings.apiProvider || "gemini") === "grok" ? "selected" : ""}>xAI Grok</option>
+                <option value="openrouter" ${(settings.apiProvider || "gemini") === "openrouter" ? "selected" : ""}>OpenRouter</option>
+                <option value="custom_openai" ${(settings.apiProvider || "gemini") === "custom_openai" ? "selected" : ""}>Custom OpenAI</option>
             </select>
         </div>
         <div class="provider-settings-container">${renderCurrentProviderSettings(
@@ -484,7 +484,10 @@ export function setupMobileSettingsUIEventListeners(app) {
   );
   if (randomFrequencyMin) {
     randomFrequencyMin.addEventListener("input", (e) => {
-      app.handleSettingChange("randomMessageFrequencyMin", parseInt(e.target.value));
+      app.handleSettingChange(
+        "randomMessageFrequencyMin",
+        parseInt(e.target.value),
+      );
     });
   }
 
@@ -493,7 +496,10 @@ export function setupMobileSettingsUIEventListeners(app) {
   );
   if (randomFrequencyMax) {
     randomFrequencyMax.addEventListener("input", (e) => {
-      app.handleSettingChange("randomMessageFrequencyMax", parseInt(e.target.value));
+      app.handleSettingChange(
+        "randomMessageFrequencyMax",
+        parseInt(e.target.value),
+      );
     });
   }
 
@@ -526,8 +532,10 @@ export function setupMobileSettingsUIEventListeners(app) {
 
     fontScale.addEventListener("input", (e) => {
       const value = parseFloat(e.target.value);
-      const fontScaleValueEl = document.querySelector("#scale-settings-ui-content #font-scale-value");
-      if(fontScaleValueEl) {
+      const fontScaleValueEl = document.querySelector(
+        "#scale-settings-ui-content #font-scale-value",
+      );
+      if (fontScaleValueEl) {
         fontScaleValueEl.textContent = `${Math.round(value * 100)}%`;
       }
       debouncedSave(e.target.value);
@@ -573,25 +581,31 @@ export function setupMobileSettingsUIEventListeners(app) {
     });
   }
 
-  const profileMaxTokens = document.getElementById("settings-profile-max-tokens");
+  const profileMaxTokens = document.getElementById(
+    "settings-profile-max-tokens",
+  );
   if (profileMaxTokens) {
     profileMaxTokens.addEventListener("input", (e) => {
-      app.handleProviderConfigChange("profileMaxTokens", parseInt(e.target.value));
+      app.handleProviderConfigChange(
+        "profileMaxTokens",
+        parseInt(e.target.value),
+      );
       document.getElementById("profile-max-tokens-value").textContent =
         e.target.value;
     });
   }
 
-  const profileTemperature = document.getElementById("settings-profile-temperature");
+  const profileTemperature = document.getElementById(
+    "settings-profile-temperature",
+  );
   if (profileTemperature) {
     profileTemperature.addEventListener("input", (e) => {
       app.handleProviderConfigChange(
         "profileTemperature",
         parseFloat(e.target.value),
       );
-      document.getElementById("profile-temperature-value").textContent = parseFloat(
-        e.target.value,
-      ).toFixed(1);
+      document.getElementById("profile-temperature-value").textContent =
+        parseFloat(e.target.value).toFixed(1);
     });
   }
 
@@ -654,7 +668,7 @@ export function renderProviderConfig(provider, config) {
                 />
             </div>
 
-            ${ 
+            ${
               provider === PROVIDERS.CUSTOM_OPENAI
                 ? `
                 <!-- Custom OpenAI Base URL -->
@@ -682,7 +696,7 @@ export function renderProviderConfig(provider, config) {
                     )}
                 </label>
 
-                ${ 
+                ${
                   models.length > 0
                     ? `
                     <div class="grid grid-cols-1 gap-2 mb-3">
@@ -691,7 +705,7 @@ export function renderProviderConfig(provider, config) {
                             (model) => `
                             <button
                                 type="button"
-                                class="model-select-btn px-3 py-2 text-left text-sm rounded-lg transition-colors ${ 
+                                class="model-select-btn px-3 py-2 text-left text-sm rounded-lg transition-colors ${
                                   config.model === model
                                     ? "bg-blue-600 text-white"
                                     : "bg-gray-700 text-gray-300 hover:bg-gray-600"
@@ -727,7 +741,7 @@ export function renderProviderConfig(provider, config) {
                     </button>
                 </div>
 
-                ${ 
+                ${
                   customModels.length > 0
                     ? `
                     <div class="mt-3 space-y-1">
@@ -740,7 +754,7 @@ export function renderProviderConfig(provider, config) {
                             <div class="flex items-center gap-2">
                                 <button
                                     type="button"
-                                    class="model-select-btn flex-1 px-3 py-2 text-left text-sm rounded-lg transition-colors ${ 
+                                    class="model-select-btn flex-1 px-3 py-2 text-left text-sm rounded-lg transition-colors ${
                                       config.model === model
                                         ? "bg-blue-600 text-white"
                                         : "bg-gray-700 text-gray-300 hover:bg-gray-600"
@@ -803,7 +817,7 @@ export function renderProviderConfig(provider, config) {
                 <div>
                     <label class="flex items-center justify-between text-sm font-medium text-gray-300 mb-2">
                         <span>${t("settings.temperature")}</span>
-                        <span class="text-blue-400 font-mono text-xs" id="temperature-value">${ 
+                        <span class="text-blue-400 font-mono text-xs" id="temperature-value">${
                           config.temperature !== undefined
                             ? config.temperature
                             : provider === "gemini"
@@ -818,7 +832,7 @@ export function renderProviderConfig(provider, config) {
                         min="0"
                         max="2"
                         step="0.1"
-                        value="${ 
+                        value="${
                           config.temperature !== undefined
                             ? config.temperature
                             : provider === "gemini"
@@ -865,7 +879,7 @@ export function renderProviderConfig(provider, config) {
                         <div>
                             <label class="flex items-center justify-between text-sm font-medium text-gray-300 mb-2">
                                 <span>${t("settings.profileTemperature")}</span>
-                                <span class="text-blue-400 font-mono text-xs" id="profile-temperature-value">${ 
+                                <span class="text-blue-400 font-mono text-xs" id="profile-temperature-value">${
                                   config.profileTemperature !== undefined
                                     ? config.profileTemperature
                                     : 1.2
@@ -878,7 +892,7 @@ export function renderProviderConfig(provider, config) {
                                 min="0.5"
                                 max="2"
                                 step="0.1"
-                                value="${ 
+                                value="${
                                   config.profileTemperature !== undefined
                                     ? config.profileTemperature
                                     : 1.2
@@ -923,7 +937,7 @@ export function renderSnapshotList(app) {
         `,
           )
           .join("")}
-        ${ 
+        ${
           app.state.settingsSnapshots.length === 0
             ? `<p class="text-sm text-gray-500 text-center py-2">${t(
                 "settings.noSnapshots",

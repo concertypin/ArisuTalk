@@ -1,4 +1,8 @@
-import { buildContentPrompt, buildProfilePrompt, buildCharacterSheetPrompt } from "../prompts/builder/promptBuilder.js";
+import {
+  buildContentPrompt,
+  buildProfilePrompt,
+  buildCharacterSheetPrompt,
+} from "../prompts/builder/promptBuilder.js";
 import { t } from "../i18n.js";
 
 const API_BASE_URL = "https://api.anthropic.com/v1";
@@ -214,7 +218,7 @@ export class ClaudeClient {
   async generateCharacterSheet({
     characterName,
     characterDescription,
-    characterSheetPrompt
+    characterSheetPrompt,
   }) {
     const { systemPrompt, contents } = buildCharacterSheetPrompt({
       characterName,
@@ -227,10 +231,10 @@ export class ClaudeClient {
       max_tokens: this.profileMaxOutputTokens,
       temperature: this.profileTemperature,
       system: systemPrompt,
-      messages: contents.map(content => ({
+      messages: contents.map((content) => ({
         role: content.role === "model" ? "assistant" : content.role,
-        content: content.parts.map(part => part.text).join("")
-      }))
+        content: content.parts.map((part) => part.text).join(""),
+      })),
     };
 
     try {
@@ -248,24 +252,33 @@ export class ClaudeClient {
 
       if (!response.ok) {
         console.error("Character Sheet Gen API Error:", data);
-        const errorMessage = data?.error?.message ||
+        const errorMessage =
+          data?.error?.message ||
           t("api.requestFailed", { status: response.statusText });
         throw new Error(errorMessage);
       }
 
       if (data.content && data.content.length > 0) {
-        const responseText = data.content.map(item => item.text).join("").trim();
+        const responseText = data.content
+          .map((item) => item.text)
+          .join("")
+          .trim();
 
         return {
           messages: [{ content: responseText }],
           reactionDelay: 1000,
         };
       } else {
-        throw new Error(t("api.profileNotGenerated", { reason: data.stop_reason || t("api.unknownReason") }));
+        throw new Error(
+          t("api.profileNotGenerated", {
+            reason: data.stop_reason || t("api.unknownReason"),
+          }),
+        );
       }
     } catch (error) {
       console.error(
-        t("api.profileGenerationError", { provider: "Claude" }) + " (Character Sheet)",
+        t("api.profileGenerationError", { provider: "Claude" }) +
+          " (Character Sheet)",
         error,
       );
       return { error: error.message };

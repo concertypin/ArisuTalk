@@ -1,4 +1,8 @@
-import { buildContentPrompt, buildProfilePrompt, buildCharacterSheetPrompt } from "../prompts/builder/promptBuilder.js";
+import {
+  buildContentPrompt,
+  buildProfilePrompt,
+  buildCharacterSheetPrompt,
+} from "../prompts/builder/promptBuilder.js";
 import { t } from "../i18n.js";
 
 const API_BASE_URL = "https://openrouter.ai/api/v1";
@@ -218,7 +222,7 @@ export class OpenRouterClient {
   async generateCharacterSheet({
     characterName,
     characterDescription,
-    characterSheetPrompt
+    characterSheetPrompt,
   }) {
     const { systemPrompt, contents } = buildCharacterSheetPrompt({
       characterName,
@@ -228,10 +232,10 @@ export class OpenRouterClient {
 
     const messages = [
       { role: "system", content: systemPrompt },
-      ...contents.map(content => ({
+      ...contents.map((content) => ({
         role: content.role === "model" ? "assistant" : content.role,
-        content: content.parts.map(part => part.text).join("")
-      }))
+        content: content.parts.map((part) => part.text).join(""),
+      })),
     ];
 
     const payload = {
@@ -246,7 +250,7 @@ export class OpenRouterClient {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${this.apiKey}`,
+          Authorization: `Bearer ${this.apiKey}`,
           "HTTP-Referer": this.referer,
           "X-Title": this.appName,
         },
@@ -257,7 +261,8 @@ export class OpenRouterClient {
 
       if (!response.ok) {
         console.error("Character Sheet Gen API Error:", data);
-        const errorMessage = data?.error?.message ||
+        const errorMessage =
+          data?.error?.message ||
           t("api.requestFailed", { status: response.statusText });
         throw new Error(errorMessage);
       }
@@ -270,11 +275,14 @@ export class OpenRouterClient {
           reactionDelay: 1000,
         };
       } else {
-        throw new Error(t("api.profileNotGenerated", { reason: t("api.unknownReason") }));
+        throw new Error(
+          t("api.profileNotGenerated", { reason: t("api.unknownReason") }),
+        );
       }
     } catch (error) {
       console.error(
-        t("api.profileGenerationError", { provider: "OpenRouter" }) + " (Character Sheet)",
+        t("api.profileGenerationError", { provider: "OpenRouter" }) +
+          " (Character Sheet)",
         error,
       );
       return { error: error.message };
