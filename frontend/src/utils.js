@@ -2,11 +2,17 @@ import { getLanguage } from "./i18n.js";
 
 export function debounce(func, delay) {
   let timeout;
-  return function (...args) {
+  const debounced = function (...args) {
     const context = this;
     clearTimeout(timeout);
     timeout = setTimeout(() => func.apply(context, args), delay);
   };
+
+  debounced.cancel = function () {
+    clearTimeout(timeout);
+  };
+
+  return debounced;
 }
 
 export function findMessageGroup(messages, targetIndex, characterName) {

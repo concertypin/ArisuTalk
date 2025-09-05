@@ -158,7 +158,9 @@ export async function render(app) {
       if (
         isFirstRender ||
         oldState.showSettingsUI !== newState.showSettingsUI ||
-        oldState.mobileSettingsPage !== newState.mobileSettingsPage
+        oldState.mobileSettingsPage !== newState.mobileSettingsPage ||
+        JSON.stringify(oldState.debugLogs) !==
+          JSON.stringify(newState.debugLogs)
       ) {
         settingsContainer.innerHTML = renderMobileSettingsUI(app);
         setupMobileSettingsUIEventListeners(app);

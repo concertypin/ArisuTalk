@@ -430,52 +430,56 @@ class PersonaChatApp {
       this.state.enableDebugLogs = settings.enableDebugLogs || false;
 
       // Load debug logs (use existing logs if available, otherwise default)
-      this.state.debugLogs =
-        debugLogs.length > 0
-          ? debugLogs
-          : [
-              {
-                id: Date.now(),
-                timestamp: Date.now(),
-                message: t("ui.appStarted"),
-                level: "info",
-                type: "simple",
-              },
-              {
-                id: Date.now() + 1,
-                timestamp: Date.now(),
-                characterName: "System",
-                chatType: "system",
-                type: "structured",
-                data: {
-                  personaInput: {
-                    characterName: "System",
-                    characterPrompt: "System initialization",
-                    characterMemories: [],
-                    characterId: "system",
-                  },
-                  systemPrompt: { initialization: "App startup process" },
-                  outputResponse: {
-                    messages: [],
-                    newMemory: null,
-                    characterState: null,
-                  },
-                  parameters: {
-                    model: "system",
-                    isProactive: false,
-                    forceSummary: false,
-                    messageCount: 0,
-                  },
-                  metadata: {
-                    chatId: null,
-                    chatType: "system",
-                    timestamp: Date.now(),
-                    apiProvider: "system",
-                    model: "system",
+      if (this.state.enableDebugLogs) {
+        this.state.debugLogs =
+          debugLogs.length > 0
+            ? debugLogs
+            : [
+                {
+                  id: Date.now(),
+                  timestamp: Date.now(),
+                  message: t("ui.appStarted"),
+                  level: "info",
+                  type: "simple",
+                },
+                {
+                  id: Date.now() + 1,
+                  timestamp: Date.now(),
+                  characterName: "System",
+                  chatType: "system",
+                  type: "structured",
+                  data: {
+                    personaInput: {
+                      characterName: "System",
+                      characterPrompt: "System initialization",
+                      characterMemories: [],
+                      characterId: "system",
+                    },
+                    systemPrompt: { initialization: "App startup process" },
+                    outputResponse: {
+                      messages: [],
+                      newMemory: null,
+                      characterState: null,
+                    },
+                    parameters: {
+                      model: "system",
+                      isProactive: false,
+                      forceSummary: false,
+                      messageCount: 0,
+                    },
+                    metadata: {
+                      chatId: null,
+                      chatType: "system",
+                      timestamp: Date.now(),
+                      apiProvider: "system",
+                      model: "system",
+                    },
                   },
                 },
-              },
-            ];
+              ];
+      } else {
+        this.state.debugLogs = [];
+      }
     } catch (error) {
       console.error(t("ui.dataLoadFailed"), error);
     }
@@ -850,7 +854,11 @@ class PersonaChatApp {
         characterSheet: oldSettings.prompts.character_sheet_generation,
         profileCreation: oldSettings.prompts.profile_creation,
       };
-      await saveAllPrompts(newPrompts);
+      
+      const filteredPrompts = Object.fromEntries(
+          Object.entries(newPrompts).filter(([, v]) => v !== undefined)
+      );
+      await saveAllPrompts(filteredPrompts);
 
       delete oldSettings.prompts;
       await saveToBrowserStorage("personaChat_settings_v16", oldSettings);
@@ -5163,20 +5171,10 @@ class PersonaChatApp {
     this.setState({ debugLogs: newLogs });
   }
 
-  clearDebugLogs() {
+  async clearDebugLogs() {
+    this.debouncedSaveDebugLogs.cancel();
+    await saveToBrowserStorage("personaChat_debugLogs_v16", []);
     this.setState({ debugLogs: [] });
-    // Save immediately
-    saveToBrowserStorage("personaChat_debugLogs_v16", []);
-
-    // If the settings modal is open, force a re-render
-    if (this.state.showSettingsModal) {
-      this.setState({
-        showSettingsModal: false,
-      });
-      setTimeout(() => {
-        this.setState({ showSettingsModal: true });
-      }, 10);
-    }
   }
 
   exportDebugLogs() {
