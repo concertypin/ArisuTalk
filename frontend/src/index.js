@@ -816,17 +816,7 @@ class PersonaChatApp {
         this.setState({ showMobileSearch: false, searchQuery: "" });
       }
 
-      if (e.target.id === "create-new-chat-room-modal") {
-        const { character } = this.state.modal;
-        if (character) {
-          const newChatRoomId = this.createNewChatRoomForCharacter(
-            character.id,
-          );
-          this.selectChatRoom(newChatRoomId);
-          this.hideModal();
-        }
-      }
-    });
+      });
 
     appElement.addEventListener("input", (e) => {
       handleSidebarInput(e, this);
@@ -1339,6 +1329,15 @@ class PersonaChatApp {
     this.setState({
       modal: { isOpen: false, title: "", message: "", onConfirm: null },
     });
+  }
+
+  handleCreateNewChatRoom() {
+    const { character } = this.state.modal;
+    if (character) {
+      const newChatRoomId = this.createNewChatRoom(character.id);
+      this.selectChatRoom(newChatRoomId);
+      this.hideModal();
+    }
   }
 
   handleModelSelect(model) {

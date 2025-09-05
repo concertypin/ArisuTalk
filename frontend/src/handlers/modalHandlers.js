@@ -50,6 +50,12 @@ export function handleModalClick(e, app) {
     app.closeCharacterModal();
 
   // Chat Selection Modal
+  if (e.target.closest('#create-new-chat-room-modal')) {
+    e.stopPropagation();
+    app.handleCreateNewChatRoom();
+    return;
+  }
+
   const closeChatSelection = e.target.closest('[data-action="close-chat-selection"]');
   if (closeChatSelection) {
     app.hideModal();
@@ -63,6 +69,7 @@ export function handleModalClick(e, app) {
   }
 
   if (e.target.closest('#create-new-chat-room-modal')) {
+    e.stopPropagation();
     app.handleCreateNewChatRoom();
   }
   if (e.target.closest("#save-character")) app.handleSaveCharacter();
