@@ -55,7 +55,7 @@ export function renderCreateGroupChatModal(app) {
                         <label class="text-sm font-medium text-gray-300 mb-2 block">${t(
                           "groupChat.groupChatName",
                         )}</label>
-                        <input id="group-chat-name" type="text" placeholder="${t(
+                        <input id="group-chat-name" type="text" value="${app.state.createGroupChatName}" placeholder="${t(
                           "ui.groupChatNamePlaceholder",
                         )}" class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" />
                     </div>
@@ -64,7 +64,7 @@ export function renderCreateGroupChatModal(app) {
                         <label class="text-sm font-medium text-gray-300 mb-3 block">${t(
                           "groupChat.selectParticipants",
                         )}</label>
-                        <div class="space-y-2 max-h-60 overflow-y-auto">
+                        <div id="group-chat-character-list" class="space-y-2 max-h-60 overflow-y-auto character-list-scrollbar">
                             ${characters
                               .map(
                                 (character) => `

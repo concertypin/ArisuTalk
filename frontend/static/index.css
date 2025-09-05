@@ -443,3 +443,20 @@ textarea::-webkit-scrollbar,
 button > svg {
   pointer-events: none;
 }
+
+.character-list-scrollbar {
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(255, 255, 255, 0.5) transparent !important;
+}
+
+.character-list-scrollbar::-webkit-scrollbar {
+  display: block !important;
+  -webkit-appearance: none;
+  width: 7px;
+}
+
+.character-list-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
+}

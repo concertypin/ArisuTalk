@@ -46,27 +46,38 @@ export function adjustMessageContainerPadding() {
 
 async function renderModals(app) {
   const container = document.getElementById("modal-container");
-  let html = "";
-  if (app.state.showSettingsModal) html += renderDesktopSettingsModal(app);
-  if (app.state.showCharacterModal) html += renderCharacterModal(app);
-  if (app.state.showPromptModal) html += await renderPromptModal(app);
+  const confirmationContainer = document.getElementById(
+    "confirmation-modal-container",
+  );
+
+  // Render main modals
+  let mainModalHtml = "";
+  if (app.state.showSettingsModal) mainModalHtml += renderDesktopSettingsModal(app);
+  if (app.state.showCharacterModal) mainModalHtml += renderCharacterModal(app);
+  if (app.state.showPromptModal) mainModalHtml += await renderPromptModal(app);
   if (app.state.showCreateGroupChatModal)
-    html += renderCreateGroupChatModal(app);
-  if (app.state.showCreateOpenChatModal) html += renderCreateOpenChatModal(app);
-  if (app.state.showEditGroupChatModal) html += renderEditGroupChatModal(app);
-  if (app.state.showDebugLogsModal) html += renderDebugLogsModal(app.state);
-  if (app.state.showMobileSearch) html += renderSearchModal(app);
-  if (app.state.modal.isOpen) {
-    switch (app.state.modal.type) {
-      case "confirmation":
-        html += renderConfirmationModal(app);
-        break;
-      case "chatSelection":
-        html += renderChatSelectionModal(app);
-        break;
-    }
+    mainModalHtml += renderCreateGroupChatModal(app);
+  if (app.state.showCreateOpenChatModal)
+    mainModalHtml += renderCreateOpenChatModal(app);
+  if (app.state.showEditGroupChatModal)
+    mainModalHtml += renderEditGroupChatModal(app);
+  if (app.state.showDebugLogsModal) mainModalHtml += renderDebugLogsModal(app.state);
+  if (app.state.showMobileSearch) mainModalHtml += renderSearchModal(app);
+  if (app.state.modal.isOpen && app.state.modal.type === "chatSelection") {
+    mainModalHtml += renderChatSelectionModal(app);
   }
-  container.innerHTML = html;
+  if (container.innerHTML !== mainModalHtml) {
+    container.innerHTML = mainModalHtml;
+  }
+
+  // Render confirmation modal
+  let confirmationModalHtml = "";
+  if (app.state.modal.isOpen && app.state.modal.type === "confirmation") {
+    confirmationModalHtml += renderConfirmationModal(app);
+  }
+  if (confirmationContainer.innerHTML !== confirmationModalHtml) {
+    confirmationContainer.innerHTML = confirmationModalHtml;
+  }
 
   // Setup event listeners for modals after DOM update
   if (app.state.showSettingsModal) {
@@ -78,6 +89,15 @@ async function renderModals(app) {
   if (app.state.showPromptModal) {
     setupPromptModalEventListeners(app);
   }
+}
+
+function renderConfirmationModalContainer(app) {
+    const container = document.getElementById("confirmation-modal-container");
+    let html = "";
+    if (app.state.modal.isOpen && app.state.modal.type === "confirmation") {
+        html += renderConfirmationModal(app);
+    }
+    container.innerHTML = html;
 }
 
 function updateSnapshotList(app) {
@@ -301,6 +321,28 @@ export async function render(app) {
     }
   }
 
+  // Render confirmation modal separately
+  if (isFirstRender || shouldUpdateConfirmationModal(oldState, newState)) {
+    renderConfirmationModalContainer(app);
+  }
+
+  // Set scroll position for group chat character list and add scroll listener
+  if (newState.showCreateGroupChatModal) {
+    const characterList = document.getElementById("group-chat-character-list");
+    if (characterList) {
+      characterList.scrollTop = newState.createGroupChatScrollTop || 0;
+      // Remove existing listener to prevent duplicates
+      if (characterList._scrollListener) {
+        characterList.removeEventListener("scroll", characterList._scrollListener);
+      }
+      const scrollListener = (e) => {
+        app.setState({ createGroupChatScrollTop: e.target.scrollTop });
+      };
+      characterList.addEventListener("scroll", scrollListener);
+      characterList._scrollListener = scrollListener; // Store reference
+    }
+  }
+
   lucide.createIcons();
   setupConditionalBlur();
 }
@@ -378,7 +420,6 @@ function shouldUpdateModals(oldState, newState) {
         JSON.stringify(newState.settingsSnapshots) ||
       oldState.settings.model !== newState.settings.model ||
       oldState.showPromptModal !== newState.showPromptModal ||
-      JSON.stringify(oldState.modal) !== JSON.stringify(newState.modal) ||
       JSON.stringify(oldState.openSettingsSections) !==
         JSON.stringify(newState.openSettingsSections) ||
       oldState.enableDebugLogs !== newState.enableDebugLogs ||
@@ -401,7 +442,6 @@ function shouldUpdateModals(oldState, newState) {
     oldState.showCreateOpenChatModal !== newState.showCreateOpenChatModal ||
     oldState.showEditGroupChatModal !== newState.showEditGroupChatModal ||
     oldState.showDebugLogsModal !== newState.showDebugLogsModal ||
-    JSON.stringify(oldState.modal) !== JSON.stringify(newState.modal) ||
     (newState.showCharacterModal &&
       JSON.stringify(oldState.editingCharacter) !==
         JSON.stringify(newState.editingCharacter)) ||
@@ -419,6 +459,10 @@ function shouldUpdateModals(oldState, newState) {
         JSON.stringify(newState.debugLogs)) ||
     (newState.showMobileSearch && oldState.searchQuery !== newState.searchQuery)
   );
+}
+
+function shouldUpdateConfirmationModal(oldState, newState) {
+    return JSON.stringify(oldState.modal) !== JSON.stringify(newState.modal);
 }
 
 // --- New function for conditional blur ---

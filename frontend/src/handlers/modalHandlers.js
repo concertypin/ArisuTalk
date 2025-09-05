@@ -275,6 +275,11 @@ const settingsUpdaters = {
 };
 
 export function handleModalInput(e, app) {
+  if (e.target.id === "group-chat-name") {
+    app.setState({ createGroupChatName: e.target.value });
+    return;
+  }
+
   const updater = settingsUpdaters[e.target.id];
   if (updater) {
     const value =

@@ -83,6 +83,8 @@ class PersonaChatApp {
       showCharacterModal: false,
       showPromptModal: false,
       showCreateGroupChatModal: false,
+      createGroupChatName: "",
+      createGroupChatScrollTop: 0,
       showCreateOpenChatModal: false,
       showEditGroupChatModal: false,
       editingGroupChat: null,
@@ -704,6 +706,8 @@ class PersonaChatApp {
       messages: newMessages,
       selectedChatId: groupChatId,
       showCreateGroupChatModal: false,
+      createGroupChatName: "",
+      createGroupChatScrollTop: 0,
     });
 
     saveToBrowserStorage("personaChat_messages_v16", newMessages);
@@ -1324,7 +1328,15 @@ class PersonaChatApp {
   }
 
   showInfoModal(title, message) {
-    this.setState({ modal: { isOpen: true, title, message, onConfirm: null } });
+    this.setState({
+      modal: {
+        isOpen: true,
+        type: "confirmation",
+        title,
+        message,
+        onConfirm: null,
+      },
+    });
   }
 
   showConfirmModal(title, message, onConfirm) {
