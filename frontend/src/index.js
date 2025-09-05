@@ -990,6 +990,10 @@ class PersonaChatApp {
       messages: newMessages,
     });
 
+    // Force save immediately, bypassing the debounce
+    saveToBrowserStorage("personaChat_chatRooms_v16", newChatRooms);
+    saveToBrowserStorage("personaChat_messages_v16", newMessages);
+
     return newChatRoomId;
   }
 
@@ -3056,7 +3060,7 @@ class PersonaChatApp {
           newUnreadCounts[chatId] = (newUnreadCounts[chatId] || 0) + 1;
         }
 
-        this.setState({
+        await this.setState({
           messages: { ...this.state.messages, [chatId]: currentChatMessages },
           unreadCounts: newUnreadCounts,
         });
@@ -3076,12 +3080,18 @@ class PersonaChatApp {
         type: "text",
       };
       const currentChatMessages = this.state.messages[chatId] || [];
+      const newMessagesForChat = [...currentChatMessages, errorMessage];
+      const newMessagesState = {
+        ...this.state.messages,
+        [chatId]: newMessagesForChat,
+      };
+
       this.setState({
-        messages: {
-          ...this.state.messages,
-          [chatId]: [...currentChatMessages, errorMessage],
-        },
+        messages: newMessagesState,
       });
+
+      // Force save immediately
+      saveToBrowserStorage("personaChat_messages_v16", newMessagesState);
     }
 
     this.setState({ typingCharacterId: null });

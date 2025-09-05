@@ -96,33 +96,53 @@ export function chatMLToPromptStructure(messages, character, userName = '', user
   let systemPrompt = '';
   const contents = [];
 
+  const replacements = {
+    'character.name': character ? character.name : '',
+    'user.name': userName,
+    'persona.name': userName,
+    'user.description': userDescription,
+    'persona.description': userDescription,
+  };
+
+  const replacePlaceholders = (text) => {
+    if (!text) return '';
+    let result = text;
+    for (const key in replacements) {
+      result = result.replace(new RegExp(`{${key}}`, 'g'), replacements[key]);
+    }
+    return result;
+  };
+
   for (const message of messages) {
     const { role, content } = message;
+    const processedContent = replacePlaceholders(content); // Process content here
 
     if (role === 'system') {
-      // System messages become the system prompt
       if (systemPrompt) {
-        systemPrompt += '\n\n' + content;
+        systemPrompt += '\n\n' + processedContent;
       } else {
-        systemPrompt = content;
+        systemPrompt = processedContent;
       }
-    } else if (role === 'user' || role === 'assistant') {
-      // Only include user/assistant messages if explicitly requested
-      // This prevents ChatML prompt examples from interfering with real conversation history
+    } else if (includeConversation && (role === 'user' || role === 'assistant')) {
       const internalRole = role === 'assistant' ? 'model' : 'user';
-      
       contents.push({
         role: internalRole,
-        parts: [{ text: content }]
+        parts: [{ text: processedContent }]
       });
+    } else if (role === 'user' || role === 'assistant') {
+        const internalRole = role === 'assistant' ? 'model' : 'user';
+        contents.push({
+            role: internalRole,
+            parts: [{ text: processedContent }]
+        });
     }
-    // If includeConversation is false, user/assistant messages from ChatML are ignored
   }
 
-  // If no system prompt was found in ChatML, create a basic one
   if (!systemPrompt && character) {
     systemPrompt = `You are ${character.name}. Act according to your character description:\n\n${character.prompt || ''}`;
   }
+  
+  systemPrompt = replacePlaceholders(systemPrompt); // Also process the final system prompt
 
   return { systemPrompt, contents };
 }

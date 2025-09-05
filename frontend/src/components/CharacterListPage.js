@@ -131,4 +131,14 @@ export function renderCharacterListPage(app) {
 
   const listContainer = container.querySelector("#character-list-items");
   renderCharacterList(app, listContainer);
+
+  listContainer.addEventListener('click', (e) => {
+    const characterItem = e.target.closest('.character-list-item');
+    if (characterItem) {
+      const characterId = characterItem.dataset.characterId;
+      if (characterId) {
+        app.handleCharacterSelect(characterId);
+      }
+    }
+  });
 }
