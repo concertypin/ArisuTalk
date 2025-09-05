@@ -22,11 +22,7 @@ export function handleModalClick(e, app) {
     e.target.closest("#open-settings-modal-mobile")
   )
     app.openSettingsModal();
-  if (
-    e.target.closest("#close-settings-modal") ||
-    e.target.closest("#close-settings-ui")
-  )
-    app.handleCancelSettings();
+  if (e.target.closest("#close-settings-modal")) app.handleCancelSettings();
   if (
     e.target.closest("#save-settings") ||
     e.target.closest("#save-settings-ui")
