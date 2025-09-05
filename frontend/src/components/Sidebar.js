@@ -211,7 +211,7 @@ function renderChatRoomItem(app, chatRoom) {
 
   return `
     <div class="chat-room-list-item-wrapper">
-        <div onclick="${isEditing ? "event.stopPropagation()" : `window.personaApp.selectChatRoom('${chatRoom.id}')`}" class="chat-room-item group p-2 rounded-lg cursor-pointer transition-all duration-200 w-full ${isSelected ? "bg-blue-600" : "hover:bg-gray-700"}">
+        <div onclick="${isEditing ? "" : `window.personaApp.selectChatRoom('${chatRoom.id}')`}" class="chat-room-item group p-2 rounded-lg cursor-pointer transition-all duration-200 w-full ${isSelected ? "bg-blue-600" : "hover:bg-gray-700"}">
             <div class="flex items-center justify-between">
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between mb-1 gap-2">

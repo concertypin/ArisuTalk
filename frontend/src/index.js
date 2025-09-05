@@ -545,11 +545,16 @@ class PersonaChatApp {
 
     await render(this);
 
+    const isRenamingChat =
+      this.oldState &&
+      this.oldState.editingChatRoomId &&
+      !this.state.editingChatRoomId;
+
     if (scrollInfo) {
       const messagesContainerNew =
         document.getElementById("messages-container");
       if (messagesContainerNew) {
-        if (scrollInfo.isAtBottom) {
+        if (scrollInfo.isAtBottom && !isRenamingChat) {
           this.scrollToBottom();
         } else {
           messagesContainerNew.scrollTop = scrollInfo.scrollTop;
