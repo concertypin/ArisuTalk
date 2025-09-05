@@ -58,28 +58,10 @@ export class CustomOpenAIClient {
       forceSummary,
     });
 
-    const messages = contents.map(c => {
-      const contentParts = c.parts.map(p => {
-        if (p.inlineData) {
-          return {
-            type: 'image_url',
-            image_url: {
-              url: `data:${p.inlineData.mimeType};base64,${p.inlineData.data}`,
-            },
-          };
-        }
-        return { type: 'text', text: p.text };
-      }).filter(p => p.text || p.image_url);
-
-      const finalContent = (contentParts.length === 1 && contentParts[0].type === 'text')
-        ? contentParts[0].text
-        : contentParts;
-
-      return {
-        role: c.role === 'model' ? 'assistant' : c.role,
-        content: finalContent,
-      };
-    });
+    const messages = contents.map(c => ({
+      role: c.role === 'model' ? 'assistant' : c.role,
+      content: c.parts.map(p => p.text).join('')
+    }));
 
     messages.unshift({ role: "system", content: systemPrompt });
 

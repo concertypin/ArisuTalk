@@ -66,28 +66,45 @@ export class OpenAIClient {
       forceSummary,
     });
 
-    const messages = contents.map(c => {
-      const contentParts = c.parts.map(p => {
-        if (p.inlineData) {
-          return {
-            type: 'image_url',
-            image_url: {
-              url: `data:${p.inlineData.mimeType};base64,${p.inlineData.data}`,
+    const messages = [];
+    for (const msg of history) {
+      const role = msg.isMe ? "user" : "assistant";
+      let content = msg.content || "";
+
+      if (msg.isMe && msg.type === "image" && msg.imageId) {
+        const imageData = character?.media?.find((m) => m.id === msg.imageId);
+        if (imageData) {
+          content = [
+            { type: "text", text: content || t("api.imageMessage") },
+            {
+              type: "image_url",
+              image_url: {
+                url: imageData.dataUrl,
+              },
             },
-          };
+          ];
+        } else {
+          content = content || t("api.imageUnavailable");
         }
-        return { type: 'text', text: p.text };
-      }).filter(p => p.text || p.image_url);
+      } else if (msg.isMe && msg.type === "sticker" && msg.stickerData) {
+        const stickerName =
+          msg.stickerData.stickerName || t("api.unknownSticker");
+        content =
+          t("api.stickerMessage", { stickerName: stickerName }) +
+          (content ? ` ${content}` : "");
+      }
 
-      const finalContent = (contentParts.length === 1 && contentParts[0].type === 'text')
-        ? contentParts[0].text
-        : contentParts;
+      if (content) {
+        messages.push({ role, content });
+      }
+    }
 
-      return {
-        role: c.role === 'model' ? 'assistant' : c.role,
-        content: finalContent,
-      };
-    });
+    if (isProactive && messages.length === 0) {
+      messages.push({
+        role: "user",
+        content: "(SYSTEM: You are starting this conversation. Please begin.)",
+      });
+    }
 
     messages.unshift({ role: "system", content: systemPrompt });
 

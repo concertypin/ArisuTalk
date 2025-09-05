@@ -33,30 +33,47 @@ export class ClaudeClient {
       forceSummary,
     });
 
-    const messages = contents.map(c => {
-      const content = c.parts.map(p => {
-        if (p.inlineData) {
-          return {
-            type: 'image',
-            source: {
-              type: 'base64',
-              media_type: p.inlineData.mimeType,
-              data: p.inlineData.data,
+    const messages = [];
+    for (const msg of history) {
+      const role = msg.isMe ? "user" : "assistant";
+      let content = msg.content || "";
+
+      if (msg.isMe && msg.type === "image" && msg.imageId) {
+        const imageData = character?.media?.find((m) => m.id === msg.imageId);
+        if (imageData) {
+          content = [
+            { type: "text", text: content || t("api.imageMessage") },
+            {
+              type: "image",
+              source: {
+                type: "base64",
+                media_type: imageData.mimeType || "image/jpeg",
+                data: imageData.dataUrl.split(",")[1],
+              },
             },
-          };
+          ];
+        } else {
+          content = content || t("api.imageUnavailable");
         }
-        return { type: 'text', text: p.text };
+      } else if (msg.isMe && msg.type === "sticker" && msg.stickerData) {
+        const stickerName =
+          msg.stickerData.stickerName || t("api.unknownSticker");
+        content = `${t("api.stickerMessage", { stickerName: stickerName })}${
+          content ? ` ${content}` : ""
+        }`;
+      }
+
+      if (content) {
+        messages.push({ role, content });
+      }
+    }
+
+    if (isProactive && messages.length === 0) {
+      messages.push({
+        role: "user",
+        content: "(SYSTEM: You are starting this conversation. Please begin.)",
       });
-
-      const finalContent = (content.length === 1 && content[0].type === 'text')
-        ? content[0].text
-        : content.filter(p => p.text || p.source);
-
-      return {
-        role: c.role === 'model' ? 'assistant' : 'user',
-        content: finalContent,
-      };
-    });
+    }
 
     const requestBody = {
       model: this.model,
