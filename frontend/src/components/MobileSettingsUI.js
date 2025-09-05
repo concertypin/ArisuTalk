@@ -1,4 +1,5 @@
 import { t, getLanguage } from "../i18n.js";
+import { debounce } from "../utils.js";
 import {
   PROVIDERS,
   PROVIDER_MODELS,
@@ -519,8 +520,17 @@ export function setupMobileSettingsUIEventListeners(app) {
 
   const fontScale = document.getElementById("settings-font-scale");
   if (fontScale) {
+    const debouncedSave = debounce((value) => {
+      app.handleSettingChange("fontScale", parseFloat(value));
+    }, 500);
+
     fontScale.addEventListener("input", (e) => {
-      app.handleSettingChange("fontScale", parseFloat(e.target.value));
+      const value = parseFloat(e.target.value);
+      const fontScaleValueEl = document.querySelector("#scale-settings-ui-content #font-scale-value");
+      if(fontScaleValueEl) {
+        fontScaleValueEl.textContent = `${Math.round(value * 100)}%`;
+      }
+      debouncedSave(e.target.value);
     });
   }
 

@@ -4,6 +4,7 @@ import { renderCharacterDefaultsPanel } from "./settings/panels/CharacterDefault
 import { renderDataManagementPanel } from "./settings/panels/DataManagementPanel.js";
 import { renderAdvancedSettingsPanel } from "./settings/panels/AdvancedSettingsPanel.js";
 import { setLanguage, t } from "../i18n.js";
+import { handleModalChange, handleModalInput } from "../handlers/modalHandlers.js";
 
 /**
  * Renders the desktop-specific settings UI
@@ -290,145 +291,85 @@ export function setupDesktopSettingsEventListeners(app) {
   requestAnimationFrame(() => {
     // 네비게이션 패널 전환
     const panelButtons = document.querySelectorAll("[data-panel]");
-    console.log("Found panel buttons:", panelButtons.length); // 디버그 로그
-
     panelButtons.forEach((button) => {
-      // 이미 이벤트 리스너가 추가된 경우 제거
-      if (button.dataset.listenerAdded === "true") {
-        return;
-      }
-
-      // 이벤트 리스너 추가
-      const handlePanelClick = (e) => {
+      if (button.dataset.listenerAdded === "true") return;
+      button.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
         const panelId = e.currentTarget.dataset.panel;
-        console.log("Panel clicked:", panelId); // 디버그 로그
-
         if (panelId) {
-          // 상태 업데이트
           app.setState({
-            ui: {
-              ...app.state.ui,
-              desktopSettings: {
-                ...app.state.ui?.desktopSettings,
-                activePanel: panelId,
-              },
-            },
+            ui: { ...app.state.ui, desktopSettings: { ...app.state.ui?.desktopSettings, activePanel: panelId } },
           });
-
-          // 즉시 UI 업데이트
           updateDesktopSettingsContent(app, panelId);
         }
-      };
-
-      button.addEventListener("click", handlePanelClick);
+      });
       button.dataset.listenerAdded = "true";
     });
 
-    // 랜덤 선톡 토글 처리
-    const randomToggle = document.getElementById(
-      "settings-random-first-message-toggle",
-    );
-    const randomOptions = document.getElementById("random-chat-options");
-
-    if (randomToggle && randomOptions) {
-      randomToggle.addEventListener("change", (e) => {
-        randomOptions.classList.toggle("hidden", !e.target.checked);
+    // 콘텐츠 영역에 대한 이벤트 위임 설정
+    const contentArea = document.getElementById("desktop-settings-content");
+    if (contentArea && !contentArea.dataset.listenersAdded) {
+      // 입력 필드 변경 핸들러 (debounced)
+      contentArea.addEventListener("input", (e) => {
+        if (e.target.id === 'settings-font-scale') {
+            const value = parseFloat(e.target.value);
+            const fontScaleValueEl = document.getElementById('font-scale-value');
+            if (fontScaleValueEl) {
+                fontScaleValueEl.textContent = Math.round(value * 100) + '%';
+            }
+        }
+        handleModalInput(e, app)
       });
-    }
+      
+      // 체크박스, 셀렉트 등 즉시 변경이 필요한 경우
+      contentArea.addEventListener("change", (e) => handleModalChange(e, app));
 
-    // 스냅샷 토글 처리
-    const snapshotsToggle = document.getElementById(
-      "settings-snapshots-toggle",
-    );
-    const snapshotsList = document.getElementById("snapshots-list");
-
-    if (snapshotsToggle && snapshotsList) {
-      snapshotsToggle.addEventListener("change", (e) => {
-        snapshotsList.classList.toggle("hidden", !e.target.checked);
-      });
-    }
-
-    // 폰트 스케일 실시간 업데이트
-    const fontScaleSlider = document.getElementById("settings-font-scale");
-    const fontScaleValue = document.getElementById("font-scale-value");
-
-    if (fontScaleSlider && fontScaleValue) {
-      fontScaleSlider.addEventListener("input", (e) => {
-        const value = parseFloat(e.target.value);
-        fontScaleValue.textContent = Math.round(value * 100) + "%";
-      });
-    }
-
-    // 랜덤 캐릭터 카운트 실시간 업데이트
-    const characterCountSlider = document.getElementById(
-      "settings-random-character-count",
-    );
-    const characterCountLabel = document.getElementById(
-      "random-character-count-label",
-    );
-
-    if (characterCountSlider && characterCountLabel) {
-      characterCountSlider.addEventListener("input", (e) => {
-        characterCountLabel.textContent =
-          e.target.value + t("settings.characterCountUnit");
-      });
-    }
-
-    // API 제공업체 변경 처리
-    const apiProviderSelect = document.getElementById("settings-api-provider");
-    if (apiProviderSelect && !apiProviderSelect.dataset.listenerAdded) {
-      apiProviderSelect.addEventListener("change", (e) => {
-        console.log("API Provider changed to:", e.target.value);
-        app.handleAPIProviderChange(e.target.value);
-      });
-      apiProviderSelect.dataset.listenerAdded = "true";
-    }
-
-    // 디버그 로그 관련 버튼 처리
-    const viewDebugLogsBtn = document.getElementById("view-debug-logs");
-    if (viewDebugLogsBtn && !viewDebugLogsBtn.dataset.listenerAdded) {
-      viewDebugLogsBtn.addEventListener("click", () => {
-        console.log("View logs button clicked");
-        app.setState({
-          showSettingsModal: false,
-          showDebugLogsModal: true,
-        });
-      });
-      viewDebugLogsBtn.dataset.listenerAdded = "true";
-    }
-
-    const clearDebugLogsBtn = document.getElementById("clear-debug-logs-btn");
-    if (clearDebugLogsBtn && !clearDebugLogsBtn.dataset.listenerAdded) {
-      clearDebugLogsBtn.addEventListener("click", () => {
-        console.log("Clear logs button clicked");
-        app.clearDebugLogs();
-      });
-      clearDebugLogsBtn.dataset.listenerAdded = "true";
-    }
-
-    // 언어 설정 버튼 처리
-    const languageButtons = document.querySelectorAll(".language-select-btn");
-    languageButtons.forEach((button) => {
-      if (!button.dataset.listenerAdded) {
-        button.addEventListener("click", (e) => {
-          const selectedLanguage = e.currentTarget.dataset.language;
-          if (selectedLanguage) {
-            // 언어 변경
-            setLanguage(selectedLanguage);
-
-            // 확인 메시지 표시 후 페이지 새로고침
-            alert(t("system.languageChangeMessage"));
-
-            // 짧은 지연 후 새로고침
-            setTimeout(() => {
-              window.location.reload();
-            }, 500);
+      // 클릭 이벤트 핸들러 (버튼 등)
+      contentArea.addEventListener("click", (e) => {
+        const restoreBtn = e.target.closest(".restore-snapshot-btn");
+        if (restoreBtn) {
+          const timestamp = parseInt(restoreBtn.dataset.timestamp, 10);
+          if (confirm(t("confirm.restoreSnapshotConfirm"))) {
+            app.handleRestoreSnapshot(timestamp);
           }
-        });
-        button.dataset.listenerAdded = "true";
-      }
-    });
+          return;
+        }
+
+        const deleteBtn = e.target.closest(".delete-snapshot-btn");
+        if (deleteBtn) {
+          const timestamp = parseInt(deleteBtn.dataset.timestamp, 10);
+          if (confirm(t("confirm.deleteSnapshotConfirm"))) {
+            app.handleDeleteSnapshot(timestamp);
+          }
+          return;
+        }
+
+        const viewDebugLogsBtn = e.target.closest("#view-debug-logs");
+        if (viewDebugLogsBtn) {
+          app.setState({ showSettingsModal: false, showDebugLogsModal: true });
+          return;
+        }
+
+        const clearDebugLogsBtn = e.target.closest("#clear-debug-logs-btn");
+        if (clearDebugLogsBtn) {
+          app.clearDebugLogs();
+          return;
+        }
+
+        const languageButton = e.target.closest(".language-select-btn");
+        if (languageButton) {
+          const selectedLanguage = languageButton.dataset.language;
+          if (selectedLanguage) {
+            setLanguage(selectedLanguage);
+            alert(t("system.languageChangeMessage"));
+            setTimeout(() => window.location.reload(), 500);
+          }
+          return;
+        }
+      });
+
+      contentArea.dataset.listenersAdded = "true";
+    }
   });
 }

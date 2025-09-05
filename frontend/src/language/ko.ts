@@ -76,6 +76,8 @@ export const ko: LanguageStrings = {
     resetDataComplete:
       "모든 데이터가 초기화되었습니다. 페이지를 새로고침합니다.",
     resetDataFailed: "데이터 초기화에 실패했습니다: ",
+    restoreSnapshotConfirm: "이 스냅샷을 복원하시겠습니까? 현재 설정은 덮어씌워집니다.",
+    deleteSnapshotConfirm: "이 스냅샷을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
   },
   mainChat: {
     uploadPhoto: "사진 업로드",

@@ -193,6 +193,7 @@ export function handleModalClick(e, app) {
 // This prevents the UI from re-rendering on every keystroke, improving user experience.
 const debouncedUpdateSettings = debounce((app, newSetting) => {
   app.setState({ settings: { ...app.state.settings, ...newSetting } });
+  app.debouncedCreateSettingsSnapshot();
 }, 500);
 
 const settingsUpdaters = {

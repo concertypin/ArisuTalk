@@ -77,6 +77,8 @@ export const en: LanguageStrings = {
       "Final confirmation: Do you want to delete all data?",
     resetDataComplete: "All data has been reset. The page will refresh.",
     resetDataFailed: "Failed to reset data: ",
+    restoreSnapshotConfirm: "Are you sure you want to restore this snapshot? Current settings will be overwritten.",
+    deleteSnapshotConfirm: "Are you sure you want to delete this snapshot? This action cannot be undone.",
   },
   mainChat: {
     uploadPhoto: "Upload Photo",

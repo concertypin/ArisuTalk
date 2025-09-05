@@ -1,4 +1,5 @@
 import { t, setLanguage, getLanguage } from "./i18n.js";
+import { renderSnapshotList } from "./components/MobileSettingsUI.js";
 import {
   defaultCharacters,
   defaultAPISettings,
@@ -176,6 +177,11 @@ class PersonaChatApp {
       (query) => this.setState({ searchQuery: query }),
       300,
     );
+
+    this.debouncedCreateSettingsSnapshot = debounce(
+      () => this.createSettingsSnapshot(),
+      2000,
+    );
   }
 
   /**
@@ -212,6 +218,7 @@ class PersonaChatApp {
     this.setState({
       settings: { ...this.state.settings, [key]: value },
     });
+    this.debouncedCreateSettingsSnapshot();
   }
 
   /**
@@ -234,6 +241,7 @@ class PersonaChatApp {
         },
       },
     });
+    this.debouncedCreateSettingsSnapshot();
   }
 
   createSettingsSnapshot() {
@@ -249,6 +257,17 @@ class PersonaChatApp {
       10,
     );
     this.setState({ settingsSnapshots: newSnapshots });
+
+    // 모바일 UI가 표시 중일 때 스냅샷 목록을 수동으로 다시 렌더링
+    if (this.state.showSettingsUI) {
+      const snapshotsListEl = document.getElementById("snapshots-list");
+      if (snapshotsListEl) {
+        snapshotsListEl.innerHTML = renderSnapshotList(this);
+        if (window.lucide) {
+          window.lucide.createIcons();
+        }
+      }
+    }
   }
 
   /**
@@ -301,9 +320,6 @@ class PersonaChatApp {
     const wasRandomDisabled =
       this.initialSettings && !this.initialSettings.randomFirstMessageEnabled;
     const isRandomEnabled = this.state.settings.randomFirstMessageEnabled;
-
-    // Create a snapshot of the settings when the user explicitly saves.
-    this.createSettingsSnapshot();
 
     this.setState({ showSettingsModal: false, showSettingsUI: false, initialSettings: null });
 
@@ -500,6 +516,20 @@ class PersonaChatApp {
       };
     }
 
+    const desktopSettingsContent = document.getElementById(
+      "desktop-settings-content",
+    );
+    let desktopScrollTop = null;
+    if (desktopSettingsContent) {
+      desktopScrollTop = desktopSettingsContent.scrollTop;
+    }
+
+    const mobileSettingsContent = document.getElementById("settings-ui-content");
+    let mobileScrollTop = null;
+    if (mobileSettingsContent) {
+      mobileScrollTop = mobileSettingsContent.scrollTop;
+    }
+
     this.oldState = { ...this.state };
     this.state = { ...this.state, ...newState };
 
@@ -517,15 +547,19 @@ class PersonaChatApp {
       }
     }
 
-    if (scrollInfo) {
-      const messagesContainerNew =
-        document.getElementById("messages-container");
-      if (messagesContainerNew) {
-        if (scrollInfo.isAtBottom) {
-          this.scrollToBottom();
-        } else {
-          messagesContainerNew.scrollTop = scrollInfo.scrollTop;
-        }
+    if (desktopScrollTop !== null) {
+      const newDesktopSettingsContent = document.getElementById(
+        "desktop-settings-content",
+      );
+      if (newDesktopSettingsContent) {
+        newDesktopSettingsContent.scrollTop = desktopScrollTop;
+      }
+    }
+    if (mobileScrollTop !== null) {
+      const newMobileSettingsContent =
+        document.getElementById("settings-ui-content");
+      if (newMobileSettingsContent) {
+        newMobileSettingsContent.scrollTop = mobileScrollTop;
       }
     }
 
