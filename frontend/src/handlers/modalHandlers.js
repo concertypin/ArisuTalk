@@ -57,19 +57,20 @@ export function handleModalClick(e, app) {
     return;
   }
 
+  const selectChat = e.target.closest('[data-action="select-chat"]');
+  if (selectChat) {
+    const chatRoomId = selectChat.dataset.chatRoomId;
+    app.selectChatRoom(chatRoomId);
+    app.hideModal();
+    return;
+  }
+
   const closeChatSelection = e.target.closest(
     '[data-action="close-chat-selection"]',
   );
   if (closeChatSelection) {
     app.closeChatSelectionModal();
     return;
-  }
-
-  const selectChat = e.target.closest('[data-action="select-chat"]');
-  if (selectChat) {
-    const chatRoomId = selectChat.dataset.chatRoomId;
-    app.selectChatRoom(chatRoomId);
-    app.hideModal();
   }
 
   if (e.target.closest("#create-new-chat-room-modal")) {
