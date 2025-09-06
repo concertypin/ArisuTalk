@@ -222,7 +222,7 @@ export function renderDebugLogsModal(state) {
             <div class="bg-gray-800 rounded-lg w-full max-w-6xl h-[90vh] flex flex-col">
                 <!-- Header -->
                 <div class="p-6 border-b border-gray-600">
-                    <div class="flex justify-between items-center">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                         <div>
                             <h2 class="text-xl font-bold text-white flex items-center gap-2">
                                 <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
@@ -241,7 +241,7 @@ export function renderDebugLogsModal(state) {
                                 }
                             </p>
                         </div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex flex-wrap justify-end gap-2 w-full sm:w-auto sm:flex-nowrap">
                             ${
                               logCount > 0
                                 ? `
