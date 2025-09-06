@@ -461,3 +461,10 @@ button > svg {
   box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
 }
 
+.message-bubble-me {
+  background-color: rgba(37, 99, 235, 0.7);
+}
+
+.message-bubble-them {
+  background-color: rgba(35, 42, 55, 0.7);
+}

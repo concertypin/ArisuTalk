@@ -140,12 +140,6 @@ export function chatMLToPromptStructure(
         role: internalRole,
         parts: [{ text: processedContent }],
       });
-    } else if (role === "user" || role === "assistant") {
-      const internalRole = role === "assistant" ? "model" : "user";
-      contents.push({
-        role: internalRole,
-        parts: [{ text: processedContent }],
-      });
     }
   }
 

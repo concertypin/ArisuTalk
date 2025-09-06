@@ -27,7 +27,7 @@ export class ClaudeClient {
     isProactive = false,
     forceSummary = false,
   }) {
-    const { systemPrompt, contents } = await buildContentPrompt({
+    const { systemPrompt } = await buildContentPrompt({
       userName,
       userDescription,
       character,
