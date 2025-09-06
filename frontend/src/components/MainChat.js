@@ -89,7 +89,7 @@ function renderInputArea(app) {
                       : t("mainChat.messagePlaceholder")
                 }" class="relative flex-1 self-center pl-5 pr-5 py-3 bg-gray-700 text-white rounded-full border border-transparent focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 transition-all duration-200 text-sm placeholder-gray-500 resize-none" rows="1" style="min-height: 44px; max-height: 120px;" ${
                   isWaitingForResponse ? "disabled" : ""
-                }></textarea>
+                }>${app.state.currentMessage || ""}</textarea>
                 <button id="sticker-btn"
                     class="flex-shrink-0 bg-gray-700 hover:bg-gray-600 text-white rounded-full transition-all duration-200 w-[44px] h-[44px] flex items-center justify-center"
                     ${isWaitingForResponse ? "disabled" : ""}>

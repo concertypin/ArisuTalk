@@ -1,13 +1,18 @@
 export function handleMainChatClick(e, app) {
+  const messageInput = document.getElementById("new-message-input");
+  const currentMessage = messageInput ? messageInput.value : "";
+
   if (e.target.closest("#open-input-options-btn")) {
     app.setState({
       showInputOptions: !app.state.showInputOptions,
       showUserStickerPanel: false,
+      currentMessage,
     });
   } else if (e.target.closest("#sticker-btn")) {
     app.setState({
       showUserStickerPanel: !app.state.showUserStickerPanel,
       showInputOptions: false,
+      currentMessage,
     });
   } else if (e.target.closest("#open-image-upload")) {
     document.getElementById("image-upload-input").click();

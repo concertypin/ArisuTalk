@@ -97,6 +97,7 @@ class PersonaChatApp {
       modal: { isOpen: false, title: "", message: "", onConfirm: null },
       showInputOptions: false,
       imageToSend: null,
+      currentMessage: "",
       // Debug log system
       showDebugLogsModal: false,
       enableDebugLogs: false,
@@ -1223,6 +1224,7 @@ class PersonaChatApp {
       this.setState({
         stickerToSend: null,
         showInputOptions: false,
+        currentMessage: "",
       });
 
       if (messageInput) {
@@ -2030,6 +2032,7 @@ class PersonaChatApp {
       isWaitingForResponse: true,
       characters: updatedCharacters,
       imageToSend: null,
+      currentMessage: "",
     });
     this.scrollToBottom();
 
@@ -2071,6 +2074,7 @@ class PersonaChatApp {
       isWaitingForResponse: true,
       imageToSend: null,
       stickerToSend: null,
+      currentMessage: "",
     });
     this.scrollToBottom();
 
@@ -2121,6 +2125,7 @@ class PersonaChatApp {
       isWaitingForResponse: true,
       imageToSend: null,
       stickerToSend: null,
+      currentMessage: "",
     });
     this.scrollToBottom();
 
