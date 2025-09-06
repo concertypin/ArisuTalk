@@ -61,7 +61,8 @@ export function handleModalClick(e, app) {
     '[data-action="close-chat-selection"]',
   );
   if (closeChatSelection) {
-    app.hideModal();
+    app.closeChatSelectionModal();
+    return;
   }
 
   const selectChat = e.target.closest('[data-action="select-chat"]');

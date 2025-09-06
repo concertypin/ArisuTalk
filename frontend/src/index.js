@@ -191,8 +191,9 @@ class PersonaChatApp {
    * If the character has multiple chat rooms, it shows a selection modal.
    * Otherwise, it directly opens the chat room.
    * @param {string | number} characterId - The ID of the selected character.
+   * @param {MouseEvent} e - The click event.
    */
-  handleCharacterSelect(characterId) {
+  async handleCharacterSelect(characterId, e) {
     const numericCharacterId = Number(characterId);
     const character = this.state.characters.find(
       (c) => c.id === numericCharacterId,
@@ -202,7 +203,7 @@ class PersonaChatApp {
     const chatRooms = this.state.chatRooms[numericCharacterId] || [];
 
     if (chatRooms.length > 1) {
-      this.showModal("chatSelection", { character });
+      await this.showModal("chatSelection", { character }, e);
     } else if (chatRooms.length === 1) {
       this.selectChatRoom(chatRooms[0].id);
     } else {
@@ -801,7 +802,7 @@ class PersonaChatApp {
       if (characterListItem) {
         const characterId = characterListItem.dataset.characterId;
         if (characterId) {
-          this.handleCharacterSelect(characterId);
+          this.handleCharacterSelect(characterId, e);
         }
       }
 
@@ -1345,8 +1346,47 @@ class PersonaChatApp {
     });
   }
 
-  showModal(type, data) {
-    this.setState({ modal: { isOpen: true, type, ...data } });
+  async showModal(type, data, e = null) {
+    const modalState = { isOpen: true, type, ...data };
+    await this.setState({ modal: modalState });
+
+    if (e && type === 'chatSelection') {
+        requestAnimationFrame(() => {
+            const modalBackdrop = document.querySelector('#chat-selection-modal-backdrop');
+            const modalContent = document.querySelector('#chat-selection-modal-backdrop [data-modal-content]');
+            
+            if (modalContent && modalBackdrop) {
+                // Animate backdrop
+                modalBackdrop.animate([
+                    { opacity: 0 },
+                    { opacity: 1 }
+                ], {
+                    duration: 450, // Match modal animation duration
+                    easing: 'ease-in-out',
+                    fill: 'forwards'
+                });
+
+                // Animate modal content
+                const rect = modalContent.getBoundingClientRect();
+                const initialScale = 0.1;
+                const modalCenterX = rect.left + rect.width / 2;
+                const modalCenterY = rect.top + rect.height / 2;
+                const initialX = e.clientX - modalCenterX;
+                const initialY = e.clientY - modalCenterY;
+
+                modalContent.style.opacity = 0; // Prevent flash
+
+                modalContent.animate([
+                    { transform: `translate(${initialX}px, ${initialY}px) scale(${initialScale})`, opacity: 0 },
+                    { transform: 'translate(0, 0) scale(1)', opacity: 1 }
+                ], {
+                    duration: 450,
+                    easing: 'cubic-bezier(0.215, 0.610, 0.355, 1)',
+                    fill: 'forwards'
+                });
+            }
+        });
+    }
   }
 
   hideModal(event) {
@@ -1357,6 +1397,59 @@ class PersonaChatApp {
     this.setState({
       modal: { isOpen: false, title: "", message: "", onConfirm: null },
     });
+  }
+
+  async closeChatSelectionModal() {
+    const modalBackdrop = document.querySelector('#chat-selection-modal-backdrop');
+    const modalContent = document.querySelector('#chat-selection-modal-backdrop [data-modal-content]');
+    const character = this.state.modal.character;
+
+    if (!modalContent || !modalBackdrop || !character) {
+      this.hideModal();
+      return;
+    }
+
+    const characterEl = document.querySelector(`.character-list-item[data-character-id="${character.id}"]`);
+    
+    // If character element is not visible (e.g. scrolled out of view), just hide modal
+    if (!characterEl) {
+      this.hideModal();
+      return;
+    }
+
+    const charRect = characterEl.getBoundingClientRect();
+    const modalRect = modalContent.getBoundingClientRect();
+
+    const destX = charRect.left + charRect.width / 2;
+    const destY = charRect.top + charRect.height / 2;
+
+    const startX = modalRect.left + modalRect.width / 2;
+    const startY = modalRect.top + modalRect.height / 2;
+
+    const translateX = destX - startX;
+    const translateY = destY - startY;
+
+    const backdropAnimation = modalBackdrop.animate([
+        { opacity: 1 },
+        { opacity: 0 }
+    ], {
+        duration: 300, // Faster than open
+        easing: 'ease-in-out',
+        fill: 'forwards'
+    });
+
+    const contentAnimation = modalContent.animate([
+        { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+        { transform: `translate(${translateX}px, ${translateY}px) scale(0.1)`, opacity: 0 }
+    ], {
+        duration: 300,
+        easing: 'cubic-bezier(0.550, 0.055, 0.675, 0.190)', // EaseInQuad
+        fill: 'forwards'
+    });
+
+    await Promise.all([backdropAnimation.finished, contentAnimation.finished]);
+    
+    this.hideModal();
   }
 
   handleCreateNewChatRoom() {

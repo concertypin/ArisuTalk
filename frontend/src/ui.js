@@ -434,6 +434,7 @@ function shouldUpdateModals(oldState, newState) {
   }
 
   return (
+    JSON.stringify(oldState.modal) !== JSON.stringify(newState.modal) ||
     oldState.showSettingsModal !== newState.showSettingsModal ||
     oldState.showCharacterModal !== newState.showCharacterModal ||
     oldState.showMobileSearch !== newState.showMobileSearch ||
