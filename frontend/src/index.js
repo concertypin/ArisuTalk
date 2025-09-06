@@ -1296,12 +1296,12 @@ class PersonaChatApp {
         "audio/mp3",
       ];
       if (!allowedTypes.includes(file.type)) {
-        alert(`${file.name} is not a supported file format.`);
+        alert(t('modal.unsupportedFileType.message') + file.name);
         continue;
       }
 
       if (file.size > 30 * 1024 * 1024) {
-        alert(`${file.name} is too large. (Max 30MB)`);
+        alert(t('modal.fileTooLarge.message') + file.name);
         continue;
       }
 
@@ -1527,7 +1527,7 @@ class PersonaChatApp {
       if (file.size > 30 * 1024 * 1024) {
         this.showInfoModal(
           t("ui.fileSizeExceeded"),
-          `${file.name} exceeds 30MB.`,
+          t("ui.fileSizeExceededMessage", { fileName: file.name, sizeLimit: "30MB" }),
         );
         continue;
       }
@@ -1547,7 +1547,7 @@ class PersonaChatApp {
       if (!allowedTypes.includes(file.type)) {
         this.showInfoModal(
           t("ui.unsupportedFormat"),
-          `${file.name} is not a supported file format.`,
+          t("ui.unsupportedFormatMessage", { fileName: file.name }),
         );
         continue;
       }
@@ -1583,10 +1583,10 @@ class PersonaChatApp {
         };
         newStickers.push(sticker);
       } catch (error) {
-        console.error(`Sticker processing error: ${file.name}`, error);
+        console.error(t("ui.stickerProcessingErrorConsole", { fileName: file.name }), error);
         this.showInfoModal(
           t("ui.stickerProcessingError"),
-          `An error occurred while processing ${file.name}.`,
+          t("ui.stickerProcessingErrorMessage", { fileName: file.name }),
         );
       }
     }
@@ -1673,7 +1673,7 @@ class PersonaChatApp {
         const selectAllHTML = `
                     <button id="select-all-stickers" class="py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm flex flex-col items-center gap-1">
                         <i data-lucide="check-circle" class="w-4 h-4"></i>
-                        <span class="text-xs">Select<br>All</span>
+                        <span class="text-xs">${t("system.selectAll")}</span>
                     </button>
                 `;
         toggleButton.insertAdjacentHTML("afterend", selectAllHTML);
@@ -3892,7 +3892,7 @@ class PersonaChatApp {
         link.click();
       } catch (error) {
         console.error("Character card save failed:", error);
-        alert("Failed to save character card.");
+        alert(t("modal.characterCardSaveError.message"));
       }
     };
     image.onerror = () =>
@@ -4989,8 +4989,8 @@ class PersonaChatApp {
 
     if (!characterName) {
       this.showInfoModal(
-        "Name required",
-        "Please enter a character name first.",
+        t("character_name_required_title"),
+        t("character_name_required_message"),
       );
       return;
     }
@@ -5014,8 +5014,8 @@ class PersonaChatApp {
       currentConfig.apiKey.trim() === ""
     ) {
       this.showInfoModal(
-        "API Key Required",
-        "Please enter your API key in the settings first.",
+        t("modal.apiKeyRequired.title"),
+        t("modal.apiKeyRequired.message"),
       );
       this.setState({ showSettingsModal: true });
       return;
@@ -5025,8 +5025,7 @@ class PersonaChatApp {
     const generateBtn = document.getElementById("ai-generate-character-btn");
     const originalText = generateBtn.innerHTML;
     generateBtn.disabled = true;
-    generateBtn.innerHTML =
-      '<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Generating...';
+    generateBtn.innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> ${t("gneratingStatus.generating")}`;
     if (window.lucide) {
       window.lucide.createIcons();
     }
@@ -5145,8 +5144,8 @@ class PersonaChatApp {
           // Show success message after state update is complete
           setTimeout(() => {
             this.showInfoModal(
-              "AI Generation Complete",
-              `Successfully generated details for character "${characterName}"`,
+              t("modal.aiGenerationComplete.title"),
+              t("modal.aiGenerationComplete.message", { characterName: characterName }),
             );
           }, 100);
         } else {
@@ -5161,8 +5160,8 @@ class PersonaChatApp {
     } catch (error) {
       console.error("AI character generation error:", error);
       this.showInfoModal(
-        "Generation Failed",
-        `An error occurred during character generation: ${error.message}`,
+        t("modal.generationFailed.title"),
+        t("modal.generationFailed.message", { errorMessage: error.message }),
       );
     } finally {
       // Restore button

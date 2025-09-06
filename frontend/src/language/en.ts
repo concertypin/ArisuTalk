@@ -485,6 +485,19 @@ export const en: LanguageStrings = {
       message: "Select a chat room to continue the conversation.",
       newChat: "New Chat",
     },
+    characterCardSaveError: {
+        message: "Failed to save character card."
+    },
+    character_name_required_title: "Name required",
+    character_name_required_message: "Please enter a character name first.",
+    aiGenerationComplete: {
+        title: "AI Generation Complete",
+        message: "Successfully generated details for character \"{{characterName}}\""
+    },
+    generationFailed: {
+        title: "Generation Failed",
+        message: "An error occurred during character generation: {{errorMessage}}"
+    }
   },
   ui: {
     discardChanges: "Discard Changes",
@@ -504,8 +517,12 @@ export const en: LanguageStrings = {
     fileProcessingError: "File processing error:",
     fileProcessingAlert: "An error occurred while processing the file.",
     fileSizeExceeded: "File Size Exceeded",
+    fileSizeExceededMessage: "'{{fileName}}' is too large. (Max {{sizeLimit}})",
     unsupportedFormat: "Unsupported Format",
+    unsupportedFormatMessage: "'{{fileName}}' is not a supported file format.",
     stickerProcessingError: "Sticker Processing Error",
+    stickerProcessingErrorConsole: "Sticker processing error: {{fileName}}",
+    stickerProcessingErrorMessage: "An error occurred while processing '{{fileName}}'.",
     storageFull: "Storage Full",
     storageFullMessage: "Not enough storage space.",
     groupChatNamePlaceholder: "Enter group chat name",
@@ -647,6 +664,7 @@ export const en: LanguageStrings = {
     storageFullMessage: "Not enough storage space.",
     selectModeDeselect: "Deselect<br>Mode",
     selectModeSelect: "Select<br>Mode",
+    selectAll: "Select<br>All",
   },
   landing: {
     welcomeTitle: "Welcome to ArisuTalk",
@@ -708,4 +726,7 @@ export const en: LanguageStrings = {
     prompt: "Search for characters by name.",
     noResults: "No characters found.",
   },
+  gneratingStatus: {
+    generating: "Generating..."
+  }
 };
