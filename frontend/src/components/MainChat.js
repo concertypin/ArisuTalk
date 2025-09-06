@@ -605,7 +605,7 @@ export function renderMainChat(app) {
                         </p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-2 md:space-x-2">
+                <div class="flex items-center space-x-4 md:space-x-4">
                     <button class="p-3 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="phone" class="w-6 h-6 text-gray-300"></i></button>
                     <button class="p-3 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="video" class="w-6 h-6 text-gray-300"></i></button>
                     <button class="chat-debug-logs-btn p-3 rounded-full bg-gray-800 hover:bg-gray-700" title="${t(
@@ -650,7 +650,7 @@ export function renderMainChat(app) {
                         </p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-2 md:space-x-2">
+                <div class="flex items-center space-x-4 md:space-x-4">
                     <button class="p-3 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="phone" class="w-6 h-6 text-gray-300"></i></button>
                     <button class="p-3 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="video" class="w-6 h-6 text-gray-300"></i></button>
                     <button class="chat-debug-logs-btn p-3 rounded-full bg-gray-800 hover:bg-gray-700" title="${t(
@@ -683,7 +683,7 @@ export function renderMainChat(app) {
                         }</p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-2 md:space-x-2">
+                <div class="flex items-center space-x-4 md:space-x-4">
                     <button class="p-3 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="phone" class="w-6 h-6 text-gray-300"></i></button>
                     <button class="p-3 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="video" class="w-6 h-6 text-gray-300"></i></button>
                     <button class="chat-debug-logs-btn p-3 rounded-full bg-gray-800 hover:bg-gray-700" title="${t(
