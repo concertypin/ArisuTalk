@@ -580,20 +580,20 @@ export function renderMainChat(app) {
       .filter(Boolean);
 
     mainChat.innerHTML = `
-            <header class="p-4 bg-gray-900/80 border-b border-gray-800 glass-effect flex items-center justify-between z-10">
-                <div class="flex items-center space-x-2 md:space-x-4">
-                    <button id="mobile-sidebar-toggle" class="p-2 -ml-2 rounded-full hover:bg-gray-700 md:hidden">
-                        <i data-lucide="menu" class="h-5 w-5 text-gray-300"></i>
+            <header class="px-4 py-4 bg-gray-900/80 border-b border-gray-800 glass-effect flex items-center justify-between z-10">
+                <div class="flex items-center space-x-3 md:space-x-4">
+                    <button id="mobile-sidebar-toggle" class="p-3 -ml-2 rounded-full hover:bg-gray-700 md:hidden">
+                        <i data-lucide="menu" class="h-6 w-6 text-gray-300"></i>
                     </button>
-                    <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
-                        <i data-lucide="globe" class="w-6 h-6 text-white"></i>
+                    <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <i data-lucide="globe" class="w-7 h-7 text-white"></i>
                     </div>
                     <div>
-                        <h2 class="font-semibold text-white text-base md:text-lg">${
+                        <h2 class="font-semibold text-white text-lg leading-tight">${
                           selectedOpenChat.name
                         }</h2>
-                        <p class="text-xs md:text-sm text-gray-400 flex items-center">
-                            <i data-lucide="globe" class="w-3 h-3 mr-1.5"></i>
+                        <p class="text-sm text-gray-400 flex items-center">
+                            <i data-lucide="globe" class="w-4 h-4 mr-1.5"></i>
                             ${t("mainChat.participantsConnected").replace(
                               "{{count}}",
                               currentParticipants.length,
@@ -605,12 +605,12 @@ export function renderMainChat(app) {
                         </p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-1 md:space-x-2">
-                    <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="phone" class="w-4 h-4 text-gray-300"></i></button>
-                    <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="video" class="w-4 h-4 text-gray-300"></i></button>
-                    <button class="chat-debug-logs-btn p-2 rounded-full bg-gray-800 hover:bg-gray-700" title="${t(
+                <div class="flex items-center space-x-2 md:space-x-2">
+                    <button class="p-3 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="phone" class="w-6 h-6 text-gray-300"></i></button>
+                    <button class="p-3 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="video" class="w-6 h-6 text-gray-300"></i></button>
+                    <button class="chat-debug-logs-btn p-3 rounded-full bg-gray-800 hover:bg-gray-700" title="${t(
                       "mainChat.debugLogButtonTitle",
-                    )}"><i data-lucide="bar-chart-3" class="w-4 h-4 text-gray-300 pointer-events-none"></i></button>
+                    )}"><i data-lucide="bar-chart-3" class="w-6 h-6 text-gray-300 pointer-events-none"></i></button>
                 </div>
             </header>
             <div id="messages-container" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
@@ -627,20 +627,20 @@ export function renderMainChat(app) {
     const participantNames = participants.map((char) => char.name).join(", ");
 
     mainChat.innerHTML = `
-            <header class="p-4 bg-gray-900/80 border-b border-gray-800 glass-effect flex items-center justify-between z-10">
-                <div class="flex items-center space-x-2 md:space-x-4">
-                    <button id="mobile-sidebar-toggle" class="p-2 -ml-2 rounded-full hover:bg-gray-700 md:hidden">
-                        <i data-lucide="menu" class="h-5 w-5 text-gray-300"></i>
+            <header class="px-4 py-4 bg-gray-900/80 border-b border-gray-800 glass-effect flex items-center justify-between z-10">
+                <div class="flex items-center space-x-3 md:space-x-4">
+                    <button id="mobile-sidebar-toggle" class="p-3 -ml-2 rounded-full hover:bg-gray-700 md:hidden">
+                        <i data-lucide="menu" class="h-6 w-6 text-gray-300"></i>
                     </button>
-                    <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center">
-                        <i data-lucide="users" class="w-6 h-6 text-white"></i>
+                    <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center">
+                        <i data-lucide="users" class="w-7 h-7 text-white"></i>
                     </div>
                     <div>
-                        <h2 class="font-semibold text-white text-base md:text-lg">${
+                        <h2 class="font-semibold text-white text-lg leading-tight">${
                           selectedGroupChat.name
                         }</h2>
-                        <p class="text-xs md:text-sm text-gray-400 flex items-center">
-                            <i data-lucide="users" class="w-3 h-3 mr-1.5"></i>
+                        <p class="text-sm text-gray-400 flex items-center">
+                            <i data-lucide="users" class="w-4 h-4 mr-1.5"></i>
                             ${t("mainChat.participantsJoined").replace(
                               "{{count}}",
                               participants.length,
@@ -650,12 +650,12 @@ export function renderMainChat(app) {
                         </p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-1 md:space-x-2">
-                    <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="phone" class="w-4 h-4 text-gray-300"></i></button>
-                    <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="video" class="w-4 h-4 text-gray-300"></i></button>
-                    <button class="chat-debug-logs-btn p-2 rounded-full bg-gray-800 hover:bg-gray-700" title="${t(
+                <div class="flex items-center space-x-2 md:space-x-2">
+                    <button class="p-3 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="phone" class="w-6 h-6 text-gray-300"></i></button>
+                    <button class="p-3 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="video" class="w-6 h-6 text-gray-300"></i></button>
+                    <button class="chat-debug-logs-btn p-3 rounded-full bg-gray-800 hover:bg-gray-700" title="${t(
                       "mainChat.debugLogButtonTitle",
-                    )}"><i data-lucide="bar-chart-3" class="w-4 h-4 text-gray-300 pointer-events-none"></i></button>
+                    )}"><i data-lucide="bar-chart-3" class="w-6 h-6 text-gray-300 pointer-events-none"></i></button>
                 </div>
             </header>
             <div id="messages-container" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
@@ -668,27 +668,27 @@ export function renderMainChat(app) {
         `;
   } else if (selectedChatRoom && selectedChat) {
     mainChat.innerHTML = `
-            <header class="p-4 bg-gray-900/80 border-b border-gray-800 glass-effect flex items-center justify-between z-10">
-                <div class="flex items-center space-x-2 md:space-x-4">
-                    <button id="back-to-char-list" class="p-2 -ml-2 rounded-full hover:bg-gray-700 md:hidden">
-                        <i data-lucide="arrow-left" class="h-5 w-5 text-gray-300"></i>
+            <header class="px-4 py-4 bg-gray-900/80 border-b border-gray-800 glass-effect flex items-center justify-between z-10">
+                <div class="flex items-center space-x-3 md:space-x-4">
+                    <button id="back-to-char-list" class="p-3 -ml-2 rounded-full hover:bg-gray-700 md:hidden">
+                        <i data-lucide="arrow-left" class="h-6 w-6 text-gray-300"></i>
                     </button>
                     ${renderAvatar(selectedChat, "sm")}
                     <div>
-                        <h2 class="font-semibold text-white text-base md:text-lg">${
+                        <h2 class="font-semibold text-white text-lg leading-tight">${
                           selectedChat.name
                         }</h2>
-                        <p class="text-xs md:text-sm text-gray-400 flex items-center"><i data-lucide="message-circle" class="w-3 h-3 mr-1.5"></i>${
+                        <p class="text-sm text-gray-400 flex items-center"><i data-lucide="message-circle" class="w-4 h-4 mr-1.5"></i>${
                           selectedChatRoom.name
                         }</p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-1 md:space-x-2">
-                    <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="phone" class="w-4 h-4 text-gray-300"></i></button>
-                    <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="video" class="w-4 h-4 text-gray-300"></i></button>
-                    <button class="chat-debug-logs-btn p-2 rounded-full bg-gray-800 hover:bg-gray-700" title="${t(
+                <div class="flex items-center space-x-2 md:space-x-2">
+                    <button class="p-3 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="phone" class="w-6 h-6 text-gray-300"></i></button>
+                    <button class="p-3 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="video" class="w-6 h-6 text-gray-300"></i></button>
+                    <button class="chat-debug-logs-btn p-3 rounded-full bg-gray-800 hover:bg-gray-700" title="${t(
                       "mainChat.debugLogButtonTitle",
-                    )}"><i data-lucide="bar-chart-3" class="w-4 h-4 text-gray-300 pointer-events-none"></i></button>
+                    )}"><i data-lucide="bar-chart-3" class="w-6 h-6 text-gray-300 pointer-events-none"></i></button>
                 </div>
             </header>
             <div id="messages-container" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
