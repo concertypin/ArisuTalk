@@ -22,7 +22,7 @@ ArisuTalk follows a **client-server architecture** with a modern JavaScript fron
 ┌─────────────────────────────────────────────────────────────┐
 │                    ArisuTalk System                         │
 ├─────────────────────────────────────────────────────────────┤
-│  Frontend (JavaScript/Vite)                                │
+│  Frontend (JavaScript/Vite)                                
 │  ├── UI Layer (Components)                                 │
 │  ├── State Management (index.js)                           │
 │  ├── API Integration Layer                                 │
@@ -48,29 +48,34 @@ ArisuTalk follows a **client-server architecture** with a modern JavaScript fron
 
 ### Component Hierarchy
 
-The frontend follows a **component-based architecture** with clear separation of concerns:
+The frontend follows a **component-based architecture** with clear separation of concerns. The new architecture emphasizes a mobile-first approach with distinct page components for different views on mobile devices.
 
 ```
 Application Root (index.js)
 ├── UI Manager (ui.js)
 ├── State Manager (index.js)
-├── Settings Router (SettingsRouter.js)
-│   ├── Desktop Settings (DesktopSettingsUI.js)
-│   │   ├── API Settings Panel
-│   │   ├── Appearance Settings Panel
-│   │   ├── Character Defaults Panel
-│   │   ├── Data Management Panel
-│   │   └── Advanced Settings Panel
-│   └── Mobile Settings (MobileSettingsModal.js)
-├── Main Chat (MainChat.js)
-├── Group Chat (GroupChat.js)
-├── Sidebar (Sidebar.js)
+├── Page Containers
+│   ├── Character List Page (CharacterListPage.js)
+│   ├── Main Chat Page (MainChat.js)
+│   ├── Mobile Settings Page (MobileSettingsUI.js)
+│   └── Landing Page (LandingPage.js)
+├── Desktop-specific Components
+│   ├── Sidebar (Sidebar.js)
+│   └── Desktop Settings (DesktopSettingsModal.js & DesktopSettingsUI.js)
+│       ├── API Settings Panel
+│       ├── Appearance Settings Panel
+│       ├── Character Defaults Panel
+│       ├── Data Management Panel
+│       ├── Scale Settings Panel
+│       └── Advanced Settings Panel
 └── Modal System
     ├── Character Modal
     ├── Prompt Modal
     ├── Debug Logs Modal
     ├── Master Password Modal
-    └── Confirmation Modal
+    ├── Confirmation Modal
+    ├── Chat Selection Modal
+    └── Search Modal
 ```
 
 ### Design Patterns
@@ -107,39 +112,24 @@ window.dispatchEvent(new CustomEvent('settingsChanged', {
 }));
 ```
 
-#### 3. **Factory Pattern**
-Settings panels are created dynamically based on device type:
-
-```javascript
-// SettingsRouter.js
-function createSettingsUI(deviceType) {
-    if (deviceType === 'desktop') {
-        return new DesktopSettingsUI();
-    } else {
-        return new MobileSettingsModal();
-    }
-}
-```
+#### 3. **Page-Based UI for Mobile**
+On mobile devices, the UI is organized into pages that transition smoothly. This is managed by showing and hiding different page containers within the `index.html`.
 
 ## Settings System Architecture
 
 ### Modular Panel System
 
-The settings system has been completely restructured into a modular architecture:
+The settings system is structured into a modular architecture, with a clear distinction between mobile and desktop interfaces.
 
 ```
 Settings Architecture
-├── Router Layer (SettingsRouter.js)
-│   ├── Device Detection
-│   ├── UI Selection Logic
-│   └── Component Initialization
 ├── UI Layer
-│   ├── Desktop Interface (DesktopSettingsUI.js)
+│   ├── Desktop Interface (DesktopSettingsModal.js & DesktopSettingsUI.js)
 │   │   ├── Tab Navigation
 │   │   ├── Centered Layout
 │   │   └── Panel Container
-│   └── Mobile Interface (MobileSettingsModal.js)
-│       ├── Modal Layout
+│   └── Mobile Interface (MobileSettingsUI.js)
+│       ├── Page-based Navigation
 │       ├── Touch Optimization
 │       └── Responsive Design
 └── Panel Layer (settings/panels/)
@@ -147,6 +137,7 @@ Settings Architecture
     ├── AppearanceSettingsPanel.js
     ├── CharacterDefaultsPanel.js
     ├── DataManagementPanel.js
+    ├── ScaleSettingsPanel.js
     └── AdvancedSettingsPanel.js
 ```
 
@@ -154,10 +145,9 @@ Settings Architecture
 
 ```mermaid
 graph TB
-    A[User Opens Settings] --> B[SettingsRouter]
-    B --> C{Device Type?}
-    C -->|Desktop| D[DesktopSettingsUI]
-    C -->|Mobile| E[MobileSettingsModal]
+    A[User Opens Settings] --> C{Device Type?}
+    C -->|Desktop| D[DesktopSettingsModal]
+    C -->|Mobile| E[MobileSettingsUI]
     D --> F[Load Selected Panel]
     E --> F
     F --> G[Render Panel Content]

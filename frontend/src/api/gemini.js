@@ -1,4 +1,8 @@
-import { buildContentPrompt, buildProfilePrompt, buildCharacterSheetPrompt } from "../prompts/builder/promptBuilder.js";
+import {
+  buildContentPrompt,
+  buildProfilePrompt,
+  buildCharacterSheetPrompt,
+} from "../prompts/builder/promptBuilder.js";
 import { t } from "../i18n.js";
 
 const API_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models";
@@ -185,7 +189,7 @@ export class GeminiClient {
           // Additional cleanup for common JSON issues
           cleanedText = cleanedText
             .replace(/\\n/g, "\\\\n") // Escape newlines properly for JSON.parse
-            .replace(/\\"/g, '\\\\"') // Escape double quotes properly for JSON.parse
+            .replace(/\\\"/g, '\\\\"') // Escape double quotes properly for JSON.parse
             .trim();
 
           const parsed = JSON.parse(cleanedText);
@@ -245,7 +249,7 @@ export class GeminiClient {
    * @throws {Error} When API call fails or JSON parsing error occurs
    */
   async generateProfile({ userName, userDescription, profileCreationPrompt }) {
-    const { systemPrompt, contents } = buildProfilePrompt({
+    const { systemPrompt, contents } = await buildProfilePrompt({
       userName,
       userDescription,
       profileCreationPrompt,
@@ -253,9 +257,9 @@ export class GeminiClient {
 
     const payload = {
       contents: contents,
-      systemInstruction: {
-        parts: [{ text: systemPrompt }],
-      },
+      systemInstruction: systemPrompt
+        ? { parts: [{ text: systemPrompt }] }
+        : undefined,
       generationConfig: {
         temperature: this.profileTemperature,
         maxOutputTokens: this.profileMaxOutputTokens,
@@ -283,6 +287,16 @@ export class GeminiClient {
         },
       ],
     };
+
+    if (
+      (!payload.contents || payload.contents.length === 0) &&
+      payload.systemInstruction
+    ) {
+      payload.contents = [
+        { role: "user", parts: payload.systemInstruction.parts },
+      ];
+      delete payload.systemInstruction;
+    }
 
     try {
       const response = await fetch(
@@ -331,7 +345,7 @@ export class GeminiClient {
           // Additional cleanup for common JSON issues
           cleanedText = cleanedText
             .replace(/\\n/g, "\\\\n") // Escape newlines properly for JSON.parse
-            .replace(/\\"/g, '\\\\"') // Escape double quotes properly for JSON.parse
+            .replace(/\\\"/g, '\\\\"') // Escape double quotes properly for JSON.parse
             .trim();
 
           const parsed = JSON.parse(cleanedText);
@@ -394,9 +408,9 @@ export class GeminiClient {
   async generateCharacterSheet({
     characterName,
     characterDescription,
-    characterSheetPrompt
+    characterSheetPrompt,
   }) {
-    const { systemPrompt, contents } = buildCharacterSheetPrompt({
+    const { systemPrompt, contents } = await buildCharacterSheetPrompt({
       characterName,
       characterDescription,
       characterSheetPrompt,
@@ -404,9 +418,9 @@ export class GeminiClient {
 
     const payload = {
       contents: contents,
-      systemInstruction: {
-        parts: [{ text: systemPrompt }],
-      },
+      systemInstruction: systemPrompt
+        ? { parts: [{ text: systemPrompt }] }
+        : undefined,
       generationConfig: {
         temperature: this.profileTemperature, // Use profile temperature for consistency
         maxOutputTokens: this.profileMaxOutputTokens,
@@ -426,6 +440,16 @@ export class GeminiClient {
         },
       ],
     };
+
+    if (
+      (!payload.contents || payload.contents.length === 0) &&
+      payload.systemInstruction
+    ) {
+      payload.contents = [
+        { role: "user", parts: payload.systemInstruction.parts },
+      ];
+      delete payload.systemInstruction;
+    }
 
     try {
       const response = await fetch(
@@ -461,7 +485,10 @@ export class GeminiClient {
           reactionDelay: 1000, // Standard delay
         };
       } else {
-        console.warn("Character Sheet Gen API 응답에 유효한 content가 없습니다.", data);
+        console.warn(
+          "Character Sheet Gen API 응답에 유효한 content가 없습니다.",
+          data,
+        );
         const reason =
           data.promptFeedback?.blockReason ||
           data.candidates?.[0]?.finishReason ||
@@ -470,7 +497,8 @@ export class GeminiClient {
       }
     } catch (error) {
       console.error(
-        t("api.profileGenerationError", { provider: "Gemini" }) + " (Character Sheet)",
+        t("api.profileGenerationError", { provider: "Gemini" }) +
+          " (Character Sheet)",
         error,
       );
       return { error: error.message };

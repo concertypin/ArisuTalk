@@ -1,4 +1,8 @@
-import { buildContentPrompt, buildProfilePrompt, buildCharacterSheetPrompt } from "../prompts/builder/promptBuilder.js";
+import {
+  buildContentPrompt,
+  buildProfilePrompt,
+  buildCharacterSheetPrompt,
+} from "../prompts/builder/promptBuilder.js";
 import { t } from "../i18n.js";
 
 const API_BASE_URL = "https://api.openai.com/v1";
@@ -66,14 +70,48 @@ export class OpenAIClient {
       forceSummary,
     });
 
-    const messages = contents.map(c => ({
-      role: c.role === 'model' ? 'assistant' : c.role,
-      content: c.parts.map(p => p.text).join('')
-    }));
+    const messages = [];
+    for (const msg of history) {
+      const role = msg.isMe ? "user" : "assistant";
+      let content = msg.content || "";
+
+      if (msg.isMe && msg.type === "image" && msg.imageId) {
+        const imageData = character?.media?.find((m) => m.id === msg.imageId);
+        if (imageData) {
+          content = [
+            { type: "text", text: content || t("api.imageMessage") },
+            {
+              type: "image_url",
+              image_url: {
+                url: imageData.dataUrl,
+              },
+            },
+          ];
+        } else {
+          content = content || t("api.imageUnavailable");
+        }
+      } else if (msg.isMe && msg.type === "sticker" && msg.stickerData) {
+        const stickerName =
+          msg.stickerData.stickerName || t("api.unknownSticker");
+        content =
+          t("api.stickerMessage", { stickerName: stickerName }) +
+          (content ? ` ${content}` : "");
+      }
+
+      if (content) {
+        messages.push({ role, content });
+      }
+    }
+
+    if (isProactive && messages.length === 0) {
+      messages.push({
+        role: "user",
+        content: "(SYSTEM: You are starting this conversation. Please begin.)",
+      });
+    }
 
     messages.unshift({ role: "system", content: systemPrompt });
 
-    // for_update 라인 7017-7022: 요청 본문 구성
     const requestBody = {
       model: this.model,
       messages: messages,
@@ -82,7 +120,6 @@ export class OpenAIClient {
     };
 
     try {
-      // for_update 라인 7025-7032: API 호출
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: "POST",
         headers: {
@@ -105,7 +142,6 @@ export class OpenAIClient {
 
       const data = await response.json();
 
-      // for_update 라인 7041-7056: 응답 처리
       if (data.choices && data.choices.length > 0) {
         const textContent = data.choices[0].message.content;
 
@@ -228,7 +264,7 @@ export class OpenAIClient {
   async generateCharacterSheet({
     characterName,
     characterDescription,
-    characterSheetPrompt
+    characterSheetPrompt,
   }) {
     const { systemPrompt, contents } = buildCharacterSheetPrompt({
       characterName,
@@ -238,10 +274,10 @@ export class OpenAIClient {
 
     const messages = [
       { role: "system", content: systemPrompt },
-      ...contents.map(content => ({
+      ...contents.map((content) => ({
         role: content.role === "model" ? "assistant" : content.role,
-        content: content.parts.map(part => part.text).join("")
-      }))
+        content: content.parts.map((part) => part.text).join(""),
+      })),
     ];
 
     const payload = {
@@ -256,7 +292,7 @@ export class OpenAIClient {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${this.apiKey}`,
+          Authorization: `Bearer ${this.apiKey}`,
         },
         body: JSON.stringify(payload),
       });
@@ -265,7 +301,8 @@ export class OpenAIClient {
 
       if (!response.ok) {
         console.error("Character Sheet Gen API Error:", data);
-        const errorMessage = data?.error?.message ||
+        const errorMessage =
+          data?.error?.message ||
           t("api.requestFailed", { status: response.statusText });
         throw new Error(errorMessage);
       }
@@ -278,11 +315,14 @@ export class OpenAIClient {
           reactionDelay: 1000,
         };
       } else {
-        throw new Error(t("api.profileNotGenerated", { reason: t("api.unknownReason") }));
+        throw new Error(
+          t("api.profileNotGenerated", { reason: t("api.unknownReason") }),
+        );
       }
     } catch (error) {
       console.error(
-        t("api.profileGenerationError", { provider: "OpenAI" }) + " (Character Sheet)",
+        t("api.profileGenerationError", { provider: "OpenAI" }) +
+          " (Character Sheet)",
         error,
       );
       return { error: error.message };

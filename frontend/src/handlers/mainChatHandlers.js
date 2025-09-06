@@ -1,52 +1,42 @@
 export function handleMainChatClick(e, app) {
+  const messageInput = document.getElementById("new-message-input");
+  const currentMessage = messageInput ? messageInput.value : "";
+
   if (e.target.closest("#open-input-options-btn")) {
-    app.setState({ showInputOptions: !app.state.showInputOptions });
-  }
-  if (e.target.closest("#open-image-upload")) {
+    app.setState({
+      showInputOptions: !app.state.showInputOptions,
+      showUserStickerPanel: false,
+      currentMessage,
+    });
+  } else if (e.target.closest("#sticker-btn")) {
+    app.setState({
+      showUserStickerPanel: !app.state.showUserStickerPanel,
+      showInputOptions: false,
+      currentMessage,
+    });
+  } else if (e.target.closest("#open-image-upload")) {
     document.getElementById("image-upload-input").click();
-  }
-  if (e.target.closest("#cancel-image-preview")) {
+  } else if (e.target.closest("#cancel-image-preview")) {
     app.setState({ imageToSend: null });
-  }
-
-  const deleteMsgButton = e.target.closest(".delete-msg-btn");
-  if (deleteMsgButton) {
+  } else if (e.target.closest(".delete-msg-btn")) {
+    const deleteMsgButton = e.target.closest(".delete-msg-btn");
     app.handleDeleteMessage(parseFloat(deleteMsgButton.dataset.id));
-  }
-
-  const editMsgButton = e.target.closest(".edit-msg-btn");
-  if (editMsgButton) {
+  } else if (e.target.closest(".edit-msg-btn")) {
+    const editMsgButton = e.target.closest(".edit-msg-btn");
     app.handleEditMessage(parseFloat(editMsgButton.dataset.id));
-  }
-
-  const rerollMsgButton = e.target.closest(".reroll-msg-btn");
-  if (rerollMsgButton) {
+  } else if (e.target.closest(".reroll-msg-btn")) {
+    const rerollMsgButton = e.target.closest(".reroll-msg-btn");
     app.handleRerollMessage(parseFloat(rerollMsgButton.dataset.id));
-  }
-
-  const saveEditButton = e.target.closest(".save-edit-btn");
-  if (saveEditButton) {
+  } else if (e.target.closest(".save-edit-btn")) {
+    const saveEditButton = e.target.closest(".save-edit-btn");
     app.handleSaveEditedMessage(parseFloat(saveEditButton.dataset.id));
-  }
-
-  const cancelEditButton = e.target.closest(".cancel-edit-btn");
-  if (cancelEditButton) {
+  } else if (e.target.closest(".cancel-edit-btn")) {
     app.setState({ editingMessageId: null });
-  }
-
-  if (e.target.closest("#sticker-btn")) {
-    app.toggleUserStickerPanel();
-  }
-
-  if (e.target.closest("#send-message-btn")) {
+  } else if (e.target.closest("#send-message-btn")) {
     app.handleSendMessageWithSticker();
+  } else if (e.target.closest("#close-sticker-panel-btn")) {
+    app.setState({ showUserStickerPanel: false });
   }
-
-  if (e.target.closest("#close-sticker-panel-btn")) {
-    app.toggleUserStickerPanel();
-  }
-
-  // 디버그 로그 버튼은 onclick으로 처리됨
 }
 
 export function handleMainChatInput(e, app) {

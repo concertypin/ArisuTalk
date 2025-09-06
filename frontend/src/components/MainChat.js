@@ -2,6 +2,10 @@ import { t } from "../i18n.js";
 import { formatBytes } from "../storage.js";
 import { findMessageGroup, formatDateSeparator } from "../utils.js";
 import { renderAvatar } from "./Avatar.js";
+import {
+  renderLandingPage,
+  setupLandingPageEventListeners,
+} from "./LandingPage.js";
 
 function getGroupChatParticipants(app, groupChatId) {
   const groupChat = app.state.groupChats[groupChatId];
@@ -13,7 +17,8 @@ function getGroupChatParticipants(app, groupChatId) {
 }
 
 function renderInputArea(app) {
-  const { showInputOptions, isWaitingForResponse, imageToSend } = app.state;
+  const { showInputOptions, isWaitingForResponse, imageToSend, stickerToSend } =
+    app.state;
   const hasImage = !!imageToSend;
 
   let imagePreviewHtml = "";
@@ -21,7 +26,9 @@ function renderInputArea(app) {
     imagePreviewHtml = `
             <div class="p-2 border-b border-gray-700 mb-2">
                 <div class="relative w-20 h-20">
-                    <img src="${imageToSend.dataUrl}" class="w-full h-full object-cover rounded-lg">
+                    <img src="${
+                      imageToSend.dataUrl
+                    }" class="w-full h-full object-cover rounded-lg">
                     <button id="cancel-image-preview" class="absolute -top-2 -right-2 p-1 bg-gray-900 rounded-full text-white hover:bg-red-500 transition-colors">
                         <i data-lucide="x" class="w-4 h-4 pointer-events-none"></i>
                     </button>
@@ -30,13 +37,29 @@ function renderInputArea(app) {
         `;
   }
 
+  let stickerPreviewHtml = "";
+  if (stickerToSend) {
+    stickerPreviewHtml = `
+      <div class="mb-2 p-2 bg-gray-700 rounded-lg flex items-center gap-2 text-sm text-gray-300">
+          <img src="${stickerToSend.data}" alt="${
+            stickerToSend.stickerName
+          }" class="w-6 h-6 rounded object-cover">
+          <span>${t("mainChat.stickerLabel")}${stickerToSend.stickerName}</span>
+          <button id="remove-sticker-to-send-btn" class="ml-auto text-gray-400 hover:text-white">
+              <i data-lucide="x" class="w-3 h-3"></i>
+          </button>
+      </div>
+    `;
+  }
+
   return `
-        <div class="input-area-container relative">
+        <div class="input-area-container experimental relative">
             ${imagePreviewHtml}
+            ${stickerPreviewHtml}
             ${
               showInputOptions
                 ? `
-                <div class="absolute bottom-full left-0 mb-2 w-48 bg-gray-700 rounded-xl shadow-lg p-2 animate-fadeIn">
+                <div class="absolute bottom-full left-0 mb-2 w-48 rounded-xl shadow-lg p-2 animate-fadeIn floating-panel">
                     <button id="open-image-upload" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-left rounded-lg hover:bg-gray-600">
                         <i data-lucide="image" class="w-4 h-4"></i> ${t(
                           "mainChat.uploadPhoto",
@@ -46,66 +69,39 @@ function renderInputArea(app) {
             `
                 : ""
             }
-            <div class="flex items-start gap-3">
+            <div class="flex items-center gap-3">
                 ${
                   !hasImage
                     ? `
-                <button id="open-input-options-btn" class="flex-shrink-0 p-2 bg-gray-800 hover:bg-gray-700 text-white rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 h-[48px] w-[48px] flex items-center justify-center" ${
+                <button id="open-input-options-btn" class="flex-shrink-0 bg-gray-700 hover:bg-gray-600 text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 h-[44px] w-[44px] flex items-center justify-center" ${
                   isWaitingForResponse ? "disabled" : ""
-                }>
-                   <i data-lucide="plus" class="w-5 h-5"></i>
+                }> 
+                   <i data-lucide="plus" class="w-5 h-5 pointer-events-none"></i>
                 </button>
                 `
                     : ""
                 }
-                <div class="flex-1">
-                    ${
-                      app.state.stickerToSend
-                        ? `
-                        <div class="mb-2 p-2 bg-gray-700 rounded-lg flex items-center gap-2 text-sm text-gray-300">
-                            <img src="${app.state.stickerToSend.data}" alt="${
-                              app.state.stickerToSend.stickerName
-                            }" class="w-6 h-6 rounded object-cover">
-                            <span>${t("mainChat.stickerLabel")}${
-                              app.state.stickerToSend.stickerName
-                            }</span>
-                            <button id="remove-sticker-to-send-btn" class="ml-auto text-gray-400 hover:text-white">
-                                <i data-lucide="x" class="w-3 h-3"></i>
-                            </button>
-                        </div>
-                    `
-                        : ""
-                    }
-                    <div class="relative">
-                        <textarea id="new-message-input" placeholder="${
-                          hasImage
-                            ? t("mainChat.addCaption")
-                            : app.state.stickerToSend
-                              ? t("mainChat.stickerMessagePlaceholder")
-                              : t("mainChat.messagePlaceholder")
-                        }" class="w-full pl-4 pr-24 py-3 bg-gray-800 text-white rounded-2xl border border-gray-700 resize-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 transition-all duration-200 text-sm placeholder-gray-500" rows="1" style="min-height: 48px; max-height: 120px;" ${
-                          isWaitingForResponse ? "disabled" : ""
-                        }></textarea>
-                        <div class="absolute right-3 flex items-center gap-2" style="top: 50%; transform: translateY(-50%);">
-                            <button id="sticker-btn" 
-                                class="flex-shrink-0 p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-full transition-all duration-200 w-9 h-9 flex items-center justify-center"
-                                ${isWaitingForResponse ? "disabled" : ""}>
-                                <i data-lucide="smile" class="w-4 h-4 pointer-events-none"></i>
-                            </button>
-                            <button id="send-message-btn" 
-                                class="flex-shrink-0 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 w-9 h-9 flex items-center justify-center"
-                                ${isWaitingForResponse ? "disabled" : ""}>
-                                <i data-lucide="send" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                        ${
-                          app.state.showUserStickerPanel
-                            ? renderUserStickerPanel(app)
-                            : ""
-                        }
-                    </div>
-                </div>
+                <textarea id="new-message-input" placeholder="${
+                  hasImage
+                    ? t("mainChat.addCaption")
+                    : stickerToSend
+                      ? t("mainChat.stickerMessagePlaceholder")
+                      : t("mainChat.messagePlaceholder")
+                }" class="relative flex-1 self-center pl-5 pr-5 py-3 bg-gray-700 text-white rounded-full border border-transparent focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 transition-all duration-200 text-sm placeholder-gray-500 resize-none" rows="1" style="min-height: 44px; max-height: 120px;" ${
+                  isWaitingForResponse ? "disabled" : ""
+                }>${app.state.currentMessage || ""}</textarea>
+                <button id="sticker-btn"
+                    class="flex-shrink-0 bg-gray-700 hover:bg-gray-600 text-white rounded-full transition-all duration-200 w-[44px] h-[44px] flex items-center justify-center"
+                    ${isWaitingForResponse ? "disabled" : ""}>
+                    <i data-lucide="smile" class="w-5 h-5 pointer-events-none"></i>
+                </button>
+                <button id="send-message-btn"
+                    class="flex-shrink-0 bg-blue-600 hover:bg-blue-700 text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 w-[44px] h-[44px] flex items-center justify-center"
+                    ${isWaitingForResponse ? "disabled" : ""}>
+                    <i data-lucide="send" class="w-5 h-5"></i>
+                </button>
             </div>
+            ${app.state.showUserStickerPanel ? renderUserStickerPanel(app) : ""}
         </div>
     `;
 }
@@ -115,7 +111,7 @@ function renderUserStickerPanel(app) {
   const currentSize = app.calculateUserStickerSize();
 
   return `
-        <div class="absolute bottom-full left-0 mb-2 w-80 bg-gray-800 rounded-xl shadow-lg border border-gray-700 animate-fadeIn">
+        <div class="absolute bottom-full right-0 z-20 mb-2 w-80 rounded-xl shadow-lg border border-gray-700 animate-fadeIn floating-panel">
             <div class="p-3 border-b border-gray-700 flex items-center justify-between">
                 <h3 class="text-sm font-medium text-white">${t(
                   "mainChat.personaStickers",
@@ -185,18 +181,18 @@ function renderUserStickerPanel(app) {
                                   name: sticker.name,
                                   data: sticker.data,
                                   type: sticker.type || "image/png",
-                                })}' 
+                                })}'
                                     class="user-sticker-send-btn w-full aspect-square bg-gray-700 rounded-lg overflow-hidden hover:bg-gray-600 transition-colors">
                                     ${content}
                                 </button>
                                 <div class="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                                    <button data-sticker-edit="${sticker.id}" 
+                                    <button data-sticker-edit="${sticker.id}"
                                         class="sticker-edit-btn w-5 h-5 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center text-xs" title="${t(
                                           "characterModal.editStickerName",
                                         )}">
                                         <i data-lucide="edit-3" class="w-2 h-2"></i>
                                     </button>
-                                    <button data-sticker-delete="${sticker.id}" 
+                                    <button data-sticker-delete="${sticker.id}"
                                         class="sticker-delete-btn w-5 h-5 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center text-xs" title="${t(
                                           "characterModal.deleteSticker",
                                         )}">
@@ -403,9 +399,7 @@ function renderMessages(app) {
           }
 
           if (textContent.trim()) {
-            const textHtml = `<div class="px-4 py-2 rounded-2xl text-sm md:text-base leading-relaxed ${
-              msg.isMe ? "bg-blue-600 text-white" : "bg-gray-700 text-gray-100"
-            } mb-2"><div class="break-words">${textContent}</div></div>`;
+            const textHtml = `<div class="px-4 py-2 rounded-2xl text-sm md:text-base leading-relaxed ${msg.isMe ? "text-white" : "text-gray-100"} mb-2 ${msg.isMe ? "message-bubble-me" : "message-bubble-them"}"><div class="break-words">${textContent}</div></div>`;
             messageBodyHtml = `<div class="flex flex-col ${
               msg.isMe ? "items-end" : "items-start"
             }">${textHtml}${stickerHtml}</div>`;
@@ -439,17 +433,13 @@ function renderMessages(app) {
         : "max-height: 320px;";
       const imageTag = `<div class="sticker-toggle-btn inline-block cursor-pointer transition-all duration-300" data-message-id="${msg.id}"><img src="${imageUrl}" class="${sizeClass} rounded-lg object-cover" style="${heightStyle}"></div>`;
       const captionTag = msg.content
-        ? `<div class="mt-2 px-4 py-2 rounded-2xl text-sm md:text-base leading-relaxed inline-block ${
-            msg.isMe ? "bg-blue-600 text-white" : "bg-gray-700 text-gray-100"
-          }"><div class="break-words">${msg.content}</div></div>`
+        ? `<div class="mt-2 px-4 py-2 rounded-2xl text-sm md:text-base leading-relaxed inline-block ${msg.isMe ? "text-white" : "text-gray-100"} ${msg.isMe ? "message-bubble-me" : "message-bubble-them"}"><div class="break-words">${msg.content}</div></div>`
         : "";
       messageBodyHtml = `<div class="flex flex-col ${
         msg.isMe ? "items-end" : "items-start"
       }">${imageTag}${captionTag}</div>`;
     } else {
-      messageBodyHtml = `<div class="px-4 py-2 rounded-2xl text-sm md:text-base leading-relaxed ${
-        msg.isMe ? "bg-blue-600 text-white" : "bg-gray-700 text-gray-100"
-      }"><div class="break-words">${msg.content}</div></div>`;
+      messageBodyHtml = `<div class="px-4 py-2 rounded-2xl text-sm md:text-base leading-relaxed ${msg.isMe ? "text-white" : "text-gray-100"} ${msg.isMe ? "message-bubble-me" : "message-bubble-them"}"><div class="break-words">${msg.content}</div></div>`;
     }
 
     let actionButtonsHtml = "";
@@ -485,9 +475,7 @@ function renderMessages(app) {
     }
 
     html += `
-                <div class="group flex w-full items-start gap-3 ${
-                  needsAnimation ? "animate-slideUp" : ""
-                } ${msg.isMe ? "flex-row-reverse" : ""}">
+                <div class="group flex w-full items-start gap-3  ${msg.isMe ? "flex-row-reverse" : ""}">
                     ${
                       !msg.isMe
                         ? `<div class="shrink-0 w-10 h-10 mt-1">${
@@ -497,7 +485,7 @@ function renderMessages(app) {
                           }</div>`
                         : ""
                     }
-                    <div class="flex flex-col max-w-[85%] sm:max-w-[75%] ${
+                    <div class="flex flex-col ${msg.isMe ? "max-w-[85%] sm:max-w-[75%]" : "max-w-[70%] sm:max-w-[75%]"} ${
                       msg.isMe ? "items-end" : "items-start"
                     }">
                         ${
@@ -592,20 +580,20 @@ export function renderMainChat(app) {
       .filter(Boolean);
 
     mainChat.innerHTML = `
-            <header class="p-4 bg-gray-900/80 border-b border-gray-800 glass-effect flex items-center justify-between z-10">
-                <div class="flex items-center space-x-2 md:space-x-4">
-                    <button id="mobile-sidebar-toggle" class="p-2 -ml-2 rounded-full hover:bg-gray-700 md:hidden">
-                        <i data-lucide="menu" class="h-5 w-5 text-gray-300"></i>
+            <header class="px-4 py-4 bg-gray-900/80 border-b border-gray-800 glass-effect flex items-center justify-between z-10">
+                <div class="flex items-center space-x-3 md:space-x-4">
+                    <button id="mobile-sidebar-toggle" class="p-3 -ml-2 rounded-full hover:bg-gray-700 md:hidden">
+                        <i data-lucide="menu" class="h-6 w-6 text-gray-300"></i>
                     </button>
-                    <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
-                        <i data-lucide="globe" class="w-6 h-6 text-white"></i>
+                    <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <i data-lucide="globe" class="w-7 h-7 text-white"></i>
                     </div>
                     <div>
-                        <h2 class="font-semibold text-white text-base md:text-lg">${
+                        <h2 class="font-semibold text-white text-lg leading-tight">${
                           selectedOpenChat.name
                         }</h2>
-                        <p class="text-xs md:text-sm text-gray-400 flex items-center">
-                            <i data-lucide="globe" class="w-3 h-3 mr-1.5"></i>
+                        <p class="text-sm text-gray-400 flex items-center">
+                            <i data-lucide="globe" class="w-4 h-4 mr-1.5"></i>
                             ${t("mainChat.participantsConnected").replace(
                               "{{count}}",
                               currentParticipants.length,
@@ -617,19 +605,19 @@ export function renderMainChat(app) {
                         </p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-1 md:space-x-2">
-                    <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="phone" class="w-4 h-4 text-gray-300"></i></button>
-                    <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="video" class="w-4 h-4 text-gray-300"></i></button>
-                    <button class="chat-debug-logs-btn p-2 rounded-full bg-gray-800 hover:bg-gray-700" title="${t(
+                <div class="flex items-center space-x-4 md:space-x-4">
+                    <button class="p-3 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="phone" class="w-6 h-6 text-gray-300"></i></button>
+                    <button class="p-3 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="video" class="w-6 h-6 text-gray-300"></i></button>
+                    <button class="chat-debug-logs-btn p-3 rounded-full bg-gray-800 hover:bg-gray-700" title="${t(
                       "mainChat.debugLogButtonTitle",
-                    )}"><i data-lucide="bar-chart-3" class="w-4 h-4 text-gray-300 pointer-events-none"></i></button>
+                    )}"><i data-lucide="bar-chart-3" class="w-6 h-6 text-gray-300 pointer-events-none"></i></button>
                 </div>
             </header>
             <div id="messages-container" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
                 ${renderMessages(app)}
                 <div id="messages-end-ref"></div>
             </div>
-            <div class="p-4 bg-gray-900 border-t border-gray-800">
+            <div id="input-area-wrapper" class="px-4 pb-4 glass-effect experimental-input-parent">
                 ${renderInputArea(app)}
             </div>
         `;
@@ -639,20 +627,20 @@ export function renderMainChat(app) {
     const participantNames = participants.map((char) => char.name).join(", ");
 
     mainChat.innerHTML = `
-            <header class="p-4 bg-gray-900/80 border-b border-gray-800 glass-effect flex items-center justify-between z-10">
-                <div class="flex items-center space-x-2 md:space-x-4">
-                    <button id="mobile-sidebar-toggle" class="p-2 -ml-2 rounded-full hover:bg-gray-700 md:hidden">
-                        <i data-lucide="menu" class="h-5 w-5 text-gray-300"></i>
+            <header class="px-4 py-4 bg-gray-900/80 border-b border-gray-800 glass-effect flex items-center justify-between z-10">
+                <div class="flex items-center space-x-3 md:space-x-4">
+                    <button id="mobile-sidebar-toggle" class="p-3 -ml-2 rounded-full hover:bg-gray-700 md:hidden">
+                        <i data-lucide="menu" class="h-6 w-6 text-gray-300"></i>
                     </button>
-                    <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center">
-                        <i data-lucide="users" class="w-6 h-6 text-white"></i>
+                    <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center">
+                        <i data-lucide="users" class="w-7 h-7 text-white"></i>
                     </div>
                     <div>
-                        <h2 class="font-semibold text-white text-base md:text-lg">${
+                        <h2 class="font-semibold text-white text-lg leading-tight">${
                           selectedGroupChat.name
                         }</h2>
-                        <p class="text-xs md:text-sm text-gray-400 flex items-center">
-                            <i data-lucide="users" class="w-3 h-3 mr-1.5"></i>
+                        <p class="text-sm text-gray-400 flex items-center">
+                            <i data-lucide="users" class="w-4 h-4 mr-1.5"></i>
                             ${t("mainChat.participantsJoined").replace(
                               "{{count}}",
                               participants.length,
@@ -662,72 +650,57 @@ export function renderMainChat(app) {
                         </p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-1 md:space-x-2">
-                    <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="phone" class="w-4 h-4 text-gray-300"></i></button>
-                    <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="video" class="w-4 h-4 text-gray-300"></i></button>
-                    <button class="chat-debug-logs-btn p-2 rounded-full bg-gray-800 hover:bg-gray-700" title="${t(
+                <div class="flex items-center space-x-4 md:space-x-4">
+                    <button class="p-3 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="phone" class="w-6 h-6 text-gray-300"></i></button>
+                    <button class="p-3 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="video" class="w-6 h-6 text-gray-300"></i></button>
+                    <button class="chat-debug-logs-btn p-3 rounded-full bg-gray-800 hover:bg-gray-700" title="${t(
                       "mainChat.debugLogButtonTitle",
-                    )}"><i data-lucide="bar-chart-3" class="w-4 h-4 text-gray-300 pointer-events-none"></i></button>
+                    )}"><i data-lucide="bar-chart-3" class="w-6 h-6 text-gray-300 pointer-events-none"></i></button>
                 </div>
             </header>
             <div id="messages-container" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
                 ${renderMessages(app)}
                 <div id="messages-end-ref"></div>
             </div>
-            <div class="p-4 bg-gray-900 border-t border-gray-800">
+            <div id="input-area-wrapper" class="px-4 pb-4 glass-effect experimental-input-parent">
                 ${renderInputArea(app)}
             </div>
         `;
   } else if (selectedChatRoom && selectedChat) {
     mainChat.innerHTML = `
-            <header class="p-4 bg-gray-900/80 border-b border-gray-800 glass-effect flex items-center justify-between z-10">
-                <div class="flex items-center space-x-2 md:space-x-4">
-                    <button id="mobile-sidebar-toggle" class="p-2 -ml-2 rounded-full hover:bg-gray-700 md:hidden">
-                        <i data-lucide="menu" class="h-5 w-5 text-gray-300"></i>
+            <header class="px-4 py-4 bg-gray-900/80 border-b border-gray-800 glass-effect flex items-center justify-between z-10">
+                <div class="flex items-center space-x-3 md:space-x-4">
+                    <button id="back-to-char-list" class="p-3 -ml-2 rounded-full hover:bg-gray-700 md:hidden">
+                        <i data-lucide="arrow-left" class="h-6 w-6 text-gray-300"></i>
                     </button>
                     ${renderAvatar(selectedChat, "sm")}
                     <div>
-                        <h2 class="font-semibold text-white text-base md:text-lg">${
+                        <h2 class="font-semibold text-white text-lg leading-tight">${
                           selectedChat.name
                         }</h2>
-                        <p class="text-xs md:text-sm text-gray-400 flex items-center"><i data-lucide="message-circle" class="w-3 h-3 mr-1.5"></i>${
+                        <p class="text-sm text-gray-400 flex items-center"><i data-lucide="message-circle" class="w-4 h-4 mr-1.5"></i>${
                           selectedChatRoom.name
                         }</p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-1 md:space-x-2">
-                    <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="phone" class="w-4 h-4 text-gray-300"></i></button>
-                    <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="video" class="w-4 h-4 text-gray-300"></i></button>
-                    <button class="chat-debug-logs-btn p-2 rounded-full bg-gray-800 hover:bg-gray-700" title="${t(
+                <div class="flex items-center space-x-4 md:space-x-4">
+                    <button class="p-3 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="phone" class="w-6 h-6 text-gray-300"></i></button>
+                    <button class="p-3 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="video" class="w-6 h-6 text-gray-300"></i></button>
+                    <button class="chat-debug-logs-btn p-3 rounded-full bg-gray-800 hover:bg-gray-700" title="${t(
                       "mainChat.debugLogButtonTitle",
-                    )}"><i data-lucide="bar-chart-3" class="w-4 h-4 text-gray-300 pointer-events-none"></i></button>
+                    )}"><i data-lucide="bar-chart-3" class="w-6 h-6 text-gray-300 pointer-events-none"></i></button>
                 </div>
             </header>
             <div id="messages-container" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
                 ${renderMessages(app)}
                 <div id="messages-end-ref"></div>
             </div>
-            <div class="p-4 bg-gray-900 border-t border-gray-800">
+            <div id="input-area-wrapper" class="px-4 pb-4 glass-effect experimental-input-parent">
                 ${renderInputArea(app)}
             </div>
         `;
   } else {
-    mainChat.innerHTML = `
-            <div class="flex-1 flex items-center justify-center text-center p-4">
-                <button id="mobile-sidebar-toggle" class="absolute top-4 left-4 p-2 rounded-full hover:bg-gray-700 md:hidden">
-                    <i data-lucide="menu" class="h-5 w-5 text-gray-300"></i>
-                </button>
-                <div>
-                    <div class="w-20 h-20 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full flex items-center justify-center mx-auto mb-6"><i data-lucide="bot" class="w-10 h-10 text-white"></i></div>
-                    <h3 class="text-xl md:text-2xl font-semibold text-white mb-3">${t(
-                      "mainChat.selectCharacter",
-                    )}</h3>
-                    <p class="text-sm md:text-base text-gray-400 leading-relaxed">${t(
-                      "mainChat.selectCharacterPrompt",
-                    )}</p>
-                </div>
-            </div>
-        `;
+    mainChat.innerHTML = renderLandingPage();
   }
 }
 
@@ -736,6 +709,15 @@ export function renderMainChat(app) {
  * 관심사 분리 원칙에 따라 이벤트 핸들링을 별도 함수로 분리
  */
 export function setupMainChatEventListeners() {
+  setupLandingPageEventListeners();
+
+  const backBtn = document.getElementById("back-to-char-list");
+  if (backBtn) {
+    backBtn.addEventListener("click", () => {
+      window.personaApp.setState({ selectedChatId: null });
+    });
+  }
+
   // Remove sticker to send button
   const removeStickerBtn = document.getElementById(
     "remove-sticker-to-send-btn",

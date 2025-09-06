@@ -24,7 +24,7 @@ const prodOnlyPlugin = [
         }
     })
 ]
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
     server: {
         open: "index.html",
     },
@@ -35,6 +35,6 @@ export default defineConfig({
     clearScreen: false,
     publicDir: "static",
     plugins: [
-        prodOnlyPlugin
+        ...(mode === 'production' ? prodOnlyPlugin : [])
     ]
-});
+}));

@@ -1,4 +1,4 @@
-import { renderProviderConfig } from "../../MobileSettingsModal.js";
+import { renderProviderConfig } from "../../MobileSettingsUI.js";
 import {
   PROVIDERS,
   PROVIDER_MODELS,

@@ -1,4 +1,8 @@
-import { buildContentPrompt, buildProfilePrompt, buildCharacterSheetPrompt } from "../prompts/builder/promptBuilder.js";
+import {
+  buildContentPrompt,
+  buildProfilePrompt,
+  buildCharacterSheetPrompt,
+} from "../prompts/builder/promptBuilder.js";
 import { t } from "../i18n.js";
 
 export class CustomOpenAIClient {
@@ -58,9 +62,9 @@ export class CustomOpenAIClient {
       forceSummary,
     });
 
-    const messages = contents.map(c => ({
-      role: c.role === 'model' ? 'assistant' : c.role,
-      content: c.parts.map(p => p.text).join('')
+    const messages = contents.map((c) => ({
+      role: c.role === "model" ? "assistant" : c.role,
+      content: c.parts.map((p) => p.text).join(""),
     }));
 
     messages.unshift({ role: "system", content: systemPrompt });
@@ -214,7 +218,7 @@ export class CustomOpenAIClient {
   async generateCharacterSheet({
     characterName,
     characterDescription,
-    characterSheetPrompt
+    characterSheetPrompt,
   }) {
     const { systemPrompt, contents } = await buildCharacterSheetPrompt({
       characterName,
@@ -224,10 +228,10 @@ export class CustomOpenAIClient {
 
     const messages = [
       { role: "system", content: systemPrompt },
-      ...contents.map(content => ({
+      ...contents.map((content) => ({
         role: content.role === "model" ? "assistant" : content.role,
-        content: content.parts.map(part => part.text).join("")
-      }))
+        content: content.parts.map((part) => part.text).join(""),
+      })),
     ];
 
     const payload = {
@@ -242,7 +246,7 @@ export class CustomOpenAIClient {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${this.apiKey}`,
+          Authorization: `Bearer ${this.apiKey}`,
         },
         body: JSON.stringify(payload),
       });
@@ -251,7 +255,8 @@ export class CustomOpenAIClient {
 
       if (!response.ok) {
         console.error("Character Sheet Gen API Error:", data);
-        const errorMessage = data?.error?.message ||
+        const errorMessage =
+          data?.error?.message ||
           t("api.requestFailed", { status: response.statusText });
         throw new Error(errorMessage);
       }
@@ -264,11 +269,14 @@ export class CustomOpenAIClient {
           reactionDelay: 1000,
         };
       } else {
-        throw new Error(t("api.profileNotGenerated", { reason: t("api.unknownReason") }));
+        throw new Error(
+          t("api.profileNotGenerated", { reason: t("api.unknownReason") }),
+        );
       }
     } catch (error) {
       console.error(
-        t("api.profileGenerationError", { provider: "Custom OpenAI" }) + " (Character Sheet)",
+        t("api.profileGenerationError", { provider: "Custom OpenAI" }) +
+          " (Character Sheet)",
         error,
       );
       return { error: error.message };

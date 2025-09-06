@@ -1,4 +1,8 @@
-import { buildContentPrompt, buildProfilePrompt, buildCharacterSheetPrompt } from "../prompts/builder/promptBuilder.js";
+import {
+  buildContentPrompt,
+  buildProfilePrompt,
+  buildCharacterSheetPrompt,
+} from "../prompts/builder/promptBuilder.js";
 import { t } from "../i18n.js";
 
 const API_BASE_URL = "https://api.anthropic.com/v1";
@@ -23,7 +27,7 @@ export class ClaudeClient {
     isProactive = false,
     forceSummary = false,
   }) {
-    const { systemPrompt, contents } = await buildContentPrompt({
+    const { systemPrompt } = await buildContentPrompt({
       userName,
       userDescription,
       character,
@@ -33,12 +37,48 @@ export class ClaudeClient {
       forceSummary,
     });
 
-    const messages = contents.map(c => ({
-      role: c.role === 'model' ? 'assistant' : c.role,
-      content: c.parts.map(p => p.text).join('')
-    }));
+    const messages = [];
+    for (const msg of history) {
+      const role = msg.isMe ? "user" : "assistant";
+      let content = msg.content || "";
 
-    // for_update 라인 6918-6924: 요청 본문 구성
+      if (msg.isMe && msg.type === "image" && msg.imageId) {
+        const imageData = character?.media?.find((m) => m.id === msg.imageId);
+        if (imageData) {
+          content = [
+            { type: "text", text: content || t("api.imageMessage") },
+            {
+              type: "image",
+              source: {
+                type: "base64",
+                media_type: imageData.mimeType || "image/jpeg",
+                data: imageData.dataUrl.split(",")[1],
+              },
+            },
+          ];
+        } else {
+          content = content || t("api.imageUnavailable");
+        }
+      } else if (msg.isMe && msg.type === "sticker" && msg.stickerData) {
+        const stickerName =
+          msg.stickerData.stickerName || t("api.unknownSticker");
+        content = `${t("api.stickerMessage", { stickerName: stickerName })}${
+          content ? ` ${content}` : ""
+        }`;
+      }
+
+      if (content) {
+        messages.push({ role, content });
+      }
+    }
+
+    if (isProactive && messages.length === 0) {
+      messages.push({
+        role: "user",
+        content: "(SYSTEM: You are starting this conversation. Please begin.)",
+      });
+    }
+
     const requestBody = {
       model: this.model,
       max_tokens: this.maxTokens,
@@ -48,7 +88,6 @@ export class ClaudeClient {
     };
 
     try {
-      // for_update 라인 6927-6936: API 호출
       const response = await fetch(`${this.baseUrl}/messages`, {
         method: "POST",
         headers: {
@@ -73,7 +112,6 @@ export class ClaudeClient {
 
       const data = await response.json();
 
-      // for_update 라인 6945-6960: 응답 처리
       if (data.content && data.content.length > 0) {
         const textContent = data.content[0].text;
 
@@ -180,7 +218,7 @@ export class ClaudeClient {
   async generateCharacterSheet({
     characterName,
     characterDescription,
-    characterSheetPrompt
+    characterSheetPrompt,
   }) {
     const { systemPrompt, contents } = buildCharacterSheetPrompt({
       characterName,
@@ -193,10 +231,10 @@ export class ClaudeClient {
       max_tokens: this.profileMaxOutputTokens,
       temperature: this.profileTemperature,
       system: systemPrompt,
-      messages: contents.map(content => ({
+      messages: contents.map((content) => ({
         role: content.role === "model" ? "assistant" : content.role,
-        content: content.parts.map(part => part.text).join("")
-      }))
+        content: content.parts.map((part) => part.text).join(""),
+      })),
     };
 
     try {
@@ -214,24 +252,33 @@ export class ClaudeClient {
 
       if (!response.ok) {
         console.error("Character Sheet Gen API Error:", data);
-        const errorMessage = data?.error?.message ||
+        const errorMessage =
+          data?.error?.message ||
           t("api.requestFailed", { status: response.statusText });
         throw new Error(errorMessage);
       }
 
       if (data.content && data.content.length > 0) {
-        const responseText = data.content.map(item => item.text).join("").trim();
+        const responseText = data.content
+          .map((item) => item.text)
+          .join("")
+          .trim();
 
         return {
           messages: [{ content: responseText }],
           reactionDelay: 1000,
         };
       } else {
-        throw new Error(t("api.profileNotGenerated", { reason: data.stop_reason || t("api.unknownReason") }));
+        throw new Error(
+          t("api.profileNotGenerated", {
+            reason: data.stop_reason || t("api.unknownReason"),
+          }),
+        );
       }
     } catch (error) {
       console.error(
-        t("api.profileGenerationError", { provider: "Claude" }) + " (Character Sheet)",
+        t("api.profileGenerationError", { provider: "Claude" }) +
+          " (Character Sheet)",
         error,
       );
       return { error: error.message };
