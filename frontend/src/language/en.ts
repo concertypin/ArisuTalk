@@ -77,6 +77,10 @@ export const en: LanguageStrings = {
       "Final confirmation: Do you want to delete all data?",
     resetDataComplete: "All data has been reset. The page will refresh.",
     resetDataFailed: "Failed to reset data: ",
+    restoreSnapshotConfirm:
+      "Are you sure you want to restore this snapshot? Current settings will be overwritten.",
+    deleteSnapshotConfirm:
+      "Are you sure you want to delete this snapshot? This action cannot be undone.",
   },
   mainChat: {
     uploadPhoto: "Upload Photo",
@@ -116,17 +120,22 @@ export const en: LanguageStrings = {
     groupChatContext: "## Group Chat Context",
     openChatContext: "## Open Chat Context",
     resetToDefault: "Reset to Default",
-    randomFirstMessagePrompt: "Random First Message Character Generation Prompt",
+    randomFirstMessagePrompt:
+      "Random First Message Character Generation Prompt",
     profileCreationRules: "# Profile Creation Rules",
     characterSheetGenerationRules: "# Character Sheet Generation Rules",
     backupPrompts: "Backup Prompts",
     restorePrompts: "Restore Prompts",
     characterSheetGenerationPrompt: "AI Character Sheet Generation Prompt",
-    characterSheetGenerationPromptDescription: "This prompt is used when generating a new character sheet.",
-    mainChatPromptDescription: "This prompt is used in main chat conversations. It will guide the AI's behavior and response style.",
-    randomFirstMessagePromptDescription: "This prompt is used when generating a new first message.",
+    characterSheetGenerationPromptDescription:
+      "This prompt is used when generating a new character sheet.",
+    mainChatPromptDescription:
+      "This prompt is used in main chat conversations. It will guide the AI's behavior and response style.",
+    randomFirstMessagePromptDescription:
+      "This prompt is used when generating a new first message.",
     resetAllPrompts: "Reset All Prompts",
-    resetAllPromptsConfirmation: "Are you really sure you want to reset all prompts? This action cannot be undone.",
+    resetAllPromptsConfirmation:
+      "Are you really sure you want to reset all prompts? This action cannot be undone.",
     restoreFailed: "Failed to restore prompts: ",
   },
   settings: {
@@ -135,6 +144,7 @@ export const en: LanguageStrings = {
     noSnapshots: "No saved snapshots.",
     title: "Settings",
     aiSettings: "AI Settings",
+    scaleSettings: "Scale Settings",
     advancedSettings: "Advanced Settings",
     apiKey: "API Key",
     apiKeyPlaceholder: "Enter your API key",
@@ -221,6 +231,8 @@ export const en: LanguageStrings = {
     performanceComingSoon:
       "Performance optimization options will be supported in future updates.",
     experimentalFeatures: "Experimental Features",
+    useNewInputBar: "New Input Bar Design",
+    useNewInputBarDesc: "Uses a rounded, floating input bar design.",
     experimentalWarning:
       "Experimental features may be unstable and cause unexpected behavior.",
     warningNote: "Warning",
@@ -274,6 +286,8 @@ export const en: LanguageStrings = {
       stickerData: "Sticker data",
       debugLogs: "Debug logs",
     },
+    uiSizePreviewMessage1: "Hello! I'll help you adjust the UI size.",
+    uiSizePreviewMessage2: "Yes, the preview is nice!",
   },
   sidebar: {
     startNewChat: "Start a new chat",
@@ -467,6 +481,23 @@ export const en: LanguageStrings = {
     resetPromptCompleteTitle: "Reset Complete",
     resetPromptCompleteMessage:
       '"{{promptName}}" has been reset to default values.',
+    selectChat: {
+      message: "Select a chat room to continue the conversation.",
+      newChat: "New Chat",
+    },
+    characterCardSaveError: {
+        message: "Failed to save character card."
+    },
+    character_name_required_title: "Name required",
+    character_name_required_message: "Please enter a character name first.",
+    aiGenerationComplete: {
+        title: "AI Generation Complete",
+        message: "Successfully generated details for character \"{{characterName}}\""
+    },
+    generationFailed: {
+        title: "Generation Failed",
+        message: "An error occurred during character generation: {{errorMessage}}"
+    }
   },
   ui: {
     discardChanges: "Discard Changes",
@@ -486,8 +517,12 @@ export const en: LanguageStrings = {
     fileProcessingError: "File processing error:",
     fileProcessingAlert: "An error occurred while processing the file.",
     fileSizeExceeded: "File Size Exceeded",
+    fileSizeExceededMessage: "'{{fileName}}' is too large. (Max {{sizeLimit}})",
     unsupportedFormat: "Unsupported Format",
+    unsupportedFormatMessage: "'{{fileName}}' is not a supported file format.",
     stickerProcessingError: "Sticker Processing Error",
+    stickerProcessingErrorConsole: "Sticker processing error: {{fileName}}",
+    stickerProcessingErrorMessage: "An error occurred while processing '{{fileName}}'.",
     storageFull: "Storage Full",
     storageFullMessage: "Not enough storage space.",
     groupChatNamePlaceholder: "Enter group chat name",
@@ -629,6 +664,14 @@ export const en: LanguageStrings = {
     storageFullMessage: "Not enough storage space.",
     selectModeDeselect: "Deselect<br>Mode",
     selectModeSelect: "Select<br>Mode",
+    selectAll: "Select<br>All",
+  },
+  landing: {
+    welcomeTitle: "Welcome to ArisuTalk",
+    welcomeMessage:
+      "This is a space where you can freely chat with your own AI characters. Select a character from the sidebar or create a new one to start a conversation.",
+    newCharacterButton: "New Character",
+    selectCharacterButton: "Select Character",
   },
   security: {
     masterPasswordPlaceholder: "Enter a secure master password",
@@ -642,35 +685,48 @@ export const en: LanguageStrings = {
       "Password must contain at least 3 of the following: uppercase, lowercase, numbers, special characters.",
     passwordStrong: "Strong password.",
     encryptionSetupTitle: "API Key Encryption Setup",
-    encryptionSetupDescription: "Set up encryption to securely protect your API keys.",
+    encryptionSetupDescription:
+      "Set up encryption to securely protect your API keys.",
     whyEncryptionIsNeeded: "Why is encryption needed?",
-    encryptionBenefit1: "• API keys are not exposed in plain text in the browser",
+    encryptionBenefit1:
+      "• API keys are not exposed in plain text in the browser",
     encryptionBenefit2: "• Protects API keys from malicious extensions",
     encryptionBenefit3: "• Securely protects API keys from XSS attacks",
     masterPasswordLabel: "Master Password",
     confirmPasswordLabel: "Confirm Password",
     passwordHintLabel: "Password Hint (optional)",
-    passwordHintWarning: "The hint is not encrypted, so do not include the password itself.",
+    passwordHintWarning:
+      "The hint is not encrypted, so do not include the password itself.",
     generateSecurePassword: "Generate a secure password automatically",
     setupEncryption: "Setup Encryption",
     enterMasterPassword: "Please enter a master password.",
     passwordsDoNotMatch: "Passwords do not match.",
     encryptionEnabledSuccess: "API key encryption has been enabled!",
-    generatedPasswordMessage: "Generated Master Password:\n\n${password}\n\nPlease save this password in a safe place!",
+    generatedPasswordMessage:
+      "Generated Master Password:\n\n${password}\n\nPlease save this password in a safe place!",
     passwordStrength: {
       veryWeak: "Very Weak",
       weak: "Weak",
       medium: "Medium",
       strong: "Strong",
-      label: "Password Strength: "
-    }
+      label: "Password Strength: ",
+    },
   },
   secureStorage: {
     autoGeneratedHint: "Auto-generated for security",
     setupEncryptionFailed: "Failed to setup encryption.",
-    noMasterPasswordForEncryption: "No master password available for encryption",
+    noMasterPasswordForEncryption:
+      "No master password available for encryption",
     saveApiConfigsFailed: "Failed to save API settings.",
-    noMasterPasswordForDecryption: "No master password available for decryption",
+    noMasterPasswordForDecryption:
+      "No master password available for decryption",
     loadApiConfigsFailed: "Failed to load encrypted API configs:",
   },
+  search: {
+    prompt: "Search for characters by name.",
+    noResults: "No characters found.",
+  },
+  generatingStatus: {
+    generating: "Generating..."
+  }
 };

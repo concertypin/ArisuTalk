@@ -1,4 +1,5 @@
 import { t } from "../i18n.js";
+import { formatTimestamp } from "../utils.js";
 
 import { renderAvatar } from "./Avatar.js";
 import {
@@ -7,9 +8,41 @@ import {
   renderEditGroupChatModal,
 } from "./GroupChat.js";
 
+/**
+ * Calculates and applies the correct horizontal position for the tree-like connector lines.
+ * It uses a CSS variable to dynamically style the lines based on the avatar's position.
+ * @param {number | string} characterId - The ID of the character whose tree line needs updating.
+ */
+function updateTreeLine(characterId) {
+  const characterGroup = document.querySelector(
+    `.character-group[data-id='${characterId}']`,
+  );
+  if (!characterGroup) return;
+
+  const avatar = characterGroup.querySelector(".character-avatar");
+
+  if (!avatar) {
+    characterGroup.style.removeProperty("--tree-trunk-left");
+    return;
+  }
+
+  const groupRect = characterGroup.getBoundingClientRect();
+  const avatarRect = avatar.getBoundingClientRect();
+
+  // Alignment: Calculate the avatar center and apply a small manual correction based on screenshot visuals.
+  const alignmentCorrection = -2; // Nudge 2px to the left
+  const trunkLeft =
+    avatarRect.left -
+    groupRect.left +
+    avatarRect.width / 2 +
+    alignmentCorrection;
+
+  characterGroup.style.setProperty("--tree-trunk-left", `${trunkLeft}px`);
+}
+
 function renderCharacterItem(app, char) {
   const chatRooms = app.state.chatRooms[char.id] || [];
-  const isExpanded = app.state.expandedCharacterId === Number(char.id);
+  const isExpanded = app.state.expandedCharacterIds.has(Number(char.id));
 
   let lastMessage = null;
   let totalUnreadCount = 0;
@@ -36,7 +69,7 @@ function renderCharacterItem(app, char) {
   }
 
   return `
-        <div class="character-group">
+        <div class="character-group ${isExpanded ? "is-expanded" : ""}" data-id="${char.id}">
             <div onclick="window.personaApp.toggleCharacterExpansion(${
               char.id
             })" class="character-header group p-3 md:p-4 rounded-xl cursor-pointer transition-all duration-200 relative hover:bg-gray-800/50">
@@ -63,8 +96,10 @@ function renderCharacterItem(app, char) {
                         <i data-lucide="trash-2" class="w-3 h-3"></i>
                     </button>
                 </div>
-                <div class="flex items-center space-x-3 md:space-x-4">
-                    ${renderAvatar(char, "md")}
+                <div class="flex items-center space-x-4 md:space-x-5">
+                    <div class="character-avatar relative">
+                         ${renderAvatar(char, "md")}
+                    </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center justify-between mb-1">
                             <h3 class="font-semibold text-white text-sm truncate">${
@@ -76,9 +111,9 @@ function renderCharacterItem(app, char) {
                                     ? `<span class="bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full leading-none">${totalUnreadCount}</span>`
                                     : ""
                                 }
-                                <span class="text-xs text-gray-500 shrink-0">${
-                                  lastMessage?.time || ""
-                                }</span>
+                                <span class="text-sm text-gray-500 shrink-0">${formatTimestamp(
+                                  lastMessage?.id,
+                                )}</span>
                                 <i data-lucide="chevron-${
                                   isExpanded ? "down" : "right"
                                 }" class="w-4 h-4 text-gray-400"></i>
@@ -98,7 +133,7 @@ function renderCharacterItem(app, char) {
             ${
               isExpanded
                 ? `
-                <div class="ml-6 space-y-1 pb-2">
+                <div class="ml-2 space-y-1 pb-2 chat-room-list">
                     ${chatRooms
                       .map((chatRoom) => renderChatRoomItem(app, chatRoom))
                       .join("")}
@@ -129,12 +164,12 @@ function renderChatRoomItem(app, chatRoom) {
   }
 
   const nameElement = isEditing
-    ? `<input type="text" 
+    ? `<input type="text"
                  id="chat-room-name-input-${chatRoom.id}"
-                 value="${chatRoom.name}" 
-                 class="flex-grow bg-gray-600 text-white rounded px-1 py-0 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" 
+                 value="${chatRoom.name}"
+                 class="flex-grow bg-gray-600 text-white rounded px-1 py-0 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                  onkeydown="window.personaApp.handleChatRoomNameKeydown(event, '${chatRoom.id}')"
-                 onclick="event.stopPropagation()" 
+                 onclick="event.stopPropagation()"
                  autofocus>`
     : `<h4 class="text-sm font-medium text-white truncate">${chatRoom.name}</h4>`;
 
@@ -175,14 +210,9 @@ function renderChatRoomItem(app, chatRoom) {
            </div>`;
 
   return `
-        <div class="chat-room-item group p-2 rounded-lg cursor-pointer transition-all duration-200 ${
-          isSelected ? "bg-blue-600" : "hover:bg-gray-700"
-        } relative">
-            <div onclick="${
-              isEditing
-                ? "event.stopPropagation()"
-                : `window.personaApp.selectChatRoom('${chatRoom.id}')`
-            }" class="flex items-center justify-between">
+    <div class="chat-room-list-item-wrapper">
+        <div onclick="${isEditing ? "" : `window.personaApp.selectChatRoom('${chatRoom.id}')`}" class="chat-room-item group p-2 rounded-lg cursor-pointer transition-all duration-200 w-full ${isSelected ? "bg-blue-600" : "hover:bg-gray-700"}">
+            <div class="flex items-center justify-between">
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between mb-1 gap-2">
                         ${nameElement}
@@ -191,33 +221,35 @@ function renderChatRoomItem(app, chatRoom) {
                     <p class="text-xs text-gray-400 truncate">${lastMessageContent}</p>
                 </div>
             </div>
-            <div class="absolute top-1 right-1 ${
-              isEditing ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-            } transition-opacity duration-200 flex items-center space-x-1">
+            <div class="mt-1 flex justify-end items-center space-x-1 ${isEditing ? "opacity-100" : "opacity-0 group-hover:opacity-100"} transition-opacity duration-200">
                 ${actionButtons}
             </div>
         </div>
+    </div>
     `;
 }
 
+/**
+ * Renders the entire sidebar, including the header, search, character list, and group/open chats.
+ * @param {object} app - The main application object.
+ */
 export function renderSidebar(app) {
-  const sidebar = document.getElementById("sidebar");
+  const appElement = document.getElementById("app");
+  if (appElement) {
+    if (app.state.sidebarCollapsed) {
+      appElement.classList.add("sidebar-collapsed");
+    } else {
+      appElement.classList.remove("sidebar-collapsed");
+    }
+  }
+
   const sidebarContent = document.getElementById("sidebar-content");
-  const backdrop = document.getElementById("sidebar-backdrop");
   const desktopToggle = document.getElementById("desktop-sidebar-toggle");
 
-  if (app.state.sidebarCollapsed) {
-    sidebar.classList.add("-translate-x-full", "md:w-0");
-    sidebar.classList.remove("translate-x-0", "md:w-80");
-    backdrop.classList.add("hidden");
-    if (desktopToggle)
-      desktopToggle.innerHTML = `<i data-lucide="chevron-right" class="w-5 h-5 text-gray-300"></i>`;
-  } else {
-    sidebar.classList.remove("-translate-x-full", "md:w-0");
-    sidebar.classList.add("translate-x-0", "md:w-80");
-    backdrop.classList.remove("hidden");
-    if (desktopToggle)
-      desktopToggle.innerHTML = `<i data-lucide="chevron-left" class="w-5 h-5 text-gray-300"></i>`;
+  if (desktopToggle) {
+    desktopToggle.innerHTML = app.state.sidebarCollapsed
+      ? `<i data-lucide="chevron-right" class="w-5 h-5 text-gray-300"></i>`
+      : `<i data-lucide="chevron-left" class="w-5 h-5 text-gray-300"></i>`;
   }
 
   const filteredCharacters = app.state.characters.filter((char) =>
@@ -264,4 +296,11 @@ export function renderSidebar(app) {
             </div>
         </div>
     `;
+
+  // After rendering, update the tree lines for all expanded characters
+  requestAnimationFrame(() => {
+    app.state.expandedCharacterIds.forEach((id) => {
+      updateTreeLine(id);
+    });
+  });
 }

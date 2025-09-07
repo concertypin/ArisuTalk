@@ -2,14 +2,17 @@
  * This module is responsible for building the prompts for the various API clients.
  * It uses the new promptManager to fetch ChatML prompts and then populates them with dynamic data.
  */
-import { getPrompt } from '../promptManager.ts';
-import { parseChatML, chatMLToPromptStructure } from '../../api/chatMLParser.js';
-import { parseMagicPatterns } from './magicPatternParser.ts';
+import { getPrompt } from "../promptManager.ts";
+import {
+  parseChatML,
+  chatMLToPromptStructure,
+} from "../../api/chatMLParser.js";
+import { parseMagicPatterns } from "./magicPatternParser.ts";
 
 /**
  * Populates a template with magic patterns.
  * It also makes the context safe by deep copying objects to avoid mutations.
- * 
+ *
  * @param {string} template - The string template with magic patterns.
  * @param {object} context - The context to be available in the sandbox.
  * @returns {Promise<string>} The populated string.
@@ -18,23 +21,25 @@ async function populateTemplate(template, context) {
   const defaultContext = {
     sessionStorage: window.sessionStorage,
     console: { log: console.log },
-  }
-  const allowed = { ...defaultContext }
+  };
+  const allowed = { ...defaultContext };
   for (const key in context) {
     try {
       // Merge primpitive context property with default context
-      if (context[key] === null || (typeof context[key] !== 'object' && typeof context[key] !== 'function')) {
+      if (
+        context[key] === null ||
+        (typeof context[key] !== "object" && typeof context[key] !== "function")
+      ) {
         allowed[key] = context[key];
       }
       //Functions can't be deepcopied, so we merge them directly
-      if (typeof context[key] === 'function') {
+      if (typeof context[key] === "function") {
         allowed[key] = context[key];
       }
       // Object values are deepcopied in the magic pattern parser
-      if (typeof context[key] === 'object' && context[key] !== null) {
+      if (typeof context[key] === "object" && context[key] !== null) {
         allowed[key] = structuredClone(context[key]);
       }
-
     } catch (e) {
       //fallback to JSON-copy value if deep copy fails
       allowed[key] = JSON.parse(JSON.stringify(context[key]));
@@ -42,7 +47,6 @@ async function populateTemplate(template, context) {
   }
   return await parseMagicPatterns(template, allowed);
 }
-
 
 /**
  * Builds the contents and system prompt for a content generation request.
@@ -61,11 +65,12 @@ export async function buildContentPrompt({
   character,
   history,
   isProactive = false,
-  forceSummary = false
+  forceSummary = false,
 }) {
-  const chatMLTemplate = await getPrompt('mainChat');
+  const chatMLTemplate = await getPrompt("mainChat");
 
-  const lastMessageTime = history.length > 0 ? new Date(history[history.length - 1].id) : new Date();
+  const lastMessageTime =
+    history.length > 0 ? new Date(history[history.length - 1].id) : new Date();
   const currentTime = new Date();
   const timeDiff = Math.round((currentTime - lastMessageTime) / 1000 / 60);
 
@@ -90,14 +95,19 @@ export async function buildContentPrompt({
     timeContext += ` (summarize_memory: true)`;
   }
 
-  const availableStickers = character.stickers?.map(sticker => `${sticker.id} (${sticker.name})`).join(', ') || 'none';
-  const stickerInfo = character.stickers && character.stickers.length > 0
-    ? `The character has access to the following stickers: ${availableStickers}`
-    : 'The character has no stickers.';
+  const availableStickers =
+    character.stickers
+      ?.map((sticker) => `${sticker.id} (${sticker.name})`)
+      .join(", ") || "none";
+  const stickerInfo =
+    character.stickers && character.stickers.length > 0
+      ? `The character has access to the following stickers: ${availableStickers}`
+      : "The character has no stickers.";
 
-  const memories = character.memories && character.memories.length > 0
-    ? character.memories.map(mem => `- ${mem}`).join('\n')
-    : 'No specific memories recorded yet.';
+  const memories =
+    character.memories && character.memories.length > 0
+      ? character.memories.map((mem) => `- ${mem}`).join("\n")
+      : "No specific memories recorded yet.";
 
   const chat = (a, b) => {
     // Create a reversed copy of the history array to make indexing easier.
@@ -114,7 +124,7 @@ export async function buildContentPrompt({
       } else {
         return clamp(length + index, length);
       }
-    }
+    };
 
     let start = resolveIndex(a, historyLength);
     let end = resolveIndex(b, historyLength);
@@ -141,7 +151,6 @@ export async function buildContentPrompt({
       diff: timeDiff,
     },
     chat: chat,
-
   };
   data.char = data.character.name;
   data.user = data.persona.name;
@@ -153,7 +162,7 @@ export async function buildContentPrompt({
     character,
     userName,
     userDescription,
-    false // Don't include user/assistant messages from ChatML prompts
+    false, // Don't include user/assistant messages from ChatML prompts
   );
 
   let conversationContents = [];
@@ -173,7 +182,10 @@ export async function buildContentPrompt({
           },
         });
       } else {
-        parts.push({ text: msg.content || "(User sent an image that is no longer available)" });
+        parts.push({
+          text:
+            msg.content || "(User sent an image that is no longer available)",
+        });
       }
     } else if (msg.isMe && msg.type === "sticker" && msg.stickerData) {
       const stickerName = msg.stickerData.stickerName || "Unknown Sticker";
@@ -201,11 +213,16 @@ export async function buildContentPrompt({
   if (isProactive && conversationContents.length === 0) {
     conversationContents.push({
       role: "user",
-      parts: [{ text: "(SYSTEM: You are starting this conversation. Please begin.)" }],
+      parts: [
+        { text: "(SYSTEM: You are starting this conversation. Please begin.)" },
+      ],
     });
   }
 
-  return { contents: [...promptContents, ...conversationContents], systemPrompt };
+  return {
+    contents: [...promptContents, ...conversationContents],
+    systemPrompt,
+  };
 }
 
 /**
@@ -215,8 +232,11 @@ export async function buildContentPrompt({
  * @param {string} params.characterDescription - The character's description.
  * @returns {Promise<{systemPrompt: string, contents: Array<object>}>} - The generated system prompt and contents.
  */
-export async function buildCharacterSheetPrompt({ characterName, characterDescription }) {
-  const chatMLTemplate = await getPrompt('characterSheet');
+export async function buildCharacterSheetPrompt({
+  characterName,
+  characterDescription,
+}) {
+  const chatMLTemplate = await getPrompt("characterSheet");
 
   const data = {
     character: {
@@ -233,9 +253,9 @@ export async function buildCharacterSheetPrompt({ characterName, characterDescri
   const { systemPrompt, contents } = chatMLToPromptStructure(
     chatMLMessages,
     null,
-    '',
-    '',
-    true // Allow conversation messages for character sheet generation
+    "",
+    "",
+    true, // Allow conversation messages for character sheet generation
   );
 
   return { systemPrompt, contents };
@@ -249,7 +269,7 @@ export async function buildCharacterSheetPrompt({ characterName, characterDescri
  * @returns {Promise<{systemPrompt: string, contents: Array<object>}>} - The generated system prompt and contents.
  */
 export async function buildProfilePrompt({ userName, userDescription }) {
-  const chatMLTemplate = await getPrompt('profileCreation');
+  const chatMLTemplate = await getPrompt("profileCreation");
 
   const data = {
     character: {},
@@ -266,9 +286,9 @@ export async function buildProfilePrompt({ userName, userDescription }) {
   const { systemPrompt, contents } = chatMLToPromptStructure(
     chatMLMessages,
     null,
-    '',
-    '',
-    true // Allow conversation messages for profile generation
+    "",
+    "",
+    true, // Allow conversation messages for profile generation
   );
 
   return { systemPrompt, contents };

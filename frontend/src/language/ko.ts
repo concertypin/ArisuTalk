@@ -76,6 +76,10 @@ export const ko: LanguageStrings = {
     resetDataComplete:
       "모든 데이터가 초기화되었습니다. 페이지를 새로고침합니다.",
     resetDataFailed: "데이터 초기화에 실패했습니다: ",
+    restoreSnapshotConfirm:
+      "이 스냅샷을 복원하시겠습니까? 현재 설정은 덮어씌워집니다.",
+    deleteSnapshotConfirm:
+      "이 스냅샷을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
   },
   mainChat: {
     uploadPhoto: "사진 업로드",
@@ -117,15 +121,20 @@ export const ko: LanguageStrings = {
     resetToDefault: "기본값으로 되돌리기",
     randomFirstMessagePrompt: "랜덤 선톡 캐릭터 생성 프롬프트",
     profileCreationRules: "# 캐릭터 생성 규칙 (Profile Creation Rules)",
-    characterSheetGenerationRules: "# 캐릭터 시트 생성 규칙 (Character Sheet Generation Rules)",
+    characterSheetGenerationRules:
+      "# 캐릭터 시트 생성 규칙 (Character Sheet Generation Rules)",
+    characterSheetGenerationPrompt: "AI 캐릭터 시트 생성 프롬프트",
     backupPrompts: "프롬프트 백업",
     restorePrompts: "프롬프트 불러오기",
-    characterSheetGenerationPrompt: "AI 캐릭터 시트 생성 프롬프트",
-    characterSheetGenerationPromptDescription: "이 프롬프트는 새로운 캐릭터 시트를 생성할 때 사용됩니다.",
-    mainChatPromptDescription: "이 프롬프트는 메인 채팅 대화에서 사용됩니다. AI의 행동 방식과 응답 스타일을 안내합니다.",
-    randomFirstMessagePromptDescription: "이 프롬프트는 새로운 첫 메시지를 생성할 때 사용됩니다.",
+    characterSheetGenerationPromptDescription:
+      "이 프롬프트는 새로운 캐릭터 시트를 생성할 때 사용됩니다.",
+    mainChatPromptDescription:
+      "이 프롬프트는 메인 채팅 대화에서 사용됩니다. AI의 행동 방식과 응답 스타일을 안내합니다.",
+    randomFirstMessagePromptDescription:
+      "이 프롬프트는 새로운 첫 메시지를 생성할 때 사용됩니다.",
     resetAllPrompts: "프롬프트 초기화!",
-    resetAllPromptsConfirmation: "모든 프롬프트를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+    resetAllPromptsConfirmation:
+      "모든 프롬프트를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
     restoreFailed: "프롬프트 불러오기에 실패했습니다: ",
   },
   settings: {
@@ -134,6 +143,7 @@ export const ko: LanguageStrings = {
     noSnapshots: "저장된 스냅샷이 없습니다.",
     title: "설정",
     aiSettings: "AI 설정",
+    scaleSettings: "크기 설정",
     advancedSettings: "고급 설정",
     apiKey: "API 키",
     apiKeyPlaceholder: "API 키를 입력하세요",
@@ -220,6 +230,8 @@ export const ko: LanguageStrings = {
     performanceComingSoon:
       "성능 최적화 옵션은 향후 업데이트에서 지원될 예정입니다.",
     experimentalFeatures: "실험적 기능",
+    useNewInputBar: "새로운 입력창 디자인",
+    useNewInputBarDesc: "둥글고 떠다니는 디자인의 입력창을 사용합니다.",
     experimentalWarning:
       "실험적 기능은 불안정할 수 있으며, 예상치 못한 동작을 할 수 있습니다.",
     warningNote: "주의사항",
@@ -273,6 +285,8 @@ export const ko: LanguageStrings = {
       stickerData: "스티커 데이터",
       debugLogs: "디버그 로그",
     },
+    uiSizePreviewMessage1: "안녕하세요! UI 크기 조절을 도와드릴게요.",
+    uiSizePreviewMessage2: "네, 미리보기 좋네요!",
   },
   sidebar: {
     startNewChat: "새로운 채팅 시작",
@@ -437,7 +451,8 @@ export const ko: LanguageStrings = {
       message: "을(를) 처리하는 중 오류가 발생했습니다.",
     },
     cannotGenerateRandomCharacter: {
-      message: "랜덤 캐릭터를 생성할 수 없습니다: 사용자 페르소나가 설정되지 않았습니다.",
+      message:
+        "랜덤 캐릭터를 생성할 수 없습니다: 사용자 페르소나가 설정되지 않았습니다.",
     },
     failedToGenerateProfile: {
       message: "프로필 생성 실패:",
@@ -463,6 +478,23 @@ export const ko: LanguageStrings = {
     resetPromptCompleteTitle: "초기화 완료",
     resetPromptCompleteMessage:
       '"{{promptName}}"이(가) 기본값으로 되돌려졌습니다.',
+    selectChat: {
+      message: "대화를 이어갈 채팅방을 선택해주세요.",
+      newChat: "새로운 채팅",
+    },
+    characterCardSaveError: {
+        message: "캐릭터 카드 저장에 실패했습니다."
+    },
+    character_name_required_title: "이름 필요",
+    character_name_required_message: "캐릭터 이름을 먼저 입력해주세요.",
+    aiGenerationComplete: {
+        title: "AI 생성 완료",
+        message: "캐릭터 \"{{characterName}}\"의 정보 생성이 완료되었습니다."
+    },
+    generationFailed: {
+        title: "생성 실패",
+        message: "캐릭터 생성 중 오류가 발생했습니다: {{errorMessage}}"
+    }
   },
   ui: {
     discardChanges: "변경사항 취소",
@@ -482,8 +514,12 @@ export const ko: LanguageStrings = {
     fileProcessingError: "파일 처리 오류:",
     fileProcessingAlert: "파일을 처리하는 중 오류가 발생했습니다.",
     fileSizeExceeded: "파일 크기 초과",
+    fileSizeExceededMessage: "'{{fileName}}'의 파일 크기가 너무 큽니다. (최대 {{sizeLimit}})",
     unsupportedFormat: "지원하지 않는 형식",
+    unsupportedFormatMessage: "'{{fileName}}'은(는) 지원하지 않는 파일 형식입니다.",
     stickerProcessingError: "스티커 처리 오류",
+    stickerProcessingErrorConsole: "스티커 처리 오류: {{fileName}}",
+    stickerProcessingErrorMessage: "'{{fileName}}'을(를) 처리하는 중 오류가 발생했습니다.",
     storageFull: "저장 공간 가득 참",
     storageFullMessage: "저장 공간이 부족합니다.",
     groupChatNamePlaceholder: "단톡방 이름을 입력하세요",
@@ -597,8 +633,7 @@ export const ko: LanguageStrings = {
     imageUnavailable: "(사용자가 이미지를 보냈지만 더 이상 사용할 수 없습니다)",
     unknownSticker: "알 수 없는 스티커",
     stickerMessage: '[사용자가 "{{stickerName}}" 스티커를 보냄]',
-    proactiveStart:
-      "(SYSTEM: 당신이 이 대화를 시작합니다. 시작해주세요.)",
+    proactiveStart: "(SYSTEM: 당신이 이 대화를 시작합니다. 시작해주세요.)",
     apiError: "{{provider}} API 오류: {{status}} - {{error}}",
     invalidResponse: "{{provider}} API로부터 유효한 응답을 받지 못했습니다.",
     requestFailed: "API 요청 실패: {{status}}",
@@ -612,9 +647,9 @@ export const ko: LanguageStrings = {
     geminiResponseEmpty: "응답이 생성되지 않았습니다. (이유: {{reason}})",
     geminiLocationNotSupported:
       "죄송합니다, 현재 국가에서는 Gemini API가 지원되지 않습니다.",
-    geminiProcessingError:
-      "응답 처리 중 오류가 발생했습니다: {{error}}",
-    apiKeyNotFound: "API 키를 찾을 수 없습니다. 설정에서 API 키를 확인해주세요.",
+    geminiProcessingError: "응답 처리 중 오류가 발생했습니다: {{error}}",
+    apiKeyNotFound:
+      "API 키를 찾을 수 없습니다. 설정에서 API 키를 확인해주세요.",
   },
   system: {
     languageChangeMessage:
@@ -623,6 +658,14 @@ export const ko: LanguageStrings = {
     storageFullMessage: "저장 공간이 부족합니다.",
     selectModeDeselect: "선택<br>해제",
     selectModeSelect: "선택<br>모드",
+    selectAll: "전체<br>선택",
+  },
+  landing: {
+    welcomeTitle: "아리스톡에 오신 것을 환영합니다",
+    welcomeMessage:
+      "이곳은 당신만의 AI 캐릭터들과 자유롭게 대화할 수 있는 공간입니다. 사이드바에서 캐릭터를 선택하거나 새 캐릭터를 만들어 대화를 시작해보세요.",
+    newCharacterButton: "새 캐릭터 만들기",
+    selectCharacterButton: "캐릭터 선택",
   },
   security: {
     masterPasswordPlaceholder: "안전한 마스터 비밀번호를 입력하세요",
@@ -631,10 +674,12 @@ export const ko: LanguageStrings = {
     encryptionFailed: "암호화에 실패했습니다",
     decryptionFailed: "복호화에 실패했습니다. 비밀번호를 확인해주세요.",
     passwordTooShort: "비밀번호는 최소 {{minLength}}자 이상이어야 합니다.",
-    passwordNotComplex: "비밀번호는 대문자, 소문자, 숫자, 특수문자 중 3가지 이상을 포함해야 합니다.",
+    passwordNotComplex:
+      "비밀번호는 대문자, 소문자, 숫자, 특수문자 중 3가지 이상을 포함해야 합니다.",
     passwordStrong: "강력한 비밀번호입니다.",
     encryptionSetupTitle: "API 키 암호화 설정",
-    encryptionSetupDescription: "API 키를 안전하게 보호하기 위해 암호화를 설정하세요.",
+    encryptionSetupDescription:
+      "API 키를 안전하게 보호하기 위해 암호화를 설정하세요.",
     whyEncryptionIsNeeded: "암호화가 필요한 이유",
     encryptionBenefit1: "• 브라우저에서 API 키가 평문으로 노출되지 않습니다",
     encryptionBenefit2: "• 악성 확장프로그램으로부터 API 키를 보호합니다",
@@ -642,27 +687,38 @@ export const ko: LanguageStrings = {
     masterPasswordLabel: "마스터 비밀번호",
     confirmPasswordLabel: "비밀번호 확인",
     passwordHintLabel: "비밀번호 힌트 (선택사항)",
-    passwordHintWarning: "힌트는 암호화되지 않으므로 비밀번호 자체를 포함하지 마세요.",
+    passwordHintWarning:
+      "힌트는 암호화되지 않으므로 비밀번호 자체를 포함하지 마세요.",
     generateSecurePassword: "안전한 비밀번호 자동 생성",
     setupEncryption: "암호화 설정",
     enterMasterPassword: "마스터 비밀번호를 입력하세요.",
     passwordsDoNotMatch: "비밀번호가 일치하지 않습니다.",
     encryptionEnabledSuccess: "API 키 암호화가 활성화되었습니다!",
-    generatedPasswordMessage: "생성된 마스터 비밀번호:\n\n${password}\n\n이 비밀번호를 안전한 곳에 저장하세요!",
+    generatedPasswordMessage:
+      "생성된 마스터 비밀번호:\n\n${password}\n\n이 비밀번호를 안전한 곳에 저장하세요!",
     passwordStrength: {
       veryWeak: "매우 약함",
       weak: "약함",
       medium: "보통",
       strong: "강함",
-      label: "비밀번호 강도: "
-    }
+      label: "비밀번호 강도: ",
+    },
   },
   secureStorage: {
     autoGeneratedHint: "보안을 위해 자동으로 생성됨",
     setupEncryptionFailed: "암호화 설정에 실패했습니다.",
-    noMasterPasswordForEncryption: "암호화에 사용할 마스터 비밀번호가 없습니다.",
+    noMasterPasswordForEncryption:
+      "암호화에 사용할 마스터 비밀번호가 없습니다.",
     saveApiConfigsFailed: "API 설정 저장에 실패했습니다.",
-    noMasterPasswordForDecryption: "복호화에 사용할 마스터 비밀번호가 없습니다.",
+    noMasterPasswordForDecryption:
+      "복호화에 사용할 마스터 비밀번호가 없습니다.",
     loadApiConfigsFailed: "암호화된 API 설정을 불러오는데 실패했습니다:",
   },
+  search: {
+    prompt: "이름으로 캐릭터를 검색해보세요.",
+    noResults: "검색된 캐릭터가 없습니다.",
+  },
+  generatingStatus: {
+    generating: "생성 중..."
+  }
 };

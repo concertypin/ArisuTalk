@@ -3,16 +3,22 @@ import {
   renderMainChat,
   setupMainChatEventListeners,
 } from "./components/MainChat.js";
-import { renderSettingsUI } from "./components/SettingsRouter.js";
+import { renderDesktopSettingsModal } from "./components/DesktopSettingsModal.js";
 import {
-  renderSnapshotList,
-  setupSettingsModalEventListeners,
-} from "./components/MobileSettingsModal.js";
+  renderMobileSettingsUI,
+  renderAiSettingsPage, // Import the new function
+  renderScaleSettingsPage,
+  setupMobileSettingsUIEventListeners,
+} from "./components/MobileSettingsUI.js";
 import { setupDesktopSettingsEventListeners } from "./components/DesktopSettingsUI.js";
-import { getCurrentSettingsUIMode } from "./components/SettingsRouter.js";
+
 import { renderCharacterModal } from "./components/CharacterModal.js";
-import { renderPromptModal, setupPromptModalEventListeners } from "./components/PromptModal.js";
+import {
+  renderPromptModal,
+  setupPromptModalEventListeners,
+} from "./components/PromptModal.js";
 import { renderConfirmationModal } from "./components/ConfirmationModal.js";
+import { renderChatSelectionModal } from "./components/ChatSelectionModal.js";
 import {
   renderCreateGroupChatModal,
   renderCreateOpenChatModal,
@@ -22,39 +28,76 @@ import {
   renderDebugLogsModal,
   setupDebugLogsModalEventListeners,
 } from "./components/DebugLogsModal.js";
+import {
+  renderCharacterListPage,
+  renderCharacterList,
+} from "./components/CharacterListPage.js";
+import { renderSearchModal } from "./components/SearchModal.js";
+
+export function adjustMessageContainerPadding() {
+  const messagesContainer = document.getElementById("messages-container");
+  const inputAreaWrapper = document.getElementById("input-area-wrapper");
+
+  if (messagesContainer && inputAreaWrapper) {
+    const inputHeight = inputAreaWrapper.offsetHeight;
+    messagesContainer.style.paddingBottom = `${inputHeight + 4}px`;
+  }
+}
 
 async function renderModals(app) {
   const container = document.getElementById("modal-container");
-  let html = "";
-  if (app.state.showSettingsModal) html += renderSettingsUI(app);
-  if (app.state.showCharacterModal) html += renderCharacterModal(app);
-  if (app.state.showPromptModal) html += await renderPromptModal(app);
+  const confirmationContainer = document.getElementById(
+    "confirmation-modal-container",
+  );
+
+  // Render main modals
+  let mainModalHtml = "";
+  if (app.state.showSettingsModal) mainModalHtml += renderDesktopSettingsModal(app);
+  if (app.state.showCharacterModal) mainModalHtml += renderCharacterModal(app);
+  if (app.state.showPromptModal) mainModalHtml += await renderPromptModal(app);
   if (app.state.showCreateGroupChatModal)
-    html += renderCreateGroupChatModal(app);
-  if (app.state.showCreateOpenChatModal) html += renderCreateOpenChatModal(app);
-  if (app.state.showEditGroupChatModal) html += renderEditGroupChatModal(app);
-  if (app.state.showDebugLogsModal) html += renderDebugLogsModal(app.state);
-  if (app.state.modal.isOpen) html += renderConfirmationModal(app);
-  container.innerHTML = html;
+    mainModalHtml += renderCreateGroupChatModal(app);
+  if (app.state.showCreateOpenChatModal)
+    mainModalHtml += renderCreateOpenChatModal(app);
+  if (app.state.showEditGroupChatModal)
+    mainModalHtml += renderEditGroupChatModal(app);
+  if (app.state.showDebugLogsModal) mainModalHtml += renderDebugLogsModal(app.state);
+  if (app.state.showMobileSearch) mainModalHtml += renderSearchModal(app);
+  if (app.state.modal.isOpen && app.state.modal.type === "chatSelection") {
+    mainModalHtml += renderChatSelectionModal(app);
+  }
+  if (container.innerHTML !== mainModalHtml) {
+    container.innerHTML = mainModalHtml;
+  }
+
+  // Render confirmation modal
+  let confirmationModalHtml = "";
+  if (app.state.modal.isOpen && app.state.modal.type === "confirmation") {
+    confirmationModalHtml += renderConfirmationModal(app);
+  }
+  if (confirmationContainer.innerHTML !== confirmationModalHtml) {
+    confirmationContainer.innerHTML = confirmationModalHtml;
+  }
 
   // Setup event listeners for modals after DOM update
+  if (app.state.showSettingsModal) {
+    setupDesktopSettingsEventListeners(app);
+  }
   if (app.state.showDebugLogsModal) {
     setupDebugLogsModalEventListeners();
-  }
-  if (app.state.showSettingsModal) {
-    const uiMode = getCurrentSettingsUIMode(app);
-    if (uiMode === "desktop") {
-      // DOM이 완전히 업데이트된 후 이벤트 리스너 설정
-      requestAnimationFrame(() => {
-        setupDesktopSettingsEventListeners(app);
-      });
-    } else {
-      setupSettingsModalEventListeners();
-    }
   }
   if (app.state.showPromptModal) {
     setupPromptModalEventListeners(app);
   }
+}
+
+function renderConfirmationModalContainer(app) {
+    const container = document.getElementById("confirmation-modal-container");
+    let html = "";
+    if (app.state.modal.isOpen && app.state.modal.type === "confirmation") {
+        html += renderConfirmationModal(app);
+    }
+    container.innerHTML = html;
 }
 
 function updateSnapshotList(app) {
@@ -71,48 +114,199 @@ export async function render(app) {
   const oldState = app.oldState || {};
   const newState = app.state;
   const isFirstRender = !app.oldState;
+  const isMobile = window.innerWidth < 768;
 
-  // Conditionally render the sidebar to minimize DOM updates
-  if (isFirstRender || shouldUpdateSidebar(oldState, newState)) {
-    renderSidebar(app);
-  }
+  const mainContainer = document.getElementById("main-chat");
+  const listContainer = document.getElementById(
+    "character-list-page-container",
+  );
+  const settingsContainer = document.getElementById("settings-page-container");
+  const aiSettingsContainer = document.getElementById(
+    "ai-settings-page-container",
+  );
+  const scaleSettingsContainer = document.getElementById(
+    "scale-settings-page-container",
+  );
+  const sidebarContainer = document.getElementById("sidebar");
 
-  // Conditionally render the main chat to minimize DOM updates
-  if (isFirstRender || shouldUpdateMainChat(oldState, newState)) {
-    // 재렌더링 전에 입력창 값 보존
-    const messageInput = document.getElementById("new-message-input");
-    const inputValue = messageInput ? messageInput.value : "";
-    const inputHeight = messageInput ? messageInput.style.height : "auto";
+  // Main Content Rendering
+  if (isMobile) {
+    const transitionContainer = document.getElementById(
+      "page-transition-container",
+    );
 
-    renderMainChat(app);
-    setupMainChatEventListeners();
+    // --- Visibility & Animation Control ---
+    sidebarContainer.classList.add("hidden");
+    listContainer.classList.remove("hidden");
+    mainContainer.classList.remove("hidden");
+    settingsContainer.classList.remove("hidden");
+    aiSettingsContainer.classList.remove("hidden");
 
-    // 재렌더링 후 입력창 값 복원
-    const newMessageInput = document.getElementById("new-message-input");
-    if (newMessageInput && inputValue) {
-      newMessageInput.value = inputValue;
-      newMessageInput.style.height = inputHeight;
+    // --- View Switching Logic ---
+    if (newState.showAiSettingsUI) {
+      transitionContainer.classList.add("show-ai-settings");
+      transitionContainer.classList.remove(
+        "show-chat",
+        "show-settings",
+        "show-scale-settings",
+      );
+      if (
+        isFirstRender ||
+        oldState.showAiSettingsUI !== newState.showAiSettingsUI
+      ) {
+        aiSettingsContainer.innerHTML = renderAiSettingsPage(app);
+        setupMobileSettingsUIEventListeners(app); // Re-use listeners for back button etc.
+      }
+    } else if (newState.showScaleSettingsUI) {
+      transitionContainer.classList.add("show-scale-settings");
+      transitionContainer.classList.remove(
+        "show-chat",
+        "show-settings",
+        "show-ai-settings",
+      );
+      if (
+        isFirstRender ||
+        oldState.showScaleSettingsUI !== newState.showScaleSettingsUI
+      ) {
+        scaleSettingsContainer.innerHTML = renderScaleSettingsPage(app);
+        setupMobileSettingsUIEventListeners(app); // Re-use listeners for back button etc.
+      }
+    } else if (newState.showSettingsUI) {
+      transitionContainer.classList.add("show-settings");
+      transitionContainer.classList.remove(
+        "show-chat",
+        "show-ai-settings",
+        "show-scale-settings",
+      );
+      if (
+        isFirstRender ||
+        oldState.showSettingsUI !== newState.showSettingsUI ||
+        oldState.mobileSettingsPage !== newState.mobileSettingsPage ||
+        JSON.stringify(oldState.debugLogs) !==
+          JSON.stringify(newState.debugLogs)
+      ) {
+        settingsContainer.innerHTML = renderMobileSettingsUI(app);
+        setupMobileSettingsUIEventListeners(app);
+      }
+      setTimeout(() => {
+        if (!window.personaApp.state.selectedChatId) {
+          mainContainer.innerHTML = "";
+        }
+      }, 600);
+    } else if (newState.selectedChatId) {
+      if (oldState.selectedChatId !== newState.selectedChatId) {
+        mainContainer.innerHTML =
+          '<div class="flex-1 flex items-center justify-center"><div class="w-6 h-6 border-4 border-gray-700 border-t-blue-500 rounded-full animate-spin"></div></div>';
+      }
 
-      // 전송 버튼 상태도 업데이트
-      const sendButton = document.getElementById("send-message-btn");
-      if (sendButton) {
-        const hasText = inputValue.trim() !== "";
-        const hasImage = !!app.state.imageToSend;
-        sendButton.disabled =
-          (!hasText && !hasImage) || app.state.isWaitingForResponse;
+      transitionContainer.classList.add("show-chat");
+      transitionContainer.classList.remove(
+        "show-settings",
+        "show-ai-settings",
+        "show-scale-settings",
+      );
+
+      setTimeout(() => {
+        if (
+          window.personaApp.state.selectedChatId === newState.selectedChatId
+        ) {
+          if (isFirstRender || shouldUpdateMainChat(oldState, newState)) {
+            renderMainChat(app);
+            setupMainChatEventListeners();
+            adjustMessageContainerPadding();
+            lucide.createIcons();
+            setupConditionalBlur();
+            const messagesContainer =
+              document.getElementById("messages-container");
+            if (messagesContainer) {
+              messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+          }
+        }
+      }, 600);
+    } else {
+      transitionContainer.classList.remove(
+        "show-chat",
+        "show-settings",
+        "show-ai-settings",
+        "show-scale-settings",
+      );
+
+      if (isFirstRender || shouldUpdateCharacterList(oldState, newState)) {
+        const isListAlreadyRendered = !!listContainer.querySelector("header");
+        if (
+          !isListAlreadyRendered ||
+          oldState.showFabMenu !== newState.showFabMenu
+        ) {
+          renderCharacterListPage(app);
+        } else {
+          const listItemsContainer = listContainer.querySelector(
+            "#character-list-items",
+          );
+          if (listItemsContainer) {
+            renderCharacterList(app, listItemsContainer);
+          }
+        }
+      }
+
+      setTimeout(() => {
+        if (!window.personaApp.state.selectedChatId) {
+          mainContainer.innerHTML = "";
+        }
+        if (!window.personaApp.state.showSettingsUI) {
+          settingsContainer.innerHTML = "";
+        }
+        if (!window.personaApp.state.showAiSettingsUI) {
+          aiSettingsContainer.innerHTML = "";
+        }
+        if (!window.personaApp.state.showScaleSettingsUI) {
+          scaleSettingsContainer.innerHTML = "";
+        }
+      }, 600);
+    }
+  } else {
+    // --- Desktop Layout ---
+    const transitionContainer = document.getElementById(
+      "page-transition-container",
+    );
+
+    // Setup desktop-specific visibility
+    sidebarContainer.classList.remove("hidden");
+    mainContainer.classList.remove("hidden");
+    listContainer.classList.add("hidden"); // Character list page is not used on desktop
+    transitionContainer.classList.add("show-chat");
+    transitionContainer.classList.remove("show-settings", "show-ai-settings"); // Ensure animation state is reset for desktop
+
+    // Render sidebar and main chat content
+    if (isFirstRender || shouldUpdateSidebar(oldState, newState)) {
+      const sidebarScrollContainer = document.querySelector(
+        "#sidebar-content > .overflow-y-auto",
+      );
+      const scrollPosition = sidebarScrollContainer
+        ? sidebarScrollContainer.scrollTop
+        : 0;
+
+      renderSidebar(app);
+
+      const newSidebarScrollContainer = document.querySelector(
+        "#sidebar-content > .overflow-y-auto",
+      );
+      if (newSidebarScrollContainer) {
+        newSidebarScrollContainer.scrollTop = scrollPosition;
+      }
+    }
+    if (isFirstRender || shouldUpdateMainChat(oldState, newState)) {
+      renderMainChat(app);
+      setupMainChatEventListeners();
+      adjustMessageContainerPadding();
+      const messagesContainer = document.getElementById("messages-container");
+      if (messagesContainer) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
       }
     }
   }
 
-  // showInputOptions 상태 변화 시 입력 옵션 영역만 업데이트
-  if (
-    !isFirstRender &&
-    oldState.showInputOptions !== newState.showInputOptions
-  ) {
-    updateInputOptions(app);
-  }
-
-  // Conditionally render modals to minimize DOM updates
+  // Modal Rendering (always runs, independent of main content)
   if (isFirstRender || shouldUpdateModals(oldState, newState)) {
     const settingsContent = document.getElementById("settings-modal-content");
     const scrollPosition = settingsContent ? settingsContent.scrollTop : 0;
@@ -127,49 +321,55 @@ export async function render(app) {
     }
   }
 
-  lucide.createIcons();
-  app.scrollToBottom();
-}
+  // Render confirmation modal separately
+  if (isFirstRender || shouldUpdateConfirmationModal(oldState, newState)) {
+    renderConfirmationModalContainer(app);
+  }
 
-// --- RENDER HELPER FUNCTIONS ---
-
-function updateInputOptions(app) {
-  const inputAreaContainer = document.querySelector(".input-area-container");
-  if (!inputAreaContainer) return;
-
-  const existingOptionsPanel = inputAreaContainer.querySelector(
-    ".absolute.bottom-full",
-  );
-
-  if (app.state.showInputOptions) {
-    // 옵션 패널이 없으면 추가
-    if (!existingOptionsPanel) {
-      const optionsHtml = `
-        <div class="absolute bottom-full left-0 mb-2 w-48 bg-gray-700 rounded-xl shadow-lg p-2 animate-fadeIn">
-          <button id="open-image-upload" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-left rounded-lg hover:bg-gray-600">
-            <i data-lucide="image" class="w-4 h-4"></i> 사진 업로드
-          </button>
-        </div>
-      `;
-      inputAreaContainer.insertAdjacentHTML("afterbegin", optionsHtml);
-      if (window.lucide) window.lucide.createIcons();
-    }
-  } else {
-    // 옵션 패널이 있으면 제거
-    if (existingOptionsPanel) {
-      existingOptionsPanel.remove();
+  // Set scroll position for group chat character list and add scroll listener
+  if (newState.showCreateGroupChatModal) {
+    const characterList = document.getElementById("group-chat-character-list");
+    if (characterList) {
+      characterList.scrollTop = newState.createGroupChatScrollTop || 0;
+      // Remove existing listener to prevent duplicates
+      if (characterList._scrollListener) {
+        characterList.removeEventListener("scroll", characterList._scrollListener);
+      }
+      const scrollListener = (e) => {
+        app.setState({ createGroupChatScrollTop: e.target.scrollTop });
+      };
+      characterList.addEventListener("scroll", scrollListener);
+      characterList._scrollListener = scrollListener; // Store reference
     }
   }
+
+  lucide.createIcons();
+  setupConditionalBlur();
 }
 
 // --- RENDER HELPER FUNCTIONS ---
+
+function shouldUpdateCharacterList(oldState, newState) {
+  return (
+    oldState.selectedChatId !== newState.selectedChatId ||
+    oldState.showFabMenu !== newState.showFabMenu ||
+    oldState.showMobileSearch !== newState.showMobileSearch ||
+    oldState.searchQuery !== newState.searchQuery ||
+    JSON.stringify(oldState.characters) !==
+      JSON.stringify(newState.characters) ||
+    JSON.stringify(oldState.unreadCounts) !==
+      JSON.stringify(newState.unreadCounts) ||
+    JSON.stringify(oldState.messages) !== JSON.stringify(newState.messages)
+  );
+}
 
 function shouldUpdateSidebar(oldState, newState) {
   // This function checks if any state related to the sidebar has changed
   return (
     oldState.sidebarCollapsed !== newState.sidebarCollapsed ||
     oldState.searchQuery !== newState.searchQuery ||
-    oldState.expandedCharacterId !== newState.expandedCharacterId ||
+    JSON.stringify(Array.from(oldState.expandedCharacterIds || [])) !==
+      JSON.stringify(Array.from(newState.expandedCharacterIds || [])) ||
     oldState.editingChatRoomId !== newState.editingChatRoomId ||
     JSON.stringify(oldState.characters) !==
       JSON.stringify(newState.characters) ||
@@ -194,12 +394,13 @@ function shouldUpdateMainChat(oldState, newState) {
     oldState.isWaitingForResponse !== newState.isWaitingForResponse ||
     oldState.imageToSend !== newState.imageToSend ||
     oldState.showUserStickerPanel !== newState.showUserStickerPanel ||
+    oldState.showInputOptions !== newState.showInputOptions ||
     oldState.stickerToSend !== newState.stickerToSend ||
     JSON.stringify(oldState.userStickers) !==
       JSON.stringify(newState.userStickers) ||
     JSON.stringify([...oldState.expandedStickers]) !==
       JSON.stringify([...newState.expandedStickers]) ||
-    // 그룹채팅/오픈채팅 관련 상태 변화
+    // Group/open chat related state changes
     JSON.stringify(oldState.groupChats) !==
       JSON.stringify(newState.groupChats) ||
     JSON.stringify(oldState.openChats) !== JSON.stringify(newState.openChats)
@@ -219,29 +420,29 @@ function shouldUpdateModals(oldState, newState) {
         JSON.stringify(newState.settingsSnapshots) ||
       oldState.settings.model !== newState.settings.model ||
       oldState.showPromptModal !== newState.showPromptModal ||
-      JSON.stringify(oldState.modal) !== JSON.stringify(newState.modal) ||
       JSON.stringify(oldState.openSettingsSections) !==
         JSON.stringify(newState.openSettingsSections) ||
       oldState.enableDebugLogs !== newState.enableDebugLogs ||
       JSON.stringify(oldState.debugLogs) !==
         JSON.stringify(newState.debugLogs) ||
-      // 데스크톱 설정 UI의 활성 패널 변경 감지
+      // Detect active panel change in desktop settings UI
       oldState.ui?.desktopSettings?.activePanel !==
         newState.ui?.desktopSettings?.activePanel ||
-      // 설정 UI 모드 변경 감지
+      // Detect settings UI mode change
       oldState.ui?.settingsUIMode !== newState.ui?.settingsUIMode
-  );
+    );
   }
 
   return (
+    JSON.stringify(oldState.modal) !== JSON.stringify(newState.modal) ||
     oldState.showSettingsModal !== newState.showSettingsModal ||
     oldState.showCharacterModal !== newState.showCharacterModal ||
+    oldState.showMobileSearch !== newState.showMobileSearch ||
     oldState.showPromptModal !== newState.showPromptModal ||
     oldState.showCreateGroupChatModal !== newState.showCreateGroupChatModal ||
     oldState.showCreateOpenChatModal !== newState.showCreateOpenChatModal ||
     oldState.showEditGroupChatModal !== newState.showEditGroupChatModal ||
     oldState.showDebugLogsModal !== newState.showDebugLogsModal ||
-    JSON.stringify(oldState.modal) !== JSON.stringify(newState.modal) ||
     (newState.showCharacterModal &&
       JSON.stringify(oldState.editingCharacter) !==
         JSON.stringify(newState.editingCharacter)) ||
@@ -255,6 +456,51 @@ function shouldUpdateModals(oldState, newState) {
       JSON.stringify(oldState.editingGroupChat) !==
         JSON.stringify(newState.editingGroupChat)) ||
     (newState.showDebugLogsModal &&
-      JSON.stringify(oldState.debugLogs) !== JSON.stringify(newState.debugLogs))
+      JSON.stringify(oldState.debugLogs) !==
+        JSON.stringify(newState.debugLogs)) ||
+    (newState.showMobileSearch && oldState.searchQuery !== newState.searchQuery)
   );
+}
+
+function shouldUpdateConfirmationModal(oldState, newState) {
+    return JSON.stringify(oldState.modal) !== JSON.stringify(newState.modal);
+}
+
+// --- New function for conditional blur ---
+function setupConditionalBlur() {
+  const messagesContainer = document.getElementById("messages-container");
+  const inputAreaWrapper = document.getElementById("input-area-wrapper");
+
+  if (!messagesContainer || !inputAreaWrapper) {
+    return; // If elements aren't here, do nothing. It will be called again on next render.
+  }
+
+  // To prevent multiple listeners on the same element if re-renders happen without DOM replacement
+  if (messagesContainer._scrollHandler) {
+    messagesContainer.removeEventListener(
+      "scroll",
+      messagesContainer._scrollHandler,
+    );
+  }
+
+  const handleScroll = () => {
+    // Check if scrolled to the bottom
+    const isAtBottom =
+      messagesContainer.scrollHeight -
+        messagesContainer.scrollTop -
+        messagesContainer.clientHeight <
+      5;
+
+    if (isAtBottom) {
+      inputAreaWrapper.classList.add("scrolled-to-bottom");
+    } else {
+      inputAreaWrapper.classList.remove("scrolled-to-bottom");
+    }
+  };
+
+  messagesContainer.addEventListener("scroll", handleScroll);
+  messagesContainer._scrollHandler = handleScroll; // Store reference to the handler
+
+  // Initial check, deferred for accurate layout calculation
+  setTimeout(handleScroll, 0);
 }

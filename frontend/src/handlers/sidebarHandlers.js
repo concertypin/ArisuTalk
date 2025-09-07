@@ -1,3 +1,5 @@
+import { updateSearchResults } from "../components/SearchModal.js";
+
 export function handleSidebarClick(e, app) {
   const toggleSidebar = () =>
     app.setState({ sidebarCollapsed: !app.state.sidebarCollapsed });
@@ -107,7 +109,10 @@ export function handleSidebarClick(e, app) {
 }
 
 export function handleSidebarInput(e, app) {
-  if (e.target.id === "search-input") {
-    app.setState({ searchQuery: e.target.value });
+  if (e.target.id === "search-input" || e.target.id === "search-input-mobile") {
+    app.debouncedSetSearchQuery(e.target.value);
+  } else if (e.target.id === "search-modal-input") {
+    app.state.searchQuery = e.target.value;
+    updateSearchResults(app);
   }
 }

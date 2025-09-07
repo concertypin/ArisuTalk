@@ -1,6 +1,5 @@
 import { debounce } from "../utils.js";
 import { t, setLanguage } from "../i18n.js";
-import { getCurrentSettingsUIMode } from "../components/SettingsRouter.js";
 import { setupDesktopSettingsEventListeners } from "../components/DesktopSettingsUI.js";
 
 export function handleModalClick(e, app) {
@@ -18,9 +17,21 @@ export function handleModalClick(e, app) {
   }
 
   // Settings Modal
-  if (e.target.closest("#open-settings-modal")) app.openSettingsModal();
+  if (
+    e.target.closest("#open-settings-modal") ||
+    e.target.closest("#open-settings-modal-mobile")
+  )
+    app.openSettingsModal();
   if (e.target.closest("#close-settings-modal")) app.handleCancelSettings();
-  if (e.target.closest("#save-settings")) app.handleSaveSettings();
+  if (
+    e.target.closest("#save-settings") ||
+    e.target.closest("#save-settings-ui")
+  )
+    app.handleSaveSettings();
+
+  // Character Modal
+  if (e.target.closest("#open-new-character-modal-mobile"))
+    app.openNewCharacterModal();
 
   // Prompt Modal
   if (e.target.closest("#open-prompt-modal"))
@@ -32,11 +43,40 @@ export function handleModalClick(e, app) {
   // ChatML handlers
   if (e.target.closest("#use-chatml-toggle")) app.handleChatMLToggle();
   if (e.target.closest("#reset-chatml-btn")) app.handleResetChatML();
-  if (e.target.closest("#generate-chatml-template-btn")) app.handleGenerateChatMLTemplate();
+  if (e.target.closest("#generate-chatml-template-btn"))
+    app.handleGenerateChatMLTemplate();
 
   // Character Modal
   if (e.target.closest('[data-action="close-character-modal"]'))
     app.closeCharacterModal();
+
+  // Chat Selection Modal
+  if (e.target.closest("#create-new-chat-room-modal")) {
+    e.stopPropagation();
+    app.handleCreateNewChatRoom();
+    return;
+  }
+
+  const selectChat = e.target.closest('[data-action="select-chat"]');
+  if (selectChat) {
+    const chatRoomId = selectChat.dataset.chatRoomId;
+    app.selectChatRoom(chatRoomId);
+    app.hideModal();
+    return;
+  }
+
+  const closeChatSelection = e.target.closest(
+    '[data-action="close-chat-selection"]',
+  );
+  if (closeChatSelection) {
+    app.closeChatSelectionModal();
+    return;
+  }
+
+  if (e.target.closest("#create-new-chat-room-modal")) {
+    e.stopPropagation();
+    app.handleCreateNewChatRoom();
+  }
   if (e.target.closest("#save-character")) app.handleSaveCharacter();
   if (e.target.closest("#select-avatar-btn"))
     document.getElementById("avatar-input").click();
@@ -71,7 +111,7 @@ export function handleModalClick(e, app) {
   if (e.target.closest("#modal-cancel")) {
     e.preventDefault();
     e.stopPropagation();
-    app.closeModal();
+    app.hideModal();
     return;
   }
   if (e.target.closest("#modal-confirm")) {
@@ -79,7 +119,7 @@ export function handleModalClick(e, app) {
     e.stopPropagation();
     if (app.state.modal.onConfirm) {
       const onConfirm = app.state.modal.onConfirm;
-      app.closeModal(); // 먼저 모달을 닫고
+      app.hideModal(); // 먼저 모달을 닫고
       setTimeout(() => onConfirm(), 0); // 비동기로 확인 액션 실행
     }
     return;
@@ -165,6 +205,7 @@ export function handleModalClick(e, app) {
 // This prevents the UI from re-rendering on every keystroke, improving user experience.
 const debouncedUpdateSettings = debounce((app, newSetting) => {
   app.setState({ settings: { ...app.state.settings, ...newSetting } });
+  app.debouncedCreateSettingsSnapshot();
 }, 500);
 
 const settingsUpdaters = {
@@ -236,6 +277,11 @@ const settingsUpdaters = {
 };
 
 export function handleModalInput(e, app) {
+  if (e.target.id === "group-chat-name") {
+    app.setState({ createGroupChatName: e.target.value });
+    return;
+  }
+
   const updater = settingsUpdaters[e.target.id];
   if (updater) {
     const value =
@@ -267,12 +313,7 @@ export function handleModalChange(e, app) {
     const optionsDiv = document.getElementById("random-chat-options");
     if (optionsDiv) {
       // 모바일 UI에서는 style.display 사용
-      if (getCurrentSettingsUIMode(window.personaApp) === "mobile") {
-        optionsDiv.style.display = e.target.checked ? "block" : "none";
-      } else {
-        // 데스크톱 UI에서는 클래스 토글 사용
-        optionsDiv.classList.toggle("hidden", !e.target.checked);
-      }
+      optionsDiv.style.display = e.target.checked ? "block" : "none";
     }
   }
 
@@ -280,12 +321,7 @@ export function handleModalChange(e, app) {
     const snapshotsList = document.getElementById("snapshots-list");
     if (snapshotsList) {
       // 모바일 UI에서는 style.display 사용
-      if (getCurrentSettingsUIMode(window.personaApp) === "mobile") {
-        snapshotsList.style.display = e.target.checked ? "block" : "none";
-      } else {
-        // 데스크톱 UI에서는 클래스 토글 사용
-        snapshotsList.classList.toggle("hidden", !e.target.checked);
-      }
+      snapshotsList.style.display = e.target.checked ? "block" : "none";
     }
   }
 

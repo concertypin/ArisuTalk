@@ -10,15 +10,18 @@ export async function loadFromBrowserStorage(key, defaultValue) {
   }
 }
 
-export function saveToBrowserStorage(key, value) {
-  // 비동기 처리를 내부적으로 수행하여 기존 코드와 호환성 유지
-  saveToIndexedDB(key, value).catch((error) => {
+export async function saveToBrowserStorage(key, value) {
+  try {
+    await saveToIndexedDB(key, value);
+  } catch (error) {
     console.error(`Error saving to IndexedDB key "${key}":`, error);
     // 중요한 데이터 손실 방지를 위해 사용자에게 알림
     setTimeout(() => {
       alert(t("modal.saveFailed.message"));
     }, 100);
-  });
+    // 에러를 다시 던져서 호출한 쪽에서 인지할 수 있도록 함
+    throw error;
+  }
 }
 
 export async function loadFromIndexedDB(key) {
@@ -51,7 +54,7 @@ export async function loadFromIndexedDB(key) {
   });
 }
 /**
- * @param {any} value 
+ * @param {any} value
  * @returns {Promise<void>}
  */
 export async function saveToIndexedDB(key, value) {

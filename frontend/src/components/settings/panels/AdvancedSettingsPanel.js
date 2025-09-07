@@ -32,12 +32,12 @@ export function renderAdvancedSettingsPanel(app) {
                                 )}</p>
                             </div>
                             <label class="relative inline-block w-12 h-6 cursor-pointer">
-                                <input 
-                                    type="checkbox" 
-                                    id="settings-enable-debug-logs" 
+                                <input
+                                    type="checkbox"
+                                    id="settings-enable-debug-logs"
                                     ${
                                       app.state.enableDebugLogs ? "checked" : ""
-                                    } 
+                                    }
                                     class="sr-only peer"
                                 />
                                 <div class="w-12 h-6 bg-gray-600 rounded-full peer-checked:bg-blue-600 transition-colors"></div>
@@ -91,7 +91,7 @@ export function renderAdvancedSettingsPanel(app) {
             <!-- 실험적 기능 -->
             <div class="bg-gray-700/30 rounded-xl p-6">
                 <h4 class="text-lg font-semibold text-white mb-4 flex items-center">
-                    <i data-lucide="flask" class="w-5 h-5 mr-3 text-blue-400"></i>
+                    <i data-lucide="flask-conical" class="w-5 h-5 mr-3 text-blue-400"></i>
                     ${t("settings.experimentalFeatures")}
                 </h4>
                 <div class="space-y-4">
@@ -106,6 +106,7 @@ export function renderAdvancedSettingsPanel(app) {
                             </div>
                         </div>
                     </div>
+                    
                     <div class="bg-gray-600/30 rounded-lg p-3 border border-gray-600/50">
                         <p class="text-xs text-gray-400 text-center">
                             <i data-lucide="clock" class="w-3 h-3 inline mr-1"></i>

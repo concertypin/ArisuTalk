@@ -1,4 +1,8 @@
-import { buildContentPrompt, buildProfilePrompt, buildCharacterSheetPrompt } from "../prompts/builder/promptBuilder.js";
+import {
+  buildContentPrompt,
+  buildProfilePrompt,
+  buildCharacterSheetPrompt,
+} from "../prompts/builder/promptBuilder.js";
 import { t } from "../i18n.js";
 
 const API_BASE_URL = "https://openrouter.ai/api/v1";
@@ -33,14 +37,48 @@ export class OpenRouterClient {
       forceSummary,
     });
 
-    const messages = contents.map(c => ({
-      role: c.role === 'model' ? 'assistant' : c.role,
-      content: c.parts.map(p => p.text).join('')
-    }));
+    const messages = [];
+    for (const msg of history) {
+      const role = msg.isMe ? "user" : "assistant";
+      let content = msg.content || "";
+
+      if (msg.isMe && msg.type === "image" && msg.imageId) {
+        const imageData = character?.media?.find((m) => m.id === msg.imageId);
+        if (imageData) {
+          content = [
+            { type: "text", text: content || t("api.imageMessage") },
+            {
+              type: "image_url",
+              image_url: {
+                url: imageData.dataUrl,
+              },
+            },
+          ];
+        } else {
+          content = content || t("api.imageUnavailable");
+        }
+      } else if (msg.isMe && msg.type === "sticker" && msg.stickerData) {
+        const stickerName =
+          msg.stickerData.stickerName || t("api.unknownSticker");
+        content =
+          t("api.stickerMessage", { stickerName: stickerName }) +
+          (content ? ` ${content}` : "");
+      }
+
+      if (content) {
+        messages.push({ role, content });
+      }
+    }
+
+    if (isProactive && messages.length === 0) {
+      messages.push({
+        role: "user",
+        content: "(SYSTEM: You are starting this conversation. Please begin.)",
+      });
+    }
 
     messages.unshift({ role: "system", content: systemPrompt });
 
-    // for_update 라인 7209-7214: 요청 본문 구성
     const requestBody = {
       model: this.model,
       messages: messages,
@@ -49,7 +87,6 @@ export class OpenRouterClient {
     };
 
     try {
-      // for_update 라인 7217-7226: API 호출
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: "POST",
         headers: {
@@ -74,7 +111,6 @@ export class OpenRouterClient {
 
       const data = await response.json();
 
-      // for_update 라인 7235-7250: 응답 처리
       if (data.choices && data.choices.length > 0) {
         const textContent = data.choices[0].message.content;
 
@@ -186,7 +222,7 @@ export class OpenRouterClient {
   async generateCharacterSheet({
     characterName,
     characterDescription,
-    characterSheetPrompt
+    characterSheetPrompt,
   }) {
     const { systemPrompt, contents } = buildCharacterSheetPrompt({
       characterName,
@@ -196,10 +232,10 @@ export class OpenRouterClient {
 
     const messages = [
       { role: "system", content: systemPrompt },
-      ...contents.map(content => ({
+      ...contents.map((content) => ({
         role: content.role === "model" ? "assistant" : content.role,
-        content: content.parts.map(part => part.text).join("")
-      }))
+        content: content.parts.map((part) => part.text).join(""),
+      })),
     ];
 
     const payload = {
@@ -214,7 +250,7 @@ export class OpenRouterClient {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${this.apiKey}`,
+          Authorization: `Bearer ${this.apiKey}`,
           "HTTP-Referer": this.referer,
           "X-Title": this.appName,
         },
@@ -225,7 +261,8 @@ export class OpenRouterClient {
 
       if (!response.ok) {
         console.error("Character Sheet Gen API Error:", data);
-        const errorMessage = data?.error?.message ||
+        const errorMessage =
+          data?.error?.message ||
           t("api.requestFailed", { status: response.statusText });
         throw new Error(errorMessage);
       }
@@ -238,11 +275,14 @@ export class OpenRouterClient {
           reactionDelay: 1000,
         };
       } else {
-        throw new Error(t("api.profileNotGenerated", { reason: t("api.unknownReason") }));
+        throw new Error(
+          t("api.profileNotGenerated", { reason: t("api.unknownReason") }),
+        );
       }
     } catch (error) {
       console.error(
-        t("api.profileGenerationError", { provider: "OpenRouter" }) + " (Character Sheet)",
+        t("api.profileGenerationError", { provider: "OpenRouter" }) +
+          " (Character Sheet)",
         error,
       );
       return { error: error.message };

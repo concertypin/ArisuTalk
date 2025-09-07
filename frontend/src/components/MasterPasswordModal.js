@@ -200,9 +200,7 @@ export function setupMasterPasswordModalEventListeners(app) {
       document.getElementById("setup-master-password-confirm").value = password;
 
       // Show generated password temporarily
-      alert(
-        t("security.generatedPasswordMessage", { password }),
-      );
+      alert(t("security.generatedPasswordMessage", { password }));
     });
   }
 
@@ -230,10 +228,10 @@ export function setupMasterPasswordModalEventListeners(app) {
           "text-green-400",
         ];
         const strengthText = [
-            t("security.passwordStrength.veryWeak"), 
-            t("security.passwordStrength.weak"), 
-            t("security.passwordStrength.medium"), 
-            t("security.passwordStrength.strong")
+          t("security.passwordStrength.veryWeak"),
+          t("security.passwordStrength.weak"),
+          t("security.passwordStrength.medium"),
+          t("security.passwordStrength.strong"),
         ];
 
         strengthDiv.className = `mt-2 text-xs ${

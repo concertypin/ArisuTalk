@@ -9,5 +9,5 @@ import characterSheetPrompt from "../texts/characterSheetChatMLPrompt.txt?raw";
 export const defaultChatMLPrompts = {
   mainChat: mainPrompt,
   characterSheet: characterSheetPrompt,
-  profileCreation: profilePrompt
+  profileCreation: profilePrompt,
 };

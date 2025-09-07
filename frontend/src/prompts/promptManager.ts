@@ -3,28 +3,28 @@
  * It handles loading prompts from local storage and falling back to the default prompts.
  */
 
-import { defaultChatMLPrompts } from './chatMLPrompts';
+import { defaultChatMLPrompts } from "./chatMLPrompts";
 import { loadFromBrowserStorage, saveToBrowserStorage } from "../storage";
 
-const PROMPT_STORAGE_KEY = 'chatMLPrompts';
+const PROMPT_STORAGE_KEY = "chatMLPrompts";
 
 /**
  * Represents the available prompt types.
-*/
+ */
 
-type PromptType = ('mainChat' | 'characterSheet' | 'profileCreation')
+type PromptType = "mainChat" | "characterSheet" | "profileCreation";
 /**
  * Retrieves all ChatML prompts, merging defaults with any custom prompts from storage.
  * @returns {Promise<{[key: PromptType]: string}>}
  */
 export async function getAllPrompts(): Promise<Record<PromptType, string>> {
-  const customPrompts = (await loadFromBrowserStorage(PROMPT_STORAGE_KEY)) || {};
+  const customPrompts =
+    (await loadFromBrowserStorage(PROMPT_STORAGE_KEY)) || {};
   return {
     ...defaultChatMLPrompts,
     ...customPrompts,
   };
 }
-
 
 /**
  * Retrieves a specific ChatML prompt by its type.
@@ -40,8 +40,12 @@ export async function getPrompt(type: PromptType): Promise<string> {
  * @param type - The type of prompt to save.
  * @param content - The content of the prompt.
  */
-export async function savePrompt(type: PromptType, content: string): Promise<void> {
-  const customPrompts = (await loadFromBrowserStorage(PROMPT_STORAGE_KEY)) || {};
+export async function savePrompt(
+  type: PromptType,
+  content: string,
+): Promise<void> {
+  const customPrompts =
+    (await loadFromBrowserStorage(PROMPT_STORAGE_KEY)) || {};
   customPrompts[type] = content;
   await saveToBrowserStorage(PROMPT_STORAGE_KEY, customPrompts);
 }
@@ -50,8 +54,11 @@ export async function savePrompt(type: PromptType, content: string): Promise<voi
  * Saves multiple ChatML prompts to local storage.
  * @param prompts - An object containing the prompts to save.
  */
-export async function saveAllPrompts(prompts: Record<PromptType, string>): Promise<void> {
-  const customPrompts = (await loadFromBrowserStorage(PROMPT_STORAGE_KEY)) || {};
+export async function saveAllPrompts(
+  prompts: Record<PromptType, string>,
+): Promise<void> {
+  const customPrompts =
+    (await loadFromBrowserStorage(PROMPT_STORAGE_KEY)) || {};
   Object.assign(customPrompts, prompts);
   saveToBrowserStorage(PROMPT_STORAGE_KEY, customPrompts);
 }
@@ -61,7 +68,8 @@ export async function saveAllPrompts(prompts: Record<PromptType, string>): Promi
  * @param type - The type of prompt to reset.
  */
 export async function resetPrompt(type: PromptType): Promise<void> {
-  const customPrompts = (await loadFromBrowserStorage(PROMPT_STORAGE_KEY)) || {};
+  const customPrompts =
+    (await loadFromBrowserStorage(PROMPT_STORAGE_KEY)) || {};
   delete customPrompts[type];
   await saveToBrowserStorage(PROMPT_STORAGE_KEY, customPrompts);
 }

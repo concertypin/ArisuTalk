@@ -1,4 +1,4 @@
-import { renderSnapshotList } from "../../MobileSettingsModal.js";
+import { renderSnapshotList } from "../../MobileSettingsUI.js";
 import { t } from "../../../i18n.js";
 
 /**

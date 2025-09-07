@@ -2,11 +2,17 @@ import { getLanguage } from "./i18n.js";
 
 export function debounce(func, delay) {
   let timeout;
-  return function (...args) {
+  const debounced = function (...args) {
     const context = this;
     clearTimeout(timeout);
     timeout = setTimeout(() => func.apply(context, args), delay);
   };
+
+  debounced.cancel = function () {
+    clearTimeout(timeout);
+  };
+
+  return debounced;
 }
 
 export function findMessageGroup(messages, targetIndex, characterName) {
@@ -62,4 +68,33 @@ export function formatDateSeparator(dateString) {
     weekday: "long",
   };
   return date.toLocaleDateString(getLanguage(), options);
+}
+
+export function formatTimestamp(timestamp) {
+  if (!timestamp) return "";
+
+  const now = new Date();
+  const date = new Date(timestamp);
+
+  const nowDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+  const diffTime = nowDay.getTime() - dateDay.getTime();
+  const diffDays = diffTime / (1000 * 3600 * 24);
+
+  const lang = getLanguage();
+
+  if (diffDays < 1) {
+    // Today
+    return date.toLocaleTimeString(lang, {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  } else if (diffDays < 7) {
+    // Within a week
+    return date.toLocaleDateString(lang, { weekday: "long" });
+  } else {
+    // More than a week ago
+    return date.toLocaleDateString(lang, { month: "numeric", day: "numeric" });
+  }
 }
