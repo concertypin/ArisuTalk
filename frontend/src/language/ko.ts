@@ -718,7 +718,7 @@ export const ko: LanguageStrings = {
     prompt: "이름으로 캐릭터를 검색해보세요.",
     noResults: "검색된 캐릭터가 없습니다.",
   },
-  gneratingStatus: {
+  generatingStatus: {
     generating: "생성 중..."
   }
 };

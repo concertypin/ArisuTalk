@@ -5025,7 +5025,7 @@ class PersonaChatApp {
     const generateBtn = document.getElementById("ai-generate-character-btn");
     const originalText = generateBtn.innerHTML;
     generateBtn.disabled = true;
-    generateBtn.innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> ${t("gneratingStatus.generating")}`;
+    generateBtn.innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> ${t("generatingStatus.generating")}`;
     if (window.lucide) {
       window.lucide.createIcons();
     }

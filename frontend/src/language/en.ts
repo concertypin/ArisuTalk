@@ -726,7 +726,7 @@ export const en: LanguageStrings = {
     prompt: "Search for characters by name.",
     noResults: "No characters found.",
   },
-  gneratingStatus: {
+  generatingStatus: {
     generating: "Generating..."
   }
 };
