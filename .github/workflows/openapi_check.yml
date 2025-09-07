@@ -1,0 +1,142 @@
+name: Pre-merge Checks for Backend
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths: 
+      - 'backend/**'
+  workflow_dispatch: 
+    inputs:
+      from:
+        description: 'Base branch to compare against'
+        required: true
+        default: 'main'
+      to:
+        description: 'Head branch to compare'
+        required: true
+
+
+permissions:
+  pull-requests: write # Needed to request changes
+  contents: read # Needed to checkout code
+env:
+  BRANCH_FROM: ${{ github.event.inputs.from || github.base_ref }}
+  BRANCH_TO: ${{ github.event.inputs.to || github.head_ref }}
+jobs:
+  typecheck:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python and Poetry Environment
+        uses: concertypin/action/poetry-install@b86d15781ac3d180116bce15597056a52132137b
+        with:
+          python-version: "3.13"
+          working-directory: backend
+      
+      - name: Run Mypy to check types
+        run: cd backend && poetry run mypy src/
+
+  openapi_diff_original:
+    defaults:
+      run:
+        working-directory: base_repo/backend
+    runs-on: ubuntu-latest
+    outputs:
+      openapi_spec: ${{ steps.openapi_spec.outputs.openapi_spec }}
+    if: github.event.pull_request.draft == false
+    steps:
+    - name: Checkout base branch
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ env.BRANCH_FROM }}
+        path: base_repo
+
+    - name: Setup Python and Poetry Environment (base)
+      uses: concertypin/action/poetry-install@b78047ec002db704c45704f72830ca45d4b15fc8
+      with:
+        python-version: '3.x'
+        working-directory: base_repo/backend
+
+    - name: launch base backend service
+      run: poetry run python utils/openapi_spec.py  > base_openapi.json
+
+    - name: Display Base OpenAPI Spec (for debugging)
+      run: cat base_openapi.json
+
+    - name: export OpenAPI spec to job output
+      id: openapi_spec
+      run: echo "openapi_spec=$(cat base_openapi.json)" >> $GITHUB_OUTPUT
+
+  openapi_diff_pr:
+    defaults:
+      run:
+        working-directory: pr_repo/backend
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    outputs:
+      openapi_spec: ${{ steps.openapi_spec.outputs.openapi_spec }}
+
+    steps:
+    - name: Checkout PR branch
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ env.BRANCH_TO }}
+        path: pr_repo
+
+    - name: Setup Python and Poetry Environment (PR)
+      uses: concertypin/action/poetry-install@b78047ec002db704c45704f72830ca45d4b15fc8
+      with:
+        python-version: '3.13'
+        working-directory: pr_repo/backend
+      
+    - name: Get OpenAPI spec from PR branch
+      run: poetry run python utils/openapi_spec.py > pr_openapi.json
+
+    - name: Display PR OpenAPI Spec (for debugging)
+      run: cat pr_openapi.json
+
+    - name: export OpenAPI spec to job output
+
+      id: openapi_spec
+      run: echo "openapi_spec=$(cat pr_openapi.json)" >> $GITHUB_OUTPUT
+
+  openapi_diff_check:
+    needs: [openapi_diff_original, openapi_diff_pr]
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+
+    steps:
+    - name: Ready OpenAPI spec files
+      run: |
+        echo "$BASE_OPENAPI_SPEC" > base_openapi.json
+        echo "$PR_OPENAPI_SPEC" > pr_openapi.json
+      env:
+        BASE_OPENAPI_SPEC: ${{ needs.openapi_diff_original.outputs.openapi_spec }}
+        PR_OPENAPI_SPEC: ${{ needs.openapi_diff_pr.outputs.openapi_spec }}
+
+    - name: Display OpenAPI Specs (for debugging)
+      run: |
+        cat base_openapi.json
+        cat pr_openapi.json
+
+    - name: Run openapi-diff
+      id: openapi_diff_check
+      run: |
+        docker run --rm -t \
+        -v $PWD:/data \
+        openapitools/openapi-diff:latest \
+        /data/base_openapi.json /data/pr_openapi.json \
+        --state incompatible \
+        --fail-on-incompatible \
+        --markdown out.md
+
+    - name: Report breaking changes
+      if: steps.openapi_diff_check.outcome == 'failure' && github.event.pull_request.number != null
+      # We'll make a code review (Request Changes) if there are breaking changes
+      run: |
+        echo "Breaking changes detected in OpenAPI spec. See details below." > openapi_diff_output.txt
+        echo "*If you made non-breaking changes or version bump, please make a comment to ignore this check.*\n\n" >> openapi_diff_output.txt
+        cat out.md >> openapi_diff_output.txt
+        gh pr review ${{ github.event.pull_request.number }} --request-changes -F openapi_diff_output.txt

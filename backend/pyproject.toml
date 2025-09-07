@@ -1,0 +1,31 @@
+[project]
+name = "backend"
+version = "0.0.0"
+description = ""
+authors = [
+    {name = "concertypin",email = "55056558+concertypin@users.noreply.github.com"}
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi (>=0.116.1,<0.117.0)"
+]
+
+[project.scripts]
+spec = 'utils.openapi_spec:main'
+
+
+[tool.poetry]
+package-mode=false
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"] 
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+fastapi-cli = "^0.0.10"
+
+
+[tool.poetry.group.ci.dependencies]
+mypy = "^1.17.1"
+

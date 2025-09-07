@@ -117,7 +117,7 @@ jobs:
 
           GEMINI_RESPONSE=$(curl -sf -H "Content-Type: application/json" \
             -d @payload.json \
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${{ secrets.GEMINI_API_KEY }}")
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${{ secrets.GEMINI_API_KEY }}")
 
           # A more robust python script to handle potential errors in the JSON response.
           LABELS_TO_APPLY=$(echo "$GEMINI_RESPONSE" | python -c '

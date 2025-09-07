@@ -1,0 +1,6 @@
+{
+    "python.analysis.typeCheckingMode": "standard",
+    "python.autoComplete.extraPaths": [
+        "backend"
+    ]
+}
