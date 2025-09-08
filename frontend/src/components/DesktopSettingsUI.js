@@ -76,6 +76,19 @@ function renderDesktopSettingsHeader() {
  * @param {string} activePanel - Currently active panel
  * @returns {string} Navigation HTML
  */
+/**
+ * 네비게이션 버튼의 CSS 클래스를 생성
+ * @param {boolean} isActive - 활성 상태 여부
+ * @returns {string} CSS 클래스 문자열
+ */
+function getNavButtonClasses(isActive) {
+  const baseClasses = "w-full text-left p-3 rounded-lg transition-all duration-200 flex items-start gap-3";
+  const activeClasses = "bg-blue-600/20 border border-blue-500/30 text-blue-400";
+  const inactiveClasses = "hover:bg-gray-700/50 text-gray-300 hover:text-white";
+  
+  return `${baseClasses} ${isActive ? activeClasses : inactiveClasses}`;
+}
+
 function renderDesktopSettingsNavigation(activePanel) {
   const navItems = [
     {
@@ -128,11 +141,7 @@ function renderDesktopSettingsNavigation(activePanel) {
                   .map(
                     (item) => `
                     <button 
-                        class="w-full text-left p-3 rounded-lg transition-all duration-200 flex items-start gap-3 ${
-                          activePanel === item.id
-                            ? "bg-blue-600/20 border border-blue-500/30 text-blue-400"
-                            : "hover:bg-gray-700/50 text-gray-300 hover:text-white"
-                        }"
+                        class="${getNavButtonClasses(activePanel === item.id)}"
                         data-panel="${item.id}"
                         id="nav-${item.id}"
                     >
@@ -273,16 +282,7 @@ export function updateDesktopSettingsContent(app, panelId) {
   // 네비게이션 버튼 활성 상태 업데이트
   document.querySelectorAll("[data-panel]").forEach((btn) => {
     const isActive = btn.dataset.panel === panelId;
-    const baseClasses =
-      "w-full text-left p-3 rounded-lg transition-all duration-200 flex items-start gap-3";
-    const activeClasses =
-      "bg-blue-600/20 border border-blue-500/30 text-blue-400";
-    const inactiveClasses =
-      "hover:bg-gray-700/50 text-gray-300 hover:text-white";
-
-    btn.className = `${baseClasses} ${
-      isActive ? activeClasses : inactiveClasses
-    }`;
+    btn.className = getNavButtonClasses(isActive);
   });
 
   // 아이콘 다시 생성

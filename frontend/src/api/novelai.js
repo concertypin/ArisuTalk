@@ -560,7 +560,7 @@ export class NovelAIClient {
       negative_prompt = "",
       
       // 모델 및 이미지 설정
-      model = "nai-diffusion-4-curated-preview",
+      model = "nai-diffusion-4-5-full",
       width = 1024,
       height = 1024,
       
