@@ -34,6 +34,9 @@ import {
 } from "./components/CharacterListPage.js";
 import { renderSearchModal } from "./components/SearchModal.js";
 
+const MODAL_ANIMATION_INITIAL_SCALE = 0.2;
+const MODAL_ANIMATION_DURATION_MS = 350;
+
 export function adjustMessageContainerPadding() {
   const messagesContainer = document.getElementById("messages-container");
   const inputAreaWrapper = document.getElementById("input-area-wrapper");
@@ -359,7 +362,7 @@ export async function render(app) {
 
         if (modalPanel) {
             const rect = modalPanel.getBoundingClientRect();
-            const initialScale = 0.2;
+            const initialScale = MODAL_ANIMATION_INITIAL_SCALE;
             const modalCenterX = rect.left + rect.width / 2;
             const modalCenterY = rect.top + rect.height / 2;
             const initialX = event.clientX - modalCenterX;
@@ -371,7 +374,7 @@ export async function render(app) {
                 { transform: `translate(${initialX}px, ${initialY}px) scale(${initialScale})`, opacity: 0 },
                 { transform: 'translate(0, 0) scale(1)', opacity: 1 }
             ], {
-                duration: 350,
+                duration: MODAL_ANIMATION_DURATION_MS,
                 easing: 'cubic-bezier(0.215, 0.610, 0.355, 1)',
                 fill: 'forwards'
             });

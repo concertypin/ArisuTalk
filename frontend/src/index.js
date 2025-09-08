@@ -37,6 +37,8 @@ import {
 import { handleGroupChatClick } from "./handlers/groupChatHandlers.js";
 import { debounce, findMessageGroup } from "./utils.js";
 
+const MODAL_FADE_OUT_DURATION_MS = 200;
+
 // --- APP INITIALIZATION ---
 document.addEventListener("DOMContentLoaded", async () => {
   window.personaApp = new PersonaChatApp();
@@ -1537,7 +1539,7 @@ class PersonaChatApp {
           stickerSelectionMode: false,
           selectedStickerIndices: [],
         });
-      }, 200); // Match animation duration
+      }, MODAL_FADE_OUT_DURATION_MS); // Match animation duration
     } else {
       // Fallback if modal not found
       this.setState({

@@ -2,6 +2,10 @@ import { t } from "../i18n.js";
 import { renderAvatar } from "./Avatar.js";
 import { formatTimestamp } from "../utils.js";
 
+const LONG_PRESS_DURATION_MS = 500;
+const RIPPLE_EFFECT_DURATION_MS = 600;
+const TOUCH_MOVE_THRESHOLD_PX = 10;
+
 /**
  * Renders a single character item for the character list page.
  * @param {object} app - The main application object.
@@ -208,9 +212,9 @@ export function renderCharacterListPage(app) {
       setTimeout(() => {
           ripple.remove();
           app.openCharacterEditMode(characterId);
-      }, 600);
+      }, RIPPLE_EFFECT_DURATION_MS);
 
-    }, 500);
+    }, LONG_PRESS_DURATION_MS);
   }, { passive: true });
 
   listContainer.addEventListener("touchend", (e) => {
@@ -218,7 +222,7 @@ export function renderCharacterListPage(app) {
   });
 
   listContainer.addEventListener("touchmove", (e) => {
-    if (longPressTimer && (Math.abs(e.touches[0].clientX - touchStartX) > 10 || Math.abs(e.touches[0].clientY - touchStartY) > 10)) {
+    if (longPressTimer && (Math.abs(e.touches[0].clientX - touchStartX) > TOUCH_MOVE_THRESHOLD_PX || Math.abs(e.touches[0].clientY - touchStartY) > TOUCH_MOVE_THRESHOLD_PX)) {
       clearTimeout(longPressTimer);
     }
   });
