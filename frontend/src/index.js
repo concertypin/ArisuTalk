@@ -118,6 +118,8 @@ class PersonaChatApp {
       },
       showAiSettingsUI: false,
       showScaleSettingsUI: false,
+      mobileEditModeCharacterId: null,
+      modalOpeningEvent: null,
     };
     this.oldState = null;
     this.messagesEndRef = null;
@@ -837,6 +839,17 @@ class PersonaChatApp {
       ) {
         this.setState({ showMobileSearch: false, searchQuery: "" });
       }
+
+      // --- Handlers for Mobile Edit Mode ---
+      if (e.target.closest("#cancel-edit-mode-btn")) {
+        this._fadeOutHeaderAndCloseEditMode();
+      }
+      if (e.target.closest("#edit-character-btn")) {
+        if (this.state.mobileEditModeCharacterId) {
+          this.editCharacter(this.state.mobileEditModeCharacterId, e);
+          this._fadeOutHeaderAndCloseEditMode();
+        }
+      }
     });
 
     appElement.addEventListener("input", (e) => {
@@ -1043,13 +1056,13 @@ class PersonaChatApp {
     setTimeout(() => this.scrollToBottom(), 0);
   }
 
-  editCharacter(characterId) {
+  editCharacter(characterId, e = null) {
     const numericCharacterId = Number(characterId);
     const character = this.state.characters.find(
       (c) => c.id === numericCharacterId,
     );
     if (character) {
-      this.openEditCharacterModal(character);
+      this.openEditCharacterModal(character, e);
     }
   }
 
@@ -1486,31 +1499,75 @@ class PersonaChatApp {
     this.setState({ settings: { ...this.state.settings, model } });
   }
 
-  openNewCharacterModal() {
+  openNewCharacterModal(e = null) {
     this.setState({
       editingCharacter: { memories: [], proactiveEnabled: true },
       showCharacterModal: true,
       stickerSelectionMode: false,
       selectedStickerIndices: [],
+      modalOpeningEvent: e,
     });
   }
 
-  openEditCharacterModal(character) {
+  openEditCharacterModal(character, e = null) {
     this.setState({
       editingCharacter: { ...character, memories: character.memories || [] },
       showCharacterModal: true,
       stickerSelectionMode: false,
       selectedStickerIndices: [],
+      modalOpeningEvent: e,
     });
   }
 
   closeCharacterModal() {
-    this.setState({
-      showCharacterModal: false,
-      editingCharacter: null,
-      stickerSelectionMode: false,
-      selectedStickerIndices: [],
-    });
+    const modalBackdrop = document.getElementById("character-modal-backdrop");
+    if (modalBackdrop) {
+      const modalPanel = modalBackdrop.querySelector(".bg-gray-800");
+      if (modalPanel) {
+        modalPanel.classList.add("animate-modal-fade-out");
+      }
+      // Also fade out the backdrop
+      modalBackdrop.style.transition = "opacity 0.2s ease-in-out";
+      modalBackdrop.style.opacity = "0";
+
+      setTimeout(() => {
+        this.setState({
+          showCharacterModal: false,
+          editingCharacter: null,
+          stickerSelectionMode: false,
+          selectedStickerIndices: [],
+        });
+      }, 200); // Match animation duration
+    } else {
+      // Fallback if modal not found
+      this.setState({
+        showCharacterModal: false,
+        editingCharacter: null,
+        stickerSelectionMode: false,
+        selectedStickerIndices: [],
+      });
+    }
+  }
+
+  openCharacterEditMode(characterId) {
+    this.setState({ mobileEditModeCharacterId: characterId });
+  }
+
+  closeCharacterEditMode() {
+    this.setState({ mobileEditModeCharacterId: null });
+  }
+
+  _fadeOutHeaderAndCloseEditMode() {
+    const header = document.getElementById("mobile-edit-header");
+    if (header) {
+        header.classList.remove("animate-fade-in");
+        header.classList.add("animate-fade-out");
+        setTimeout(() => {
+            this.closeCharacterEditMode();
+        }, 300);
+    } else {
+        this.closeCharacterEditMode();
+    }
   }
 
   handleAvatarChange(e, isCard = false) {

@@ -18,6 +18,7 @@ export const en: LanguageStrings = {
     deleteSticker: "Delete",
     addContact: "Add Contact",
     editContact: "Edit Contact",
+    editModeTitle: "Edit '{{name}}'",
     profileImage: "Profile Image",
     importContact: "Import Contact",
     shareContact: "Share Contact",

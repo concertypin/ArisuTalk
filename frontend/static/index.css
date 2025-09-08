@@ -468,3 +468,58 @@ button > svg {
 .message-bubble-them {
   background-color: rgba(35, 42, 55, 0.7);
 }
+
+/* Added for mobile edit mode header */
+@keyframes fadeInHeader {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOutHeader {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.animate-fade-in {
+  animation: fadeInHeader 0.3s ease-out forwards;
+}
+
+.animate-fade-out {
+  animation: fadeOutHeader 0.3s ease-out forwards;
+}
+
+/* Added for long-press ripple effect */
+.character-list-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: scale(0);
+  animation: ripple 0.6s linear;
+  pointer-events: none;
+  width: 100px; /* Set a fixed size */
+  height: 100px; /* Set a fixed size */
+  margin-top: -50px; /* Adjust for size */
+  margin-left: -50px; /* Adjust for size */
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Added for modal close animation */
+@keyframes modalFadeOut {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.95); }
+}
+
+.animate-modal-fade-out {
+  animation: modalFadeOut 0.2s ease-in-out forwards;
+}

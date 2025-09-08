@@ -238,7 +238,8 @@ export async function render(app) {
         const isListAlreadyRendered = !!listContainer.querySelector("header");
         if (
           !isListAlreadyRendered ||
-          oldState.showFabMenu !== newState.showFabMenu
+          oldState.showFabMenu !== newState.showFabMenu ||
+          oldState.mobileEditModeCharacterId !== newState.mobileEditModeCharacterId
         ) {
           renderCharacterListPage(app);
         } else {
@@ -348,6 +349,39 @@ export async function render(app) {
     }
   }
 
+  // Animate character modal opening
+  if (newState.showCharacterModal && newState.modalOpeningEvent) {
+    const event = newState.modalOpeningEvent;
+    // Use requestAnimationFrame to ensure the element is in the DOM before animating
+    requestAnimationFrame(() => {
+        const modalBackdrop = document.getElementById("character-modal-backdrop");
+        const modalPanel = modalBackdrop?.querySelector(".bg-gray-800");
+
+        if (modalPanel) {
+            const rect = modalPanel.getBoundingClientRect();
+            const initialScale = 0.2;
+            const modalCenterX = rect.left + rect.width / 2;
+            const modalCenterY = rect.top + rect.height / 2;
+            const initialX = event.clientX - modalCenterX;
+            const initialY = event.clientY - modalCenterY;
+
+            modalPanel.style.opacity = 0; // prevent flash
+
+            modalPanel.animate([
+                { transform: `translate(${initialX}px, ${initialY}px) scale(${initialScale})`, opacity: 0 },
+                { transform: 'translate(0, 0) scale(1)', opacity: 1 }
+            ], {
+                duration: 350,
+                easing: 'cubic-bezier(0.215, 0.610, 0.355, 1)',
+                fill: 'forwards'
+            });
+        }
+    });
+
+    // Clean up the event so it doesn't fire again
+    app.setState({ modalOpeningEvent: null });
+  }
+
   lucide.createIcons();
   setupConditionalBlur();
 }
@@ -356,6 +390,7 @@ export async function render(app) {
 
 function shouldUpdateCharacterList(oldState, newState) {
   return (
+    oldState.mobileEditModeCharacterId !== newState.mobileEditModeCharacterId ||
     oldState.selectedChatId !== newState.selectedChatId ||
     oldState.showFabMenu !== newState.showFabMenu ||
     oldState.showMobileSearch !== newState.showMobileSearch ||

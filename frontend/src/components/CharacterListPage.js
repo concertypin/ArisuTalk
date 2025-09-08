@@ -89,20 +89,44 @@ export function renderCharacterListPage(app) {
   const container = document.getElementById("character-list-page-container");
   if (!container) return;
 
+  const isEditMode = app.state.mobileEditModeCharacterId !== null;
+
+  let headerHTML = "";
+  if (isEditMode) {
+    const character = app.state.characters.find(c => c.id === app.state.mobileEditModeCharacterId);
+    headerHTML = `
+      <header id="mobile-edit-header" class="px-6 py-4 sticky top-0 bg-gray-950 z-20 animate-fade-in">
+          <div class="flex items-center justify-between">
+              <button id="cancel-edit-mode-btn" class="p-3 rounded-full hover:bg-gray-700 transition-colors">
+                  <i data-lucide="x" class="w-6 h-6 text-gray-100"></i>
+              </button>
+              <h1 class="text-xl text-white truncate">${t("characterModal.editModeTitle", { name: character?.name || "" })}</h1>
+              <button id="edit-character-btn" class="p-3 rounded-full hover:bg-gray-700 transition-colors">
+                  <i data-lucide="pencil" class="w-6 h-6 text-gray-100"></i>
+              </button>
+          </div>
+      </header>
+    `;
+  } else {
+    headerHTML = `
+      <header class="px-6 py-4 sticky top-0 bg-gray-950 z-10">
+          <div class="flex items-center justify-between">
+              <h1 class="text-3xl text-white">${t("sidebar.title")}</h1>
+              <div class="flex items-center gap-2">
+                  <button id="toggle-mobile-search-btn" class="p-3 rounded-full hover:bg-gray-700 transition-colors">
+                      <i data-lucide="search" class="w-6 h-6 text-gray-100"></i>
+                  </button>
+                  <button id="open-settings-modal-mobile" class="p-3 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
+                      <i data-lucide="settings" class="w-6 h-6 text-gray-100"></i>
+                  </button>
+              </div>
+          </div>
+      </header>
+    `;
+  }
+
   container.innerHTML = `
-    <header class="px-6 py-4  sticky top-0 bg-gray-950 z-10">
-        <div class="flex items-center justify-between">
-            <h1 class="text-3xl text-white">${t("sidebar.title")}</h1>
-            <div class="flex items-center gap-2">
-                <button id="toggle-mobile-search-btn" class="p-3 rounded-full hover:bg-gray-700 transition-colors">
-                    <i data-lucide="search" class="w-6 h-6 text-gray-100"></i>
-                </button>
-                <button id="open-settings-modal-mobile" class="p-3 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
-                    <i data-lucide="settings" class="w-6 h-6 text-gray-100"></i>
-                </button>
-            </div>
-        </div>
-    </header>
+    ${headerHTML}
     <div class="flex-1 overflow-y-auto p-4 bg-gray-900 rounded-t-[3rem]" style="scroll-behavior: smooth;">
         <div id="character-list-items" class="character-list space-y-4">
             <!-- Character items will be rendered here by renderCharacterList -->
@@ -111,7 +135,7 @@ export function renderCharacterListPage(app) {
 
     <!-- FAB Menu (conditionally rendered) -->
     ${
-      app.state.showFabMenu
+      app.state.showFabMenu && !isEditMode
         ? `
     <div class="fab-menu fixed bottom-24 right-6 w-48 bg-gray-700 rounded-2xl shadow-lg z-20 animate-fab-menu-in">
         <button id="open-new-character-modal-mobile" class="w-full flex items-center gap-3 px-4 py-3 text-white text-sm text-left rounded-2xl hover:bg-gray-600">
@@ -124,21 +148,78 @@ export function renderCharacterListPage(app) {
     }
 
     <!-- FAB Toggle -->
+    ${!isEditMode ? `
     <button id="fab-menu-toggle" class="fixed bottom-6 right-6 bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 transition-all duration-200 transform-gpu hover:scale-110 active:scale-95 z-30">
         <i data-lucide="${app.state.showFabMenu ? "x" : "plus"}" class="w-8 h-8 transition-transform duration-300 ease-in-out ${app.state.showFabMenu ? "rotate-45" : ""}"></i>
     </button>
+    ` : ''}
   `;
 
   const listContainer = container.querySelector("#character-list-items");
   renderCharacterList(app, listContainer);
 
+  let longPressTimer;
+  let touchStartX, touchStartY;
+  let longPressFired = false;
+
   listContainer.addEventListener("click", (e) => {
-    const characterItem = e.target.closest(".character-list-item");
-    if (characterItem) {
-      const characterId = characterItem.dataset.characterId;
-      if (characterId) {
-        app.handleCharacterSelect(characterId);
-      }
+    const item = e.target.closest(".character-list-item");
+    if (!item) return;
+
+    const characterId = Number(item.dataset.characterId);
+
+    if (longPressFired) {
+      e.preventDefault();
+      e.stopPropagation();
+      longPressFired = false;
+      return;
+    }
+    if (app.state.mobileEditModeCharacterId !== null) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    app.handleCharacterSelect(characterId, e);
+  });
+
+  listContainer.addEventListener("touchstart", (e) => {
+    const item = e.target.closest(".character-list-item");
+    if (!item) return;
+
+    if (app.state.mobileEditModeCharacterId !== null) return;
+
+    longPressFired = false;
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    
+    const characterId = Number(item.dataset.characterId);
+
+    longPressTimer = setTimeout(() => {
+      longPressTimer = null;
+      longPressFired = true;
+      
+      const rect = item.getBoundingClientRect();
+      const ripple = document.createElement("span");
+      ripple.className = "ripple";
+      item.appendChild(ripple);
+      ripple.style.left = `${e.touches[0].clientX - rect.left}px`;
+      ripple.style.top = `${e.touches[0].clientY - rect.top}px`;
+
+      setTimeout(() => {
+          ripple.remove();
+          app.openCharacterEditMode(characterId);
+      }, 600);
+
+    }, 500);
+  }, { passive: true });
+
+  listContainer.addEventListener("touchend", (e) => {
+    clearTimeout(longPressTimer);
+  });
+
+  listContainer.addEventListener("touchmove", (e) => {
+    if (longPressTimer && (Math.abs(e.touches[0].clientX - touchStartX) > 10 || Math.abs(e.touches[0].clientY - touchStartY) > 10)) {
+      clearTimeout(longPressTimer);
     }
   });
 }
