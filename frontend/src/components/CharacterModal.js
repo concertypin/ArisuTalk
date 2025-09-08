@@ -124,13 +124,13 @@ export function renderCharacterModal(app) {
   return `
         <div id="character-modal-backdrop" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 transition-all duration-300 ease-out">
             <div class="bg-gray-800 rounded-2xl w-full max-w-md mx-auto my-auto flex flex-col" style="max-height: 90vh;">
-                <div class="flex items-center justify-between p-6 border-b border-gray-700 shrink-0">
+                <div class="flex items-center justify-between px-6 py-2 md:p-6 border-b border-gray-700 shrink-0">
                     <h3 class="text-xl font-semibold text-white">${
                       isNew
                         ? t("characterModal.addContact")
                         : t("characterModal.editContact")
                     }</h3>
-                    <button id="close-character-modal" data-action="close-character-modal" class="p-1 hover:bg-gray-700 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
+                    <button id="close-character-modal" data-action="close-character-modal" class="p-3 md:p-1 hover:bg-gray-700 rounded-full"><i data-lucide="x" class="w-7 h-7 md:w-5 md:h-5"></i></button>
                 </div>
                 <div class="p-6 space-y-6 overflow-y-auto">
                     <div class="flex items-center space-x-4">

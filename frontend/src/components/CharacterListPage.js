@@ -163,6 +163,7 @@ export function renderCharacterListPage(app) {
   let longPressTimer;
   let touchStartX, touchStartY;
   let longPressFired = false;
+  let isTouching = false; // Flag to distinguish touch from mouse events
 
   const handleLongPress = (item, e) => {
     longPressTimer = null;
@@ -233,17 +234,35 @@ export function renderCharacterListPage(app) {
     if (!item) return;
 
     e.preventDefault();
+
+    // If triggered by touch, let the touch event handlers manage the long press.
+    // This prevents the context menu from interfering with the ripple animation.
+    if (isTouching) {
+      return;
+    }
+
+    // For desktop right-click, trigger edit mode immediately.
     const characterId = Number(item.dataset.characterId);
     app.openCharacterEditMode(characterId);
   });
 
   // Touch events
-  listContainer.addEventListener("touchstart", (e) => handlePressStart(e, true), { passive: true });
-  listContainer.addEventListener("touchend", handlePressEnd);
+  listContainer.addEventListener("touchstart", (e) => {
+    isTouching = true;
+    handlePressStart(e, true);
+  }, { passive: true });
+  listContainer.addEventListener("touchend", () => {
+    isTouching = false;
+    handlePressEnd();
+  });
   listContainer.addEventListener("touchmove", (e) => handlePressMove(e, true));
 
   // Mouse events
-  listContainer.addEventListener("mousedown", (e) => handlePressStart(e, false));
+  listContainer.addEventListener("mousedown", (e) => {
+    // Ignore mousedown if a touch is in progress
+    if (isTouching) return;
+    handlePressStart(e, false);
+  });
   listContainer.addEventListener("mouseup", handlePressEnd);
   listContainer.addEventListener("mouseleave", handlePressEnd);
   listContainer.addEventListener("mousemove", (e) => handlePressMove(e, false));
