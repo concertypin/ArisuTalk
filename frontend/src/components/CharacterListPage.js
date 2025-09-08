@@ -163,8 +163,52 @@ export function renderCharacterListPage(app) {
   renderCharacterList(app, listContainer);
 
   let longPressTimer;
-  let touchStartX, touchStartY;
+  let startX, startY;
   let longPressFired = false;
+
+  const handlePressStart = (e, isTouchEvent) => {
+    const item = e.target.closest(".character-list-item");
+    if (!item) return;
+
+    if (app.state.mobileEditModeCharacterId !== null) return;
+
+    longPressFired = false;
+    const point = isTouchEvent ? e.touches[0] : e;
+    startX = point.clientX;
+    startY = point.clientY;
+    
+    const characterId = Number(item.dataset.characterId);
+
+    longPressTimer = setTimeout(() => {
+      longPressTimer = null;
+      longPressFired = true;
+      
+      const rect = item.getBoundingClientRect();
+      const ripple = document.createElement("span");
+      ripple.className = "ripple";
+      item.appendChild(ripple);
+      ripple.style.left = `${point.clientX - rect.left}px`;
+      ripple.style.top = `${point.clientY - rect.top}px`;
+
+      setTimeout(() => {
+          ripple.remove();
+          app.openCharacterEditMode(characterId);
+      }, RIPPLE_EFFECT_DURATION_MS);
+
+    }, LONG_PRESS_DURATION_MS);
+  };
+
+  const handlePressEnd = () => {
+    clearTimeout(longPressTimer);
+  };
+
+  const handlePressMove = (e, isTouchEvent) => {
+    if (!longPressTimer) return;
+    const point = isTouchEvent ? e.touches[0] : e;
+    if (Math.abs(point.clientX - startX) > TOUCH_MOVE_THRESHOLD_PX || Math.abs(point.clientY - startY) > TOUCH_MOVE_THRESHOLD_PX) {
+      clearTimeout(longPressTimer);
+    }
+  };
 
   listContainer.addEventListener("click", (e) => {
     const item = e.target.closest(".character-list-item");
@@ -186,44 +230,12 @@ export function renderCharacterListPage(app) {
     app.handleCharacterSelect(characterId, e);
   });
 
-  listContainer.addEventListener("touchstart", (e) => {
-    const item = e.target.closest(".character-list-item");
-    if (!item) return;
+  listContainer.addEventListener("mousedown", (e) => handlePressStart(e, false));
+  listContainer.addEventListener("mouseup", handlePressEnd);
+  listContainer.addEventListener("mouseleave", handlePressEnd);
+  listContainer.addEventListener("mousemove", (e) => handlePressMove(e, false));
 
-    if (app.state.mobileEditModeCharacterId !== null) return;
-
-    longPressFired = false;
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
-    
-    const characterId = Number(item.dataset.characterId);
-
-    longPressTimer = setTimeout(() => {
-      longPressTimer = null;
-      longPressFired = true;
-      
-      const rect = item.getBoundingClientRect();
-      const ripple = document.createElement("span");
-      ripple.className = "ripple";
-      item.appendChild(ripple);
-      ripple.style.left = `${e.touches[0].clientX - rect.left}px`;
-      ripple.style.top = `${e.touches[0].clientY - rect.top}px`;
-
-      setTimeout(() => {
-          ripple.remove();
-          app.openCharacterEditMode(characterId);
-      }, RIPPLE_EFFECT_DURATION_MS);
-
-    }, LONG_PRESS_DURATION_MS);
-  }, { passive: true });
-
-  listContainer.addEventListener("touchend", (e) => {
-    clearTimeout(longPressTimer);
-  });
-
-  listContainer.addEventListener("touchmove", (e) => {
-    if (longPressTimer && (Math.abs(e.touches[0].clientX - touchStartX) > TOUCH_MOVE_THRESHOLD_PX || Math.abs(e.touches[0].clientY - touchStartY) > TOUCH_MOVE_THRESHOLD_PX)) {
-      clearTimeout(longPressTimer);
-    }
-  });
+  listContainer.addEventListener("touchstart", (e) => handlePressStart(e, true), { passive: true });
+  listContainer.addEventListener("touchend", handlePressEnd);
+  listContainer.addEventListener("touchmove", (e) => handlePressMove(e, true));
 }
