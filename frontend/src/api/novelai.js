@@ -652,7 +652,7 @@ export class NovelAIClient {
             use_order: false, 
             caption: {
               base_caption: prompt,
-              char_captions: []
+              char_captions: characterPrompts || []
             }
           },
           v4_negative_prompt: {
@@ -866,7 +866,7 @@ export class NovelAIClient {
       sm_dyn: naiSettings.sm_dyn || false,  // SMEA DYN 활성화
       
       // 캐릭터 프롬프트 (v4/v4.5 전용) - v3 모델에서는 제외
-      characterPrompts: [],
+      characterPrompts: promptData.characterPrompts,
       
       // Vibe Transfer 설정
       ...(naiSettings.vibeTransferEnabled && naiSettings.vibeTransferImage ? {
