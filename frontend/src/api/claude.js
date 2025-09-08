@@ -155,10 +155,10 @@ export class ClaudeClient {
         }
       } else {
         const reason = data.stop_reason || t("api.unknownReason");
-        console.warn(
-          "Claude Profile Gen API 응답에 유효한 content가 없습니다.",
-          data,
-        );
+        // console.warn(
+        //   "Claude Profile Gen API 응답에 유효한 content가 없습니다.",
+        //   data,
+        // );
         throw new Error(t("api.profileNotGenerated", { reason: reason }));
       }
     } catch (error) {

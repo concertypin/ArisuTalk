@@ -876,7 +876,7 @@ export function setupSettingsModalEventListeners() {
   );
   if (clearDebugLogsBtnSettings) {
     clearDebugLogsBtnSettings.addEventListener("click", () => {
-      console.log("Clear logs button clicked");
+      // console.log("Clear logs button clicked");
       window.personaApp.clearDebugLogs();
     });
   }

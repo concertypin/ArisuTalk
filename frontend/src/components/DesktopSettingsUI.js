@@ -303,7 +303,7 @@ export function setupDesktopSettingsEventListeners(app) {
   requestAnimationFrame(() => {
     // 네비게이션 패널 전환
     const panelButtons = document.querySelectorAll("[data-panel]");
-    console.log("Found panel buttons:", panelButtons.length); // 디버그 로그
+    // console.log("Found panel buttons:", panelButtons.length); // 디버그 로그
 
     panelButtons.forEach((button) => {
       // 이미 이벤트 리스너가 추가된 경우 제거
@@ -316,7 +316,7 @@ export function setupDesktopSettingsEventListeners(app) {
         e.preventDefault();
         e.stopPropagation();
         const panelId = e.currentTarget.dataset.panel;
-        console.log("Panel clicked:", panelId); // 디버그 로그
+        // console.log("Panel clicked:", panelId); // 디버그 로그
 
         if (panelId) {
           // 상태 업데이트
@@ -392,7 +392,7 @@ export function setupDesktopSettingsEventListeners(app) {
     const apiProviderSelect = document.getElementById("settings-api-provider");
     if (apiProviderSelect && !apiProviderSelect.dataset.listenerAdded) {
       apiProviderSelect.addEventListener("change", (e) => {
-        console.log("API Provider changed to:", e.target.value);
+        // console.log("API Provider changed to:", e.target.value);
         app.handleAPIProviderChange(e.target.value);
       });
       apiProviderSelect.dataset.listenerAdded = "true";
@@ -402,7 +402,7 @@ export function setupDesktopSettingsEventListeners(app) {
     const viewDebugLogsBtn = document.getElementById("view-debug-logs");
     if (viewDebugLogsBtn && !viewDebugLogsBtn.dataset.listenerAdded) {
       viewDebugLogsBtn.addEventListener("click", () => {
-        console.log("View logs button clicked");
+        // console.log("View logs button clicked");
         app.setState({
           showSettingsModal: false,
           showDebugLogsModal: true,
@@ -414,7 +414,7 @@ export function setupDesktopSettingsEventListeners(app) {
     const clearDebugLogsBtn = document.getElementById("clear-debug-logs-btn");
     if (clearDebugLogsBtn && !clearDebugLogsBtn.dataset.listenerAdded) {
       clearDebugLogsBtn.addEventListener("click", () => {
-        console.log("Clear logs button clicked");
+        // console.log("Clear logs button clicked");
         app.clearDebugLogs();
       });
       clearDebugLogsBtn.dataset.listenerAdded = "true";

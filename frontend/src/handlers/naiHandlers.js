@@ -175,8 +175,8 @@ function handlePreferredSizeChange(app, size) {
   const naiSettings = { ...(app.state.settings.naiSettings || {}) };
   naiSettings.preferredSize = size;
   
-  console.log('[NAI] 이미지 크기 변경:', size);
-  console.log('[NAI] 변경 후 naiSettings:', naiSettings);
+  // console.log('[NAI] 이미지 크기 변경:', size);
+  // console.log('[NAI] 변경 후 naiSettings:', naiSettings);
   
   app.setState({
     settings: {
@@ -257,7 +257,7 @@ function setupProgressModalEvents(app, progressState) {
   if (retryButton) {
     retryButton.addEventListener('click', () => {
       // 재시도 로직 구현 (나중에 추가)
-      console.log('재시도 기능은 추후 구현됩니다.');
+      // console.log('재시도 기능은 추후 구현됩니다.');
     });
   }
 
@@ -265,7 +265,7 @@ function setupProgressModalEvents(app, progressState) {
   const cancelButton = document.getElementById('cancel-sticker-generation');
   if (cancelButton) {
     cancelButton.addEventListener('click', () => {
-      console.log('[NAI] 스티커 생성 취소 요청');
+      // console.log('[NAI] 스티커 생성 취소 요청');
       if (app.stickerManager && app.stickerManager.naiClient) {
         const cancelled = app.stickerManager.naiClient.cancelGeneration();
         if (cancelled) {
@@ -274,7 +274,7 @@ function setupProgressModalEvents(app, progressState) {
           if (modal) modal.remove();
           
           // 알림 표시 (선택사항)
-          console.log('[NAI] 스티커 생성이 취소되었습니다');
+          // console.log('[NAI] 스티커 생성이 취소되었습니다');
         }
       }
     });
@@ -682,7 +682,7 @@ export async function handleAutoStickerGeneration(app, character, messageContent
   try {
     const emotion = app.stickerManager.analyzeEmotion(messageContent);
     if (emotion && app.stickerManager.shouldGenerateSticker(character, emotion)) {
-      console.log(`[NAI] ${character.name}의 ${emotion} 스티커 자동 생성 시작...`);
+      // console.log(`[NAI] ${character.name}의 ${emotion} 스티커 자동 생성 시작...`);
       
       // 백그라운드에서 생성 (UI 블로킹하지 않음)
       app.stickerManager.autoGenerateSticker(character, emotion)

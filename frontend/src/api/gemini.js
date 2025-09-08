@@ -209,15 +209,15 @@ export class GeminiClient {
           );
         }
       } else {
-        console.warn("API 응답에 유효한 content가 없습니다.", data);
-        console.log("Candidates array:", data.candidates);
-        console.log("Candidates length:", data.candidates?.length);
+        // console.warn("API 응답에 유효한 content가 없습니다.", data);
+        // console.log("Candidates array:", data.candidates);
+        // console.log("Candidates length:", data.candidates?.length);
         if (data.candidates && data.candidates.length > 0) {
-          console.log("First candidate content:", data.candidates[0]?.content);
-          console.log(
-            "First candidate parts:",
-            data.candidates[0]?.content?.parts,
-          );
+          // console.log("First candidate content:", data.candidates[0]?.content);
+          // console.log(
+          //   "First candidate parts:",
+          //   data.candidates[0]?.content?.parts,
+          // );
         }
 
         const reason =
@@ -362,15 +362,15 @@ export class GeminiClient {
           );
         }
       } else {
-        console.warn("Profile Gen API 응답에 유효한 content가 없습니다.", data);
-        console.log("Candidates array:", data.candidates);
-        console.log("Candidates length:", data.candidates?.length);
+        // console.warn("Profile Gen API 응답에 유효한 content가 없습니다.", data);
+        // console.log("Candidates array:", data.candidates);
+        // console.log("Candidates length:", data.candidates?.length);
         if (data.candidates && data.candidates.length > 0) {
-          console.log("First candidate content:", data.candidates[0]?.content);
-          console.log(
-            "First candidate parts:",
-            data.candidates[0]?.content?.parts,
-          );
+          // console.log("First candidate content:", data.candidates[0]?.content);
+          // console.log(
+          //   "First candidate parts:",
+          //   data.candidates[0]?.content?.parts,
+          // );
         }
 
         const reason =
@@ -469,7 +469,7 @@ export class GeminiClient {
           reactionDelay: 1000, // Standard delay
         };
       } else {
-        console.warn("Character Sheet Gen API 응답에 유효한 content가 없습니다.", data);
+        // console.warn("Character Sheet Gen API 응답에 유효한 content가 없습니다.", data);
         const reason =
           data.promptFeedback?.blockReason ||
           data.candidates?.[0]?.finishReason ||

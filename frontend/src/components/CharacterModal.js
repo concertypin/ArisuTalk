@@ -66,12 +66,12 @@ export function renderStickerGrid(app, stickers) {
       } else {
         // 디버깅: 스티커 렌더링 시 데이터 확인
         if (!sticker.dataUrl || !sticker.dataUrl.startsWith('data:image/')) {
-          console.warn('[CharacterModal] 잘못된 스티커 dataUrl:', {
-            name: sticker.name,
-            id: sticker.id,
-            hasDataUrl: !!sticker.dataUrl,
-            dataUrlPrefix: sticker.dataUrl?.substring(0, 50) + '...'
-          });
+          // console.warn('[CharacterModal] 잘못된 스티커 dataUrl:', {
+          //   name: sticker.name,
+          //   id: sticker.id,
+          //   hasDataUrl: !!sticker.dataUrl,
+          //   dataUrlPrefix: sticker.dataUrl?.substring(0, 50) + '...'
+          // });
         }
         
         content = `

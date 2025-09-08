@@ -105,7 +105,7 @@ export class SecureStorageManager {
    */
   async saveApiConfigs(apiConfigs) {
     if (!this.masterPassword) {
-      console.warn(t("secureStorage.noMasterPasswordForEncryption"));
+      // console.warn(t("secureStorage.noMasterPasswordForEncryption"));
       return;
     }
 
@@ -125,7 +125,7 @@ export class SecureStorageManager {
    */
   async loadApiConfigs() {
     if (!this.masterPassword) {
-      console.warn(t("secureStorage.noMasterPasswordForDecryption"));
+      // console.warn(t("secureStorage.noMasterPasswordForDecryption"));
       return {};
     }
 

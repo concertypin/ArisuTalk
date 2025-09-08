@@ -354,7 +354,7 @@ class PersonaChatApp {
       snsPosts: [...(character.snsPosts || []), newPost]
     };
     
-    console.log(`[Auto Post] ${character.name} (${newPost.type}): ${newPost.content}`);
+// console.log(`[Auto Post] ${character.name} (${newPost.type}): ${newPost.content}`);
     return updatedCharacter;
   }
 
@@ -404,7 +404,7 @@ class PersonaChatApp {
     });
     
     if (migrationNeeded) {
-      console.log('[Migration] 메모리를 SNS 포스트로 마이그레이션했습니다.');
+// console.log('[Migration] 메모리를 SNS 포스트로 마이그레이션했습니다.');
       this.shouldSaveCharacters = true;
     }
     
@@ -452,8 +452,8 @@ class PersonaChatApp {
         id: Number(char.id),
       }));
       this.state.chatRooms = chatRooms;
-      console.log('[ChatRooms loaded]:', Object.keys(chatRooms).length, 'rooms');
-      console.log('[ChatRooms data]:', chatRooms);
+// console.log('[ChatRooms loaded]:', Object.keys(chatRooms).length, 'rooms');
+// console.log('[ChatRooms data]:', chatRooms);
       this.state.messages = messages;
       this.state.unreadCounts = unreadCounts;
       this.state.userStickers = userStickers;
@@ -543,7 +543,7 @@ class PersonaChatApp {
       if (JSON.stringify(this.oldState.settings.naiSettings) !== JSON.stringify(this.state.settings.naiSettings)) {
         if (this.stickerManager) {
           this.stickerManager.initializeNAI();
-          console.log('[NAI] NAI 설정 변경 감지, 클라이언트 재초기화');
+// console.log('[NAI] NAI 설정 변경 감지, 클라이언트 재초기화');
         }
       }
     }
@@ -669,7 +669,7 @@ class PersonaChatApp {
       if (JSON.stringify(this.oldState.settings.naiSettings) !== JSON.stringify(this.state.settings.naiSettings)) {
         if (this.stickerManager) {
           this.stickerManager.initializeNAI();
-          console.log('[NAI] NAI 설정 변경 감지, 클라이언트 재초기화');
+// console.log('[NAI] NAI 설정 변경 감지, 클라이언트 재초기화');
         }
       }
     }
@@ -685,18 +685,18 @@ class PersonaChatApp {
     const newChatRoomsStr = JSON.stringify(this.state.chatRooms);
     const chatRoomsChanged = oldChatRoomsStr !== newChatRoomsStr;
     
-    console.log('[DEBUG] ChatRooms comparison:');
-    console.log('  - Old length:', oldChatRoomsStr.length);
-    console.log('  - New length:', newChatRoomsStr.length);
-    console.log('  - Are different:', chatRoomsChanged);
-    console.log('  - Old keys:', this.oldState.chatRooms ? Object.keys(this.oldState.chatRooms) : []);
-    console.log('  - New keys:', this.state.chatRooms ? Object.keys(this.state.chatRooms) : []);
+// console.log('[DEBUG] ChatRooms comparison:');
+// console.log('  - Old length:', oldChatRoomsStr.length);
+// console.log('  - New length:', newChatRoomsStr.length);
+// console.log('  - Are different:', chatRoomsChanged);
+// console.log('  - Old keys:', this.oldState.chatRooms ? Object.keys(this.oldState.chatRooms) : []);
+// console.log('  - New keys:', this.state.chatRooms ? Object.keys(this.state.chatRooms) : []);
     
     if (chatRoomsChanged) {
-      console.log('[DEBUG] ChatRooms changed, saving...');
+// console.log('[DEBUG] ChatRooms changed, saving...');
       this.debouncedSaveChatRooms(this.state.chatRooms);
     } else {
-      console.log('[DEBUG] ChatRooms NOT changed, skipping save');
+// console.log('[DEBUG] ChatRooms NOT changed, skipping save');
     }
     if (
       JSON.stringify(this.oldState.messages) !==
@@ -889,15 +889,15 @@ class PersonaChatApp {
       elements.forEach(element => element.remove());
     });
     
-    console.log('[Overlay] 기존 오버레이들 정리 완료');
+// console.log('[Overlay] 기존 오버레이들 정리 완료');
   }
   
   // 강제 재초기화 메서드 (디버깅용)
   forceReinitialize() {
-    console.log('[Debug] 강제 재초기화 실행');
+// console.log('[Debug] 강제 재초기화 실행');
     this.cleanupOverlays();
     this.addEventListeners();
-    console.log('[Debug] 재초기화 완료');
+// console.log('[Debug] 재초기화 완료');
   }
 
   // --- EVENT LISTENERS ---
@@ -935,7 +935,7 @@ class PersonaChatApp {
           const characterId = textarea.dataset.characterId;
           const postId = textarea.dataset.postId;
           const newContent = textarea.value.trim();
-          console.log('Save button clicked:', characterId, postId, newContent);
+// console.log('Save button clicked:', characterId, postId, newContent);
           this.saveSNSEdit(characterId, postId, newContent);
         }
         return;
@@ -948,7 +948,7 @@ class PersonaChatApp {
         if (textarea) {
           const characterId = textarea.dataset.characterId;
           const postId = textarea.dataset.postId;
-          console.log('Cancel button clicked:', characterId, postId);
+// console.log('Cancel button clicked:', characterId, postId);
           this.cancelSNSEdit(characterId, postId);
         }
         return;
@@ -1543,7 +1543,7 @@ class PersonaChatApp {
   }
 
   openEditCharacterModal(character) {
-    console.log('[Edit Character] 편집 시작, NAI 설정:', character.naiSettings);
+// console.log('[Edit Character] 편집 시작, NAI 설정:', character.naiSettings);
     this.setState({
       editingCharacter: { 
         ...character, 
@@ -1558,12 +1558,12 @@ class PersonaChatApp {
     // 모달이 렌더링된 후 실제 호감도 수치를 표시하도록 업데이트
     setTimeout(() => {
       let characterState = this.state.characterStates[character.id];
-      console.log('[최면] openCharacterModal에서 호출:', characterState);
+// console.log('[최면] openCharacterModal에서 호출:', characterState);
       
       // 캐릭터 상태가 없으면 기본값으로 생성
       if (!characterState) {
         console.warn('[최면] characterState가 없음, 기본값 생성:', character.id);
-        console.log('[최면] 사용 가능한 characterStates:', Object.keys(this.state.characterStates));
+// console.log('[최면] 사용 가능한 characterStates:', Object.keys(this.state.characterStates));
         
         characterState = {
           affection: 0.2,
@@ -1916,7 +1916,7 @@ class PersonaChatApp {
       naiSettings: this.state.editingCharacter?.naiSettings || {}
     };
 
-    console.log('[Save Character] NAI 설정 저장:', characterData.naiSettings);
+// console.log('[Save Character] NAI 설정 저장:', characterData.naiSettings);
 
     const characterDataString = JSON.stringify(characterData);
     const storageCheck = await checkIndexedDBQuota(
@@ -1941,7 +1941,7 @@ class PersonaChatApp {
       
       // 저장된 캐릭터의 NAI 설정 확인
       const savedCharacter = updatedCharacters.find(c => c.id === this.state.editingCharacter.id);
-      console.log('[Save Character] 저장 완료, NAI 설정 확인:', savedCharacter?.naiSettings);
+// console.log('[Save Character] 저장 완료, NAI 설정 확인:', savedCharacter?.naiSettings);
       
       this.shouldSaveCharacters = true;
       this.setState({ characters: updatedCharacters });
@@ -2022,20 +2022,20 @@ class PersonaChatApp {
       button.disabled = true;
       button.innerHTML = '<i data-lucide="loader" class="w-3 h-3 animate-spin pointer-events-none"></i> 테스트 중...';
       
-      console.log('[Test] 외모 프롬프트 테스트 시작:', appearance);
-      console.log('[Test] NAI Client 상태:', this.stickerManager.naiClient);
-      console.log('[Test] Test Character:', testCharacter);
+// console.log('[Test] 외모 프롬프트 테스트 시작:', appearance);
+// console.log('[Test] NAI Client 상태:', this.stickerManager.naiClient);
+// console.log('[Test] Test Character:', testCharacter);
       
       // happy 감정으로 테스트 스티커 생성
       const result = await this.stickerManager.naiClient.generateSticker(testCharacter, 'happy', {
         naiSettings: this.state.settings.naiSettings || {}
       });
 
-      console.log('[Test] 생성 결과:', result);
+// console.log('[Test] 생성 결과:', result);
 
       // generateSticker는 성공 시 스티커 객체를 직접 반환
       if (result && result.dataUrl) {
-        console.log('[Test] 외모 프롬프트 테스트 성공');
+// console.log('[Test] 외모 프롬프트 테스트 성공');
         
         // 이미지 실제 크기 확인
         const img = new Image();
@@ -2791,12 +2791,12 @@ class PersonaChatApp {
     if (response.autoGenerateSticker && character.naiSettings?.autoGenerate) {
       const emotion = response.autoGenerateSticker.emotion;
       if (emotion) {
-        console.log(`[NAI Auto] ${character.name}의 ${emotion} 감정 감지, 스티커 자동 생성 시작`);
+// console.log(`[NAI Auto] ${character.name}의 ${emotion} 감정 감지, 스티커 자동 생성 시작`);
         
         // 비동기로 스티커 생성 (UI 차단 방지)
         this.stickerManager.autoGenerateSticker(character, emotion).then(sticker => {
           if (sticker) {
-            console.log(`[NAI Auto] ${character.name}의 ${emotion} 스티커 생성 완료`);
+// console.log(`[NAI Auto] ${character.name}의 ${emotion} 스티커 생성 완료`);
             
             // 스티커를 새 메시지로 추가
             const stickerMessage = {
@@ -3118,12 +3118,12 @@ class PersonaChatApp {
     if (response.autoGenerateSticker && character.naiSettings?.autoGenerate) {
       const emotion = response.autoGenerateSticker.emotion;
       if (emotion) {
-        console.log(`[NAI Auto] ${character.name}의 ${emotion} 감정 감지, 스티커 자동 생성 시작`);
+// console.log(`[NAI Auto] ${character.name}의 ${emotion} 감정 감지, 스티커 자동 생성 시작`);
         
         // 비동기로 스티커 생성 (UI 차단 방지)
         this.stickerManager.autoGenerateSticker(character, emotion).then(sticker => {
           if (sticker) {
-            console.log(`[NAI Auto] ${character.name}의 ${emotion} 스티커 생성 완료`);
+// console.log(`[NAI Auto] ${character.name}의 ${emotion} 스티커 생성 완료`);
             
             // 스티커를 새 메시지로 추가
             const stickerMessage = {
@@ -3370,7 +3370,7 @@ class PersonaChatApp {
       if (Math.random() > Math.min(0.8, leaveChance)) {
         remainingParticipants.push(participantId);
       } else {
-        console.log(`${character.name} left open chat due to low energy/mood`);
+// console.log(`${character.name} left open chat due to low energy/mood`);
         this.characterLeaveOpenChat(openChatId, participantId, "tired");
       }
     }
@@ -3387,7 +3387,7 @@ class PersonaChatApp {
           availableCharacters[
           Math.floor(Math.random() * availableCharacters.length)
           ];
-        console.log(`${newParticipant.name} joined open chat randomly`);
+// console.log(`${newParticipant.name} joined open chat randomly`);
         this.characterJoinOpenChat(openChatId, newParticipant.id, false);
       }
     }
@@ -3446,8 +3446,8 @@ class PersonaChatApp {
   updateCharacterState(characterId, characterState) {
     if (!characterState) return;
 
-    console.log(`[호감도 저장] updateCharacterState 호출됨:`, { characterId, characterState });
-    console.log(`[호감도 저장] 기존 characterStates:`, this.state.characterStates);
+// console.log(`[호감도 저장] updateCharacterState 호출됨:`, { characterId, characterState });
+// console.log(`[호감도 저장] 기존 characterStates:`, this.state.characterStates);
 
     // romantic_interest만 조건 확인하여 제한
     if (characterState.romantic_interest !== undefined) {
@@ -3459,7 +3459,7 @@ class PersonaChatApp {
               existing.trust >= minRequiredLevel)) {
           // 조건 미충족시 romantic_interest 변화를 기존 값으로 고정
           characterState.romantic_interest = existing.romantic_interest;
-          console.log(`[호감도] ${characterId}: romantic_interest 증가 조건 미충족`);
+// console.log(`[호감도] ${characterId}: romantic_interest 증가 조건 미충족`);
         }
       }
     }
@@ -3471,8 +3471,8 @@ class PersonaChatApp {
       lastActivity: Date.now(),
     };
 
-    console.log(`[호감도 저장] 새로운 characterStates 저장:`, newCharacterStates);
-    console.log(`[호감도 저장] 해당 캐릭터 최종 상태:`, newCharacterStates[characterId]);
+// console.log(`[호감도 저장] 새로운 characterStates 저장:`, newCharacterStates);
+// console.log(`[호감도 저장] 해당 캐릭터 최종 상태:`, newCharacterStates[characterId]);
     
     this.setState({ characterStates: newCharacterStates });
     saveToBrowserStorage("personaChat_characterStates_v16", newCharacterStates);
@@ -3481,7 +3481,7 @@ class PersonaChatApp {
     if (this.state.showCharacterModal && this.state.editingCharacter?.id === characterId) {
       // setState 이후 DOM이 업데이트될 때까지 기다린 후 최면 표시 값 업데이트
       setTimeout(() => {
-        console.log(`[최면] ${characterId} 캐릭터 상태 업데이트:`, newCharacterStates[characterId]);
+// console.log(`[최면] ${characterId} 캐릭터 상태 업데이트:`, newCharacterStates[characterId]);
         this.updateHypnosisDisplayValues(newCharacterStates[characterId]);
       }, 100);
     }
@@ -3665,7 +3665,7 @@ class PersonaChatApp {
         updatedCharacters[charIndex] = this.processAutoPost(charToUpdate, legacyMemoryPost);
         this.shouldSaveCharacters = true;
         this.setState({ characters: updatedCharacters });
-        console.log('[Saving] Memory → SNS Post, saving characters...');
+// console.log('[Saving] Memory → SNS Post, saving characters...');
         saveToBrowserStorage("personaChat_characters_v16", updatedCharacters);
         console.log(
           `[Memory → SNS Post] for ${charToUpdate.name}: ${memoryContent}`,
@@ -3685,7 +3685,7 @@ class PersonaChatApp {
         updatedCharacters[charIndex] = this.processAutoPost(charToUpdate, response.autoPost);
         this.shouldSaveCharacters = true;
         this.setState({ characters: updatedCharacters });
-        console.log('[Saving] autoPost, saving characters...');
+// console.log('[Saving] autoPost, saving characters...');
         saveToBrowserStorage("personaChat_characters_v16", updatedCharacters);
       }
     }
@@ -3695,13 +3695,13 @@ class PersonaChatApp {
     if (response.autoGenerateSticker && character.naiSettings?.autoGenerate) {
       const emotion = response.autoGenerateSticker.emotion;
       if (emotion) {
-        console.log(`[NAI Auto] ${character.name}의 ${emotion} 감정 감지, 스티커 자동 생성 시작`);
+// console.log(`[NAI Auto] ${character.name}의 ${emotion} 감정 감지, 스티커 자동 생성 시작`);
         
         // 스티커 생성 Promise 저장 (나중에 메시지 추가)
         naiStickerPromise = this.stickerManager.autoGenerateSticker(character, emotion)
           .then(sticker => {
             if (sticker) {
-              console.log(`[NAI Auto] ${character.name}의 ${emotion} 스티커 생성 완료`);
+// console.log(`[NAI Auto] ${character.name}의 ${emotion} 스티커 생성 완료`);
               return {
                 id: Date.now() + Math.random(),
                 sender: character.name,
@@ -3842,11 +3842,11 @@ class PersonaChatApp {
         if (emotion && situationPrompt) {
           // AI가 생성한 독특한 상황 프롬프트로 NAI 스티커 생성
           this.handleAIGeneratedNAISticker(character, emotion, situationPrompt).catch(error => {
-            console.log('NAI AI 스티커 생성 실패 (무시됨):', error);
+// console.log('NAI AI 스티커 생성 실패 (무시됨):', error);
           });
         }
       } catch (error) {
-        console.log('NAI AI 스티커 생성 중 오류 (무시됨):', error);
+// console.log('NAI AI 스티커 생성 중 오류 (무시됨):', error);
       }
     }
   }
@@ -3881,7 +3881,7 @@ class PersonaChatApp {
         eligibleCharacters[
         Math.floor(Math.random() * eligibleCharacters.length)
         ];
-      console.log(`[Proactive] Sending message from ${character.name}`);
+// console.log(`[Proactive] Sending message from ${character.name}`);
       await this.handleProactiveMessage(character);
     }
   }
@@ -4266,7 +4266,7 @@ class PersonaChatApp {
     const targetMessage = messages.find(msg => msg.id === messageId);
     
     if (!targetMessage || targetMessage.isMe) {
-      console.log('[SNS Force] 사용자 메시지에는 SNS 포스트를 생성할 수 없습니다');
+// console.log('[SNS Force] 사용자 메시지에는 SNS 포스트를 생성할 수 없습니다');
       return;
     }
 
@@ -4279,12 +4279,12 @@ class PersonaChatApp {
     }
 
     if (!character) {
-      console.log('[SNS Force] 캐릭터를 찾을 수 없습니다. chatId:', chatId, 'sender:', targetMessage?.sender);
+// console.log('[SNS Force] 캐릭터를 찾을 수 없습니다. chatId:', chatId, 'sender:', targetMessage?.sender);
       return;
     }
 
     try {
-      console.log(`[SNS Force] ${character.name}의 SNS 포스트 강제 생성 시작`);
+// console.log(`[SNS Force] ${character.name}의 SNS 포스트 강제 생성 시작`);
       
       // 현재 사용자 정보 안전하게 가져오기
       const currentPersona = this.state.personas?.[this.state.selectedPersona] || { name: "User" };
@@ -4340,11 +4340,11 @@ class PersonaChatApp {
         }
       };
 
-      console.log('[SNS Force] API 호출 정보:');
-      console.log('- URL:', apiUrl);
-      console.log('- Model:', model);
-      console.log('- API Key 길이:', apiKey?.length);
-      console.log('- Payload:', payload);
+// console.log('[SNS Force] API 호출 정보:');
+// console.log('- URL:', apiUrl);
+// console.log('- Model:', model);
+// console.log('- API Key 길이:', apiKey?.length);
+// console.log('- Payload:', payload);
 
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -4354,28 +4354,28 @@ class PersonaChatApp {
         body: JSON.stringify(payload)
       });
 
-      console.log('[SNS Force] Response 상태:', response.status, response.statusText);
+// console.log('[SNS Force] Response 상태:', response.status, response.statusText);
 
       if (!response.ok) {
         throw new Error(`Gemini API 호출 실패: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log('[SNS Force] 전체 API 응답:', data);
-      console.log('[SNS Force] 응답 구조 분석:', JSON.stringify(data, null, 2));
+// console.log('[SNS Force] 전체 API 응답:', data);
+// console.log('[SNS Force] 응답 구조 분석:', JSON.stringify(data, null, 2));
       
       const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      console.log('[SNS Force] 추출된 텍스트:', responseText);
+// console.log('[SNS Force] 추출된 텍스트:', responseText);
 
       if (!responseText) {
-        console.log('[SNS Force] 응답 텍스트가 없습니다. 응답 구조 상세 확인:');
-        console.log('- candidates:', data.candidates);
-        console.log('- candidates[0]:', data.candidates?.[0]);
-        console.log('- candidates[0].content:', data.candidates?.[0]?.content);
-        console.log('- candidates[0].content.parts:', data.candidates?.[0]?.content?.parts);
-        console.log('- candidates[0].finishReason:', data.candidates?.[0]?.finishReason);
-        console.log('- candidates[0].safetyRatings:', data.candidates?.[0]?.safetyRatings);
-        console.log('- error:', data.error);
+// console.log('[SNS Force] 응답 텍스트가 없습니다. 응답 구조 상세 확인:');
+// console.log('- candidates:', data.candidates);
+// console.log('- candidates[0]:', data.candidates?.[0]);
+// console.log('- candidates[0].content:', data.candidates?.[0]?.content);
+// console.log('- candidates[0].content.parts:', data.candidates?.[0]?.content?.parts);
+// console.log('- candidates[0].finishReason:', data.candidates?.[0]?.finishReason);
+// console.log('- candidates[0].safetyRatings:', data.candidates?.[0]?.safetyRatings);
+// console.log('- error:', data.error);
         throw new Error('Gemini API에서 텍스트 응답을 받지 못했습니다.');
       }
 
@@ -4393,11 +4393,11 @@ class PersonaChatApp {
             cleanText = cleanText.replace(/^```[a-zA-Z]*\s*/, '').replace(/\s*```$/, '');
           }
           
-          console.log('[SNS Force] 정리된 텍스트:', cleanText);
+// console.log('[SNS Force] 정리된 텍스트:', cleanText);
           parsedResponse = JSON.parse(cleanText);
         } catch (e) {
-          console.log('[SNS Force] JSON 파싱 실패, 텍스트에서 JSON 추출 시도');
-          console.log('[SNS Force] 원본 텍스트:', responseText);
+// console.log('[SNS Force] JSON 파싱 실패, 텍스트에서 JSON 추출 시도');
+// console.log('[SNS Force] 원본 텍스트:', responseText);
           
           // JSON 부분만 추출 시도 (더 강력한 정규식)
           const jsonMatch = responseText.match(/\{[\s\S]*?\}/);
@@ -4407,7 +4407,7 @@ class PersonaChatApp {
               
               // JSON이 잘렸는지 확인하고 기본 구조 완성 시도
               if (!jsonText.includes('"tags"') || !jsonText.endsWith('}')) {
-                console.log('[SNS Force] JSON이 잘린 것 같음. 기본 구조로 복구 시도');
+// console.log('[SNS Force] JSON이 잘린 것 같음. 기본 구조로 복구 시도');
                 
                 // 기본 autoPost 구조 생성
                 const fallbackPost = {
@@ -4425,10 +4425,10 @@ class PersonaChatApp {
                 parsedResponse = JSON.parse(jsonText);
               }
             } catch (e2) {
-              console.log('[SNS Force] JSON 추출 후 파싱도 실패:', e2.message);
+// console.log('[SNS Force] JSON 추출 후 파싱도 실패:', e2.message);
               
               // 최후 수단: 기본 autoPost 생성
-              console.log('[SNS Force] 기본 SNS 포스트로 대체');
+// console.log('[SNS Force] 기본 SNS 포스트로 대체');
               parsedResponse = {
                 autoPost: {
                   type: "post",
@@ -4457,7 +4457,7 @@ class PersonaChatApp {
           this.setState({ characters: updatedCharacters });
           saveToBrowserStorage("personaChat_characters_v16", updatedCharacters);
           
-          console.log(`[SNS Force] ${character.name}의 SNS 포스트가 생성되었습니다:`, parsedResponse.autoPost.content);
+// console.log(`[SNS Force] ${character.name}의 SNS 포스트가 생성되었습니다:`, parsedResponse.autoPost.content);
           
           // 사용자에게 알림
           this.showInfoModal(
@@ -4466,14 +4466,14 @@ class PersonaChatApp {
           );
         }
       } else {
-        console.log('[SNS Force] autoPost가 응답에 없습니다:', parsedResponse);
+// console.log('[SNS Force] autoPost가 응답에 없습니다:', parsedResponse);
         this.showInfoModal(
           'SNS 포스트 생성 실패',
           'SNS 포스트 생성에 실패했습니다. 다시 시도해주세요.'
         );
       }
       
-      console.log(`[SNS Force] ${character.name}의 SNS 포스트 강제 생성 완료`);
+// console.log(`[SNS Force] ${character.name}의 SNS 포스트 강제 생성 완료`);
       
     } catch (error) {
       console.error('[SNS Force] SNS 포스트 생성 실패:', error);
@@ -4490,7 +4490,7 @@ class PersonaChatApp {
     const targetMessage = messages.find(msg => msg.id === messageId);
     
     if (!targetMessage || targetMessage.isMe) {
-      console.log('[NAI Force] 사용자 메시지에는 NAI 스티커를 생성할 수 없습니다');
+// console.log('[NAI Force] 사용자 메시지에는 NAI 스티커를 생성할 수 없습니다');
       return;
     }
 
@@ -4501,7 +4501,7 @@ class PersonaChatApp {
     }
 
     if (!character) {
-      console.log('[NAI Force] 캐릭터를 찾을 수 없습니다. chatId:', chatId, 'sender:', targetMessage?.sender);
+// console.log('[NAI Force] 캐릭터를 찾을 수 없습니다. chatId:', chatId, 'sender:', targetMessage?.sender);
       return;
     }
 
@@ -4509,7 +4509,7 @@ class PersonaChatApp {
     const currentPersona = this.state.personas?.[this.state.selectedPersona] || { name: "User" };
     
     try {
-      console.log(`[NAI Force] ${character.name}의 AI 기반 스티커 생성 시작`);
+// console.log(`[NAI Force] ${character.name}의 AI 기반 스티커 생성 시작`);
       
       // 1단계: NAI 스티커 프롬프트로 감정과 상황 분석
       const recentConversation = messages.slice(-3).map(msg => `${msg.sender}: ${msg.content}`).join('\n');
@@ -4548,7 +4548,7 @@ class PersonaChatApp {
         }
       };
 
-      console.log('[NAI Force] AI 감정 분석 호출 중...');
+// console.log('[NAI Force] AI 감정 분석 호출 중...');
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -4576,8 +4576,8 @@ class PersonaChatApp {
       const parsedResponse = JSON.parse(cleanedText);
       const { emotion, situationPrompt } = parsedResponse.naiSticker;
 
-      console.log(`[NAI Force] 생성된 감정: ${emotion}`);
-      console.log(`[NAI Force] 생성된 상황: ${situationPrompt}`);
+// console.log(`[NAI Force] 생성된 감정: ${emotion}`);
+// console.log(`[NAI Force] 생성된 상황: ${situationPrompt}`);
 
       // 2단계: 기존 NAI API 클라이언트를 사용하여 이미지 생성
       const naiApiKey = character.naiSettings?.apiKey || this.state.settings?.naiSettings?.apiKey;
@@ -4607,11 +4607,11 @@ class PersonaChatApp {
         width: charNAISettings.width || globalNAISettings.width || 1024,
         height: charNAISettings.height || globalNAISettings.height || 1024,
         steps: charNAISettings.steps || globalNAISettings.steps || 28,
-        scale: charNAISettings.scale || globalNAISettings.scale || 5.0,
+        scale: charNAISettings.scale || globalNAISettings.scale || 3.0,
         sampler: charNAISettings.sampler || globalNAISettings.sampler || 'k_euler'
       };
 
-      console.log(`[NAI Force] NAI 생성 파라미터:`, generationParams);
+// console.log(`[NAI Force] NAI 생성 파라미터:`, generationParams);
 
       // NAI 클라이언트로 이미지 생성
       const naiResult = await naiClient.generateImage(generationParams);
@@ -4652,7 +4652,7 @@ class PersonaChatApp {
       this.setState({ messages: updatedMessages });
       saveToBrowserStorage("personaChat_messages_v16", updatedMessages);
       
-      console.log(`[NAI Force] ${character.name}의 AI 기반 스티커 생성 및 표시 완료`);
+// console.log(`[NAI Force] ${character.name}의 AI 기반 스티커 생성 및 표시 완료`);
 
     } catch (error) {
       console.error('[NAI Force] NAI 스티커 생성 실패:', error);
@@ -6437,7 +6437,7 @@ class PersonaChatApp {
   async initializeSecureStorage() {
     try {
       await secureStorage.initialize();
-      console.log("Secure storage initialized");
+// console.log("Secure storage initialized");
     } catch (error) {
       console.error("Failed to initialize secure storage:", error);
     }
@@ -6526,7 +6526,7 @@ class PersonaChatApp {
       // Re-initialize secure storage for next use
       await this.initializeSecureStorage();
 
-      console.log("All application data has been reset");
+// console.log("All application data has been reset");
     } catch (error) {
       console.error("Failed to reset all data:", error);
       throw new Error("데이터 초기화 중 오류가 발생했습니다: " + error.message);
@@ -6565,7 +6565,7 @@ class PersonaChatApp {
         trust: hypnosis.trust !== null ? hypnosis.trust : state.trust,
         romantic_interest: hypnosis.romantic_interest !== null ? hypnosis.romantic_interest : state.romantic_interest
       };
-      console.log(`[SNS 접근] 최면 호감도 값 사용:`, state);
+// console.log(`[SNS 접근] 최면 호감도 값 사용:`, state);
     }
     
     console.log(`[SNS 접근] 캐릭터 ${character.id} 접근 확인:`, {
@@ -6586,11 +6586,11 @@ class PersonaChatApp {
       });
       
       if (hypnosis.sns_full_access) {
-        console.log(`[SNS 접근] sns_full_access로 접근 허용`);
+// console.log(`[SNS 접근] sns_full_access로 접근 허용`);
         return true;
       }
       if (accessLevel.includes('secret') && hypnosis.secret_account_access) {
-        console.log(`[SNS 접근] secret_account_access로 비밀 계정 접근 허용`);
+// console.log(`[SNS 접근] secret_account_access로 비밀 계정 접근 허용`);
         return true;
       }
     }
@@ -6658,11 +6658,11 @@ class PersonaChatApp {
 
   updateHypnosisDisplayValues(characterState) {
     if (!characterState) {
-      console.log('[최면] characterState가 없음');
+// console.log('[최면] characterState가 없음');
       return;
     }
     
-    console.log('[최면] updateHypnosisDisplayValues 호출됨:', characterState);
+// console.log('[최면] updateHypnosisDisplayValues 호출됨:', characterState);
     
     const affectionSlider = document.getElementById('hypnosis-affection');
     const intimacySlider = document.getElementById('hypnosis-intimacy');
@@ -6684,13 +6684,13 @@ class PersonaChatApp {
     const hypnosis = this.state.editingCharacter?.hypnosis;
     const hypnosisEnabled = hypnosis?.enabled;
     
-    console.log('[최면] 최면 설정:', { hypnosisEnabled, hypnosis });
+// console.log('[최면] 최면 설정:', { hypnosisEnabled, hypnosis });
     
     // 호감도 (affection)
     if (affectionSlider && typeof characterState.affection === 'number') {
       const displayValue = (hypnosisEnabled && hypnosis?.affection !== null) ? 
         Math.round(hypnosis.affection * 100) : Math.round(characterState.affection * 100);
-      console.log(`[최면] affection 업데이트: ${displayValue}% (실제값: ${Math.round(characterState.affection * 100)}%)`);
+// console.log(`[최면] affection 업데이트: ${displayValue}% (실제값: ${Math.round(characterState.affection * 100)}%)`);
       affectionSlider.value = displayValue;
       if (affectionValue) affectionValue.textContent = `${displayValue}%`;
     }
@@ -6699,7 +6699,7 @@ class PersonaChatApp {
     if (intimacySlider && typeof characterState.intimacy === 'number') {
       const displayValue = (hypnosisEnabled && hypnosis?.intimacy !== null) ? 
         Math.round(hypnosis.intimacy * 100) : Math.round(characterState.intimacy * 100);
-      console.log(`[최면] intimacy 업데이트: ${displayValue}% (실제값: ${Math.round(characterState.intimacy * 100)}%)`);
+// console.log(`[최면] intimacy 업데이트: ${displayValue}% (실제값: ${Math.round(characterState.intimacy * 100)}%)`);
       intimacySlider.value = displayValue;
       if (intimacyValue) intimacyValue.textContent = `${displayValue}%`;
     }
@@ -6708,7 +6708,7 @@ class PersonaChatApp {
     if (trustSlider && typeof characterState.trust === 'number') {
       const displayValue = (hypnosisEnabled && hypnosis?.trust !== null) ? 
         Math.round(hypnosis.trust * 100) : Math.round(characterState.trust * 100);
-      console.log(`[최면] trust 업데이트: ${displayValue}% (실제값: ${Math.round(characterState.trust * 100)}%)`);
+// console.log(`[최면] trust 업데이트: ${displayValue}% (실제값: ${Math.round(characterState.trust * 100)}%)`);
       trustSlider.value = displayValue;
       if (trustValue) trustValue.textContent = `${displayValue}%`;
     }
@@ -6717,7 +6717,7 @@ class PersonaChatApp {
     if (romanticSlider && typeof characterState.romantic_interest === 'number') {
       const displayValue = (hypnosisEnabled && hypnosis?.romantic_interest !== null) ? 
         Math.round(hypnosis.romantic_interest * 100) : Math.round(characterState.romantic_interest * 100);
-      console.log(`[최면] romantic_interest 업데이트: ${displayValue}% (실제값: ${Math.round(characterState.romantic_interest * 100)}%)`);
+// console.log(`[최면] romantic_interest 업데이트: ${displayValue}% (실제값: ${Math.round(characterState.romantic_interest * 100)}%)`);
       romanticSlider.value = displayValue;
       if (romanticValue) romanticValue.textContent = `${displayValue}%`;
     }
@@ -6753,8 +6753,8 @@ class PersonaChatApp {
     }
     
     this.hypnosisLogTimeout[characterId] = setTimeout(() => {
-      console.log(`[최면] ${type} 값 변경 완료:`, value / 100);
-      console.log(`[최면] 전체 최면 설정:`, updatedCharacters.find(c => c.id === characterId)?.hypnosis);
+// console.log(`[최면] ${type} 값 변경 완료:`, value / 100);
+// console.log(`[최면] 전체 최면 설정:`, updatedCharacters.find(c => c.id === characterId)?.hypnosis);
       delete this.hypnosisLogTimeout[characterId];
     }, 300); // 300ms 후에 로그 출력
     
@@ -7090,7 +7090,7 @@ class PersonaChatApp {
 
   // NAI 관련 메소드들
   handleGenerateCharacterStickers() {
-    console.log('NAI 캐릭터 스티커 생성 시작');
+// console.log('NAI 캐릭터 스티커 생성 시작');
     // NAI 핸들러의 handleGenerateCurrentCharacterStickers 호출
     const event = new CustomEvent('generateCurrentCharacterStickers');
     document.dispatchEvent(event);
@@ -7103,20 +7103,20 @@ class PersonaChatApp {
     }
 
     try {
-      console.log(`[NAI AI] AI가 요청한 ${emotion} 스티커 생성 시작:`, situationPrompt);
+// console.log(`[NAI AI] AI가 요청한 ${emotion} 스티커 생성 시작:`, situationPrompt);
       
       // StickerManager 인스턴스 생성
       const { StickerManager } = await import('./services/stickerManager.js');
       const stickerManager = new StickerManager(this);
       
       if (!stickerManager.initializeNAI()) {
-        console.log('[NAI AI] NAI 설정이 없어 스티커 생성 생략');
+// console.log('[NAI AI] NAI 설정이 없어 스티커 생성 생략');
         return;
       }
 
       // 이미 해당 감정의 스티커가 있는지 확인
       if (stickerManager.hasEmotionSticker(character, emotion)) {
-        console.log(`[NAI AI] ${character.name}의 ${emotion} 스티커가 이미 존재함`);
+// console.log(`[NAI AI] ${character.name}의 ${emotion} 스티커가 이미 존재함`);
         return;
       }
 
@@ -7149,7 +7149,7 @@ class PersonaChatApp {
       );
       this.setState({ characters: updatedCharacters });
       
-      console.log(`[NAI AI] ${character.name}의 ${emotion} AI 스티커 생성 완료`);
+// console.log(`[NAI AI] ${character.name}의 ${emotion} AI 스티커 생성 완료`);
     } catch (error) {
       console.error(`[NAI AI] AI 스티커 생성 실패:`, error);
     }
@@ -7157,13 +7157,13 @@ class PersonaChatApp {
 
   // 캐릭터별 NAI 자동 스티커 생성 토글 처리
   handleCharacterNAIToggle(isEnabled) {
-    console.log('[NAI Toggle] 함수 호출됨, isEnabled:', isEnabled);
+// console.log('[NAI Toggle] 함수 호출됨, isEnabled:', isEnabled);
     const editingCharacter = this.state.editingCharacter;
     if (!editingCharacter) {
       console.warn('[NAI Toggle] 편집 중인 캐릭터가 없습니다.');
       return;
     }
-    console.log('[NAI Toggle] 변경 전 editingCharacter:', JSON.parse(JSON.stringify(editingCharacter)));
+// console.log('[NAI Toggle] 변경 전 editingCharacter:', JSON.parse(JSON.stringify(editingCharacter)));
 
     // NAI 설정 초기화 (없으면 생성)
     if (!editingCharacter.naiSettings) {
@@ -7173,8 +7173,8 @@ class PersonaChatApp {
     // autoGenerate 설정 업데이트
     editingCharacter.naiSettings.autoGenerate = isEnabled;
 
-    console.log(`[NAI Toggle] ${editingCharacter.name}의 NAI 자동 생성: ${isEnabled ? '활성화' : '비활성화'}`);
-    console.log('[NAI Toggle] 변경 후 editingCharacter.naiSettings:', editingCharacter.naiSettings);
+// console.log(`[NAI Toggle] ${editingCharacter.name}의 NAI 자동 생성: ${isEnabled ? '활성화' : '비활성화'}`);
+// console.log('[NAI Toggle] 변경 후 editingCharacter.naiSettings:', editingCharacter.naiSettings);
     
     // editingCharacter 상태 업데이트 (반드시 새 객체로)
     this.setState({ 
@@ -7187,7 +7187,7 @@ class PersonaChatApp {
       }
     }, () => {
       // setState 콜백에서 상태 업데이트 확인
-      console.log('[NAI Toggle] setState 완료 후 editingCharacter.naiSettings:', this.state.editingCharacter.naiSettings);
+// console.log('[NAI Toggle] setState 완료 후 editingCharacter.naiSettings:', this.state.editingCharacter.naiSettings);
       
       // 캐릭터 모달 UI 업데이트
       this.updateCharacterNAIUI(isEnabled);
@@ -7238,7 +7238,7 @@ class PersonaChatApp {
     // qualityPrompt 설정 업데이트
     editingCharacter.naiSettings.qualityPrompt = value;
 
-    console.log(`[NAI Quality Prompt] ${editingCharacter.name}의 품질 프롬프트 변경: ${value}`);
+// console.log(`[NAI Quality Prompt] ${editingCharacter.name}의 품질 프롬프트 변경: ${value}`);
     
     // editingCharacter 상태 업데이트 (반드시 새 객체로)
     this.setState({ 
@@ -7262,7 +7262,7 @@ class PersonaChatApp {
     }
 
     editingCharacter.naiSettings.model = value;
-    console.log(`[NAI Model] ${editingCharacter.name}의 모델 변경: ${value}`);
+// console.log(`[NAI Model] ${editingCharacter.name}의 모델 변경: ${value}`);
     
     this.setState({ 
       editingCharacter: {
@@ -7285,7 +7285,7 @@ class PersonaChatApp {
     }
 
     editingCharacter.naiSettings.imageSize = value;
-    console.log(`[NAI Image Size] ${editingCharacter.name}의 이미지 크기 변경: ${value}`);
+// console.log(`[NAI Image Size] ${editingCharacter.name}의 이미지 크기 변경: ${value}`);
     
     this.setState({ 
       editingCharacter: {
@@ -7309,7 +7309,7 @@ class PersonaChatApp {
 
     const delayMs = parseInt(value) * 1000; // 초를 밀리초로 변환
     editingCharacter.naiSettings.minDelay = delayMs;
-    console.log(`[NAI Min Delay] ${editingCharacter.name}의 최소 대기 시간 변경: ${value}초`);
+// console.log(`[NAI Min Delay] ${editingCharacter.name}의 최소 대기 시간 변경: ${value}초`);
     
     this.setState({ 
       editingCharacter: {
@@ -7333,7 +7333,7 @@ class PersonaChatApp {
 
     const delayMs = parseInt(value) * 1000; // 초를 밀리초로 변환
     editingCharacter.naiSettings.maxAdditionalDelay = delayMs;
-    console.log(`[NAI Random Delay] ${editingCharacter.name}의 추가 랜덤 대기 시간 변경: ${value}초`);
+// console.log(`[NAI Random Delay] ${editingCharacter.name}의 추가 랜덤 대기 시간 변경: ${value}초`);
     
     this.setState({ 
       editingCharacter: {
@@ -7347,14 +7347,14 @@ class PersonaChatApp {
   }
 
   showNotification(message, type = 'info') {
-    console.log(`[${type.toUpperCase()}] ${message}`);
+// console.log(`[${type.toUpperCase()}] ${message}`);
     // 간단한 알림 시스템 (나중에 UI로 확장 가능)
     if (type === 'error') {
       console.error(message);
     } else if (type === 'success') {
-      console.log(`✅ ${message}`);
+// console.log(`✅ ${message}`);
     } else {
-      console.log(`ℹ️ ${message}`);
+// console.log(`ℹ️ ${message}`);
     }
   }
 

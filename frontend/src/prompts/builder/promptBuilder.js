@@ -191,15 +191,15 @@ export async function buildContentPrompt({
   data.user = data.persona;  // 호환성을 위해 user를 persona의 별칭으로 유지
 
   // 디버깅: 실제 데이터 확인
-  console.log('[PromptBuilder] Character name:', data.character.name);
-  console.log('[PromptBuilder] Persona name:', data.persona.name);
+  // console.log('[PromptBuilder] Character name:', data.character.name);
+  // console.log('[PromptBuilder] Persona name:', data.persona.name);
   
   const populatedPrompt = await populateTemplate(chatMLTemplate, data);
   
   // 디버깅: 치환된 프롬프트 일부 확인
   if (populatedPrompt.includes('{persona.name}') || populatedPrompt.includes('{character.name}')) {
-    console.warn('[PromptBuilder] Variables not replaced properly!');
-    console.log('[PromptBuilder] Sample:', populatedPrompt.substring(0, 500));
+    // console.warn('[PromptBuilder] Variables not replaced properly!');
+    // console.log('[PromptBuilder] Sample:', populatedPrompt.substring(0, 500));
   }
   
   const chatMLMessages = parseChatML(populatedPrompt);

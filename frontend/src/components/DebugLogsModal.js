@@ -321,7 +321,7 @@ export function setupDebugLogsModalEventListeners() {
   const clearBtn = document.getElementById("clear-debug-logs");
   if (clearBtn) {
     clearBtn.addEventListener("click", () => {
-      console.log("모달 내 로그 삭제 버튼 클릭됨");
+      // console.log("모달 내 로그 삭제 버튼 클릭됨");
       window.personaApp.clearDebugLogs();
     });
   }

@@ -207,10 +207,10 @@ export class OpenAIClient {
       } else {
         const reason =
           data.choices?.[0]?.finish_reason || t("api.unknownReason");
-        console.warn(
-          "OpenAI Profile Gen API 응답에 유효한 content가 없습니다.",
-          data,
-        );
+        // console.warn(
+        //   "OpenAI Profile Gen API 응답에 유효한 content가 없습니다.",
+        //   data,
+        // );
         throw new Error(t("api.profileNotGenerated", { reason: reason }));
       }
     } catch (error) {

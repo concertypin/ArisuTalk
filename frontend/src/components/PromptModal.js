@@ -30,6 +30,16 @@ export async function renderPromptModal(app) {
       content: prompts.naiSticker,
       description: t("promptModal.naiStickerPromptDescription"),
     },
+    [t("promptModal.groupChatPrompt")]: {
+      key: 'groupChat',
+      content: prompts.groupChat,
+      description: t("promptModal.groupChatPromptDescription"),
+    },
+    [t("promptModal.openChatPrompt")]: {
+      key: 'openChat',  
+      content: prompts.openChat,
+      description: t("promptModal.openChatPromptDescription"),
+    },
   };
 
   return `

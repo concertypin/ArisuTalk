@@ -69,11 +69,11 @@ async function renderModals(app) {
     requestAnimationFrame(() => {
       const characterId = app.state.editingCharacter?.id;
       let characterState = app.state.characterStates[characterId];
-      console.log('[최면] ui.js에서 CharacterModal 렌더링 후 호출:', { characterId, characterState });
+      // console.log('[최면] ui.js에서 CharacterModal 렌더링 후 호출:', { characterId, characterState });
       
       // 캐릭터 상태가 없으면 기본값으로 생성
       if (characterId && !characterState) {
-        console.warn('[최면] ui.js에서 characterState가 없음, 기본값 생성:', characterId);
+        // console.warn('[최면] ui.js에서 characterState가 없음, 기본값 생성:', characterId);
         
         characterState = {
           affection: 0.2,

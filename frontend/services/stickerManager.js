@@ -1,5 +1,4 @@
 import { NovelAIClient, DEFAULT_EMOTIONS, validateNAIApiKey } from "../api/novelai.js";
-import { saveToBrowserStorage } from "../storage.js";
 import { t } from "../i18n.js";
 
 /**
@@ -21,25 +20,14 @@ export class StickerManager {
   initializeNAI() {
     const naiSettings = this.app.state.settings.naiSettings;
     if (!naiSettings || !validateNAIApiKey(naiSettings.apiKey)) {
-      // console.warn("[StickerManager] NAI API 키가 설정되지 않았습니다.");
+      console.warn("[StickerManager] NAI API 키가 설정되지 않았습니다.");
       return false;
     }
 
-    // 중앙 관리되는 기본 NAI 딜레이 설정 (캐릭터별 설정이 없을 때 사용)
-    const DEFAULT_NAI_DELAYS = {
-      minDelay: 10000,        // 최소 10초
-      maxAdditionalDelay: 5000, // 추가 0~5초
-      rateLimitDelay: 15000,   // 429 에러 시 15초
-      serverErrorDelay: 5000,  // 500 에러 시 5초
-    };
-
     this.naiClient = new NovelAIClient(naiSettings.apiKey, {
-      minDelay: DEFAULT_NAI_DELAYS.minDelay,
-      maxAdditionalDelay: DEFAULT_NAI_DELAYS.maxAdditionalDelay,
+      minDelay: naiSettings.minDelay || 20000,
+      maxAdditionalDelay: naiSettings.maxAdditionalDelay || 10000,
     });
-    
-    // 에러 복구 딜레이도 중앙에서 관리
-    this.NAI_DELAYS = DEFAULT_NAI_DELAYS;
 
     return true;
   }
@@ -122,35 +110,20 @@ export class StickerManager {
    * @returns {boolean} 생성 필요 여부
    */
   shouldGenerateSticker(character, emotion) {
-    // 캐릭터별 NAI 설정 확인 (전역 설정이 아닌 캐릭터 설정 우선)
-    const characterNaiSettings = character.naiSettings;
-    const globalNaiSettings = this.app.state.settings.naiSettings;
+    const naiSettings = this.app.state.settings.naiSettings;
     
-    // console.log('[StickerManager] shouldGenerateSticker 체크:', {
-    //   emotion,
-    //   characterName: character.name,
-    //   characterAutoGenerate: characterNaiSettings?.autoGenerate,
-    //   globalAutoGenerate: globalNaiSettings?.autoGenerate,
-    //   hasNaiClient: !!this.naiClient
-    // });
-    
-    // 캐릭터별 자동 생성 설정 확인 (캐릭터 설정이 없으면 전역 설정 사용)
-    const autoGenerate = characterNaiSettings?.autoGenerate ?? globalNaiSettings?.autoGenerate;
-    
-    if (!autoGenerate) {
-      // console.log('[StickerManager] 자동 생성이 비활성화되어 있음');
+    // 자동 생성이 비활성화되어 있으면 생성하지 않음
+    if (!naiSettings || !naiSettings.autoGenerate) {
       return false;
     }
 
     // 해당 감정의 스티커가 이미 있으면 생성하지 않음
     if (this.hasEmotionSticker(character, emotion)) {
-      // console.log('[StickerManager] 이미 해당 감정의 스티커가 존재함:', emotion);
       return false;
     }
 
     // NAI 클라이언트가 없으면 생성할 수 없음
     if (!this.naiClient) {
-      // console.log('[StickerManager] NAI 클라이언트가 없음');
       return false;
     }
 
@@ -177,31 +150,12 @@ export class StickerManager {
       if (!character.stickers) {
         character.stickers = [];
       }
-      
-      // 디버깅: 스티커 데이터 확인
-      // console.log('[StickerManager] 생성된 스티커 정보:', {
-      //   id: sticker.id,
-      //   name: sticker.name,
-      //   type: sticker.type,
-      //   hasDataUrl: !!sticker.dataUrl,
-      //   dataUrlLength: sticker.dataUrl?.length,
-      //   dataUrlValid: sticker.dataUrl?.startsWith('data:image/'),
-      //   dataUrlPrefix: sticker.dataUrl?.substring(0, 50) + '...'
-      // });
-      
       character.stickers.push(sticker);
       
-      // 캐릭터 정보 즉시 저장
-      const updatedCharacters = this.app.state.characters.map(c => 
-        c.id === character.id ? character : c
-      );
-      await saveToBrowserStorage("personaChat_characters_v16", updatedCharacters);
-      this.app.state.characters = updatedCharacters;
+      // 캐릭터 정보 저장
+      await this.app.saveCharacter(character);
       
-      // UI 업데이트를 위해 상태 갱신
-      this.app.setState({ characters: updatedCharacters });
-      
-      // console.log(`[StickerManager] ${character.name}의 ${emotion} 스티커가 자동 생성되어 저장되었습니다.`);
+      console.log(`[StickerManager] ${character.name}의 ${emotion} 스티커가 자동 생성되었습니다.`);
       return sticker;
     } catch (error) {
       console.error(`[StickerManager] 자동 스티커 생성 실패:`, error);
@@ -232,91 +186,28 @@ export class StickerManager {
     }
 
     try {
-      const results = [];
-      
-      // 스티커를 하나씩 생성하고 즉시 저장
-      for (let i = 0; i < missingEmotions.length; i++) {
-        const emotion = missingEmotions[i];
-        
-        try {
-          if (onProgress) {
-            onProgress({
-              type: "sticker",
-              current: i + 1,
-              total: missingEmotions.length,
-              emotion,
-              status: "generating"
-            });
-          }
-
-          const sticker = await this.naiClient.generateSticker(character, emotion, {
-            size: this.app.state.settings.naiSettings?.preferredSize || "square",
-            naiSettings: this.app.state.settings.naiSettings || {}
-          });
-
-          // 스티커를 캐릭터에 추가하고 즉시 저장
-          if (!character.stickers) {
-            character.stickers = [];
-          }
-          character.stickers.push(sticker);
-          
-          // 캐릭터 정보 즉시 저장
-          const updatedCharacters = this.app.state.characters.map(c => 
-            c.id === character.id ? character : c
-          );
-          await saveToBrowserStorage("personaChat_characters_v16", updatedCharacters);
-          this.app.state.characters = updatedCharacters;
-          
-          // UI 상태 즉시 업데이트
-          this.app.setState({ characters: updatedCharacters });
-
-          results.push({ success: true, sticker, emotion });
-
-          if (onProgress) {
-            onProgress({
-              type: "sticker",
-              current: i + 1,
-              total: missingEmotions.length,
-              emotion,
-              status: "completed",
-              sticker
-            });
-          }
-
-        } catch (error) {
-          console.error(`[StickerManager] ${emotion} 스티커 생성 실패:`, error);
-          
-          // 실패 후에도 대기 시간을 두어 429 오류 방지
-          if (error.message.includes('429') || error.message.includes('Too Many Requests')) {
-            // console.log('[StickerManager] 429 오류로 인한 추가 대기...');
-            await new Promise(resolve => setTimeout(resolve, this.NAI_DELAYS.rateLimitDelay));
-          } else if (error.message.includes('500') || error.message.includes('Internal Server Error')) {
-            // console.log('[StickerManager] 500 오류로 인한 짧은 대기...');
-            await new Promise(resolve => setTimeout(resolve, this.NAI_DELAYS.serverErrorDelay));
-          }
-          
-          results.push({
-            success: false,
-            error: error.message,
-            emotion
-          });
-
-          if (onProgress) {
-            onProgress({
-              type: "sticker",
-              current: i + 1,
-              total: missingEmotions.length,
-              emotion,
-              status: "error",
-              error: error.message
-            });
-          }
+      const results = await this.naiClient.generateStickerBatch(
+        character,
+        missingEmotions,
+        {
+          onProgress,
+          size: this.app.state.settings.naiSettings?.preferredSize || "square",
+          naiSettings: this.app.state.settings.naiSettings || {}
         }
-      }
+      );
 
+      // 성공한 스티커들을 캐릭터에 추가
       const generatedStickers = results
         .filter(result => result.success)
         .map(result => result.sticker);
+
+      if (generatedStickers.length > 0) {
+        if (!character.stickers) {
+          character.stickers = [];
+        }
+        character.stickers.push(...generatedStickers);
+        await this.app.saveCharacter(character);
+      }
 
       return {
         success: true,

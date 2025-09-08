@@ -97,7 +97,7 @@ export class NovelAIClient {
    * @returns {Promise<Uint8Array>} 추출된 이미지 데이터
    */
   async extractImageFromZip(zipData) {
-    console.log('[NAI] ZIP 파일 처리 시작, 크기:', zipData.length);
+    // console.log('[NAI] ZIP 파일 처리 시작, 크기:', zipData.length);
     
     // 방법 1: JSZip 사용 (가장 표준적인 방법)
     try {
@@ -108,42 +108,42 @@ export class NovelAIClient {
       if (zipEntries.length > 0) {
         const imageEntry = zip.file(zipEntries[0]);
         if (imageEntry) {
-          console.log('[NAI] JSZip으로 이미지 엔트리 추출:', zipEntries[0]);
+          // console.log('[NAI] JSZip으로 이미지 엔트리 추출:', zipEntries[0]);
           const imageBytes = await imageEntry.async('uint8array');
-          console.log('[NAI] JSZip 추출 성공:', imageBytes.length, '바이트');
+          // console.log('[NAI] JSZip 추출 성공:', imageBytes.length, '바이트');
           return imageBytes;
         }
       }
     } catch (jsZipError) {
-      console.warn('[NAI] JSZip 실패:', jsZipError.message);
+      // console.warn('[NAI] JSZip 실패:', jsZipError.message);
     }
     
     // 방법 2: PNG/JPEG 시그니처를 직접 찾기
     try {
       const imageData = await this.extractImageBySignature(zipData);
-      console.log('[NAI] 시그니처 검색으로 이미지 추출 성공:', imageData.length, '바이트');
+      // console.log('[NAI] 시그니처 검색으로 이미지 추출 성공:', imageData.length, '바이트');
       return imageData;
     } catch (signatureError) {
-      console.warn('[NAI] 시그니처 검색 실패:', signatureError.message);
+      // console.warn('[NAI] 시그니처 검색 실패:', signatureError.message);
     }
     
     // 방법 3: 표준 ZIP 파싱 시도
     try {
       const imageData = await this.parseStandardZip(zipData);
-      console.log('[NAI] 표준 ZIP 파싱으로 이미지 추출 성공:', imageData.length, '바이트');
+      // console.log('[NAI] 표준 ZIP 파싱으로 이미지 추출 성공:', imageData.length, '바이트');
       return imageData;
     } catch (zipError) {
-      console.warn('[NAI] 표준 ZIP 파싱 실패:', zipError.message);
+      // console.warn('[NAI] 표준 ZIP 파싱 실패:', zipError.message);
     }
     
     // 방법 4: 원본 데이터가 이미 이미지인지 확인
     if (this.isValidImageData(zipData)) {
-      console.log('[NAI] 원본 데이터가 이미지임을 확인');
+      // console.log('[NAI] 원본 데이터가 이미지임을 확인');
       return zipData;
     }
     
     // 최후 수단: 원본 데이터 반환
-    console.warn('[NAI] 모든 방법 실패, 원본 데이터 그대로 사용');
+    // console.warn('[NAI] 모든 방법 실패, 원본 데이터 그대로 사용');
     return zipData;
   }
 
@@ -264,7 +264,7 @@ export class NovelAIClient {
    * 원시 데이터에서 이미지 추출 (최후 방법)
    */
   async extractImageFromRawData(data) {
-    console.log('[NAI] 원시 데이터에서 이미지 검색 시작');
+    // console.log('[NAI] 원시 데이터에서 이미지 검색 시작');
     
     // 1. 데이터 내에서 이미지 시그니처 찾기 (더 넓은 검색)
     for (let i = 0; i < data.length - 100; i++) { // 최소 100바이트는 있어야 의미있는 이미지
@@ -274,7 +274,7 @@ export class NovelAIClient {
           data[i + 4] === 0x0D && data[i + 5] === 0x0A &&
           data[i + 6] === 0x1A && data[i + 7] === 0x0A) {
         
-        console.log('[NAI] PNG 시그니처 발견 at offset:', i);
+        // console.log('[NAI] PNG 시그니처 발견 at offset:', i);
         
         // PNG IEND 청크 찾기
         for (let j = i + 8; j < Math.min(data.length - 8, i + 10 * 1024 * 1024); j++) { // 최대 10MB 까지만
@@ -284,31 +284,31 @@ export class NovelAIClient {
               data[j + 6] === 0x4E && data[j + 7] === 0x44) {
             
             const pngEnd = j + 12; // IEND + CRC
-            console.log('[NAI] PNG 끝 발견 at offset:', pngEnd);
+            // console.log('[NAI] PNG 끝 발견 at offset:', pngEnd);
             return data.slice(i, pngEnd);
           }
         }
         
         // IEND를 찾지 못했으면 나머지 데이터 모두 반환
-        console.log('[NAI] PNG IEND 찾지 못함, 나머지 데이터 모두 사용');
+        // console.log('[NAI] PNG IEND 찾지 못함, 나머지 데이터 모두 사용');
         return data.slice(i);
       }
       
       // JPEG 시그니처 찾기
       if (data[i] === 0xFF && data[i + 1] === 0xD8) {
-        console.log('[NAI] JPEG 시그니처 발견 at offset:', i);
+        // console.log('[NAI] JPEG 시그니처 발견 at offset:', i);
         
         // JPEG EOI 마커 찾기
         for (let j = i + 2; j < Math.min(data.length - 2, i + 10 * 1024 * 1024); j++) {
           if (data[j] === 0xFF && data[j + 1] === 0xD9) {
             const jpegEnd = j + 2;
-            console.log('[NAI] JPEG 끝 발견 at offset:', jpegEnd);
+            // console.log('[NAI] JPEG 끝 발견 at offset:', jpegEnd);
             return data.slice(i, jpegEnd);
           }
         }
         
         // EOI를 찾지 못했으면 나머지 데이터 모두 반환
-        console.log('[NAI] JPEG EOI 찾지 못함, 나머지 데이터 모두 사용');
+        // console.log('[NAI] JPEG EOI 찾지 못함, 나머지 데이터 모두 사용');
         return data.slice(i);
       }
     }
@@ -449,7 +449,7 @@ export class NovelAIClient {
     });
     
     if (modelKey) {
-      console.warn(`[NAI] 모델명 자동 수정: "${modelName}" → "${modelKey}"`);
+      // console.warn(`[NAI] 모델명 자동 수정: "${modelName}" → "${modelKey}"`);
       return modelKey;
     }
     
@@ -469,9 +469,7 @@ export class NovelAIClient {
 
     if (timeSinceLastGeneration < requiredDelay) {
       const waitTime = requiredDelay - timeSinceLastGeneration;
-      console.log(
-        `[NAI] API 제한 방지를 위해 ${Math.ceil(waitTime / 1000)}초 대기 중...`
-      );
+      // console.log(`[NAI] API 제한 방지를 위해 ${Math.ceil(waitTime / 1000)}초 대기 중...`);
       await new Promise((resolve) => setTimeout(resolve, waitTime));
     }
   }
@@ -671,7 +669,7 @@ export class NovelAIClient {
 
 
     // 디버깅을 위한 요청 JSON 로그
-    console.log('[NAI] 요청 JSON:', JSON.stringify(requestBody, null, 2));
+    // console.log('[NAI] 요청 JSON:', JSON.stringify(requestBody, null, 2));
 
     // AbortController로 취소 가능한 요청 생성
     const controller = new AbortController();
@@ -720,11 +718,11 @@ export class NovelAIClient {
           
           // ZIP에서 추출된 데이터 검증
           if (!imageData || imageData.length === 0) {
-            console.warn('[NAI] ZIP에서 추출된 데이터가 비어있음, 원본 데이터 사용');
+            // console.warn('[NAI] ZIP에서 추출된 데이터가 비어있음, 원본 데이터 사용');
             imageData = bytes;
           }
         } catch (zipError) {
-          console.warn('[NAI] ZIP 파일 처리 실패, 원본 데이터 사용:', zipError.message);
+          // console.warn('[NAI] ZIP 파일 처리 실패, 원본 데이터 사용:', zipError.message);
           imageData = bytes;
         }
       } else {
@@ -742,7 +740,7 @@ export class NovelAIClient {
       
       // 이미지 시그니처가 없으면 경고만 출력하고 계속 진행 (NovelAI가 다른 형식일 수 있음)
       if (!isPNG && !isJPEG) {
-        console.warn(`[NAI] 알 수 없는 이미지 형식, 그대로 진행: 첫 바이트 ${imageData[0]} ${imageData[1]} ${imageData[2]} ${imageData[3]}`);
+        // console.warn(`[NAI] 알 수 없는 이미지 형식, 그대로 진행: 첫 바이트 ${imageData[0]} ${imageData[1]} ${imageData[2]} ${imageData[3]}`);
       }
       
       // FileReader를 사용한 더 안전한 Base64 변환
@@ -776,7 +774,7 @@ export class NovelAIClient {
       };
     } catch (error) {
       if (error.name === 'AbortError') {
-        console.log("[NAI] 이미지 생성이 취소되었습니다");
+        // console.log("[NAI] 이미지 생성이 취소되었습니다");
         throw new Error('이미지 생성이 사용자에 의해 취소되었습니다');
       }
       console.error("[NAI] 이미지 생성 실패:", error);
@@ -792,7 +790,7 @@ export class NovelAIClient {
    */
   cancelGeneration() {
     if (this.currentRequest) {
-      console.log('[NAI] 이미지 생성 취소 요청');
+      // console.log('[NAI] 이미지 생성 취소 요청');
       this.currentRequest.abort();
       this.currentRequest = null;
       return true;
@@ -826,13 +824,13 @@ export class NovelAIClient {
     const sizeConfig = NovelAIClient.UNLIMITED_SIZES.find(s => s.name === imageSize) || 
                      NovelAIClient.UNLIMITED_SIZES[2]; // 기본값: square
     
-    console.log('[NAI generateSticker] 이미지 크기 설정:', {
-      preferredSize: mergedSettings.preferredSize,
-      imageSize: imageSize,
-      sizeConfig: sizeConfig,
-      width: sizeConfig.width,
-      height: sizeConfig.height
-    });
+    // console.log('[NAI generateSticker] 이미지 크기 설정:', {
+    //   preferredSize: mergedSettings.preferredSize,
+    //   imageSize: imageSize,
+    //   sizeConfig: sizeConfig,
+    //   width: sizeConfig.width,
+    //   height: sizeConfig.height
+    // });
 
     // 대기 시간 설정 업데이트 (캐릭터별 설정 우선)
     if (mergedSettings.minDelay) {

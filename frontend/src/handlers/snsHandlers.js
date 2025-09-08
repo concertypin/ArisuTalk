@@ -317,18 +317,18 @@ export const snsMethods = {
     let state = this.getCharacterState(character.id);
     const hypnosis = character.hypnosis || {};
     
-    console.log('[SNS접근] 초기 상태:', { characterId: character.id, state, hypnosis, accessLevel });
+    // console.log('[SNS접근] 초기 상태:', { characterId: character.id, state, hypnosis, accessLevel });
     
     // 최면이 활성화되고 호감도 조작이 활성화된 경우 최면 값 사용
     if (hypnosis.enabled && hypnosis.affection_override) {
-      console.log('[SNS접근] 최면 모드 활성화 - 최면 값으로 덮어쓰기');
+      // console.log('[SNS접근] 최면 모드 활성화 - 최면 값으로 덮어쓰기');
       state = {
         affection: hypnosis.affection !== null ? hypnosis.affection : state.affection,
         intimacy: hypnosis.intimacy !== null ? hypnosis.intimacy : state.intimacy,
         trust: hypnosis.trust !== null ? hypnosis.trust : state.trust,
         romantic_interest: hypnosis.romantic_interest !== null ? hypnosis.romantic_interest : state.romantic_interest
       };
-      console.log('[SNS접근] 최면 적용 후 상태:', state);
+      // console.log('[SNS접근] 최면 적용 후 상태:', state);
     }
     
     // Define access requirements for each level
@@ -340,7 +340,7 @@ export const snsMethods = {
     };
     
     const required = requirements[accessLevel] || requirements.public;
-    console.log('[SNS접근] 필요 조건:', required);
+    // console.log('[SNS접근] 필요 조건:', required);
     
     // Check if all requirements are met
     const hasAccess = (
@@ -350,15 +350,15 @@ export const snsMethods = {
       state.romantic_interest >= required.romantic_interest
     );
     
-    console.log('[SNS접근] 접근 결과:', {
-      hasAccess,
-      comparison: {
-        affection: `${state.affection} >= ${required.affection} = ${state.affection >= required.affection}`,
-        intimacy: `${state.intimacy} >= ${required.intimacy} = ${state.intimacy >= required.intimacy}`,
-        trust: `${state.trust} >= ${required.trust} = ${state.trust >= required.trust}`,
-        romantic_interest: `${state.romantic_interest} >= ${required.romantic_interest} = ${state.romantic_interest >= required.romantic_interest}`
-      }
-    });
+    // console.log('[SNS접근] 접근 결과:', {
+    //   hasAccess,
+    //   comparison: {
+    //     affection: `${state.affection} >= ${required.affection} = ${state.affection >= required.affection}`,
+    //     intimacy: `${state.intimacy} >= ${required.intimacy} = ${state.intimacy >= required.intimacy}`,
+    //     trust: `${state.trust} >= ${required.trust} = ${state.trust >= required.trust}`,
+    //     romantic_interest: `${state.romantic_interest} >= ${required.romantic_interest} = ${state.romantic_interest >= required.romantic_interest}`
+    //   }
+    // });
     
     return hasAccess;
   },

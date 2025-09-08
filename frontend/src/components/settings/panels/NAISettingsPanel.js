@@ -20,8 +20,8 @@ export function renderNAISettingsPanel(app) {
     preferredSize = "square",
     
     // 생성 파라미터
-    steps = 20,
-    scale = 7,
+    steps = 28,
+    scale = 3,
     sampler = "k_euler_ancestral",
     noise_schedule = "native",
     
