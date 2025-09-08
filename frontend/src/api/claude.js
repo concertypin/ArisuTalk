@@ -83,6 +83,7 @@ export class ClaudeClient {
             parsedResponse.messages &&
             Array.isArray(parsedResponse.messages)
           ) {
+            // autoPost, characterState, newMemory 등 모든 필드 포함
             return parsedResponse;
           }
         } catch (e) {

@@ -40,7 +40,25 @@ async function populateTemplate(template, context) {
       allowed[key] = JSON.parse(JSON.stringify(context[key]));
     }
   }
-  return await parseMagicPatterns(template, allowed);
+  
+  // 일반 변수 치환 ({variable.property} 형식)
+  let result = template;
+  
+  // 재귀적으로 객체 속성에 접근하는 함수
+  const getNestedProperty = (obj, path) => {
+    return path.split('.').reduce((current, prop) => {
+      return current && current[prop] !== undefined ? current[prop] : null;
+    }, obj);
+  };
+  
+  // {variable} 또는 {variable.property} 패턴 찾기
+  result = result.replace(/\{([^|}]+)\}/g, (match, path) => {
+    const value = getNestedProperty(allowed, path.trim());
+    return value !== null && value !== undefined ? String(value) : match;
+  });
+  
+  // 그 다음 magic patterns 처리
+  return await parseMagicPatterns(result, allowed);
 }
 
 
@@ -61,7 +79,8 @@ export async function buildContentPrompt({
   character,
   history,
   isProactive = false,
-  forceSummary = false
+  forceSummary = false,
+  characterState = null
 }) {
   const chatMLTemplate = await getPrompt('mainChat');
 
@@ -95,9 +114,23 @@ export async function buildContentPrompt({
     ? `The character has access to the following stickers: ${availableStickers}`
     : 'The character has no stickers.';
 
-  const memories = character.memories && character.memories.length > 0
-    ? character.memories.map(mem => `- ${mem}`).join('\n')
-    : 'No specific memories recorded yet.';
+  // SNS 포스트를 메모리로 변환 (접근 권한 고려)
+  const getSNSMemories = (character) => {
+    if (!character.snsPosts || character.snsPosts.length === 0) {
+      return 'No specific memories recorded yet.';
+    }
+    
+    // 현재는 모든 메모리 타입 포스트를 사용 (나중에 접근 권한 로직 추가)
+    const memoryPosts = character.snsPosts
+      .filter(post => post.type === 'memory' || post.type === 'post')
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+      .slice(0, 10) // 최근 10개만
+      .map(post => `- ${post.content}${post.reason ? ` (${post.reason})` : ''}`);
+      
+    return memoryPosts.length > 0 ? memoryPosts.join('\n') : 'No specific memories recorded yet.';
+  };
+  
+  const memories = getSNSMemories(character);
 
   const chat = (a, b) => {
     // Create a reversed copy of the history array to make indexing easier.
@@ -133,20 +166,42 @@ export async function buildContentPrompt({
     return result;
   };
 
+  // Character에 현재 호감도 상태 추가
+  const characterWithState = {
+    ...character,
+    currentState: characterState || {
+      affection: 0.3,
+      intimacy: 0.2,
+      trust: 0.25,
+      romantic_interest: 0.0
+    },
+    memories: memories  // SNS 포스트를 메모리 형식으로 변환한 것 (프롬프트에서 {character.memories}로 참조됨)
+  };
+
   const data = {
-    character: character,
+    character: characterWithState,
     persona: { name: userName, description: userDescription },
     time: {
       context: timeContext,
       diff: timeDiff,
     },
     chat: chat,
-
   };
   data.char = data.character.name;
-  data.user = data.persona.name;
+  data.user = data.persona;  // 호환성을 위해 user를 persona의 별칭으로 유지
 
+  // 디버깅: 실제 데이터 확인
+  console.log('[PromptBuilder] Character name:', data.character.name);
+  console.log('[PromptBuilder] Persona name:', data.persona.name);
+  
   const populatedPrompt = await populateTemplate(chatMLTemplate, data);
+  
+  // 디버깅: 치환된 프롬프트 일부 확인
+  if (populatedPrompt.includes('{persona.name}') || populatedPrompt.includes('{character.name}')) {
+    console.warn('[PromptBuilder] Variables not replaced properly!');
+    console.log('[PromptBuilder] Sample:', populatedPrompt.substring(0, 500));
+  }
+  
   const chatMLMessages = parseChatML(populatedPrompt);
   const { systemPrompt, contents: promptContents } = chatMLToPromptStructure(
     chatMLMessages,
@@ -226,7 +281,7 @@ export async function buildCharacterSheetPrompt({ characterName, characterDescri
     persona: {},
   };
   data.char = data.character.name;
-  data.user = data.persona.name;
+  data.user = data.persona;
 
   const populatedPrompt = await populateTemplate(chatMLTemplate, data);
   const chatMLMessages = parseChatML(populatedPrompt);
@@ -259,7 +314,7 @@ export async function buildProfilePrompt({ userName, userDescription }) {
     },
   };
   data.char = data.character.name;
-  data.user = data.persona.name;
+  data.user = data.persona;
 
   const populatedPrompt = await populateTemplate(chatMLTemplate, data);
   const chatMLMessages = parseChatML(populatedPrompt);

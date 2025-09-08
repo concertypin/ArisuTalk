@@ -24,6 +24,21 @@ export function handleMainChatClick(e, app) {
     app.handleRerollMessage(parseFloat(rerollMsgButton.dataset.id));
   }
 
+  const generateSNSButton = e.target.closest(".generate-sns-btn");
+  if (generateSNSButton) {
+    app.handleGenerateSNSPost(parseFloat(generateSNSButton.dataset.id));
+  }
+
+  const generateNAIButton = e.target.closest(".generate-nai-btn");
+  if (generateNAIButton) {
+    app.handleGenerateNAISticker(parseFloat(generateNAIButton.dataset.id));
+  }
+
+  const addSNSMemoryButton = e.target.closest(".add-sns-memory-btn");
+  if (addSNSMemoryButton) {
+    app.handleAddToSNSMemory(parseFloat(addSNSMemoryButton.dataset.id));
+  }
+
   const saveEditButton = e.target.closest(".save-edit-btn");
   if (saveEditButton) {
     app.handleSaveEditedMessage(parseFloat(saveEditButton.dataset.id));
@@ -32,6 +47,17 @@ export function handleMainChatClick(e, app) {
   const cancelEditButton = e.target.closest(".cancel-edit-btn");
   if (cancelEditButton) {
     app.setState({ editingMessageId: null });
+  }
+
+  // 스티커 클릭 - 크기 확대/축소 토글
+  const stickerToggleBtn = e.target.closest(".sticker-toggle-btn");
+  if (stickerToggleBtn) {
+    e.preventDefault();
+    e.stopPropagation();
+    const messageId = parseFloat(stickerToggleBtn.dataset.messageId);
+    if (messageId) {
+      app.toggleStickerSize(messageId);
+    }
   }
 
   if (e.target.closest("#sticker-btn")) {

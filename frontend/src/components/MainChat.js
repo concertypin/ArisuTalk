@@ -249,9 +249,18 @@ function renderMessages(app) {
     if (app.state.editingMessageId === groupInfo.lastMessageId) {
       let editContentHtml = "";
       if (msg.type === "image") {
+        // 이미지 URL 가져오기 - imageUrl이 있으면 사용, 없으면 imageId로 캐릭터 미디어에서 찾기
+        let imageUrl = msg.imageUrl;
+        if (!imageUrl && msg.imageId) {
+          const selectedChatRoom = app.getCurrentChatRoom();
+          const character = selectedChatRoom ? app.state.characters.find(c => c.id === selectedChatRoom.characterId) : null;
+          const imageData = character?.media?.find(m => m.id === msg.imageId);
+          imageUrl = imageData?.dataUrl || "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+        }
+        
         editContentHtml = `
-                        <img src="${msg.imageUrl}" class="image-open-btn max-w-xs max-h-80 rounded-lg object-cover mb-2 cursor-pointer" data-image-url="${msg.imageUrl}">
-                        <textarea data-id="${groupInfo.lastMessageId}" class="edit-message-textarea w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500/50 text-sm" rows="2">${msg.content}</textarea>
+                        <img src="${imageUrl}" class="image-open-btn max-w-xs max-h-80 rounded-lg object-cover mb-2 cursor-pointer" data-image-url="${imageUrl}">
+                        <textarea data-id="${groupInfo.lastMessageId}" class="edit-message-textarea w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500/50 text-sm" rows="2" placeholder="이미지에 설명을 추가하세요...">${msg.content || ''}</textarea>
                     `;
       } else {
         const combinedContent = messages
@@ -359,9 +368,9 @@ function renderMessages(app) {
         } else if (isVideo) {
           const videoSrc = stickerData.data || stickerData.dataUrl;
           const isExpanded = app.state.expandedStickers.has(msg.id);
-          const sizeClass = isExpanded ? "max-w-4xl" : "max-w-xs";
+          const sizeClass = isExpanded ? "max-w-6xl" : "max-w-xs";
           const heightStyle = isExpanded
-            ? "max-height: 720px;"
+            ? "max-height: 1080px;"
             : "max-height: 240px;";
           stickerHtml = `
                         <div class="sticker-toggle-btn inline-block cursor-pointer transition-all duration-300" data-message-id="${msg.id}">
@@ -377,9 +386,9 @@ function renderMessages(app) {
             stickerData.name ||
             t("mainChat.sticker");
           const isExpanded = app.state.expandedStickers.has(msg.id);
-          const sizeClass = isExpanded ? "max-w-4xl" : "max-w-xs";
+          const sizeClass = isExpanded ? "max-w-6xl" : "max-w-xs";
           const heightStyle = isExpanded
-            ? "max-height: 720px;"
+            ? "max-height: 1080px;"
             : "max-height: 240px;";
           stickerHtml = `<div class="sticker-toggle-btn inline-block cursor-pointer transition-all duration-300" data-message-id="${msg.id}"><img src="${imgSrc}" alt="${stickerName}" class="${sizeClass} rounded-2xl object-contain" style="${heightStyle}"></div>`;
         }
@@ -433,9 +442,9 @@ function renderMessages(app) {
         : "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"; // Transparent pixel
 
       const isExpanded = app.state.expandedStickers.has(msg.id);
-      const sizeClass = isExpanded ? "max-w-4xl" : "max-w-xs";
+      const sizeClass = isExpanded ? "max-w-6xl" : "max-w-xs";
       const heightStyle = isExpanded
-        ? "max-height: 720px;"
+        ? "max-height: 1080px;"
         : "max-height: 320px;";
       const imageTag = `<div class="sticker-toggle-btn inline-block cursor-pointer transition-all duration-300" data-message-id="${msg.id}"><img src="${imageUrl}" class="${sizeClass} rounded-lg object-cover" style="${heightStyle}"></div>`;
       const captionTag = msg.content
@@ -456,13 +465,14 @@ function renderMessages(app) {
     if (isLastInGroup) {
       const canEdit =
         msg.isMe &&
-        (msg.type === "text" || (msg.type === "image" && msg.content));
+        (msg.type === "text" || msg.type === "image" || msg.type === "sticker");
       const isLastMessageOverall = i === messages.length - 1;
       const canReroll =
         !msg.isMe &&
-        (msg.type === "text" || msg.type === "image") &&
+        (msg.type === "text" || msg.type === "image" || msg.type === "sticker") &&
         isLastMessageOverall &&
         !app.state.isWaitingForResponse;
+      const canGenerateExtra = canReroll; // SNS와 NAI 버튼도 같은 조건 사용
       actionButtonsHtml = `
                 <div class="flex items-center gap-2 mt-1.5 h-5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${
                   msg.isMe ? "justify-end" : ""
@@ -477,7 +487,17 @@ function renderMessages(app) {
                     }" class="delete-msg-btn text-gray-500 hover:text-white"><i data-lucide="trash-2" class="w-3 h-3 pointer-events-none"></i></button>
                     ${
                       canReroll
-                        ? `<button data-id="${msg.id}" class="reroll-msg-btn text-gray-500 hover:text-white"><i data-lucide="refresh-cw" class="w-3 h-3 pointer-events-none"></i></button>`
+                        ? `<button data-id="${msg.id}" class="reroll-msg-btn text-gray-500 hover:text-white" title="${t('mainChat.regenerateMessage')}"><i data-lucide="refresh-cw" class="w-3 h-3 pointer-events-none"></i></button>`
+                        : ""
+                    }
+                    ${
+                      canGenerateExtra
+                        ? `<button data-id="${msg.id}" class="generate-sns-btn text-gray-500 hover:text-white" title="${t('mainChat.generateSNS')}"><i data-lucide="newspaper" class="w-3 h-3 pointer-events-none"></i></button>`
+                        : ""
+                    }
+                    ${
+                      canGenerateExtra
+                        ? `<button data-id="${msg.id}" class="generate-nai-btn text-gray-500 hover:text-white" title="${t('mainChat.generateNAI')}"><i data-lucide="image" class="w-3 h-3 pointer-events-none"></i></button>`
                         : ""
                     }
                 </div>
@@ -618,6 +638,9 @@ export function renderMainChat(app) {
                     </div>
                 </div>
                 <div class="flex items-center space-x-1 md:space-x-2">
+                    <button id="open-chat-sns-btn" class="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors" title="${t('sns.openSNSList')}">
+                        <i data-lucide="user" class="w-4 h-4 text-gray-300 pointer-events-none"></i>
+                    </button>
                     <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="phone" class="w-4 h-4 text-gray-300"></i></button>
                     <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="video" class="w-4 h-4 text-gray-300"></i></button>
                     <button class="chat-debug-logs-btn p-2 rounded-full bg-gray-800 hover:bg-gray-700" title="${t(
@@ -663,6 +686,9 @@ export function renderMainChat(app) {
                     </div>
                 </div>
                 <div class="flex items-center space-x-1 md:space-x-2">
+                    <button id="group-chat-sns-btn" class="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors" title="${t('sns.openSNSList')}">
+                        <i data-lucide="user" class="w-4 h-4 text-gray-300 pointer-events-none"></i>
+                    </button>
                     <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="phone" class="w-4 h-4 text-gray-300"></i></button>
                     <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="video" class="w-4 h-4 text-gray-300"></i></button>
                     <button class="chat-debug-logs-btn p-2 rounded-full bg-gray-800 hover:bg-gray-700" title="${t(
@@ -696,9 +722,12 @@ export function renderMainChat(app) {
                     </div>
                 </div>
                 <div class="flex items-center space-x-1 md:space-x-2">
-                    <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="phone" class="w-4 h-4 text-gray-300"></i></button>
-                    <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700"><i data-lucide="video" class="w-4 h-4 text-gray-300"></i></button>
-                    <button class="chat-debug-logs-btn p-2 rounded-full bg-gray-800 hover:bg-gray-700" title="${t(
+                    <button id="individual-chat-sns-btn" class="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors" title="${t('sns.viewSNS', { name: selectedChat.name })}">
+                        <i data-lucide="user" class="w-4 h-4 text-gray-300 pointer-events-none"></i>
+                    </button>
+                    <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"><i data-lucide="phone" class="w-4 h-4 text-gray-300"></i></button>
+                    <button class="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"><i data-lucide="video" class="w-4 h-4 text-gray-300"></i></button>
+                    <button class="chat-debug-logs-btn p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors" title="${t(
                       "mainChat.debugLogButtonTitle",
                     )}"><i data-lucide="bar-chart-3" class="w-4 h-4 text-gray-300 pointer-events-none"></i></button>
                 </div>
@@ -806,14 +835,7 @@ export function setupMainChatEventListeners() {
     }
   });
 
-  // Sticker toggle buttons (dynamically generated)
-  document.addEventListener("click", (event) => {
-    if (event.target.closest(".sticker-toggle-btn")) {
-      const btn = event.target.closest(".sticker-toggle-btn");
-      const messageId = btn.dataset.messageId;
-      window.personaApp.toggleStickerSize(messageId);
-    }
-  });
+  // 스티커 토글 기능은 mainChatHandlers.js에서 처리됨
 
   // Chat debug logs buttons (multiple instances)
   document.addEventListener("click", (event) => {

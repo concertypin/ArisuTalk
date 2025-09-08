@@ -3,6 +3,7 @@ import { renderAppearanceSettingsPanel } from "./settings/panels/AppearanceSetti
 import { renderCharacterDefaultsPanel } from "./settings/panels/CharacterDefaultsPanel.js";
 import { renderDataManagementPanel } from "./settings/panels/DataManagementPanel.js";
 import { renderAdvancedSettingsPanel } from "./settings/panels/AdvancedSettingsPanel.js";
+import { renderNAISettingsPanel } from "./settings/panels/NAISettingsPanel.js";
 import { setLanguage, t } from "../i18n.js";
 
 /**
@@ -84,6 +85,12 @@ function renderDesktopSettingsNavigation(activePanel) {
       description: t("settings.apiDescription"),
     },
     {
+      id: "nai",
+      icon: "image", 
+      label: "🧪 NAI 스티커 생성",
+      description: "NovelAI 기반 스티커 자동 생성 설정",
+    },
+    {
       id: "appearance",
       icon: "palette",
       label: t("settings.appearanceSettings"),
@@ -158,6 +165,10 @@ export function renderContentHeader(activePanel) {
       title: t("settings.aiSettings"),
       subtitle: t("settings.apiSubtitle"),
     },
+    nai: {
+      title: "NAI 스티커 자동 생성",
+      subtitle: "NovelAI를 활용한 캐릭터별 감정 스티커 자동 생성 설정",
+    },
     appearance: {
       title: t("settings.appearanceSettings"),
       subtitle: t("settings.appearanceSubtitle"),
@@ -196,6 +207,8 @@ export function renderActivePanel(app, activePanel) {
   switch (activePanel) {
     case "api":
       return renderAPISettingsPanel(app);
+    case "nai":
+      return renderNAISettingsPanel(app);
     case "appearance":
       return renderAppearanceSettingsPanel(app);
     case "character":

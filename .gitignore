@@ -29,3 +29,7 @@ backend/ktlint
 
 # Local files
 TODO.md
+
+# Claude Code files
+CLAUDE.MD
+.claude/

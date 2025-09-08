@@ -20,6 +20,16 @@ export async function renderPromptModal(app) {
       content: prompts.profileCreation,
       description: t("promptModal.randomFirstMessagePromptDescription"),
     },
+    [t("promptModal.snsForcePrompt")]: {
+      key: 'snsForce',
+      content: prompts.snsForce,
+      description: t("promptModal.snsForcePromptDescription"),
+    },
+    [t("promptModal.naiStickerPrompt")]: {
+      key: 'naiSticker',
+      content: prompts.naiSticker,
+      description: t("promptModal.naiStickerPromptDescription"),
+    },
   };
 
   return `

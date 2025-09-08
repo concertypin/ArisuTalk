@@ -55,6 +55,7 @@ export class GeminiClient {
     prompts,
     isProactive = false,
     forceSummary = false,
+    characterState = null,
   }) {
     const { contents, systemPrompt } = await buildContentPrompt({
       userName,
@@ -64,6 +65,7 @@ export class GeminiClient {
       prompts,
       isProactive,
       forceSummary,
+      characterState,
     });
 
     const payload = {
@@ -93,32 +95,38 @@ export class GeminiClient {
                 required: ["delay"],
               },
             },
-            newMemory: { type: "STRING" },
             characterState: {
               type: "OBJECT",
               properties: {
-                mood: { type: "NUMBER" },
-                energy: { type: "NUMBER" },
-                socialBattery: { type: "NUMBER" },
-                personality: {
-                  type: "OBJECT",
-                  properties: {
-                    extroversion: { type: "NUMBER" },
-                    openness: { type: "NUMBER" },
-                    conscientiousness: { type: "NUMBER" },
-                    agreeableness: { type: "NUMBER" },
-                    neuroticism: { type: "NUMBER" },
-                  },
-                  required: [
-                    "extroversion",
-                    "openness",
-                    "conscientiousness",
-                    "agreeableness",
-                    "neuroticism",
-                  ],
-                },
+                affection: { type: "NUMBER" },
+                intimacy: { type: "NUMBER" },
+                trust: { type: "NUMBER" },
+                romantic_interest: { type: "NUMBER" },
+                reason: { type: "STRING" },
               },
-              required: ["mood", "energy", "socialBattery", "personality"],
+              required: ["affection", "intimacy", "trust", "romantic_interest"],
+            },
+            autoPost: {
+              type: "OBJECT",
+              properties: {
+                type: { type: "STRING" },
+                content: { type: "STRING" },
+                access_level: { type: "STRING" },
+                importance: { type: "NUMBER" },
+                tags: {
+                  type: "ARRAY",
+                  items: { type: "STRING" }
+                },
+                emotion: { type: "STRING" },
+                reason: { type: "STRING" }
+              },
+              required: ["type", "content", "access_level"]
+            },
+            autoGenerateSticker: {
+              type: "OBJECT",
+              properties: {
+                emotion: { type: "STRING" }
+              }
             },
           },
           required: ["reactionDelay", "messages"],
