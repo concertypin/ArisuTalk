@@ -1509,6 +1509,13 @@ class PersonaChatApp {
       selectedStickerIndices: [],
       modalOpeningEvent: e,
     });
+
+    requestAnimationFrame(() => {
+      const modalBackdrop = document.getElementById("character-modal-backdrop");
+      if (modalBackdrop) {
+        modalBackdrop.classList.add("backdrop-blur-sm");
+      }
+    });
   }
 
   openEditCharacterModal(character, e = null) {
@@ -1519,18 +1526,24 @@ class PersonaChatApp {
       selectedStickerIndices: [],
       modalOpeningEvent: e,
     });
+
+    requestAnimationFrame(() => {
+      const modalBackdrop = document.getElementById("character-modal-backdrop");
+      if (modalBackdrop) {
+        modalBackdrop.classList.add("backdrop-blur-sm");
+      }
+    });
   }
 
   closeCharacterModal() {
     const modalBackdrop = document.getElementById("character-modal-backdrop");
     if (modalBackdrop) {
+      modalBackdrop.classList.remove("backdrop-blur-sm");
       const modalPanel = modalBackdrop.querySelector(".bg-gray-800");
       if (modalPanel) {
         modalPanel.classList.add("animate-modal-fade-out");
       }
-      // Also fade out the backdrop
-      modalBackdrop.style.transition = "opacity 0.2s ease-in-out";
-      modalBackdrop.style.opacity = "0";
+      modalBackdrop.classList.add("animate-backdrop-fade-out");
 
       setTimeout(() => {
         this.setState({

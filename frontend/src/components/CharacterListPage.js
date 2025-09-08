@@ -3,7 +3,7 @@ import { renderAvatar } from "./Avatar.js";
 import { formatTimestamp } from "../utils.js";
 
 const LONG_PRESS_DURATION_MS = 500;
-const RIPPLE_EFFECT_DURATION_MS = 600;
+const RIPPLE_ANIMATION_DURATION_MS = 600;
 const TOUCH_MOVE_THRESHOLD_PX = 10;
 
 /**
@@ -139,7 +139,7 @@ export function renderCharacterListPage(app) {
 
     <!-- FAB Menu (conditionally rendered) -->
     ${
-      app.state.showFabMenu && !isEditMode
+      app.state.showFabMenu
         ? `
     <div class="fab-menu fixed bottom-24 right-6 w-48 bg-gray-700 rounded-2xl shadow-lg z-20 animate-fab-menu-in">
         <button id="open-new-character-modal-mobile" class="w-full flex items-center gap-3 px-4 py-3 text-white text-sm text-left rounded-2xl hover:bg-gray-600">
@@ -152,19 +152,38 @@ export function renderCharacterListPage(app) {
     }
 
     <!-- FAB Toggle -->
-    ${!isEditMode ? `
     <button id="fab-menu-toggle" class="fixed bottom-6 right-6 bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 transition-all duration-200 transform-gpu hover:scale-110 active:scale-95 z-30">
         <i data-lucide="${app.state.showFabMenu ? "x" : "plus"}" class="w-8 h-8 transition-transform duration-300 ease-in-out ${app.state.showFabMenu ? "rotate-45" : ""}"></i>
     </button>
-    ` : ''}
   `;
 
   const listContainer = container.querySelector("#character-list-items");
   renderCharacterList(app, listContainer);
 
   let longPressTimer;
-  let startX, startY;
+  let touchStartX, touchStartY;
   let longPressFired = false;
+
+  const handleLongPress = (item, e) => {
+    longPressTimer = null;
+    longPressFired = true;
+
+    const characterId = Number(item.dataset.characterId);
+    
+    const rect = item.getBoundingClientRect();
+    const ripple = document.createElement("span");
+    ripple.className = "ripple";
+    item.appendChild(ripple);
+
+    const point = e.touches ? e.touches[0] : e;
+    ripple.style.left = `${point.clientX - rect.left}px`;
+    ripple.style.top = `${point.clientY - rect.top}px`;
+
+    setTimeout(() => {
+        ripple.remove();
+        app.openCharacterEditMode(characterId);
+    }, RIPPLE_ANIMATION_DURATION_MS);
+  };
 
   const handlePressStart = (e, isTouchEvent) => {
     const item = e.target.closest(".character-list-item");
@@ -174,28 +193,10 @@ export function renderCharacterListPage(app) {
 
     longPressFired = false;
     const point = isTouchEvent ? e.touches[0] : e;
-    startX = point.clientX;
-    startY = point.clientY;
+    touchStartX = point.clientX;
+    touchStartY = point.clientY;
     
-    const characterId = Number(item.dataset.characterId);
-
-    longPressTimer = setTimeout(() => {
-      longPressTimer = null;
-      longPressFired = true;
-      
-      const rect = item.getBoundingClientRect();
-      const ripple = document.createElement("span");
-      ripple.className = "ripple";
-      item.appendChild(ripple);
-      ripple.style.left = `${point.clientX - rect.left}px`;
-      ripple.style.top = `${point.clientY - rect.top}px`;
-
-      setTimeout(() => {
-          ripple.remove();
-          app.openCharacterEditMode(characterId);
-      }, RIPPLE_EFFECT_DURATION_MS);
-
-    }, LONG_PRESS_DURATION_MS);
+    longPressTimer = setTimeout(() => handleLongPress(item, e), LONG_PRESS_DURATION_MS);
   };
 
   const handlePressEnd = () => {
@@ -205,7 +206,7 @@ export function renderCharacterListPage(app) {
   const handlePressMove = (e, isTouchEvent) => {
     if (!longPressTimer) return;
     const point = isTouchEvent ? e.touches[0] : e;
-    if (Math.abs(point.clientX - startX) > TOUCH_MOVE_THRESHOLD_PX || Math.abs(point.clientY - startY) > TOUCH_MOVE_THRESHOLD_PX) {
+    if (Math.abs(point.clientX - touchStartX) > TOUCH_MOVE_THRESHOLD_PX || Math.abs(point.clientY - touchStartY) > TOUCH_MOVE_THRESHOLD_PX) {
       clearTimeout(longPressTimer);
     }
   };
@@ -230,12 +231,18 @@ export function renderCharacterListPage(app) {
     app.handleCharacterSelect(characterId, e);
   });
 
+  listContainer.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+  });
+
+  // Touch events
+  listContainer.addEventListener("touchstart", (e) => handlePressStart(e, true), { passive: true });
+  listContainer.addEventListener("touchend", handlePressEnd);
+  listContainer.addEventListener("touchmove", (e) => handlePressMove(e, true));
+
+  // Mouse events
   listContainer.addEventListener("mousedown", (e) => handlePressStart(e, false));
   listContainer.addEventListener("mouseup", handlePressEnd);
   listContainer.addEventListener("mouseleave", handlePressEnd);
   listContainer.addEventListener("mousemove", (e) => handlePressMove(e, false));
-
-  listContainer.addEventListener("touchstart", (e) => handlePressStart(e, true), { passive: true });
-  listContainer.addEventListener("touchend", handlePressEnd);
-  listContainer.addEventListener("touchmove", (e) => handlePressMove(e, true));
 }
