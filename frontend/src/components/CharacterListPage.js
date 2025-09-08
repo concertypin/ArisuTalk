@@ -217,22 +217,24 @@ export function renderCharacterListPage(app) {
 
     const characterId = Number(item.dataset.characterId);
 
-    if (longPressFired) {
+    if (longPressFired || app.state.mobileEditModeCharacterId !== null) {
       e.preventDefault();
       e.stopPropagation();
-      longPressFired = false;
-      return;
-    }
-    if (app.state.mobileEditModeCharacterId !== null) {
-      e.preventDefault();
-      e.stopPropagation();
+      if (longPressFired) {
+        longPressFired = false;
+      }
       return;
     }
     app.handleCharacterSelect(characterId, e);
   });
 
   listContainer.addEventListener("contextmenu", (e) => {
+    const item = e.target.closest(".character-list-item");
+    if (!item) return;
+
     e.preventDefault();
+    const characterId = Number(item.dataset.characterId);
+    app.openCharacterEditMode(characterId);
   });
 
   // Touch events

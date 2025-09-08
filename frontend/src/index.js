@@ -38,6 +38,7 @@ import { handleGroupChatClick } from "./handlers/groupChatHandlers.js";
 import { debounce, findMessageGroup } from "./utils.js";
 
 const MODAL_FADE_OUT_DURATION_MS = 200;
+const HEADER_FADE_OUT_DURATION_MS = 300;
 
 // --- APP INITIALIZATION ---
 document.addEventListener("DOMContentLoaded", async () => {
@@ -1579,7 +1580,7 @@ class PersonaChatApp {
         header.classList.add("animate-fade-out");
         setTimeout(() => {
             this.closeCharacterEditMode();
-        }, 300);
+        }, HEADER_FADE_OUT_DURATION_MS);
     } else {
         this.closeCharacterEditMode();
     }
