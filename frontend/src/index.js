@@ -1059,6 +1059,10 @@ class PersonaChatApp {
     setTimeout(() => this.scrollToBottom(), 0);
   }
 
+  /**
+   * @param {string | number} characterId
+   * @param {Event | null} e
+   */
   editCharacter(characterId, e = null) {
     const numericCharacterId = Number(characterId);
     const character = this.state.characters.find(
@@ -1502,6 +1506,9 @@ class PersonaChatApp {
     this.setState({ settings: { ...this.state.settings, model } });
   }
 
+  /**
+   * @param {Event | null} e
+   */
   openNewCharacterModal(e = null) {
     this.setState({
       editingCharacter: { memories: [], proactiveEnabled: true },
@@ -1519,6 +1526,10 @@ class PersonaChatApp {
     });
   }
 
+  /**
+   * @param {object} character
+   * @param {Event | null} e
+   */
   openEditCharacterModal(character, e = null) {
     this.setState({
       editingCharacter: { ...character, memories: character.memories || [] },

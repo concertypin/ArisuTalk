@@ -165,7 +165,7 @@ export function renderCharacterListPage(app) {
   let longPressFired = false;
   let isTouching = false; // Flag to distinguish touch from mouse events
 
-  const handleLongPress = (item, e) => {
+  function handleLongPress(item, e) {
     longPressTimer = null;
     longPressFired = true;
 
@@ -184,9 +184,9 @@ export function renderCharacterListPage(app) {
         ripple.remove();
         app.openCharacterEditMode(characterId);
     }, RIPPLE_ANIMATION_DURATION_MS);
-  };
+  }
 
-  const handlePressStart = (e, isTouchEvent) => {
+  function handlePressStart(e, isTouchEvent) {
     const item = e.target.closest(".character-list-item");
     if (!item) return;
 
@@ -198,19 +198,19 @@ export function renderCharacterListPage(app) {
     touchStartY = point.clientY;
     
     longPressTimer = setTimeout(() => handleLongPress(item, e), LONG_PRESS_DURATION_MS);
-  };
+  }
 
-  const handlePressEnd = () => {
+  function handlePressEnd() {
     clearTimeout(longPressTimer);
-  };
+  }
 
-  const handlePressMove = (e, isTouchEvent) => {
+  function handlePressMove(e, isTouchEvent) {
     if (!longPressTimer) return;
     const point = isTouchEvent ? e.touches[0] : e;
     if (Math.abs(point.clientX - touchStartX) > TOUCH_MOVE_THRESHOLD_PX || Math.abs(point.clientY - touchStartY) > TOUCH_MOVE_THRESHOLD_PX) {
       clearTimeout(longPressTimer);
     }
-  };
+  }
 
   listContainer.addEventListener("click", (e) => {
     const item = e.target.closest(".character-list-item");

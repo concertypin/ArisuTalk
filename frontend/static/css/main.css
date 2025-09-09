@@ -3,86 +3,6 @@ html {
   font-size: calc(var(--font-scale, 1) * 14px);
 }
 
-/* 커스텀 애니메이션 */
-@keyframes slideUp {
-  0% {
-    opacity: 0;
-    transform: translateY(15px);
-    scale: 0.95;
-  }
-
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-    scale: 1;
-  }
-}
-
-.animate-slideUp {
-  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-.animate-fadeIn {
-  animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fab-menu-in {
-  from {
-    transform: scale(0.95) translateY(10px);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1) translateY(0);
-    opacity: 1;
-  }
-}
-
-.animate-fab-menu-in {
-  animation: fab-menu-in 0.2s ease-out forwards;
-}
-
-@keyframes slide-down {
-  from {
-    transform: translateY(-100%);
-  }
-  to {
-    transform: translateY(0);
-  }
-}
-
-.animate-slide-down {
-  animation: slide-down 0.3s ease-out forwards;
-}
-
-@keyframes slide-down-fast {
-  from {
-    transform: translateY(-20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.animate-slide-down-fast {
-    animation: slide-down-fast 0.3s ease-out forwards;
-}
-
-.height-transition {
-    transition: max-height 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -99,17 +19,6 @@ textarea,
 textarea::-webkit-scrollbar,
 .overflow-y-auto::-webkit-scrollbar {
   display: none;
-}
-
-/* 로딩 스피너 */
-@keyframes pulse {
-  50% {
-    opacity: 0.5;
-  }
-}
-
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 /* 단어 단위 줄바꿈 */
@@ -471,66 +380,8 @@ button > svg {
   background-color: rgba(35, 42, 55, 0.7);
 }
 
-/* Added for mobile edit mode header */
-@keyframes fadeInHeader {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes fadeOutHeader {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-.animate-fade-in {
-  animation: fadeInHeader 0.3s ease-out forwards;
-}
-
-.animate-fade-out {
-  animation: fadeOutHeader 0.3s ease-out forwards;
-}
-
 /* Added for long-press ripple effect */
 .character-list-item {
   position: relative;
   overflow: hidden;
-}
-
-.ripple {
-  position: absolute;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.3);
-  transform: scale(0);
-  animation: ripple 0.6s ease-out;
-  pointer-events: none;
-  width: 100px; /* Set a fixed size */
-  height: 100px; /* Set a fixed size */
-  margin-top: -50px; /* Adjust for size */
-  margin-left: -50px; /* Adjust for size */
-}
-
-@keyframes ripple {
-  to {
-    transform: scale(4);
-    opacity: 0;
-  }
-}
-
-/* Added for modal close animation */
-@keyframes modalFadeOut {
-  from { opacity: 1; transform: scale(1); }
-  to { opacity: 0; transform: scale(0.95); }
-}
-
-.animate-modal-fade-out {
-  animation: modalFadeOut 0.2s ease-in-out forwards;
-}
-
-@keyframes backdropFadeOut {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-.animate-backdrop-fade-out {
-  animation: backdropFadeOut 0.2s ease-in-out forwards;
 }
