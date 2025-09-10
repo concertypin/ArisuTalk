@@ -30,7 +30,7 @@ export function shouldUseMaxCompletionTokens(model) {
  * Gets the correct token limit parameter name for a given model
  * @param {string} model - The model name
  * @param {number} tokenLimit - The token limit value
- * @returns {{max_tokens: number} | {max_completion_tokens: number}} Object with either max_tokens or max_completion_tokens property
+ * @returns {({max_tokens: number} | {max_completion_tokens: number})} An object with a single key, which is either `max_tokens` or `max_completion_tokens`.
  */
 export function getTokenLimitParameter(model, tokenLimit) {
   const paramName = shouldUseMaxCompletionTokens(model)
