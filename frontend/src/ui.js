@@ -52,7 +52,8 @@ async function renderModals(app) {
 
   // Render main modals
   let mainModalHtml = "";
-  if (app.state.showSettingsModal) mainModalHtml += renderDesktopSettingsModal(app);
+  if (app.state.showSettingsModal)
+    mainModalHtml += renderDesktopSettingsModal(app);
   if (app.state.showCharacterModal) mainModalHtml += renderCharacterModal(app);
   if (app.state.showPromptModal) mainModalHtml += await renderPromptModal(app);
   if (app.state.showCreateGroupChatModal)
@@ -61,7 +62,8 @@ async function renderModals(app) {
     mainModalHtml += renderCreateOpenChatModal(app);
   if (app.state.showEditGroupChatModal)
     mainModalHtml += renderEditGroupChatModal(app);
-  if (app.state.showDebugLogsModal) mainModalHtml += renderDebugLogsModal(app.state);
+  if (app.state.showDebugLogsModal)
+    mainModalHtml += renderDebugLogsModal(app.state);
   if (app.state.showMobileSearch) mainModalHtml += renderSearchModal(app);
   if (app.state.modal.isOpen && app.state.modal.type === "chatSelection") {
     mainModalHtml += renderChatSelectionModal(app);
@@ -92,12 +94,12 @@ async function renderModals(app) {
 }
 
 function renderConfirmationModalContainer(app) {
-    const container = document.getElementById("confirmation-modal-container");
-    let html = "";
-    if (app.state.modal.isOpen && app.state.modal.type === "confirmation") {
-        html += renderConfirmationModal(app);
-    }
-    container.innerHTML = html;
+  const container = document.getElementById("confirmation-modal-container");
+  let html = "";
+  if (app.state.modal.isOpen && app.state.modal.type === "confirmation") {
+    html += renderConfirmationModal(app);
+  }
+  container.innerHTML = html;
 }
 
 function updateSnapshotList(app) {
@@ -333,7 +335,10 @@ export async function render(app) {
       characterList.scrollTop = newState.createGroupChatScrollTop || 0;
       // Remove existing listener to prevent duplicates
       if (characterList._scrollListener) {
-        characterList.removeEventListener("scroll", characterList._scrollListener);
+        characterList.removeEventListener(
+          "scroll",
+          characterList._scrollListener,
+        );
       }
       const scrollListener = (e) => {
         app.setState({ createGroupChatScrollTop: e.target.scrollTop });
@@ -463,7 +468,7 @@ function shouldUpdateModals(oldState, newState) {
 }
 
 function shouldUpdateConfirmationModal(oldState, newState) {
-    return JSON.stringify(oldState.modal) !== JSON.stringify(newState.modal);
+  return JSON.stringify(oldState.modal) !== JSON.stringify(newState.modal);
 }
 
 // --- New function for conditional blur ---

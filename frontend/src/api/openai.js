@@ -4,6 +4,7 @@ import {
   buildCharacterSheetPrompt,
 } from "../prompts/builder/promptBuilder.js";
 import { t } from "../i18n.js";
+import { getTokenLimitParameter } from "../utils/modelUtils.js";
 
 const API_BASE_URL = "https://api.openai.com/v1";
 
@@ -115,8 +116,8 @@ export class OpenAIClient {
     const requestBody = {
       model: this.model,
       messages: messages,
-      max_tokens: this.maxTokens,
       temperature: this.temperature,
+      ...getTokenLimitParameter(this.model, this.maxTokens),
     };
 
     try {
@@ -191,7 +192,6 @@ export class OpenAIClient {
 
     const requestBody = {
       model: this.model,
-      max_tokens: this.profileMaxTokens,
       temperature: this.profileTemperature,
       messages: [
         {
@@ -207,6 +207,7 @@ export class OpenAIClient {
             ` ${userDescription}`,
         },
       ],
+      ...getTokenLimitParameter(this.model, this.profileMaxTokens),
     };
 
     try {
@@ -283,8 +284,8 @@ export class OpenAIClient {
     const payload = {
       model: this.model,
       messages: messages,
-      max_tokens: this.profileMaxOutputTokens,
       temperature: this.profileTemperature,
+      ...getTokenLimitParameter(this.model, this.profileMaxTokens),
     };
 
     try {

@@ -483,18 +483,18 @@ export const ko: LanguageStrings = {
       newChat: "새로운 채팅",
     },
     characterCardSaveError: {
-        message: "캐릭터 카드 저장에 실패했습니다."
+      message: "캐릭터 카드 저장에 실패했습니다.",
     },
     character_name_required_title: "이름 필요",
     character_name_required_message: "캐릭터 이름을 먼저 입력해주세요.",
     aiGenerationComplete: {
-        title: "AI 생성 완료",
-        message: "캐릭터 \"{{characterName}}\"의 정보 생성이 완료되었습니다."
+      title: "AI 생성 완료",
+      message: '캐릭터 "{{characterName}}"의 정보 생성이 완료되었습니다.',
     },
     generationFailed: {
-        title: "생성 실패",
-        message: "캐릭터 생성 중 오류가 발생했습니다: {{errorMessage}}"
-    }
+      title: "생성 실패",
+      message: "캐릭터 생성 중 오류가 발생했습니다: {{errorMessage}}",
+    },
   },
   ui: {
     discardChanges: "변경사항 취소",
@@ -514,12 +514,15 @@ export const ko: LanguageStrings = {
     fileProcessingError: "파일 처리 오류:",
     fileProcessingAlert: "파일을 처리하는 중 오류가 발생했습니다.",
     fileSizeExceeded: "파일 크기 초과",
-    fileSizeExceededMessage: "'{{fileName}}'의 파일 크기가 너무 큽니다. (최대 {{sizeLimit}})",
+    fileSizeExceededMessage:
+      "'{{fileName}}'의 파일 크기가 너무 큽니다. (최대 {{sizeLimit}})",
     unsupportedFormat: "지원하지 않는 형식",
-    unsupportedFormatMessage: "'{{fileName}}'은(는) 지원하지 않는 파일 형식입니다.",
+    unsupportedFormatMessage:
+      "'{{fileName}}'은(는) 지원하지 않는 파일 형식입니다.",
     stickerProcessingError: "스티커 처리 오류",
     stickerProcessingErrorConsole: "스티커 처리 오류: {{fileName}}",
-    stickerProcessingErrorMessage: "'{{fileName}}'을(를) 처리하는 중 오류가 발생했습니다.",
+    stickerProcessingErrorMessage:
+      "'{{fileName}}'을(를) 처리하는 중 오류가 발생했습니다.",
     storageFull: "저장 공간 가득 참",
     storageFullMessage: "저장 공간이 부족합니다.",
     groupChatNamePlaceholder: "단톡방 이름을 입력하세요",
@@ -719,6 +722,6 @@ export const ko: LanguageStrings = {
     noResults: "검색된 캐릭터가 없습니다.",
   },
   generatingStatus: {
-    generating: "생성 중..."
-  }
+    generating: "생성 중...",
+  },
 };

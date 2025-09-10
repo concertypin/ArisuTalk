@@ -4,6 +4,7 @@ import {
   buildCharacterSheetPrompt,
 } from "../prompts/builder/promptBuilder.js";
 import { t } from "../i18n.js";
+import { getTokenLimitParameter } from "../utils/modelUtils.js";
 
 export class CustomOpenAIClient {
   /**
@@ -73,8 +74,8 @@ export class CustomOpenAIClient {
     const requestBody = {
       model: this.model,
       messages: messages,
-      max_tokens: this.maxTokens,
       temperature: this.temperature,
+      ...getTokenLimitParameter(this.model, this.maxTokens),
     };
 
     try {
@@ -145,7 +146,6 @@ export class CustomOpenAIClient {
 
     const requestBody = {
       model: this.model,
-      max_tokens: this.profileMaxTokens,
       temperature: this.profileTemperature,
       messages: [
         {
@@ -161,6 +161,7 @@ export class CustomOpenAIClient {
             ` ${userDescription}`,
         },
       ],
+      ...getTokenLimitParameter(this.model, this.profileMaxTokens),
     };
 
     try {
@@ -237,8 +238,8 @@ export class CustomOpenAIClient {
     const payload = {
       model: this.model,
       messages: messages,
-      max_tokens: this.profileMaxOutputTokens,
       temperature: this.profileTemperature,
+      ...getTokenLimitParameter(this.model, this.profileMaxTokens),
     };
 
     try {
