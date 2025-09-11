@@ -123,7 +123,7 @@ export function renderCharacterModal(app) {
 
   return `
         <div id="character-modal-backdrop" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 transition-all duration-300 ease-out">
-            <div class="bg-gray-800 rounded-2xl w-full max-w-md mx-auto my-auto flex flex-col" style="max-height: 90vh;">
+            <div id="character-modal-panel" class="bg-gray-800 rounded-2xl w-full max-w-md mx-auto my-auto flex flex-col" style="max-height: 90vh;">
                 <div class="flex items-center justify-between px-6 py-2 md:p-6 border-b border-gray-700 shrink-0">
                     <h3 class="text-xl font-semibold text-white">${
                       isNew

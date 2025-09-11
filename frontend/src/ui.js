@@ -358,7 +358,7 @@ export async function render(app) {
     // Use requestAnimationFrame to ensure the element is in the DOM before animating
     requestAnimationFrame(() => {
         const modalBackdrop = document.getElementById("character-modal-backdrop");
-        const modalPanel = modalBackdrop?.querySelector(".bg-gray-800");
+        const modalPanel = modalBackdrop?.querySelector("#character-modal-panel");
 
         if (modalPanel) {
             const rect = modalPanel.getBoundingClientRect();

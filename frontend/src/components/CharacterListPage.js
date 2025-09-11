@@ -251,10 +251,12 @@ export function renderCharacterListPage(app) {
     isTouching = true;
     handlePressStart(e, true);
   }, { passive: true });
-  listContainer.addEventListener("touchend", () => {
+  const onTouchEnd = () => {
     isTouching = false;
     handlePressEnd();
-  });
+  };
+  listContainer.addEventListener("touchend", onTouchEnd);
+  listContainer.addEventListener("touchcancel", onTouchEnd);
   listContainer.addEventListener("touchmove", (e) => handlePressMove(e, true));
 
   // Mouse events

@@ -1551,7 +1551,7 @@ class PersonaChatApp {
     const modalBackdrop = document.getElementById("character-modal-backdrop");
     if (modalBackdrop) {
       modalBackdrop.classList.remove("backdrop-blur-sm");
-      const modalPanel = modalBackdrop.querySelector(".bg-gray-800");
+      const modalPanel = modalBackdrop.querySelector("#character-modal-panel");
       if (modalPanel) {
         modalPanel.classList.add("animate-modal-fade-out");
       }
