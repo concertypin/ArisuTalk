@@ -18,6 +18,7 @@ export const ko: LanguageStrings = {
     deleteSticker: "삭제",
     addContact: "연락처 추가",
     editContact: "연락처 수정",
+    editModeTitle: "'{{name}}' 편집",
     profileImage: "프로필 이미지",
     importContact: "연락처 불러오기",
     shareContact: "연락처 공유하기",

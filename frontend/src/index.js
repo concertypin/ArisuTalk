@@ -37,6 +37,9 @@ import {
 import { handleGroupChatClick } from "./handlers/groupChatHandlers.js";
 import { debounce, findMessageGroup } from "./utils.js";
 
+const MODAL_FADE_OUT_DURATION_MS = 200;
+const HEADER_FADE_OUT_DURATION_MS = 300;
+
 // --- APP INITIALIZATION ---
 document.addEventListener("DOMContentLoaded", async () => {
   window.personaApp = new PersonaChatApp();
@@ -118,6 +121,8 @@ class PersonaChatApp {
       },
       showAiSettingsUI: false,
       showScaleSettingsUI: false,
+      mobileEditModeCharacterId: null,
+      modalOpeningEvent: null,
     };
     this.oldState = null;
     this.messagesEndRef = null;
@@ -837,6 +842,17 @@ class PersonaChatApp {
       ) {
         this.setState({ showMobileSearch: false, searchQuery: "" });
       }
+
+      // --- Handlers for Mobile Edit Mode ---
+      if (e.target.closest("#cancel-edit-mode-btn")) {
+        this._fadeOutHeaderAndCloseEditMode();
+      }
+      if (e.target.closest("#edit-character-btn")) {
+        if (this.state.mobileEditModeCharacterId) {
+          this.editCharacter(this.state.mobileEditModeCharacterId, e);
+          this._fadeOutHeaderAndCloseEditMode();
+        }
+      }
     });
 
     appElement.addEventListener("input", (e) => {
@@ -1043,13 +1059,17 @@ class PersonaChatApp {
     setTimeout(() => this.scrollToBottom(), 0);
   }
 
-  editCharacter(characterId) {
+  /**
+   * @param {string | number} characterId
+   * @param {Event | null} e
+   */
+  editCharacter(characterId, e = null) {
     const numericCharacterId = Number(characterId);
     const character = this.state.characters.find(
       (c) => c.id === numericCharacterId,
     );
     if (character) {
-      this.openEditCharacterModal(character);
+      this.openEditCharacterModal(character, e);
     }
   }
 
@@ -1486,31 +1506,95 @@ class PersonaChatApp {
     this.setState({ settings: { ...this.state.settings, model } });
   }
 
-  openNewCharacterModal() {
+  /**
+   * @param {Event | null} e
+   */
+  openNewCharacterModal(e = null) {
     this.setState({
       editingCharacter: { memories: [], proactiveEnabled: true },
       showCharacterModal: true,
       stickerSelectionMode: false,
       selectedStickerIndices: [],
+      modalOpeningEvent: e,
+    });
+
+    requestAnimationFrame(() => {
+      const modalBackdrop = document.getElementById("character-modal-backdrop");
+      if (modalBackdrop) {
+        modalBackdrop.classList.add("backdrop-blur-sm");
+      }
     });
   }
 
-  openEditCharacterModal(character) {
+  /**
+   * @param {object} character
+   * @param {Event | null} e
+   */
+  openEditCharacterModal(character, e = null) {
     this.setState({
       editingCharacter: { ...character, memories: character.memories || [] },
       showCharacterModal: true,
       stickerSelectionMode: false,
       selectedStickerIndices: [],
+      modalOpeningEvent: e,
+    });
+
+    requestAnimationFrame(() => {
+      const modalBackdrop = document.getElementById("character-modal-backdrop");
+      if (modalBackdrop) {
+        modalBackdrop.classList.add("backdrop-blur-sm");
+      }
     });
   }
 
   closeCharacterModal() {
-    this.setState({
-      showCharacterModal: false,
-      editingCharacter: null,
-      stickerSelectionMode: false,
-      selectedStickerIndices: [],
-    });
+    const modalBackdrop = document.getElementById("character-modal-backdrop");
+    if (modalBackdrop) {
+      modalBackdrop.classList.remove("backdrop-blur-sm");
+      const modalPanel = modalBackdrop.querySelector("#character-modal-panel");
+      if (modalPanel) {
+        modalPanel.classList.add("animate-modal-fade-out");
+      }
+      modalBackdrop.classList.add("animate-backdrop-fade-out");
+
+      setTimeout(() => {
+        this.setState({
+          showCharacterModal: false,
+          editingCharacter: null,
+          stickerSelectionMode: false,
+          selectedStickerIndices: [],
+        });
+      }, MODAL_FADE_OUT_DURATION_MS); // Match animation duration
+    } else {
+      // Fallback if modal not found
+      this.setState({
+        showCharacterModal: false,
+        editingCharacter: null,
+        stickerSelectionMode: false,
+        selectedStickerIndices: [],
+      });
+    }
+  }
+
+  openCharacterEditMode(characterId) {
+    this.setState({ mobileEditModeCharacterId: characterId });
+  }
+
+  closeCharacterEditMode() {
+    this.setState({ mobileEditModeCharacterId: null });
+  }
+
+  _fadeOutHeaderAndCloseEditMode() {
+    const header = document.getElementById("mobile-edit-header");
+    if (header) {
+        header.classList.remove("animate-fade-in");
+        header.classList.add("animate-fade-out");
+        setTimeout(() => {
+            this.closeCharacterEditMode();
+        }, HEADER_FADE_OUT_DURATION_MS);
+    } else {
+        this.closeCharacterEditMode();
+    }
   }
 
   handleAvatarChange(e, isCard = false) {

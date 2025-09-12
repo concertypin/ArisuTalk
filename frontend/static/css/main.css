@@ -3,86 +3,6 @@ html {
   font-size: calc(var(--font-scale, 1) * 14px);
 }
 
-/* 커스텀 애니메이션 */
-@keyframes slideUp {
-  0% {
-    opacity: 0;
-    transform: translateY(15px);
-    scale: 0.95;
-  }
-
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-    scale: 1;
-  }
-}
-
-.animate-slideUp {
-  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-.animate-fadeIn {
-  animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fab-menu-in {
-  from {
-    transform: scale(0.95) translateY(10px);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1) translateY(0);
-    opacity: 1;
-  }
-}
-
-.animate-fab-menu-in {
-  animation: fab-menu-in 0.2s ease-out forwards;
-}
-
-@keyframes slide-down {
-  from {
-    transform: translateY(-100%);
-  }
-  to {
-    transform: translateY(0);
-  }
-}
-
-.animate-slide-down {
-  animation: slide-down 0.3s ease-out forwards;
-}
-
-@keyframes slide-down-fast {
-  from {
-    transform: translateY(-20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.animate-slide-down-fast {
-    animation: slide-down-fast 0.3s ease-out forwards;
-}
-
-.height-transition {
-    transition: max-height 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -101,17 +21,6 @@ textarea::-webkit-scrollbar,
   display: none;
 }
 
-/* 로딩 스피너 */
-@keyframes pulse {
-  50% {
-    opacity: 0.5;
-  }
-}
-
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
 /* 단어 단위 줄바꿈 */
 .break-words {
   overflow-wrap: break-word;
@@ -128,6 +37,8 @@ textarea::-webkit-scrollbar,
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.7);
   z-index: 40;
+  backdrop-filter: blur(4px);
+  transition: backdrop-filter 0.3s ease-out;
 }
 
 /* 모달 컨테이너 */
@@ -467,4 +378,10 @@ button > svg {
 
 .message-bubble-them {
   background-color: rgba(35, 42, 55, 0.7);
+}
+
+/* Added for long-press ripple effect */
+.character-list-item {
+  position: relative;
+  overflow: hidden;
 }
