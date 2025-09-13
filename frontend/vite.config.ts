@@ -5,6 +5,9 @@ import { VitePWA } from "vite-plugin-pwa";
 const prodOnlyPlugin = [
     VitePWA({
         registerType: "autoUpdate",
+        workbox: {
+            maximumFileSizeToCacheInBytes: 4000000, // 4MB로 증가 (기본값: 2MB)
+        },
         manifest: {
             name: "ArisuTalk",
             short_name: "ArisuTalk",
