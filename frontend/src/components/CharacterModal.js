@@ -222,7 +222,19 @@ export function renderCharacterModal(app) {
                         <textarea id="character-appearance" placeholder="예: young Korean woman, long black hair, school uniform, bright smile, casual modern clothes..." class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-purple-500/50 text-sm" rows="3">${
                           char.appearance
                         }</textarea>
-                        <div class="mt-2 flex justify-end">
+                        <div class="mt-2 flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs text-gray-400">NAI 자동 생성</label>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input 
+                                        id="character-nai-enabled" 
+                                        type="checkbox" 
+                                        ${char.naiSettings?.autoGenerate ? "checked" : ""} 
+                                        class="sr-only peer"
+                                    >
+                                    <div class="w-9 h-5 bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-500/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+                                </label>
+                            </div>
                             <button id="test-appearance-prompt" class="px-3 py-1 text-xs bg-purple-600 hover:bg-purple-700 text-white rounded-lg flex items-center gap-1">
                                 <i data-lucide="test-tube" class="w-3 h-3 pointer-events-none"></i>
                                 외모 프롬프트 테스트
@@ -375,32 +387,6 @@ export function renderCharacterModal(app) {
                                                   editingCharacter?.stickers ||
                                                     [],
                                                 )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </details>
-                                <details class="group border-t border-gray-700 pt-2">
-                                    <summary class="flex items-center justify-between cursor-pointer list-none py-2">
-                                       <h4 class="text-sm font-medium text-gray-300">NAI 스티커 자동 생성 설정</h4>
-                                       <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"></i>
-                                    </summary>
-                                    <div class="content-wrapper">
-                                        <div class="content-inner pt-4 space-y-4">
-                                            <!-- 자동 생성 토글 -->
-                                            <div class="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg border border-gray-700">
-                                                <div>
-                                                    <label class="text-sm font-medium text-gray-300">자동 생성</label>
-                                                    <p class="text-xs text-gray-400 mt-1">대화 중 AI가 감정을 감지하면 자동으로 스티커 생성</p>
-                                                </div>
-                                                <label class="relative inline-flex items-center cursor-pointer">
-                                                    <input 
-                                                        id="character-nai-enabled" 
-                                                        type="checkbox" 
-                                                        ${char.naiSettings?.autoGenerate ? "checked" : ""} 
-                                                        class="sr-only peer"
-                                                    >
-                                                    <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-500/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
-                                                </label>
                                             </div>
                                         </div>
                                     </div>

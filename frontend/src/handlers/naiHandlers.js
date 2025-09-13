@@ -38,8 +38,6 @@ export function setupNAIHandlers(app) {
     // 기본 설정
     if (target.id === "nai-api-key") {
       handleNAIApiKeyChange(app, target.value);
-    } else if (target.id === "nai-auto-generate") {
-      handleAutoGenerateToggle(app, target.checked);
     } else if (target.id === "nai-preferred-size") {
       handlePreferredSizeChange(app, target.value);
     } else if (target.id === "nai-min-delay") {
@@ -153,20 +151,6 @@ function handleNAIApiKeyChange(app, apiKey) {
   }
 }
 
-/**
- * 자동 생성 토글 처리
- */
-function handleAutoGenerateToggle(app, enabled) {
-  const naiSettings = { ...(app.state.settings.naiSettings || {}) };
-  naiSettings.autoGenerate = enabled;
-  
-  app.setState({
-    settings: {
-      ...app.state.settings,
-      naiSettings
-    }
-  });
-}
 
 /**
  * 선호 크기 변경 처리

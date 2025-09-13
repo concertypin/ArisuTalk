@@ -13,7 +13,6 @@ export function renderNAISettingsPanel(app) {
   const {
     // 기본 API 설정
     apiKey = "",
-    autoGenerate = true,
     
     // 모델 및 크기 설정
     model = "nai-diffusion-4-5-full",
@@ -104,28 +103,6 @@ export function renderNAISettingsPanel(app) {
         </h4>
         
         <div class="space-y-4">
-          <!-- 자동 생성 토글 (최상단) -->
-          <div class="flex items-center justify-between">
-            <div>
-              <label class="text-sm font-medium text-gray-300">
-                스티커 자동 생성
-              </label>
-              <p class="text-xs text-gray-400 mt-1">
-                대화 중 감정이 감지되면 해당 스티커를 자동으로 생성합니다
-              </p>
-            </div>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input 
-                id="nai-auto-generate" 
-                type="checkbox" 
-                ${autoGenerate ? "checked" : ""} 
-                class="sr-only peer"
-              >
-              <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-500/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
-            </label>
-          </div>
-
-          <div class="border-t border-gray-600 pt-4"></div>
           <div>
             <label class="block text-sm font-medium text-gray-300 mb-2">
               NovelAI 모델
