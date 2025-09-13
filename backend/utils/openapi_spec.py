@@ -1,6 +1,6 @@
+import json
 import os
 import sys
-import json
 
 # Add the project root to the sys.path
 # Assuming the script is in <project_root>/utils/
