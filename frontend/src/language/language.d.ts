@@ -2,6 +2,8 @@ export type LanguageStrings = {
   common: {
     cancel: string;
     save: string;
+    create: string;
+    add: string;
     confirm: string;
     close: string;
     delete: string;
@@ -38,6 +40,7 @@ export type LanguageStrings = {
     memory: string;
     addMemory: string;
     responseSpeed: string;
+    openSNS: string;
   };
   characterModalSlider: {
     responseTime: {
@@ -95,6 +98,9 @@ export type LanguageStrings = {
     participantsConnected: string;
     participantsJoined: string;
     debugLogButtonTitle: string;
+    regenerateMessage: string;
+    generateSNS: string;
+    generateNAI: string;
   };
   promptModal: {
     title: string;
@@ -634,5 +640,74 @@ export type LanguageStrings = {
     saveApiConfigsFailed: string;
     noMasterPasswordForDecryption: string;
     loadApiConfigsFailed: string;
+  };
+  sns: {
+    characterListTitle: string;
+    accessDenied: string;
+    createPost: string;
+    editPost: string;
+    likes: string;
+    comments: string;
+    secretAccount: string;
+    mainAccount: string;
+    secretAccountWarning: string;
+    selectedSticker: string;
+    changeSticker: string;
+    selectSticker: string;
+    noStickers: string;
+    postPlaceholder: string;
+    posts: string;
+    secrets: string;
+    tags: string;
+    postsTab: string;
+    secretsTab: string;
+    tagsTab: string;
+    addTag: string;
+    tagsDescription: string;
+    postsCount: string;
+    noPostsYet: string;
+    noSecretsYet: string;
+    noTagsYet: string;
+    noPostsAvailable: string;
+    noSecretsAvailable: string;
+    noTagsAvailable: string;
+    lockedContent: string;
+    accessLevel: string;
+    mainPublic: string;
+    mainPublicDesc: string;
+    mainPrivate: string;
+    mainPrivateDesc: string;
+    secretPublic: string;
+    secretPublicDesc: string;
+    secretPrivate: string;
+    secretPrivateDesc: string;
+    importance: string;
+    justNow: string;
+    minutesAgo: string;
+    hoursAgo: string;
+    daysAgo: string;
+    weeksAgo: string;
+    monthsAgo: string;
+    characterList: {
+      searchPlaceholder: string;
+      availableCharacters: string;
+      noAccessCharacters: string;
+      affectionLevel: string;
+      intimacyLevel: string;
+      trustLevel: string;
+      romanceLevel: string;
+    };
+    accessDeniedDescription: string;
+    requiresAffection: string;
+    requiresIntimacy: string;
+    requiresTrust: string;
+    requiresRomance: string;
+    backToMain: string;
+    affection: string;
+    intimacy: string;
+    trust: string;
+    romanticInterest: string;
+    openSNSList: string;
+    viewSNS: string;
   };
 };

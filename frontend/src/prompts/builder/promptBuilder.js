@@ -45,7 +45,23 @@ async function populateTemplate(template, context) {
       allowed[key] = JSON.parse(JSON.stringify(context[key]));
     }
   }
-  return await parseMagicPatterns(template, allowed);
+  
+  // 먼저 간단한 변수 치환을 처리
+  let result = template;
+  
+  // {character.memories}, {character.name} 등의 중첩된 속성 치환
+  result = result.replace(/\{([^{}|]+)\}/g, (match, path) => {
+    try {
+      const value = path.split('.').reduce((obj, key) => obj?.[key], allowed);
+      return value !== undefined ? String(value) : match;
+    } catch (e) {
+      console.warn(`[populateTemplate] 변수 치환 실패: ${path}`, e);
+      return match;
+    }
+  });
+  
+  // 그 다음 magic patterns 처리
+  return await parseMagicPatterns(result, allowed);
 }
 
 /**
@@ -104,10 +120,29 @@ export async function buildContentPrompt({
       ? `The character has access to the following stickers: ${availableStickers}`
       : "The character has no stickers.";
 
-  const memories =
-    character.memories && character.memories.length > 0
-      ? character.memories.map((mem) => `- ${mem}`).join("\n")
-      : "No specific memories recorded yet.";
+  // SNS 포스트를 메모리로 변환 (SNS 기반 메모리 시스템)
+  const memories = (() => {
+    // 1. SNS 포스트가 있으면 SNS 포스트를 메모리로 사용
+    if (character.snsPosts && character.snsPosts.length > 0) {
+      return character.snsPosts
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) // 최신순 정렬
+        .slice(0, 15) // 최근 15개만 사용 (컨텍스트 제한)
+        .map(post => {
+          const tags = post.tags && post.tags.length > 0 ? ` [${post.tags.join(', ')}]` : '';
+          const date = new Date(post.timestamp).toLocaleDateString('ko-KR');
+          return `- ${post.content}${tags} (${date})`;
+        })
+        .join("\n");
+    }
+    
+    // 2. 기존 텍스트 메모리가 있으면 그것을 사용 (하위 호환성)
+    if (character.memories && character.memories.length > 0) {
+      return character.memories.map((mem) => `- ${mem}`).join("\n");
+    }
+    
+    // 3. 둘 다 없으면 기본 메시지
+    return "No specific memories recorded yet.";
+  })();
 
   const chat = (a, b) => {
     // Create a reversed copy of the history array to make indexing easier.
@@ -144,7 +179,7 @@ export async function buildContentPrompt({
   };
 
   const data = {
-    character: character,
+    character: { ...character, memories: memories },
     persona: { name: userName, description: userDescription },
     time: {
       context: timeContext,

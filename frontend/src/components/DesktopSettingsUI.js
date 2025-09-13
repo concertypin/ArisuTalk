@@ -3,6 +3,7 @@ import { renderAppearanceSettingsPanel } from "./settings/panels/AppearanceSetti
 import { renderCharacterDefaultsPanel } from "./settings/panels/CharacterDefaultsPanel.js";
 import { renderDataManagementPanel } from "./settings/panels/DataManagementPanel.js";
 import { renderAdvancedSettingsPanel } from "./settings/panels/AdvancedSettingsPanel.js";
+import { renderNAISettingsPanel } from "./settings/panels/NAISettingsPanel.js";
 import { setLanguage, t } from "../i18n.js";
 import {
   handleModalChange,
@@ -86,6 +87,12 @@ function renderDesktopSettingsNavigation(activePanel) {
       icon: "globe",
       label: t("settings.aiSettings"),
       description: t("settings.apiDescription"),
+    },
+    {
+      id: "nai",
+      icon: "image", 
+      label: "🧪 NAI 스티커 생성",
+      description: "NovelAI 기반 스티커 자동 생성 설정",
     },
     {
       id: "appearance",
@@ -200,6 +207,8 @@ export function renderActivePanel(app, activePanel) {
   switch (activePanel) {
     case "api":
       return renderAPISettingsPanel(app);
+    case "nai":
+      return renderNAISettingsPanel(app);
     case "appearance":
       return renderAppearanceSettingsPanel(app);
     case "character":

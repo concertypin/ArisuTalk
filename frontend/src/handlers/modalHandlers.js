@@ -1,8 +1,14 @@
 import { debounce } from "../utils.js";
 import { t, setLanguage } from "../i18n.js";
 import { setupDesktopSettingsEventListeners } from "../components/DesktopSettingsUI.js";
+import { handleSNSClick } from "./snsHandlers.js";
 
 export function handleModalClick(e, app) {
+  // 🎯 SNS 핸들러 먼저 시도
+  if (handleSNSClick(e, app)) {
+    return; // SNS 핸들러에서 처리했으면 종료
+  }
+
   const summary = e.target.closest("details > summary");
   if (summary) {
     const details = summary.parentElement;
@@ -83,6 +89,10 @@ export function handleModalClick(e, app) {
   if (e.target.closest("#load-card-btn"))
     document.getElementById("card-input").click();
   if (e.target.closest("#save-card-btn")) app.handleSaveCharacterToImage();
+  if (e.target.closest("#test-appearance-prompt")) {
+    app.testAppearancePrompt(e);
+    return;
+  }
   if (e.target.closest("#add-memory-btn")) app.addMemoryField();
   if (e.target.closest("#add-sticker-btn"))
     document.getElementById("sticker-input").click();
@@ -199,6 +209,67 @@ export function handleModalClick(e, app) {
       settings: { ...app.state.settings, enableDebugLogs: checked },
     });
   }
+
+  // Hypnosis control event handlers
+  if (e.target.closest("#hypnosis-enabled")) {
+    const controls = document.getElementById('hypnosis-controls');
+    if (controls) {
+      if (e.target.checked) {
+        controls.classList.remove('opacity-50', 'pointer-events-none');
+      } else {
+        controls.classList.add('opacity-50', 'pointer-events-none');
+      }
+    }
+  }
+
+  if (e.target.closest("#hypnosis-affection-override")) {
+    const controls = document.getElementById('affection-controls');
+    if (controls) {
+      if (e.target.checked) {
+        controls.classList.remove('opacity-50', 'pointer-events-none');
+      } else {
+        controls.classList.add('opacity-50', 'pointer-events-none');
+      }
+    }
+  }
+
+  // SNS Character List Modal
+  if (e.target.closest('[data-action="close-sns-character-list"]')) {
+    app.setState({
+      snsModals: {
+        ...app.state.snsModals,
+        character: null,
+        isOpen: false
+      }
+    });
+  }
+
+  if (e.target.closest('[data-action="open-sns"]')) {
+    const characterId = parseInt(e.target.closest('[data-character-id]').dataset.characterId);
+    app.openSNSModal(characterId, 'posts');
+  }
+
+  // ImageResultModal
+  if (e.target.closest("#close-image-result-modal") || e.target.closest("#close-image-result-modal-btn")) {
+    app.setState({
+      imageResultModal: {
+        isOpen: false,
+        imageUrl: null,
+        promptText: null
+      }
+    });
+    return;
+  }
+
+  // ImageZoomModal
+  if (e.target.closest("#close-image-zoom") || e.target.closest("#image-zoom-modal")) {
+    if (e.target.closest("#zoomed-image")) {
+      // 이미지 자체 클릭은 무시 (확대 유지)
+      return;
+    }
+    app.closeImageZoom();
+    return;
+  }
 }
 
 // Debounced function to update settings with a 500ms delay.
@@ -207,6 +278,30 @@ const debouncedUpdateSettings = debounce((app, newSetting) => {
   app.setState({ settings: { ...app.state.settings, ...newSetting } });
   app.debouncedCreateSettingsSnapshot();
 }, 500);
+
+// Function to save persona settings from DOM inputs
+function savePersonaSettings(app) {
+  const userNameInput = document.getElementById("settings-user-name");
+  const userDescInput = document.getElementById("settings-user-desc");
+  
+  if (userNameInput || userDescInput) {
+    const updates = {};
+    
+    if (userNameInput) {
+      updates.userName = userNameInput.value;
+    }
+    
+    if (userDescInput) {
+      updates.userDescription = userDescInput.value;
+    }
+    
+    // Update settings with persona info
+    if (Object.keys(updates).length > 0) {
+      app.setState({ settings: { ...app.state.settings, ...updates } });
+      app.debouncedCreateSettingsSnapshot();
+    }
+  }
+}
 
 const settingsUpdaters = {
   "settings-font-scale": (app, value) => ({ fontScale: parseFloat(value) }),
@@ -253,8 +348,6 @@ const settingsUpdaters = {
     apiConfigs[apiProvider].profileTemperature = parseFloat(value);
     return { apiConfigs };
   },
-  "settings-user-name": (app, value) => ({ userName: value }),
-  "settings-user-desc": (app, value) => ({ userDescription: value }),
   "settings-proactive-toggle": (app, checked) => ({
     proactiveChatEnabled: checked,
   }),
@@ -276,9 +369,22 @@ const settingsUpdaters = {
   "settings-api-provider": (app, value) => ({ apiProvider: value }),
 };
 
+export { savePersonaSettings };
+
 export function handleModalInput(e, app) {
   if (e.target.id === "group-chat-name") {
     app.setState({ createGroupChatName: e.target.value });
+    return;
+  }
+
+  // Handle persona fields separately
+  if (e.target.id === "settings-user-name") {
+    app.setState({ userName: e.target.value });
+    return;
+  }
+  
+  if (e.target.id === "settings-user-desc") {
+    app.setState({ userDescription: e.target.value });
     return;
   }
 
@@ -287,6 +393,7 @@ export function handleModalInput(e, app) {
     const value =
       e.target.type === "checkbox" ? e.target.checked : e.target.value;
     const newSetting = updater(app, value);
+    
     // Call the debounced function to update settings
     debouncedUpdateSettings(app, newSetting);
 
@@ -333,6 +440,13 @@ export function handleModalChange(e, app) {
     if (optionsDiv)
       optionsDiv.style.display = e.target.checked ? "block" : "none";
     app.handleToggleSnapshots(e.target.checked);
+  }
+
+  // SNS character search
+  if (e.target.closest('[data-action="sns-character-search"]')) {
+    app.setState({
+      snsCharacterSearchTerm: e.target.value
+    });
   }
 
   // 디버그 로그 관련 이벤트는 모두 onclick/onchange로 처리됨

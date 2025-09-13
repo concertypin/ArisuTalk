@@ -1010,3 +1010,41 @@ function setupDataManagementEventListeners() {
     });
   }
 }
+
+export function setupAdvancedSettingsEventListeners() {
+  // Max Tokens slider
+  const maxTokensSlider = document.getElementById("settings-max-tokens");
+  const maxTokensValue = document.getElementById("max-tokens-value");
+  if (maxTokensSlider && maxTokensValue) {
+    maxTokensSlider.addEventListener("input", (e) => {
+      maxTokensValue.textContent = e.target.value;
+    });
+  }
+
+  // Temperature slider
+  const temperatureSlider = document.getElementById("settings-temperature");
+  const temperatureValue = document.getElementById("temperature-value");
+  if (temperatureSlider && temperatureValue) {
+    temperatureSlider.addEventListener("input", (e) => {
+      temperatureValue.textContent = parseFloat(e.target.value).toFixed(1);
+    });
+  }
+
+  // Profile Max Tokens slider
+  const profileMaxTokensSlider = document.getElementById("settings-profile-max-tokens");
+  const profileMaxTokensValue = document.getElementById("profile-max-tokens-value");
+  if (profileMaxTokensSlider && profileMaxTokensValue) {
+    profileMaxTokensSlider.addEventListener("input", (e) => {
+      profileMaxTokensValue.textContent = e.target.value;
+    });
+  }
+
+  // Profile Temperature slider
+  const profileTemperatureSlider = document.getElementById("settings-profile-temperature");
+  const profileTemperatureValue = document.getElementById("profile-temperature-value");
+  if (profileTemperatureSlider && profileTemperatureValue) {
+    profileTemperatureSlider.addEventListener("input", (e) => {
+      profileTemperatureValue.textContent = parseFloat(e.target.value).toFixed(1);
+    });
+  }
+}

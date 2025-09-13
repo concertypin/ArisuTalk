@@ -12,7 +12,7 @@ const PROMPT_STORAGE_KEY = "chatMLPrompts";
  * Represents the available prompt types.
  */
 
-type PromptType = "mainChat" | "characterSheet" | "profileCreation";
+type PromptType = "mainChat" | "characterSheet" | "profileCreation" | "snsForce" | "naiSticker" | "groupChat" | "openChat";
 /**
  * Retrieves all ChatML prompts, merging defaults with any custom prompts from storage.
  * @returns {Promise<{[key: PromptType]: string}>}

@@ -26,7 +26,7 @@ export function renderCharacterDefaultsPanel(app) {
                             id="settings-user-name" 
                             type="text" 
                             placeholder="${t("settings.yourNamePlaceholder")}" 
-                            value="${settings.userName || ""}" 
+                            value="${app.state.userName || ""}" 
                             class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200"
                         />
                         <p class="text-xs text-gray-400 mt-1">${t(
@@ -45,7 +45,7 @@ export function renderCharacterDefaultsPanel(app) {
                             )}" 
                             class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 resize-none" 
                             rows="4"
-                        >${settings.userDescription || ""}</textarea>
+                        >${app.state.userDescription || ""}</textarea>
                         <p class="text-xs text-gray-400 mt-1">${t(
                           "settings.selfIntroductionInfo",
                         )}</p>

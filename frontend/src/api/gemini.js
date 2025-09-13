@@ -47,7 +47,6 @@ export class GeminiClient {
    * @returns {Promise<Object>} Generated response object
    * @returns {number} returns.reactionDelay - Reaction delay time (milliseconds)
    * @returns {Array<Object>} returns.messages - Generated message array
-   * @returns {string} [returns.newMemory] - New memory
    * @returns {Object} [returns.characterState] - Character state
    * @throws {Error} When API call fails or JSON parsing error occurs
    */
@@ -97,32 +96,46 @@ export class GeminiClient {
                 required: ["delay"],
               },
             },
-            newMemory: { type: "STRING" },
             characterState: {
               type: "OBJECT",
               properties: {
-                mood: { type: "NUMBER" },
-                energy: { type: "NUMBER" },
-                socialBattery: { type: "NUMBER" },
-                personality: {
-                  type: "OBJECT",
-                  properties: {
-                    extroversion: { type: "NUMBER" },
-                    openness: { type: "NUMBER" },
-                    conscientiousness: { type: "NUMBER" },
-                    agreeableness: { type: "NUMBER" },
-                    neuroticism: { type: "NUMBER" },
-                  },
-                  required: [
-                    "extroversion",
-                    "openness",
-                    "conscientiousness",
-                    "agreeableness",
-                    "neuroticism",
-                  ],
-                },
+                affection: { type: "NUMBER" },
+                intimacy: { type: "NUMBER" },
+                trust: { type: "NUMBER" },
+                romantic_interest: { type: "NUMBER" },
+                reason: { type: "STRING" },
               },
-              required: ["mood", "energy", "socialBattery", "personality"],
+              required: ["affection", "intimacy", "trust", "romantic_interest", "reason"],
+            },
+            autoPost: {
+              type: "OBJECT",
+              properties: {
+                type: { type: "STRING" },
+                content: { type: "STRING" },
+                access_level: { type: "STRING" },
+                importance: { type: "NUMBER" },
+                tags: {
+                  type: "ARRAY",
+                  items: { type: "STRING" },
+                },
+                emotion: { type: "STRING" },
+              },
+              required: ["type", "content", "access_level", "importance", "tags", "emotion"],
+            },
+            naiSticker: {
+              type: "OBJECT",
+              properties: {
+                emotion: { type: "STRING" },
+                situationPrompt: { type: "STRING" },
+              },
+              required: ["emotion", "situationPrompt"],
+            },
+            autoGenerateSticker: {
+              type: "OBJECT",
+              properties: {
+                emotion: { type: "STRING" },
+              },
+              required: ["emotion"],
             },
           },
           required: ["reactionDelay", "messages"],

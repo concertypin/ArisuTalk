@@ -29,3 +29,19 @@ backend/ktlint
 
 # Local files
 TODO.md
+
+# Backup files
+*.backup
+*.bak
+*~
+*_backup.js
+*_bak.js
+backup/
+backups/
+.backup/
+.backups/
+# Claude development files
+.claude/
+CLAUDE.MD
+CLAUDE.md
+claude.md

@@ -95,6 +95,7 @@ export async function getIndexedDBUsage() {
     "personaChat_openChats_v16",
     "personaChat_characterStates_v16",
     "personaChat_userStickers_v16",
+    "personaChat_personaData_v16",
   ];
 
   let totalSize = 0;
