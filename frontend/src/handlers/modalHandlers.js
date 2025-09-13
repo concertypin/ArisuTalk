@@ -295,10 +295,9 @@ function savePersonaSettings(app) {
       updates.userDescription = userDescInput.value;
     }
     
-    // Update settings with persona info
+    // Update state with persona info (최상위 속성으로 저장)
     if (Object.keys(updates).length > 0) {
-      app.setState({ settings: { ...app.state.settings, ...updates } });
-      app.debouncedCreateSettingsSnapshot();
+      app.setState(updates);
     }
   }
 }

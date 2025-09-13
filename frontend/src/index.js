@@ -521,6 +521,65 @@ class PersonaChatApp {
     return migratedCharacters;
   }
 
+  // CharacterStates를 새로운 호감도 기반 스키마로 마이그레이션
+  migrateCharacterStates(characterStates) {
+    if (!characterStates || typeof characterStates !== 'object') {
+      return {};
+    }
+
+    const migratedStates = {};
+    let migrationNeeded = false;
+    
+    Object.keys(characterStates).forEach(characterId => {
+      const oldState = characterStates[characterId];
+      
+      // 이미 새 스키마인 경우 (affection이 존재하는 경우)
+      if (oldState && typeof oldState === 'object' && 'affection' in oldState) {
+        migratedStates[characterId] = { ...oldState };
+        return;
+      }
+      
+      migrationNeeded = true;
+      
+      // 기존 스키마인 경우 변환
+      if (oldState && typeof oldState === 'object') {
+        migratedStates[characterId] = {
+          // mood -> affection 변환 (mood가 높을수록 호감도도 높음)
+          affection: oldState.mood !== undefined ? Math.max(0, Math.min(1, oldState.mood)) : 0.3,
+          
+          // energy -> intimacy 변환 (에너지가 높을수록 친밀감도 높음)  
+          intimacy: oldState.energy !== undefined ? Math.max(0, Math.min(1, oldState.energy)) : 0.1,
+          
+          // socialBattery -> trust 변환 (사회적 배터리가 높을수록 신뢰도 높음)
+          trust: oldState.socialBattery !== undefined ? Math.max(0, Math.min(1, oldState.socialBattery)) : 0.2,
+          
+          // romantic_interest는 새로운 값이므로 기본값 0.0
+          romantic_interest: 0.0,
+          
+          // reason도 새로운 값이므로 기본값
+          reason: "기존 캐릭터 상태를 새 시스템으로 마이그레이션했습니다"
+        };
+      } else {
+        // 기본값으로 초기화
+        migratedStates[characterId] = {
+          affection: 0.3,
+          intimacy: 0.1,
+          trust: 0.2,
+          romantic_interest: 0.0,
+          reason: "캐릭터 상태를 새 시스템으로 초기화했습니다"
+        };
+      }
+    });
+    
+    // 마이그레이션이 필요했다면 즉시 저장하여 다음 로딩 시에는 변환 과정을 거치지 않도록 함
+    if (migrationNeeded) {
+      saveToBrowserStorage("personaChat_characterStates_v16", migratedStates);
+      console.log("CharacterStates 마이그레이션 완료:", Object.keys(migratedStates).length, "개 캐릭터");
+    }
+    
+    return migratedStates;
+  }
+
   processAutoPost(character, autoPost) {
     if (!autoPost || !autoPost.content?.trim()) return character;
     
@@ -592,6 +651,9 @@ class PersonaChatApp {
         ...settings,
       };
 
+      // CharacterStates를 새로운 호감도 기반 스키마로 마이그레이션
+      const migratedCharacterStates = this.migrateCharacterStates(characterStates);
+
       // 메모리를 SNS 포스트로 마이그레이션
       const migratedCharacters = this.migrateMemoriesToSNSPosts(characters);
       
@@ -605,7 +667,7 @@ class PersonaChatApp {
       this.state.userStickers = userStickers;
       this.state.groupChats = groupChats;
       this.state.openChats = openChats;
-      this.state.characterStates = characterStates;
+      this.state.characterStates = migratedCharacterStates;
       this.state.settingsSnapshots = settingsSnapshots;
       this.state.selectedChatId = selectedChatId;
       this.state.userName = personaData.userName || "";
@@ -3596,6 +3658,51 @@ class PersonaChatApp {
       setTimeout(() => {
         this.updateHypnosisDisplayValues(newCharacterStates[characterId]);
       }, 100);
+    }
+  }
+
+  // 최면 제어 슬라이더의 표시값을 실시간으로 업데이트하는 함수
+  updateHypnosisDisplayValues(characterState) {
+    if (!characterState) return;
+
+    // 최면 호감도 오버라이드가 비활성화된 상태에서만 현재 상태값을 반영
+    const hypnosisAffectionOverride = document.getElementById('hypnosis-affection-override');
+    if (hypnosisAffectionOverride && !hypnosisAffectionOverride.checked) {
+      // 호감도 슬라이더 및 표시값 업데이트
+      const affectionSlider = document.getElementById('hypnosis-affection');
+      const affectionValue = document.getElementById('hypnosis-affection-value');
+      if (affectionSlider && affectionValue && characterState.affection !== undefined) {
+        const affectionPercent = Math.round(characterState.affection * 100);
+        affectionSlider.value = affectionPercent;
+        affectionValue.textContent = affectionPercent + '%';
+      }
+
+      // 친밀도 슬라이더 및 표시값 업데이트
+      const intimacySlider = document.getElementById('hypnosis-intimacy');
+      const intimacyValue = document.getElementById('hypnosis-intimacy-value');
+      if (intimacySlider && intimacyValue && characterState.intimacy !== undefined) {
+        const intimacyPercent = Math.round(characterState.intimacy * 100);
+        intimacySlider.value = intimacyPercent;
+        intimacyValue.textContent = intimacyPercent + '%';
+      }
+
+      // 신뢰도 슬라이더 및 표시값 업데이트
+      const trustSlider = document.getElementById('hypnosis-trust');
+      const trustValue = document.getElementById('hypnosis-trust-value');
+      if (trustSlider && trustValue && characterState.trust !== undefined) {
+        const trustPercent = Math.round(characterState.trust * 100);
+        trustSlider.value = trustPercent;
+        trustValue.textContent = trustPercent + '%';
+      }
+
+      // 로맨틱 관심도 슬라이더 및 표시값 업데이트
+      const romanticSlider = document.getElementById('hypnosis-romantic');
+      const romanticValue = document.getElementById('hypnosis-romantic-value');
+      if (romanticSlider && romanticValue && characterState.romantic_interest !== undefined) {
+        const romanticPercent = Math.round(characterState.romantic_interest * 100);
+        romanticSlider.value = romanticPercent;
+        romanticValue.textContent = romanticPercent + '%';
+      }
     }
   }
 
