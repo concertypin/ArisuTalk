@@ -888,7 +888,6 @@ class PersonaChatApp {
       }
       // NAI 설정이 변경되면 StickerManager의 NAI 클라이언트 재초기화
       if (JSON.stringify(this.oldState.settings.naiSettings) !== JSON.stringify(this.state.settings.naiSettings)) {
-        console.log('[NAI Settings] 배치 변경 감지, StickerManager 재초기화');
         if (this.stickerManager) {
           this.stickerManager.updateNAIClient(this.state.settings.naiSettings);
         }
@@ -3761,6 +3760,16 @@ class PersonaChatApp {
       }
     }
 
+    // NAI 자동 스티커 처리 (임시 스티커 생성, 저장하지 않음)
+    let temporaryNAISticker = null;
+    if (response.naiSticker) {
+      try {
+        temporaryNAISticker = await this.generateTemporaryNAISticker(character, response.naiSticker);
+      } catch (error) {
+        console.error('[NAI] 자동 스티커 생성 실패:', error);
+      }
+    }
+
     await this.sleep(response.reactionDelay || 1000);
     this.setState({ isWaitingForResponse: false, typingCharacterId: chatId });
 
@@ -3804,6 +3813,14 @@ class PersonaChatApp {
             return false;
           });
           botMessage.stickerName = foundSticker?.name || "Unknown Sticker";
+        }
+
+        // NAI 임시 스티커 처리 (응답의 첫 번째 메시지에만 적용)
+        if (i === 0 && temporaryNAISticker) {
+          botMessage.type = "sticker";
+          botMessage.stickerId = temporaryNAISticker.id;
+          botMessage.stickerName = temporaryNAISticker.name;
+          botMessage.temporaryNAISticker = temporaryNAISticker; // 임시 스티커 데이터 포함
         }
 
         currentChatMessages = [...currentChatMessages, botMessage];
@@ -4457,6 +4474,54 @@ class PersonaChatApp {
         '에러',
         `SNS 포스트 생성 중 오류가 발생했습니다: ${error.message}`
       );
+    }
+  }
+
+  /**
+   * AI 응답에서 받은 naiSticker 데이터로 임시 스티커 생성 (저장하지 않음)
+   * @param {Object} character - 캐릭터 정보
+   * @param {Object} naiStickerData - AI가 제공한 NAI 스티커 데이터
+   * @returns {Promise<Object|null>} 생성된 임시 스티커 또는 null
+   */
+  async generateTemporaryNAISticker(character, naiStickerData) {
+    try {
+      // NAI 설정 확인
+      const naiSettings = this.state.settings.naiSettings;
+      if (!naiSettings || !naiSettings.apiKey) {
+        return null;
+      }
+
+      // 스티커 매니저 초기화
+      if (!this.stickerManager) {
+        const { StickerManager } = await import('./services/stickerManager.js');
+        this.stickerManager = new StickerManager(this);
+      }
+
+      // AI가 제공한 감정과 상황 정보 사용
+      const emotion = naiStickerData.emotion || 'neutral';
+      const situationPrompt = naiStickerData.situationPrompt || '';
+
+      // NAI 클라이언트로 직접 스티커 생성 (저장하지 않음)
+      const sticker = await this.stickerManager.naiClient.generateSticker(
+        character, 
+        emotion, 
+        {
+          naiSettings: naiSettings,
+          customPrompt: situationPrompt,
+          reason: naiStickerData.reason || 'AI 자동 생성'
+        }
+      );
+
+      if (sticker) {
+        // 임시 스티커에 표시 전용 ID 부여
+        sticker.isTemporary = true;
+        sticker.id = `temp_nai_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      }
+
+      return sticker;
+    } catch (error) {
+      console.error('[NAI] 임시 스티커 생성 실패:', error);
+      return null;
     }
   }
 

@@ -311,14 +311,20 @@ function renderMessages(app) {
               (c) => c.id === selectedChatRoom.characterId,
             )
           : null;
-        stickerData = character?.stickers?.find((s) => {
-          if (s.id === Number(msg.stickerId)) return true;
-          if (s.name === msg.stickerId) return true;
-          const baseFileName = s.name.replace(/\.[^/.]+$/, "");
-          const searchFileName = String(msg.stickerId).replace(/\.[^/.]+$/, "");
-          if (baseFileName === searchFileName) return true;
-          return false;
-        });
+        // 먼저 임시 NAI 스티커 확인
+        if (msg.temporaryNAISticker) {
+          stickerData = msg.temporaryNAISticker;
+        } else {
+          // 일반 캐릭터 스티커에서 찾기
+          stickerData = character?.stickers?.find((s) => {
+            if (s.id === Number(msg.stickerId)) return true;
+            if (s.name === msg.stickerId) return true;
+            const baseFileName = s.name.replace(/\.[^/.]+$/, "");
+            const searchFileName = String(msg.stickerId).replace(/\.[^/.]+$/, "");
+            if (baseFileName === searchFileName) return true;
+            return false;
+          });
+        }
       }
 
       if (stickerData) {
