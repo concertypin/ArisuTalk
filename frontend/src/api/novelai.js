@@ -1,4 +1,5 @@
 import { t } from "../i18n.js";
+import pako from "pako";
 
 /**
  * NovelAI Image Generation Client
@@ -337,14 +338,25 @@ export class NovelAIClient {
   }
 
   /**
-   * Deflate 압축된 데이터를 해제 (간단한 구현)
+   * Deflate 압축된 데이터를 해제 (pako 라이브러리 사용)
    * @param {Uint8Array} compressedData - 압축된 데이터
    * @returns {Promise<Uint8Array>} 압축 해제된 데이터
    */
   async decompressDeflate(compressedData) {
-    // ZIP에서 추출된 deflate 데이터는 보통 압축되지 않은 블록으로 저장됨
-    // 간단한 deflate 파싱으로 처리
-    return await this.fallbackDeflateDecompress(compressedData);
+    try {
+      // pako 라이브러리를 사용하여 안정적으로 deflate 압축 해제
+      const decompressed = pako.inflateRaw(compressedData);
+      return new Uint8Array(decompressed);
+    } catch (pakoError) {
+      // pako 실패 시 fallback 사용
+      try {
+        return await this.fallbackDeflateDecompress(compressedData);
+      } catch (fallbackError) {
+        // 모든 방법 실패 시 원본 데이터 반환
+        console.warn('[NAI] Deflate 압축 해제 실패, 원본 데이터 사용:', fallbackError.message);
+        return compressedData;
+      }
+    }
   }
 
   /**

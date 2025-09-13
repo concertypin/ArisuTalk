@@ -210,6 +210,29 @@ export function handleModalClick(e, app) {
     });
   }
 
+  // Hypnosis control event handlers
+  if (e.target.closest("#hypnosis-enabled")) {
+    const controls = document.getElementById('hypnosis-controls');
+    if (controls) {
+      if (e.target.checked) {
+        controls.classList.remove('opacity-50', 'pointer-events-none');
+      } else {
+        controls.classList.add('opacity-50', 'pointer-events-none');
+      }
+    }
+  }
+
+  if (e.target.closest("#hypnosis-affection-override")) {
+    const controls = document.getElementById('affection-controls');
+    if (controls) {
+      if (e.target.checked) {
+        controls.classList.remove('opacity-50', 'pointer-events-none');
+      } else {
+        controls.classList.add('opacity-50', 'pointer-events-none');
+      }
+    }
+  }
+
   // SNS Character List Modal
   if (e.target.closest('[data-action="close-sns-character-list"]')) {
     app.setState({

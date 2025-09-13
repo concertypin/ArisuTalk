@@ -16,7 +16,7 @@ export function renderNAISettingsPanel(app) {
     autoGenerate = true,
     
     // 모델 및 크기 설정
-    model = "nai-diffusion-4-curated-preview",
+    model = "nai-diffusion-4-5-full",
     preferredSize = "square",
     
     // 생성 파라미터

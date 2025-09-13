@@ -519,8 +519,7 @@ export function renderCharacterModal(app) {
                                     <div class="flex items-center justify-between">
                                         <label class="text-sm font-medium text-gray-300">${t('hypnosis.enabled')}</label>
                                         <input type="checkbox" id="hypnosis-enabled" ${char.hypnosis?.enabled ? 'checked' : ''} 
-                                               class="bg-gray-700 border-gray-600 text-red-600 focus:ring-red-500 rounded"
-                                               onchange="const controls = document.getElementById('hypnosis-controls'); if (controls) { if (this.checked) { controls.classList.remove('opacity-50', 'pointer-events-none'); } else { controls.classList.add('opacity-50', 'pointer-events-none'); } }">
+                                               class="bg-gray-700 border-gray-600 text-red-600 focus:ring-red-500 rounded">
                                     </div>
 
                                     <div id="hypnosis-controls" class="${char.hypnosis?.enabled ? '' : 'opacity-50 pointer-events-none'} space-y-4">
@@ -542,8 +541,7 @@ export function renderCharacterModal(app) {
                                                 <p class="text-xs text-gray-400">호감도 수치를 강제로 조작합니다</p>
                                             </div>
                                             <input type="checkbox" id="hypnosis-affection-override" ${char.hypnosis?.affection_override ? 'checked' : ''} 
-                                                   class="accent-red-500"
-                                                   onchange="const controls = document.getElementById('affection-controls'); if (controls) { if (this.checked) { controls.classList.remove('opacity-50', 'pointer-events-none'); } else { controls.classList.add('opacity-50', 'pointer-events-none'); } }">
+                                                   class="accent-red-500">
                                         </div>
 
                                         <!-- 호감도 조작 컨트롤 -->
