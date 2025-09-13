@@ -135,6 +135,8 @@ export type LanguageStrings = {
     noSnapshots: string;
     title: string;
     aiSettings: string;
+    scaleSettings: string;
+    naiSettings: string;
     advancedSettings: string;
     apiKey: string;
     apiKeyPlaceholder: string;

@@ -160,6 +160,7 @@ export const en: LanguageStrings = {
     title: "Settings",
     aiSettings: "AI Settings",
     scaleSettings: "Scale Settings",
+    naiSettings: "NAI Sticker Generation",
     advancedSettings: "Advanced Settings",
     apiKey: "API Key",
     apiKeyPlaceholder: "Enter your API key",

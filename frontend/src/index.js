@@ -1170,6 +1170,14 @@ class PersonaChatApp {
           this._fadeOutHeaderAndCloseEditMode();
         }
       }
+      if (e.target.closest("#delete-character-btn")) {
+        const deleteBtn = e.target.closest("#delete-character-btn");
+        if (deleteBtn && this.state.mobileEditModeCharacterId) {
+          const characterId = parseInt(deleteBtn.dataset.characterId);
+          this.deleteCharacter(characterId);
+          this._fadeOutHeaderAndCloseEditMode();
+        }
+      }
     });
 
     appElement.addEventListener("input", (e) => {
@@ -4597,15 +4605,47 @@ class PersonaChatApp {
         }
       };
 
-      const apiResponse = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      // 재시도 로직을 포함한 API 호출
+      let apiResponse;
+      let apiData;
+      const maxRetries = 3;
+      const retryDelay = 2000; // 2초
+      
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          apiResponse = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
 
-      const apiData = await apiResponse.json();
-      if (!apiResponse.ok) {
-        throw new Error(`AI API 호출 실패: ${apiResponse.status}`);
+          apiData = await apiResponse.json();
+          
+          if (apiResponse.ok) {
+            break; // 성공하면 반복문 종료
+          }
+          
+          // 5xx 서버 오류의 경우 재시도
+          if (apiResponse.status >= 500 && attempt < maxRetries) {
+            console.warn(`[NAI Force] API 호출 실패 (${apiResponse.status}), ${retryDelay/1000}초 후 재시도... (${attempt}/${maxRetries})`);
+            await new Promise(resolve => setTimeout(resolve, retryDelay));
+            continue;
+          }
+          
+          // 재시도하지 않을 오류 또는 최종 실패
+          throw new Error(`AI API 호출 실패: ${apiResponse.status}${apiData?.error?.message ? ` - ${apiData.error.message}` : ''}`);
+          
+        } catch (error) {
+          if (attempt === maxRetries) {
+            if (error.message.includes('fetch')) {
+              throw new Error('네트워크 연결 오류: 인터넷 연결을 확인해주세요.');
+            }
+            throw error;
+          }
+          
+          console.warn(`[NAI Force] API 호출 중 오류 발생, ${retryDelay/1000}초 후 재시도... (${attempt}/${maxRetries}):`, error.message);
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+        }
       }
 
       const naiResponseText = apiData.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -4640,23 +4680,54 @@ class PersonaChatApp {
       // 글로벌 및 캐릭터별 NAI 설정 병합
       const globalNAISettings = this.state.settings?.naiSettings || {};
       const charNAISettings = character.naiSettings || {};
+      const mergedSettings = { ...globalNAISettings, ...charNAISettings };
       
-      // 캐릭터 외모 정보 추출
-      const characterAppearance = character.appearance || character.prompt?.match(/외모[:\s]*([^.\n]+)/)?.[1] || "";
+      // 이미지 크기 설정 (preferredSize 기반)
+      const preferredSize = mergedSettings.preferredSize || "square";
+      const sizeConfig = NovelAIClient.UNLIMITED_SIZES.find(s => s.name === preferredSize) || 
+                        NovelAIClient.UNLIMITED_SIZES[2]; // 기본값: square
       
-      // AI가 생성한 태그를 사용하여 NAI 생성 파라미터 구성
+      // NAI 클라이언트의 buildPrompt 메서드를 사용하여 체계적인 프롬프트 생성
+      const promptData = naiClient.buildPrompt(character, emotion, { naiSettings: mergedSettings });
+      
+      // 자동 생성과 동일한 방식으로 완전한 생성 파라미터 구성
       const generationParams = {
-        prompt: characterAppearance ? 
-          `${characterAppearance}, ${emotion}, ${situationPrompt}, anime style, masterpiece, high quality` :
-          `1girl, ${emotion}, ${situationPrompt}, anime style, masterpiece, high quality`,
-        negative_prompt: charNAISettings.negativePrompt || globalNAISettings.negativePrompt || 
-          "lowres, bad anatomy, text, error, worst quality, low quality, blurry",
-        model: charNAISettings.model || globalNAISettings.model || 'nai-diffusion-4-5-full',
-        width: charNAISettings.width || globalNAISettings.width || 1024,
-        height: charNAISettings.height || globalNAISettings.height || 1024,
-        steps: charNAISettings.steps || globalNAISettings.steps || 28,
-        scale: charNAISettings.scale || globalNAISettings.scale || 3.0,
-        sampler: charNAISettings.sampler || globalNAISettings.sampler || 'k_euler'
+        // 기본 프롬프트
+        prompt: promptData.prompt,
+        negative_prompt: promptData.negative_prompt,
+        
+        // 모델 및 이미지 설정
+        model: naiClient.validateModel(mergedSettings.model) || "nai-diffusion-4-5-full",
+        width: sizeConfig.width,
+        height: sizeConfig.height,
+        
+        // 생성 파라미터
+        scale: mergedSettings.scale || 3,
+        steps: mergedSettings.steps || 28,
+        sampler: mergedSettings.sampler || "k_euler",
+        noise_schedule: mergedSettings.noise_schedule || "native",
+        
+        // SMEA 설정 (v3 모델 전용)
+        sm: mergedSettings.sm || false,
+        sm_dyn: mergedSettings.sm_dyn || false,
+        
+        // 캐릭터 프롬프트 (v4/v4.5 전용)
+        characterPrompts: promptData.characterPrompts,
+        
+        // Vibe Transfer 설정
+        ...(mergedSettings.vibeTransferEnabled && mergedSettings.vibeTransferImage ? {
+          vibeTransferImage: mergedSettings.vibeTransferImage,
+          reference_strength: mergedSettings.vibeTransferStrength || 0.6,
+          reference_information_extracted: mergedSettings.vibeTransferInformationExtracted || 1.0
+        } : {}),
+        
+        // 고급 설정
+        cfg_rescale: mergedSettings.cfg_rescale || 0,
+        uncond_scale: mergedSettings.uncond_scale || 1.0,
+        dynamic_thresholding: mergedSettings.dynamic_thresholding || false,
+        dynamic_thresholding_percentile: mergedSettings.dynamic_thresholding_percentile || 0.999,
+        dynamic_thresholding_mimic_scale: mergedSettings.dynamic_thresholding_mimic_scale || 10,
+        legacy: mergedSettings.legacy || false
       };
 
       // console.log(`[NAI Force] NAI 생성 파라미터:`, generationParams);

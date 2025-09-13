@@ -8,6 +8,7 @@ import {
   renderMobileSettingsUI,
   renderAiSettingsPage, // Import the new function
   renderScaleSettingsPage,
+  renderNaiSettingsPage,
   setupMobileSettingsUIEventListeners,
 } from "./components/MobileSettingsUI.js";
 import { setupDesktopSettingsEventListeners } from "./components/DesktopSettingsUI.js";
@@ -188,6 +189,7 @@ export async function render(app) {
         "show-chat",
         "show-settings",
         "show-scale-settings",
+        "show-nai-settings",
       );
       if (
         isFirstRender ||
@@ -202,6 +204,7 @@ export async function render(app) {
         "show-chat",
         "show-settings",
         "show-ai-settings",
+        "show-nai-settings",
       );
       if (
         isFirstRender ||
@@ -210,12 +213,31 @@ export async function render(app) {
         scaleSettingsContainer.innerHTML = renderScaleSettingsPage(app);
         setupMobileSettingsUIEventListeners(app); // Re-use listeners for back button etc.
       }
+    } else if (newState.showNaiSettingsUI) {
+      transitionContainer.classList.add("show-nai-settings");
+      transitionContainer.classList.remove(
+        "show-chat",
+        "show-settings",
+        "show-ai-settings",
+        "show-scale-settings",
+      );
+      if (
+        isFirstRender ||
+        oldState.showNaiSettingsUI !== newState.showNaiSettingsUI
+      ) {
+        const naiSettingsContainer = document.getElementById("nai-settings-container");
+        if (naiSettingsContainer) {
+          naiSettingsContainer.innerHTML = renderNaiSettingsPage(app);
+          setupMobileSettingsUIEventListeners(app); // Re-use listeners for back button etc.
+        }
+      }
     } else if (newState.showSettingsUI) {
       transitionContainer.classList.add("show-settings");
       transitionContainer.classList.remove(
         "show-chat",
         "show-ai-settings",
         "show-scale-settings",
+        "show-nai-settings",
       );
       if (
         isFirstRender ||
@@ -243,6 +265,7 @@ export async function render(app) {
         "show-settings",
         "show-ai-settings",
         "show-scale-settings",
+        "show-nai-settings",
       );
 
       setTimeout(() => {
@@ -269,6 +292,7 @@ export async function render(app) {
         "show-settings",
         "show-ai-settings",
         "show-scale-settings",
+        "show-nai-settings",
       );
 
       if (isFirstRender || shouldUpdateCharacterList(oldState, newState)) {
@@ -301,6 +325,12 @@ export async function render(app) {
         }
         if (!window.personaApp.state.showScaleSettingsUI) {
           scaleSettingsContainer.innerHTML = "";
+        }
+        if (!window.personaApp.state.showNaiSettingsUI) {
+          const naiSettingsContainer = document.getElementById("nai-settings-container");
+          if (naiSettingsContainer) {
+            naiSettingsContainer.innerHTML = "";
+          }
         }
       }, 600);
     }

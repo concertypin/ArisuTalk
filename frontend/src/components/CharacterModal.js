@@ -302,6 +302,10 @@ export function renderCharacterModal(app) {
                                                           "characterModal.addSticker",
                                                         )}</span>
                                                     </button>
+                                                    <button id="generate-character-stickers" class="py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm flex flex-col items-center justify-center gap-1">
+                                                        <i data-lucide="image" class="w-4 h-4"></i> 
+                                                        <span class="text-xs">기본감정생성</span>
+                                                    </button>
                                                     <input type="file" accept="image/jpeg,image/jpg,image/gif,image/png,image/bmp,image/webp,video/webm,video/mp4,audio/mpeg,audio/mp3" id="sticker-input" class="hidden" multiple />
                                                 </div>
                                                 ${

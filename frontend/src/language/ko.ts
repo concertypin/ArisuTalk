@@ -159,6 +159,7 @@ export const ko: LanguageStrings = {
     title: "설정",
     aiSettings: "AI 설정",
     scaleSettings: "크기 설정",
+    naiSettings: "NAI 스티커 생성",
     advancedSettings: "고급 설정",
     apiKey: "API 키",
     apiKeyPlaceholder: "API 키를 입력하세요",

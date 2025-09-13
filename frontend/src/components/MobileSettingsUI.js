@@ -5,6 +5,7 @@ import {
   PROVIDER_MODELS,
   DEFAULT_PROVIDER,
 } from "../constants/providers.js";
+import { DEFAULT_EMOTIONS, NovelAIClient } from "../api/novelai.js";
 
 /**
  * Renders the main mobile settings UI page (the list of settings).
@@ -37,8 +38,17 @@ export function renderMobileSettingsUI(app) {
           <div id="navigate-to-scale-settings" class="group border-b border-gray-700 pb-3 cursor-pointer">
             <div class="flex items-center justify-between list-none py-3">
                 <span class="text-lg font-medium text-gray-200">${t(
-                  "settings.scale",
+                  "settings.scaleSettings",
                 )}</span>
+                <i data-lucide="chevron-right" class="w-6 h-6 text-gray-400"></i>
+            </div>
+          </div>
+          <div id="navigate-to-nai-settings" class="group border-b border-gray-700 pb-3 cursor-pointer">
+            <div class="flex items-center justify-between list-none py-3">
+                <span class="text-lg font-medium text-gray-200 flex items-center">
+                    <i data-lucide="image" class="w-5 h-5 mr-3 text-purple-400"></i>
+                    ${t("settings.naiSettings")}
+                </span>
                 <i data-lucide="chevron-right" class="w-6 h-6 text-gray-400"></i>
             </div>
           </div>
@@ -440,6 +450,24 @@ export function setupMobileSettingsUIEventListeners(app) {
     closeButton.dataset.listenerAdded = "true";
   }
 
+  // NAI settings navigation
+  const navigateToNaiSettings = document.getElementById("navigate-to-nai-settings");
+  if (navigateToNaiSettings && !navigateToNaiSettings.dataset.listenerAdded) {
+    navigateToNaiSettings.addEventListener("click", () => {
+      app.setState({ showNaiSettingsUI: true });
+    });
+    navigateToNaiSettings.dataset.listenerAdded = "true";
+  }
+
+  // Close NAI settings
+  const closeNaiSettingsButton = document.getElementById("close-nai-settings-ui");
+  if (closeNaiSettingsButton && !closeNaiSettingsButton.dataset.listenerAdded) {
+    closeNaiSettingsButton.addEventListener("click", () => {
+      app.setState({ showNaiSettingsUI: false });
+    });
+    closeNaiSettingsButton.dataset.listenerAdded = "true";
+  }
+
   const userNameInput = document.getElementById("settings-user-name");
   if (userNameInput) {
     userNameInput.addEventListener("input", (e) => {
@@ -609,7 +637,110 @@ export function setupMobileSettingsUIEventListeners(app) {
     });
   }
 
+  // NAI Settings event listeners
+  setupNaiSettingsEventListeners(app);
+
   setupSettingsModalEventListeners(app);
+}
+
+/**
+ * Sets up NAI settings event listeners
+ * @param {Object} app - The application instance
+ */
+function setupNaiSettingsEventListeners(app) {
+  // NAI API Key
+  const naiApiKey = document.getElementById("nai-api-key");
+  if (naiApiKey) {
+    naiApiKey.addEventListener("input", (e) => {
+      app.handleNaiSettingChange("apiKey", e.target.value);
+    });
+  }
+
+  // Toggle API Key visibility
+  const toggleNaiApiKey = document.getElementById("toggle-nai-api-key");
+  if (toggleNaiApiKey) {
+    toggleNaiApiKey.addEventListener("click", () => {
+      const input = document.getElementById("nai-api-key");
+      if (input) {
+        const isPassword = input.type === "password";
+        input.type = isPassword ? "text" : "password";
+        const icon = toggleNaiApiKey.querySelector("i");
+        if (icon) {
+          icon.setAttribute("data-lucide", isPassword ? "eye-off" : "eye");
+        }
+      }
+    });
+  }
+
+  // NAI Model
+  const naiModel = document.getElementById("nai-model");
+  if (naiModel) {
+    naiModel.addEventListener("change", (e) => {
+      app.handleNaiSettingChange("model", e.target.value);
+    });
+  }
+
+  // NAI Preferred Size
+  const naiPreferredSize = document.getElementById("nai-preferred-size");
+  if (naiPreferredSize) {
+    naiPreferredSize.addEventListener("change", (e) => {
+      app.handleNaiSettingChange("preferredSize", e.target.value);
+    });
+  }
+
+  // NAI Min Delay
+  const naiMinDelay = document.getElementById("nai-min-delay");
+  if (naiMinDelay) {
+    naiMinDelay.addEventListener("input", (e) => {
+      app.handleNaiSettingChange("minDelay", parseInt(e.target.value) * 1000);
+    });
+  }
+
+  // NAI Max Additional Delay
+  const naiMaxAdditionalDelay = document.getElementById("nai-max-additional-delay");
+  if (naiMaxAdditionalDelay) {
+    naiMaxAdditionalDelay.addEventListener("input", (e) => {
+      app.handleNaiSettingChange("maxAdditionalDelay", parseInt(e.target.value) * 1000);
+    });
+  }
+
+  // NAI Steps slider
+  const naiSteps = document.getElementById("nai-steps");
+  const naiStepsValue = document.getElementById("nai-steps-value");
+  if (naiSteps && naiStepsValue) {
+    naiSteps.addEventListener("input", (e) => {
+      const value = parseInt(e.target.value);
+      naiStepsValue.textContent = value;
+      app.handleNaiSettingChange("steps", value);
+    });
+  }
+
+  // NAI Scale slider
+  const naiScale = document.getElementById("nai-scale");
+  const naiScaleValue = document.getElementById("nai-scale-value");
+  if (naiScale && naiScaleValue) {
+    naiScale.addEventListener("input", (e) => {
+      const value = parseFloat(e.target.value);
+      naiScaleValue.textContent = value;
+      app.handleNaiSettingChange("scale", value);
+    });
+  }
+
+  // NAI Sampler
+  const naiSampler = document.getElementById("nai-sampler");
+  if (naiSampler) {
+    naiSampler.addEventListener("change", (e) => {
+      app.handleNaiSettingChange("sampler", e.target.value);
+    });
+  }
+
+  // Generate all characters stickers button
+  const generateAllButton = document.getElementById("generate-all-characters-stickers");
+  if (generateAllButton) {
+    generateAllButton.addEventListener("click", () => {
+      app.handleGenerateAllCharactersStickers();
+    });
+  }
 }
 
 function renderCurrentProviderSettings(app) {
@@ -1047,4 +1178,305 @@ export function setupAdvancedSettingsEventListeners() {
       profileTemperatureValue.textContent = parseFloat(e.target.value).toFixed(1);
     });
   }
+}
+
+/**
+ * Renders the NAI settings page for mobile view.
+ * @param {Object} app - Application instance
+ * @returns {string} NAI settings page HTML
+ */
+export function renderNaiSettingsPage(app) {
+  const { settings } = app.state;
+  const naiSettings = settings.naiSettings || {};
+  
+  const {
+    // 기본 API 설정
+    apiKey = "",
+    
+    // 모델 및 크기 설정
+    model = "nai-diffusion-4-5-full",
+    preferredSize = "square",
+    
+    // 생성 파라미터
+    steps = 28,
+    scale = 3,
+    sampler = "k_euler_ancestral",
+    
+    // 안전 설정
+    minDelay = 20000,
+    maxAdditionalDelay = 10000,
+  } = naiSettings;
+
+  const isApiKeySet = apiKey && apiKey.trim().length > 0;
+  const maskedApiKey = isApiKeySet ? "●".repeat(8) + apiKey.slice(-4) : "";
+
+  return `
+    <div class="flex flex-col h-full relative">
+      <header class="absolute top-0 left-0 right-0 px-6 py-4 bg-gray-900/80 flex items-center justify-between z-10" style="backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
+          <div class="flex items-center space-x-2">
+              <button id="close-nai-settings-ui" class="p-3 -ml-2 rounded-full hover:bg-gray-700">
+                  <i data-lucide="arrow-left" class="h-6 w-6 text-gray-300"></i>
+              </button>
+              <h2 class="font-semibold text-white text-3xl">${t("settings.naiSettings")}</h2>
+          </div>
+      </header>
+      <div class="flex-1 overflow-y-auto space-y-4 mt-[88px] px-6 mx-4 bg-gray-900 rounded-t-2xl" id="nai-settings-ui-content">
+        
+        <!-- NAI API 설정 -->
+        <div class="bg-gray-700/30 rounded-xl p-4">
+          <h4 class="text-lg font-semibold text-white mb-3 flex items-center">
+            <i data-lucide="image" class="w-5 h-5 mr-3 text-purple-400"></i>
+            NovelAI API 설정
+          </h4>
+          
+          <div class="space-y-3">
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2">
+                API 키 (Persistent Token)
+              </label>
+              <div class="flex gap-2">
+                <input 
+                  id="nai-api-key" 
+                  type="password" 
+                  value="${apiKey}" 
+                  placeholder="NovelAI API 키를 입력하세요"
+                  class="flex-1 px-3 py-2 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-purple-500/50 transition-all duration-200 text-base"
+                >
+                <button 
+                  id="toggle-nai-api-key" 
+                  type="button"
+                  class="px-3 py-2 rounded-full bg-gray-800 hover:bg-gray-700 text-gray-300 transition-colors"
+                  title="API 키 보기/숨기기"
+                >
+                  <i data-lucide="eye" class="w-4 h-4 pointer-events-none"></i>
+                </button>
+              </div>
+              ${isApiKeySet ? 
+                `<div class="text-xs text-green-400 mt-1">✓ API 키가 설정되었습니다: ${maskedApiKey}</div>` :
+                `<div class="text-xs text-red-400 mt-1">⚠ API 키가 필요합니다</div>`
+              }
+              <div class="text-xs text-gray-400 mt-2">
+                <a href="https://novelai.net/account" target="_blank" class="text-purple-400 hover:text-purple-300">
+                  NovelAI 계정 설정에서 Persistent API Token을 발급받으세요
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 모델 및 생성 설정 -->
+        <div class="bg-gray-700/30 rounded-xl p-4">
+          <h4 class="text-lg font-semibold text-white mb-3 flex items-center">
+            <i data-lucide="cpu" class="w-5 h-5 mr-3 text-green-400"></i>
+            모델 및 생성 설정
+          </h4>
+          
+          <div class="space-y-3">
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2">
+                NovelAI 모델
+              </label>
+              <select 
+                id="nai-model" 
+                class="w-full px-3 py-2 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-green-500/50 text-base"
+              >
+                ${Object.entries(NovelAIClient.MODELS).map(([modelId, modelInfo]) => `
+                  <option value="${modelId}" ${model === modelId ? "selected" : ""}>
+                    ${modelInfo.name} (${modelInfo.version})
+                  </option>
+                `).join("")}
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2">
+                이미지 크기
+              </label>
+              <select 
+                id="nai-preferred-size" 
+                class="w-full px-3 py-2 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-green-500/50 text-base"
+              >
+                <option value="square" ${preferredSize === "square" ? "selected" : ""}>
+                  정사각형 (1024×1024) - 권장
+                </option>
+                <option value="portrait" ${preferredSize === "portrait" ? "selected" : ""}>
+                  세로형 (832×1216)
+                </option>
+                <option value="landscape" ${preferredSize === "landscape" ? "selected" : ""}>
+                  가로형 (1216×832)
+                </option>
+              </select>
+              <div class="text-xs text-gray-400 mt-1">
+                ✓ 모든 크기는 무제한 생성이 가능합니다
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">
+                  최소 대기 시간 (초)
+                </label>
+                <input 
+                  id="nai-min-delay" 
+                  type="number" 
+                  min="10" 
+                  max="60" 
+                  value="${minDelay / 1000}"
+                  class="w-full px-3 py-2 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-green-500/50 text-base"
+                >
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">
+                  추가 랜덤 시간 (초)
+                </label>
+                <input 
+                  id="nai-max-additional-delay" 
+                  type="number" 
+                  min="0" 
+                  max="30" 
+                  value="${maxAdditionalDelay / 1000}"
+                  class="w-full px-3 py-2 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-green-500/50 text-base"
+                >
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">
+                  생성 스텝 수
+                </label>
+                <input 
+                  id="nai-steps" 
+                  type="range" 
+                  min="1" 
+                  max="50" 
+                  value="${steps}"
+                  class="w-full"
+                >
+                <div class="flex justify-between text-xs text-gray-400 mt-1">
+                  <span>1</span>
+                  <span id="nai-steps-value">${steps}</span>
+                  <span>50</span>
+                </div>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">
+                  프롬프트 가이던스
+                </label>
+                <input 
+                  id="nai-scale" 
+                  type="range" 
+                  min="1" 
+                  max="30" 
+                  step="0.5"
+                  value="${scale}"
+                  class="w-full"
+                >
+                <div class="flex justify-between text-xs text-gray-400 mt-1">
+                  <span>1.0</span>
+                  <span id="nai-scale-value">${scale}</span>
+                  <span>30.0</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2">
+                샘플러
+              </label>
+              <select 
+                id="nai-sampler" 
+                class="w-full px-3 py-2 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-green-500/50 text-base"
+              >
+                ${NovelAIClient.SAMPLERS.map(samplerOption => `
+                  <option value="${samplerOption}" ${sampler === samplerOption ? "selected" : ""}>
+                    ${samplerOption.replace(/_/g, " ").toUpperCase()}
+                  </option>
+                `).join("")}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- 기본 감정 목록 -->
+        <div class="bg-gray-700/30 rounded-xl p-4">
+          <h4 class="text-lg font-semibold text-white mb-3 flex items-center">
+            <i data-lucide="smile" class="w-5 h-5 mr-3 text-blue-400"></i>
+            기본 감정 스티커
+          </h4>
+          
+          <div class="grid grid-cols-2 gap-2 mb-3">
+            ${DEFAULT_EMOTIONS.map(emotion => {
+              const emotionLabels = {
+                happy: "😊 기쁨",
+                sad: "😢 슬픔", 
+                surprised: "😮 놀람",
+                angry: "😠 분노",
+                love: "💕 사랑",
+                embarrassed: "😳 부끄러움",
+                confused: "😕 혼란",
+                sleepy: "😴 졸림",
+                excited: "🤩 흥분",
+                neutral: "😐 무표정"
+              };
+              
+              return `
+                <div class="bg-gray-600/50 rounded-lg px-2 py-2 text-center">
+                  <span class="text-xs text-gray-300">${emotionLabels[emotion] || emotion}</span>
+                </div>
+              `;
+            }).join("")}
+          </div>
+          
+          <div class="text-xs text-gray-400">
+            위 감정들에 대한 스티커가 자동으로 생성됩니다.
+          </div>
+        </div>
+
+        <!-- 배치 생성 -->
+        <div class="bg-gray-700/30 rounded-xl p-4">
+          <h4 class="text-lg font-semibold text-white mb-3 flex items-center">
+            <i data-lucide="download" class="w-5 h-5 mr-3 text-green-400"></i>
+            배치 생성
+          </h4>
+          
+          <div>
+            <button 
+              id="generate-all-characters-stickers" 
+              class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-base"
+              ${!isApiKeySet ? "disabled" : ""}
+            >
+              <i data-lucide="users" class="w-4 h-4 pointer-events-none"></i>
+              모든 캐릭터 기본 감정 생성
+            </button>
+            
+            ${!isApiKeySet ? 
+              `<div class="text-xs text-yellow-400 text-center mt-2">
+                ⚠ API 키를 설정해야 배치 생성을 사용할 수 있습니다
+              </div>` :
+              `<div class="text-xs text-gray-400 text-center mt-2">
+                모든 캐릭터의 누락된 기본 감정 스티커를 한 번에 생성합니다.
+              </div>`
+            }
+          </div>
+        </div>
+
+        <!-- 도움말 -->
+        <div class="bg-blue-900/20 border border-blue-500/30 rounded-xl p-4 mb-6">
+          <h4 class="text-lg font-semibold text-blue-300 mb-2 flex items-center">
+            <i data-lucide="help-circle" class="w-5 h-5 mr-3"></i>
+            사용 안내
+          </h4>
+          <div class="space-y-1 text-sm text-blue-200">
+            <p>• NovelAI Persistent API Token이 필요합니다</p>
+            <p>• 무제한 생성 크기만 지원: 1024×1024, 832×1216, 1216×832</p>
+            <p>• 부정사용 방지를 위해 생성 간 20-30초 대기시간이 적용됩니다</p>
+            <p>• 대화 중 감정이 감지되면 자동으로 해당 감정 스티커를 생성합니다</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
 }

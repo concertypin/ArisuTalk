@@ -173,9 +173,14 @@ export function renderCharacterListPage(app) {
                   <i data-lucide="x" class="w-6 h-6 text-gray-100"></i>
               </button>
               <h1 class="text-xl text-white truncate">${t("characterModal.editModeTitle", { name: character?.name || "" })}</h1>
-              <button id="edit-character-btn" class="p-3 rounded-full hover:bg-gray-700 transition-colors">
-                  <i data-lucide="pencil" class="w-6 h-6 text-gray-100"></i>
-              </button>
+              <div class="flex items-center gap-1">
+                  <button id="delete-character-btn" class="p-3 rounded-full hover:bg-red-600 transition-colors" data-character-id="${character?.id}" title="${t("common.delete")}">
+                      <i data-lucide="trash-2" class="w-6 h-6 text-red-400 pointer-events-none"></i>
+                  </button>
+                  <button id="edit-character-btn" class="p-3 rounded-full hover:bg-gray-700 transition-colors">
+                      <i data-lucide="pencil" class="w-6 h-6 text-gray-100 pointer-events-none"></i>
+                  </button>
+              </div>
           </div>
       </header>
     `;
