@@ -27,6 +27,12 @@ export function handleMainChatClick(e, app) {
   } else if (e.target.closest(".reroll-msg-btn")) {
     const rerollMsgButton = e.target.closest(".reroll-msg-btn");
     app.handleRerollMessage(parseFloat(rerollMsgButton.dataset.id));
+  } else if (e.target.closest(".generate-sns-btn")) {
+    const generateSnsButton = e.target.closest(".generate-sns-btn");
+    app.handleGenerateSNSPost(parseFloat(generateSnsButton.dataset.id));
+  } else if (e.target.closest(".generate-nai-btn")) {
+    const generateNaiButton = e.target.closest(".generate-nai-btn");
+    app.handleGenerateNAISticker(parseFloat(generateNaiButton.dataset.id));
   } else if (e.target.closest(".save-edit-btn")) {
     const saveEditButton = e.target.closest(".save-edit-btn");
     app.handleSaveEditedMessage(parseFloat(saveEditButton.dataset.id));

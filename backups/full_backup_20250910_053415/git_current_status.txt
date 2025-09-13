@@ -1,0 +1,13 @@
+현재 브랜치 main
+브랜치가 'origin/main'에 맞게 업데이트된 상태입니다.
+
+커밋할 변경 사항:
+  (use "git restore --staged <file>..." to unstage)
+	새 파일:       docs/CUSTOM_FEATURES.md
+	새 파일:       docs/MERGE_STRATEGY.md
+
+추적하지 않는 파일:
+  (커밋할 사항에 포함하려면 "git add <파일>..."을 사용하십시오)
+	backups/
+	docs/CONFLICT_FILES_LIST.md
+

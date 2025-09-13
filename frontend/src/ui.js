@@ -33,6 +33,12 @@ import {
   renderCharacterList,
 } from "./components/CharacterListPage.js";
 import { renderSearchModal } from "./components/SearchModal.js";
+import { renderSNSCharacterList } from "./components/SNSCharacterList.js";
+import { renderSNSFeed } from "./components/SNSFeed.js";
+import { renderSNSPostModal } from "./components/SNSPostModal.js";
+import { renderStickerProgressModal } from "./components/StickerProgressModal.js";
+import { renderImageResultModal } from "./components/ImageResultModal.js";
+import { renderImageZoomModal } from "./components/ImageZoomModal.js";
 
 export function adjustMessageContainerPadding() {
   const messagesContainer = document.getElementById("messages-container");
@@ -66,6 +72,30 @@ async function renderModals(app) {
   if (app.state.modal.isOpen && app.state.modal.type === "chatSelection") {
     mainModalHtml += renderChatSelectionModal(app);
   }
+  // SNS character list modal
+  if (app.state.showSNSCharacterListModal) {
+    mainModalHtml += renderSNSCharacterList(app);
+  }
+  // SNS feed modal
+  if (app.state.showSNSModal) {
+    mainModalHtml += renderSNSFeed(app);
+  }
+  // SNS post modal
+  if (app.state.showSNSPostModal) {
+    mainModalHtml += renderSNSPostModal(app);
+  }
+  // Sticker progress modal
+  if (app.state.showStickerProgressModal) {
+    mainModalHtml += renderStickerProgressModal(app);
+  }
+  // Image result modal
+  if (app.state.imageResultModal && app.state.imageResultModal.isOpen) {
+    mainModalHtml += renderImageResultModal(app.state.imageResultModal);
+  }
+  // Image zoom modal
+  if (app.state.imageZoomModal && app.state.imageZoomModal.isOpen) {
+    mainModalHtml += renderImageZoomModal(app);
+  }
   if (container.innerHTML !== mainModalHtml) {
     container.innerHTML = mainModalHtml;
   }
@@ -88,6 +118,10 @@ async function renderModals(app) {
   }
   if (app.state.showPromptModal) {
     setupPromptModalEventListeners(app);
+  }
+  if (app.state.imageResultModal && app.state.imageResultModal.isOpen) {
+    // ImageResultModal 이벤트 리스너는 modalHandlers.js에서 처리
+    // 닫기 버튼 이벤트는 handleModalClick에서 처리됨
   }
 }
 
@@ -398,8 +432,8 @@ function shouldUpdateMainChat(oldState, newState) {
     oldState.stickerToSend !== newState.stickerToSend ||
     JSON.stringify(oldState.userStickers) !==
       JSON.stringify(newState.userStickers) ||
-    JSON.stringify([...oldState.expandedStickers]) !==
-      JSON.stringify([...newState.expandedStickers]) ||
+    JSON.stringify(Array.from(oldState.expandedStickers || new Set()).sort()) !==
+      JSON.stringify(Array.from(newState.expandedStickers || new Set()).sort()) ||
     // Group/open chat related state changes
     JSON.stringify(oldState.groupChats) !==
       JSON.stringify(newState.groupChats) ||
@@ -415,7 +449,11 @@ function shouldUpdateModals(oldState, newState) {
   if (newState.showSettingsModal && oldState.showSettingsModal) {
     // We need to check for specific state changes that require a re-render
     // even when the settings modal is open.
-    return (
+    
+    // If Character Defaults panel is active, ignore userName and userDescription changes
+    const isCharacterDefaultsActive = newState.ui?.desktopSettings?.activePanel === 'character-defaults';
+    
+    let shouldUpdate = (
       JSON.stringify(oldState.settingsSnapshots) !==
         JSON.stringify(newState.settingsSnapshots) ||
       oldState.settings.model !== newState.settings.model ||
@@ -431,6 +469,15 @@ function shouldUpdateModals(oldState, newState) {
       // Detect settings UI mode change
       oldState.ui?.settingsUIMode !== newState.ui?.settingsUIMode
     );
+    
+    // If Character Defaults panel is NOT active, also check for userName/userDescription changes
+    if (!isCharacterDefaultsActive) {
+      shouldUpdate = shouldUpdate || 
+        oldState.settings.userName !== newState.settings.userName ||
+        oldState.settings.userDescription !== newState.settings.userDescription;
+    }
+    
+    return shouldUpdate;
   }
 
   return (
@@ -458,7 +505,26 @@ function shouldUpdateModals(oldState, newState) {
     (newState.showDebugLogsModal &&
       JSON.stringify(oldState.debugLogs) !==
         JSON.stringify(newState.debugLogs)) ||
-    (newState.showMobileSearch && oldState.searchQuery !== newState.searchQuery)
+    (newState.showMobileSearch && oldState.searchQuery !== newState.searchQuery) ||
+    // SNS modal state changes
+    oldState.showSNSCharacterListModal !== newState.showSNSCharacterListModal ||
+    oldState.showSNSModal !== newState.showSNSModal ||
+    oldState.selectedSNSCharacter !== newState.selectedSNSCharacter ||
+    oldState.snsActiveTab !== newState.snsActiveTab ||
+    oldState.snsCharacterSearchTerm !== newState.snsCharacterSearchTerm ||
+    oldState.snsSecretMode !== newState.snsSecretMode ||
+    oldState.showSNSPostModal !== newState.showSNSPostModal ||
+    JSON.stringify(oldState.editingSNSPost) !== JSON.stringify(newState.editingSNSPost) ||
+    oldState.snsRefreshTrigger !== newState.snsRefreshTrigger ||
+    oldState.showStickerProgressModal !== newState.showStickerProgressModal ||
+    // ImageResultModal state changes
+    JSON.stringify(oldState.imageResultModal) !== JSON.stringify(newState.imageResultModal) ||
+    // ImageZoomModal state changes
+    JSON.stringify(oldState.imageZoomModal) !== JSON.stringify(newState.imageZoomModal) ||
+    // Character states change detection (for hypnosis UI real-time updates)
+    (newState.showCharacterModal &&
+      JSON.stringify(oldState.characterStates) !==
+        JSON.stringify(newState.characterStates))
   );
 }
 

@@ -1,11 +1,11 @@
 import { t, setLanguage, getLanguage } from "./i18n.js";
-import { renderSnapshotList } from "./components/MobileSettingsUI.js";
+import { renderSnapshotList, setupAdvancedSettingsEventListeners } from "./components/MobileSettingsUI.js";
 import {
   defaultCharacters,
   defaultAPISettings,
   defaultPrompts,
 } from "./defaults.js";
-import { getAllPrompts, saveAllPrompts } from "./prompts/promptManager.ts";
+import { getAllPrompts, saveAllPrompts, getPrompt } from "./prompts/promptManager.ts";
 
 import {
   loadFromBrowserStorage,
@@ -33,20 +33,31 @@ import {
   handleModalClick,
   handleModalInput,
   handleModalChange,
+  savePersonaSettings,
 } from "./handlers/modalHandlers.js";
 import { handleGroupChatClick } from "./handlers/groupChatHandlers.js";
 import { debounce, findMessageGroup } from "./utils.js";
+// 🎯 커스텀 기능 imports
+import { setupNAIHandlers, handleAutoStickerGeneration } from "./handlers/naiHandlers.js";
+import { snsMethods, handleSNSInput, handleSNSKeypress } from "./handlers/snsHandlers.js";
+import { StickerManager } from "./services/stickerManager.js";
+import { renderImageResultModal } from "./components/ImageResultModal.js";
 
 // --- APP INITIALIZATION ---
 document.addEventListener("DOMContentLoaded", async () => {
   window.personaApp = new PersonaChatApp();
+  window.app = window.personaApp; // SNS 편집을 위한 전역 접근
   await window.personaApp.init();
+  
+  // 디버깅용 전역 함수 노출
+  window.fixOverlays = () => window.personaApp.forceReinitialize();
 });
 
 class PersonaChatApp {
   constructor() {
     this.apiManager = new APIManager();
     this.defaultPrompts = defaultPrompts;
+    this.stickerManager = null; // NAI 스티커 매니저
     this.state = {
       settings: {
         // Legacy compatibility
@@ -118,6 +129,22 @@ class PersonaChatApp {
       },
       showAiSettingsUI: false,
       showScaleSettingsUI: false,
+      // 🎯 SNS 시스템 상태
+      // SNS related states (백업 구조)
+      showSNSCharacterListModal: false,
+      showSNSModal: false,
+      showSNSPostModal: false,
+      selectedSNSCharacter: null,
+      snsActiveTab: 'posts',
+      snsCharacterListType: null,
+      snsCharacterSearchTerm: '',
+      snsSecretMode: false,
+      // Image Result Modal
+      imageResultModal: {
+        isOpen: false,
+        imageUrl: null,
+        promptText: null
+      },
     };
     this.oldState = null;
     this.messagesEndRef = null;
@@ -176,6 +203,7 @@ class PersonaChatApp {
       500,
     );
 
+
     this.debouncedSetSearchQuery = debounce(
       (query) => this.setState({ searchQuery: query }),
       300,
@@ -184,6 +212,12 @@ class PersonaChatApp {
     this.debouncedCreateSettingsSnapshot = debounce(
       () => this.createSettingsSnapshot(),
       2000,
+    );
+
+    this.debouncedSavePersonaData = debounce(
+      (personaData) =>
+        saveToBrowserStorage("personaChat_personaData_v16", personaData),
+      500,
     );
   }
 
@@ -297,8 +331,18 @@ class PersonaChatApp {
     this.applyFontScale();
     await this.migrateChatData();
 
+    // 🎯 SNS 메서드 연결
+    Object.assign(this, snsMethods);
+
+    // 🎯 NAI 스티커 매니저 초기화
+    this.stickerManager = new StickerManager(this);
+    this.stickerManager.initializeNAI();
+
     await render(this);
     this.addEventListeners();
+    
+    // NAI 핸들러 초기화
+    setupNAIHandlers(this);
 
     this.proactiveInterval = setInterval(
       () => this.checkAndSendProactiveMessages(),
@@ -325,6 +369,9 @@ class PersonaChatApp {
       this.initialSettings && !this.initialSettings.randomFirstMessageEnabled;
     const isRandomEnabled = this.state.settings.randomFirstMessageEnabled;
 
+    // Save persona settings from DOM before closing
+    savePersonaSettings(this);
+
     this.setState({
       showSettingsModal: false,
       showSettingsUI: false,
@@ -337,9 +384,23 @@ class PersonaChatApp {
   }
 
   handleCancelSettings() {
-    const hasChanges =
+    // Check for changes in DOM inputs for persona fields
+    const userNameInput = document.getElementById("settings-user-name");
+    const userDescInput = document.getElementById("settings-user-desc");
+    
+    let hasPersonaChanges = false;
+    if (userNameInput && userNameInput.value !== (this.initialSettings?.userName || "")) {
+      hasPersonaChanges = true;
+    }
+    if (userDescInput && userDescInput.value !== (this.initialSettings?.userDescription || "")) {
+      hasPersonaChanges = true;
+    }
+    
+    const hasSettingsChanges =
       JSON.stringify(this.initialSettings) !==
       JSON.stringify(this.state.settings);
+
+    const hasChanges = hasSettingsChanges || hasPersonaChanges;
 
     if (hasChanges) {
       this.showConfirmModal(
@@ -402,6 +463,92 @@ class PersonaChatApp {
     this.setState({ openSettingsSections: newOpenSections });
   }
 
+  // 메모리를 SNS 포스트로 마이그레이션하는 함수
+  migrateMemoriesToSNSPosts(characters) {
+    let migrationNeeded = false;
+    
+    const migratedCharacters = characters.map(character => {
+      // 이미 SNS 포스트가 있고 메모리가 없으면 이미 마이그레이션됨
+      if (character.snsPosts && !character.memories?.length) {
+        return character;
+      }
+      
+      // 메모리가 있으면 SNS 포스트로 변환
+      if (character.memories && character.memories.length > 0) {
+        migrationNeeded = true;
+        const snsPosts = character.memories.map((memory, index) => ({
+          id: `memory_${character.id}_${Date.now()}_${index}`,
+          type: "memory",
+          content: memory,
+          timestamp: new Date(Date.now() - (character.memories.length - index) * 86400000).toISOString(), // 과거 날짜로 설정
+          affection_state: {
+            affection: 0.3,
+            intimacy: 0.2, 
+            trust: 0.25,
+            romantic_interest: 0.0
+          },
+          access_level: "main-public",
+          importance: 5.0,
+          tags: ["기존메모리"],
+          reason: "기존 메모리에서 마이그레이션"
+        }));
+        
+        return {
+          ...character,
+          snsPosts: [...(character.snsPosts || []), ...snsPosts],
+          memories: [] // 메모리 배열 초기화
+        };
+      }
+      
+      // 메모리도 SNS 포스트도 없으면 빈 배열 설정
+      return {
+        ...character,
+        snsPosts: character.snsPosts || []
+      };
+    });
+    
+    if (migrationNeeded) {
+      console.log('[Migration] 메모리를 SNS 포스트로 마이그레이션했습니다.');
+      this.shouldSaveCharacters = true;
+    }
+    
+    return migratedCharacters;
+  }
+
+  processAutoPost(character, autoPost) {
+    if (!autoPost || !autoPost.content?.trim()) return character;
+    
+    const currentState = this.getCharacterState(character.id);
+    const timestamp = new Date().toISOString();
+    
+    // 태그가 #으로 시작하지 않으면 추가
+    const formattedTags = Array.isArray(autoPost.tags) 
+      ? autoPost.tags.map(tag => tag.startsWith('#') ? tag : `#${tag}`)
+      : [];
+    
+    const newPost = {
+      id: `autopost_${character.id}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      type: autoPost.type || "memory",
+      content: autoPost.content.trim(),
+      timestamp: timestamp,
+      affection_state: {
+        affection: currentState?.affection || 0.3,
+        intimacy: currentState?.intimacy || 0.2,
+        trust: currentState?.trust || 0.25,
+        romantic_interest: currentState?.romantic_interest || 0.0
+      },
+      access_level: autoPost.access_level || "main-public",
+      importance: autoPost.importance || 5.0,
+      tags: formattedTags,
+      reason: autoPost.reason || "AI 자동 포스팅"
+    };
+    
+    return {
+      ...character,
+      snsPosts: [...(character.snsPosts || []), newPost]
+    };
+  }
+
   async loadAllData() {
     try {
       const [
@@ -417,6 +564,7 @@ class PersonaChatApp {
         settingsSnapshots,
         debugLogs,
         selectedChatId,
+        personaData,
       ] = await Promise.all([
         loadFromBrowserStorage("personaChat_settings_v16", {}),
         loadFromBrowserStorage("personaChat_characters_v16", defaultCharacters),
@@ -430,6 +578,7 @@ class PersonaChatApp {
         loadFromBrowserStorage("personaChat_settingsSnapshots_v16", []),
         loadFromBrowserStorage("personaChat_debugLogs_v16", []),
         loadFromBrowserStorage("personaChat_selectedChatId_v16", null),
+        loadFromBrowserStorage("personaChat_personaData_v16", { userName: "", userDescription: "" }),
       ]);
 
       this.state.settings = {
@@ -437,7 +586,10 @@ class PersonaChatApp {
         ...settings,
       };
 
-      this.state.characters = characters.map((char) => ({
+      // 메모리를 SNS 포스트로 마이그레이션
+      const migratedCharacters = this.migrateMemoriesToSNSPosts(characters);
+      
+      this.state.characters = migratedCharacters.map((char) => ({
         ...char,
         id: Number(char.id),
       }));
@@ -450,6 +602,8 @@ class PersonaChatApp {
       this.state.characterStates = characterStates;
       this.state.settingsSnapshots = settingsSnapshots;
       this.state.selectedChatId = selectedChatId;
+      this.state.userName = personaData.userName || "";
+      this.state.userDescription = personaData.userDescription || "";
 
       // Load prompts
       this.state.settings.prompts = await getAllPrompts();
@@ -512,6 +666,10 @@ class PersonaChatApp {
       console.error(t("ui.dataLoadFailed"), error);
     }
   }
+
+  // 배치 처리를 위한 큐
+  _stateQueue = [];
+  _renderScheduled = false;
 
   async setState(newState) {
     const messagesContainerOld = document.getElementById("messages-container");
@@ -647,12 +805,147 @@ class PersonaChatApp {
     ) {
       this.debouncedSaveDebugLogs(this.state.debugLogs);
     }
+    if (
+      this.oldState.userName !== this.state.userName ||
+      this.oldState.userDescription !== this.state.userDescription
+    ) {
+      this.debouncedSavePersonaData({
+        userName: this.state.userName,
+        userDescription: this.state.userDescription
+      });
+    }
     if (this.oldState.selectedChatId !== this.state.selectedChatId) {
       saveToBrowserStorage(
         "personaChat_selectedChatId_v16",
         this.state.selectedChatId,
       );
     }
+  }
+
+  // 고성능 배치 setState (SNS 등에서 사용)
+  setStateBatch(newState) {
+    return new Promise((resolve, reject) => {
+      this._stateQueue.push({ newState, resolve, reject });
+      
+      if (!this._renderScheduled) {
+        this._renderScheduled = true;
+        // 다음 tick에서 배치 처리 (React의 패턴과 유사)
+        Promise.resolve().then(() => this._processBatch());
+      }
+    });
+  }
+
+  async _processBatch() {
+    if (this._stateQueue.length === 0) {
+      this._renderScheduled = false;
+      return;
+    }
+
+    // 모든 상태 변경 합치기
+    this.oldState = { ...this.state };
+    const batch = this._stateQueue.splice(0); // 큐 비우기
+    
+    const mergedState = batch.reduce((merged, { newState }) => {
+      return { ...merged, ...newState };
+    }, {});
+
+    this.oldState = this.oldState;
+    this.state = { ...this.state, ...mergedState };
+
+    try {
+      // 한 번만 렌더링
+      await render(this);
+
+      // 모든 Promise resolve
+      batch.forEach(({ resolve }) => resolve());
+
+      // 기존 저장 로직 실행
+      await this._handleBatchStateChanges();
+    } catch (error) {
+      console.error('Batch setState error:', error);
+      // 오류 시 모든 Promise reject
+      batch.forEach(({ reject }) => reject(error));
+    }
+
+    this._renderScheduled = false;
+  }
+
+  async _handleBatchStateChanges() {
+    // 기존 setState의 저장 로직과 동일
+    if (
+      JSON.stringify(this.oldState.settings) !==
+      JSON.stringify(this.state.settings)
+    ) {
+      this.debouncedSaveSettings(this.state.settings);
+      if (this.oldState.settings.fontScale !== this.state.settings.fontScale) {
+        this.applyFontScale();
+      }
+      // NAI 설정이 변경되면 StickerManager의 NAI 클라이언트 재초기화
+      if (JSON.stringify(this.oldState.settings.naiSettings) !== JSON.stringify(this.state.settings.naiSettings)) {
+        console.log('[NAI Settings] 배치 변경 감지, StickerManager 재초기화');
+        if (this.stickerManager) {
+          this.stickerManager.updateNAIClient(this.state.settings.naiSettings);
+        }
+      }
+    }
+    if (
+      this.shouldSaveCharacters ||
+      this.oldState.characters !== this.state.characters
+    ) {
+      this.debouncedSaveCharacters(this.state.characters);
+      this.shouldSaveCharacters = false;
+    }
+    if (
+      JSON.stringify(this.oldState.chatRooms) !==
+      JSON.stringify(this.state.chatRooms)
+    ) {
+      this.debouncedSaveChatRooms(this.state.chatRooms);
+    }
+    if (
+      JSON.stringify(this.oldState.messages) !==
+      JSON.stringify(this.state.messages)
+    ) {
+      this.debouncedSaveMessages(this.state.messages);
+    }
+    if (
+      JSON.stringify(this.oldState.groupChats) !==
+      JSON.stringify(this.state.groupChats)
+    ) {
+      this.debouncedSaveGroupChats(this.state.groupChats);
+    }
+    if (
+      JSON.stringify(this.oldState.openChats) !==
+      JSON.stringify(this.state.openChats)
+    ) {
+      this.debouncedSaveOpenChats(this.state.openChats);
+    }
+    if (
+      JSON.stringify(this.oldState.unreadCounts) !==
+      JSON.stringify(this.state.unreadCounts)
+    ) {
+      this.debouncedSaveUnreadCounts(this.state.unreadCounts);
+    }
+    if (this.oldState.selectedChatId !== this.state.selectedChatId) {
+      saveToBrowserStorage(
+        "personaChat_selectedChatId_v16",
+        this.state.selectedChatId,
+      );
+    }
+    if (
+      JSON.stringify(this.oldState.characterStates) !==
+      JSON.stringify(this.state.characterStates)
+    ) {
+      this.debouncedSaveCharacters(this.state.characterStates);
+    }
+    if (
+      JSON.stringify(this.oldState.debugLogs) !==
+      JSON.stringify(this.state.debugLogs)
+    ) {
+      this.debouncedSaveDebugLogs(this.state.debugLogs);
+    }
+    
+    // 비교 완료 후 this.oldState를 현재 상태로 업데이트
+    this.oldState = { ...this.state };
   }
 
   // --- CHAT ROOM TYPE MANAGEMENT ---
@@ -672,6 +965,30 @@ class PersonaChatApp {
     if (this.isGroupChat(chatId)) return "group";
     if (this.isOpenChat(chatId)) return "open";
     return "regular";
+  }
+
+  getCurrentChatRoom() {
+    if (!this.state.selectedChatId) return null;
+
+    // Check group chats first
+    if (this.isGroupChat(this.state.selectedChatId)) {
+      return this.state.groupChats[this.state.selectedChatId] || null;
+    }
+
+    // Check open chats
+    if (this.isOpenChat(this.state.selectedChatId)) {
+      return this.state.openChats[this.state.selectedChatId] || null;
+    }
+
+    // Check regular chat rooms
+    for (const characterId in this.state.chatRooms) {
+      const chatRooms = this.state.chatRooms[characterId];
+      const chatRoom = chatRooms.find(
+        (room) => room.id === this.state.selectedChatId,
+      );
+      if (chatRoom) return chatRoom;
+    }
+    return null;
   }
 
   createGroupChat(name, participantIds) {
@@ -843,6 +1160,7 @@ class PersonaChatApp {
       handleSidebarInput(e, this);
       handleMainChatInput(e, this);
       handleModalInput(e, this);
+      handleSNSInput(e, this); // SNS 관련 input 이벤트 처리
       if (e.target.id === "new-message-input") {
         adjustMessageContainerPadding();
       }
@@ -851,10 +1169,12 @@ class PersonaChatApp {
     appElement.addEventListener("change", (e) => {
       handleMainChatChange(e, this);
       handleModalChange(e, this);
+      handleSNSInput(e, this); // SNS 관련 change 이벤트 처리
     });
 
     appElement.addEventListener("keypress", (e) => {
       handleMainChatKeypress(e, this);
+      handleSNSKeypress(e, this); // SNS 관련 keypress 이벤트 처리
     });
 
     document.addEventListener("click", (e) => {
@@ -1179,12 +1499,23 @@ class PersonaChatApp {
   }
 
   toggleStickerSize(messageId) {
+    
+    // messageId를 숫자로 변환 (HTML data-attribute에서 가져온 값은 문자열이므로)
+    const numericMessageId = parseFloat(messageId);
+    
     const expandedStickers = new Set(this.state.expandedStickers);
-    if (expandedStickers.has(messageId)) {
-      expandedStickers.delete(messageId);
+    
+    const wasExpanded = expandedStickers.has(numericMessageId);
+    
+    if (wasExpanded) {
+      expandedStickers.delete(numericMessageId);
+      console.log(`⬇️ 축소 처리 - ID ${numericMessageId} 제거함`);
     } else {
-      expandedStickers.add(messageId);
+      expandedStickers.add(numericMessageId);
+      console.log(`⬆️ 확대 처리 - ID ${numericMessageId} 추가함`);
     }
+    
+    
     this.setState({ expandedStickers });
   }
 
@@ -1758,6 +2089,7 @@ class PersonaChatApp {
   async handleSaveCharacter() {
     const name = document.getElementById("character-name").value.trim();
     const prompt = document.getElementById("character-prompt").value.trim();
+    const appearance = document.getElementById("character-appearance")?.value.trim() || "";
 
     if (!name || !prompt) {
       this.showInfoModal(
@@ -1779,9 +2111,17 @@ class PersonaChatApp {
       ? proactiveToggle.checked
       : this.state.editingCharacter?.proactiveEnabled !== false;
 
+    // NAI 설정 수집
+    const naiSettings = {
+      ...(this.state.editingCharacter?.naiSettings || {}),
+      autoGenerate: document.getElementById("character-nai-enabled")?.checked || false,
+      qualityPrompt: document.getElementById("character-nai-quality-prompt")?.value.trim() || "masterpiece, best quality, high resolution, detailed"
+    };
+
     const characterData = {
       name,
       prompt,
+      appearance,
       avatar: this.state.editingCharacter?.avatar || null,
       responseTime: document.getElementById("character-responseTime").value,
       thinkingTime: document.getElementById("character-thinkingTime").value,
@@ -1793,6 +2133,24 @@ class PersonaChatApp {
         this.state.editingCharacter?.messageCountSinceLastSummary || 0,
       media: this.state.editingCharacter?.media || [],
       stickers: this.state.editingCharacter?.stickers || [],
+      naiSettings,
+      hypnosis: {
+        enabled: document.getElementById('hypnosis-enabled')?.checked || false,
+        affection: document.getElementById('hypnosis-affection-override')?.checked ? 
+          (document.getElementById('hypnosis-affection') ? parseFloat(document.getElementById('hypnosis-affection').value) / 100 : null) : null,
+        intimacy: document.getElementById('hypnosis-affection-override')?.checked ? 
+          (document.getElementById('hypnosis-intimacy') ? parseFloat(document.getElementById('hypnosis-intimacy').value) / 100 : null) : null,
+        trust: document.getElementById('hypnosis-affection-override')?.checked ? 
+          (document.getElementById('hypnosis-trust') ? parseFloat(document.getElementById('hypnosis-trust').value) / 100 : null) : null,
+        romantic_interest: document.getElementById('hypnosis-affection-override')?.checked ? 
+          (document.getElementById('hypnosis-romantic') ? parseFloat(document.getElementById('hypnosis-romantic').value) / 100 : null) : null,
+        force_love_unlock: document.getElementById('hypnosis-force-love')?.checked || false,
+        sns_edit_access: document.getElementById('hypnosis-sns-edit')?.checked || false,
+        affection_override: document.getElementById('hypnosis-affection-override')?.checked || false,
+        sns_full_access: document.getElementById('hypnosis-sns-access')?.checked || false,
+        secret_account_access: document.getElementById('hypnosis-secret-account')?.checked || false
+      },
+      snsPosts: this.state.editingCharacter?.snsPosts || []
     };
 
     const characterDataString = JSON.stringify(characterData);
@@ -1837,6 +2195,117 @@ class PersonaChatApp {
     }
     this.closeCharacterModal();
   }
+
+  /**
+   * 외모 프롬프트 테스트 - 현재 입력된 외모 설정으로 이미지 생성
+   */
+  async testAppearancePrompt(e) {
+    e.preventDefault();
+    
+    // 현재 외모 입력 필드에서 값 가져오기
+    const appearanceInput = document.getElementById("character-appearance");
+    if (!appearanceInput) {
+      console.error('[Test] 외모 입력 필드를 찾을 수 없습니다');
+      return;
+    }
+
+    const appearance = appearanceInput.value.trim();
+    if (!appearance) {
+      this.showInfoModal('외모 설명 필요', '외모 설명을 입력해주세요.');
+      return;
+    }
+
+    // NAI 설정 확인
+    const naiApiKey = this.state.settings.naiSettings?.apiKey;
+    if (!naiApiKey) {
+      this.showInfoModal('NAI API 키 필요', 'NAI API 키가 설정되지 않았습니다. 설정에서 API 키를 입력해주세요.');
+      return;
+    }
+
+    // StickerManager 초기화
+    if (!this.stickerManager) {
+      const { StickerManager } = await import("./services/stickerManager.js");
+      this.stickerManager = new StickerManager(this);
+    }
+
+    // 현재 편집 중인 캐릭터의 NAI 설정 가져오기
+    const characterNaiSettings = this.state.editingCharacter?.naiSettings || {};
+    
+    // 테스트 캐릭터 객체 생성 (캐릭터별 NAI 설정 포함)
+    const testCharacter = {
+      id: 'test',
+      name: '테스트',
+      appearance: appearance,
+      naiSettings: characterNaiSettings
+    };
+
+    // StickerManager NAI 클라이언트 초기화 확인
+    if (!this.stickerManager.initializeNAI()) {
+      this.showInfoModal('NAI 초기화 실패', 'NAI API 키가 설정되지 않았습니다. 설정에서 NAI API 키를 입력해주세요.');
+      return;
+    }
+
+    const button = e.target.closest('button');
+    const originalText = button.innerHTML;
+    
+    try {
+      button.disabled = true;
+      button.innerHTML = '<i data-lucide="loader" class="w-3 h-3 animate-spin pointer-events-none"></i> 테스트 중...';
+      
+      // happy 감정으로 테스트 스티커 생성
+      const result = await this.stickerManager.naiClient.generateSticker(testCharacter, 'happy', {
+        naiSettings: this.state.settings.naiSettings || {}
+      });
+
+      // generateSticker는 성공 시 스티커 객체를 직접 반환
+      if (result && result.dataUrl) {
+        // 이미지 실제 크기 확인
+        const img = new Image();
+        img.onload = () => {
+          console.log('[Test] 생성된 이미지 실제 크기:', {
+            width: img.width,
+            height: img.height,
+            비율: `${img.width}x${img.height}`
+          });
+        };
+        img.src = result.dataUrl;
+        
+        // 내부 모달로 이미지 표시 (setState가 자동으로 UI 업데이트하고 이벤트 리스너 설정)
+        this.showImageResultModal(result.dataUrl, appearance);
+      } else {
+        throw new Error(result?.error || '이미지 생성 실패');
+      }
+    } catch (error) {
+      console.error('[Test] 외모 프롬프트 테스트 실패:', error);
+      this.showInfoModal('테스트 실패', `외모 프롬프트 테스트 실패: ${error.message}`);
+    } finally {
+      // 버튼 복구
+      button.disabled = false;
+      button.innerHTML = originalText;
+    }
+  }
+
+  showImageResultModal(imageUrl, promptText) {
+    this.setState({
+      imageResultModal: {
+        isOpen: true,
+        imageUrl: imageUrl,
+        promptText: promptText
+      }
+    });
+  }
+
+  // 이미지 결과 모달 닫기
+  closeImageResultModal() {
+    this.setState({
+      imageResultModal: {
+        isOpen: false,
+        imageUrl: null,
+        promptText: null
+      }
+    });
+  }
+
 
   handleDeleteCharacter(characterId) {
     const numericCharacterId = Number(characterId);
@@ -2980,6 +3449,20 @@ class PersonaChatApp {
   updateCharacterState(characterId, characterState) {
     if (!characterState) return;
 
+    // romantic_interest만 조건 확인하여 제한
+    if (characterState.romantic_interest !== undefined) {
+      const existing = this.state.characterStates[characterId];
+      if (existing) {
+        const minRequiredLevel = 0.5; // 50%
+        if (!(existing.affection >= minRequiredLevel && 
+              existing.intimacy >= minRequiredLevel && 
+              existing.trust >= minRequiredLevel)) {
+          // 조건 미충족시 romantic_interest 변화를 기존 값으로 고정
+          characterState.romantic_interest = existing.romantic_interest;
+        }
+      }
+    }
+
     const newCharacterStates = { ...this.state.characterStates };
     newCharacterStates[characterId] = {
       ...newCharacterStates[characterId],
@@ -2989,6 +3472,14 @@ class PersonaChatApp {
 
     this.setState({ characterStates: newCharacterStates });
     saveToBrowserStorage("personaChat_characterStates_v16", newCharacterStates);
+    
+    // Character Modal이 열려있고 해당 캐릭터의 상태가 업데이트된 경우, 최면 표시 값도 업데이트
+    if (this.state.showCharacterModal && this.state.editingCharacter?.id === characterId) {
+      // setState 이후 DOM이 업데이트될 때까지 기다린 후 최면 표시 값 업데이트
+      setTimeout(() => {
+        this.updateHypnosisDisplayValues(newCharacterStates[characterId]);
+      }, 100);
+    }
   }
 
   async triggerApiCall(
@@ -3111,6 +3602,14 @@ class PersonaChatApp {
 
     this.addStructuredLog(chatId, "general", character.name, structuredLogData);
 
+    // characterState 응답이 있으면 처리 (개별 채팅)
+    if (response.characterState) {
+      this.updateCharacterState(character.id, response.characterState);
+    } else {
+      console.warn(`⚠️ characterState가 응답에 포함되지 않음:`, response);
+    }
+
+    // 기존 newMemory 처리 - SNS 포스트로 변환
     if (response.newMemory && response.newMemory.trim() !== "") {
       const charIndex = this.state.characters.findIndex(
         (c) => c.id === character.id,
@@ -3118,15 +3617,37 @@ class PersonaChatApp {
       if (charIndex !== -1) {
         const updatedCharacters = [...this.state.characters];
         const charToUpdate = { ...updatedCharacters[charIndex] };
-        charToUpdate.memories = charToUpdate.memories || [];
-        charToUpdate.memories.push(response.newMemory.trim());
+        
+        const legacyMemoryPost = {
+          type: "memory",
+          content: response.newMemory.trim(),
+          access_level: "main-public",
+          importance: 5.0,
+          tags: ["추억", "일상"],
+          reason: "개별 대화 기반 기억"
+        };
+        
+        updatedCharacters[charIndex] = this.processAutoPost(charToUpdate, legacyMemoryPost);
         this.shouldSaveCharacters = true;
         this.setState({ characters: updatedCharacters });
         console.log(
-          `[Memory Added] for ${
-            charToUpdate.name
-          }: ${response.newMemory.trim()}`,
+          `[Memory → SNS Post] for ${charToUpdate.name}: ${response.newMemory.trim()}`,
         );
+      }
+    }
+    
+    // 새로운 autoPost 처리
+    if (response.autoPost) {
+      const charIndex = this.state.characters.findIndex(
+        (c) => c.id === character.id,
+      );
+      if (charIndex !== -1) {
+        const updatedCharacters = [...this.state.characters];
+        const charToUpdate = { ...updatedCharacters[charIndex] };
+        
+        updatedCharacters[charIndex] = this.processAutoPost(charToUpdate, response.autoPost);
+        this.shouldSaveCharacters = true;
+        this.setState({ characters: updatedCharacters });
       }
     }
 
@@ -3594,6 +4115,425 @@ class PersonaChatApp {
 
   handleEditMessage(lastMessageId) {
     this.setState({ editingMessageId: lastMessageId });
+  }
+
+  async handleGenerateSNSPost(messageId) {
+    // 마지막 대화 내용을 기반으로 SNS 포스트 강제 생성
+    const chatId = this.state.selectedChatId;
+    const messages = this.state.messages[chatId] || [];
+    const targetMessage = messages.find(msg => msg.id === messageId);
+    
+    if (!targetMessage || targetMessage.isMe) {
+      // console.log('[SNS Force] 사용자 메시지에는 SNS 포스트를 생성할 수 없습니다');
+      return;
+    }
+
+    // 개별 채팅인 경우 chatId로 캐릭터 찾기
+    let character = this.state.characters.find(c => c.id === chatId);
+    
+    // 그룹 채팅인 경우 메시지 발신자로 캐릭터 찾기
+    if (!character && targetMessage) {
+      character = this.state.characters.find(c => c.name === targetMessage.sender);
+    }
+
+    if (!character) {
+      // console.log('[SNS Force] 캐릭터를 찾을 수 없습니다. chatId:', chatId, 'sender:', targetMessage?.sender);
+      return;
+    }
+
+    try {
+      // console.log(`[SNS Force] ${character.name}의 SNS 포스트 강제 생성 시작`);
+      
+      // 현재 사용자 정보 안전하게 가져오기 (settings 기반)
+      const currentPersona = {
+        name: this.state.settings.userName || "User",
+        description: this.state.settings.userDescription || ""
+      };
+      
+      // SNS 전용 프롬프트를 파일에서 로딩
+      const recentConversation = messages.slice(-3).map(msg => `${msg.sender}: ${msg.content}`).join('\n');
+      
+      // 프롬프트 템플릿을 로딩하고 변수 치환
+      let snsPromptTemplate = await getPrompt('snsForce');
+      
+      // 프롬프트 변수들을 실제 값으로 치환
+      const snsPrompt = snsPromptTemplate
+        .replace(/\{character\.name\}/g, character.name)
+        .replace(/\{persona\.name\}/g, currentPersona.name)
+        .replace(/\{persona\.description\}/g, currentPersona.description || '')
+        .replace(/\{character\.prompt\}/g, character.prompt || '')
+        .replace(/\{recentContext\}/g, recentConversation)
+        .replace(/\{character\.responseTime\}/g, character.responseTime || 5)
+        .replace(/\{character\.thinkingTime\}/g, character.thinkingTime || 5)
+        .replace(/\{character\.reactivity\}/g, character.reactivity || 5)
+        .replace(/\{character\.tone\}/g, character.tone || 5)
+        .replace(/\{character\.currentState\.affection\}/g, character.currentState?.affection || 0.3)
+        .replace(/\{character\.currentState\.intimacy\}/g, character.currentState?.intimacy || 0.1)
+        .replace(/\{character\.currentState\.trust\}/g, character.currentState?.trust || 0.2)
+        .replace(/\{character\.currentState\.romantic_interest\}/g, character.currentState?.romantic_interest || 0.0);
+
+      // 직접 API 호출 (현재 선택된 프로바이더 사용)
+      const selectedProvider = this.state.settings.apiProvider || 'gemini';
+      const apiConfigs = this.state.settings.apiConfigs || {};
+      let currentConfig = apiConfigs[selectedProvider];
+
+      // 레거시 호환성: gemini의 경우 기존 설정 사용
+      if (!currentConfig && selectedProvider === 'gemini') {
+        currentConfig = {
+          apiKey: this.state.settings.apiKey,
+          model: this.state.settings.model,
+        };
+      }
+
+      if (!currentConfig?.apiKey) {
+        throw new Error('API 키가 설정되지 않았습니다.');
+      }
+
+      // 직접 API 클라이언트 호출 (단순 프롬프트용)
+      const client = this.apiManager.getClient(
+        selectedProvider,
+        currentConfig.apiKey,
+        currentConfig.model,
+        currentConfig.baseUrl
+      );
+      
+      // 직접 Gemini API 호출 (백업 방식 활용)
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${currentConfig.model}:generateContent?key=${currentConfig.apiKey}`;
+      
+      const payload = {
+        contents: [{
+          parts: [{ text: snsPrompt }]
+        }],
+        generationConfig: {
+          temperature: currentConfig.temperature || 1.25,
+          maxOutputTokens: currentConfig.maxTokens || 4096,
+        }
+      };
+
+      console.log('[SNS Force] API 호출 정보:', {
+        url: apiUrl,
+        model: currentConfig.model,
+        promptLength: snsPrompt.length
+      });
+
+      const apiResponse = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      });
+
+
+      if (!apiResponse.ok) {
+        throw new Error(`Gemini API 호출 실패: ${apiResponse.status}`);
+      }
+
+      const apiData = await apiResponse.json();
+      
+      const responseText = apiData.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (!responseText) {
+        throw new Error('Gemini API에서 텍스트 응답을 받지 못했습니다.');
+      }
+
+      const response = {
+        messages: [{
+          content: responseText
+        }]
+      };
+
+      if (!response || !response.messages || response.messages.length === 0) {
+        throw new Error('API에서 유효한 응답을 받지 못했습니다.');
+      }
+
+      const snsResponseText = response.messages[0].content;
+
+      // 응답이 텍스트 형태일 경우 JSON 파싱 시도
+      let parsedResponse = snsResponseText;
+      if (typeof snsResponseText === 'string') {
+        try {
+          // 먼저 markdown 코드 블록 제거
+          let cleanText = snsResponseText.trim();
+          
+          // ```json과 ``` 제거
+          if (cleanText.startsWith('```json')) {
+            cleanText = cleanText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+          } else if (cleanText.startsWith('```')) {
+            cleanText = cleanText.replace(/^```[a-zA-Z]*\s*/, '').replace(/\s*```$/, '');
+          }
+          
+          parsedResponse = JSON.parse(cleanText);
+        } catch (e) {
+          // JSON 부분만 추출 시도 (더 강력한 정규식)
+          const jsonMatch = snsResponseText.match(/\{[\s\S]*?\}/);
+          if (jsonMatch) {
+            try {
+              let jsonText = jsonMatch[0];
+              
+              // JSON이 잘렸는지 확인하고 기본 구조 완성 시도
+              if (!jsonText.includes('"tags"') || !jsonText.endsWith('}')) {
+                // 기본 autoPost 구조 생성
+                const fallbackPost = {
+                  autoPost: {
+                    type: "post",
+                    content: "사용자와의 대화에서 느낀 감정을 기록하고 싶어요",
+                    access_level: "main-public",
+                    importance: 5,
+                    tags: ["일상", "대화"],
+                    emotion: "normal"
+                  }
+                };
+                parsedResponse = fallbackPost;
+              } else {
+                parsedResponse = JSON.parse(jsonText);
+              }
+            } catch (e2) {
+              // 최후 수단: 기본 autoPost 생성
+              parsedResponse = {
+                autoPost: {
+                  type: "post",
+                  content: "사용자와의 대화가 즐거웠어요 😊",
+                  access_level: "main-public",
+                  importance: 5,
+                  tags: ["일상", "대화"],
+                  emotion: "happy"
+                }
+              };
+            }
+          } else {
+            // JSON이 전혀 없으면 응답 텍스트를 그대로 사용
+            parsedResponse = {
+              autoPost: {
+                type: "post",
+                content: snsResponseText.trim() || "사용자와의 대화가 즐거웠어요 😊",
+                access_level: "main-public",
+                importance: 5,
+                tags: ["일상", "대화"],
+                emotion: "happy"
+              }
+            };
+          }
+        }
+      }
+
+      // 응답에서 autoPost 추출 및 저장
+      if (parsedResponse && parsedResponse.autoPost) {
+        const charIndex = this.state.characters.findIndex(c => c.id === character.id);
+        if (charIndex !== -1) {
+          const updatedCharacters = [...this.state.characters];
+          const charToUpdate = { ...updatedCharacters[charIndex] };
+          
+          updatedCharacters[charIndex] = this.processAutoPost(charToUpdate, parsedResponse.autoPost);
+          this.setState({ characters: updatedCharacters });
+          saveToBrowserStorage("personaChat_characters_v16", updatedCharacters);
+          
+          // 사용자에게 알림
+          this.showInfoModal(
+            'SNS 포스트 생성 완료',
+            `${character.name}의 SNS 포스트가 생성되었습니다.\n\n"${parsedResponse.autoPost.content}"`
+          );
+        }
+      } else {
+        this.showInfoModal(
+          'SNS 포스트 생성 실패',
+          'SNS 포스트 생성에 실패했습니다. 다시 시도해주세요.'
+        );
+      }
+      
+    } catch (error) {
+      console.error('[SNS Force] SNS 포스트 생성 실패:', error);
+      this.showInfoModal(
+        '에러',
+        `SNS 포스트 생성 중 오류가 발생했습니다: ${error.message}`
+      );
+    }
+  }
+
+  async handleGenerateNAISticker(messageId) {
+    const chatId = this.state.selectedChatId;
+    const messages = this.state.messages[chatId] || [];
+    const targetMessage = messages.find(msg => msg.id === messageId);
+    
+    if (!targetMessage || targetMessage.isMe) {
+      // console.log('[NAI Force] 사용자 메시지에는 NAI 스티커를 생성할 수 없습니다');
+      return;
+    }
+
+    // 캐릭터 찾기
+    let character = this.state.characters.find(c => c.id === chatId);
+    if (!character && targetMessage) {
+      character = this.state.characters.find(c => c.name === targetMessage.sender);
+    }
+
+    if (!character) {
+      // console.log('[NAI Force] 캐릭터를 찾을 수 없습니다. chatId:', chatId, 'sender:', targetMessage?.sender);
+      return;
+    }
+
+    // 현재 사용자 정보 (settings 기반)
+    const currentPersona = {
+      name: this.state.settings.userName || "User",
+      description: this.state.settings.userDescription || ""
+    };
+    
+    try {
+      // console.log(`[NAI Force] ${character.name}의 AI 기반 스티커 생성 시작`);
+      
+      // 1단계: NAI 스티커 프롬프트로 감정과 상황 분석
+      const recentConversation = messages.slice(-3).map(msg => `${msg.sender}: ${msg.content}`).join('\n');
+      
+      let naiPromptTemplate = await getPrompt('naiSticker');
+      const naiAnalysisPrompt = naiPromptTemplate
+        .replace(/\{character\.name\}/g, character.name)
+        .replace(/\{persona\.name\}/g, currentPersona.name)
+        .replace(/\{persona\.description\}/g, currentPersona.description || '')
+        .replace(/\{character\.prompt\}/g, character.prompt || '')
+        .replace(/\{recentContext\}/g, recentConversation);
+
+      // AI 호출로 감정과 상황 태그 생성
+      const selectedProvider = this.state.settings.apiProvider || 'gemini';
+      const apiConfigs = this.state.settings.apiConfigs || {};
+      let currentConfig = apiConfigs[selectedProvider];
+
+      // 레거시 호환성: gemini의 경우 기존 설정 사용
+      if (!currentConfig && selectedProvider === 'gemini') {
+        currentConfig = {
+          apiKey: this.state.settings.apiKey,
+          model: this.state.settings.model,
+        };
+      }
+
+      if (!currentConfig?.apiKey) {
+        throw new Error('AI API 키가 설정되지 않았습니다.');
+      }
+
+      
+      // 직접 Gemini API 호출 (백업 방식 활용)
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${currentConfig.model}:generateContent?key=${currentConfig.apiKey}`;
+      
+      const payload = {
+        contents: [{
+          parts: [{ text: naiAnalysisPrompt }]
+        }],
+        generationConfig: {
+          temperature: currentConfig.temperature || 1.25,
+          maxOutputTokens: currentConfig.maxTokens || 4096,
+        }
+      };
+
+      const apiResponse = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const apiData = await apiResponse.json();
+      if (!apiResponse.ok) {
+        throw new Error(`AI API 호출 실패: ${apiResponse.status}`);
+      }
+
+      const naiResponseText = apiData.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!naiResponseText) {
+        throw new Error('AI에서 유효한 응답을 받지 못했습니다.');
+      }
+
+      // JSON 파싱
+      let cleanedText = naiResponseText.trim();
+      if (cleanedText.startsWith('```json')) {
+        cleanedText = cleanedText.replace(/```json\s*/, '').replace(/\s*```$/, '');
+      } else if (cleanedText.startsWith('```')) {
+        cleanedText = cleanedText.replace(/```[^\\n]*\\n/, '').replace(/\\n?```$/, '');
+      }
+
+      const parsedResponse = JSON.parse(cleanedText);
+      const { emotion, situationPrompt } = parsedResponse.naiSticker;
+
+      // console.log(`[NAI Force] 생성된 감정: ${emotion}`);
+      // console.log(`[NAI Force] 생성된 상황: ${situationPrompt}`);
+
+      // 2단계: 기존 NAI API 클라이언트를 사용하여 이미지 생성
+      const naiApiKey = character.naiSettings?.apiKey || this.state.settings?.naiSettings?.apiKey;
+      if (!naiApiKey) {
+        throw new Error('NAI API 키가 설정되지 않았습니다.');
+      }
+
+      // NAI 클라이언트 동적 import
+      const { NovelAIClient } = await import('./api/novelai.js');
+      const naiClient = new NovelAIClient(naiApiKey);
+
+      // 글로벌 및 캐릭터별 NAI 설정 병합
+      const globalNAISettings = this.state.settings?.naiSettings || {};
+      const charNAISettings = character.naiSettings || {};
+      
+      // 캐릭터 외모 정보 추출
+      const characterAppearance = character.appearance || character.prompt?.match(/외모[:\s]*([^.\n]+)/)?.[1] || "";
+      
+      // AI가 생성한 태그를 사용하여 NAI 생성 파라미터 구성
+      const generationParams = {
+        prompt: characterAppearance ? 
+          `${characterAppearance}, ${emotion}, ${situationPrompt}, anime style, masterpiece, high quality` :
+          `1girl, ${emotion}, ${situationPrompt}, anime style, masterpiece, high quality`,
+        negative_prompt: charNAISettings.negativePrompt || globalNAISettings.negativePrompt || 
+          "lowres, bad anatomy, text, error, worst quality, low quality, blurry",
+        model: charNAISettings.model || globalNAISettings.model || 'nai-diffusion-4-5-full',
+        width: charNAISettings.width || globalNAISettings.width || 1024,
+        height: charNAISettings.height || globalNAISettings.height || 1024,
+        steps: charNAISettings.steps || globalNAISettings.steps || 28,
+        scale: charNAISettings.scale || globalNAISettings.scale || 3.0,
+        sampler: charNAISettings.sampler || globalNAISettings.sampler || 'k_euler'
+      };
+
+      // console.log(`[NAI Force] NAI 생성 파라미터:`, generationParams);
+
+      // NAI 클라이언트로 이미지 생성
+      const naiResult = await naiClient.generateImage(generationParams);
+      
+      if (!naiResult.success) {
+        throw new Error('NAI 이미지 생성에 실패했습니다.');
+      }
+
+      const imageDataUrl = naiResult.dataUrl;
+
+      // 3단계: 채팅에 바로 표시 (저장하지 않음)
+      const stickerMessage = {
+        id: Date.now() + Math.random(),
+        sender: character.name,
+        content: "",
+        time: new Date().toLocaleTimeString("ko-KR", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        isMe: false,
+        type: "sticker",
+        stickerId: `temp_${Date.now()}`,
+        stickerName: "Generated Sticker",
+        stickerData: {
+          stickerId: `temp_${Date.now()}`,
+          stickerName: "Generated Sticker",
+          type: "image/png",
+          dataUrl: imageDataUrl
+        }
+      };
+      
+      const currentMessages = this.state.messages[chatId] || [];
+      const updatedMessages = {
+        ...this.state.messages,
+        [chatId]: [...currentMessages, stickerMessage]
+      };
+      
+      this.setState({ messages: updatedMessages });
+      saveToBrowserStorage("personaChat_messages_v16", updatedMessages);
+      
+      // console.log(`[NAI Force] ${character.name}의 AI 기반 스티커 생성 및 표시 완료`);
+
+    } catch (error) {
+      console.error('[NAI Force] NAI 스티커 생성 실패:', error);
+      this.showInfoModal(
+        'NAI 스티커 생성 실패',
+        `스티커 생성 중 오류가 발생했습니다: ${error.message}`
+      );
+    }
   }
 
   toBase64 = (file) =>
@@ -5467,5 +6407,106 @@ class PersonaChatApp {
         "An error occurred while resetting data: " + error.message,
       );
     }
+  }
+
+  // === SNS 관련 함수들 ===
+  
+  getCharacterState(characterId) {
+    return this.state.characterStates[characterId] || {
+      affection: 0.2,
+      intimacy: 0.2,  
+      trust: 0.2,
+      romantic_interest: 0
+    };
+  }
+
+  setCharacterState(characterId, state) {
+    this.setState({
+      characterStates: {
+        ...this.state.characterStates,
+        [characterId]: { ...state }
+      }
+    });
+  }
+
+  checkSNSAccess(character, accessLevel) {
+    let state = this.getCharacterState(character.id);
+    const hypnosis = character.hypnosis || {};
+    
+    // 최면이 활성화되고 호감도 조작이 활성화된 경우 최면 값 사용
+    if (hypnosis.enabled && hypnosis.affection_override) {
+      state = {
+        affection: hypnosis.affection !== null ? hypnosis.affection : state.affection,
+        intimacy: hypnosis.intimacy !== null ? hypnosis.intimacy : state.intimacy,
+        trust: hypnosis.trust !== null ? hypnosis.trust : state.trust,
+        romantic_interest: hypnosis.romantic_interest !== null ? hypnosis.romantic_interest : state.romantic_interest
+      };
+    }
+    
+    
+    // 최면 제어 우선 확인 (전체 권한)
+    if (hypnosis.enabled) {
+      
+      if (hypnosis.sns_full_access) {
+        return true;
+      }
+      if (accessLevel.includes('secret') && hypnosis.secret_account_access) {
+        return true;
+      }
+    }
+    
+    // 접근 레벨별 요구사항 정의
+    const requirements = {
+      'main-public': { affection: 0, intimacy: 0, trust: 0, romantic_interest: 0 },        // 본계정: 상시 접근
+      'main-private': { affection: 0.5, intimacy: 0.5, trust: 0.5, romantic_interest: 0 }, // 본계정 비밀글: 일정 수치 필요
+      'secret-public': { affection: 0.7, intimacy: 0.7, trust: 0.7, romantic_interest: 0.4 }, // 뒷계정: 3개 수치 70%+ 연애수치 40%+ 필요
+      'secret-private': { affection: 0.9, intimacy: 0.9, trust: 0.9, romantic_interest: 0.9 }, // 뒷계정 비밀글: 모든 수치 90% 이상
+      public: { affection: 0, intimacy: 0, trust: 0, romantic_interest: 0 },        // 호환성용 - 상시 접근
+      private: { affection: 0.5, intimacy: 0.5, trust: 0.5, romantic_interest: 0 }, // 호환성용
+      secretPublic: { affection: 0.7, intimacy: 0.7, trust: 0.7, romantic_interest: 0.4 }, // 호환성용
+      secretPrivate: { affection: 0.9, intimacy: 0.9, trust: 0.9, romantic_interest: 0.9 } // 호환성용
+    };
+
+    // main-public과 public 접근은 항상 허용 (기본 SNS 접근)
+    if (accessLevel === 'main-public' || accessLevel === 'public') {
+      return true;
+    }
+    
+    const required = requirements[accessLevel] || requirements.public;
+    
+    const hasAccess = (
+      state.affection >= required.affection &&
+      state.intimacy >= required.intimacy &&
+      state.trust >= required.trust &&
+      state.romantic_interest >= required.romantic_interest
+    );
+    
+    
+    return hasAccess;
+  }
+
+  openSNSFeed(characterId) {
+    const character = this.state.characters.find(char => char.id === characterId);
+    if (!character) return;
+    
+    this.setState({
+      showSNSModal: true,
+      selectedSNSCharacter: characterId,
+      snsActiveTab: 'posts'
+    });
+  }
+
+  openSNSCharacterList(type) {
+    this.setState({
+      showSNSCharacterListModal: true,
+      snsCharacterListType: type,
+      snsCharacterSearchTerm: ''
+    });
+  }
+
+  toggleSNSSecretMode() {
+    this.setState({
+      snsSecretMode: !this.state.snsSecretMode
+    });
   }
 }

@@ -24,6 +24,26 @@ export async function renderPromptModal(app) {
       content: prompts.profileCreation,
       description: t("promptModal.randomFirstMessagePromptDescription"),
     },
+    [t("promptModal.snsForcePrompt")]: {
+      key: "snsForce",
+      content: prompts.snsForce,
+      description: t("promptModal.snsForcePromptDescription"),
+    },
+    [t("promptModal.naiStickerPrompt")]: {
+      key: "naiSticker",
+      content: prompts.naiSticker,
+      description: t("promptModal.naiStickerPromptDescription"),
+    },
+    [t("promptModal.groupChatPrompt")]: {
+      key: "groupChat",
+      content: prompts.groupChat,
+      description: t("promptModal.groupChatPromptDescription"),
+    },
+    [t("promptModal.openChatPrompt")]: {
+      key: "openChat",  
+      content: prompts.openChat,
+      description: t("promptModal.openChatPromptDescription"),
+    },
   };
 
   return `
@@ -111,6 +131,10 @@ export function setupPromptModalEventListeners(app) {
         characterSheet: document.getElementById("prompt-characterSheet").value,
         profileCreation: document.getElementById("prompt-profileCreation")
           .value,
+        snsForce: document.getElementById("prompt-snsForce").value,
+        naiSticker: document.getElementById("prompt-naiSticker").value,
+        groupChat: document.getElementById("prompt-groupChat").value,
+        openChat: document.getElementById("prompt-openChat").value,
       };
       await saveAllPrompts(newPrompts);
       app.setState({ showPromptModal: false });

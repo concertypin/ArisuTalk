@@ -3,6 +3,72 @@ import { renderAvatar } from "./Avatar.js";
 import { formatTimestamp } from "../utils.js";
 
 /**
+ * Renders mobile character action buttons (SNS, Character Settings).
+ * @param {object} app - The main application object.
+ * @param {object} char - The character object.
+ * @returns {string} The HTML string for the action buttons.
+ */
+function renderMobileCharacterButtons(app, char) {
+  return `
+    <div class="flex items-center gap-1">
+      <!-- SNS 버튼 -->
+      <button class="mobile-character-sns-btn p-1.5 hover:bg-gray-700 rounded-full transition-colors z-20" 
+              data-character-id="${char.id}" 
+              title="${t('characterModal.openSNS')}">
+        <i data-lucide="instagram" class="w-4 h-4 text-gray-300 pointer-events-none"></i>
+      </button>
+      
+      <!-- 캐릭터 설정 버튼 -->
+      <button class="mobile-character-edit-btn p-1.5 hover:bg-gray-700 rounded-full transition-colors z-20" 
+              data-character-id="${char.id}" 
+              title="${t('sidebar.editCharacter')}">
+        <i data-lucide="settings" class="w-4 h-4 text-gray-300 pointer-events-none"></i>
+      </button>
+    </div>
+  `;
+}
+
+/**
+ * Renders mobile affection display for a character.
+ * @param {object} app - The main application object.
+ * @param {object} char - The character object.
+ * @returns {string} The HTML string for affection display.
+ */
+function renderMobileAffectionDisplay(app, char) {
+  const currentState = char.currentState || {
+    affection: 0.0,
+    intimacy: 0.0,
+    trust: 0.0,
+    romantic_interest: 0.0
+  };
+
+  const getAffectionColor = (value) => {
+    if (value >= 0.8) return "text-pink-400";
+    if (value >= 0.6) return "text-blue-400";
+    if (value >= 0.4) return "text-green-400";
+    if (value >= 0.2) return "text-yellow-400";
+    return "text-gray-400";
+  };
+
+  return `
+    <div class="flex items-center gap-3 text-xs mb-1">
+      <span class="${getAffectionColor(currentState.affection)}" title="${t('sns.affection')}">
+        ❤️ ${Math.round(currentState.affection * 100)}%
+      </span>
+      <span class="${getAffectionColor(currentState.intimacy)}" title="${t('sns.intimacy')}">
+        🤝 ${Math.round(currentState.intimacy * 100)}%
+      </span>
+      <span class="${getAffectionColor(currentState.trust)}" title="${t('sns.trust')}">
+        🛡️ ${Math.round(currentState.trust * 100)}%
+      </span>
+      <span class="${getAffectionColor(currentState.romantic_interest)}" title="${t('sns.romanticInterest')}">
+        💕 ${Math.round(currentState.romantic_interest * 100)}%
+      </span>
+    </div>
+  `;
+}
+
+/**
  * Renders a single character item for the character list page.
  * @param {object} app - The main application object.
  * @param {object} char - The character object to render.
@@ -54,9 +120,11 @@ export function renderCharacterItem(app, char) {
                 <div class="flex items-center mb-1">
                     <h3 class="font-semibold text-white text-lg truncate">${char.name || t("sidebar.unknownCharacter")}</h3>
                     <div class="flex items-center gap-2 shrink-0 ml-auto">
+                        ${renderMobileCharacterButtons(app, char)}
                         ${totalUnreadCount > 0 ? `<span class="bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full leading-none">${totalUnreadCount}</span>` : ""}
                     </div>
                 </div>
+                ${renderMobileAffectionDisplay(app, char)}
                 <div class="flex justify-between items-start">
                     <p class="text-base line-clamp-2 ${lastMessage?.isError ? "text-red-400" : "text-gray-400"} pr-4">${lastMessageContent}</p>
                     <span class="text-sm text-gray-500 shrink-0">${formatTimestamp(lastMessage?.id)}</span>

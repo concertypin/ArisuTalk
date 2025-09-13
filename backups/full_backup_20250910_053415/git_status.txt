@@ -1,0 +1,5 @@
+3847ba9 fix: 콘솔 로그 최적화 및 프롬프트 설정 개선
+aee02ac fix: Gemini 코드 리뷰 권고사항 추가 수정
+b9abb88 fix: NAI API v4 모델에서 characterPrompts 누락 버그 수정
+c028b0c feat: SNS 시스템 및 NAI 스티커 생성 시스템 구현
+a9fbb31 feat: Make ChatML the default prompt format, adding script feature on prompt (#20)

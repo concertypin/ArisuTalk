@@ -1,0 +1,726 @@
+export type LanguageStrings = {
+  common: {
+    cancel: string;
+    save: string;
+    confirm: string;
+    close: string;
+    delete: string;
+    edit: string;
+    done: string;
+    setupLater: string;
+  };
+  characterModal: {
+    memoryPlaceholder: string;
+    noStickers: string;
+    editStickerName: string;
+    deleteSticker: string;
+    addContact: string;
+    editContact: string;
+    profileImage: string;
+    importContact: string;
+    shareContact: string;
+    nameLabel: string;
+    namePlaceholder: string;
+    promptLabel: string;
+    promptPlaceholder: string;
+    proactiveToggle: string;
+    advancedSettings: string;
+    sticker: string;
+    addSticker: string;
+    deselect: string;
+    selectMode: string;
+    selectAll: string;
+    deleteSelected: string;
+    stickerSupport: string;
+    stickerCount: string;
+    totalStorage: string;
+    totalSize: string;
+    memory: string;
+    addMemory: string;
+    addToSNSMemory: string;
+    responseSpeed: string;
+  };
+  characterModalSlider: {
+    responseTime: {
+      description: string;
+      low: string;
+      high: string;
+    };
+    thinkingTime: {
+      description: string;
+      low: string;
+      high: string;
+    };
+    reactivity: {
+      description: string;
+      low: string;
+      high: string;
+    };
+    tone: {
+      description: string;
+      low: string;
+      high: string;
+    };
+  };
+  confirm: {
+    cancel: string;
+    confirm: string;
+    resetDataConfirm: string;
+    resetDataWarning: string;
+    resetDataCannotUndo: string;
+    resetDataDoubleConfirm: string;
+    resetDataBackupWarning: string;
+    resetDataFinalConfirm: string;
+    resetDataComplete: string;
+    resetDataFailed: string;
+  };
+  mainChat: {
+    uploadPhoto: string;
+    addCaption: string;
+    stickerMessagePlaceholder: string;
+    messagePlaceholder: string;
+    stickerLabel: string;
+    regenerateMessage: string;
+    generateSNS: string;
+    generateNAI: string;
+    personaStickers: string;
+    addSticker: string;
+    addStickerPrompt: string;
+    addStickerButton: string;
+    deletedSticker: string;
+    audio: string;
+    sticker: string;
+    selectCharacter: string;
+    selectCharacterPrompt: string;
+    stickerSupport: string;
+    stickerCount: string;
+    totalSize: string;
+    audioSticker: string;
+    participantsConnected: string;
+    participantsJoined: string;
+    debugLogButtonTitle: string;
+  };
+  promptModal: {
+    title: string;
+    mainChatPrompt: string;
+    systemRules: string;
+    roleAndObjective: string;
+    memoryGeneration: string;
+    characterActing: string;
+    messageWriting: string;
+    language: string;
+    additionalInstructions: string;
+    stickerUsage: string;
+    groupChatContext: string;
+    openChatContext: string;
+    resetToDefault: string;
+    randomFirstMessagePrompt: string;
+    profileCreationRules: string;
+    characterSheetGenerationRules: string;
+    backupPrompts: string;
+    restorePrompts: string;
+    characterSheetGenerationPrompt: string;
+    characterSheetGenerationPromptDescription: string;
+    mainChatPromptDescription: string;
+    randomFirstMessagePromptDescription: string;
+    snsForcePrompt: string;
+    snsForcePromptDescription: string;
+    naiStickerPrompt: string;
+    naiStickerPromptDescription: string;
+    resetAllPrompts: string;
+    resetAllPromptsConfirmation: string;
+    restoreFailed: string;
+  };
+  settings: {
+    restore: string;
+    delete: string;
+    noSnapshots: string;
+    title: string;
+    aiSettings: string;
+    advancedSettings: string;
+    apiKey: string;
+    apiKeyPlaceholder: string;
+    aiModel: string;
+    aiProvider: string;
+    scale: string;
+    uiSize: string;
+    interfaceSize: string;
+    uiScale: string;
+    uiScaleInfo: string;
+    small: string;
+    large: string;
+    defaultSize: string;
+    yourPersona: string;
+    yourName: string;
+    yourNamePlaceholder: string;
+    yourDescription: string;
+    yourDescriptionPlaceholder: string;
+    nameOrNickname: string;
+    nameOrNicknameInfo: string;
+    selfIntroduction: string;
+    selfIntroductionPlaceholder: string;
+    selfIntroductionInfo: string;
+    proactiveSettings: string;
+    proactiveChat: string;
+    proactiveChatInfo: string;
+    randomFirstMessage: string;
+    randomFirstMessageInfo: string;
+    autoMessageSettings: string;
+    characterCount: string;
+    characterCountUnit: string;
+    messageFrequency: string;
+    messageFrequencyInfo: string;
+    minInterval: string;
+    maxInterval: string;
+    min: string;
+    max: string;
+    snapshots: string;
+    enableSnapshots: string;
+    autoSnapshots: string;
+    autoSnapshotsInfo: string;
+    savedSnapshots: string;
+    scrollToSeeMore: string;
+    dataManagement: string;
+    backup: string;
+    backupData: string;
+    restoreData: string;
+    backupInfo: string;
+    backupInfoTitle: string;
+    promptBackup: string;
+    promptRestore: string;
+    promptBackupInfo: string;
+    dangerZone: string;
+    resetAllData: string;
+    resetAllDataInfo: string;
+    resetWarning: string;
+    language: string;
+    languageEnglish: string;
+    languageKorean: string;
+    languageInfo: string;
+    themeSettings: string;
+    darkTheme: string;
+    currentTheme: string;
+    themeComingSoon: string;
+    animationSettings: string;
+    animationComingSoon: string;
+    debugSettings: string;
+    debugLogs: string;
+    enableDebugLogs: string;
+    debugLogsInfo: string;
+    currentLogCount: string;
+    viewLogs: string;
+    clearLogs: string;
+    performanceOptimization: string;
+    performanceComingSoon: string;
+    experimentalFeatures: string;
+    experimentalWarning: string;
+    warningNote: string;
+    experimentalComingSoon: string;
+    applicationInfo: string;
+    appName: string;
+    uiMode: string;
+    browser: string;
+    screenResolution: string;
+    providerSettings: string;
+    promptManagement: string;
+    promptInfo: string;
+    editPrompt: string;
+    model: string;
+    customModel: string;
+    addModel: string;
+    customModels: string;
+    maxTokens: string;
+    temperature: string;
+    conservativeTemp: string;
+    creativeTemp: string;
+    profileGenerationSettings: string;
+    profileMaxTokens: string;
+    profileTemperature: string;
+    consistentProfile: string;
+    diverseProfile: string;
+    cancel: string;
+    done: string;
+    settingsCategories: string;
+    appearanceSettings: string;
+    characterDefaults: string;
+    apiDescription: string;
+    appearanceDescription: string;
+    characterDescription: string;
+    dataDescription: string;
+    advancedDescription: string;
+    apiSubtitle: string;
+    appearanceSubtitle: string;
+    characterSubtitle: string;
+    dataSubtitle: string;
+    advancedSubtitle: string;
+    autoSaveInfo: string;
+    close: string;
+    saveAndClose: string;
+    settingsDescription: string;
+    resetDataList: {
+      allCharacters: string;
+      allChatHistory: string;
+      userSettings: string;
+      stickerData: string;
+      debugLogs: string;
+    };
+  };
+  sidebar: {
+    startNewChat: string;
+    imageSent: string;
+    newChatRoom: string;
+    unknownCharacter: string;
+    chatRoomCount: string;
+    startChatting: string;
+    stickerSent: string;
+    rename: string;
+    deleteChatRoom: string;
+    title: string;
+    description: string;
+    searchPlaceholder: string;
+    invite: string;
+  };
+  defaultCharacter: {
+    name: string;
+  };
+  modal: {
+    noSpaceError: {
+      title: string;
+      message: string;
+    };
+    saveFailed: {
+      title: string;
+      message: string;
+    };
+    localStorageSaveError: {
+      title: string;
+      message: string;
+    };
+    promptSaveComplete: {
+      title: string;
+      message: string;
+    };
+    characterNameDescriptionNotFulfilled: {
+      title: string;
+      message: string;
+    };
+    characterDeleteConfirm: {
+      title: string;
+      message: string;
+    };
+    imageFileSizeExceeded: {
+      title: string;
+      message: string;
+    };
+    imageProcessingError: {
+      title: string;
+      message: string;
+    };
+    apiKeyRequired: {
+      title: string;
+      message: string;
+    };
+    messageGroupDeleteConfirm: {
+      title: string;
+      message: string;
+    };
+    messageEmptyError: {
+      title: string;
+      message: string;
+    };
+    imageTooSmallOrCharacterInfoTooLong: {
+      title: string;
+      message: string;
+    };
+    characterCardNoNameError: {
+      title: string;
+      message: string;
+    };
+    characterCardNoAvatarImageError: {
+      title: string;
+      message: string;
+    };
+    avatarImageLoadError: {
+      title: string;
+      message: string;
+    };
+    avatarLoadSuccess: {
+      title: string;
+      message: string;
+    };
+    characterCardNoAvatarImageInfo: {
+      title: string;
+      message: string;
+    };
+    backupComplete: {
+      title: string;
+      message: string;
+    };
+    backupFailed: {
+      title: string;
+      message: string;
+    };
+    restoreFailed: {
+      title: string;
+      message: string;
+    };
+    restoreConfirm: {
+      title: string;
+      message: string;
+    };
+    restoreComplete: {
+      title: string;
+      message: string;
+    };
+    promptBackupComplete: {
+      title: string;
+      message: string;
+    };
+    promptBackupFailed: {
+      title: string;
+      message: string;
+    };
+    promptRestoreConfirm: {
+      title: string;
+      message: string;
+    };
+    promptRestoreFailed: {
+      title: string;
+      message: string;
+    };
+    promptRestoreComplete: {
+      title: string;
+      message: string;
+    };
+    cancelChanges: {
+      title: string;
+      message: string;
+    };
+    loadFailed: {
+      title: string;
+    };
+    deleteChatRoom: {
+      title: string;
+      message: string;
+    };
+    editStickerName: {
+      title: string;
+    };
+    unsupportedFileType: {
+      message: string;
+    };
+    fileTooLarge: {
+      title: string;
+      message: string;
+    };
+    fileProcessingError: {
+      title: string;
+      message: string;
+    };
+    stickerProcessingError: {
+      title: string;
+      message: string;
+    };
+    cannotGenerateRandomCharacter: {
+      message: string;
+    };
+    failedToGenerateProfile: {
+      message: string;
+    };
+    invalidProfileName: {
+      message: string;
+    };
+    invalidProfilePrompt: {
+      message: string;
+    };
+    failedToGetFirstMessage: {
+      message: string;
+    };
+    invalidFirstMessage: {
+      message: string;
+    };
+    failedToGenerateRandomCharacter: {
+      message: string;
+    };
+    resetPromptTitle: string;
+    resetPromptMessage: string;
+    resetPromptCompleteTitle: string;
+    resetPromptCompleteMessage: string;
+  };
+  ui: {
+    discardChanges: string;
+    unsavedChangesWarning: string;
+    appStarted: string;
+    dataLoadFailed: string;
+    defaultChatName: string;
+    newChatName: string;
+    deleteChatRoom: string;
+    deleteChatRoomConfirm: string;
+    startConversation: string;
+    imageSent: string;
+    stickerSent: string;
+    enterStickerName: string;
+    fileProcessingError: string;
+    fileProcessingAlert: string;
+    fileSizeExceeded: string;
+    unsupportedFormat: string;
+    stickerProcessingError: string;
+    storageFull: string;
+    storageFullMessage: string;
+    groupChatNamePlaceholder: string;
+    openChatNamePlaceholder: string;
+    newGroupChat: string;
+    newOpenChat: string;
+    edit: string;
+    delete: string;
+    apiKeyPlaceholder: string;
+    customModelPlaceholder: string;
+    generate: string;
+  };
+  chat: {
+    defaultChatName: string;
+    newChat: string;
+    randomChatName: string;
+    startNewChat: string;
+    imageSent: string;
+    messageGenerationError: string;
+  };
+  groupChat: {
+    groupChat: string;
+    openChat: string;
+    createGroupChat: string;
+    createOpenChat: string;
+    groupChatName: string;
+    openChatName: string;
+    openChatNamePlaceholder: string;
+    groupChatSettings: string;
+    openChatInfo: string;
+    newGroupChat: string;
+    newOpenChat: string;
+    calculatingStorage: string;
+    responseSettings: string;
+    overallResponseFrequency: string;
+    responseFrequencyInfo: string;
+    maxSimultaneousResponders: string;
+    responseInterval: string;
+    responseIntervalInfo: string;
+    individualCharacterSettings: string;
+    responseEnabled: string;
+    individualResponseProbability: string;
+    characterRole: string;
+    roleNormal: string;
+    roleLeader: string;
+    roleQuiet: string;
+    roleActive: string;
+    cancel: string;
+    save: string;
+    create: string;
+    edit: string;
+    delete: string;
+    people1: string;
+    people2: string;
+    people3: string;
+    people4: string;
+    seconds: string;
+    selectParticipants: string;
+    minimumParticipants: string;
+    participantsCount: string;
+    participantsConnected: string;
+    startConversation: string;
+    imageSent: string;
+    stickerSent: string;
+    openChatAutoManagement: string;
+    charactersMoodBased: string;
+    naturalConversation: string;
+    initialParticipants: string;
+    deleteGroupChatTitle: string;
+    deleteGroupChatMessage: string;
+    deleteOpenChatTitle: string;
+    deleteOpenChatMessage: string;
+    groupChatNameRequired: string;
+    groupChatNameRequiredMessage: string;
+    participantsRequired: string;
+    participantsRequiredMessage: string;
+    openChatNameRequired: string;
+    openChatNameRequiredMessage: string;
+    noCharactersAvailable: string;
+    noCharactersAvailableMessage: string;
+  };
+  debugLogs: {
+    systemDebugLogs: string;
+    groupChatType: string;
+    openChatType: string;
+    normalChatType: string;
+    totalLogItems: string;
+    maxLogItems: string;
+    logCollectionStatus: string;
+    enabled: string;
+    disabled: string;
+    chatRoom: string;
+    api: string;
+    model: string;
+    export: string;
+    clearAll: string;
+    close: string;
+    noLogs: string;
+    noLogsCollected: string;
+    logsDisabled: string;
+    unknown: string;
+    invalidDate: string;
+  };
+  api: {
+    imageMessage: string;
+    imageUnavailable: string;
+    unknownSticker: string;
+    stickerMessage: string;
+    proactiveStart: string;
+    apiError: string;
+    invalidResponse: string;
+    requestFailed: string;
+    profileParseError: string;
+    unknownReason: string;
+    profileNotGenerated: string;
+    profileGenerationError: string;
+    userNameLabel: string;
+    userDescriptionLabel: string;
+    geminiParsingError: string;
+    geminiResponseEmpty: string;
+    geminiLocationNotSupported: string;
+    geminiProcessingError: string;
+    apiKeyNotFound: string;
+  };
+  system: {
+    languageChangeMessage: string;
+    storageFullTitle: string;
+    storageFullMessage: string;
+    selectModeDeselect: string;
+    selectModeSelect: string;
+  };
+  security: {
+    masterPasswordPlaceholder: string;
+    confirmPasswordPlaceholder: string;
+    passwordHintPlaceholder: string;
+    encryptionFailed: string;
+    decryptionFailed: string;
+    passwordTooShort: string;
+    passwordNotComplex: string;
+    passwordStrong: string;
+    encryptionSetupTitle: string;
+    encryptionSetupDescription: string;
+    whyEncryptionIsNeeded: string;
+    encryptionBenefit1: string;
+    encryptionBenefit2: string;
+    encryptionBenefit3: string;
+    masterPasswordLabel: string;
+    confirmPasswordLabel: string;
+    passwordHintLabel: string;
+    passwordHintWarning: string;
+    generateSecurePassword: string;
+    setupEncryption: string;
+    enterMasterPassword: string;
+    passwordsDoNotMatch: string;
+    encryptionEnabledSuccess: string;
+    generatedPasswordMessage: string;
+    passwordStrength: {
+      veryWeak: string;
+      weak: string;
+      medium: string;
+      strong: string;
+      label: string;
+    }
+  };
+  secureStorage: {
+    autoGeneratedHint: string;
+    setupEncryptionFailed: string;
+    noMasterPasswordForEncryption: string;
+    saveApiConfigsFailed: string;
+    noMasterPasswordForDecryption: string;
+    loadApiConfigsFailed: string;
+  };
+  sns: {
+    arisutagram: string;
+    characterListTitle: string;
+    viewSNS: string;
+    secretModeToggle: string;
+    postsTab: string;
+    secretsTab: string;
+    tagsTab: string;
+    noPostsAvailable: string;
+    noSecretsAvailable: string;
+    noTagsAvailable: string;
+    secrets: string;
+    tags: string;
+    secretPostsWarning: string;
+    tagsDescription: string;
+    accessDenied: string;
+    accessDeniedDescription: string;
+    requiresAffection: string;
+    requiresIntimacy: string;
+    requiresTrust: string;
+    requiresRomance: string;
+    hypnosisOverride: string;
+    mainAccount: string;
+    secretAccount: string;
+    secretAccountWarning: string;
+    post: string;
+    posts: string;
+    memory: string;
+    memories: string;
+    following: string;
+    followers: string;
+    likes: string;
+    comments: string;
+    share: string;
+    ago: string;
+    justNow: string;
+    minutesAgo: string;
+    hoursAgo: string;
+    daysAgo: string;
+    weeksAgo: string;
+    monthsAgo: string;
+    yearsAgo: string;
+    accessLevel: {
+      public: string;
+      private: string;
+      secretPublic: string;
+      secretPrivate: string;
+    };
+    characterList: {
+      allCharacters: string;
+      availableCharacters: string;
+      noAccessCharacters: string;
+      searchPlaceholder: string;
+      affectionLevel: string;
+      intimacyLevel: string;
+      trustLevel: string;
+      romanceLevel: string;
+    };
+    postCreated: string;
+    postCreationFailed: string;
+    postCreationError: string;
+  };
+  nai: {
+    stickerCreated: string;
+    stickerGenerationFailed: string;
+    stickerGenerationError: string;
+    apiKeyNotSet: string;
+  };
+  hypnosis: {
+    hypnosisControl: string;
+    enabled: string;
+    disabled: string;
+    affectionControl: string;
+    intimacyControl: string;
+    trustControl: string;
+    romanceControl: string;
+    forceLoveUnlock: string;
+    snsFullAccess: string;
+    secretAccountAccess: string;
+    currentLevel: string;
+    override: string;
+    naturalValue: string;
+    hypnosisValue: string;
+    settingsWarning: string;
+    dangerousFeature: string;
+  };
+}
