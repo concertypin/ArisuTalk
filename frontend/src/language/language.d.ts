@@ -668,6 +668,9 @@ export type LanguageStrings = {
     noPostsYet: string;
     noSecretsYet: string;
     noTagsYet: string;
+    noPostsAvailable: string;
+    noSecretsAvailable: string;
+    noTagsAvailable: string;
     lockedContent: string;
     accessLevel: string;
     mainPublic: string;
