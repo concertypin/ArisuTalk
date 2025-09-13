@@ -20,6 +20,7 @@ export const en: LanguageStrings = {
     deleteSticker: "Delete",
     addContact: "Add Contact",
     editContact: "Edit Contact",
+    editModeTitle: "Edit '{{name}}'",
     profileImage: "Profile Image",
     importContact: "Import Contact",
     shareContact: "Share Contact",
@@ -500,18 +501,20 @@ export const en: LanguageStrings = {
       newChat: "New Chat",
     },
     characterCardSaveError: {
-        message: "Failed to save character card."
+      message: "Failed to save character card.",
     },
     character_name_required_title: "Name required",
     character_name_required_message: "Please enter a character name first.",
     aiGenerationComplete: {
-        title: "AI Generation Complete",
-        message: "Successfully generated details for character \"{{characterName}}\""
+      title: "AI Generation Complete",
+      message:
+        'Successfully generated details for character "{{characterName}}"',
     },
     generationFailed: {
-        title: "Generation Failed",
-        message: "An error occurred during character generation: {{errorMessage}}"
-    }
+      title: "Generation Failed",
+      message:
+        "An error occurred during character generation: {{errorMessage}}",
+    },
   },
   ui: {
     discardChanges: "Discard Changes",
@@ -536,7 +539,8 @@ export const en: LanguageStrings = {
     unsupportedFormatMessage: "'{{fileName}}' is not a supported file format.",
     stickerProcessingError: "Sticker Processing Error",
     stickerProcessingErrorConsole: "Sticker processing error: {{fileName}}",
-    stickerProcessingErrorMessage: "An error occurred while processing '{{fileName}}'.",
+    stickerProcessingErrorMessage:
+      "An error occurred while processing '{{fileName}}'.",
     storageFull: "Storage Full",
     storageFullMessage: "Not enough storage space.",
     groupChatNamePlaceholder: "Enter group chat name",
@@ -741,7 +745,7 @@ export const en: LanguageStrings = {
     noResults: "No characters found.",
   },
   generatingStatus: {
-    generating: "Generating..."
+    generating: "Generating...",
   },
   hypnosis: {
     hypnosisControl: "Hypnosis Control",
@@ -826,5 +830,5 @@ export const en: LanguageStrings = {
     romanticInterest: "Romance",
     openSNSList: "View SNS List",
     viewSNS: "View {{name}}'s SNS"
-  }
+  },
 };

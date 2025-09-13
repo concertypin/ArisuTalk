@@ -139,9 +139,9 @@ export function renderCharacterModal(app) {
   };
 
   return `
-        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div class="bg-gray-800 rounded-2xl w-full max-w-md mx-auto my-auto flex flex-col" style="max-height: 90vh;">
-                <div class="flex items-center justify-between p-6 border-b border-gray-700 shrink-0">
+        <div id="character-modal-backdrop" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 transition-all duration-300 ease-out">
+            <div id="character-modal-panel" class="bg-gray-800 rounded-2xl w-full max-w-md mx-auto my-auto flex flex-col" style="max-height: 90vh;">
+                <div class="flex items-center justify-between px-6 py-2 md:p-6 border-b border-gray-700 shrink-0">
                     <h3 class="text-xl font-semibold text-white">${
                       isNew
                         ? t("characterModal.addContact")
@@ -149,11 +149,11 @@ export function renderCharacterModal(app) {
                     }</h3>
                     <div class="flex items-center gap-2">
                         ${!isNew ? `
-                            <button id="character-sns-btn" class="p-2 hover:bg-gray-700 rounded-full transition-colors z-20" title="${t('characterModal.openSNS')}">
-                                <i data-lucide="instagram" class="w-5 h-5 text-gray-300 pointer-events-none"></i>
+                            <button id="character-sns-btn" class="p-2 md:p-2 hover:bg-gray-700 rounded-full transition-colors z-20" title="${t('characterModal.openSNS')}">
+                                <i data-lucide="instagram" class="w-6 h-6 md:w-5 md:h-5 text-gray-300 pointer-events-none"></i>
                             </button>
                         ` : ''}
-                        <button id="close-character-modal" data-action="close-character-modal" class="p-1 hover:bg-gray-700 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
+                        <button id="close-character-modal" data-action="close-character-modal" class="p-3 md:p-1 hover:bg-gray-700 rounded-full"><i data-lucide="x" class="w-7 h-7 md:w-5 md:h-5"></i></button>
                     </div>
                 </div>
                 <div class="p-6 space-y-6 overflow-y-auto">

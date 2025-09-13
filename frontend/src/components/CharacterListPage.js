@@ -2,6 +2,10 @@ import { t } from "../i18n.js";
 import { renderAvatar } from "./Avatar.js";
 import { formatTimestamp } from "../utils.js";
 
+const LONG_PRESS_DURATION_MS = 500;
+const RIPPLE_ANIMATION_DURATION_MS = 600;
+const TOUCH_MOVE_THRESHOLD_PX = 10;
+
 /**
  * Renders mobile character action buttons (SNS, Character Settings).
  * @param {object} app - The main application object.
@@ -157,20 +161,44 @@ export function renderCharacterListPage(app) {
   const container = document.getElementById("character-list-page-container");
   if (!container) return;
 
+  const isEditMode = app.state.mobileEditModeCharacterId !== null;
+
+  let headerHTML = "";
+  if (isEditMode) {
+    const character = app.state.characters.find(c => c.id === app.state.mobileEditModeCharacterId);
+    headerHTML = `
+      <header id="mobile-edit-header" class="px-6 py-4 sticky top-0 bg-gray-950 z-20 animate-fade-in">
+          <div class="flex items-center justify-between">
+              <button id="cancel-edit-mode-btn" class="p-3 rounded-full hover:bg-gray-700 transition-colors">
+                  <i data-lucide="x" class="w-6 h-6 text-gray-100"></i>
+              </button>
+              <h1 class="text-xl text-white truncate">${t("characterModal.editModeTitle", { name: character?.name || "" })}</h1>
+              <button id="edit-character-btn" class="p-3 rounded-full hover:bg-gray-700 transition-colors">
+                  <i data-lucide="pencil" class="w-6 h-6 text-gray-100"></i>
+              </button>
+          </div>
+      </header>
+    `;
+  } else {
+    headerHTML = `
+      <header class="px-6 py-4 sticky top-0 bg-gray-950 z-10">
+          <div class="flex items-center justify-between">
+              <h1 class="text-3xl text-white">${t("sidebar.title")}</h1>
+              <div class="flex items-center gap-2">
+                  <button id="toggle-mobile-search-btn" class="p-3 rounded-full hover:bg-gray-700 transition-colors">
+                      <i data-lucide="search" class="w-6 h-6 text-gray-100"></i>
+                  </button>
+                  <button id="open-settings-modal-mobile" class="p-3 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
+                      <i data-lucide="settings" class="w-6 h-6 text-gray-100"></i>
+                  </button>
+              </div>
+          </div>
+      </header>
+    `;
+  }
+
   container.innerHTML = `
-    <header class="px-6 py-4  sticky top-0 bg-gray-950 z-10">
-        <div class="flex items-center justify-between">
-            <h1 class="text-3xl text-white">${t("sidebar.title")}</h1>
-            <div class="flex items-center gap-2">
-                <button id="toggle-mobile-search-btn" class="p-3 rounded-full hover:bg-gray-700 transition-colors">
-                    <i data-lucide="search" class="w-6 h-6 text-gray-100"></i>
-                </button>
-                <button id="open-settings-modal-mobile" class="p-3 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
-                    <i data-lucide="settings" class="w-6 h-6 text-gray-100"></i>
-                </button>
-            </div>
-        </div>
-    </header>
+    ${headerHTML}
     <div class="flex-1 overflow-y-auto p-4 bg-gray-900 rounded-t-[3rem]" style="scroll-behavior: smooth;">
         <div id="character-list-items" class="character-list space-y-4">
             <!-- Character items will be rendered here by renderCharacterList -->
@@ -200,13 +228,112 @@ export function renderCharacterListPage(app) {
   const listContainer = container.querySelector("#character-list-items");
   renderCharacterList(app, listContainer);
 
-  listContainer.addEventListener("click", (e) => {
-    const characterItem = e.target.closest(".character-list-item");
-    if (characterItem) {
-      const characterId = characterItem.dataset.characterId;
-      if (characterId) {
-        app.handleCharacterSelect(characterId);
-      }
+  let longPressTimer;
+  let touchStartX, touchStartY;
+  let longPressFired = false;
+  let isTouching = false; // Flag to distinguish touch from mouse events
+
+  function handleLongPress(item, e) {
+    longPressTimer = null;
+    longPressFired = true;
+
+    const characterId = Number(item.dataset.characterId);
+    
+    const rect = item.getBoundingClientRect();
+    const ripple = document.createElement("span");
+    ripple.className = "ripple";
+    item.appendChild(ripple);
+
+    const point = e.touches ? e.touches[0] : e;
+    ripple.style.left = `${point.clientX - rect.left}px`;
+    ripple.style.top = `${point.clientY - rect.top}px`;
+
+    setTimeout(() => {
+        ripple.remove();
+        app.openCharacterEditMode(characterId);
+    }, RIPPLE_ANIMATION_DURATION_MS);
+  }
+
+  function handlePressStart(e, isTouchEvent) {
+    const item = e.target.closest(".character-list-item");
+    if (!item) return;
+
+    if (app.state.mobileEditModeCharacterId !== null) return;
+
+    longPressFired = false;
+    const point = isTouchEvent ? e.touches[0] : e;
+    touchStartX = point.clientX;
+    touchStartY = point.clientY;
+    
+    longPressTimer = setTimeout(() => handleLongPress(item, e), LONG_PRESS_DURATION_MS);
+  }
+
+  function handlePressEnd() {
+    clearTimeout(longPressTimer);
+  }
+
+  function handlePressMove(e, isTouchEvent) {
+    if (!longPressTimer) return;
+    const point = isTouchEvent ? e.touches[0] : e;
+    if (Math.abs(point.clientX - touchStartX) > TOUCH_MOVE_THRESHOLD_PX || Math.abs(point.clientY - touchStartY) > TOUCH_MOVE_THRESHOLD_PX) {
+      clearTimeout(longPressTimer);
     }
+  }
+
+  listContainer.addEventListener("click", (e) => {
+    const item = e.target.closest(".character-list-item");
+    if (!item) return;
+
+    const characterId = Number(item.dataset.characterId);
+
+    if (longPressFired || app.state.mobileEditModeCharacterId !== null) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (longPressFired) {
+        longPressFired = false;
+      }
+      return;
+    }
+    app.handleCharacterSelect(characterId, e);
   });
+
+  listContainer.addEventListener("contextmenu", (e) => {
+    const item = e.target.closest(".character-list-item");
+    if (!item) return;
+
+    e.preventDefault();
+
+    // If triggered by touch, let the touch event handlers manage the long press.
+    // This prevents the context menu from interfering with the ripple animation.
+    if (isTouching) {
+      return;
+    }
+
+    // For desktop right-click, trigger edit mode immediately.
+    const characterId = Number(item.dataset.characterId);
+    app.openCharacterEditMode(characterId);
+  });
+
+  // Touch events
+  listContainer.addEventListener("touchstart", (e) => {
+    isTouching = true;
+    handlePressStart(e, true);
+  }, { passive: true });
+  const onTouchEnd = () => {
+    isTouching = false;
+    handlePressEnd();
+  };
+  listContainer.addEventListener("touchend", onTouchEnd);
+  listContainer.addEventListener("touchcancel", onTouchEnd);
+  listContainer.addEventListener("touchmove", (e) => handlePressMove(e, true));
+
+  // Mouse events
+  listContainer.addEventListener("mousedown", (e) => {
+    // Ignore mousedown if a touch is in progress
+    if (isTouching) return;
+    handlePressStart(e, false);
+  });
+  listContainer.addEventListener("mouseup", handlePressEnd);
+  listContainer.addEventListener("mouseleave", handlePressEnd);
+  listContainer.addEventListener("mousemove", (e) => handlePressMove(e, false));
 }

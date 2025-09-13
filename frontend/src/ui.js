@@ -40,6 +40,9 @@ import { renderStickerProgressModal } from "./components/StickerProgressModal.js
 import { renderImageResultModal } from "./components/ImageResultModal.js";
 import { renderImageZoomModal } from "./components/ImageZoomModal.js";
 
+const MODAL_ANIMATION_INITIAL_SCALE = 0.2;
+const MODAL_ANIMATION_DURATION_MS = 350;
+
 export function adjustMessageContainerPadding() {
   const messagesContainer = document.getElementById("messages-container");
   const inputAreaWrapper = document.getElementById("input-area-wrapper");
@@ -58,7 +61,8 @@ async function renderModals(app) {
 
   // Render main modals
   let mainModalHtml = "";
-  if (app.state.showSettingsModal) mainModalHtml += renderDesktopSettingsModal(app);
+  if (app.state.showSettingsModal)
+    mainModalHtml += renderDesktopSettingsModal(app);
   if (app.state.showCharacterModal) mainModalHtml += renderCharacterModal(app);
   if (app.state.showPromptModal) mainModalHtml += await renderPromptModal(app);
   if (app.state.showCreateGroupChatModal)
@@ -67,7 +71,8 @@ async function renderModals(app) {
     mainModalHtml += renderCreateOpenChatModal(app);
   if (app.state.showEditGroupChatModal)
     mainModalHtml += renderEditGroupChatModal(app);
-  if (app.state.showDebugLogsModal) mainModalHtml += renderDebugLogsModal(app.state);
+  if (app.state.showDebugLogsModal)
+    mainModalHtml += renderDebugLogsModal(app.state);
   if (app.state.showMobileSearch) mainModalHtml += renderSearchModal(app);
   if (app.state.modal.isOpen && app.state.modal.type === "chatSelection") {
     mainModalHtml += renderChatSelectionModal(app);
@@ -126,12 +131,12 @@ async function renderModals(app) {
 }
 
 function renderConfirmationModalContainer(app) {
-    const container = document.getElementById("confirmation-modal-container");
-    let html = "";
-    if (app.state.modal.isOpen && app.state.modal.type === "confirmation") {
-        html += renderConfirmationModal(app);
-    }
-    container.innerHTML = html;
+  const container = document.getElementById("confirmation-modal-container");
+  let html = "";
+  if (app.state.modal.isOpen && app.state.modal.type === "confirmation") {
+    html += renderConfirmationModal(app);
+  }
+  container.innerHTML = html;
 }
 
 function updateSnapshotList(app) {
@@ -270,7 +275,8 @@ export async function render(app) {
         const isListAlreadyRendered = !!listContainer.querySelector("header");
         if (
           !isListAlreadyRendered ||
-          oldState.showFabMenu !== newState.showFabMenu
+          oldState.showFabMenu !== newState.showFabMenu ||
+          oldState.mobileEditModeCharacterId !== newState.mobileEditModeCharacterId
         ) {
           renderCharacterListPage(app);
         } else {
@@ -367,7 +373,10 @@ export async function render(app) {
       characterList.scrollTop = newState.createGroupChatScrollTop || 0;
       // Remove existing listener to prevent duplicates
       if (characterList._scrollListener) {
-        characterList.removeEventListener("scroll", characterList._scrollListener);
+        characterList.removeEventListener(
+          "scroll",
+          characterList._scrollListener,
+        );
       }
       const scrollListener = (e) => {
         app.setState({ createGroupChatScrollTop: e.target.scrollTop });
@@ -377,6 +386,39 @@ export async function render(app) {
     }
   }
 
+  // Animate character modal opening
+  if (newState.showCharacterModal && newState.modalOpeningEvent) {
+    const event = newState.modalOpeningEvent;
+    // Use requestAnimationFrame to ensure the element is in the DOM before animating
+    requestAnimationFrame(() => {
+        const modalBackdrop = document.getElementById("character-modal-backdrop");
+        const modalPanel = modalBackdrop?.querySelector("#character-modal-panel");
+
+        if (modalPanel) {
+            const rect = modalPanel.getBoundingClientRect();
+            const initialScale = MODAL_ANIMATION_INITIAL_SCALE;
+            const modalCenterX = rect.left + rect.width / 2;
+            const modalCenterY = rect.top + rect.height / 2;
+            const initialX = event.clientX - modalCenterX;
+            const initialY = event.clientY - modalCenterY;
+
+            modalPanel.style.opacity = 0; // prevent flash
+
+            modalPanel.animate([
+                { transform: `translate(${initialX}px, ${initialY}px) scale(${initialScale})`, opacity: 0 },
+                { transform: 'translate(0, 0) scale(1)', opacity: 1 }
+            ], {
+                duration: MODAL_ANIMATION_DURATION_MS,
+                easing: 'cubic-bezier(0.215, 0.610, 0.355, 1)',
+                fill: 'forwards'
+            });
+        }
+    });
+
+    // Clean up the event so it doesn't fire again
+    app.setState({ modalOpeningEvent: null });
+  }
+
   lucide.createIcons();
   setupConditionalBlur();
 }
@@ -384,61 +426,65 @@ export async function render(app) {
 // --- RENDER HELPER FUNCTIONS ---
 
 function shouldUpdateCharacterList(oldState, newState) {
-  return (
-    oldState.selectedChatId !== newState.selectedChatId ||
-    oldState.showFabMenu !== newState.showFabMenu ||
-    oldState.showMobileSearch !== newState.showMobileSearch ||
-    oldState.searchQuery !== newState.searchQuery ||
+  const conditions = [
+    oldState.mobileEditModeCharacterId !== newState.mobileEditModeCharacterId,
+    oldState.selectedChatId !== newState.selectedChatId,
+    oldState.showFabMenu !== newState.showFabMenu,
+    oldState.showMobileSearch !== newState.showMobileSearch,
+    oldState.searchQuery !== newState.searchQuery,
     JSON.stringify(oldState.characters) !==
-      JSON.stringify(newState.characters) ||
+      JSON.stringify(newState.characters),
     JSON.stringify(oldState.unreadCounts) !==
-      JSON.stringify(newState.unreadCounts) ||
-    JSON.stringify(oldState.messages) !== JSON.stringify(newState.messages)
-  );
+      JSON.stringify(newState.unreadCounts),
+    JSON.stringify(oldState.messages) !== JSON.stringify(newState.messages),
+  ];
+  return conditions.some(condition => condition);
 }
 
 function shouldUpdateSidebar(oldState, newState) {
   // This function checks if any state related to the sidebar has changed
-  return (
-    oldState.sidebarCollapsed !== newState.sidebarCollapsed ||
-    oldState.searchQuery !== newState.searchQuery ||
+  const conditions = [
+    oldState.sidebarCollapsed !== newState.sidebarCollapsed,
+    oldState.searchQuery !== newState.searchQuery,
     JSON.stringify(Array.from(oldState.expandedCharacterIds || [])) !==
-      JSON.stringify(Array.from(newState.expandedCharacterIds || [])) ||
-    oldState.editingChatRoomId !== newState.editingChatRoomId ||
+      JSON.stringify(Array.from(newState.expandedCharacterIds || [])),
+    oldState.editingChatRoomId !== newState.editingChatRoomId,
     JSON.stringify(oldState.characters) !==
-      JSON.stringify(newState.characters) ||
-    oldState.selectedChatId !== newState.selectedChatId ||
+      JSON.stringify(newState.characters),
+    oldState.selectedChatId !== newState.selectedChatId,
     JSON.stringify(oldState.unreadCounts) !==
-      JSON.stringify(newState.unreadCounts) ||
-    JSON.stringify(oldState.messages) !== JSON.stringify(newState.messages) ||
-    JSON.stringify(oldState.chatRooms) !== JSON.stringify(newState.chatRooms) ||
+      JSON.stringify(newState.unreadCounts),
+    JSON.stringify(oldState.messages) !== JSON.stringify(newState.messages),
+    JSON.stringify(oldState.chatRooms) !== JSON.stringify(newState.chatRooms),
     JSON.stringify(oldState.groupChats) !==
-      JSON.stringify(newState.groupChats) ||
-    JSON.stringify(oldState.openChats) !== JSON.stringify(newState.openChats)
-  );
+      JSON.stringify(newState.groupChats),
+    JSON.stringify(oldState.openChats) !== JSON.stringify(newState.openChats),
+  ];
+  return conditions.some(condition => condition);
 }
 
 function shouldUpdateMainChat(oldState, newState) {
   // This function checks if any state related to the main chat has changed
-  return (
-    oldState.selectedChatId !== newState.selectedChatId ||
-    oldState.editingMessageId !== newState.editingMessageId ||
-    JSON.stringify(oldState.messages) !== JSON.stringify(newState.messages) ||
-    oldState.typingCharacterId !== newState.typingCharacterId ||
-    oldState.isWaitingForResponse !== newState.isWaitingForResponse ||
-    oldState.imageToSend !== newState.imageToSend ||
-    oldState.showUserStickerPanel !== newState.showUserStickerPanel ||
-    oldState.showInputOptions !== newState.showInputOptions ||
-    oldState.stickerToSend !== newState.stickerToSend ||
+  const conditions = [
+    oldState.selectedChatId !== newState.selectedChatId,
+    oldState.editingMessageId !== newState.editingMessageId,
+    JSON.stringify(oldState.messages) !== JSON.stringify(newState.messages),
+    oldState.typingCharacterId !== newState.typingCharacterId,
+    oldState.isWaitingForResponse !== newState.isWaitingForResponse,
+    oldState.imageToSend !== newState.imageToSend,
+    oldState.showUserStickerPanel !== newState.showUserStickerPanel,
+    oldState.showInputOptions !== newState.showInputOptions,
+    oldState.stickerToSend !== newState.stickerToSend,
     JSON.stringify(oldState.userStickers) !==
-      JSON.stringify(newState.userStickers) ||
-    JSON.stringify(Array.from(oldState.expandedStickers || new Set()).sort()) !==
-      JSON.stringify(Array.from(newState.expandedStickers || new Set()).sort()) ||
+      JSON.stringify(newState.userStickers),
+    JSON.stringify([...oldState.expandedStickers]) !==
+      JSON.stringify([...newState.expandedStickers]),
     // Group/open chat related state changes
     JSON.stringify(oldState.groupChats) !==
-      JSON.stringify(newState.groupChats) ||
-    JSON.stringify(oldState.openChats) !== JSON.stringify(newState.openChats)
-  );
+      JSON.stringify(newState.groupChats),
+    JSON.stringify(oldState.openChats) !== JSON.stringify(newState.openChats),
+  ];
+  return conditions.some(condition => condition);
 }
 
 function shouldUpdateModals(oldState, newState) {
@@ -447,89 +493,88 @@ function shouldUpdateModals(oldState, newState) {
   // If the settings modal is open, we don't re-render it just for settings changes.
   // This prevents the modal from resetting while the user is typing in input fields.
   if (newState.showSettingsModal && oldState.showSettingsModal) {
-    // We need to check for specific state changes that require a re-render
-    // even when the settings modal is open.
-    
     // If Character Defaults panel is active, ignore userName and userDescription changes
     const isCharacterDefaultsActive = newState.ui?.desktopSettings?.activePanel === 'character-defaults';
     
-    let shouldUpdate = (
-      JSON.stringify(oldState.settingsSnapshots) !==
-        JSON.stringify(newState.settingsSnapshots) ||
-      oldState.settings.model !== newState.settings.model ||
-      oldState.showPromptModal !== newState.showPromptModal ||
-      JSON.stringify(oldState.openSettingsSections) !==
-        JSON.stringify(newState.openSettingsSections) ||
-      oldState.enableDebugLogs !== newState.enableDebugLogs ||
-      JSON.stringify(oldState.debugLogs) !==
-        JSON.stringify(newState.debugLogs) ||
-      // Detect active panel change in desktop settings UI
-      oldState.ui?.desktopSettings?.activePanel !==
-        newState.ui?.desktopSettings?.activePanel ||
-      // Detect settings UI mode change
-      oldState.ui?.settingsUIMode !== newState.ui?.settingsUIMode
-    );
+    const conditions = [
+        JSON.stringify(oldState.settingsSnapshots) !==
+          JSON.stringify(newState.settingsSnapshots),
+        oldState.settings.model !== newState.settings.model,
+        oldState.showPromptModal !== newState.showPromptModal,
+        JSON.stringify(oldState.openSettingsSections) !==
+          JSON.stringify(newState.openSettingsSections),
+        oldState.enableDebugLogs !== newState.enableDebugLogs,
+        JSON.stringify(oldState.debugLogs) !==
+          JSON.stringify(newState.debugLogs),
+        // Detect active panel change in desktop settings UI
+        oldState.ui?.desktopSettings?.activePanel !==
+          newState.ui?.desktopSettings?.activePanel,
+        // Detect settings UI mode change
+        oldState.ui?.settingsUIMode !== newState.ui?.settingsUIMode
+    ];
     
     // If Character Defaults panel is NOT active, also check for userName/userDescription changes
     if (!isCharacterDefaultsActive) {
-      shouldUpdate = shouldUpdate || 
-        oldState.settings.userName !== newState.settings.userName ||
-        oldState.settings.userDescription !== newState.settings.userDescription;
+      conditions.push(
+        oldState.userName !== newState.userName,
+        oldState.userDescription !== newState.userDescription
+      );
     }
     
-    return shouldUpdate;
+    return conditions.some(condition => condition);
   }
 
-  return (
-    JSON.stringify(oldState.modal) !== JSON.stringify(newState.modal) ||
-    oldState.showSettingsModal !== newState.showSettingsModal ||
-    oldState.showCharacterModal !== newState.showCharacterModal ||
-    oldState.showMobileSearch !== newState.showMobileSearch ||
-    oldState.showPromptModal !== newState.showPromptModal ||
-    oldState.showCreateGroupChatModal !== newState.showCreateGroupChatModal ||
-    oldState.showCreateOpenChatModal !== newState.showCreateOpenChatModal ||
-    oldState.showEditGroupChatModal !== newState.showEditGroupChatModal ||
-    oldState.showDebugLogsModal !== newState.showDebugLogsModal ||
+  const conditions = [
+    JSON.stringify(oldState.modal) !== JSON.stringify(newState.modal),
+    oldState.showSettingsModal !== newState.showSettingsModal,
+    oldState.showCharacterModal !== newState.showCharacterModal,
+    oldState.showMobileSearch !== newState.showMobileSearch,
+    oldState.showPromptModal !== newState.showPromptModal,
+    oldState.showCreateGroupChatModal !== newState.showCreateGroupChatModal,
+    oldState.showCreateOpenChatModal !== newState.showCreateOpenChatModal,
+    oldState.showEditGroupChatModal !== newState.showEditGroupChatModal,
+    oldState.showDebugLogsModal !== newState.showDebugLogsModal,
     (newState.showCharacterModal &&
       JSON.stringify(oldState.editingCharacter) !==
-        JSON.stringify(newState.editingCharacter)) ||
+        JSON.stringify(newState.editingCharacter)),
     (newState.showPromptModal &&
       JSON.stringify(oldState.settings.prompts) !==
-        JSON.stringify(newState.settings.prompts)) ||
+        JSON.stringify(newState.settings.prompts)),
     (newState.showCreateGroupChatModal &&
       JSON.stringify(oldState.characters) !==
-        JSON.stringify(newState.characters)) ||
+        JSON.stringify(newState.characters)),
     (newState.showEditGroupChatModal &&
       JSON.stringify(oldState.editingGroupChat) !==
-        JSON.stringify(newState.editingGroupChat)) ||
+        JSON.stringify(newState.editingGroupChat)),
     (newState.showDebugLogsModal &&
       JSON.stringify(oldState.debugLogs) !==
-        JSON.stringify(newState.debugLogs)) ||
-    (newState.showMobileSearch && oldState.searchQuery !== newState.searchQuery) ||
+        JSON.stringify(newState.debugLogs)),
+    (newState.showMobileSearch && oldState.searchQuery !== newState.searchQuery),
     // SNS modal state changes
-    oldState.showSNSCharacterListModal !== newState.showSNSCharacterListModal ||
-    oldState.showSNSModal !== newState.showSNSModal ||
-    oldState.selectedSNSCharacter !== newState.selectedSNSCharacter ||
-    oldState.snsActiveTab !== newState.snsActiveTab ||
-    oldState.snsCharacterSearchTerm !== newState.snsCharacterSearchTerm ||
-    oldState.snsSecretMode !== newState.snsSecretMode ||
-    oldState.showSNSPostModal !== newState.showSNSPostModal ||
-    JSON.stringify(oldState.editingSNSPost) !== JSON.stringify(newState.editingSNSPost) ||
-    oldState.snsRefreshTrigger !== newState.snsRefreshTrigger ||
-    oldState.showStickerProgressModal !== newState.showStickerProgressModal ||
+    oldState.showSNSCharacterListModal !== newState.showSNSCharacterListModal,
+    oldState.showSNSModal !== newState.showSNSModal,
+    oldState.selectedSNSCharacter !== newState.selectedSNSCharacter,
+    oldState.snsActiveTab !== newState.snsActiveTab,
+    oldState.snsCharacterSearchTerm !== newState.snsCharacterSearchTerm,
+    oldState.snsSecretMode !== newState.snsSecretMode,
+    oldState.showSNSPostModal !== newState.showSNSPostModal,
+    JSON.stringify(oldState.editingSNSPost) !== JSON.stringify(newState.editingSNSPost),
+    oldState.snsRefreshTrigger !== newState.snsRefreshTrigger,
+    oldState.showStickerProgressModal !== newState.showStickerProgressModal,
     // ImageResultModal state changes
-    JSON.stringify(oldState.imageResultModal) !== JSON.stringify(newState.imageResultModal) ||
+    JSON.stringify(oldState.imageResultModal) !== JSON.stringify(newState.imageResultModal),
     // ImageZoomModal state changes
-    JSON.stringify(oldState.imageZoomModal) !== JSON.stringify(newState.imageZoomModal) ||
+    JSON.stringify(oldState.imageZoomModal) !== JSON.stringify(newState.imageZoomModal),
     // Character states change detection (for hypnosis UI real-time updates)
     (newState.showCharacterModal &&
       JSON.stringify(oldState.characterStates) !==
         JSON.stringify(newState.characterStates))
-  );
+  ];
+  return conditions.some(condition => condition);
 }
 
 function shouldUpdateConfirmationModal(oldState, newState) {
-    return JSON.stringify(oldState.modal) !== JSON.stringify(newState.modal);
+  return JSON.stringify(oldState.modal) !== JSON.stringify(newState.modal);
 }
 
 // --- New function for conditional blur ---

@@ -37,7 +37,7 @@ export function handleModalClick(e, app) {
 
   // Character Modal
   if (e.target.closest("#open-new-character-modal-mobile"))
-    app.openNewCharacterModal();
+    app.openNewCharacterModal(e);
 
   // Prompt Modal
   if (e.target.closest("#open-prompt-modal"))

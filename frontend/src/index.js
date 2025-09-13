@@ -43,6 +43,9 @@ import { snsMethods, handleSNSInput, handleSNSKeypress } from "./handlers/snsHan
 import { StickerManager } from "./services/stickerManager.js";
 import { renderImageResultModal } from "./components/ImageResultModal.js";
 
+const MODAL_FADE_OUT_DURATION_MS = 200;
+const HEADER_FADE_OUT_DURATION_MS = 300;
+
 // --- APP INITIALIZATION ---
 document.addEventListener("DOMContentLoaded", async () => {
   window.personaApp = new PersonaChatApp();
@@ -129,6 +132,9 @@ class PersonaChatApp {
       },
       showAiSettingsUI: false,
       showScaleSettingsUI: false,
+      // Mobile edit mode states (upstream)
+      mobileEditModeCharacterId: null,
+      modalOpeningEvent: null,
       // 🎯 SNS 시스템 상태
       // SNS related states (백업 구조)
       showSNSCharacterListModal: false,
@@ -1154,6 +1160,17 @@ class PersonaChatApp {
       ) {
         this.setState({ showMobileSearch: false, searchQuery: "" });
       }
+
+      // --- Handlers for Mobile Edit Mode ---
+      if (e.target.closest("#cancel-edit-mode-btn")) {
+        this._fadeOutHeaderAndCloseEditMode();
+      }
+      if (e.target.closest("#edit-character-btn")) {
+        if (this.state.mobileEditModeCharacterId) {
+          this.editCharacter(this.state.mobileEditModeCharacterId, e);
+          this._fadeOutHeaderAndCloseEditMode();
+        }
+      }
     });
 
     appElement.addEventListener("input", (e) => {
@@ -1363,13 +1380,17 @@ class PersonaChatApp {
     setTimeout(() => this.scrollToBottom(), 0);
   }
 
-  editCharacter(characterId) {
+  /**
+   * @param {string | number} characterId
+   * @param {Event | null} e
+   */
+  editCharacter(characterId, e = null) {
     const numericCharacterId = Number(characterId);
     const character = this.state.characters.find(
       (c) => c.id === numericCharacterId,
     );
     if (character) {
-      this.openEditCharacterModal(character);
+      this.openEditCharacterModal(character, e);
     }
   }
 
@@ -1627,12 +1648,12 @@ class PersonaChatApp {
         "audio/mp3",
       ];
       if (!allowedTypes.includes(file.type)) {
-        alert(t('modal.unsupportedFileType.message') + file.name);
+        alert(t("modal.unsupportedFileType.message") + file.name);
         continue;
       }
 
       if (file.size > 30 * 1024 * 1024) {
-        alert(t('modal.fileTooLarge.message') + file.name);
+        alert(t("modal.fileTooLarge.message") + file.name);
         continue;
       }
 
@@ -1683,42 +1704,49 @@ class PersonaChatApp {
     const modalState = { isOpen: true, type, ...data };
     await this.setState({ modal: modalState });
 
-    if (e && type === 'chatSelection') {
-        requestAnimationFrame(() => {
-            const modalBackdrop = document.querySelector('#chat-selection-modal-backdrop');
-            const modalContent = document.querySelector('#chat-selection-modal-backdrop [data-modal-content]');
-            
-            if (modalContent && modalBackdrop) {
-                // Animate backdrop
-                modalBackdrop.animate([
-                    { opacity: 0 },
-                    { opacity: 1 }
-                ], {
-                    duration: 450, // Match modal animation duration
-                    easing: 'ease-in-out',
-                    fill: 'forwards'
-                });
+    if (e && type === "chatSelection") {
+      requestAnimationFrame(() => {
+        const modalBackdrop = document.querySelector(
+          "#chat-selection-modal-backdrop",
+        );
+        const modalContent = document.querySelector(
+          "#chat-selection-modal-backdrop [data-modal-content]",
+        );
 
-                // Animate modal content
-                const rect = modalContent.getBoundingClientRect();
-                const initialScale = 0.1;
-                const modalCenterX = rect.left + rect.width / 2;
-                const modalCenterY = rect.top + rect.height / 2;
-                const initialX = e.clientX - modalCenterX;
-                const initialY = e.clientY - modalCenterY;
+        if (modalContent && modalBackdrop) {
+          // Animate backdrop
+          modalBackdrop.animate([{ opacity: 0 }, { opacity: 1 }], {
+            duration: 450, // Match modal animation duration
+            easing: "ease-in-out",
+            fill: "forwards",
+          });
 
-                modalContent.style.opacity = 0; // Prevent flash
+          // Animate modal content
+          const rect = modalContent.getBoundingClientRect();
+          const initialScale = 0.1;
+          const modalCenterX = rect.left + rect.width / 2;
+          const modalCenterY = rect.top + rect.height / 2;
+          const initialX = e.clientX - modalCenterX;
+          const initialY = e.clientY - modalCenterY;
 
-                modalContent.animate([
-                    { transform: `translate(${initialX}px, ${initialY}px) scale(${initialScale})`, opacity: 0 },
-                    { transform: 'translate(0, 0) scale(1)', opacity: 1 }
-                ], {
-                    duration: 450,
-                    easing: 'cubic-bezier(0.215, 0.610, 0.355, 1)',
-                    fill: 'forwards'
-                });
-            }
-        });
+          modalContent.style.opacity = 0; // Prevent flash
+
+          modalContent.animate(
+            [
+              {
+                transform: `translate(${initialX}px, ${initialY}px) scale(${initialScale})`,
+                opacity: 0,
+              },
+              { transform: "translate(0, 0) scale(1)", opacity: 1 },
+            ],
+            {
+              duration: 450,
+              easing: "cubic-bezier(0.215, 0.610, 0.355, 1)",
+              fill: "forwards",
+            },
+          );
+        }
+      });
     }
   }
 
@@ -1733,8 +1761,12 @@ class PersonaChatApp {
   }
 
   async closeChatSelectionModal() {
-    const modalBackdrop = document.querySelector('#chat-selection-modal-backdrop');
-    const modalContent = document.querySelector('#chat-selection-modal-backdrop [data-modal-content]');
+    const modalBackdrop = document.querySelector(
+      "#chat-selection-modal-backdrop",
+    );
+    const modalContent = document.querySelector(
+      "#chat-selection-modal-backdrop [data-modal-content]",
+    );
     const character = this.state.modal.character;
 
     if (!modalContent || !modalBackdrop || !character) {
@@ -1742,8 +1774,10 @@ class PersonaChatApp {
       return;
     }
 
-    const characterEl = document.querySelector(`.character-list-item[data-character-id="${character.id}"]`);
-    
+    const characterEl = document.querySelector(
+      `.character-list-item[data-character-id="${character.id}"]`,
+    );
+
     // If character element is not visible (e.g. scrolled out of view), just hide modal
     if (!characterEl) {
       this.hideModal();
@@ -1762,26 +1796,32 @@ class PersonaChatApp {
     const translateX = destX - startX;
     const translateY = destY - startY;
 
-    const backdropAnimation = modalBackdrop.animate([
-        { opacity: 1 },
-        { opacity: 0 }
-    ], {
+    const backdropAnimation = modalBackdrop.animate(
+      [{ opacity: 1 }, { opacity: 0 }],
+      {
         duration: 300, // Faster than open
-        easing: 'ease-in-out',
-        fill: 'forwards'
-    });
+        easing: "ease-in-out",
+        fill: "forwards",
+      },
+    );
 
-    const contentAnimation = modalContent.animate([
-        { transform: 'translate(0, 0) scale(1)', opacity: 1 },
-        { transform: `translate(${translateX}px, ${translateY}px) scale(0.1)`, opacity: 0 }
-    ], {
+    const contentAnimation = modalContent.animate(
+      [
+        { transform: "translate(0, 0) scale(1)", opacity: 1 },
+        {
+          transform: `translate(${translateX}px, ${translateY}px) scale(0.1)`,
+          opacity: 0,
+        },
+      ],
+      {
         duration: 300,
-        easing: 'cubic-bezier(0.550, 0.055, 0.675, 0.190)', // EaseInQuad
-        fill: 'forwards'
-    });
+        easing: "cubic-bezier(0.550, 0.055, 0.675, 0.190)", // EaseInQuad
+        fill: "forwards",
+      },
+    );
 
     await Promise.all([backdropAnimation.finished, contentAnimation.finished]);
-    
+
     this.hideModal();
   }
 
@@ -1798,31 +1838,95 @@ class PersonaChatApp {
     this.setState({ settings: { ...this.state.settings, model } });
   }
 
-  openNewCharacterModal() {
+  /**
+   * @param {Event | null} e
+   */
+  openNewCharacterModal(e = null) {
     this.setState({
       editingCharacter: { memories: [], proactiveEnabled: true },
       showCharacterModal: true,
       stickerSelectionMode: false,
       selectedStickerIndices: [],
+      modalOpeningEvent: e,
+    });
+
+    requestAnimationFrame(() => {
+      const modalBackdrop = document.getElementById("character-modal-backdrop");
+      if (modalBackdrop) {
+        modalBackdrop.classList.add("backdrop-blur-sm");
+      }
     });
   }
 
-  openEditCharacterModal(character) {
+  /**
+   * @param {object} character
+   * @param {Event | null} e
+   */
+  openEditCharacterModal(character, e = null) {
     this.setState({
       editingCharacter: { ...character, memories: character.memories || [] },
       showCharacterModal: true,
       stickerSelectionMode: false,
       selectedStickerIndices: [],
+      modalOpeningEvent: e,
+    });
+
+    requestAnimationFrame(() => {
+      const modalBackdrop = document.getElementById("character-modal-backdrop");
+      if (modalBackdrop) {
+        modalBackdrop.classList.add("backdrop-blur-sm");
+      }
     });
   }
 
   closeCharacterModal() {
-    this.setState({
-      showCharacterModal: false,
-      editingCharacter: null,
-      stickerSelectionMode: false,
-      selectedStickerIndices: [],
-    });
+    const modalBackdrop = document.getElementById("character-modal-backdrop");
+    if (modalBackdrop) {
+      modalBackdrop.classList.remove("backdrop-blur-sm");
+      const modalPanel = modalBackdrop.querySelector("#character-modal-panel");
+      if (modalPanel) {
+        modalPanel.classList.add("animate-modal-fade-out");
+      }
+      modalBackdrop.classList.add("animate-backdrop-fade-out");
+
+      setTimeout(() => {
+        this.setState({
+          showCharacterModal: false,
+          editingCharacter: null,
+          stickerSelectionMode: false,
+          selectedStickerIndices: [],
+        });
+      }, MODAL_FADE_OUT_DURATION_MS); // Match animation duration
+    } else {
+      // Fallback if modal not found
+      this.setState({
+        showCharacterModal: false,
+        editingCharacter: null,
+        stickerSelectionMode: false,
+        selectedStickerIndices: [],
+      });
+    }
+  }
+
+  openCharacterEditMode(characterId) {
+    this.setState({ mobileEditModeCharacterId: characterId });
+  }
+
+  closeCharacterEditMode() {
+    this.setState({ mobileEditModeCharacterId: null });
+  }
+
+  _fadeOutHeaderAndCloseEditMode() {
+    const header = document.getElementById("mobile-edit-header");
+    if (header) {
+        header.classList.remove("animate-fade-in");
+        header.classList.add("animate-fade-out");
+        setTimeout(() => {
+            this.closeCharacterEditMode();
+        }, HEADER_FADE_OUT_DURATION_MS);
+    } else {
+        this.closeCharacterEditMode();
+    }
   }
 
   handleAvatarChange(e, isCard = false) {
@@ -1858,7 +1962,10 @@ class PersonaChatApp {
       if (file.size > 30 * 1024 * 1024) {
         this.showInfoModal(
           t("ui.fileSizeExceeded"),
-          t("ui.fileSizeExceededMessage", { fileName: file.name, sizeLimit: "30MB" }),
+          t("ui.fileSizeExceededMessage", {
+            fileName: file.name,
+            sizeLimit: "30MB",
+          }),
         );
         continue;
       }
@@ -1914,7 +2021,10 @@ class PersonaChatApp {
         };
         newStickers.push(sticker);
       } catch (error) {
-        console.error(t("ui.stickerProcessingErrorConsole", { fileName: file.name }), error);
+        console.error(
+          t("ui.stickerProcessingErrorConsole", { fileName: file.name }),
+          error,
+        );
         this.showInfoModal(
           t("ui.stickerProcessingError"),
           t("ui.stickerProcessingErrorMessage", { fileName: file.name }),
@@ -6085,7 +6195,9 @@ class PersonaChatApp {
           setTimeout(() => {
             this.showInfoModal(
               t("modal.aiGenerationComplete.title"),
-              t("modal.aiGenerationComplete.message", { characterName: characterName }),
+              t("modal.aiGenerationComplete.message", {
+                characterName: characterName,
+              }),
             );
           }, 100);
         } else {
