@@ -3,7 +3,8 @@ import {
   renderMainChat,
   setupMainChatEventListeners,
 } from "./components/MainChat.js";
-import { renderDesktopSettingsModal } from "./components/DesktopSettingsModal.js";
+import { saveToBrowserStorage } from "./storage.js";
+import { renderSettingsUI, getCurrentSettingsUIMode } from "./components/SettingsRouter.js";
 import {
   renderMobileSettingsUI,
   renderAiSettingsPage, // Import the new function
@@ -11,7 +12,7 @@ import {
   setupMobileSettingsUIEventListeners,
 } from "./components/MobileSettingsUI.js";
 import { setupDesktopSettingsEventListeners } from "./components/DesktopSettingsUI.js";
-
+import { setupNAIHandlers } from "./handlers/naiHandlers.js";
 import { renderCharacterModal } from "./components/CharacterModal.js";
 import {
   renderPromptModal,
@@ -33,6 +34,10 @@ import {
   renderCharacterList,
 } from "./components/CharacterListPage.js";
 import { renderSearchModal } from "./components/SearchModal.js";
+import { renderSNSCharacterList } from "./components/SNSCharacterList.js";
+import { renderSNSFeed } from "./components/SNSFeed.js";
+import { renderSNSPostModal } from "./components/SNSPostModal.js";
+import { renderImageResultModal } from "./components/ImageResultModal.js";
 
 const MODAL_ANIMATION_INITIAL_SCALE = 0.2;
 const MODAL_ANIMATION_DURATION_MS = 350;
@@ -55,8 +60,7 @@ async function renderModals(app) {
 
   // Render main modals
   let mainModalHtml = "";
-  if (app.state.showSettingsModal)
-    mainModalHtml += renderDesktopSettingsModal(app);
+  if (app.state.showSettingsModal) mainModalHtml += renderSettingsUI(app);
   if (app.state.showCharacterModal) mainModalHtml += renderCharacterModal(app);
   if (app.state.showPromptModal) mainModalHtml += await renderPromptModal(app);
   if (app.state.showCreateGroupChatModal)
@@ -71,6 +75,11 @@ async function renderModals(app) {
   if (app.state.modal.isOpen && app.state.modal.type === "chatSelection") {
     mainModalHtml += renderChatSelectionModal(app);
   }
+  if (app.state.showSNSCharacterListModal) mainModalHtml += renderSNSCharacterList(app);
+  if (app.state.showSNSModal) mainModalHtml += renderSNSFeed(app);
+  if (app.state.showSNSPostModal) mainModalHtml += renderSNSPostModal(app);
+  if (app.state.imageResultModal && app.state.imageResultModal.isOpen) mainModalHtml += renderImageResultModal(app.state.imageResultModal);
+  
   if (container.innerHTML !== mainModalHtml) {
     container.innerHTML = mainModalHtml;
   }
@@ -86,13 +95,83 @@ async function renderModals(app) {
 
   // Setup event listeners for modals after DOM update
   if (app.state.showSettingsModal) {
-    setupDesktopSettingsEventListeners(app);
+    const uiMode = getCurrentSettingsUIMode(app);
+    if (uiMode === "desktop") {
+      // DOM이 완전히 업데이트된 후 이벤트 리스너 설정
+      requestAnimationFrame(() => {
+        setupDesktopSettingsEventListeners(app);
+        setupNAIHandlers(app);
+      });
+    } else {
+      // setupSettingsModalEventListeners(); // This function does not exist in HEAD or ltxy12/main
+      setupNAIHandlers(app);
+    }
   }
   if (app.state.showDebugLogsModal) {
     setupDebugLogsModalEventListeners();
   }
+  if (app.state.showCharacterModal) {
+    // CharacterModal이 렌더링된 후 최면 표시 값 업데이트 및 이벤트 리스너 설정
+    requestAnimationFrame(() => {
+      const characterId = app.state.editingCharacter?.id;
+      let characterState = app.state.characterStates[characterId];
+      // console.log('[최면] ui.js에서 CharacterModal 렌더링 후 호출:', { characterId, characterState });
+      
+      // 캐릭터 상태가 없으면 기본값으로 생성
+      if (characterId && !characterState) {
+        // console.warn('[최면] ui.js에서 characterState가 없음, 기본값 생성:', characterId);
+        
+        characterState = {
+          affection: 0.2,
+          intimacy: 0.2,
+          trust: 0.2,
+          romantic_interest: 0,
+          lastActivity: Date.now()
+        };
+        
+        // 새로운 캐릭터 상태를 저장
+        const newCharacterStates = { ...app.state.characterStates };
+        newCharacterStates[characterId] = characterState;
+        app.setState({ characterStates: newCharacterStates });
+        saveToBrowserStorage("personaChat_characterStates_v16", newCharacterStates);
+      }
+      
+      if (characterId && characterState && app.updateHypnosisDisplayValues) {
+        app.updateHypnosisDisplayValues(characterState);
+      }
+      
+      // 최면 슬라이더 이벤트 리스너 설정
+      const setupHypnosisSlider = (type) => {
+        const slider = document.getElementById(`hypnosis-${type}`);
+        const valueDisplay = document.getElementById(`hypnosis-${type}-value`);
+        
+        if (slider && valueDisplay) {
+          slider.addEventListener('input', (e) => {
+            const value = e.target.value;
+            valueDisplay.textContent = `${value}%`;
+            
+            if (app.updateHypnosisValue) {
+              app.updateHypnosisValue(characterId, type, parseInt(value));
+            }
+          });
+        }
+      };
+      
+      setupHypnosisSlider('affection');
+      setupHypnosisSlider('intimacy');
+      setupHypnosisSlider('trust');
+      setupHypnosisSlider('romantic_interest');
+    });
+  }
   if (app.state.showPromptModal) {
     setupPromptModalEventListeners(app);
+  }
+  // 이미지 결과 모달 이벤트 리스너 설정
+  if (app.state.imageResultModal && app.state.imageResultModal.isOpen) {
+    // DOM이 완전히 업데이트된 후 이벤트 리스너 설정
+    requestAnimationFrame(() => {
+      app.setupImageResultModalEvents();
+    });
   }
 }
 
@@ -488,6 +567,17 @@ function shouldUpdateModals(oldState, newState) {
     oldState.showCreateOpenChatModal !== newState.showCreateOpenChatModal,
     oldState.showEditGroupChatModal !== newState.showEditGroupChatModal,
     oldState.showDebugLogsModal !== newState.showDebugLogsModal,
+    oldState.showSNSCharacterListModal !== newState.showSNSCharacterListModal,
+    oldState.showSNSModal !== newState.showSNSModal,
+    oldState.showSNSPostModal !== newState.showSNSPostModal,
+    oldState.selectedSNSCharacter !== newState.selectedSNSCharacter,
+    oldState.snsSecretMode !== newState.snsSecretMode,
+    oldState.snsActiveTab !== newState.snsActiveTab,
+    // 이미지 결과 모달 상태 변경 감지 (중요!)
+    JSON.stringify(oldState.imageResultModal) !== JSON.stringify(newState.imageResultModal),
+    // SNS 모달이 열려있을 때 characters 배열의 변경(글 작성/삭제)을 감지
+    (newState.showSNSModal &&
+      JSON.stringify(oldState.characters) !== JSON.stringify(newState.characters)),
     (newState.showCharacterModal &&
       JSON.stringify(oldState.editingCharacter) !==
         JSON.stringify(newState.editingCharacter)),

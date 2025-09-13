@@ -64,8 +64,18 @@ export function renderStickerGrid(app, stickers) {
                 <div class="text-xs text-gray-300 text-center truncate mt-1">${sticker.name}</div>
             `;
       } else {
+        // 디버깅: 스티커 렌더링 시 데이터 확인
+        if (!sticker.dataUrl || !sticker.dataUrl.startsWith('data:image/')) {
+          // console.warn('[CharacterModal] 잘못된 스티커 dataUrl:', {
+          //   name: sticker.name,
+          //   id: sticker.id,
+          //   hasDataUrl: !!sticker.dataUrl,
+          //   dataUrlPrefix: sticker.dataUrl?.substring(0, 50) + '...'
+          // });
+        }
+        
         content = `
-                <img src="${sticker.dataUrl}" alt="${sticker.name}" class="w-full h-16 object-cover rounded-lg">
+                <img src="${sticker.dataUrl}" alt="${sticker.name}" class="w-full h-16 object-contain rounded-lg" onerror="console.error('스티커 이미지 로드 실패:', '${sticker.name}', this.src.substring(0, 50));">
                 <div class="text-xs text-gray-300 text-center truncate mt-1">${sticker.name}</div>
             `;
       }
@@ -109,9 +119,11 @@ export function renderStickerGrid(app, stickers) {
 export function renderCharacterModal(app) {
   const { editingCharacter } = app.state;
   const isNew = !editingCharacter || !editingCharacter.id;
+  const currentCharacterState = editingCharacter ? app.getCharacterState(editingCharacter.id) : null;
   const char = {
     name: editingCharacter?.name || "",
     prompt: editingCharacter?.prompt || "",
+    appearance: editingCharacter?.appearance || "",
     avatar: editingCharacter?.avatar || null,
     responseTime: editingCharacter?.responseTime ?? 5,
     thinkingTime: editingCharacter?.thinkingTime ?? 5,
@@ -119,6 +131,21 @@ export function renderCharacterModal(app) {
     tone: editingCharacter?.tone ?? 5,
     memories: editingCharacter?.memories || [],
     proactiveEnabled: editingCharacter?.proactiveEnabled !== false,
+    naiSettings: editingCharacter?.naiSettings || {},
+    hypnosis: {
+      ...editingCharacter?.hypnosis || {
+        enabled: false,
+        affection: null,
+        intimacy: null,
+        trust: null,
+        romantic_interest: null,
+        force_love_unlock: false,
+        sns_full_access: false,
+        secret_account_access: false,
+        sns_edit_access: false,
+        affection_override: false
+      }
+    }
   };
 
   return `
@@ -130,7 +157,14 @@ export function renderCharacterModal(app) {
                         ? t("characterModal.addContact")
                         : t("characterModal.editContact")
                     }</h3>
-                    <button id="close-character-modal" data-action="close-character-modal" class="p-3 md:p-1 hover:bg-gray-700 rounded-full"><i data-lucide="x" class="w-7 h-7 md:w-5 md:h-5"></i></button>
+                    <div class="flex items-center gap-2">
+                        ${!isNew ? `
+                            <button id="character-sns-btn" class="p-2 hover:bg-gray-700 rounded-full transition-colors z-20" title="${t('sns.viewSNS', { name: char.name })}">
+                                <i data-lucide="user" class="w-5 h-5 text-gray-300 pointer-events-none"></i>
+                            </button>
+                        ` : ''}
+                        <button id="close-character-modal" data-action="close-character-modal" class="p-1 hover:bg-gray-700 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
+                    </div>
                 </div>
                 <div class="p-6 space-y-6 overflow-y-auto">
                     <div class="flex items-center space-x-4">
@@ -188,6 +222,37 @@ export function renderCharacterModal(app) {
                           char.prompt
                         }</textarea>
                     </div>
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="text-sm font-medium text-gray-300">외형 설명 (NAI 스티커 생성용)</label>
+                            <div class="text-xs text-gray-400 bg-purple-900/20 px-2 py-1 rounded">
+                                <i data-lucide="image" class="w-3 h-3 inline mr-1"></i>스티커 생성
+                            </div>
+                        </div>
+                        <textarea id="character-appearance" placeholder="예: young Korean woman, long black hair, school uniform, bright smile, casual modern clothes..." class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-purple-500/50 text-sm" rows="3">${
+                          char.appearance
+                        }</textarea>
+                        <div class="mt-2 flex justify-end">
+                            <button id="test-appearance-prompt" class="px-3 py-1 text-xs bg-purple-600 hover:bg-purple-700 text-white rounded-lg flex items-center gap-1">
+                                <i data-lucide="test-tube" class="w-3 h-3 pointer-events-none"></i>
+                                외모 프롬프트 테스트
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="text-sm font-medium text-gray-300">품질 향상 프롬프트 (NAI 스티커 품질 개선용)</label>
+                            <div class="text-xs text-gray-400 bg-purple-900/20 px-2 py-1 rounded">
+                                <i data-lucide="sparkles" class="w-3 h-3 inline mr-1"></i>품질 개선
+                            </div>
+                        </div>
+                        <textarea id="character-nai-quality-prompt" placeholder="masterpiece, best quality, high resolution, detailed..." class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-purple-500/50 text-sm" rows="2">${
+                          char.naiSettings?.qualityPrompt || "masterpiece, best quality, high resolution, detailed"
+                        }</textarea>
+                        <div class="text-xs text-gray-400 mt-1">
+                            NAI 스티커 생성 시 이미지 품질을 향상시키는 키워드들 (영문 권장)
+                        </div>
+                    </div>
                     
                     ${
                       app.state.settings.proactiveChatEnabled
@@ -234,6 +299,10 @@ export function renderCharacterModal(app) {
                                                         <span class="text-xs">${t(
                                                           "characterModal.addSticker",
                                                         )}</span>
+                                                    </button>
+                                                    <button id="generate-character-stickers" class="py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm flex flex-col items-center justify-center gap-1" ${!isNew ? '' : 'disabled'}>
+                                                        <i data-lucide="image" class="w-4 h-4 pointer-events-none"></i> 
+                                                        <span class="text-xs">기본 감정 생성</span>
                                                     </button>
                                                     <input type="file" accept="image/jpeg,image/jpg,image/gif,image/png,image/bmp,image/webp,video/webm,video/mp4,audio/mpeg,audio/mp3" id="sticker-input" class="hidden" multiple />
                                                 </div>
@@ -320,6 +389,34 @@ export function renderCharacterModal(app) {
                                                   editingCharacter?.stickers ||
                                                     [],
                                                 )}
+                                            </div>
+                                            
+                                            <!-- NAI 스티커 생성 설정 -->
+                                        </div>
+                                    </div>
+                                </details>
+                                <details class="group border-t border-gray-700 pt-2">
+                                    <summary class="flex items-center justify-between cursor-pointer list-none py-2">
+                                       <h4 class="text-sm font-medium text-gray-300">NAI 스티커 자동 생성 설정</h4>
+                                       <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"></i>
+                                    </summary>
+                                    <div class="content-wrapper">
+                                        <div class="content-inner pt-4 space-y-4">
+                                            <!-- 자동 생성 토글 -->
+                                            <div class="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg border border-gray-700">
+                                                <div>
+                                                    <label class="text-sm font-medium text-gray-300">자동 생성</label>
+                                                    <p class="text-xs text-gray-400 mt-1">대화 중 AI가 감정을 감지하면 자동으로 스티커 생성</p>
+                                                </div>
+                                                <label class="relative inline-flex items-center cursor-pointer">
+                                                    <input 
+                                                        id="character-nai-enabled" 
+                                                        type="checkbox" 
+                                                        ${char.naiSettings?.autoGenerate ? "checked" : ""} 
+                                                        class="sr-only peer"
+                                                    >
+                                                    <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-500/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                                </label>
                                             </div>
                                         </div>
                                     </div>
@@ -418,6 +515,128 @@ export function renderCharacterModal(app) {
                             </div>
                         </div>
                     </details>
+                    
+                    ${!isNew ? `
+                        <details class="group border-t border-gray-700 pt-4">
+                            <summary class="flex items-center justify-between cursor-pointer list-none py-2">
+                                <h4 class="text-sm font-medium text-red-400">${t('hypnosis.hypnosisControl')}</h4>
+                                <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"></i>
+                            </summary>
+                            <div class="content-wrapper">
+                                <div class="content-inner pt-4 space-y-4">
+                                    <div class="bg-red-900/20 border border-red-700/30 rounded-lg p-3 text-xs text-red-300">
+                                        <div class="flex items-center space-x-2 mb-2">
+                                            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                                            <span class="font-medium">${t('hypnosis.dangerousFeature')}</span>
+                                        </div>
+                                        <p>${t('hypnosis.settingsWarning')}</p>
+                                    </div>
+
+                                    <div class="flex items-center justify-between">
+                                        <label class="text-sm font-medium text-gray-300">${t('hypnosis.enabled')}</label>
+                                        <input type="checkbox" id="hypnosis-enabled" ${char.hypnosis?.enabled ? 'checked' : ''} 
+                                               class="bg-gray-700 border-gray-600 text-red-600 focus:ring-red-500 rounded"
+                                               onchange="const controls = document.getElementById('hypnosis-controls'); if (controls) { if (this.checked) { controls.classList.remove('opacity-50', 'pointer-events-none'); } else { controls.classList.add('opacity-50', 'pointer-events-none'); } }">
+                                    </div>
+
+                                    <div id="hypnosis-controls" class="${char.hypnosis?.enabled ? '' : 'opacity-50 pointer-events-none'} space-y-4">
+                                        
+                                        <!-- SNS 편집 권한 -->
+                                        <div class="flex items-center justify-between p-3 bg-red-900/20 rounded-lg border border-red-800/30">
+                                            <div class="flex flex-col">
+                                                <label class="text-sm font-medium text-gray-300">SNS 내용 편집 권한</label>
+                                                <p class="text-xs text-gray-400">SNS 글 수정/삭제 기능 활성화</p>
+                                            </div>
+                                            <input type="checkbox" id="hypnosis-sns-edit" ${char.hypnosis?.sns_edit_access ? 'checked' : ''} 
+                                                   class="accent-red-500">
+                                        </div>
+                                        
+                                        <!-- 호감도 조작 활성화 토글 -->
+                                        <div class="flex items-center justify-between p-3 bg-red-900/20 rounded-lg border border-red-800/30">
+                                            <div class="flex flex-col">
+                                                <label class="text-sm font-medium text-gray-300">호감도 조작 활성화</label>
+                                                <p class="text-xs text-gray-400">호감도 수치를 강제로 조작합니다</p>
+                                            </div>
+                                            <input type="checkbox" id="hypnosis-affection-override" ${char.hypnosis?.affection_override ? 'checked' : ''} 
+                                                   class="accent-red-500"
+                                                   onchange="const controls = document.getElementById('affection-controls'); if (controls) { if (this.checked) { controls.classList.remove('opacity-50', 'pointer-events-none'); } else { controls.classList.add('opacity-50', 'pointer-events-none'); } }">
+                                        </div>
+
+                                        <!-- 호감도 조작 컨트롤 -->
+                                        <div id="affection-controls" class="${char.hypnosis?.affection_override ? '' : 'opacity-50 pointer-events-none'} space-y-4 p-3 bg-gray-800/50 rounded-lg border border-gray-700">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-300 mb-2">${t('hypnosis.affectionControl')}</label>
+                                            <input type="range" id="hypnosis-affection" min="0" max="100" 
+                                                   value="${char.hypnosis?.enabled && char.hypnosis?.affection !== null ? Math.round(char.hypnosis.affection * 100) : (currentCharacterState?.affection !== undefined ? Math.round(currentCharacterState.affection * 100) : 50)}"
+                                                   class="w-full accent-red-500">
+                                            <div class="flex justify-between text-xs text-gray-400 mt-1">
+                                                <span>0%</span>
+                                                <span id="hypnosis-affection-value">${char.hypnosis?.enabled && char.hypnosis?.affection !== null ? Math.round(char.hypnosis.affection * 100) : (currentCharacterState?.affection !== undefined ? Math.round(currentCharacterState.affection * 100) : 50)}%</span>
+                                                <span>100%</span>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-300 mb-2">${t('hypnosis.intimacyControl')}</label>
+                                            <input type="range" id="hypnosis-intimacy" min="0" max="100" 
+                                                   value="${char.hypnosis?.enabled && char.hypnosis?.intimacy !== null ? Math.round(char.hypnosis.intimacy * 100) : (currentCharacterState?.intimacy !== undefined ? Math.round(currentCharacterState.intimacy * 100) : 50)}"
+                                                   class="w-full accent-red-500">
+                                            <div class="flex justify-between text-xs text-gray-400 mt-1">
+                                                <span>0%</span>
+                                                <span id="hypnosis-intimacy-value">${char.hypnosis?.enabled && char.hypnosis?.intimacy !== null ? Math.round(char.hypnosis.intimacy * 100) : (currentCharacterState?.intimacy !== undefined ? Math.round(currentCharacterState.intimacy * 100) : 50)}%</span>
+                                                <span>100%</span>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-300 mb-2">${t('hypnosis.trustControl')}</label>
+                                            <input type="range" id="hypnosis-trust" min="0" max="100" 
+                                                   value="${char.hypnosis?.enabled && char.hypnosis?.trust !== null ? Math.round(char.hypnosis.trust * 100) : (currentCharacterState?.trust !== undefined ? Math.round(currentCharacterState.trust * 100) : 50)}"
+                                                   class="w-full accent-red-500">
+                                            <div class="flex justify-between text-xs text-gray-400 mt-1">
+                                                <span>0%</span>
+                                                <span id="hypnosis-trust-value">${char.hypnosis?.enabled && char.hypnosis?.trust !== null ? Math.round(char.hypnosis.trust * 100) : (currentCharacterState?.trust !== undefined ? Math.round(currentCharacterState.trust * 100) : 50)}%</span>
+                                                <span>100%</span>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-300 mb-2">${t('hypnosis.romanceControl')}</label>
+                                            <input type="range" id="hypnosis-romantic" min="0" max="100" 
+                                                   value="${char.hypnosis?.enabled && char.hypnosis?.romantic_interest !== null ? Math.round(char.hypnosis.romantic_interest * 100) : (currentCharacterState?.romantic_interest !== undefined ? Math.round(currentCharacterState.romantic_interest * 100) : 0)}"
+                                                   class="w-full accent-red-500">
+                                            <div class="flex justify-between text-xs text-gray-400 mt-1">
+                                                <span>0%</span>
+                                                <span id="hypnosis-romantic-value">${char.hypnosis?.enabled && char.hypnosis?.romantic_interest !== null ? Math.round(char.hypnosis.romantic_interest * 100) : (currentCharacterState?.romantic_interest !== undefined ? Math.round(currentCharacterState.romantic_interest * 100) : 0)}%</span>
+                                                <span>100%</span>
+                                            </div>
+                                        </div>
+                                        </div>
+
+                                        <div class="border-t border-gray-700 pt-4 space-y-3">
+                                            <div class="flex items-center justify-between">
+                                                <label class="text-sm font-medium text-gray-300">${t('hypnosis.forceLoveUnlock')}</label>
+                                                <input type="checkbox" id="hypnosis-force-love" ${char.hypnosis?.force_love_unlock ? 'checked' : ''} 
+                                                       class="bg-gray-700 border-gray-600 text-red-600 focus:ring-red-500 rounded">
+                                            </div>
+
+                                            <div class="flex items-center justify-between">
+                                                <label class="text-sm font-medium text-gray-300">${t('hypnosis.snsFullAccess')}</label>
+                                                <input type="checkbox" id="hypnosis-sns-access" ${char.hypnosis?.sns_full_access ? 'checked' : ''} 
+                                                       class="bg-gray-700 border-gray-600 text-red-600 focus:ring-red-500 rounded">
+                                            </div>
+
+                                            <div class="flex items-center justify-between">
+                                                <label class="text-sm font-medium text-gray-300">${t('hypnosis.secretAccountAccess')}</label>
+                                                <input type="checkbox" id="hypnosis-secret-account" ${char.hypnosis?.secret_account_access ? 'checked' : ''} 
+                                                       class="bg-gray-700 border-gray-600 text-red-600 focus:ring-red-500 rounded">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </details>
+                    ` : ''}
                 </div>
                 <div class="p-6 mt-auto border-t border-gray-700 shrink-0 flex justify-end space-x-3">
                     <button id="close-character-modal" data-action="close-character-modal" class="flex-1 py-2.5 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">${t(

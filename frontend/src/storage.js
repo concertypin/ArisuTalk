@@ -106,7 +106,7 @@ export async function getIndexedDBUsage() {
         totalSize += stringified.length + key.length;
       }
     } catch (error) {
-      console.warn(`Error getting size for key "${key}":`, error);
+      // console.warn(`Error getting size for key "${key}":`, error);
     }
   }
   return totalSize;
@@ -134,7 +134,7 @@ export async function checkIndexedDBQuota(newData = "", existingKey = "") {
     // 기본적으로 저장 허용
     return { canSave: true };
   } catch (error) {
-    console.warn("Storage quota check failed:", error);
+    // console.warn("Storage quota check failed:", error);
     return { canSave: true };
   }
 }

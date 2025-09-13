@@ -3,6 +3,7 @@ import { renderAppearanceSettingsPanel } from "./settings/panels/AppearanceSetti
 import { renderCharacterDefaultsPanel } from "./settings/panels/CharacterDefaultsPanel.js";
 import { renderDataManagementPanel } from "./settings/panels/DataManagementPanel.js";
 import { renderAdvancedSettingsPanel } from "./settings/panels/AdvancedSettingsPanel.js";
+import { renderNAISettingsPanel } from "./settings/panels/NAISettingsPanel.js";
 import { setLanguage, t } from "../i18n.js";
 import {
   handleModalChange,
@@ -79,6 +80,19 @@ function renderDesktopSettingsHeader() {
  * @param {string} activePanel - Currently active panel
  * @returns {string} Navigation HTML
  */
+/**
+ * 네비게이션 버튼의 CSS 클래스를 생성
+ * @param {boolean} isActive - 활성 상태 여부
+ * @returns {string} CSS 클래스 문자열
+ */
+function getNavButtonClasses(isActive) {
+  const baseClasses = "w-full text-left p-3 rounded-lg transition-all duration-200 flex items-start gap-3";
+  const activeClasses = "bg-blue-600/20 border border-blue-500/30 text-blue-400";
+  const inactiveClasses = "hover:bg-gray-700/50 text-gray-300 hover:text-white";
+  
+  return `${baseClasses} ${isActive ? activeClasses : inactiveClasses}`;
+}
+
 function renderDesktopSettingsNavigation(activePanel) {
   const navItems = [
     {
@@ -86,6 +100,12 @@ function renderDesktopSettingsNavigation(activePanel) {
       icon: "globe",
       label: t("settings.aiSettings"),
       description: t("settings.apiDescription"),
+    },
+    {
+      id: "nai",
+      icon: "image", 
+      label: "🧪 NAI 스티커 생성",
+      description: "NovelAI 기반 스티커 자동 생성 설정",
     },
     {
       id: "appearance",
@@ -124,12 +144,8 @@ function renderDesktopSettingsNavigation(activePanel) {
                 ${navItems
                   .map(
                     (item) => `
-                    <button
-                        class="w-full text-left p-3 rounded-lg transition-all duration-200 flex items-start gap-3 ${
-                          activePanel === item.id
-                            ? "bg-blue-600/20 border border-blue-500/30 text-blue-400"
-                            : "hover:bg-gray-700/50 text-gray-300 hover:text-white"
-                        }"
+                    <button 
+                        class="${getNavButtonClasses(activePanel === item.id)}"
                         data-panel="${item.id}"
                         id="nav-${item.id}"
                     >
@@ -161,6 +177,10 @@ export function renderContentHeader(activePanel) {
     api: {
       title: t("settings.aiSettings"),
       subtitle: t("settings.apiSubtitle"),
+    },
+    nai: {
+      title: "NAI 스티커 자동 생성",
+      subtitle: "NovelAI를 활용한 캐릭터별 감정 스티커 자동 생성 설정",
     },
     appearance: {
       title: t("settings.appearanceSettings"),
@@ -200,6 +220,8 @@ export function renderActivePanel(app, activePanel) {
   switch (activePanel) {
     case "api":
       return renderAPISettingsPanel(app);
+    case "nai":
+      return renderNAISettingsPanel(app);
     case "appearance":
       return renderAppearanceSettingsPanel(app);
     case "character":
@@ -264,16 +286,7 @@ export function updateDesktopSettingsContent(app, panelId) {
   // 네비게이션 버튼 활성 상태 업데이트
   document.querySelectorAll("[data-panel]").forEach((btn) => {
     const isActive = btn.dataset.panel === panelId;
-    const baseClasses =
-      "w-full text-left p-3 rounded-lg transition-all duration-200 flex items-start gap-3";
-    const activeClasses =
-      "bg-blue-600/20 border border-blue-500/30 text-blue-400";
-    const inactiveClasses =
-      "hover:bg-gray-700/50 text-gray-300 hover:text-white";
-
-    btn.className = `${baseClasses} ${
-      isActive ? activeClasses : inactiveClasses
-    }`;
+    btn.className = getNavButtonClasses(isActive);
   });
 
   // 아이콘 다시 생성
@@ -294,12 +307,14 @@ export function setupDesktopSettingsEventListeners(app) {
   requestAnimationFrame(() => {
     // 네비게이션 패널 전환
     const panelButtons = document.querySelectorAll("[data-panel]");
+
     panelButtons.forEach((button) => {
       if (button.dataset.listenerAdded === "true") return;
       button.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
         const panelId = e.currentTarget.dataset.panel;
+
         if (panelId) {
           app.setState({
             ui: {
@@ -321,13 +336,6 @@ export function setupDesktopSettingsEventListeners(app) {
     if (contentArea && !contentArea.dataset.listenersAdded) {
       // 입력 필드 변경 핸들러 (debounced)
       contentArea.addEventListener("input", (e) => {
-        if (e.target.id === "settings-font-scale") {
-          const value = parseFloat(e.target.value);
-          const fontScaleValueEl = document.getElementById("font-scale-value");
-          if (fontScaleValueEl) {
-            fontScaleValueEl.textContent = Math.round(value * 100) + "%";
-          }
-        }
         handleModalInput(e, app);
       });
 
@@ -353,32 +361,113 @@ export function setupDesktopSettingsEventListeners(app) {
           }
           return;
         }
-
-        const viewDebugLogsBtn = e.target.closest("#view-debug-logs");
-        if (viewDebugLogsBtn) {
-          app.setState({ showSettingsModal: false, showDebugLogsModal: true });
-          return;
-        }
-
-        const clearDebugLogsBtn = e.target.closest("#clear-debug-logs-btn");
-        if (clearDebugLogsBtn) {
-          app.clearDebugLogs();
-          return;
-        }
-
-        const languageButton = e.target.closest(".language-select-btn");
-        if (languageButton) {
-          const selectedLanguage = languageButton.dataset.language;
-          if (selectedLanguage) {
-            setLanguage(selectedLanguage);
-            alert(t("system.languageChangeMessage"));
-            setTimeout(() => window.location.reload(), 500);
-          }
-          return;
-        }
       });
 
       contentArea.dataset.listenersAdded = "true";
     }
+
+    // 랜덤 선톡 토글 처리
+    const randomToggle = document.getElementById(
+      "settings-random-first-message-toggle",
+    );
+    const randomOptions = document.getElementById("random-chat-options");
+
+    if (randomToggle && randomOptions) {
+      randomToggle.addEventListener("change", (e) => {
+        randomOptions.classList.toggle("hidden", !e.target.checked);
+      });
+    }
+
+    // 스냅샷 토글 처리
+    const snapshotsToggle = document.getElementById(
+      "settings-snapshots-toggle",
+    );
+    const snapshotsList = document.getElementById("snapshots-list");
+
+    if (snapshotsToggle && snapshotsList) {
+      snapshotsToggle.addEventListener("change", (e) => {
+        snapshotsList.classList.toggle("hidden", !e.target.checked);
+      });
+    }
+
+    // 폰트 스케일 실시간 업데이트
+    const fontScaleSlider = document.getElementById("settings-font-scale");
+    const fontScaleValue = document.getElementById("font-scale-value");
+
+    if (fontScaleSlider && fontScaleValue) {
+      fontScaleSlider.addEventListener("input", (e) => {
+        const value = parseFloat(e.target.value);
+        fontScaleValue.textContent = Math.round(value * 100) + "%";
+      });
+    }
+
+    // 랜덤 캐릭터 카운트 실시간 업데이트
+    const characterCountSlider = document.getElementById(
+      "settings-random-character-count",
+    );
+    const characterCountLabel = document.getElementById(
+      "random-character-count-label",
+    );
+
+    if (characterCountSlider && characterCountLabel) {
+      characterCountSlider.addEventListener("input", (e) => {
+        characterCountLabel.textContent = e.target.value + t("settings.characterCountUnit");
+      });
+    }
+
+    // API 제공업체 변경 처리
+    const apiProviderSelect = document.getElementById("settings-api-provider");
+    if (apiProviderSelect && !apiProviderSelect.dataset.listenerAdded) {
+      apiProviderSelect.addEventListener("change", (e) => {
+        // console.log("API Provider changed to:", e.target.value);
+        app.handleAPIProviderChange(e.target.value);
+      });
+      apiProviderSelect.dataset.listenerAdded = "true";
+    }
+
+    // 디버그 로그 관련 버튼 처리
+    const viewDebugLogsBtn = document.getElementById("view-debug-logs");
+    if (viewDebugLogsBtn && !viewDebugLogsBtn.dataset.listenerAdded) {
+      viewDebugLogsBtn.addEventListener("click", () => {
+        // console.log("View logs button clicked");
+        app.setState({
+          showSettingsModal: false,
+          showDebugLogsModal: true,
+        });
+      });
+      viewDebugLogsBtn.dataset.listenerAdded = "true";
+    }
+
+    const clearDebugLogsBtn = document.getElementById("clear-debug-logs-btn");
+    if (clearDebugLogsBtn && !clearDebugLogsBtn.dataset.listenerAdded) {
+      clearDebugLogsBtn.addEventListener("click", () => {
+        // console.log("Clear logs button clicked");
+        app.clearDebugLogs();
+      });
+      clearDebugLogsBtn.dataset.listenerAdded = "true";
+    }
+
+    // 언어 설정 버튼 처리
+    const languageButtons = document.querySelectorAll(".language-select-btn");
+    languageButtons.forEach((button) => {
+      if (!button.dataset.listenerAdded) {
+        button.addEventListener("click", (e) => {
+          const selectedLanguage = e.currentTarget.dataset.language;
+          if (selectedLanguage) {
+            // 언어 변경
+            setLanguage(selectedLanguage);
+
+            // 확인 메시지 표시 후 페이지 새로고침
+            alert(t("system.languageChangeMessage"));
+
+            // 짧은 지연 후 새로고침
+            setTimeout(() => {
+              window.location.reload();
+            }, 500);
+          }
+        });
+        button.dataset.listenerAdded = "true";
+      }
+    });
   });
 }

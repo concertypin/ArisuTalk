@@ -1,12 +1,19 @@
 import { debounce } from "../utils.js";
 import { t, setLanguage } from "../i18n.js";
 import { setupDesktopSettingsEventListeners } from "../components/DesktopSettingsUI.js";
+import { handleSNSClick, handleSNSInput } from "./snsHandlers.js";
 
 export function handleModalClick(e, app) {
+  // Handle SNS events first
+  if (handleSNSClick(e, app)) {
+    return true;
+  }
+
   const summary = e.target.closest("details > summary");
   if (summary) {
     const details = summary.parentElement;
-    if (details.closest("#settings-modal-content")) {
+    // Only handle toggleSettingsSection for settings modal, not character modal
+    if (details.closest("#settings-modal-content") && !details.closest("#character-modal")) {
       const section = details.dataset.section;
       if (section) {
         app.toggleSettingsSection(section);
@@ -49,6 +56,14 @@ export function handleModalClick(e, app) {
   // Character Modal
   if (e.target.closest('[data-action="close-character-modal"]'))
     app.closeCharacterModal();
+  if (e.target.closest("#character-sns-btn")) {
+    app.setState({ showSNSCharacterListModal: true });
+    return;
+  }
+  if (e.target.closest("#test-appearance-prompt")) {
+    app.testAppearancePrompt(e);
+    return;
+  }
 
   // Chat Selection Modal
   if (e.target.closest("#create-new-chat-room-modal")) {
@@ -107,6 +122,56 @@ export function handleModalClick(e, app) {
     app.handleStickerSelection(index, isChecked);
   }
 
+  // NAI 설정 관련 이벤트
+  if (e.target.id === "character-nai-enabled") {
+    app.handleCharacterNAIToggle(e.target.checked);
+  }
+  if (e.target.closest("#generate-character-stickers")) {
+    e.preventDefault();
+    app.handleGenerateCharacterStickers();
+  }
+  if (e.target.closest("#test-nai-generation")) {
+    e.preventDefault();
+    app.handleTestNAIGeneration();
+  }
+  if (e.target.closest("#generate-smart-sticker-btn")) {
+    e.preventDefault();
+    app.handleGenerateSmartSticker();
+  }
+
+  // NAI 개별 감정 스티커 생성 버튼 토글
+  if (e.target.closest("#generate-individual-sticker-btn")) {
+    e.preventDefault();
+    e.stopPropagation();
+    const dropdown = document.getElementById("emotion-dropdown");
+    if (dropdown) {
+      dropdown.classList.toggle("hidden");
+    }
+  }
+
+  // 드롭다운 외부 클릭 시 닫기
+  const dropdown = document.getElementById("emotion-dropdown");
+  if (dropdown && !dropdown.classList.contains("hidden")) {
+    if (!e.target.closest("#generate-individual-sticker-btn") && 
+        !e.target.closest("#emotion-dropdown")) {
+      dropdown.classList.add("hidden");
+    }
+  }
+
+  // 개별 감정 스티커 생성
+  const emotionBtn = e.target.closest(".generate-emotion-btn");
+  if (emotionBtn) {
+    e.preventDefault();
+    const emotion = emotionBtn.dataset.emotion;
+    app.handleGenerateIndividualSticker(emotion);
+    // 드롭다운 닫기
+    const dropdown = document.getElementById("emotion-dropdown");
+    if (dropdown) {
+      dropdown.classList.add("hidden");
+    }
+  }
+
+
   // Confirmation Modal
   if (e.target.closest("#modal-cancel")) {
     e.preventDefault();
@@ -124,6 +189,15 @@ export function handleModalClick(e, app) {
     }
     return;
   }
+
+  // Image Result Modal
+  if (e.target.closest("#close-image-result-modal") || e.target.closest("#close-image-result-modal-btn")) {
+    e.preventDefault();
+    e.stopPropagation();
+    app.closeImageResultModal();
+    return;
+  }
+
 
   // User Sticker Panel
   if (e.target.closest("#add-user-sticker-btn"))
@@ -208,6 +282,7 @@ const debouncedUpdateSettings = debounce((app, newSetting) => {
   app.debouncedCreateSettingsSnapshot();
 }, 500);
 
+
 const settingsUpdaters = {
   "settings-font-scale": (app, value) => ({ fontScale: parseFloat(value) }),
   "settings-api-key": (app, value) => {
@@ -274,25 +349,34 @@ const settingsUpdaters = {
     snapshotsEnabled: checked,
   }),
   "settings-api-provider": (app, value) => ({ apiProvider: value }),
+  
 };
 
 export function handleModalInput(e, app) {
+  // Handle SNS input events first
+  if (handleSNSInput(e, app)) {
+    return;
+  }
+
   if (e.target.id === "group-chat-name") {
     app.setState({ createGroupChatName: e.target.value });
     return;
   }
-
   const updater = settingsUpdaters[e.target.id];
   if (updater) {
     const value =
       e.target.type === "checkbox" ? e.target.checked : e.target.value;
-    const newSetting = updater(app, value);
-    // Call the debounced function to update settings
-    debouncedUpdateSettings(app, newSetting);
+    const newSetting = updater(app, value, e);
+    
+    // Only update settings if updater returns a non-null value
+    if (newSetting !== null) {
+      // Call the debounced function to update settings
+      debouncedUpdateSettings(app, newSetting);
 
-    // API 제공업체 변경 시 즉시 UI 업데이트
-    if (e.target.id === "settings-api-provider") {
-      app.handleAPIProviderChange(value);
+      // API 제공업체 변경 시 즉시 UI 업데이트
+      if (e.target.id === "settings-api-provider") {
+        app.handleAPIProviderChange(value);
+      }
     }
   }
 
@@ -301,6 +385,27 @@ export function handleModalInput(e, app) {
     const label = document.getElementById("random-character-count-label");
     if (label)
       label.textContent = `${count}${t("settings.characterCountUnit")}`;
+  }
+
+  // character-nai-prompt 필드는 제거됨 (기본 프롬프트에서 자동 추출)
+
+  // NAI 품질 프롬프트 변경 처리
+  if (e.target.id === "character-nai-quality-prompt") {
+    app.handleCharacterNAIQualityPromptChange(e.target.value);
+  }
+
+  // NAI 생성 설정 변경 처리
+  if (e.target.id === "character-nai-model") {
+    app.handleCharacterNAIModelChange(e.target.value);
+  }
+  if (e.target.id === "character-nai-image-size") {
+    app.handleCharacterNAIImageSizeChange(e.target.value);
+  }
+  if (e.target.id === "character-nai-min-delay") {
+    app.handleCharacterNAIMinDelayChange(e.target.value);
+  }
+  if (e.target.id === "character-nai-random-delay") {
+    app.handleCharacterNAIRandomDelayChange(e.target.value);
   }
 }
 
@@ -327,13 +432,13 @@ export function handleModalChange(e, app) {
 
   if (e.target.id === "restore-file-input") app.handleRestore(e);
   if (e.target.id === "restore-prompts-input") app.handleRestorePrompts(e);
-  if (e.target.id === "chatml-prompt-input") app.handleChatMLInput(e);
   if (e.target.id === "settings-snapshots-toggle") {
     const optionsDiv = document.getElementById("snapshots-list");
     if (optionsDiv)
       optionsDiv.style.display = e.target.checked ? "block" : "none";
     app.handleToggleSnapshots(e.target.checked);
   }
+
 
   // 디버그 로그 관련 이벤트는 모두 onclick/onchange로 처리됨
 }

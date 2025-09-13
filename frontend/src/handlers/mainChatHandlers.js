@@ -37,6 +37,33 @@ export function handleMainChatClick(e, app) {
   } else if (e.target.closest("#close-sticker-panel-btn")) {
     app.setState({ showUserStickerPanel: false });
   }
+
+  // New handlers from ltxy12/main (as separate if statements)
+  const generateSNSButton = e.target.closest(".generate-sns-btn");
+  if (generateSNSButton) {
+    app.handleGenerateSNSPost(parseFloat(generateSNSButton.dataset.id));
+  }
+
+  const generateNAIButton = e.target.closest(".generate-nai-btn");
+  if (generateNAIButton) {
+    app.handleGenerateNAISticker(parseFloat(generateNAIButton.dataset.id));
+  }
+
+  const addSNSMemoryButton = e.target.closest(".add-sns-memory-btn");
+  if (addSNSMemoryButton) {
+    app.handleAddToSNSMemory(parseFloat(addSNSMemoryButton.dataset.id));
+  }
+
+  // Sticker click - size toggle
+  const stickerToggleBtn = e.target.closest(".sticker-toggle-btn");
+  if (stickerToggleBtn) {
+    e.preventDefault();
+    e.stopPropagation();
+    const messageId = parseFloat(stickerToggleBtn.dataset.messageId);
+    if (messageId) {
+      app.toggleStickerSize(messageId);
+    }
+  }
 }
 
 export function handleMainChatInput(e, app) {
