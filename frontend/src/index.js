@@ -3762,7 +3762,7 @@ class PersonaChatApp {
 
     // NAI 자동 스티커 처리 (임시 스티커 생성, 저장하지 않음)
     let temporaryNAISticker = null;
-    if (response.naiSticker) {
+    if (response.naiSticker && character.naiSettings?.autoGenerate) {
       try {
         temporaryNAISticker = await this.generateTemporaryNAISticker(character, response.naiSticker);
       } catch (error) {
