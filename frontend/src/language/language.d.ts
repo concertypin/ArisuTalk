@@ -465,8 +465,8 @@ export type LanguageStrings = {
     characterCardSaveError: {
       message: string;
     };
-    character_name_required_title: string;
-    character_name_required_message: string;
+    characterNameRequiredTitle: string;
+    characterNameRequiredMessage: string;
     aiGenerationComplete: {
       title: string;
       message: string;

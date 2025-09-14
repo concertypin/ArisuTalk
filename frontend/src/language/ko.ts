@@ -502,8 +502,8 @@ export const ko: LanguageStrings = {
     characterCardSaveError: {
       message: "캐릭터 카드 저장에 실패했습니다.",
     },
-    character_name_required_title: "이름 필요",
-    character_name_required_message: "캐릭터 이름을 먼저 입력해주세요.",
+    characterNameRequiredTitle: "이름 필요",
+    characterNameRequiredMessage: "캐릭터 이름을 먼저 입력해주세요.",
     aiGenerationComplete: {
       title: "AI 생성 완료",
       message: '캐릭터 "{{characterName}}"의 정보 생성이 완료되었습니다.',

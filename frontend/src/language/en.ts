@@ -501,8 +501,8 @@ export const en: LanguageStrings = {
     characterCardSaveError: {
       message: "Failed to save character card.",
     },
-    character_name_required_title: "Name required",
-    character_name_required_message: "Please enter a character name first.",
+    characterNameRequiredTitle: "Name required",
+    characterNameRequiredMessage: "Please enter a character name first.",
     aiGenerationComplete: {
       title: "AI Generation Complete",
       message:
