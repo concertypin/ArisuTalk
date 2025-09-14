@@ -246,8 +246,6 @@ export const en: LanguageStrings = {
     performanceComingSoon:
       "Performance optimization options will be supported in future updates.",
     experimentalFeatures: "Experimental Features",
-    useNewInputBar: "New Input Bar Design",
-    useNewInputBarDesc: "Uses a rounded, floating input bar design.",
     experimentalWarning:
       "Experimental features may be unstable and cause unexpected behavior.",
     warningNote: "Warning",

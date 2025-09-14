@@ -140,13 +140,17 @@ export const ko: LanguageStrings = {
     randomFirstMessagePromptDescription:
       "이 프롬프트는 새로운 첫 메시지를 생성할 때 사용됩니다.",
     snsForcePrompt: "SNS 강제 생성 프롬프트",
-    snsForcePromptDescription: "이 프롬프트는 SNS 포스트를 강제로 생성할 때 사용됩니다. 최근 대화 내용을 기반으로 캐릭터의 SNS 포스트를 생성합니다.",
+    snsForcePromptDescription:
+      "이 프롬프트는 SNS 포스트를 강제로 생성할 때 사용됩니다. 최근 대화 내용을 기반으로 캐릭터의 SNS 포스트를 생성합니다.",
     naiStickerPrompt: "NAI 스티커 생성 프롬프트",
-    naiStickerPromptDescription: "이 프롬프트는 NovelAI를 통해 스티커를 생성할 때 사용됩니다. 대화 상황에 맞는 감정과 상황을 분석하여 스티커 생성 요청을 만듭니다.",
+    naiStickerPromptDescription:
+      "이 프롬프트는 NovelAI를 통해 스티커를 생성할 때 사용됩니다. 대화 상황에 맞는 감정과 상황을 분석하여 스티커 생성 요청을 만듭니다.",
     groupChatPrompt: "단톡방 프롬프트",
-    groupChatPromptDescription: "이 프롬프트는 단톡방에서 AI 캐릭터들이 대화할 때 사용됩니다. ChatML 형식으로 작성되어야 합니다.",
-    openChatPrompt: "오픈톡방 프롬프트", 
-    openChatPromptDescription: "이 프롬프트는 오픈톡방에서 AI 캐릭터들이 대화할 때 사용됩니다. ChatML 형식으로 작성되어야 합니다.",
+    groupChatPromptDescription:
+      "이 프롬프트는 단톡방에서 AI 캐릭터들이 대화할 때 사용됩니다. ChatML 형식으로 작성되어야 합니다.",
+    openChatPrompt: "오픈톡방 프롬프트",
+    openChatPromptDescription:
+      "이 프롬프트는 오픈톡방에서 AI 캐릭터들이 대화할 때 사용됩니다. ChatML 형식으로 작성되어야 합니다.",
     resetAllPrompts: "프롬프트 초기화!",
     resetAllPromptsConfirmation:
       "모든 프롬프트를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
@@ -245,8 +249,6 @@ export const ko: LanguageStrings = {
     performanceComingSoon:
       "성능 최적화 옵션은 향후 업데이트에서 지원될 예정입니다.",
     experimentalFeatures: "실험적 기능",
-    useNewInputBar: "새로운 입력창 디자인",
-    useNewInputBarDesc: "둥글고 떠다니는 디자인의 입력창을 사용합니다.",
     experimentalWarning:
       "실험적 기능은 불안정할 수 있으며, 예상치 못한 동작을 할 수 있습니다.",
     warningNote: "주의사항",
@@ -755,7 +757,8 @@ export const ko: LanguageStrings = {
     naturalValue: "자연스러운 값: {{level}}%",
     hypnosisValue: "최면 값: {{level}}%",
     settingsWarning: "최면 제어는 캐릭터의 자연스러운 감정을 무시합니다",
-    dangerousFeature: "⚠️ 이 기능은 스토리의 자연스러운 진행을 방해할 수 있습니다"
+    dangerousFeature:
+      "⚠️ 이 기능은 스토리의 자연스러운 진행을 방해할 수 있습니다",
   },
   sns: {
     characterListTitle: "캐릭터 목록",
@@ -811,19 +814,19 @@ export const ko: LanguageStrings = {
       affectionLevel: "호감도: {{level}}%",
       intimacyLevel: "친밀도: {{level}}%",
       trustLevel: "신뢰도: {{level}}%",
-      romanceLevel: "연애감정: {{level}}%"
+      romanceLevel: "연애감정: {{level}}%",
     },
     accessDeniedDescription: "이 콘텐츠를 보려면 더 높은 호감도가 필요합니다.",
     requiresAffection: "호감도 {{level}}% 이상 필요",
-    requiresIntimacy: "친밀도 {{level}}% 이상 필요", 
+    requiresIntimacy: "친밀도 {{level}}% 이상 필요",
     requiresTrust: "신뢰도 {{level}}% 이상 필요",
     requiresRomance: "연애감정 {{level}}% 이상 필요",
     backToMain: "메인 계정으로 돌아가기",
     affection: "호감도",
-    intimacy: "친밀도", 
+    intimacy: "친밀도",
     trust: "신뢰도",
     romanticInterest: "연애감정",
     openSNSList: "SNS 목록 보기",
-    viewSNS: "{{name}}의 SNS 보기"
+    viewSNS: "{{name}}의 SNS 보기",
   },
 };

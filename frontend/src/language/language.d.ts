@@ -18,6 +18,7 @@ export type LanguageStrings = {
     deleteSticker: string;
     addContact: string;
     editContact: string;
+    editModeTitle: string;
     profileImage: string;
     importContact: string;
     shareContact: string;
@@ -75,6 +76,8 @@ export type LanguageStrings = {
     resetDataFinalConfirm: string;
     resetDataComplete: string;
     resetDataFailed: string;
+    restoreSnapshotConfirm: string;
+    deleteSnapshotConfirm: string;
   };
   mainChat: {
     uploadPhoto: string;
@@ -125,6 +128,14 @@ export type LanguageStrings = {
     characterSheetGenerationPromptDescription: string;
     mainChatPromptDescription: string;
     randomFirstMessagePromptDescription: string;
+    snsForcePrompt: string;
+    snsForcePromptDescription: string;
+    naiStickerPrompt: string;
+    naiStickerPromptDescription: string;
+    groupChatPrompt: string;
+    groupChatPromptDescription: string;
+    openChatPrompt: string;
+    openChatPromptDescription: string;
     resetAllPrompts: string;
     resetAllPromptsConfirmation: string;
     restoreFailed: string;
@@ -135,6 +146,7 @@ export type LanguageStrings = {
     noSnapshots: string;
     title: string;
     aiSettings: string;
+    scaleSettings: string;
     advancedSettings: string;
     apiKey: string;
     apiKeyPlaceholder: string;
@@ -262,6 +274,8 @@ export type LanguageStrings = {
       stickerData: string;
       debugLogs: string;
     };
+    uiSizePreviewMessage1: string;
+    uiSizePreviewMessage2: string;
   };
   sidebar: {
     startNewChat: string;
@@ -444,6 +458,23 @@ export type LanguageStrings = {
     resetPromptMessage: string;
     resetPromptCompleteTitle: string;
     resetPromptCompleteMessage: string;
+    selectChat: {
+      message: string;
+      newChat: string;
+    };
+    characterCardSaveError: {
+      message: string;
+    };
+    character_name_required_title: string;
+    character_name_required_message: string;
+    aiGenerationComplete: {
+      title: string;
+      message: string;
+    };
+    generationFailed: {
+      title: string;
+      message: string;
+    };
   };
   ui: {
     discardChanges: string;
@@ -461,8 +492,12 @@ export type LanguageStrings = {
     fileProcessingError: string;
     fileProcessingAlert: string;
     fileSizeExceeded: string;
+    fileSizeExceededMessage: string;
     unsupportedFormat: string;
+    unsupportedFormatMessage: string;
     stickerProcessingError: string;
+    stickerProcessingErrorConsole: string;
+    stickerProcessingErrorMessage: string;
     storageFull: string;
     storageFullMessage: string;
     groupChatNamePlaceholder: string;
@@ -593,6 +628,7 @@ export type LanguageStrings = {
     storageFullMessage: string;
     selectModeDeselect: string;
     selectModeSelect: string;
+    selectAll: string;
   };
   landing: {
     welcomeTitle: string;
@@ -640,6 +676,31 @@ export type LanguageStrings = {
     saveApiConfigsFailed: string;
     noMasterPasswordForDecryption: string;
     loadApiConfigsFailed: string;
+  };
+  search: {
+    prompt: string;
+    noResults: string;
+  };
+  generatingStatus: {
+    generating: string;
+  };
+  hypnosis: {
+    hypnosisControl: string;
+    enabled: string;
+    disabled: string;
+    affectionControl: string;
+    intimacyControl: string;
+    trustControl: string;
+    romanceControl: string;
+    forceLoveUnlock: string;
+    snsFullAccess: string;
+    secretAccountAccess: string;
+    currentLevel: string;
+    override: string;
+    naturalValue: string;
+    hypnosisValue: string;
+    settingsWarning: string;
+    dangerousFeature: string;
   };
   sns: {
     characterListTitle: string;
