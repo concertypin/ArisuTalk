@@ -2,29 +2,29 @@ import { t } from "../../../i18n.js";
 import { DEFAULT_EMOTIONS, NovelAIClient } from "../../../api/novelai.js";
 
 /**
- * NAI 스티커 자동 생성 설정 패널
- * @param {Object} app - 애플리케이션 인스턴스
- * @returns {string} NAI 설정 패널 HTML
+ * NAI Sticker Auto-Generation Settings Panel
+ * @param {Object} app - Application instance
+ * @returns {string} NAI settings panel HTML
  */
 export function renderNAISettingsPanel(app) {
   const { settings } = app.state;
   const naiSettings = settings.naiSettings || {};
   
   const {
-    // 기본 API 설정
+    // Basic API settings
     apiKey = "",
     
-    // 모델 및 크기 설정
+    // Model and size settings
     model = "nai-diffusion-4-5-full",
     preferredSize = "square",
     
-    // 생성 파라미터
+    // Generation parameters
     steps = 28,
     scale = 3,
     sampler = "k_euler_ancestral",
     noise_schedule = "native",
     
-    // 고급 설정
+    // Advanced settings
     cfg_rescale = 0,
     dynamic_thresholding = false,
     dynamic_thresholding_percentile = 0.999,
@@ -33,17 +33,17 @@ export function renderNAISettingsPanel(app) {
     legacy = false,
     add_original_image = false,
     
-    // 캐릭터 및 이미지 설정
+    // Character and image settings
     useCharacterPrompts = false,
     vibeTransferEnabled = false,
     vibeTransferStrength = 0.6,
     vibeTransferInformationExtracted = 1.0,
     
-    // 커스텀 프롬프트
+    // Custom prompts
     customPositivePrompt = "",
     customNegativePrompt = "",
     
-    // 안전 설정
+    // Safety settings
     minDelay = 20000,
     maxAdditionalDelay = 10000,
   } = naiSettings;
@@ -53,7 +53,7 @@ export function renderNAISettingsPanel(app) {
 
   return `
     <div class="space-y-6">
-      <!-- NAI API 설정 -->
+      <!-- NAI API Settings -->
       <div class="bg-gray-700/30 rounded-xl p-6">
         <h4 class="text-lg font-semibold text-white mb-4 flex items-center">
           <i data-lucide="image" class="w-5 h-5 mr-3 text-purple-400"></i>
@@ -95,7 +95,7 @@ export function renderNAISettingsPanel(app) {
         </div>
       </div>
 
-      <!-- 모델 및 생성 설정 -->
+      <!-- Model and Generation Settings -->
       <div class="bg-gray-700/30 rounded-xl p-6">
         <h4 class="text-lg font-semibold text-white mb-4 flex items-center">
           <i data-lucide="cpu" class="w-5 h-5 mr-3 text-green-400"></i>
@@ -258,7 +258,7 @@ export function renderNAISettingsPanel(app) {
         </div>
       </div>
 
-      <!-- 캐릭터 및 이미지 설정 -->
+      <!-- Character and Image Settings -->
       <div class="bg-gray-700/30 rounded-xl p-6">
         <h4 class="text-lg font-semibold text-white mb-4 flex items-center">
           <i data-lucide="user-plus" class="w-5 h-5 mr-3 text-pink-400"></i>
@@ -363,7 +363,7 @@ export function renderNAISettingsPanel(app) {
         </div>
       </div>
 
-      <!-- 고급 설정 -->
+      <!-- Advanced Settings -->
       <div class="bg-gray-700/30 rounded-xl p-6">
         <h4 class="text-lg font-semibold text-white mb-4 flex items-center">
           <i data-lucide="settings" class="w-5 h-5 mr-3 text-yellow-400"></i>
@@ -371,7 +371,7 @@ export function renderNAISettingsPanel(app) {
         </h4>
         
         <div class="space-y-4">
-          <!-- SMEA 설정 (v3 모델 전용) -->
+          <!-- SMEA Settings (v3 models only) -->
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="flex items-center space-x-2 cursor-pointer">
@@ -607,7 +607,7 @@ export function renderNAISettingsPanel(app) {
         </div>
       </div>
 
-      <!-- 배치 생성 -->
+      <!-- Batch Generation -->
       <div class="bg-gray-700/30 rounded-xl p-6">
         <h4 class="text-lg font-semibold text-white mb-4 flex items-center">
           <i data-lucide="download" class="w-5 h-5 mr-3 text-green-400"></i>
@@ -637,18 +637,18 @@ export function renderNAISettingsPanel(app) {
         </div>
       </div>
 
-      <!-- 생성 통계 -->
+      <!-- Generation Statistics -->
       <div class="bg-gray-700/30 rounded-xl p-6" id="nai-stats-container">
         <h4 class="text-lg font-semibold text-white mb-4 flex items-center">
           <i data-lucide="bar-chart-3" class="w-5 h-5 mr-3 text-orange-400"></i>
           ${t("naiSettings.statsTitle")}
         </h4>
         <div id="nai-stats-content">
-          <!-- 통계 내용이 여기에 동적으로 삽입됩니다 -->
+          <!-- Statistics content will be dynamically inserted here -->
         </div>
       </div>
 
-      <!-- 도움말 -->
+      <!-- Help Guide -->
       <div class="bg-blue-900/20 border border-blue-500/30 rounded-xl p-6">
         <h4 class="text-lg font-semibold text-blue-300 mb-3 flex items-center">
           <i data-lucide="help-circle" class="w-5 h-5 mr-3"></i>
@@ -667,9 +667,9 @@ export function renderNAISettingsPanel(app) {
 }
 
 /**
- * NAI 통계 정보를 렌더링
- * @param {Object} app - 애플리케이션 인스턴스
- * @returns {string} 통계 HTML
+ * Renders NAI statistics information
+ * @param {Object} app - Application instance
+ * @returns {string} Statistics HTML
  */
 export function renderNAIStats(app) {
   const characters = app.state.characters || [];
@@ -722,7 +722,7 @@ export function renderNAIStats(app) {
             return `
               <div class="flex justify-between text-xs">
                 <span class="text-gray-300">${character.name}</span>
-                <span class="text-gray-400">${generatedCount}개</span>
+                <span class="text-gray-400">${t("naiSettings.stickerCount", { count: generatedCount })}</span>
               </div>
             `;
           }).join('')}

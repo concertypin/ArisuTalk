@@ -847,6 +847,7 @@ export type LanguageStrings = {
     totalStickers: string;
     generationRate: string;
     characterStats: string;
+    stickerCount: string;
     helpTitle: string;
     helpApiKey: string;
     helpImageSizes: string;

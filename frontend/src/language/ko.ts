@@ -905,6 +905,7 @@ export const ko: LanguageStrings = {
     totalStickers: "총 스티커 수",
     generationRate: "생성 비율",
     characterStats: "캐릭터별 생성 현황",
+    stickerCount: "{{count}}개",
     helpTitle: "사용 안내",
     helpApiKey: "• NovelAI Persistent API Token이 필요합니다",
     helpImageSizes: "• 무제한 생성 크기만 지원: 1024×1024, 832×1216, 1216×832",

@@ -908,6 +908,7 @@ export const en: LanguageStrings = {
     totalStickers: "Total Stickers",
     generationRate: "Generation Rate",
     characterStats: "Character Generation Status",
+    stickerCount: "{{count}} stickers",
     helpTitle: "Usage Guide",
     helpApiKey: "• NovelAI Persistent API Token is required",
     helpImageSizes: "• Only unlimited generation sizes supported: 1024×1024, 832×1216, 1216×832",
