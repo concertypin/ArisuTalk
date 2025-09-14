@@ -62,7 +62,7 @@ export async function renderPromptModal(app) {
                             <h4 class="text-base font-semibold text-blue-300">${title}</h4>
                             <div class="relative group">
                                 <i data-lucide="help-circle" class="w-4 h-4 text-gray-400 cursor-pointer"></i>
-                                <div class="absolute bottom-full mb-2 w-96 bg-gray-900 text-white text-xs rounded-lg p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                <div class="absolute bottom-full mb-2 w-96 bg-gray-900 text-white text-xs rounded-lg p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-[60]">
                                     <h5 class="font-bold mb-2">Magic Patterns</h5>
                                     <p>Magic Patterns are special patterns that can be used in the prompt to access character properties and current chatting log.</p>
                                     <p>Patterns start with <code>{|</code> and ends with <code>|}</code>. Inner text is command. Multi-line is supported.</p>
