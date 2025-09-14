@@ -73,7 +73,7 @@ async function renderModals(app) {
   if (app.state.showEditGroupChatModal)
     mainModalHtml += renderEditGroupChatModal(app);
   if (app.state.showDebugLogsModal)
-    mainModalHtml += renderDebugLogsModal(app.state);
+    mainModalHtml += await renderDebugLogsModal(app.state);
   if (app.state.showMobileSearch) mainModalHtml += renderSearchModal(app);
   if (app.state.modal.isOpen && app.state.modal.type === "chatSelection") {
     mainModalHtml += renderChatSelectionModal(app);

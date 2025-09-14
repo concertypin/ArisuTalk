@@ -5,7 +5,7 @@ import { t } from "../i18n.js";
  * 시스템 로그 뷰어 모달
  */
 
-export function renderDebugLogsModal(state) {
+export async function renderDebugLogsModal(state) {
   const { debugLogs = [], enableDebugLogs } = state;
 
   if (!state.showDebugLogsModal) {
@@ -66,7 +66,33 @@ export function renderDebugLogsModal(state) {
         `;
   };
 
-  const renderStructuredLog = (log) => {
+  // 채팅 타입별 txt 파일 실제 내용 읽기
+  const getChatPromptContent = async (chatType) => {
+    const promptFileMap = {
+      'general': '/src/texts/mainChatMLPrompt.txt',
+      'normal': '/src/texts/mainChatMLPrompt.txt',
+      'group': '/src/texts/groupChatMLPrompt.txt',
+      'open': '/src/texts/openChatMLPrompt.txt',
+      'nai': '/src/texts/naiStickerPrompt.txt',
+      'sns': '/src/texts/snsForcePrompt.txt',
+      'character_generation': '/src/texts/profileCreationChatMLPrompt.txt'
+    };
+    
+    const promptFile = promptFileMap[chatType] || promptFileMap['general'];
+    
+    try {
+      const response = await fetch(promptFile);
+      if (response.ok) {
+        return await response.text();
+      }
+    } catch (error) {
+      console.warn(`Failed to load prompt file for chat type: ${chatType}`, error);
+    }
+    
+    return t("debugLogs.promptLoadError", { chatType });
+  };
+
+  const renderStructuredLog = async (log) => {
     const data = log.data;
     const typeColor = getLogTypeColor(log.type, data);
     const chatType = data?.metadata?.chatType || "normal";
@@ -133,25 +159,15 @@ export function renderDebugLogsModal(state) {
                         : ""
                     }
                     
-                    ${
-                      data?.systemPrompt
-                        ? `
-                        <details class="group">
-                            <summary class="p-3 cursor-pointer text-sm font-medium text-yellow-300 hover:bg-gray-700 group-open:bg-gray-700">
-                                <i data-lucide="chevron-right" class="w-4 h-4 inline mr-2 group-open:transform group-open:rotate-90 transition-transform pointer-events-none"></i>
-                                System Prompt
-                            </summary>
-                            <div class="p-3 bg-gray-800 text-xs">
-                                <pre class="text-gray-300 overflow-x-auto whitespace-pre-wrap">${JSON.stringify(
-                                  data.systemPrompt,
-                                  null,
-                                  2,
-                                )}</pre>
-                            </div>
-                        </details>
-                    `
-                        : ""
-                    }
+                    <details class="group">
+                        <summary class="p-3 cursor-pointer text-sm font-medium text-yellow-300 hover:bg-gray-700 group-open:bg-gray-700">
+                            <i data-lucide="chevron-right" class="w-4 h-4 inline mr-2 group-open:transform group-open:rotate-90 transition-transform pointer-events-none"></i>
+                            Chat Prompt
+                        </summary>
+                        <div class="p-3 bg-gray-800 text-xs">
+                            <pre class="text-gray-300 overflow-x-auto whitespace-pre-wrap">${await getChatPromptContent(chatType)}</pre>
+                        </div>
+                    </details>
                     
                     ${
                       data?.outputResponse
@@ -285,15 +301,16 @@ export function renderDebugLogsModal(state) {
                         : `
                         <div class="p-6 h-full overflow-auto">
                             <div class="space-y-4">
-                                ${debugLogs
-                                  .slice()
-                                  .reverse()
-                                  .map((log) =>
-                                    log.type === "structured"
-                                      ? renderStructuredLog(log)
-                                      : renderSimpleLog(log),
-                                  )
-                                  .join("")}
+                                ${(await Promise.all(
+                                  debugLogs
+                                    .slice()
+                                    .reverse()
+                                    .map(async (log) =>
+                                      log.type === "structured"
+                                        ? await renderStructuredLog(log)
+                                        : renderSimpleLog(log),
+                                    ),
+                                )).join("")}
                             </div>
                         </div>
                     `

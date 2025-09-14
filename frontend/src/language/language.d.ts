@@ -567,6 +567,7 @@ export type LanguageStrings = {
     logsDisabled: string;
     unknown: string;
     invalidDate: string;
+    promptLoadError: string;
   };
   api: {
     imageMessage: string;
@@ -644,6 +645,8 @@ export type LanguageStrings = {
     loadApiConfigsFailed: string;
   };
   sns: {
+    createNewPost: string;
+    requiredPermissions: string;
     characterListTitle: string;
     accessDenied: string;
     createPost: string;
@@ -665,6 +668,7 @@ export type LanguageStrings = {
     secretsTab: string;
     tagsTab: string;
     addTag: string;
+    addTagPlaceholder: string;
     tagsDescription: string;
     postsCount: string;
     noPostsYet: string;
@@ -698,6 +702,8 @@ export type LanguageStrings = {
       intimacyLevel: string;
       trustLevel: string;
       romanceLevel: string;
+      noSearchResults: string;
+      noCharacters: string;
     };
     accessDeniedDescription: string;
     requiresAffection: string;
@@ -711,5 +717,62 @@ export type LanguageStrings = {
     romanticInterest: string;
     openSNSList: string;
     viewSNS: string;
+  };
+  naiSettings: {
+    apiSettings: string;
+    apiKey: string;
+    apiKeyPlaceholder: string;
+    toggleApiKey: string;
+    apiKeySet: string;
+    apiKeyRequired: string;
+    getApiKeyHint: string;
+    modelSettings: string;
+    model: string;
+    modelSupportsCharacterPrompts: string;
+    imageSize: string;
+    sizeSquare: string;
+    sizePortrait: string;
+    sizeLandscape: string;
+    unlimitedGeneration: string;
+    minDelaySeconds: string;
+    minDelayDescription: string;
+    additionalRandomSeconds: string;
+    additionalRandomDescription: string;
+    generationSteps: string;
+    promptGuidance: string;
+    sampler: string;
+    noiseSchedule: string;
+  };
+  stickerProgress: {
+    title: string;
+    defaultCharacter: string;
+    cancel: string;
+    overallProgress: string;
+    currentStatus: string;
+    emotionsToGenerate: string;
+    completedStickers: string;
+    waitingMessage: string;
+    retry: string;
+    completed: string;
+    close: string;
+    statuses: {
+      generating: string;
+      completed: string;
+      error: string;
+      waiting: string;
+      preparing: string;
+    };
+    emotions: {
+      happy: string;
+      sad: string;
+      surprised: string;
+      angry: string;
+      love: string;
+      excited: string;
+      tired: string;
+      confused: string;
+      shy: string;
+      neutral: string;
+    };
   };
 };

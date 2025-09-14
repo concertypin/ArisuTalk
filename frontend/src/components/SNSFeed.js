@@ -65,7 +65,7 @@ function renderSNSHeader(character, isSecretMode, hasAccess) {
         <button class="create-sns-post absolute top-4 right-16 p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
                 data-character-id="${character.id}"
                 data-secret-mode="${isSecretMode}"
-                title="새 포스트 작성">
+                title="${t('sns.createNewPost')}">
           <i data-lucide="plus" class="w-5 h-5 text-gray-300 pointer-events-none"></i>
         </button>
       ` : ''}
@@ -260,7 +260,7 @@ function renderAccessDenied(character, requiredLevel) {
       <p class="text-gray-400 mb-4">${t('sns.accessDeniedDescription')}</p>
       
       <div class="bg-gray-800 rounded-lg p-4 mb-4">
-        <h4 class="text-sm font-medium text-gray-300 mb-2">필요 권한:</h4>
+        <h4 class="text-sm font-medium text-gray-300 mb-2">${t('sns.requiredPermissions')}:</h4>
         <div class="text-xs text-red-400 space-y-1">
           <div>${t('sns.requiresAffection', { level: 75 })}</div>
           <div>${t('sns.requiresIntimacy', { level: 60 })}</div>

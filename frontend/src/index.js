@@ -3109,7 +3109,7 @@ class PersonaChatApp {
         },
       };
 
-      this.addStructuredLog(
+      await this.addStructuredLog(
         groupChatId,
         "group",
         character.name,
@@ -3313,7 +3313,7 @@ class PersonaChatApp {
         },
       };
 
-      this.addStructuredLog(
+      await this.addStructuredLog(
         openChatId,
         "open",
         character.name,
@@ -3824,7 +3824,7 @@ class PersonaChatApp {
       },
     };
 
-    this.addStructuredLog(chatId, "general", character.name, structuredLogData);
+    await this.addStructuredLog(chatId, "general", character.name, structuredLogData);
 
     // characterState 응답이 있으면 처리 (개별 채팅)
     if (response.characterState) {
@@ -4187,7 +4187,7 @@ class PersonaChatApp {
         },
       };
 
-      this.addStructuredLog(
+      await this.addStructuredLog(
         null,
         "random_character",
         tempCharacter.name,
@@ -6384,7 +6384,7 @@ class PersonaChatApp {
         },
       };
 
-      this.addStructuredLog(
+      await this.addStructuredLog(
         null,
         "character_generation",
         characterName,
@@ -6608,8 +6608,37 @@ class PersonaChatApp {
     this.setState({ debugLogs: newLogs });
   }
 
-  addStructuredLog(chatId, chatType, characterName, logData) {
+  // 채팅 타입별 txt 파일 읽기
+  async getSystemPromptForChatType(chatType) {
+    const promptFileMap = {
+      'general': '/src/texts/mainChatMLPrompt.txt',
+      'normal': '/src/texts/mainChatMLPrompt.txt', 
+      'group': '/src/texts/groupChatMLPrompt.txt',
+      'open': '/src/texts/openChatMLPrompt.txt',
+      'nai': '/src/texts/naiStickerPrompt.txt',
+      'sns': '/src/texts/snsForcePrompt.txt',
+      'character_generation': '/src/texts/profileCreationChatMLPrompt.txt'
+    };
+
+    const promptFile = promptFileMap[chatType] || promptFileMap['general'];
+    
+    try {
+      const response = await fetch(promptFile);
+      if (response.ok) {
+        return await response.text();
+      }
+    } catch (error) {
+      console.warn(`Failed to load prompt file for chat type: ${chatType}`, error);
+    }
+    
+    return null;
+  }
+
+  async addStructuredLog(chatId, chatType, characterName, logData) {
     if (!this.state.enableDebugLogs) return;
+
+    // 채팅 타입에 맞는 시스템 프롬프트만 가져오기
+    const chatPrompt = await this.getSystemPromptForChatType(chatType);
 
     const logEntry = {
       id: Date.now() + Math.random(),
@@ -6621,7 +6650,7 @@ class PersonaChatApp {
       // Structured data
       data: {
         personaInput: logData.personaInput || null,
-        systemPrompt: logData.systemPrompt || null,
+        systemPrompt: chatPrompt, // 채팅 타입별 txt 파일 내용만 저장
         outputResponse: logData.outputResponse || null,
         parameters: logData.parameters || {},
         metadata: {

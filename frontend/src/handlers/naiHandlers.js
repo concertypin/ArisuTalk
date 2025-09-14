@@ -2,6 +2,7 @@ import { StickerManager } from "../services/stickerManager.js";
 import { renderNAIStats } from "../components/settings/panels/NAISettingsPanel.js";
 import { renderStickerProgressModal } from "../components/StickerProgressModal.js";
 import { DEFAULT_EMOTIONS } from "../api/novelai.js";
+import { t } from "../i18n.js";
 
 /**
  * NAI 스티커 생성 관련 이벤트 핸들러
@@ -272,7 +273,7 @@ async function handleGenerateCurrentCharacterStickers(app) {
   // 캐릭터 모달에서 호출되는 경우 editingCharacter 사용, 아니면 currentCharacter 사용
   const character = app.state.editingCharacter || app.state.currentCharacter;
   if (!character) {
-    app.showNotification("캐릭터를 선택해주세요.", "warning");
+    app.showNotification(t('naiHandlers.pleaseSelectCharacter'), "warning");
     return;
   }
 
@@ -301,7 +302,7 @@ async function handleGenerateCurrentCharacterStickers(app) {
     button.disabled = true;
     button.innerHTML = `
       <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
-      생성 중...
+      ${t('naiHandlers.generating')}
     `;
     if (window.lucide) window.lucide.createIcons();
 
@@ -333,16 +334,16 @@ async function handleGenerateCurrentCharacterStickers(app) {
     // 결과 처리
     if (result.generated.length > 0) {
       app.showNotification(
-        `${character.name}의 스티커 ${result.generated.length}개가 생성되었습니다!`,
+        t('naiHandlers.stickersGenerated', { name: character.name, count: result.generated.length }),
         "success"
       );
     } else if (result.generated.length === 0 && result.failed.length === 0) {
-      app.showNotification(result.message || "이미 모든 스티커가 존재합니다.", "info");
+      app.showNotification(result.message || t('naiHandlers.allStickersExist'), "info");
     }
 
     if (result.failed.length > 0) {
       app.showNotification(
-        `${result.failed.length}개 스티커 생성에 실패했습니다.`,
+        t('naiHandlers.stickerGenerationFailed', { count: result.failed.length }),
         "warning"
       );
     }
@@ -363,7 +364,7 @@ async function handleGenerateCurrentCharacterStickers(app) {
     progressState.error = error.message;
     updateStickerProgressModal(app, progressState);
     
-    app.showNotification(`스티커 생성에 실패했습니다: ${error.message}`, "error");
+    app.showNotification(t('naiHandlers.stickerGenerationError', { error: error.message }), "error");
   } finally {
     // UI 복원 - 어떤 버튼인지에 따라 다른 텍스트 사용
     button.disabled = false;
