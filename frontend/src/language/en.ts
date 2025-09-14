@@ -246,8 +246,6 @@ export const en: LanguageStrings = {
     performanceComingSoon:
       "Performance optimization options will be supported in future updates.",
     experimentalFeatures: "Experimental Features",
-    useNewInputBar: "New Input Bar Design",
-    useNewInputBarDesc: "Uses a rounded, floating input bar design.",
     experimentalWarning:
       "Experimental features may be unstable and cause unexpected behavior.",
     warningNote: "Warning",
@@ -503,8 +501,8 @@ export const en: LanguageStrings = {
     characterCardSaveError: {
       message: "Failed to save character card.",
     },
-    character_name_required_title: "Name required",
-    character_name_required_message: "Please enter a character name first.",
+    characterNameRequiredTitle: "Name required",
+    characterNameRequiredMessage: "Please enter a character name first.",
     aiGenerationComplete: {
       title: "AI Generation Complete",
       message:
