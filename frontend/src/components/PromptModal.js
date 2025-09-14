@@ -48,7 +48,7 @@ export async function renderPromptModal(app) {
 
   return `
     <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" id="prompt-modal-root">
-        <div class="bg-gray-800 rounded-2xl w-full max-w-4xl mx-4 flex flex-col" style="max-height: 90vh;">
+        <div class="bg-gray-800 rounded-2xl w-full max-w-4xl mx-4 flex flex-col relative z-[60]" style="max-height: 90vh;">
             <div class="flex items-center justify-between p-6 border-b border-gray-700 shrink-0">
                 <h3 class="text-lg font-semibold text-white">${t("promptModal.title")}</h3>
                 <button id="close-prompt-modal" class="p-1 hover:bg-gray-700 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
@@ -62,7 +62,7 @@ export async function renderPromptModal(app) {
                             <h4 class="text-base font-semibold text-blue-300">${title}</h4>
                             <div class="relative group">
                                 <i data-lucide="help-circle" class="w-4 h-4 text-gray-400 cursor-pointer"></i>
-                                <div class="absolute bottom-full mb-2 w-96 bg-gray-900 text-white text-xs rounded-lg p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-[60]">
+                                <div class="absolute bottom-full mb-2 w-96 bg-gray-900 text-white text-xs rounded-lg p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-[70]">
                                     <h5 class="font-bold mb-2">Magic Patterns</h5>
                                     <p>Magic Patterns are special patterns that can be used in the prompt to access character properties and current chatting log.</p>
                                     <p>Patterns start with <code>{|</code> and ends with <code>|}</code>. Inner text is command. Multi-line is supported.</p>
