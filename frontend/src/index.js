@@ -6282,8 +6282,8 @@ class PersonaChatApp {
 
     if (!characterName) {
       this.showInfoModal(
-        t("character_name_required_title"),
-        t("character_name_required_message"),
+        t("characterNameRequiredTitle"),
+        t("characterNameRequiredMessage"),
       );
       return;
     }

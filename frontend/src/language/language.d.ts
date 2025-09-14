@@ -18,6 +18,7 @@ export type LanguageStrings = {
     deleteSticker: string;
     addContact: string;
     editContact: string;
+    editModeTitle: string;
     profileImage: string;
     importContact: string;
     shareContact: string;
@@ -75,6 +76,8 @@ export type LanguageStrings = {
     resetDataFinalConfirm: string;
     resetDataComplete: string;
     resetDataFailed: string;
+    restoreSnapshotConfirm: string;
+    deleteSnapshotConfirm: string;
   };
   mainChat: {
     uploadPhoto: string;
@@ -125,6 +128,14 @@ export type LanguageStrings = {
     characterSheetGenerationPromptDescription: string;
     mainChatPromptDescription: string;
     randomFirstMessagePromptDescription: string;
+    snsForcePrompt: string;
+    snsForcePromptDescription: string;
+    naiStickerPrompt: string;
+    naiStickerPromptDescription: string;
+    groupChatPrompt: string;
+    groupChatPromptDescription: string;
+    openChatPrompt: string;
+    openChatPromptDescription: string;
     resetAllPrompts: string;
     resetAllPromptsConfirmation: string;
     restoreFailed: string;
@@ -264,6 +275,8 @@ export type LanguageStrings = {
       stickerData: string;
       debugLogs: string;
     };
+    uiSizePreviewMessage1: string;
+    uiSizePreviewMessage2: string;
   };
   sidebar: {
     startNewChat: string;
@@ -446,6 +459,23 @@ export type LanguageStrings = {
     resetPromptMessage: string;
     resetPromptCompleteTitle: string;
     resetPromptCompleteMessage: string;
+    selectChat: {
+      message: string;
+      newChat: string;
+    };
+    characterCardSaveError: {
+      message: string;
+    };
+    characterNameRequiredTitle: string;
+    characterNameRequiredMessage: string;
+    aiGenerationComplete: {
+      title: string;
+      message: string;
+    };
+    generationFailed: {
+      title: string;
+      message: string;
+    };
   };
   ui: {
     discardChanges: string;
@@ -463,8 +493,12 @@ export type LanguageStrings = {
     fileProcessingError: string;
     fileProcessingAlert: string;
     fileSizeExceeded: string;
+    fileSizeExceededMessage: string;
     unsupportedFormat: string;
+    unsupportedFormatMessage: string;
     stickerProcessingError: string;
+    stickerProcessingErrorConsole: string;
+    stickerProcessingErrorMessage: string;
     storageFull: string;
     storageFullMessage: string;
     groupChatNamePlaceholder: string;
@@ -596,6 +630,7 @@ export type LanguageStrings = {
     storageFullMessage: string;
     selectModeDeselect: string;
     selectModeSelect: string;
+    selectAll: string;
   };
   landing: {
     welcomeTitle: string;
@@ -643,6 +678,31 @@ export type LanguageStrings = {
     saveApiConfigsFailed: string;
     noMasterPasswordForDecryption: string;
     loadApiConfigsFailed: string;
+  };
+  search: {
+    prompt: string;
+    noResults: string;
+  };
+  generatingStatus: {
+    generating: string;
+  };
+  hypnosis: {
+    hypnosisControl: string;
+    enabled: string;
+    disabled: string;
+    affectionControl: string;
+    intimacyControl: string;
+    trustControl: string;
+    romanceControl: string;
+    forceLoveUnlock: string;
+    snsFullAccess: string;
+    secretAccountAccess: string;
+    currentLevel: string;
+    override: string;
+    naturalValue: string;
+    hypnosisValue: string;
+    settingsWarning: string;
+    dangerousFeature: string;
   };
   sns: {
     createNewPost: string;
@@ -774,5 +834,100 @@ export type LanguageStrings = {
       shy: string;
       neutral: string;
     };
+  };
+  naiSettings: {
+    apiSettings: string;
+    apiKey: string;
+    apiKeyPlaceholder: string;
+    toggleApiKey: string;
+    apiKeySet: string;
+    apiKeyRequired: string;
+    getApiKeyHint: string;
+    modelSettings: string;
+    model: string;
+    modelSupportsCharacterPrompts: string;
+    imageSize: string;
+    sizeSquare: string;
+    sizePortrait: string;
+    sizeLandscape: string;
+    unlimitedGeneration: string;
+    minDelaySeconds: string;
+    minDelayDescription: string;
+    additionalRandomSeconds: string;
+    additionalRandomDescription: string;
+    generationSteps: string;
+    promptGuidance: string;
+    sampler: string;
+    noiseSchedule: string;
+    characterImageSettings: string;
+    useCharacterPrompts: string;
+    characterPromptsDescription: string;
+    useVibeTransfer: string;
+    vibeTransferDescription: string;
+    referenceStrength: string;
+    informationExtraction: string;
+    vibeImageUpload: string;
+    imageUploadFormats: string;
+    advancedSettings: string;
+    enableSMEA: string;
+    smeaDescription: string;
+    enableSMEADYN: string;
+    smeaDynDescription: string;
+    cfgRescale: string;
+    unconditionalScale: string;
+    dynamicThresholding: string;
+    dynamicThresholdingDescription: string;
+  };
+  stickerProgress: {
+    title: string;
+    defaultCharacter: string;
+    cancel: string;
+    overallProgress: string;
+    currentStatus: string;
+    emotionsToGenerate: string;
+    completedStickers: string;
+    statuses: {
+      preparing: string;
+      generating: string;
+      completed: string;
+      error: string;
+      waiting: string;
+    };
+    emotions: {
+      happy: string;
+      sad: string;
+      surprised: string;
+      angry: string;
+      love: string;
+      excited: string;
+      tired: string;
+      confused: string;
+      shy: string;
+      neutral: string;
+    };
+  };
+  debugLogs: {
+    promptLoadError: string;
+  };
+  naiHandlers: {
+    pleaseSelectCharacter: string;
+    generating: string;
+    stickerGenerationSuccess: string;
+    stickerGenerationError: string;
+    generateBasicEmotions: string;
+    currentCharacter: string;
+    allCharacters: string;
+    generatingAll: string;
+    noCharactersFound: string;
+    batchGenerationConfirm: string;
+    processingCharacter: string;
+    generatingEmotion: string;
+    batchGenerationComplete: string;
+    processedCharacters: string;
+    successCount: string;
+    failCount: string;
+    generatedStickers: string;
+    batchGenerationFailed: string;
+    autoStickerGenerated: string;
   };
 };
