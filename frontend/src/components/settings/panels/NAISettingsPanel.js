@@ -57,38 +57,38 @@ export function renderNAISettingsPanel(app) {
       <div class="bg-gray-700/30 rounded-xl p-6">
         <h4 class="text-lg font-semibold text-white mb-4 flex items-center">
           <i data-lucide="image" class="w-5 h-5 mr-3 text-purple-400"></i>
-          NovelAI API 설정
+          ${t("naiSettings.apiSettingsTitle")}
         </h4>
         
         <div class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-300 mb-2">
-              API 키 (Persistent Token)
+              ${t("naiSettings.apiKey")}
             </label>
             <div class="flex gap-2">
               <input 
                 id="nai-api-key" 
                 type="password" 
                 value="${apiKey}" 
-                placeholder="NovelAI API 키를 입력하세요"
+                placeholder="${t("naiSettings.apiKeyPlaceholder")}"
                 class="flex-1 px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-purple-500/50 transition-all duration-200"
               >
               <button 
                 id="toggle-nai-api-key" 
                 type="button"
                 class="px-3 py-3 rounded-full bg-gray-800 hover:bg-gray-700 text-gray-300 transition-colors"
-                title="API 키 보기/숨기기"
+                title="${t("naiSettings.apiKeyToggle")}"
               >
                 <i data-lucide="eye" class="w-4 h-4 pointer-events-none"></i>
               </button>
             </div>
             ${isApiKeySet ? 
-              `<div class="text-xs text-green-400 mt-1">✓ API 키가 설정되었습니다: ${maskedApiKey}</div>` :
-              `<div class="text-xs text-red-400 mt-1">⚠ API 키가 필요합니다</div>`
+              `<div class="text-xs text-green-400 mt-1">${t("naiSettings.apiKeySet", { maskedKey: maskedApiKey })}</div>` :
+              `<div class="text-xs text-red-400 mt-1">${t("naiSettings.apiKeyRequired")}</div>`
             }
             <div class="text-xs text-gray-400 mt-2">
               <a href="https://novelai.net/account" target="_blank" class="text-purple-400 hover:text-purple-300">
-                NovelAI 계정 설정에서 Persistent API Token을 발급받으세요
+                ${t("naiSettings.apiKeyHelp")}
               </a>
             </div>
           </div>
@@ -99,13 +99,13 @@ export function renderNAISettingsPanel(app) {
       <div class="bg-gray-700/30 rounded-xl p-6">
         <h4 class="text-lg font-semibold text-white mb-4 flex items-center">
           <i data-lucide="cpu" class="w-5 h-5 mr-3 text-green-400"></i>
-          모델 및 생성 설정
+          ${t("naiSettings.modelSettingsTitle")}
         </h4>
         
         <div class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-300 mb-2">
-              NovelAI 모델
+              ${t("naiSettings.model")}
             </label>
             <select 
               id="nai-model" 
@@ -118,37 +118,37 @@ export function renderNAISettingsPanel(app) {
               `).join("")}
             </select>
             <div class="text-xs text-gray-400 mt-1">
-              v4/v4.5 모델은 캐릭터 프롬프트를 지원합니다
+              ${t("naiSettings.modelHelp")}
             </div>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-300 mb-2">
-              이미지 크기
+              ${t("naiSettings.imageSize")}
             </label>
             <select 
               id="nai-preferred-size" 
               class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-green-500/50"
             >
               <option value="square" ${preferredSize === "square" ? "selected" : ""}>
-                정사각형 (1024×1024) - 권장
+                ${t("naiSettings.imageSizeSquare")}
               </option>
               <option value="portrait" ${preferredSize === "portrait" ? "selected" : ""}>
-                세로형 (832×1216)
+                ${t("naiSettings.imageSizePortrait")}
               </option>
               <option value="landscape" ${preferredSize === "landscape" ? "selected" : ""}>
-                가로형 (1216×832)
+                ${t("naiSettings.imageSizeLandscape")}
               </option>
             </select>
             <div class="text-xs text-gray-400 mt-1">
-              ✓ 모든 크기는 무제한 생성이 가능합니다
+              ${t("naiSettings.imageSizeHelp")}
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-300 mb-2">
-                최소 대기 시간 (초)
+                ${t("naiSettings.minDelayTime")}
               </label>
               <input 
                 id="nai-min-delay" 
@@ -159,13 +159,13 @@ export function renderNAISettingsPanel(app) {
                 class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-green-500/50"
               >
               <div class="text-xs text-gray-400 mt-1">
-                연속 생성 간 최소 대기 시간
+                ${t("naiSettings.minDelayHelp")}
               </div>
             </div>
             
             <div>
               <label class="block text-sm font-medium text-gray-300 mb-2">
-                추가 랜덤 시간 (초)
+                ${t("naiSettings.maxAdditionalTime")}
               </label>
               <input 
                 id="nai-max-additional-delay" 
@@ -176,7 +176,7 @@ export function renderNAISettingsPanel(app) {
                 class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-green-500/50"
               >
               <div class="text-xs text-gray-400 mt-1">
-                최소 시간에 추가되는 랜덤 시간
+                ${t("naiSettings.maxAdditionalHelp")}
               </div>
             </div>
           </div>
@@ -186,7 +186,7 @@ export function renderNAISettingsPanel(app) {
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-300 mb-2">
-                생성 스텝 수
+                ${t("naiSettings.steps")}
               </label>
               <input 
                 id="nai-steps" 
@@ -205,7 +205,7 @@ export function renderNAISettingsPanel(app) {
             
             <div>
               <label class="block text-sm font-medium text-gray-300 mb-2">
-                프롬프트 가이던스
+                ${t("naiSettings.scale")}
               </label>
               <input 
                 id="nai-scale" 
@@ -226,7 +226,7 @@ export function renderNAISettingsPanel(app) {
 
           <div>
             <label class="block text-sm font-medium text-gray-300 mb-2">
-              샘플러
+              ${t("naiSettings.sampler")}
             </label>
             <select 
               id="nai-sampler" 
@@ -242,7 +242,7 @@ export function renderNAISettingsPanel(app) {
 
           <div>
             <label class="block text-sm font-medium text-gray-300 mb-2">
-              노이즈 스케줄
+              ${t("naiSettings.noiseSchedule")}
             </label>
             <select 
               id="nai-noise-schedule" 
@@ -262,17 +262,17 @@ export function renderNAISettingsPanel(app) {
       <div class="bg-gray-700/30 rounded-xl p-6">
         <h4 class="text-lg font-semibold text-white mb-4 flex items-center">
           <i data-lucide="user-plus" class="w-5 h-5 mr-3 text-pink-400"></i>
-          캐릭터 및 이미지 설정
+          ${t("naiSettings.characterImageSettingsTitle")}
         </h4>
         
         <div class="space-y-4">
           <div class="flex items-center justify-between">
             <div>
               <label class="text-sm font-medium text-gray-300">
-                캐릭터 프롬프트 사용 (v4/v4.5 전용)
+                ${t("naiSettings.useCharacterPrompts")}
               </label>
               <p class="text-xs text-gray-400 mt-1">
-                특정 캐릭터를 일관성 있게 생성합니다
+                ${t("naiSettings.useCharacterPromptsHelp")}
               </p>
             </div>
             <label class="relative inline-flex items-center cursor-pointer">
@@ -289,10 +289,10 @@ export function renderNAISettingsPanel(app) {
           <div class="flex items-center justify-between">
             <div>
               <label class="text-sm font-medium text-gray-300">
-                Vibe Transfer 사용
+                ${t("naiSettings.vibeTransfer")}
               </label>
               <p class="text-xs text-gray-400 mt-1">
-                참조 이미지를 기반으로 스타일을 적용합니다
+                ${t("naiSettings.vibeTransferHelp")}
               </p>
             </div>
             <label class="relative inline-flex items-center cursor-pointer">
@@ -310,7 +310,7 @@ export function renderNAISettingsPanel(app) {
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium text-gray-300 mb-2">
-                  참조 강도
+                  ${t("naiSettings.vibeStrength")}
                 </label>
                 <input 
                   id="nai-vibe-strength" 
