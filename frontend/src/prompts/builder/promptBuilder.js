@@ -45,10 +45,10 @@ async function populateTemplate(template, context) {
       allowed[key] = JSON.parse(JSON.stringify(context[key]));
     }
   }
-  
+
   // 먼저 간단한 변수 치환을 처리
   let result = template;
-  
+
   // {character.memories}, {character.name} 등의 중첩된 속성 치환
   result = result.replace(/\{([^{}|]+)\}/g, (match, path) => {
     try {
@@ -59,7 +59,7 @@ async function populateTemplate(template, context) {
       return match;
     }
   });
-  
+
   // 그 다음 magic patterns 처리
   return await parseMagicPatterns(result, allowed);
 }
@@ -134,12 +134,12 @@ export async function buildContentPrompt({
         })
         .join("\n");
     }
-    
+
     // 2. 기존 텍스트 메모리가 있으면 그것을 사용 (하위 호환성)
     if (character.memories && character.memories.length > 0) {
       return character.memories.map((mem) => `- ${mem}`).join("\n");
     }
-    
+
     // 3. 둘 다 없으면 기본 메시지
     return "No specific memories recorded yet.";
   })();
@@ -265,7 +265,7 @@ export async function buildContentPrompt({
  * @param {object} params - The parameters for building the prompt.
  * @param {string} params.characterName - The character's name.
  * @param {string} params.characterDescription - The character's description.
- * @returns {Promise<{systemPrompt: string, contents: Array<object>}>} - The generated system prompt and contents.
+ * @returns {Promise<{systemPrompt: string, contents: Array<{role:"user"|"model",parts:{text:string}[]}>}>} - The generated system prompt and contents.
  */
 export async function buildCharacterSheetPrompt({
   characterName,

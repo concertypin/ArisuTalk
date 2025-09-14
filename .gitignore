@@ -45,3 +45,8 @@ backups/
 CLAUDE.MD
 CLAUDE.md
 claude.md
+
+
+# Secret files
+*.pem
+frontend/vite.config.local.ts

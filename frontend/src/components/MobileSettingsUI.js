@@ -669,7 +669,7 @@ export function renderProviderConfig(provider, config) {
             </div>
 
             ${
-              provider === PROVIDERS.CUSTOM_OPENAI
+              [PROVIDERS.CUSTOM_OPENAI, PROVIDERS.LANGCHAIN_CUSTOM_OPENAI].includes(provider)
                 ? `
                 <!-- Custom OpenAI Base URL -->
                 <div>

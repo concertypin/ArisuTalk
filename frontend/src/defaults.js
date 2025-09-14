@@ -73,5 +73,16 @@ export const defaultAPISettings = {
       model: "",
       customModels: [],
     },
+    langchain_gemini: {
+      apiKey: "",
+      model: "gemini-2.5-flash",
+      customModels: [],
+    },
+    langchain_custom_openai: {
+      apiKey: "",
+      baseUrl: "",
+      model: "gpt-4o",
+      customModels: [],
+    },
   },
 };

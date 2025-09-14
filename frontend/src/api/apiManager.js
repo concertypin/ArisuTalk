@@ -5,6 +5,8 @@ import { OpenAIClient } from "./openai.js";
 import { GrokClient } from "./grok.js";
 import { OpenRouterClient } from "./openrouter.js";
 import { CustomOpenAIClient } from "./customopenai.js";
+import { LangChainGeminiClient } from "./langchain-gemini.ts";
+import { LangChainCustomOpenAIClient } from "./langchain-customopenai.ts";
 import {
   PROVIDERS,
   SUPPORTED_PROVIDERS,
@@ -78,6 +80,12 @@ export class APIManager {
         break;
       case PROVIDERS.CUSTOM_OPENAI:
         client = new CustomOpenAIClient(apiKey, model, baseUrl, options);
+        break;
+      case PROVIDERS.LANGCHAIN_GEMINI:
+        client = new LangChainGeminiClient(apiKey, model, options);
+        break;
+      case PROVIDERS.LANGCHAIN_CUSTOM_OPENAI:
+        client = new LangChainCustomOpenAIClient(apiKey, model, baseUrl, options);
         break;
       default:
         throw new Error(`Unsupported API provider: ${provider}`);

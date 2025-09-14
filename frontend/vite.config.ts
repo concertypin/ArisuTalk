@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig, UserConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
 // Since it distracts debugging via service worker, enable it only on production build
@@ -27,17 +27,49 @@ const prodOnlyPlugin = [
         }
     })
 ]
-export default defineConfig(({ mode }) => ({
-    server: {
-        open: "index.html",
-    },
-    build: {
-        outDir: "dist",
-        sourcemap: "inline",
-    },
-    clearScreen: false,
-    publicDir: "static",
-    plugins: [
-        ...(mode === 'production' ? prodOnlyPlugin : [])
-    ]
-}));
+
+
+const baseConfigFactory = defineConfig(
+    ({ mode }) => {
+        return {
+            server: {
+                open: "index.html",
+            },
+            build: {
+                outDir: "dist",
+                sourcemap: "inline",
+            },
+            clearScreen: false,
+            publicDir: "static",
+            plugins: [
+                ...(mode === 'production' ? prodOnlyPlugin : [])
+            ]
+        }
+    }
+)
+
+export default defineConfig(async (env) => {
+    // If there is a object in both configs, merge them
+    // If there is object in object, merge them recursively
+    // If there is array in both configs, concatenate them
+    // If there is primitive in both configs, localConfig takes precedence
+    const localConfig: Partial<UserConfig> = await import(`./vite.config.local.ts`).then(mod => mod.default(env)).catch(() => ({}))
+    let mergedConfig = baseConfigFactory(env)
+    mergedConfig = {
+        ...mergedConfig,
+        ...localConfig,
+        server: {
+            ...mergedConfig.server,
+            ...(localConfig.server || {}),
+            proxy: {
+                ...mergedConfig.server?.proxy,
+                ...localConfig.server?.proxy,
+            }
+        },
+        plugins: [
+            ...(mergedConfig.plugins || []),
+            ...(localConfig.plugins || [])
+        ],
+    }
+    return mergedConfig
+});

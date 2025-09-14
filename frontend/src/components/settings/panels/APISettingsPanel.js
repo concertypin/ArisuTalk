@@ -62,6 +62,12 @@ export function renderAPISettingsPanel(app) {
                     <option value="custom_openai" ${
                       provider === "custom_openai" ? "selected" : ""
                     }>Custom OpenAI</option>
+                    <option value="langchain_gemini" ${
+                      provider === "langchain_gemini" ? "selected" : ""
+                    }>LangChain Gemini</option>
+                    <option value="langchain_custom_openai" ${
+                      provider === "langchain_custom_openai" ? "selected" : ""
+                    }>LangChain Custom OpenAI</option>
                 </select>
             </div>
 
@@ -109,6 +115,8 @@ function getProviderDisplayName(provider) {
     grok: "xAI Grok",
     openrouter: "OpenRouter",
     custom_openai: "Custom OpenAI",
+    langchain_gemini: "LangChain Gemini",
+    langchain_custom_openai: "LangChain Custom OpenAI",
   };
   return displayNames[provider] || provider;
 }

@@ -26,7 +26,14 @@
     "vite-plugin-pwa": "^1.0.3"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@langchain/community": "^0.3.55",
+    "@langchain/core": "^0.3.75",
+    "@langchain/google-genai": "^0.2.17",
+    "@langchain/openai": "^0.6.11",
     "jszip": "^3.10.1",
-    "pako": "^2.1.0"
+    "langchain": "^0.3.33",
+    "pako": "^2.1.0",
+    "zod": "^4.1.8"
   }
 }

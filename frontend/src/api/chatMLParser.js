@@ -92,7 +92,7 @@ export function parseChatML(chatMLText) {
  * @param {string} userName - User name
  * @param {string} userDescription - User description
  * @param {boolean} includeConversation - Whether to include user/assistant messages from ChatML (default: false)
- * @returns {{systemPrompt: string, contents: Array<Object>}} Internal prompt structure
+ * @returns {{systemPrompt: string, contents: Array<{role: "user" | "model", parts: {text: string}[]}>}} Internal prompt structure
  */
 export function chatMLToPromptStructure(
   messages,
@@ -102,6 +102,7 @@ export function chatMLToPromptStructure(
   includeConversation = false,
 ) {
   let systemPrompt = "";
+  /** @type {Array<{role: "user" | "model", parts: {text: string}[]}>} */
   const contents = [];
 
   const replacements = {

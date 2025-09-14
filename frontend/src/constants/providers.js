@@ -11,6 +11,8 @@ export const PROVIDERS = {
   GROK: "grok",
   OPENROUTER: "openrouter",
   CUSTOM_OPENAI: "custom_openai",
+  LANGCHAIN_GEMINI: "langchain_gemini",
+  LANGCHAIN_CUSTOM_OPENAI: "langchain_custom_openai",
 };
 
 // Array of all supported providers
@@ -21,6 +23,8 @@ export const SUPPORTED_PROVIDERS = [
   PROVIDERS.GROK,
   PROVIDERS.OPENROUTER,
   PROVIDERS.CUSTOM_OPENAI,
+  PROVIDERS.LANGCHAIN_GEMINI,
+  PROVIDERS.LANGCHAIN_CUSTOM_OPENAI,
 ];
 
 // Default provider
@@ -34,6 +38,8 @@ export const PROVIDER_NAMES = {
   [PROVIDERS.GROK]: "Grok",
   [PROVIDERS.OPENROUTER]: "OpenRouter",
   [PROVIDERS.CUSTOM_OPENAI]: "Custom OpenAI",
+  [PROVIDERS.LANGCHAIN_GEMINI]: "LangChain Gemini",
+  [PROVIDERS.LANGCHAIN_CUSTOM_OPENAI]: "LangChain Custom OpenAI",
 };
 
 // Default models for each provider
@@ -61,6 +67,8 @@ export const PROVIDER_MODELS = {
   [PROVIDERS.GROK]: ["grok-4", "grok-3", "grok-3-mini"],
   [PROVIDERS.OPENROUTER]: [], // 커스텀 모델만 지원
   [PROVIDERS.CUSTOM_OPENAI]: [], // 커스텀 모델만 지원
+  [PROVIDERS.LANGCHAIN_GEMINI]: ["gemini-2.5-pro", "gemini-2.5-flash"],
+  [PROVIDERS.LANGCHAIN_CUSTOM_OPENAI]: ["gpt-4o", "gpt-4o-mini"], // 예시 모델
 };
 
 // Default models for each provider
@@ -71,6 +79,8 @@ export const DEFAULT_MODELS = {
   [PROVIDERS.GROK]: "grok-3",
   [PROVIDERS.OPENROUTER]: "",
   [PROVIDERS.CUSTOM_OPENAI]: "",
+  [PROVIDERS.LANGCHAIN_GEMINI]: "gemini-2.5-flash",
+  [PROVIDERS.LANGCHAIN_CUSTOM_OPENAI]: "gpt-4o",
 };
 
 /**
