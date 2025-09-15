@@ -143,14 +143,11 @@ export function setupPromptModalEventListeners(app) {
     activeTooltip.innerHTML = template.innerHTML;
     
     const classes = template.className.replace('hidden', '').trim();
-    activeTooltip.className = classes;
-    
-    activeTooltip.style.position = 'fixed';
-    activeTooltip.style.zIndex = '100';
+    activeTooltip.className = `${classes} fixed z-[100]`;
     
     document.body.appendChild(activeTooltip);
 
-    setTimeout(() => {
+    requestAnimationFrame(() => {
         const iconRect = iconElement.getBoundingClientRect();
         const tooltipRect = activeTooltip.getBoundingClientRect();
 
@@ -167,7 +164,7 @@ export function setupPromptModalEventListeners(app) {
             leftPosition = window.innerWidth - tooltipRect.width - 5;
         }
         activeTooltip.style.left = `${leftPosition}px`;
-    }, 0);
+    });
 
     if (isTouchEvent) {
         e.stopPropagation();
