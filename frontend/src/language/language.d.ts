@@ -939,6 +939,20 @@ export type LanguageStrings = {
     viewGenerated: string;
     openCharacter: string;
     generating: string;
+    emotionsToGenerate: string;
+    completedStickers: string;
+    emotions: {
+      happy: string;
+      sad: string;
+      surprised: string;
+      angry: string;
+      love: string;
+      embarrassed: string;
+      confused: string;
+      sleepy: string;
+      excited: string;
+      neutral: string;
+    };
   };
   stickerPreview: {
     title: string;

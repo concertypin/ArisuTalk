@@ -999,7 +999,21 @@ export const en: LanguageStrings = {
     retryAll: "Retry All",
     viewGenerated: "View Generated Stickers",
     openCharacter: "Open Character",
-    generating: "Generating..."
+    generating: "Generating...",
+    emotionsToGenerate: "Emotions to Generate",
+    completedStickers: "Completed Stickers",
+    emotions: {
+      happy: "Happy",
+      sad: "Sad",
+      surprised: "Surprised",
+      angry: "Angry",
+      love: "Love",
+      embarrassed: "Embarrassed",
+      confused: "Confused",
+      sleepy: "Sleepy",
+      excited: "Excited",
+      neutral: "Neutral"
+    }
   },
   stickerPreview: {
     title: "Sticker Preview",

@@ -996,7 +996,21 @@ export const ko: LanguageStrings = {
     retryAll: "모두 재시도",
     viewGenerated: "생성된 스티커 보기",
     openCharacter: "캐릭터 열기",
-    generating: "생성 중..."
+    generating: "생성 중...",
+    emotionsToGenerate: "생성할 감정들",
+    completedStickers: "완성된 스티커",
+    emotions: {
+      happy: "기쁨",
+      sad: "슬픔",
+      surprised: "놀람",
+      angry: "분노",
+      love: "사랑",
+      embarrassed: "부끄러움",
+      confused: "혼란",
+      sleepy: "졸림",
+      excited: "흥분",
+      neutral: "무표정"
+    }
   },
   stickerPreview: {
     title: "스티커 프리뷰",
