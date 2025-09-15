@@ -853,8 +853,6 @@ export const en: LanguageStrings = {
     minDelayHelp: "Minimum wait time between consecutive generations",
     maxAdditionalTime: "Additional Random Time (seconds)",
     maxAdditionalHelp: "Random time added to minimum time",
-    steps: "Generation Steps",
-    scale: "Prompt Guidance",
     sampler: "Sampler",
     noiseSchedule: "Noise Schedule",
     characterImageSettingsTitle: "Character and Image Settings",
@@ -1092,7 +1090,6 @@ export const en: LanguageStrings = {
       exif: "EXIF",
       preview: "Preview",
       reroll: "Reroll"
-    },
-    save: "Save"
+    }
   },
 };

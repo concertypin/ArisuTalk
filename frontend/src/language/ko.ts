@@ -850,8 +850,6 @@ export const ko: LanguageStrings = {
     minDelayHelp: "연속 생성 간 최소 대기 시간",
     maxAdditionalTime: "추가 랜덤 시간 (초)",
     maxAdditionalHelp: "최소 시간에 추가되는 랜덤 시간",
-    steps: "생성 스텝 수",
-    scale: "프롬프트 가이던스",
     sampler: "샘플러",
     noiseSchedule: "노이즈 스케줄",
     characterImageSettingsTitle: "캐릭터 및 이미지 설정",
