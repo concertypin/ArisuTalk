@@ -66,10 +66,23 @@ export function renderStickerProgressModal(progress) {
           <h4 class="text-sm font-medium text-gray-700 mb-2">${t("stickerProgress.emotionsToGenerate")}</h4>
           <div class="grid grid-cols-5 gap-2">
             ${emotions.map((emotion, index) => {
-              const isCompleted = generatedStickers.some(s => s.emotion === emotion);
+              // 감정 키 추출 (객체 또는 문자열 처리)
+              let emotionKey, emotionDisplayName;
+              if (typeof emotion === 'object' && emotion.emotion) {
+                emotionKey = emotion.emotion;
+                emotionDisplayName = emotion.title || emotion.emotion;
+              } else if (typeof emotion === 'string') {
+                emotionKey = emotion;
+                emotionDisplayName = emotion;
+              } else {
+                emotionKey = 'unknown';
+                emotionDisplayName = 'Unknown';
+              }
+
+              const isCompleted = generatedStickers.some(s => s.emotion === emotionKey);
               const isCurrent = index === currentIndex - 1;
-              const isError = progress.failedEmotions?.includes(emotion);
-              
+              const isError = progress.failedEmotions?.includes(emotionKey);
+
               return `
                 <div class="text-center">
                   <div class="w-8 h-8 mx-auto mb-1 rounded-full flex items-center justify-center text-xs font-medium ${
@@ -80,7 +93,7 @@ export function renderStickerProgressModal(progress) {
                   }">
                     ${isError ? '✗' : isCompleted ? '✓' : isCurrent ? '⟳' : '○'}
                   </div>
-                  <span class="text-xs text-gray-600">${t(`stickerProgress.emotions.${emotion}`)}</span>
+                  <span class="text-xs text-gray-600">${typeof emotion === 'object' && emotion.title ? emotionDisplayName : (t(`stickerProgress.emotions.${emotionKey}`) || emotionDisplayName)}</span>
                 </div>
               `;
             }).join('')}
@@ -195,8 +208,25 @@ function getStatusIcon(status) {
 
 function getStatusText(status, currentEmotion) {
   switch (status) {
-    case 'generating':
-      return t("stickerProgress.statuses.generating", { emotion: t(`stickerProgress.emotions.${currentEmotion}`) });
+    case 'generating': {
+      // 감정 키 추출 (객체 또는 문자열 처리)
+      let emotionKey, emotionDisplayName;
+      if (typeof currentEmotion === 'object' && currentEmotion.emotion) {
+        emotionKey = currentEmotion.emotion;
+        emotionDisplayName = currentEmotion.title || currentEmotion.emotion;
+      } else if (typeof currentEmotion === 'string') {
+        emotionKey = currentEmotion;
+        emotionDisplayName = currentEmotion;
+      } else {
+        emotionKey = 'unknown';
+        emotionDisplayName = 'Unknown';
+      }
+
+      const emotionTranslation = typeof currentEmotion === 'object' && currentEmotion.title ?
+        emotionDisplayName :
+        (t(`stickerProgress.emotions.${emotionKey}`) || emotionDisplayName);
+      return t("stickerProgress.statuses.generating", { emotion: emotionTranslation });
+    }
     case 'completed':
       return t("stickerProgress.statuses.completed");
     case 'error':

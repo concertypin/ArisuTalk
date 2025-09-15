@@ -915,15 +915,30 @@ export class NovelAIClient {
 
     if (result.success) {
       // 스티커 데이터 생성
-      const stickerId = `generated_${emotion}_${Date.now()}`;
-      const stickerName = `${character.name || "Character"} - ${emotion.charAt(0).toUpperCase() + emotion.slice(1)}`;
+      let emotionKey, emotionDisplayName;
+
+      if (typeof emotion === 'object' && emotion.emotion) {
+        // 새로운 3필드 구조
+        emotionKey = emotion.emotion;
+        emotionDisplayName = emotion.title || emotion.emotion;
+      } else if (typeof emotion === 'string') {
+        // 기존 문자열 구조
+        emotionKey = emotion;
+        emotionDisplayName = emotion;
+      } else {
+        emotionKey = 'unknown';
+        emotionDisplayName = 'Unknown';
+      }
+
+      const stickerId = `generated_${emotionKey}_${Date.now()}`;
+      const stickerName = `${character.name || "Character"} - ${emotionDisplayName.charAt(0).toUpperCase() + emotionDisplayName.slice(1)}`;
 
       return {
         id: stickerId,
         name: stickerName,
         type: "image/png",
         dataUrl: result.dataUrl,
-        emotion: emotion,
+        emotion: emotionKey,
         generated: true,
         naiPrompt: promptData.prompt,
         naiNegativePrompt: promptData.negative_prompt,

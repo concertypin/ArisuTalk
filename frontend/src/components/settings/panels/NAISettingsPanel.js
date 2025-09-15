@@ -588,23 +588,32 @@ export function renderNAISettingsPanel(app) {
         
         <!-- 현재 목록 표시 -->
         <div id="nai-generation-list-display" class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
-          ${(settings.naiGenerationList || DEFAULT_EMOTIONS).map(emotion => {
-            const emotionLabels = {
-              happy: "😊 기쁨",
-              sad: "😢 슬픔", 
-              surprised: "😮 놀람",
-              angry: "😠 분노",
-              love: "💕 사랑",
-              embarrassed: "😳 부끄러움",
-              confused: "😕 혼란",
-              sleepy: "😴 졸림",
-              excited: "🤩 흥분",
-              neutral: "😐 무표정"
-            };
-            
+          ${(settings.naiGenerationList || DEFAULT_EMOTIONS).map(item => {
+            let displayText;
+
+            if (typeof item === 'object' && item.title) {
+              // 새로운 3필드 구조 - 제목만 표시
+              displayText = item.title;
+            } else {
+              // 기존 문자열 구조 (하위 호환성)
+              const emotionLabels = {
+                happy: "😊 기쁨",
+                sad: "😢 슬픔",
+                surprised: "😮 놀람",
+                angry: "😠 분노",
+                love: "💕 사랑",
+                embarrassed: "😳 부끄러움",
+                confused: "😕 혼란",
+                sleepy: "😴 졸림",
+                excited: "🤩 흥분",
+                neutral: "😐 무표정"
+              };
+              displayText = emotionLabels[item] || item;
+            }
+
             return `
               <div class="bg-gray-600/50 rounded-lg px-3 py-2 text-center">
-                <span class="text-xs text-gray-300">${emotionLabels[emotion] || emotion}</span>
+                <span class="text-xs text-gray-300">${displayText}</span>
               </div>
             `;
           }).join("")}

@@ -881,12 +881,26 @@ function handleRemoveItemFromList(app, naiItem) {
   if (!app.tempNaiGenerationList) {
     app.tempNaiGenerationList = app.state.settings.naiGenerationList || DEFAULT_EMOTIONS.slice();
   }
-  
-  const index = app.tempNaiGenerationList.indexOf(naiItem);
-  if (index !== -1) {
-    app.tempNaiGenerationList.splice(index, 1);
+
+  // 객체와 문자열 모두 처리할 수 있도록 수정
+  let indexToRemove = -1;
+
+  for (let i = 0; i < app.tempNaiGenerationList.length; i++) {
+    const currentItem = app.tempNaiGenerationList[i];
+
+    if (typeof currentItem === 'object' && currentItem.title === naiItem) {
+      indexToRemove = i;
+      break;
+    } else if (typeof currentItem === 'string' && currentItem === naiItem) {
+      indexToRemove = i;
+      break;
+    }
+  }
+
+  if (indexToRemove !== -1) {
+    app.tempNaiGenerationList.splice(indexToRemove, 1);
     renderEditableNaiGenerationList(app);
-    alert(t('naiHandlers.naiGenerationItemRemoved', { naiGenerationItem: naiItem }), "info");
+    app.showNotification(t('naiHandlers.naiGenerationItemRemoved', { naiGenerationItem: naiItem }), "info");
   }
 }
 

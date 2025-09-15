@@ -47,7 +47,7 @@ export class StickerManager {
   /**
    * 캐릭터가 특정 감정의 스티커를 가지고 있는지 확인
    * @param {Object} character - 캐릭터 정보
-   * @param {string} emotion - 감정
+   * @param {string|Object} emotion - 감정명 또는 감정 객체
    * @returns {boolean} 스티커 존재 여부
    */
   hasEmotionSticker(character, emotion) {
@@ -55,17 +55,27 @@ export class StickerManager {
       return false;
     }
 
-    return character.stickers.some(sticker => 
-      sticker.emotion === emotion || 
-      sticker.name.toLowerCase().includes(emotion.toLowerCase())
+    // 감정 파라미터 처리: 객체인 경우 emotion 필드 사용, 문자열인 경우 그대로 사용
+    let emotionKey;
+    if (typeof emotion === 'object' && emotion.emotion) {
+      emotionKey = emotion.emotion;
+    } else if (typeof emotion === 'string') {
+      emotionKey = emotion;
+    } else {
+      return false;
+    }
+
+    return character.stickers.some(sticker =>
+      sticker.emotion === emotionKey ||
+      sticker.name.toLowerCase().includes(emotionKey.toLowerCase())
     );
   }
 
   /**
    * 캐릭터에게 없는 감정 스티커 목록 반환
    * @param {Object} character - 캐릭터 정보
-   * @param {string[]} emotionList - 확인할 감정 목록
-   * @returns {string[]} 없는 감정 목록
+   * @param {Array} emotionList - 확인할 감정 목록 (문자열 또는 객체)
+   * @returns {Array} 없는 감정 목록
    */
   getMissingEmotions(character, emotionList = DEFAULT_EMOTIONS) {
     return emotionList.filter(emotion => !this.hasEmotionSticker(character, emotion));
