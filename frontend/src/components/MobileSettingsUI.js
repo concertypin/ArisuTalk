@@ -1400,11 +1400,11 @@ export function renderNaiSettingsPage(app) {
           </div>
         </div>
 
-        <!-- 기본 감정 목록 -->
+        <!-- NAI 일괄 생성 목록 -->
         <div class="bg-gray-700/30 rounded-xl p-4">
           <h4 class="text-lg font-semibold text-white mb-3 flex items-center">
             <i data-lucide="smile" class="w-5 h-5 mr-3 text-blue-400"></i>
-            기본 감정 스티커
+            ${t('naiHandlers.emotionListTitle')}
           </h4>
           
           <div class="grid grid-cols-2 gap-2 mb-3">
@@ -1449,7 +1449,7 @@ export function renderNaiSettingsPage(app) {
               ${!isApiKeySet ? "disabled" : ""}
             >
               <i data-lucide="users" class="w-4 h-4 pointer-events-none"></i>
-              모든 캐릭터 기본 감정 생성
+              ${t('naiHandlers.generateAllCharacterEmotions')}
             </button>
             
             ${!isApiKeySet ? 
@@ -1457,7 +1457,7 @@ export function renderNaiSettingsPage(app) {
                 ⚠ API 키를 설정해야 배치 생성을 사용할 수 있습니다
               </div>` :
               `<div class="text-xs text-gray-400 text-center mt-2">
-                모든 캐릭터의 누락된 기본 감정 스티커를 한 번에 생성합니다.
+                ${t('naiHandlers.emotionListBatchDescription')}
               </div>`
             }
           </div>

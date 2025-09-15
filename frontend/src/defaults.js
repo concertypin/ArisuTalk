@@ -1,4 +1,5 @@
 import { t } from "./i18n.js";
+import { DEFAULT_EMOTIONS } from "./api/novelai.js";
 
 export const defaultPrompts = {
   main: {
@@ -41,6 +42,8 @@ export const imagePlaceholder =
 // New API Configuration Structure for multiple providers
 export const defaultAPISettings = {
   apiProvider: "gemini",
+  // NAI 일괄 생성 목록 커스터마이징
+  naiGenerationList: DEFAULT_EMOTIONS.slice(), // 기본 목록을 복사하여 사용
   apiConfigs: {
     gemini: {
       apiKey: "",

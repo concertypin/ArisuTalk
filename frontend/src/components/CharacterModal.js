@@ -51,21 +51,25 @@ export function renderStickerGrid(app, stickers) {
       let content = "";
       if (isAudio) {
         content = `
-                <div class="w-full h-16 bg-gray-600 rounded-lg flex items-center justify-center">
-                    <i data-lucide="music" class="w-6 h-6 text-gray-300"></i>
+                <div class="sticker-preview-trigger w-full h-16 bg-gray-600 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-500 transition-colors" data-index="${index}">
+                    <i data-lucide="music" class="w-6 h-6 text-gray-300 pointer-events-none"></i>
                 </div>
                 <div class="text-xs text-gray-300 text-center truncate mt-1">${sticker.name}</div>
             `;
       } else if (isVideo) {
         content = `
-                <video class="w-full h-16 object-cover rounded-lg" muted loop autoplay>
-                    <source src="${sticker.dataUrl}" type="${sticker.type}">
-                </video>
+                <div class="sticker-preview-trigger cursor-pointer" data-index="${index}">
+                    <video class="w-full h-16 object-cover rounded-lg hover:opacity-80 transition-opacity pointer-events-none" muted loop autoplay>
+                        <source src="${sticker.dataUrl}" type="${sticker.type}">
+                    </video>
+                </div>
                 <div class="text-xs text-gray-300 text-center truncate mt-1">${sticker.name}</div>
             `;
       } else {
         content = `
-                <img src="${sticker.dataUrl}" alt="${sticker.name}" class="w-full h-16 object-cover rounded-lg">
+                <div class="sticker-preview-trigger cursor-pointer" data-index="${index}">
+                    <img src="${sticker.dataUrl}" alt="${sticker.name}" class="w-full h-16 object-cover rounded-lg hover:opacity-80 transition-opacity pointer-events-none">
+                </div>
                 <div class="text-xs text-gray-300 text-center truncate mt-1">${sticker.name}</div>
             `;
       }
@@ -304,7 +308,7 @@ export function renderCharacterModal(app) {
                                                     </button>
                                                     <button id="generate-character-stickers" class="py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm flex flex-col items-center justify-center gap-1">
                                                         <i data-lucide="image" class="w-4 h-4"></i> 
-                                                        <span class="text-xs">기본감정생성</span>
+                                                        <span class="text-xs">${t('naiHandlers.emotionListGeneration')}</span>
                                                     </button>
                                                     <input type="file" accept="image/jpeg,image/jpg,image/gif,image/png,image/bmp,image/webp,video/webm,video/mp4,audio/mpeg,audio/mp3" id="sticker-input" class="hidden" multiple />
                                                 </div>

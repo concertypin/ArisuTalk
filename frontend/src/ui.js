@@ -14,6 +14,7 @@ import {
 import { setupDesktopSettingsEventListeners } from "./components/DesktopSettingsUI.js";
 
 import { renderCharacterModal } from "./components/CharacterModal.js";
+import { renderStickerPreviewModal } from "./components/StickerPreviewModal.js";
 import {
   renderPromptModal,
   setupPromptModalEventListeners,
@@ -101,6 +102,10 @@ async function renderModals(app) {
   // Image zoom modal
   if (app.state.imageZoomModal && app.state.imageZoomModal.isOpen) {
     mainModalHtml += renderImageZoomModal(app);
+  }
+  // Sticker preview modal
+  if (app.state.stickerPreviewModal && app.state.stickerPreviewModal.isOpen) {
+    mainModalHtml += renderStickerPreviewModal(app.state.stickerPreviewModal);
   }
   if (container.innerHTML !== mainModalHtml) {
     container.innerHTML = mainModalHtml;
@@ -556,6 +561,7 @@ function shouldUpdateModals(oldState, newState) {
 
   const conditions = [
     JSON.stringify(oldState.modal) !== JSON.stringify(newState.modal),
+    JSON.stringify(oldState.stickerPreviewModal) !== JSON.stringify(newState.stickerPreviewModal),
     oldState.showSettingsModal !== newState.showSettingsModal,
     oldState.showCharacterModal !== newState.showCharacterModal,
     oldState.showMobileSearch !== newState.showMobileSearch,

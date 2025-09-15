@@ -210,7 +210,7 @@ export class StickerManager {
   }
 
   /**
-   * 캐릭터의 기본 감정 스티커 일괄 생성
+   * 캐릭터의 NAI 일괄 생성 목록 스티커 일괄 생성
    * @param {Object} character - 캐릭터 정보
    * @param {Object} options - 생성 옵션
    * @returns {Promise<Object>} 생성 결과

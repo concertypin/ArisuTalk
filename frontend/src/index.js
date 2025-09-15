@@ -109,6 +109,7 @@ class PersonaChatApp {
       showFabMenu: false,
       searchQuery: "",
       modal: { isOpen: false, title: "", message: "", onConfirm: null },
+      stickerPreviewModal: { isOpen: false, sticker: null, index: null },
       showInputOptions: false,
       imageToSend: null,
       currentMessage: "",
@@ -283,6 +284,20 @@ class PersonaChatApp {
           ...this.state.settings.apiConfigs,
           [provider]: newConfig,
         },
+      },
+    });
+    this.debouncedCreateSettingsSnapshot();
+  }
+
+  /**
+   * Handles changes to the custom NAI batch generation list.
+   * @param {Array} newGenerationList - The new NAI batch generation list array.
+   */
+  handleNaiGenerationListChange(newGenerationList) {
+    this.setState({
+      settings: {
+        ...this.state.settings,
+        naiGenerationList: newGenerationList,
       },
     });
     this.debouncedCreateSettingsSnapshot();
@@ -646,9 +661,12 @@ class PersonaChatApp {
         loadFromBrowserStorage("personaChat_personaData_v16", { userName: "", userDescription: "" }),
       ]);
 
+      // 기존 기본 설정과 저장된 설정을 병합하면서 누락된 키는 기본값으로 유지
       this.state.settings = {
         ...this.state.settings,
         ...settings,
+        // naiGenerationList가 없으면 기본값으로 설정
+        naiGenerationList: settings.naiGenerationList || this.state.settings.naiGenerationList,
       };
 
       // CharacterStates를 새로운 호감도 기반 스키마로 마이그레이션
@@ -2137,22 +2155,259 @@ class PersonaChatApp {
   }
 
   handleEditStickerName(index) {
+    // 새로운 내부 모달을 사용하여 스티커 미리보기 및 편집
+    this.openStickerPreviewModal(index);
+  }
+
+  // 스티커 미리보기 모달 열기
+  async openStickerPreviewModal(index, activeTab = 'preview') {
     if (this.state.editingCharacter && this.state.editingCharacter.stickers) {
       const sticker = this.state.editingCharacter.stickers[index];
       if (!sticker) return;
+      
+      // EXIF 데이터 추출 (이미지인 경우만)
+      let exifData = null;
+      let rerollData = null;
+      
+      const isImage = sticker.type && sticker.type.startsWith('image/');
+      if (isImage) {
+        try {
+          const { extractExifData, formatExifInfo, extractRerollInfo } = await import('./utils/exifUtils.js');
+          const rawExif = await extractExifData(sticker.dataUrl);
+          exifData = formatExifInfo(rawExif);
+          rerollData = extractRerollInfo(rawExif);
+        } catch (error) {
+          console.warn('EXIF 데이터 추출 실패:', error);
+          exifData = { basic: {}, nai: {} };
+        }
+      }
 
-      const newName = prompt(t("ui.enterStickerName"), sticker.name);
-      if (newName !== null && newName.trim() !== "") {
-        const newStickers = [...this.state.editingCharacter.stickers];
-        newStickers[index] = { ...sticker, name: newName.trim() };
-        this.setState({
-          editingCharacter: {
-            ...this.state.editingCharacter,
-            stickers: newStickers,
-          },
+      this.setState({
+        stickerPreviewModal: {
+          isOpen: true,
+          sticker: sticker,
+          index: index,
+          activeTab: activeTab,
+          exifData: exifData,
+          rerollData: rerollData,
+          rerollResult: null,  // 초기값
+          rerolling: false     // 초기값
+        }
+      });
+    }
+  }
+
+  // 스티커 미리보기 모달 닫기
+  closeStickerPreviewModal() {
+    this.setState({
+      stickerPreviewModal: {
+        isOpen: false,
+        sticker: null,
+        index: null
+      }
+    });
+  }
+
+  // 스티커 이름 저장
+  saveStickerName(index, newName) {
+    if (this.state.editingCharacter && this.state.editingCharacter.stickers && newName && newName.trim() !== "") {
+      const newStickers = [...this.state.editingCharacter.stickers];
+      newStickers[index] = { ...newStickers[index], name: newName.trim() };
+      
+      this.setState({
+        editingCharacter: {
+          ...this.state.editingCharacter,
+          stickers: newStickers,
+        },
+      });
+      
+      // 모달 닫기
+      this.closeStickerPreviewModal();
+      
+      // 성공 메시지 (선택사항)
+      // alert(t("stickerPreview.nameUpdated"));
+    }
+  }
+
+  // 스티커 미리보기 모달 탭 전환
+  switchStickerPreviewTab(newTab) {
+    if (this.state.stickerPreviewModal && this.state.stickerPreviewModal.isOpen) {
+      this.setState({
+        stickerPreviewModal: {
+          ...this.state.stickerPreviewModal,
+          activeTab: newTab
+        }
+      });
+    }
+  }
+
+  // 스티커 삭제
+  deleteSticker(index) {
+    if (this.state.editingCharacter && this.state.editingCharacter.stickers) {
+      const newStickers = [...this.state.editingCharacter.stickers];
+      newStickers.splice(index, 1);
+      
+      this.setState({
+        editingCharacter: {
+          ...this.state.editingCharacter,
+          stickers: newStickers,
+        },
+      });
+      
+      // 모달 닫기
+      this.closeStickerPreviewModal();
+      
+      // 성공 메시지 표시
+      this.showNotification(t('stickerPreview.stickerDeleted'), 'success');
+    }
+  }
+
+  // 스티커 클립보드 복사
+  copyStickerToClipboard(index) {
+    if (this.state.editingCharacter && this.state.editingCharacter.stickers) {
+      const sticker = this.state.editingCharacter.stickers[index];
+      if (sticker && sticker.dataUrl) {
+        // Data URL을 클립보드에 복사
+        navigator.clipboard.writeText(sticker.dataUrl).then(() => {
+          this.showNotification(t('stickerPreview.dataCopied'), 'success');
+        }).catch(err => {
+          console.error('클립보드 복사 실패:', err);
         });
       }
     }
+  }
+
+  // 스티커 다운로드
+  downloadSticker(index) {
+    if (this.state.editingCharacter && this.state.editingCharacter.stickers) {
+      const sticker = this.state.editingCharacter.stickers[index];
+      if (sticker && sticker.dataUrl) {
+        const link = document.createElement('a');
+        link.href = sticker.dataUrl;
+        link.download = `${sticker.name || 'sticker'}.${this.getFileExtension(sticker.type)}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        this.showNotification(t('stickerPreview.downloadComplete'), 'success');
+      }
+    }
+  }
+
+  // 파일 확장자 추출
+  getFileExtension(mimeType) {
+    const extensions = {
+      'image/jpeg': 'jpg',
+      'image/jpg': 'jpg',
+      'image/png': 'png',
+      'image/gif': 'gif',
+      'image/webp': 'webp',
+      'video/mp4': 'mp4',
+      'video/webm': 'webm',
+      'audio/mp3': 'mp3',
+      'audio/mpeg': 'mp3'
+    };
+    return extensions[mimeType] || 'bin';
+  }
+
+  // NAI 리롤 시작
+  async startNAIReroll(index, promptData) {
+
+    if (!promptData || !promptData.prompt) {
+      console.error('리롤을 위한 프롬프트 데이터가 없습니다');
+      return;
+    }
+
+    try {
+      // 리롤 상태 업데이트
+      this.setState({
+        stickerPreviewModal: {
+          ...this.state.stickerPreviewModal,
+          rerolling: true
+        }
+      });
+
+      // NAI API를 통한 이미지 생성
+      const originalSticker = this.state.editingCharacter.stickers[index];
+
+      // 실제 NAI API 호출
+      const character = this.state.editingCharacter;
+
+      const newStickerData = await this.stickerManager.naiClient.generateSticker(character, 'reroll', {
+        naiSettings: {
+          steps: promptData.steps,
+          scale: promptData.scale,
+          model: this.stickerManager.naiClient.options.model,
+          customPositivePrompt: promptData.prompt,  // 커스텀 프롬프트로 전달
+          imageSize: promptData.imageSize || 'square'  // 이미지 크기 설정
+        }
+      });
+
+      if (!newStickerData || !newStickerData.dataUrl) {
+        throw new Error('NAI 이미지 생성 실패');
+      }
+
+      const rerollResult = {
+        dataUrl: newStickerData.dataUrl,
+        name: `${originalSticker.name}_reroll`,
+        type: newStickerData.type || "image/png",
+        timestamp: Date.now(),
+        stickerData: newStickerData  // 전체 스티커 데이터 저장
+      };
+
+      // 리롤 결과 표시
+      this.setState({
+        stickerPreviewModal: {
+          ...this.state.stickerPreviewModal,
+          rerolling: false,
+          rerollResult: rerollResult
+        }
+      }, () => {
+        // UI 강제 업데이트
+        this.updateUI();
+      });
+
+    } catch (error) {
+      console.error('NAI 리롤 실패:', error);
+      this.setState({
+        stickerPreviewModal: {
+          ...this.state.stickerPreviewModal,
+          rerolling: false
+        }
+      });
+      console.error('리롤 실패:', error.message);
+    }
+  }
+
+  // 리롤 결과 적용
+  acceptRerollResult(index) {
+    if (this.state.stickerPreviewModal && this.state.stickerPreviewModal.rerollResult) {
+      const newStickers = [...this.state.editingCharacter.stickers];
+      newStickers[index] = {
+        ...newStickers[index],
+        ...this.state.stickerPreviewModal.rerollResult
+      };
+      
+      this.setState({
+        editingCharacter: {
+          ...this.state.editingCharacter,
+          stickers: newStickers,
+        },
+      });
+      
+      this.showNotification(t('stickerPreview.rerollComplete'), 'success');
+      this.closeStickerPreviewModal();
+    }
+  }
+
+  // 리롤 결과 거부
+  rejectRerollResult() {
+    this.setState({
+      stickerPreviewModal: {
+        ...this.state.stickerPreviewModal,
+        rerollResult: null
+      }
+    });
   }
 
   toggleStickerSelectionMode() {
@@ -6891,6 +7146,74 @@ class PersonaChatApp {
   toggleSNSSecretMode() {
     this.setState({
       snsSecretMode: !this.state.snsSecretMode
+    });
+  }
+
+  // 토스트 알림 표시
+  showNotification(message, type = 'info', duration = 3000) {
+    // 알림 컨테이너가 없으면 생성
+    let notificationContainer = document.getElementById('notification-container');
+    if (!notificationContainer) {
+      notificationContainer = document.createElement('div');
+      notificationContainer.id = 'notification-container';
+      notificationContainer.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 10000;
+        pointer-events: none;
+      `;
+      document.body.appendChild(notificationContainer);
+    }
+
+    // 알림 요소 생성
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+      background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+      color: white;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      font-size: 14px;
+      max-width: 320px;
+      word-wrap: break-word;
+      pointer-events: auto;
+      transform: translateX(100%);
+      transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+      opacity: 0;
+    `;
+    notification.textContent = message;
+
+    // 컨테이너에 추가
+    notificationContainer.appendChild(notification);
+
+    // 애니메이션으로 표시
+    setTimeout(() => {
+      notification.style.transform = 'translateX(0)';
+      notification.style.opacity = '1';
+    }, 10);
+
+    // 자동 제거
+    setTimeout(() => {
+      notification.style.transform = 'translateX(100%)';
+      notification.style.opacity = '0';
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      }, 300);
+    }, duration);
+
+    // 클릭해서 제거 가능
+    notification.addEventListener('click', () => {
+      notification.style.transform = 'translateX(100%)';
+      notification.style.opacity = '0';
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      }, 300);
     });
   }
 }

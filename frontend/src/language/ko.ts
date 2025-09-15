@@ -908,6 +908,8 @@ export const ko: LanguageStrings = {
       tired: "피곤",
       confused: "혼란",
       shy: "부끄러움",
+      embarrassed: "부끄러움",
+      sleepy: "졸림",
       neutral: "평범"
     }
   },
@@ -917,13 +919,13 @@ export const ko: LanguageStrings = {
     stickerGenerationSuccess: "{{character}}의 {{emotion}} 스티커가 생성되었습니다!",
     stickerGenerationError: "스티커 생성에 실패했습니다: {{error}}",
     // 버튼 텍스트
-    generateBasicEmotions: "기본 감정 생성",
+    generateBasicEmotions: "NAI 일괄 생성",
     currentCharacter: "현재 캐릭터",
     allCharacters: "모든 캐릭터",
     generatingAll: "전체 생성 중...",
     // 배치 생성 관련
     noCharactersFound: "캐릭터가 없습니다.",
-    batchGenerationConfirm: "모든 캐릭터({{count}}개)의 기본 감정 스티커를 생성하시겠습니까?\n생성 시간이 오래 걸릴 수 있습니다.",
+    batchGenerationConfirm: "모든 캐릭터({{count}}개)의 NAI 일괄 생성 목록 스티커를 생성하시겠습니까?\n생성 시간이 오래 걸릴 수 있습니다.",
     processingCharacter: "{{character}} 처리 중... ({{current}}/{{total}})",
     generatingEmotion: "{{character}}: {{emotion}} 스티커 생성 중...",
     batchGenerationComplete: "배치 생성 완료!",
@@ -932,6 +934,104 @@ export const ko: LanguageStrings = {
     failCount: "실패: {{count}}개",
     generatedStickers: "생성된 스티커: {{count}}개",
     batchGenerationFailed: "배치 생성에 실패했습니다: {{error}}",
-    autoStickerGenerated: "{{character}}의 {{emotion}} 스티커가 자동 생성되었습니다!"
+    autoStickerGenerated: "{{character}}의 {{emotion}} 스티커가 자동 생성되었습니다!",
+    // NAI 일괄 생성 목록 관련 (명확한 용어로 변경 완료)
+    emotionListGeneration: "NAI 일괄 생성",
+    generateAllCharacterEmotions: "모든 캐릭터 NAI 일괄 생성",
+    emotionListBatchDescription: "모든 캐릭터의 누락된 NAI 일괄 생성 목록 스티커를 한 번에 생성합니다.",
+    emotionListSettings: "NAI 일괄 생성 목록 설정",
+    emotionListDescription: "일괄 생성 시 사용할 NAI 스티커 목록을 설정합니다",
+    emotionListTitle: "NAI 일괄 생성 목록",
+    emotionListInfo: "위 목록에 대한 NAI 스티커가 자동으로 생성됩니다. 새 캐릭터 생성 시 또는 일괄 생성을 통해 모든 NAI 스티커를 만들 수 있습니다.",
+    emotionListBatchInfo: "일괄 생성으로 모든 NAI 스티커를 한 번에 만들 수 있습니다",
+    emotionListBatchConfirm: "모든 캐릭터({{count}}개)의 NAI 일괄 생성 목록 스티커를 생성하시겠습니까?\n생성 시간이 오래 걸릴 수 있습니다.",
+    // NAI 일괄 생성 목록 편집 UI
+    editNaiGenerationList: "NAI 일괄 생성 목록 편집",
+    addNaiGenerationItem: "항목 추가",
+    removeNaiGenerationItem: "항목 제거",
+    resetToDefault: "기본값으로 초기화",
+    addNaiGenerationPlaceholder: "예: happy, excited, cheerful",
+
+    // 새로운 3개 필드 시스템
+    newItemTitle: "새 생성 항목 추가",
+    itemTitleLabel: "제목",
+    itemTitlePlaceholder: "예: 기쁜 표정, 우는 모습, 화난 상태",
+    emotionLabel: "감정",
+    emotionPlaceholder: "예: happy, sad, angry, surprised",
+    actionSituationLabel: "행동 및 상황",
+    actionSituationPlaceholder: "예: smiling brightly, crying softly, shouting angrily",
+    confirmReset: "NAI 일괄 생성 목록을 기본값으로 초기화하시겠습니까?",
+    naiGenerationItemRequired: "항목을 입력해주세요.",
+    naiGenerationItemExists: "이미 존재하는 항목입니다.",
+    currentList: "현재 목록",
+    saveList: "저장",
+    cancel: "취소",
+    resetToDefaultConfirm: "NAI 일괄 생성 목록을 기본값으로 초기화하시겠습니까?",
+    naiGenerationListSaved: "NAI 일괄 생성 목록이 저장되었습니다. ({{count}}개 항목)",
+    editCancelled: "편집이 취소되었습니다.",
+    listResetToDefault: "목록이 기본값으로 초기화되었습니다.",
+    naiGenerationListEmpty: "목록이 비어있습니다. 최소 하나의 항목을 추가해주세요.",
+    naiGenerationItemAdded: "{{naiGenerationItem}} 항목이 추가되었습니다.",
+    naiGenerationItemRemoved: "{{naiGenerationItem}} 항목이 제거되었습니다.",
+    naiGenerationItemAlreadyExists: "{{naiGenerationItem}} 항목이 이미 존재합니다."
+  },
+  stickerPreview: {
+    title: "스티커 미리보기",
+    stickerName: "스티커 이름",
+    enterStickerName: "스티커 이름을 입력하세요",
+    fileType: "파일 형식",
+    fileSize: "파일 크기",
+    dateAdded: "추가 날짜",
+    save: "저장",
+    cancel: "취소",
+    nameUpdated: "스티커 이름이 업데이트되었습니다.",
+    
+    // 탭 시스템
+    tabs: {
+      preview: "미리보기",
+      exif: "EXIF 정보",
+      reroll: "리롤",
+      actions: "작업"
+    },
+    
+    // EXIF 정보 탭
+    loadingExif: "EXIF 데이터를 분석 중입니다...",
+    noExifData: "EXIF 데이터가 없습니다",
+    basicInfo: "기본 정보",
+    naiInfo: "NAI 생성 정보",
+    prompt: "프롬프트",
+    negativePrompt: "네거티브 프롬프트",
+    allMetadata: "전체 메타데이터",
+    imageSize: "이미지 크기",
+    imageComparison: "이미지 비교",
+    
+    // 리롤 탭
+    noRerollData: "리롤 가능한 데이터가 없습니다",
+    currentImage: "현재 이미지",
+    rerollSettings: "리롤 설정",
+    enterPrompt: "프롬프트를 입력하세요",
+    steps: "Steps",
+    scale: "Scale",
+    rerollResult: "리롤 결과",
+    acceptReroll: "선택",
+    rejectReroll: "취소",
+    startReroll: "리롤 시작",
+    rerolling: "생성 중...",
+    rerollComplete: "리롤 완료",
+    rerollFailed: "리롤 실패",
+    selectOriginal: "원본 선택",
+    selectReroll: "리롤 선택",
+    
+    // 액션 탭
+    dangerZone: "위험한 작업",
+    deleteSticker: "스티커 삭제",
+    deleteWarning: "이 작업은 되돌릴 수 없습니다. 정말로 삭제하시겠습니까?",
+    deleteConfirm: "삭제하기",
+    stickerDeleted: "스티커가 삭제되었습니다",
+    otherActions: "기타 작업",
+    copyToClipboard: "클립보드에 복사",
+    downloadSticker: "스티커 다운로드",
+    dataCopied: "데이터가 클립보드에 복사되었습니다",
+    downloadComplete: "다운로드 완료"
   },
 };

@@ -570,15 +570,25 @@ export function renderNAISettingsPanel(app) {
         </div>
       </div>
 
-      <!-- 기본 감정 목록 -->
+      <!-- NAI 일괄 생성 목록 -->
       <div class="bg-gray-700/30 rounded-xl p-6">
-        <h4 class="text-lg font-semibold text-white mb-4 flex items-center">
-          <i data-lucide="smile" class="w-5 h-5 mr-3 text-blue-400"></i>
-          기본 감정 스티커
+        <h4 class="text-lg font-semibold text-white mb-4 flex items-center justify-between">
+          <div class="flex items-center">
+            <i data-lucide="smile" class="w-5 h-5 mr-3 text-blue-400"></i>
+            ${t('naiHandlers.emotionListTitle')}
+          </div>
+          <button 
+            id="edit-nai-generation-list" 
+            class="px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-1"
+          >
+            <i data-lucide="edit-3" class="w-3 h-3 pointer-events-none"></i>
+            ${t('naiHandlers.editNaiGenerationList')}
+          </button>
         </h4>
         
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
-          ${DEFAULT_EMOTIONS.map(emotion => {
+        <!-- 현재 목록 표시 -->
+        <div id="nai-generation-list-display" class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
+          ${(settings.naiGenerationList || DEFAULT_EMOTIONS).map(emotion => {
             const emotionLabels = {
               happy: "😊 기쁨",
               sad: "😢 슬픔", 
@@ -600,8 +610,95 @@ export function renderNAISettingsPanel(app) {
           }).join("")}
         </div>
         
-        <div class="text-xs text-gray-400">
-          위 감정들에 대한 스티커가 자동으로 생성됩니다. 새 캐릭터 생성 시 또는 일괄 생성을 통해 모든 기본 감정 스티커를 만들 수 있습니다.
+        <!-- 편집 UI (초기에는 숨겨져 있음) -->
+        <div id="nai-generation-list-editor" class="hidden">
+          <div class="space-y-4">
+            <!-- 현재 목록 편집 -->
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2">
+                ${t('naiHandlers.currentList')}
+              </label>
+              <div id="nai-editable-list" class="space-y-2 max-h-32 overflow-y-auto">
+                <!-- 동적으로 생성되는 목록 -->
+              </div>
+            </div>
+            
+            <!-- 새 항목 추가 -->
+            <div class="space-y-3">
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">
+                  ${t('naiHandlers.itemTitleLabel')}
+                </label>
+                <input
+                  id="new-nai-item-title"
+                  type="text"
+                  placeholder="${t('naiHandlers.itemTitlePlaceholder')}"
+                  class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm"
+                >
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">
+                  ${t('naiHandlers.emotionLabel')}
+                </label>
+                <input
+                  id="new-nai-item-emotion"
+                  type="text"
+                  placeholder="${t('naiHandlers.emotionPlaceholder')}"
+                  class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm"
+                >
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">
+                  ${t('naiHandlers.actionSituationLabel')}
+                </label>
+                <textarea
+                  id="new-nai-item-action"
+                  rows="3"
+                  placeholder="${t('naiHandlers.actionSituationPlaceholder')}"
+                  class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm resize-none"
+                ></textarea>
+              </div>
+
+              <button
+                id="add-nai-item-btn"
+                class="w-full px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <i data-lucide="plus" class="w-4 h-4 pointer-events-none"></i>
+                ${t('naiHandlers.addNaiGenerationItem')}
+              </button>
+            </div>
+            
+            <!-- 버튼 영역 -->
+            <div class="flex gap-2 pt-4 border-t border-gray-600">
+              <button 
+                id="save-nai-generation-list" 
+                class="flex-1 py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <i data-lucide="check" class="w-4 h-4 pointer-events-none"></i>
+                ${t('naiHandlers.saveList')}
+              </button>
+              <button 
+                id="cancel-edit-nai-generation-list" 
+                class="flex-1 py-2 px-4 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <i data-lucide="x" class="w-4 h-4 pointer-events-none"></i>
+                ${t('naiHandlers.cancel')}
+              </button>
+              <button 
+                id="reset-nai-generation-list" 
+                class="py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <i data-lucide="refresh-cw" class="w-4 h-4 pointer-events-none"></i>
+                ${t('naiHandlers.resetToDefault')}
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="text-xs text-gray-400 mt-4">
+          ${t('naiHandlers.emotionListInfo')}
         </div>
       </div>
 
@@ -620,7 +717,7 @@ export function renderNAISettingsPanel(app) {
               ${!isApiKeySet ? "disabled" : ""}
             >
               <i data-lucide="users" class="w-4 h-4 pointer-events-none"></i>
-              모든 캐릭터 기본 감정 생성
+              ${t('naiHandlers.generateAllCharacterEmotions')}
             </button>
           </div>
           
@@ -629,7 +726,7 @@ export function renderNAISettingsPanel(app) {
               ⚠ API 키를 설정해야 배치 생성을 사용할 수 있습니다
             </div>` :
             `<div class="text-xs text-gray-400 text-center">
-              모든 캐릭터의 누락된 기본 감정 스티커를 한 번에 생성합니다. 개별 캐릭터 생성은 각 캐릭터 수정 화면에서 가능합니다.
+              ${t('naiHandlers.emotionListBatchDescription')}
             </div>`
           }
         </div>
@@ -657,7 +754,7 @@ export function renderNAISettingsPanel(app) {
           <p>• 무제한 생성 크기만 지원: 1024×1024, 832×1216, 1216×832</p>
           <p>• 부정사용 방지를 위해 생성 간 20-30초 대기시간이 적용됩니다</p>
           <p>• 대화 중 감정이 감지되면 자동으로 해당 감정 스티커를 생성합니다</p>
-          <p>• 배치 생성으로 모든 기본 감정 스티커를 한 번에 만들 수 있습니다</p>
+          <p>• 일괄 생성으로 모든 NAI 스티커를 한 번에 만들 수 있습니다</p>
         </div>
       </div>
     </div>

@@ -493,33 +493,42 @@ export class NovelAIClient {
    * @param {Object} options - 생성 옵션
    * @returns {Object} 프롬프트 정보
    */
-  buildPrompt(character, emotion, options = {}) {
+  buildPrompt(character, emotionData, options = {}) {
+    console.log('[NAI buildPrompt] emotionData:', emotionData);
     const { naiSettings = {} } = options;
-    
+
     // 캐릭터의 외모 정보 사용
     const characterPrompt = character.appearance || "";
-    
-    // AI 생성 상황 프롬프트가 있는 경우 우선 사용, 없으면 기본 감정 매핑 사용
+
+    // AI 생성 상황 프롬프트가 있는 경우 우선 사용, 없으면 NAI 일괄 생성 목록 매핑 사용
     let emotionPrompt = "";
-    
+    let actionPrompt = "";
+
     if (naiSettings.customPositivePrompt?.trim()) {
       // AI가 제공한 독특한 상황 프롬프트 사용
       emotionPrompt = naiSettings.customPositivePrompt.trim();
     } else {
-      // 기본 감정 프롬프트 매핑 (AI 프롬프트가 없을 때만 사용)
-      const emotionPrompts = {
-        happy: "smiling, cheerful, bright eyes, joyful expression",
-        sad: "sad expression, downcast eyes, melancholic, tears",
-        surprised: "wide eyes, surprised, shocked expression, open mouth",
-        angry: "angry, frowning, intense gaze, fierce expression",
-        love: "loving gaze, romantic, heart eyes, affectionate",
-        embarrassed: "blushing, shy, embarrassed, covering face",
-        confused: "confused, tilted head, questioning look",
-        sleepy: "sleepy, drowsy, tired, yawning",
-        excited: "excited, energetic, sparkling eyes",
-        neutral: "neutral expression, calm, serene",
-      };
-      emotionPrompt = emotionPrompts[emotion] || emotionPrompts.neutral;
+      // 새로운 3필드 구조 처리
+      if (typeof emotionData === 'object' && emotionData.emotion) {
+        // 새로운 구조체: { title, emotion, action }
+        emotionPrompt = emotionData.emotion;
+        actionPrompt = emotionData.action || "";
+      } else {
+        // 기존 문자열 형태 (하위 호환성)
+        const emotionPrompts = {
+          happy: "smiling, cheerful, bright eyes, joyful expression",
+          sad: "sad expression, downcast eyes, melancholic, tears",
+          surprised: "wide eyes, surprised, shocked expression, open mouth",
+          angry: "angry, frowning, intense gaze, fierce expression",
+          love: "loving gaze, romantic, heart eyes, affectionate",
+          embarrassed: "blushing, shy, embarrassed, covering face",
+          confused: "confused, tilted head, questioning look",
+          sleepy: "sleepy, drowsy, tired, yawning",
+          excited: "excited, energetic, sparkling eyes",
+          neutral: "neutral expression, calm, serene",
+        };
+        emotionPrompt = emotionPrompts[emotionData] || emotionPrompts.neutral;
+      }
     }
     
     // 스티커용 기본 프롬프트
@@ -529,8 +538,12 @@ export class NovelAIClient {
     // 기본 negative 프롬프트
     let negativePrompt = "lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry";
 
-    // 프롬프트 조합: 캐릭터 외형 + AI 상황 프롬프트(또는 기본 감정) + 기본 스타일 + 품질
-    let finalPrompt = `${characterPrompt}, ${emotionPrompt}, ${basePrompt}, ${qualityPrompt}`;
+    // 프롬프트 조합: 캐릭터 외형 + 감정 + 행동 및 상황 + 기본 스타일 + 품질
+    let finalPrompt = `${characterPrompt}, ${emotionPrompt}`;
+    if (actionPrompt) {
+      finalPrompt += `, ${actionPrompt}`;
+    }
+    finalPrompt += `, ${basePrompt}, ${qualityPrompt}`;
 
     // 커스텀 negative 프롬프트 추가
     if (naiSettings.customNegativePrompt?.trim()) {
@@ -551,7 +564,7 @@ export class NovelAIClient {
     return {
       prompt: finalPrompt,
       negative_prompt: negativePrompt,
-      emotion: emotion,
+      emotion: emotionData,
       character_name: character.name || "Unknown",
       characterPrompts: characterPrompts,
       naiSettings: naiSettings
@@ -831,8 +844,8 @@ export class NovelAIClient {
     const characterNaiSettings = character.naiSettings || {};
     const mergedSettings = { ...naiSettings, ...characterNaiSettings };
     
-    // 이미지 크기 설정 (캐릭터별 > 전역 > 기본값)
-    const imageSize = mergedSettings.preferredSize || "square";
+    // 이미지 크기 설정 (리롤시 imageSize > 캐릭터별 > 전역 > 기본값)
+    const imageSize = mergedSettings.imageSize || mergedSettings.preferredSize || "square";
     const sizeConfig = NovelAIClient.UNLIMITED_SIZES.find(s => s.name === imageSize) || 
                      NovelAIClient.UNLIMITED_SIZES[2]; // 기본값: square
     
@@ -995,7 +1008,7 @@ export class NovelAIClient {
 }
 
 /**
- * 기본 감정 목록
+ * NAI 일괄 생성 목록
  */
 export const DEFAULT_EMOTIONS = [
   "happy",

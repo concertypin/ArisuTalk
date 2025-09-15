@@ -832,6 +832,8 @@ export type LanguageStrings = {
       tired: string;
       confused: string;
       shy: string;
+      embarrassed: string;
+      sleepy: string;
       neutral: string;
     };
   };
@@ -929,5 +931,103 @@ export type LanguageStrings = {
     generatedStickers: string;
     batchGenerationFailed: string;
     autoStickerGenerated: string;
+    emotionListGeneration: string;
+    generateAllCharacterEmotions: string;
+    emotionListBatchDescription: string;
+    emotionListSettings: string;
+    emotionListDescription: string;
+    emotionListTitle: string;
+    emotionListInfo: string;
+    emotionListBatchInfo: string;
+    emotionListBatchConfirm: string;
+    // NAI 일괄 생성 목록 편집 UI
+    editNaiGenerationList: string;
+    addNaiGenerationItem: string;
+    removeNaiGenerationItem: string;
+    resetToDefault: string;
+    addNaiGenerationPlaceholder: string;
+
+    // 새로운 3개 필드 시스템
+    newItemTitle: string;
+    itemTitleLabel: string;
+    itemTitlePlaceholder: string;
+    emotionLabel: string;
+    emotionPlaceholder: string;
+    actionSituationLabel: string;
+    actionSituationPlaceholder: string;
+
+    confirmReset: string;
+    naiGenerationItemRequired: string;
+    naiGenerationItemExists: string;
+    currentList: string;
+    saveList: string;
+    cancel: string;
+    resetToDefaultConfirm: string;
+    naiGenerationListSaved: string;
+    editCancelled: string;
+    listResetToDefault: string;
+    naiGenerationListEmpty: string;
+    naiGenerationItemAdded: string;
+    naiGenerationItemRemoved: string;
+    naiGenerationItemAlreadyExists: string;
+  };
+  stickerPreview: {
+    title: string;
+    stickerName: string;
+    enterStickerName: string;
+    fileType: string;
+    fileSize: string;
+    dateAdded: string;
+    save: string;
+    cancel: string;
+    nameUpdated: string;
+    
+    // Tab system
+    tabs: {
+      preview: string;
+      exif: string;
+      reroll: string;
+      actions: string;
+    };
+    
+    // EXIF info tab
+    loadingExif: string;
+    noExifData: string;
+    basicInfo: string;
+    naiInfo: string;
+    prompt: string;
+    negativePrompt: string;
+    allMetadata: string;
+    imageSize: string;
+    imageComparison: string;
+    
+    // Reroll tab
+    noRerollData: string;
+    currentImage: string;
+    rerollSettings: string;
+    enterPrompt: string;
+    steps: string;
+    scale: string;
+    rerollResult: string;
+    acceptReroll: string;
+    rejectReroll: string;
+    startReroll: string;
+    rerolling: string;
+    rerollComplete: string;
+    rerollFailed: string;
+    selectOriginal: string;
+    selectReroll: string;
+    
+    // Actions tab
+    dangerZone: string;
+    deleteSticker: string;
+    deleteWarning: string;
+    deleteConfirm: string;
+    stickerDeleted: string;
+    otherActions: string;
+    copyToClipboard: string;
+    downloadSticker: string;
+    dataCopied: string;
+    downloadComplete: string;
   };
 };

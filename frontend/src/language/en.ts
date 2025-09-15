@@ -833,4 +833,109 @@ export const en: LanguageStrings = {
     openSNSList: "View SNS List",
     viewSNS: "View {{name}}'s SNS"
   },
+  naiHandlers: {
+    pleaseSelectCharacter: "Please select a character.",
+    generating: "Generating...",
+    stickerGenerationSuccess: "{{count}} stickers generated successfully!",
+    stickerGenerationError: "Failed to generate sticker: {{error}}",
+    generateBasicEmotions: "Generate Basic Emotions",
+    currentCharacter: "Current Character",
+    allCharacters: "All Characters",
+    generateSelected: "Generate Selected ({{count}})",
+    selectAll: "Select All",
+    deselectAll: "Deselect All",
+    processingCharacter: "Processing {{character}}... ({{current}}/{{total}})",
+    batchGenerationComplete: "Batch generation complete! Generated {{successCount}} out of {{totalCount}} stickers.",
+    batchGenerationPartialSuccess: "Batch generation completed with some errors. Generated {{successCount}} out of {{totalCount}} stickers.",
+    batchGenerationFailed: "Batch generation failed. Please check your settings and try again.",
+    emotionListTitle: "NAI Batch Generation List",
+    emotionListDescription: "List of emotions to use for NAI sticker generation",
+    emotionListBatchGenerate: "Generate All",
+    emotionListBatchConfirm: "Generate stickers for all emotions?",
+
+    // NAI 일괄 생성 목록 편집 UI
+    editNaiGenerationList: "Edit NAI Generation List",
+    addNaiGenerationItem: "Add Item",
+    removeNaiGenerationItem: "Remove Item",
+    resetToDefault: "Reset to Default",
+    addNaiGenerationPlaceholder: "e.g., happy, excited, cheerful",
+
+    // 새로운 3개 필드 시스템
+    newItemTitle: "Add New Generation Item",
+    itemTitleLabel: "Title",
+    itemTitlePlaceholder: "e.g., Happy Expression, Crying Scene, Angry State",
+    emotionLabel: "Emotion",
+    emotionPlaceholder: "e.g., happy, sad, angry, surprised",
+    actionSituationLabel: "Action & Situation",
+    actionSituationPlaceholder: "e.g., smiling brightly, crying softly, shouting angrily",
+
+    confirmReset: "Reset NAI generation list to default?",
+    naiGenerationItemRequired: "Please enter an item.",
+    naiGenerationItemExists: "This item already exists.",
+    currentList: "Current List",
+    saveList: "Save",
+    cancel: "Cancel",
+    resetToDefaultConfirm: "Reset NAI generation list to default?",
+    naiGenerationListSaved: "NAI generation list saved. ({{count}} items)",
+    editCancelled: "Edit cancelled.",
+    listResetToDefault: "List reset to default.",
+    naiGenerationListEmpty: "List is empty. Please add at least one item.",
+    naiGenerationItemAdded: "{{naiGenerationItem}} item added.",
+    naiGenerationItemRemoved: "{{naiGenerationItem}} item removed.",
+    naiGenerationItemAlreadyExists: "{{naiGenerationItem}} item already exists."
+  },
+  stickerPreview: {
+    title: "Sticker Preview",
+    stickerName: "Sticker Name",
+    enterStickerName: "Enter sticker name",
+    fileType: "File Type",
+    fileSize: "File Size",
+    dateAdded: "Date Added",
+    save: "Save",
+    cancel: "Cancel",
+    nameUpdated: "Sticker name has been updated.",
+    
+    // Tab system
+    tabs: {
+      preview: "Preview",
+      exif: "EXIF Info",
+      reroll: "Reroll",
+      actions: "Actions"
+    },
+    
+    // EXIF info tab
+    loadingExif: "Analyzing EXIF data...",
+    noExifData: "No EXIF data available",
+    basicInfo: "Basic Information",
+    naiInfo: "NAI Generation Info",
+    prompt: "Prompt",
+    negativePrompt: "Negative Prompt",
+    
+    // Reroll tab
+    noRerollData: "No reroll data available",
+    currentImage: "Current Image",
+    rerollSettings: "Reroll Settings",
+    enterPrompt: "Enter prompt",
+    steps: "Steps",
+    scale: "Scale",
+    rerollResult: "Reroll Result",
+    acceptReroll: "Accept",
+    rejectReroll: "Reject",
+    startReroll: "Start Reroll",
+    rerolling: "Generating...",
+    rerollComplete: "Reroll Complete",
+    rerollFailed: "Reroll Failed",
+    
+    // Actions tab
+    dangerZone: "Danger Zone",
+    deleteSticker: "Delete Sticker",
+    deleteWarning: "This action cannot be undone. Are you sure you want to delete this sticker?",
+    deleteConfirm: "Delete",
+    stickerDeleted: "Sticker deleted successfully",
+    otherActions: "Other Actions",
+    copyToClipboard: "Copy to Clipboard",
+    downloadSticker: "Download Sticker",
+    dataCopied: "Data copied to clipboard",
+    downloadComplete: "Download Complete"
+  },
 };
