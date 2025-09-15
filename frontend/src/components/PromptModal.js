@@ -61,8 +61,8 @@ export async function renderPromptModal(app) {
                         <div class="flex items-center gap-2">
                             <h4 class="text-base font-semibold text-blue-300">${title}</h4>
                             <div class="relative group">
-                                <i data-lucide="help-circle" class="w-4 h-4 text-gray-400 cursor-pointer"></i>
-                                <div class="absolute bottom-full mb-2 w-96 bg-gray-900 text-white text-xs rounded-lg p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                <i data-lucide="help-circle" class="w-4 h-4 text-gray-400 cursor-pointer help-icon"></i>
+                                <div class="hidden w-96 bg-gray-900 text-white text-xs rounded-lg p-4" data-tooltip-template>
                                     <h5 class="font-bold mb-2">Magic Patterns</h5>
                                     <p>Magic Patterns are special patterns that can be used in the prompt to access character properties and current chatting log.</p>
                                     <p>Patterns start with <code>{|</code> and ends with <code>|}</code>. Inner text is command. Multi-line is supported.</p>
@@ -113,6 +113,64 @@ export function setupPromptModalEventListeners(app) {
   const modal = document.getElementById("prompt-modal-root");
   if (!modal) return;
 
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+
+  let activeTooltip = null;
+
+  const removeTooltip = () => {
+    if (activeTooltip) {
+      activeTooltip.remove();
+      activeTooltip = null;
+    }
+  };
+
+  const createTooltip = (e, isTouchEvent = false) => {
+    const group = e.currentTarget;
+    const template = group.querySelector('[data-tooltip-template]');
+    if (!template) return;
+
+    const clientX = isTouchEvent ? e.touches[0].clientX : e.clientX;
+    const clientY = isTouchEvent ? e.touches[0].clientY : e.clientY;
+
+    const iconElement = document.elementFromPoint(clientX, clientY);
+    if (!iconElement) return;
+
+    removeTooltip();
+
+    activeTooltip = document.createElement('div');
+    activeTooltip.innerHTML = template.innerHTML;
+    
+    const classes = template.className.replace('hidden', '').trim();
+    activeTooltip.className = `${classes} fixed z-[100]`;
+    
+    document.body.appendChild(activeTooltip);
+
+    requestAnimationFrame(() => {
+        const iconRect = iconElement.getBoundingClientRect();
+        const tooltipRect = activeTooltip.getBoundingClientRect();
+
+        const isTopHalf = iconRect.top < window.innerHeight / 2;
+
+        if (isTopHalf) {
+            activeTooltip.style.top = `${iconRect.bottom + 5}px`;
+        } else {
+            activeTooltip.style.top = `${iconRect.top - tooltipRect.height - 5}px`;
+        }
+
+        let leftPosition = iconRect.left;
+        if (leftPosition + tooltipRect.width > window.innerWidth) {
+            leftPosition = window.innerWidth - tooltipRect.width - 5;
+        }
+        activeTooltip.style.left = `${leftPosition}px`;
+    });
+
+    if (isTouchEvent) {
+        e.stopPropagation();
+    }
+  };
+
   modal.addEventListener("click", (e) => {
     if (
       e.target.id === "close-prompt-modal" ||
@@ -121,7 +179,23 @@ export function setupPromptModalEventListeners(app) {
     ) {
       app.setState({ showPromptModal: false });
     }
+    removeTooltip();
   });
+
+  document.querySelectorAll('.help-icon').forEach(icon => {
+    const group = icon.parentElement;
+    group.addEventListener('mouseenter', (e) => createTooltip(e, false));
+    group.addEventListener('touchstart', (e) => createTooltip(e, true));
+    group.addEventListener('mouseleave', removeTooltip);
+  });
+
+  window.addEventListener('touchstart', removeTooltip, true);
+
+  const scrollableContent = modal.querySelector('.overflow-y-auto');
+  if (scrollableContent) {
+    scrollableContent.addEventListener('scroll', removeTooltip);
+  }
+
 
   document
     .getElementById("save-prompts-btn")
