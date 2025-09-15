@@ -570,19 +570,24 @@ export function renderNAISettingsPanel(app) {
         </div>
       </div>
 
-      <!-- 기본 감정 목록 -->
+      <!-- NAI 일괄 생성 목록 -->
       <div class="bg-gray-700/30 rounded-xl p-6">
         <h4 class="text-lg font-semibold text-white mb-4 flex items-center justify-between">
           <div class="flex items-center">
             <i data-lucide="smile" class="w-5 h-5 mr-3 text-blue-400"></i>
             ${t("naiSettings.naiGenerationListTitle")}
           </div>
-          <button id="edit-nai-list" class="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-lg transition-colors">
-            ${t("naiHandlers.editList")}
+          <button
+            id="edit-nai-generation-list"
+            class="px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-1"
+          >
+            <i data-lucide="edit-3" class="w-3 h-3 pointer-events-none"></i>
+            ${t('naiHandlers.editNaiGenerationList')}
           </button>
         </h4>
 
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
+        <!-- 현재 목록 표시 -->
+        <div id="nai-generation-list-display" class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
           ${(settings.naiGenerationList || DEFAULT_EMOTIONS).map(item => {
             let displayText;
 
@@ -596,8 +601,8 @@ export function renderNAISettingsPanel(app) {
                 sad: "😢 슬픔",
                 surprised: "😮 놀람",
                 angry: "😠 분노",
-                love: "😍 사랑",
-                embarrassed: "😳 당황",
+                love: "💕 사랑",
+                embarrassed: "😳 부끄러움",
                 confused: "😕 혼란",
                 sleepy: "😴 졸림",
                 excited: "🤩 흥분",
@@ -614,52 +619,94 @@ export function renderNAISettingsPanel(app) {
           }).join("")}
         </div>
 
-        <!-- 편집 모드 인터페이스 -->
-        <div id="nai-list-editor" class="hidden mt-6 bg-gray-800/50 rounded-lg p-4">
-          <h5 class="text-white font-medium mb-4">${t("naiHandlers.editingMode")}</h5>
-
-          <!-- 새 항목 추가 -->
-          <div class="mb-4 p-4 bg-gray-700/50 rounded-lg">
-            <h6 class="text-sm font-medium text-gray-300 mb-3">${t("naiHandlers.addNewItem")}</h6>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
-              <div>
-                <label class="block text-xs text-gray-400 mb-1">${t("naiHandlers.title")}</label>
-                <input type="text" id="new-item-title" placeholder="${t("naiHandlers.titlePlaceholder")}"
-                       class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg text-sm border-0 focus:ring-2 focus:ring-blue-500/50">
-              </div>
-              <div>
-                <label class="block text-xs text-gray-400 mb-1">${t("naiHandlers.emotion")}</label>
-                <input type="text" id="new-item-emotion" placeholder="${t("naiHandlers.emotionPlaceholder")}"
-                       class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg text-sm border-0 focus:ring-2 focus:ring-blue-500/50">
-              </div>
-              <div>
-                <label class="block text-xs text-gray-400 mb-1">${t("naiHandlers.action")}</label>
-                <input type="text" id="new-item-action" placeholder="${t("naiHandlers.actionPlaceholder")}"
-                       class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg text-sm border-0 focus:ring-2 focus:ring-blue-500/50">
+        <!-- 편집 UI (초기에는 숨겨져 있음) -->
+        <div id="nai-generation-list-editor" class="hidden">
+          <div class="space-y-4">
+            <!-- 현재 목록 편집 -->
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2">
+                ${t('naiHandlers.currentList')}
+              </label>
+              <div id="nai-editable-list" class="space-y-2 max-h-32 overflow-y-auto">
+                <!-- 동적으로 생성되는 목록 -->
               </div>
             </div>
-            <button id="add-nai-item" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors">
-              ${t("naiHandlers.addItem")}
-            </button>
-          </div>
 
-          <!-- 기존 항목 목록 -->
-          <div id="editable-nai-list" class="space-y-2 mb-4">
-            <!-- 동적으로 채워짐 -->
-          </div>
+            <!-- 새 항목 추가 -->
+            <div class="space-y-3">
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">
+                  ${t('naiHandlers.itemTitleLabel')}
+                </label>
+                <input
+                  id="new-nai-item-title"
+                  type="text"
+                  placeholder="${t('naiHandlers.itemTitlePlaceholder')}"
+                  class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm"
+                >
+              </div>
 
-          <!-- 버튼 -->
-          <div class="flex gap-2">
-            <button id="save-nai-list" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors">
-              ${t("naiHandlers.saveChanges")}
-            </button>
-            <button id="cancel-edit-nai-list" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded-lg transition-colors">
-              ${t("naiHandlers.cancelEdit")}
-            </button>
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">
+                  ${t('naiHandlers.emotionLabel')}
+                </label>
+                <input
+                  id="new-nai-item-emotion"
+                  type="text"
+                  placeholder="${t('naiHandlers.emotionPlaceholder')}"
+                  class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm"
+                >
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">
+                  ${t('naiHandlers.actionSituationLabel')}
+                </label>
+                <textarea
+                  id="new-nai-item-action"
+                  rows="3"
+                  placeholder="${t('naiHandlers.actionSituationPlaceholder')}"
+                  class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm resize-none"
+                ></textarea>
+              </div>
+
+              <button
+                id="add-nai-item-btn"
+                class="w-full px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <i data-lucide="plus" class="w-4 h-4 pointer-events-none"></i>
+                ${t('naiHandlers.addNaiGenerationItem')}
+              </button>
+            </div>
+
+            <!-- 버튼 영역 -->
+            <div class="flex gap-2 pt-4 border-t border-gray-600">
+              <button
+                id="save-nai-generation-list"
+                class="flex-1 py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <i data-lucide="check" class="w-4 h-4 pointer-events-none"></i>
+                ${t('naiHandlers.saveList')}
+              </button>
+              <button
+                id="cancel-edit-nai-generation-list"
+                class="flex-1 py-2 px-4 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <i data-lucide="x" class="w-4 h-4 pointer-events-none"></i>
+                ${t('naiHandlers.cancel')}
+              </button>
+              <button
+                id="reset-nai-generation-list"
+                class="py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <i data-lucide="refresh-cw" class="w-4 h-4 pointer-events-none"></i>
+                ${t('naiHandlers.resetToDefault')}
+              </button>
+            </div>
           </div>
         </div>
 
-        <div class="text-xs text-gray-400">
+        <div class="text-xs text-gray-400 mt-4">
           ${t("naiSettings.emotionStickersHelp")}
         </div>
       </div>
