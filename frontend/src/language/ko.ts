@@ -1077,7 +1077,6 @@ export const ko: LanguageStrings = {
     prompt: "프롬프트",
     rerollResult: "리롤 결과",
     rerollSettings: "리롤 설정",
-    save: "저장",
     selectOriginal: "원본 선택",
     selectReroll: "리롤 선택",
     startReroll: "리롤 시작",

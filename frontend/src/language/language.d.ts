@@ -1026,7 +1026,6 @@ export type LanguageStrings = {
     rerollComplete: string;
     rerollResult: string;
     rerollSettings: string;
-    save: string;
     scale: string;
     selectOriginal: string;
     selectReroll: string;
