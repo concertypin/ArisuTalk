@@ -166,7 +166,7 @@ function renderPreviewTab(sticker, mediaContent) {
         data-index="${sticker.index || 0}"
         class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium"
       >
-        ${t('stickerPreview.save')}
+        ${t('common.save')}
       </button>
     </div>
   `;
