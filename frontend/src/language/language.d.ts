@@ -148,6 +148,7 @@ export type LanguageStrings = {
     aiSettings: string;
     scaleSettings: string;
     advancedSettings: string;
+    naiSettings: string;
     apiKey: string;
     apiKeyPlaceholder: string;
     aiModel: string;

@@ -161,6 +161,7 @@ export const en: LanguageStrings = {
     aiSettings: "AI Settings",
     scaleSettings: "Scale Settings",
     advancedSettings: "Advanced Settings",
+    naiSettings: "NAI Settings",
     apiKey: "API Key",
     apiKeyPlaceholder: "Enter your API key",
     aiModel: "AI Model",

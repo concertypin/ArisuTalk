@@ -991,3 +991,6 @@ document.addEventListener("keydown", (e) => {
     }
   }
 });
+
+// ===== 전역 함수 노출 (모바일에서 사용하기 위해) =====
+window.handleShowNaiGenerationListEditor = handleShowNaiGenerationListEditor;
