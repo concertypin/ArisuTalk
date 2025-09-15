@@ -126,6 +126,54 @@ export function setupPromptModalEventListeners(app) {
     }
   };
 
+  const createTooltip = (e, isTouchEvent = false) => {
+    const group = e.currentTarget;
+    const template = group.querySelector('[data-tooltip-template]');
+    if (!template) return;
+
+    const clientX = isTouchEvent ? e.touches[0].clientX : e.clientX;
+    const clientY = isTouchEvent ? e.touches[0].clientY : e.clientY;
+
+    const iconElement = document.elementFromPoint(clientX, clientY);
+    if (!iconElement) return;
+
+    removeTooltip();
+
+    activeTooltip = document.createElement('div');
+    activeTooltip.innerHTML = template.innerHTML;
+    
+    const classes = template.className.replace('hidden', '').trim();
+    activeTooltip.className = classes;
+    
+    activeTooltip.style.position = 'fixed';
+    activeTooltip.style.zIndex = '100';
+    
+    document.body.appendChild(activeTooltip);
+
+    setTimeout(() => {
+        const iconRect = iconElement.getBoundingClientRect();
+        const tooltipRect = activeTooltip.getBoundingClientRect();
+
+        const isTopHalf = iconRect.top < window.innerHeight / 2;
+
+        if (isTopHalf) {
+            activeTooltip.style.top = `${iconRect.bottom + 5}px`;
+        } else {
+            activeTooltip.style.top = `${iconRect.top - tooltipRect.height - 5}px`;
+        }
+
+        let leftPosition = iconRect.left;
+        if (leftPosition + tooltipRect.width > window.innerWidth) {
+            leftPosition = window.innerWidth - tooltipRect.width - 5;
+        }
+        activeTooltip.style.left = `${leftPosition}px`;
+    }, 0);
+
+    if (isTouchEvent) {
+        e.stopPropagation();
+    }
+  };
+
   modal.addEventListener("click", (e) => {
     if (
       e.target.id === "close-prompt-modal" ||
@@ -139,48 +187,12 @@ export function setupPromptModalEventListeners(app) {
 
   document.querySelectorAll('.help-icon').forEach(icon => {
     const group = icon.parentElement;
-    group.addEventListener('mouseenter', (e) => {
-        const template = group.querySelector('[data-tooltip-template]');
-        if (!template) return;
-
-        const iconElement = document.elementFromPoint(e.clientX, e.clientY);
-        if (!iconElement) return;
-
-        removeTooltip();
-
-        activeTooltip = document.createElement('div');
-        activeTooltip.innerHTML = template.innerHTML;
-        
-        const classes = template.className.replace('hidden', '').trim();
-        activeTooltip.className = classes;
-        
-        activeTooltip.style.position = 'fixed';
-        activeTooltip.style.zIndex = '100';
-        
-        document.body.appendChild(activeTooltip);
-
-        setTimeout(() => {
-            const iconRect = iconElement.getBoundingClientRect();
-            const tooltipRect = activeTooltip.getBoundingClientRect();
-
-            const isTopHalf = iconRect.top < window.innerHeight / 2;
-
-            if (isTopHalf) {
-                activeTooltip.style.top = `${iconRect.bottom + 5}px`;
-            } else {
-                activeTooltip.style.top = `${iconRect.top - tooltipRect.height - 5}px`;
-            }
-
-            let leftPosition = iconRect.left;
-            if (leftPosition + tooltipRect.width > window.innerWidth) {
-                leftPosition = window.innerWidth - tooltipRect.width - 5;
-            }
-            activeTooltip.style.left = `${leftPosition}px`;
-        }, 0);
-    });
-
+    group.addEventListener('mouseenter', (e) => createTooltip(e, false));
+    group.addEventListener('touchstart', (e) => createTooltip(e, true));
     group.addEventListener('mouseleave', removeTooltip);
   });
+
+  window.addEventListener('touchstart', removeTooltip, true);
 
   const scrollableContent = modal.querySelector('.overflow-y-auto');
   if (scrollableContent) {
