@@ -8,11 +8,13 @@ import {
   renderMobileSettingsUI,
   renderAiSettingsPage, // Import the new function
   renderScaleSettingsPage,
+  renderNaiSettingsPage,
   setupMobileSettingsUIEventListeners,
 } from "./components/MobileSettingsUI.js";
 import { setupDesktopSettingsEventListeners } from "./components/DesktopSettingsUI.js";
 
 import { renderCharacterModal } from "./components/CharacterModal.js";
+import { renderStickerPreviewModal } from "./components/StickerPreviewModal.js";
 import {
   renderPromptModal,
   setupPromptModalEventListeners,
@@ -72,7 +74,7 @@ async function renderModals(app) {
   if (app.state.showEditGroupChatModal)
     mainModalHtml += renderEditGroupChatModal(app);
   if (app.state.showDebugLogsModal)
-    mainModalHtml += renderDebugLogsModal(app.state);
+    mainModalHtml += await renderDebugLogsModal(app.state);
   if (app.state.showMobileSearch) mainModalHtml += renderSearchModal(app);
   if (app.state.modal.isOpen && app.state.modal.type === "chatSelection") {
     mainModalHtml += renderChatSelectionModal(app);
@@ -100,6 +102,10 @@ async function renderModals(app) {
   // Image zoom modal
   if (app.state.imageZoomModal && app.state.imageZoomModal.isOpen) {
     mainModalHtml += renderImageZoomModal(app);
+  }
+  // Sticker preview modal
+  if (app.state.stickerPreviewModal && app.state.stickerPreviewModal.isOpen) {
+    mainModalHtml += renderStickerPreviewModal(app.state.stickerPreviewModal);
   }
   if (container.innerHTML !== mainModalHtml) {
     container.innerHTML = mainModalHtml;
@@ -188,6 +194,7 @@ export async function render(app) {
         "show-chat",
         "show-settings",
         "show-scale-settings",
+        "show-nai-settings",
       );
       if (
         isFirstRender ||
@@ -202,6 +209,7 @@ export async function render(app) {
         "show-chat",
         "show-settings",
         "show-ai-settings",
+        "show-nai-settings",
       );
       if (
         isFirstRender ||
@@ -210,12 +218,31 @@ export async function render(app) {
         scaleSettingsContainer.innerHTML = renderScaleSettingsPage(app);
         setupMobileSettingsUIEventListeners(app); // Re-use listeners for back button etc.
       }
+    } else if (newState.showNaiSettingsUI) {
+      transitionContainer.classList.add("show-nai-settings");
+      transitionContainer.classList.remove(
+        "show-chat",
+        "show-settings",
+        "show-ai-settings",
+        "show-scale-settings",
+      );
+      if (
+        isFirstRender ||
+        oldState.showNaiSettingsUI !== newState.showNaiSettingsUI
+      ) {
+        const naiSettingsContainer = document.getElementById("nai-settings-container");
+        if (naiSettingsContainer) {
+          naiSettingsContainer.innerHTML = renderNaiSettingsPage(app);
+          setupMobileSettingsUIEventListeners(app); // Re-use listeners for back button etc.
+        }
+      }
     } else if (newState.showSettingsUI) {
       transitionContainer.classList.add("show-settings");
       transitionContainer.classList.remove(
         "show-chat",
         "show-ai-settings",
         "show-scale-settings",
+        "show-nai-settings",
       );
       if (
         isFirstRender ||
@@ -243,6 +270,7 @@ export async function render(app) {
         "show-settings",
         "show-ai-settings",
         "show-scale-settings",
+        "show-nai-settings",
       );
 
       setTimeout(() => {
@@ -269,6 +297,7 @@ export async function render(app) {
         "show-settings",
         "show-ai-settings",
         "show-scale-settings",
+        "show-nai-settings",
       );
 
       if (isFirstRender || shouldUpdateCharacterList(oldState, newState)) {
@@ -301,6 +330,12 @@ export async function render(app) {
         }
         if (!window.personaApp.state.showScaleSettingsUI) {
           scaleSettingsContainer.innerHTML = "";
+        }
+        if (!window.personaApp.state.showNaiSettingsUI) {
+          const naiSettingsContainer = document.getElementById("nai-settings-container");
+          if (naiSettingsContainer) {
+            naiSettingsContainer.innerHTML = "";
+          }
         }
       }, 600);
     }
@@ -526,6 +561,7 @@ function shouldUpdateModals(oldState, newState) {
 
   const conditions = [
     JSON.stringify(oldState.modal) !== JSON.stringify(newState.modal),
+    JSON.stringify(oldState.stickerPreviewModal) !== JSON.stringify(newState.stickerPreviewModal),
     oldState.showSettingsModal !== newState.showSettingsModal,
     oldState.showCharacterModal !== newState.showCharacterModal,
     oldState.showMobileSearch !== newState.showMobileSearch,

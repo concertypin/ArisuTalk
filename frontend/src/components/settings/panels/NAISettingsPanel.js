@@ -570,39 +570,143 @@ export function renderNAISettingsPanel(app) {
         </div>
       </div>
 
-      <!-- 기본 감정 목록 -->
+      <!-- NAI 일괄 생성 목록 -->
       <div class="bg-gray-700/30 rounded-xl p-6">
-        <h4 class="text-lg font-semibold text-white mb-4 flex items-center">
-          <i data-lucide="smile" class="w-5 h-5 mr-3 text-blue-400"></i>
-          ${t("naiSettings.emotionStickersTitle")}
+        <h4 class="text-lg font-semibold text-white mb-4 flex items-center justify-between">
+          <div class="flex items-center">
+            <i data-lucide="smile" class="w-5 h-5 mr-3 text-blue-400"></i>
+            ${t("naiSettings.naiGenerationListTitle")}
+          </div>
+          <button
+            id="edit-nai-generation-list"
+            class="px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-1"
+          >
+            <i data-lucide="edit-3" class="w-3 h-3 pointer-events-none"></i>
+            ${t('naiHandlers.editNaiGenerationList')}
+          </button>
         </h4>
-        
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
-          ${DEFAULT_EMOTIONS.map(emotion => {
-            const emotionKeys = {
-              happy: "emotionHappy",
-              sad: "emotionSad", 
-              surprised: "emotionSurprised",
-              angry: "emotionAngry",
-              love: "emotionLove",
-              embarrassed: "emotionEmbarrassed",
-              confused: "emotionConfused",
-              sleepy: "emotionSleepy",
-              excited: "emotionExcited",
-              neutral: "emotionNeutral"
-            };
-            
-            const emotionKey = emotionKeys[emotion] || emotion;
-            
+
+        <!-- 현재 목록 표시 -->
+        <div id="nai-generation-list-display" class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
+          ${(settings.naiGenerationList || DEFAULT_EMOTIONS).map(item => {
+            let displayText;
+
+            if (typeof item === 'object' && item.title) {
+              // 새로운 3필드 구조 - 제목만 표시
+              displayText = item.title;
+            } else {
+              // 기존 문자열 구조 (하위 호환성)
+              const emotionLabels = {
+                happy: "😊 기쁨",
+                sad: "😢 슬픔",
+                surprised: "😮 놀람",
+                angry: "😠 분노",
+                love: "💕 사랑",
+                embarrassed: "😳 부끄러움",
+                confused: "😕 혼란",
+                sleepy: "😴 졸림",
+                excited: "🤩 흥분",
+                neutral: "😐 무표정"
+              };
+              displayText = emotionLabels[item] || item;
+            }
+
             return `
               <div class="bg-gray-600/50 rounded-lg px-3 py-2 text-center">
-                <span class="text-xs text-gray-300">${t(`naiSettings.${emotionKey}`)}</span>
+                <span class="text-xs text-gray-300">${displayText}</span>
               </div>
             `;
           }).join("")}
         </div>
-        
-        <div class="text-xs text-gray-400">
+
+        <!-- 편집 UI (초기에는 숨겨져 있음) -->
+        <div id="nai-generation-list-editor" class="hidden">
+          <div class="space-y-4">
+            <!-- 현재 목록 편집 -->
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2">
+                ${t('naiHandlers.currentList')}
+              </label>
+              <div id="nai-editable-list" class="space-y-2 max-h-32 overflow-y-auto">
+                <!-- 동적으로 생성되는 목록 -->
+              </div>
+            </div>
+
+            <!-- 새 항목 추가 -->
+            <div class="space-y-3">
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">
+                  ${t('naiHandlers.itemTitleLabel')}
+                </label>
+                <input
+                  id="new-nai-item-title"
+                  type="text"
+                  placeholder="${t('naiHandlers.itemTitlePlaceholder')}"
+                  class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm"
+                >
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">
+                  ${t('naiHandlers.emotionLabel')}
+                </label>
+                <input
+                  id="new-nai-item-emotion"
+                  type="text"
+                  placeholder="${t('naiHandlers.emotionPlaceholder')}"
+                  class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm"
+                >
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">
+                  ${t('naiHandlers.actionSituationLabel')}
+                </label>
+                <textarea
+                  id="new-nai-item-action"
+                  rows="3"
+                  placeholder="${t('naiHandlers.actionSituationPlaceholder')}"
+                  class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm resize-none"
+                ></textarea>
+              </div>
+
+              <button
+                id="add-nai-item-btn"
+                class="w-full px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <i data-lucide="plus" class="w-4 h-4 pointer-events-none"></i>
+                ${t('naiHandlers.addNaiGenerationItem')}
+              </button>
+            </div>
+
+            <!-- 버튼 영역 -->
+            <div class="flex gap-2 pt-4 border-t border-gray-600">
+              <button
+                id="save-nai-generation-list"
+                class="flex-1 py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <i data-lucide="check" class="w-4 h-4 pointer-events-none"></i>
+                ${t('naiHandlers.saveList')}
+              </button>
+              <button
+                id="cancel-edit-nai-generation-list"
+                class="flex-1 py-2 px-4 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <i data-lucide="x" class="w-4 h-4 pointer-events-none"></i>
+                ${t('naiHandlers.cancel')}
+              </button>
+              <button
+                id="reset-nai-generation-list"
+                class="py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <i data-lucide="refresh-cw" class="w-4 h-4 pointer-events-none"></i>
+                ${t('naiHandlers.resetToDefault')}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-xs text-gray-400 mt-4">
           ${t("naiSettings.emotionStickersHelp")}
         </div>
       </div>

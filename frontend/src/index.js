@@ -109,6 +109,7 @@ class PersonaChatApp {
       showFabMenu: false,
       searchQuery: "",
       modal: { isOpen: false, title: "", message: "", onConfirm: null },
+      stickerPreviewModal: { isOpen: false, sticker: null, index: null },
       showInputOptions: false,
       imageToSend: null,
       currentMessage: "",
@@ -283,6 +284,20 @@ class PersonaChatApp {
           ...this.state.settings.apiConfigs,
           [provider]: newConfig,
         },
+      },
+    });
+    this.debouncedCreateSettingsSnapshot();
+  }
+
+  /**
+   * Handles changes to the custom NAI batch generation list.
+   * @param {Array} newGenerationList - The new NAI batch generation list array.
+   */
+  handleNaiGenerationListChange(newGenerationList) {
+    this.setState({
+      settings: {
+        ...this.state.settings,
+        naiGenerationList: newGenerationList,
       },
     });
     this.debouncedCreateSettingsSnapshot();
@@ -521,6 +536,65 @@ class PersonaChatApp {
     return migratedCharacters;
   }
 
+  // CharacterStates를 새로운 호감도 기반 스키마로 마이그레이션
+  migrateCharacterStates(characterStates) {
+    if (!characterStates || typeof characterStates !== 'object') {
+      return {};
+    }
+
+    const migratedStates = {};
+    let migrationNeeded = false;
+    
+    Object.keys(characterStates).forEach(characterId => {
+      const oldState = characterStates[characterId];
+      
+      // 이미 새 스키마인 경우 (affection이 존재하는 경우)
+      if (oldState && typeof oldState === 'object' && 'affection' in oldState) {
+        migratedStates[characterId] = { ...oldState };
+        return;
+      }
+      
+      migrationNeeded = true;
+      
+      // 기존 스키마인 경우 변환
+      if (oldState && typeof oldState === 'object') {
+        migratedStates[characterId] = {
+          // mood -> affection 변환 (mood가 높을수록 호감도도 높음)
+          affection: oldState.mood !== undefined ? Math.max(0, Math.min(1, oldState.mood)) : 0.3,
+          
+          // energy -> intimacy 변환 (에너지가 높을수록 친밀감도 높음)  
+          intimacy: oldState.energy !== undefined ? Math.max(0, Math.min(1, oldState.energy)) : 0.1,
+          
+          // socialBattery -> trust 변환 (사회적 배터리가 높을수록 신뢰도 높음)
+          trust: oldState.socialBattery !== undefined ? Math.max(0, Math.min(1, oldState.socialBattery)) : 0.2,
+          
+          // romantic_interest는 새로운 값이므로 기본값 0.0
+          romantic_interest: 0.0,
+          
+          // reason도 새로운 값이므로 기본값
+          reason: "기존 캐릭터 상태를 새 시스템으로 마이그레이션했습니다"
+        };
+      } else {
+        // 기본값으로 초기화
+        migratedStates[characterId] = {
+          affection: 0.3,
+          intimacy: 0.1,
+          trust: 0.2,
+          romantic_interest: 0.0,
+          reason: "캐릭터 상태를 새 시스템으로 초기화했습니다"
+        };
+      }
+    });
+    
+    // 마이그레이션이 필요했다면 즉시 저장하여 다음 로딩 시에는 변환 과정을 거치지 않도록 함
+    if (migrationNeeded) {
+      saveToBrowserStorage("personaChat_characterStates_v16", migratedStates);
+      console.log("CharacterStates 마이그레이션 완료:", Object.keys(migratedStates).length, "개 캐릭터");
+    }
+    
+    return migratedStates;
+  }
+
   processAutoPost(character, autoPost) {
     if (!autoPost || !autoPost.content?.trim()) return character;
     
@@ -587,10 +661,16 @@ class PersonaChatApp {
         loadFromBrowserStorage("personaChat_personaData_v16", { userName: "", userDescription: "" }),
       ]);
 
+      // 기존 기본 설정과 저장된 설정을 병합하면서 누락된 키는 기본값으로 유지
       this.state.settings = {
         ...this.state.settings,
         ...settings,
+        // naiGenerationList가 없으면 기본값으로 설정
+        naiGenerationList: settings.naiGenerationList || this.state.settings.naiGenerationList,
       };
+
+      // CharacterStates를 새로운 호감도 기반 스키마로 마이그레이션
+      const migratedCharacterStates = this.migrateCharacterStates(characterStates);
 
       // 메모리를 SNS 포스트로 마이그레이션
       const migratedCharacters = this.migrateMemoriesToSNSPosts(characters);
@@ -605,7 +685,7 @@ class PersonaChatApp {
       this.state.userStickers = userStickers;
       this.state.groupChats = groupChats;
       this.state.openChats = openChats;
-      this.state.characterStates = characterStates;
+      this.state.characterStates = migratedCharacterStates;
       this.state.settingsSnapshots = settingsSnapshots;
       this.state.selectedChatId = selectedChatId;
       this.state.userName = personaData.userName || "";
@@ -1167,6 +1247,14 @@ class PersonaChatApp {
       if (e.target.closest("#edit-character-btn")) {
         if (this.state.mobileEditModeCharacterId) {
           this.editCharacter(this.state.mobileEditModeCharacterId, e);
+          this._fadeOutHeaderAndCloseEditMode();
+        }
+      }
+      if (e.target.closest("#delete-character-btn")) {
+        const deleteBtn = e.target.closest("#delete-character-btn");
+        if (deleteBtn && this.state.mobileEditModeCharacterId) {
+          const characterId = parseInt(deleteBtn.dataset.characterId);
+          this.deleteCharacter(characterId);
           this._fadeOutHeaderAndCloseEditMode();
         }
       }
@@ -2067,22 +2155,259 @@ class PersonaChatApp {
   }
 
   handleEditStickerName(index) {
+    // 새로운 내부 모달을 사용하여 스티커 미리보기 및 편집
+    this.openStickerPreviewModal(index);
+  }
+
+  // 스티커 미리보기 모달 열기
+  async openStickerPreviewModal(index, activeTab = 'preview') {
     if (this.state.editingCharacter && this.state.editingCharacter.stickers) {
       const sticker = this.state.editingCharacter.stickers[index];
       if (!sticker) return;
+      
+      // EXIF 데이터 추출 (이미지인 경우만)
+      let exifData = null;
+      let rerollData = null;
+      
+      const isImage = sticker.type && sticker.type.startsWith('image/');
+      if (isImage) {
+        try {
+          const { extractExifData, formatExifInfo, extractRerollInfo } = await import('./utils/exifUtils.js');
+          const rawExif = await extractExifData(sticker.dataUrl);
+          exifData = formatExifInfo(rawExif);
+          rerollData = extractRerollInfo(rawExif);
+        } catch (error) {
+          console.warn('EXIF 데이터 추출 실패:', error);
+          exifData = { basic: {}, nai: {} };
+        }
+      }
 
-      const newName = prompt(t("ui.enterStickerName"), sticker.name);
-      if (newName !== null && newName.trim() !== "") {
-        const newStickers = [...this.state.editingCharacter.stickers];
-        newStickers[index] = { ...sticker, name: newName.trim() };
-        this.setState({
-          editingCharacter: {
-            ...this.state.editingCharacter,
-            stickers: newStickers,
-          },
+      this.setState({
+        stickerPreviewModal: {
+          isOpen: true,
+          sticker: sticker,
+          index: index,
+          activeTab: activeTab,
+          exifData: exifData,
+          rerollData: rerollData,
+          rerollResult: null,  // 초기값
+          rerolling: false     // 초기값
+        }
+      });
+    }
+  }
+
+  // 스티커 미리보기 모달 닫기
+  closeStickerPreviewModal() {
+    this.setState({
+      stickerPreviewModal: {
+        isOpen: false,
+        sticker: null,
+        index: null
+      }
+    });
+  }
+
+  // 스티커 이름 저장
+  saveStickerName(index, newName) {
+    if (this.state.editingCharacter && this.state.editingCharacter.stickers && newName && newName.trim() !== "") {
+      const newStickers = [...this.state.editingCharacter.stickers];
+      newStickers[index] = { ...newStickers[index], name: newName.trim() };
+      
+      this.setState({
+        editingCharacter: {
+          ...this.state.editingCharacter,
+          stickers: newStickers,
+        },
+      });
+      
+      // 모달 닫기
+      this.closeStickerPreviewModal();
+      
+      // 성공 메시지 (선택사항)
+      // alert(t("stickerPreview.nameUpdated"));
+    }
+  }
+
+  // 스티커 미리보기 모달 탭 전환
+  switchStickerPreviewTab(newTab) {
+    if (this.state.stickerPreviewModal && this.state.stickerPreviewModal.isOpen) {
+      this.setState({
+        stickerPreviewModal: {
+          ...this.state.stickerPreviewModal,
+          activeTab: newTab
+        }
+      });
+    }
+  }
+
+  // 스티커 삭제
+  deleteSticker(index) {
+    if (this.state.editingCharacter && this.state.editingCharacter.stickers) {
+      const newStickers = [...this.state.editingCharacter.stickers];
+      newStickers.splice(index, 1);
+      
+      this.setState({
+        editingCharacter: {
+          ...this.state.editingCharacter,
+          stickers: newStickers,
+        },
+      });
+      
+      // 모달 닫기
+      this.closeStickerPreviewModal();
+      
+      // 성공 메시지 표시
+      this.showNotification(t('stickerPreview.stickerDeleted'), 'success');
+    }
+  }
+
+  // 스티커 클립보드 복사
+  copyStickerToClipboard(index) {
+    if (this.state.editingCharacter && this.state.editingCharacter.stickers) {
+      const sticker = this.state.editingCharacter.stickers[index];
+      if (sticker && sticker.dataUrl) {
+        // Data URL을 클립보드에 복사
+        navigator.clipboard.writeText(sticker.dataUrl).then(() => {
+          this.showNotification(t('stickerPreview.dataCopied'), 'success');
+        }).catch(err => {
+          console.error('클립보드 복사 실패:', err);
         });
       }
     }
+  }
+
+  // 스티커 다운로드
+  downloadSticker(index) {
+    if (this.state.editingCharacter && this.state.editingCharacter.stickers) {
+      const sticker = this.state.editingCharacter.stickers[index];
+      if (sticker && sticker.dataUrl) {
+        const link = document.createElement('a');
+        link.href = sticker.dataUrl;
+        link.download = `${sticker.name || 'sticker'}.${this.getFileExtension(sticker.type)}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        this.showNotification(t('stickerPreview.downloadComplete'), 'success');
+      }
+    }
+  }
+
+  // 파일 확장자 추출
+  getFileExtension(mimeType) {
+    const extensions = {
+      'image/jpeg': 'jpg',
+      'image/jpg': 'jpg',
+      'image/png': 'png',
+      'image/gif': 'gif',
+      'image/webp': 'webp',
+      'video/mp4': 'mp4',
+      'video/webm': 'webm',
+      'audio/mp3': 'mp3',
+      'audio/mpeg': 'mp3'
+    };
+    return extensions[mimeType] || 'bin';
+  }
+
+  // NAI 리롤 시작
+  async startNAIReroll(index, promptData) {
+
+    if (!promptData || !promptData.prompt) {
+      console.error('리롤을 위한 프롬프트 데이터가 없습니다');
+      return;
+    }
+
+    try {
+      // 리롤 상태 업데이트
+      this.setState({
+        stickerPreviewModal: {
+          ...this.state.stickerPreviewModal,
+          rerolling: true
+        }
+      });
+
+      // NAI API를 통한 이미지 생성
+      const originalSticker = this.state.editingCharacter.stickers[index];
+
+      // 실제 NAI API 호출
+      const character = this.state.editingCharacter;
+
+      const newStickerData = await this.stickerManager.naiClient.generateSticker(character, 'reroll', {
+        naiSettings: {
+          steps: promptData.steps,
+          scale: promptData.scale,
+          model: this.stickerManager.naiClient.options.model,
+          customPositivePrompt: promptData.prompt,  // 커스텀 프롬프트로 전달
+          imageSize: promptData.imageSize || 'square'  // 이미지 크기 설정
+        }
+      });
+
+      if (!newStickerData || !newStickerData.dataUrl) {
+        throw new Error('NAI 이미지 생성 실패');
+      }
+
+      const rerollResult = {
+        dataUrl: newStickerData.dataUrl,
+        name: `${originalSticker.name}_reroll`,
+        type: newStickerData.type || "image/png",
+        timestamp: Date.now(),
+        stickerData: newStickerData  // 전체 스티커 데이터 저장
+      };
+
+      // 리롤 결과 표시
+      this.setState({
+        stickerPreviewModal: {
+          ...this.state.stickerPreviewModal,
+          rerolling: false,
+          rerollResult: rerollResult
+        }
+      }, () => {
+        // UI 강제 업데이트
+        this.updateUI();
+      });
+
+    } catch (error) {
+      console.error('NAI 리롤 실패:', error);
+      this.setState({
+        stickerPreviewModal: {
+          ...this.state.stickerPreviewModal,
+          rerolling: false
+        }
+      });
+      console.error('리롤 실패:', error.message);
+    }
+  }
+
+  // 리롤 결과 적용
+  acceptRerollResult(index) {
+    if (this.state.stickerPreviewModal && this.state.stickerPreviewModal.rerollResult) {
+      const newStickers = [...this.state.editingCharacter.stickers];
+      newStickers[index] = {
+        ...newStickers[index],
+        ...this.state.stickerPreviewModal.rerollResult
+      };
+      
+      this.setState({
+        editingCharacter: {
+          ...this.state.editingCharacter,
+          stickers: newStickers,
+        },
+      });
+      
+      this.showNotification(t('stickerPreview.rerollComplete'), 'success');
+      this.closeStickerPreviewModal();
+    }
+  }
+
+  // 리롤 결과 거부
+  rejectRerollResult() {
+    this.setState({
+      stickerPreviewModal: {
+        ...this.state.stickerPreviewModal,
+        rerollResult: null
+      }
+    });
   }
 
   toggleStickerSelectionMode() {
@@ -3039,7 +3364,7 @@ class PersonaChatApp {
         },
       };
 
-      this.addStructuredLog(
+      await this.addStructuredLog(
         groupChatId,
         "group",
         character.name,
@@ -3243,7 +3568,7 @@ class PersonaChatApp {
         },
       };
 
-      this.addStructuredLog(
+      await this.addStructuredLog(
         openChatId,
         "open",
         character.name,
@@ -3591,6 +3916,51 @@ class PersonaChatApp {
     }
   }
 
+  // 최면 제어 슬라이더의 표시값을 실시간으로 업데이트하는 함수
+  updateHypnosisDisplayValues(characterState) {
+    if (!characterState) return;
+
+    // 최면 호감도 오버라이드가 비활성화된 상태에서만 현재 상태값을 반영
+    const hypnosisAffectionOverride = document.getElementById('hypnosis-affection-override');
+    if (hypnosisAffectionOverride && !hypnosisAffectionOverride.checked) {
+      // 호감도 슬라이더 및 표시값 업데이트
+      const affectionSlider = document.getElementById('hypnosis-affection');
+      const affectionValue = document.getElementById('hypnosis-affection-value');
+      if (affectionSlider && affectionValue && characterState.affection !== undefined) {
+        const affectionPercent = Math.round(characterState.affection * 100);
+        affectionSlider.value = affectionPercent;
+        affectionValue.textContent = affectionPercent + '%';
+      }
+
+      // 친밀도 슬라이더 및 표시값 업데이트
+      const intimacySlider = document.getElementById('hypnosis-intimacy');
+      const intimacyValue = document.getElementById('hypnosis-intimacy-value');
+      if (intimacySlider && intimacyValue && characterState.intimacy !== undefined) {
+        const intimacyPercent = Math.round(characterState.intimacy * 100);
+        intimacySlider.value = intimacyPercent;
+        intimacyValue.textContent = intimacyPercent + '%';
+      }
+
+      // 신뢰도 슬라이더 및 표시값 업데이트
+      const trustSlider = document.getElementById('hypnosis-trust');
+      const trustValue = document.getElementById('hypnosis-trust-value');
+      if (trustSlider && trustValue && characterState.trust !== undefined) {
+        const trustPercent = Math.round(characterState.trust * 100);
+        trustSlider.value = trustPercent;
+        trustValue.textContent = trustPercent + '%';
+      }
+
+      // 로맨틱 관심도 슬라이더 및 표시값 업데이트
+      const romanticSlider = document.getElementById('hypnosis-romantic');
+      const romanticValue = document.getElementById('hypnosis-romantic-value');
+      if (romanticSlider && romanticValue && characterState.romantic_interest !== undefined) {
+        const romanticPercent = Math.round(characterState.romantic_interest * 100);
+        romanticSlider.value = romanticPercent;
+        romanticValue.textContent = romanticPercent + '%';
+      }
+    }
+  }
+
   async triggerApiCall(
     currentMessagesState,
     isProactive = false,
@@ -3709,7 +4079,7 @@ class PersonaChatApp {
       },
     };
 
-    this.addStructuredLog(chatId, "general", character.name, structuredLogData);
+    await this.addStructuredLog(chatId, "general", character.name, structuredLogData);
 
     // characterState 응답이 있으면 처리 (개별 채팅)
     if (response.characterState) {
@@ -4072,7 +4442,7 @@ class PersonaChatApp {
         },
       };
 
-      this.addStructuredLog(
+      await this.addStructuredLog(
         null,
         "random_character",
         tempCharacter.name,
@@ -4597,15 +4967,47 @@ class PersonaChatApp {
         }
       };
 
-      const apiResponse = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      // 재시도 로직을 포함한 API 호출
+      let apiResponse;
+      let apiData;
+      const maxRetries = 3;
+      const retryDelay = 2000; // 2초
+      
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          apiResponse = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
 
-      const apiData = await apiResponse.json();
-      if (!apiResponse.ok) {
-        throw new Error(`AI API 호출 실패: ${apiResponse.status}`);
+          apiData = await apiResponse.json();
+          
+          if (apiResponse.ok) {
+            break; // 성공하면 반복문 종료
+          }
+          
+          // 5xx 서버 오류의 경우 재시도
+          if (apiResponse.status >= 500 && attempt < maxRetries) {
+            console.warn(`[NAI Force] API 호출 실패 (${apiResponse.status}), ${retryDelay/1000}초 후 재시도... (${attempt}/${maxRetries})`);
+            await new Promise(resolve => setTimeout(resolve, retryDelay));
+            continue;
+          }
+          
+          // 재시도하지 않을 오류 또는 최종 실패
+          throw new Error(`AI API 호출 실패: ${apiResponse.status}${apiData?.error?.message ? ` - ${apiData.error.message}` : ''}`);
+          
+        } catch (error) {
+          if (attempt === maxRetries) {
+            if (error.message.includes('fetch')) {
+              throw new Error('네트워크 연결 오류: 인터넷 연결을 확인해주세요.');
+            }
+            throw error;
+          }
+          
+          console.warn(`[NAI Force] API 호출 중 오류 발생, ${retryDelay/1000}초 후 재시도... (${attempt}/${maxRetries}):`, error.message);
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+        }
       }
 
       const naiResponseText = apiData.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -4640,23 +5042,54 @@ class PersonaChatApp {
       // 글로벌 및 캐릭터별 NAI 설정 병합
       const globalNAISettings = this.state.settings?.naiSettings || {};
       const charNAISettings = character.naiSettings || {};
+      const mergedSettings = { ...globalNAISettings, ...charNAISettings };
       
-      // 캐릭터 외모 정보 추출
-      const characterAppearance = character.appearance || character.prompt?.match(/외모[:\s]*([^.\n]+)/)?.[1] || "";
+      // 이미지 크기 설정 (preferredSize 기반)
+      const preferredSize = mergedSettings.preferredSize || "square";
+      const sizeConfig = NovelAIClient.UNLIMITED_SIZES.find(s => s.name === preferredSize) || 
+                        NovelAIClient.UNLIMITED_SIZES[2]; // 기본값: square
       
-      // AI가 생성한 태그를 사용하여 NAI 생성 파라미터 구성
+      // NAI 클라이언트의 buildPrompt 메서드를 사용하여 체계적인 프롬프트 생성
+      const promptData = naiClient.buildPrompt(character, emotion, { naiSettings: mergedSettings });
+      
+      // 자동 생성과 동일한 방식으로 완전한 생성 파라미터 구성
       const generationParams = {
-        prompt: characterAppearance ? 
-          `${characterAppearance}, ${emotion}, ${situationPrompt}, anime style, masterpiece, high quality` :
-          `1girl, ${emotion}, ${situationPrompt}, anime style, masterpiece, high quality`,
-        negative_prompt: charNAISettings.negativePrompt || globalNAISettings.negativePrompt || 
-          "lowres, bad anatomy, text, error, worst quality, low quality, blurry",
-        model: charNAISettings.model || globalNAISettings.model || 'nai-diffusion-4-5-full',
-        width: charNAISettings.width || globalNAISettings.width || 1024,
-        height: charNAISettings.height || globalNAISettings.height || 1024,
-        steps: charNAISettings.steps || globalNAISettings.steps || 28,
-        scale: charNAISettings.scale || globalNAISettings.scale || 3.0,
-        sampler: charNAISettings.sampler || globalNAISettings.sampler || 'k_euler'
+        // 기본 프롬프트
+        prompt: promptData.prompt,
+        negative_prompt: promptData.negative_prompt,
+        
+        // 모델 및 이미지 설정
+        model: naiClient.validateModel(mergedSettings.model) || "nai-diffusion-4-5-full",
+        width: sizeConfig.width,
+        height: sizeConfig.height,
+        
+        // 생성 파라미터
+        scale: mergedSettings.scale || 3,
+        steps: mergedSettings.steps || 28,
+        sampler: mergedSettings.sampler || "k_euler",
+        noise_schedule: mergedSettings.noise_schedule || "native",
+        
+        // SMEA 설정 (v3 모델 전용)
+        sm: mergedSettings.sm || false,
+        sm_dyn: mergedSettings.sm_dyn || false,
+        
+        // 캐릭터 프롬프트 (v4/v4.5 전용)
+        characterPrompts: promptData.characterPrompts,
+        
+        // Vibe Transfer 설정
+        ...(mergedSettings.vibeTransferEnabled && mergedSettings.vibeTransferImage ? {
+          vibeTransferImage: mergedSettings.vibeTransferImage,
+          reference_strength: mergedSettings.vibeTransferStrength || 0.6,
+          reference_information_extracted: mergedSettings.vibeTransferInformationExtracted || 1.0
+        } : {}),
+        
+        // 고급 설정
+        cfg_rescale: mergedSettings.cfg_rescale || 0,
+        uncond_scale: mergedSettings.uncond_scale || 1.0,
+        dynamic_thresholding: mergedSettings.dynamic_thresholding || false,
+        dynamic_thresholding_percentile: mergedSettings.dynamic_thresholding_percentile || 0.999,
+        dynamic_thresholding_mimic_scale: mergedSettings.dynamic_thresholding_mimic_scale || 10,
+        legacy: mergedSettings.legacy || false
       };
 
       // console.log(`[NAI Force] NAI 생성 파라미터:`, generationParams);
@@ -6206,7 +6639,7 @@ class PersonaChatApp {
         },
       };
 
-      this.addStructuredLog(
+      await this.addStructuredLog(
         null,
         "character_generation",
         characterName,
@@ -6430,8 +6863,37 @@ class PersonaChatApp {
     this.setState({ debugLogs: newLogs });
   }
 
-  addStructuredLog(chatId, chatType, characterName, logData) {
+  // 채팅 타입별 txt 파일 읽기
+  async getSystemPromptForChatType(chatType) {
+    const promptFileMap = {
+      'general': '/src/texts/mainChatMLPrompt.txt',
+      'normal': '/src/texts/mainChatMLPrompt.txt', 
+      'group': '/src/texts/groupChatMLPrompt.txt',
+      'open': '/src/texts/openChatMLPrompt.txt',
+      'nai': '/src/texts/naiStickerPrompt.txt',
+      'sns': '/src/texts/snsForcePrompt.txt',
+      'character_generation': '/src/texts/profileCreationChatMLPrompt.txt'
+    };
+
+    const promptFile = promptFileMap[chatType] || promptFileMap['general'];
+    
+    try {
+      const response = await fetch(promptFile);
+      if (response.ok) {
+        return await response.text();
+      }
+    } catch (error) {
+      console.warn(`Failed to load prompt file for chat type: ${chatType}`, error);
+    }
+    
+    return null;
+  }
+
+  async addStructuredLog(chatId, chatType, characterName, logData) {
     if (!this.state.enableDebugLogs) return;
+
+    // 채팅 타입에 맞는 시스템 프롬프트만 가져오기
+    const chatPrompt = await this.getSystemPromptForChatType(chatType);
 
     const logEntry = {
       id: Date.now() + Math.random(),
@@ -6443,7 +6905,7 @@ class PersonaChatApp {
       // Structured data
       data: {
         personaInput: logData.personaInput || null,
-        systemPrompt: logData.systemPrompt || null,
+        systemPrompt: chatPrompt, // 채팅 타입별 txt 파일 내용만 저장
         outputResponse: logData.outputResponse || null,
         parameters: logData.parameters || {},
         metadata: {
@@ -6684,6 +7146,74 @@ class PersonaChatApp {
   toggleSNSSecretMode() {
     this.setState({
       snsSecretMode: !this.state.snsSecretMode
+    });
+  }
+
+  // 토스트 알림 표시
+  showNotification(message, type = 'info', duration = 3000) {
+    // 알림 컨테이너가 없으면 생성
+    let notificationContainer = document.getElementById('notification-container');
+    if (!notificationContainer) {
+      notificationContainer = document.createElement('div');
+      notificationContainer.id = 'notification-container';
+      notificationContainer.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 10000;
+        pointer-events: none;
+      `;
+      document.body.appendChild(notificationContainer);
+    }
+
+    // 알림 요소 생성
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+      background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+      color: white;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      font-size: 14px;
+      max-width: 320px;
+      word-wrap: break-word;
+      pointer-events: auto;
+      transform: translateX(100%);
+      transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+      opacity: 0;
+    `;
+    notification.textContent = message;
+
+    // 컨테이너에 추가
+    notificationContainer.appendChild(notification);
+
+    // 애니메이션으로 표시
+    setTimeout(() => {
+      notification.style.transform = 'translateX(0)';
+      notification.style.opacity = '1';
+    }, 10);
+
+    // 자동 제거
+    setTimeout(() => {
+      notification.style.transform = 'translateX(100%)';
+      notification.style.opacity = '0';
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      }, 300);
+    }, duration);
+
+    // 클릭해서 제거 가능
+    notification.addEventListener('click', () => {
+      notification.style.transform = 'translateX(100%)';
+      notification.style.opacity = '0';
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      }, 300);
     });
   }
 }

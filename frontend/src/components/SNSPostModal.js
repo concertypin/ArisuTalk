@@ -110,7 +110,7 @@ export function renderSNSPostModal(app) {
                 type="text" 
                 id="sns-post-tag-input" 
                 class="flex-1 bg-gray-700 text-white rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                placeholder="${t('sns.addTag')} (콤마로 구분)"
+                placeholder="${t('sns.addTagPlaceholder')}"
               />
               <button id="add-post-tag" class="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded text-sm transition-colors">
                 ${t('common.add')}

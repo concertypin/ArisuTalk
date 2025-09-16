@@ -1,3 +1,5 @@
+import { t } from "../i18n.js";
+
 /**
  * 스티커 생성 진행상황 모달 컴포넌트
  * 실시간으로 스티커 생성 과정을 시각화하여 보여줌
@@ -15,11 +17,11 @@ export function renderStickerProgressModal(progress) {
       <div class="bg-white p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-lg font-medium text-gray-900">
-            ${character?.name || "캐릭터"} 스티커 생성 중...
+            ${t("stickerProgress.title", { name: character?.name || t("stickerProgress.defaultCharacter") })}
           </h3>
           <div class="flex items-center space-x-2">
             ${status === 'generating' ? `
-              <button id="cancel-sticker-generation" class="text-red-400 hover:text-red-600 p-1" title="생성 취소">
+              <button id="cancel-sticker-generation" class="text-red-400 hover:text-red-600 p-1" title="${t("stickerProgress.cancel")}">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
@@ -38,7 +40,7 @@ export function renderStickerProgressModal(progress) {
         <!-- 전체 진행률 -->
         <div class="mb-4">
           <div class="flex justify-between items-center mb-2">
-            <span class="text-sm font-medium text-gray-700">전체 진행률</span>
+            <span class="text-sm font-medium text-gray-700">${t("stickerProgress.overallProgress")}</span>
             <span class="text-sm text-gray-500">${currentIndex}/${totalCount}</span>
           </div>
           <div class="w-full bg-gray-200 rounded-full h-2">
@@ -61,13 +63,26 @@ export function renderStickerProgressModal(progress) {
 
         <!-- 감정 목록 -->
         <div class="mb-4">
-          <h4 class="text-sm font-medium text-gray-700 mb-2">생성할 감정 스티커</h4>
+          <h4 class="text-sm font-medium text-gray-700 mb-2">${t("stickerProgress.emotionsToGenerate")}</h4>
           <div class="grid grid-cols-5 gap-2">
             ${emotions.map((emotion, index) => {
-              const isCompleted = generatedStickers.some(s => s.emotion === emotion);
+              // 감정 키 추출 (객체 또는 문자열 처리)
+              let emotionKey, emotionDisplayName;
+              if (typeof emotion === 'object' && emotion.emotion) {
+                emotionKey = emotion.emotion;
+                emotionDisplayName = emotion.title || emotion.emotion;
+              } else if (typeof emotion === 'string') {
+                emotionKey = emotion;
+                emotionDisplayName = emotion;
+              } else {
+                emotionKey = 'unknown';
+                emotionDisplayName = 'Unknown';
+              }
+
+              const isCompleted = generatedStickers.some(s => s.emotion === emotionKey);
               const isCurrent = index === currentIndex - 1;
-              const isError = progress.failedEmotions?.includes(emotion);
-              
+              const isError = progress.failedEmotions?.includes(emotionKey);
+
               return `
                 <div class="text-center">
                   <div class="w-8 h-8 mx-auto mb-1 rounded-full flex items-center justify-center text-xs font-medium ${
@@ -78,7 +93,7 @@ export function renderStickerProgressModal(progress) {
                   }">
                     ${isError ? '✗' : isCompleted ? '✓' : isCurrent ? '⟳' : '○'}
                   </div>
-                  <span class="text-xs text-gray-600">${getEmotionKorean(emotion)}</span>
+                  <span class="text-xs text-gray-600">${typeof emotion === 'object' && emotion.title ? emotionDisplayName : (t(`stickerProgress.emotions.${emotionKey}`) || emotionDisplayName)}</span>
                 </div>
               `;
             }).join('')}
@@ -88,7 +103,7 @@ export function renderStickerProgressModal(progress) {
         <!-- 생성된 스티커 미리보기 -->
         ${generatedStickers.length > 0 ? `
           <div class="mb-4">
-            <h4 class="text-sm font-medium text-gray-700 mb-2">생성 완료된 스티커</h4>
+            <h4 class="text-sm font-medium text-gray-700 mb-2">${t("stickerProgress.completedStickers")}</h4>
             <div class="flex flex-wrap gap-2">
               ${generatedStickers.slice(-3).map(sticker => `
                 <div class="relative">
@@ -113,7 +128,7 @@ export function renderStickerProgressModal(progress) {
         ${status === 'waiting' ? `
           <div class="bg-yellow-50 p-3 rounded-lg">
             <p class="text-sm text-yellow-800">
-              API 제한으로 인해 ${Math.ceil(progress.waitTime / 1000)}초 대기 중...
+              ${t("stickerProgress.waitingMessage", { seconds: Math.ceil(progress.waitTime / 1000) })}
             </p>
           </div>
         ` : ''}
@@ -123,11 +138,11 @@ export function renderStickerProgressModal(progress) {
           <div class="flex justify-end space-x-3">
             ${status === 'error' && progress.canRetry ? `
               <button id="retry-sticker-generation" class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
-                재시도
+                ${t("stickerProgress.retry")}
               </button>
             ` : ''}
             <button id="close-sticker-progress" class="px-4 py-2 bg-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-400">
-              ${status === 'completed' ? '완료' : '닫기'}
+              ${status === 'completed' ? t("stickerProgress.completed") : t("stickerProgress.close")}
             </button>
           </div>
         ` : ''}
@@ -191,33 +206,52 @@ function getStatusIcon(status) {
   }
 }
 
+/**
+ * @typedef {Object} EmotionObject
+ * @property {string} emotion - 감정 키
+ * @property {string} [title] - 표시 제목
+ * @property {string} [action] - 행동/상황 설명
+ */
+
+/**
+ * @typedef {string|EmotionObject} EmotionType
+ */
+
+/**
+ * 스티커 생성 상태에 따른 텍스트 반환
+ * @param {string} status - 생성 상태 ('generating', 'completed', 'failed')
+ * @param {EmotionType} currentEmotion - 현재 감정 (문자열 또는 객체)
+ * @returns {string} 상태 텍스트
+ */
 function getStatusText(status, currentEmotion) {
   switch (status) {
-    case 'generating':
-      return `${getEmotionKorean(currentEmotion)} 스티커 생성 중...`;
+    case 'generating': {
+      // 감정 키 추출 (객체 또는 문자열 처리)
+      let emotionKey, emotionDisplayName;
+      if (typeof currentEmotion === 'object' && currentEmotion.emotion) {
+        emotionKey = currentEmotion.emotion;
+        emotionDisplayName = currentEmotion.title || currentEmotion.emotion;
+      } else if (typeof currentEmotion === 'string') {
+        emotionKey = currentEmotion;
+        emotionDisplayName = currentEmotion;
+      } else {
+        emotionKey = 'unknown';
+        emotionDisplayName = 'Unknown';
+      }
+
+      const emotionTranslation = typeof currentEmotion === 'object' && currentEmotion.title ?
+        emotionDisplayName :
+        (t(`stickerProgress.emotions.${emotionKey}`) || emotionDisplayName);
+      return t("stickerProgress.statuses.generating", { emotion: emotionTranslation });
+    }
     case 'completed':
-      return '모든 스티커 생성이 완료되었습니다!';
+      return t("stickerProgress.statuses.completed");
     case 'error':
-      return '스티커 생성 중 오류가 발생했습니다.';
+      return t("stickerProgress.statuses.error");
     case 'waiting':
-      return 'API 제한으로 인해 대기 중...';
+      return t("stickerProgress.statuses.waiting");
     default:
-      return '스티커 생성을 준비하고 있습니다...';
+      return t("stickerProgress.statuses.preparing");
   }
 }
 
-function getEmotionKorean(emotion) {
-  const emotionMap = {
-    happy: '행복',
-    sad: '슬픔',
-    surprised: '놀람',
-    angry: '화남',
-    love: '사랑',
-    embarrassed: '부끄러움',
-    confused: '혼란',
-    sleepy: '졸림',
-    excited: '흥분',
-    neutral: '평온'
-  };
-  return emotionMap[emotion] || emotion;
-}

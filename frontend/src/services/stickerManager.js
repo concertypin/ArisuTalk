@@ -3,6 +3,21 @@ import { saveToBrowserStorage } from "../storage.js";
 import { t } from "../i18n.js";
 
 /**
+ * @typedef {Object} EmotionObject
+ * @property {string} emotion - 감정 키
+ * @property {string} [title] - 표시 제목
+ * @property {string} [action] - 행동/상황 설명
+ */
+
+/**
+ * @typedef {string|EmotionObject} EmotionType
+ */
+
+/**
+ * @typedef {Array<EmotionType>} EmotionList
+ */
+
+/**
  * 스티커 자동 생성 관리자
  * NAI를 활용한 캐릭터별 감정 스티커 자동 생성 및 관리
  */
@@ -47,7 +62,7 @@ export class StickerManager {
   /**
    * 캐릭터가 특정 감정의 스티커를 가지고 있는지 확인
    * @param {Object} character - 캐릭터 정보
-   * @param {string} emotion - 감정
+   * @param {string|Object} emotion - 감정명 또는 감정 객체
    * @returns {boolean} 스티커 존재 여부
    */
   hasEmotionSticker(character, emotion) {
@@ -55,17 +70,27 @@ export class StickerManager {
       return false;
     }
 
-    return character.stickers.some(sticker => 
-      sticker.emotion === emotion || 
-      sticker.name.toLowerCase().includes(emotion.toLowerCase())
+    // 감정 파라미터 처리: 객체인 경우 emotion 필드 사용, 문자열인 경우 그대로 사용
+    let emotionKey;
+    if (typeof emotion === 'object' && emotion.emotion) {
+      emotionKey = emotion.emotion;
+    } else if (typeof emotion === 'string') {
+      emotionKey = emotion;
+    } else {
+      return false;
+    }
+
+    return character.stickers.some(sticker =>
+      sticker.emotion === emotionKey ||
+      sticker.name.toLowerCase().includes(emotionKey.toLowerCase())
     );
   }
 
   /**
    * 캐릭터에게 없는 감정 스티커 목록 반환
    * @param {Object} character - 캐릭터 정보
-   * @param {string[]} emotionList - 확인할 감정 목록
-   * @returns {string[]} 없는 감정 목록
+   * @param {EmotionList} emotionList - 확인할 감정 목록 (문자열 또는 객체)
+   * @returns {EmotionList} 없는 감정 목록
    */
   getMissingEmotions(character, emotionList = DEFAULT_EMOTIONS) {
     return emotionList.filter(emotion => !this.hasEmotionSticker(character, emotion));
@@ -210,7 +235,7 @@ export class StickerManager {
   }
 
   /**
-   * 캐릭터의 기본 감정 스티커 일괄 생성
+   * 캐릭터의 NAI 일괄 생성 목록 스티커 일괄 생성
    * @param {Object} character - 캐릭터 정보
    * @param {Object} options - 생성 옵션
    * @returns {Promise<Object>} 생성 결과

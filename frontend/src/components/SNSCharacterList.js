@@ -63,7 +63,7 @@ export function renderSNSCharacterList(app) {
 
         ${filteredCharacters.length === 0 ? `
           <div class="text-center py-8 text-gray-400">
-            ${searchTerm ? `"${searchTerm}"에 대한 검색 결과가 없습니다.` : '캐릭터가 없습니다.'}
+            ${searchTerm ? t('sns.characterList.noSearchResults', { searchTerm }) : t('sns.characterList.noCharacters')}
           </div>
         ` : ''}
       </div>

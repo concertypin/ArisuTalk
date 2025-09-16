@@ -117,6 +117,95 @@ export function handleModalClick(e, app) {
     app.handleStickerSelection(index, isChecked);
   }
 
+  // 스티커 미리보기 모달 - 이미지 클릭 시
+  const stickerPreviewTrigger = e.target.closest(".sticker-preview-trigger");
+  if (stickerPreviewTrigger) {
+    const index = parseInt(stickerPreviewTrigger.dataset.index);
+    app.openStickerPreviewModal(index);
+    return;
+  }
+
+  // 스티커 미리보기 모달 - 닫기
+  if (e.target.closest("#close-sticker-preview-modal") || e.target.closest("#cancel-sticker-edit")) {
+    app.closeStickerPreviewModal();
+    return;
+  }
+
+  // 스티커 미리보기 모달 - 저장
+  if (e.target.closest("#save-sticker-name")) {
+    const index = parseInt(e.target.closest("#save-sticker-name").dataset.index);
+    const nameInput = document.getElementById("sticker-name-input");
+    if (nameInput) {
+      app.saveStickerName(index, nameInput.value);
+    }
+    return;
+  }
+
+  // 스티커 미리보기 모달 - 탭 전환
+  const tabButton = e.target.closest("[data-tab]");
+  if (tabButton && tabButton.closest("#sticker-preview-modal")) {
+    const newTab = tabButton.dataset.tab;
+    app.switchStickerPreviewTab(newTab);
+    return;
+  }
+
+  // 스티커 미리보기 모달 - 스티커 삭제
+  if (e.target.closest("#delete-sticker")) {
+    const index = parseInt(e.target.closest("#delete-sticker").dataset.index);
+    app.deleteSticker(index);
+    return;
+  }
+
+  // 스티커 미리보기 모달 - 클립보드 복사
+  if (e.target.closest("#copy-sticker-data")) {
+    const index = parseInt(e.target.closest("#copy-sticker-data").dataset.index);
+    app.copyStickerToClipboard(index);
+    return;
+  }
+
+  // 스티커 미리보기 모달 - 다운로드
+  if (e.target.closest("#download-sticker")) {
+    const index = parseInt(e.target.closest("#download-sticker").dataset.index);
+    app.downloadSticker(index);
+    return;
+  }
+
+  // 스티커 미리보기 모달 - NAI 리롤 시작
+  if (e.target.closest("#start-reroll")) {
+    const index = parseInt(e.target.closest("#start-reroll").dataset.index);
+
+    const promptInput = document.getElementById("reroll-prompt");
+    const stepsInput = document.getElementById("reroll-steps");
+    const scaleInput = document.getElementById("reroll-scale");
+    const sizeInput = document.getElementById("reroll-size");
+
+
+    if (promptInput && stepsInput && scaleInput && sizeInput) {
+      const promptData = {
+        prompt: promptInput.value,
+        steps: parseInt(stepsInput.value) || 28,
+        scale: parseFloat(scaleInput.value) || 3,
+        imageSize: sizeInput.value || 'square'
+      };
+      app.startNAIReroll(index, promptData);
+    } else {
+    }
+    return;
+  }
+
+  // 스티커 미리보기 모달 - 원본 선택
+  if (e.target.closest("#select-original")) {
+    app.rejectRerollResult();  // 원본을 선택하면 리롤을 거부
+    return;
+  }
+
+  // 스티커 미리보기 모달 - 리롤 선택
+  if (e.target.closest("#select-reroll")) {
+    const index = parseInt(e.target.closest("#select-reroll").dataset.index);
+    app.acceptRerollResult(index);  // 리롤을 선택하면 리롤을 수락
+    return;
+  }
+
   // Confirmation Modal
   if (e.target.closest("#modal-cancel")) {
     e.preventDefault();
@@ -295,10 +384,9 @@ function savePersonaSettings(app) {
       updates.userDescription = userDescInput.value;
     }
     
-    // Update settings with persona info
+    // Update state with persona info (최상위 속성으로 저장)
     if (Object.keys(updates).length > 0) {
-      app.setState({ settings: { ...app.state.settings, ...updates } });
-      app.debouncedCreateSettingsSnapshot();
+      app.setState(updates);
     }
   }
 }

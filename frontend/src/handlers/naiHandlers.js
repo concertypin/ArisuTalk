@@ -2,6 +2,7 @@ import { StickerManager } from "../services/stickerManager.js";
 import { renderNAIStats } from "../components/settings/panels/NAISettingsPanel.js";
 import { renderStickerProgressModal } from "../components/StickerProgressModal.js";
 import { DEFAULT_EMOTIONS } from "../api/novelai.js";
+import { t } from "../i18n.js";
 
 /**
  * NAI 스티커 생성 관련 이벤트 핸들러
@@ -118,6 +119,27 @@ export function setupNAIHandlers(app) {
     } else if (e.target.closest("#generate-all-characters-stickers")) {
       e.preventDefault();
       handleGenerateAllCharactersStickers(app);
+    }
+    // NAI 일괄 생성 목록 편집 이벤트
+    else if (e.target.closest("#edit-nai-generation-list")) {
+      e.preventDefault();
+      handleShowNaiGenerationListEditor(app);
+    } else if (e.target.closest("#add-nai-item-btn")) {
+      e.preventDefault();
+      handleAddItemToList(app);
+    } else if (e.target.closest("#save-nai-generation-list")) {
+      e.preventDefault();
+      handleSaveNaiGenerationList(app);
+    } else if (e.target.closest("#cancel-edit-nai-generation-list")) {
+      e.preventDefault();
+      handleCancelEditNaiGenerationList(app);
+    } else if (e.target.closest("#reset-nai-generation-list")) {
+      e.preventDefault();
+      handleResetNaiGenerationList(app);
+    } else if (e.target.closest(".remove-generation-item-btn")) {
+      e.preventDefault();
+      const naiItem = e.target.closest(".remove-generation-item-btn").dataset.naiItem;
+      handleRemoveItemFromList(app, naiItem);
     }
   });
 
@@ -272,20 +294,23 @@ async function handleGenerateCurrentCharacterStickers(app) {
   // 캐릭터 모달에서 호출되는 경우 editingCharacter 사용, 아니면 currentCharacter 사용
   const character = app.state.editingCharacter || app.state.currentCharacter;
   if (!character) {
-    app.showNotification("캐릭터를 선택해주세요.", "warning");
+    alert(t('naiHandlers.pleaseSelectCharacter'), "warning");
     return;
   }
 
   const button = document.getElementById("generate-current-character-stickers") || document.getElementById("generate-character-stickers");
   if (!button) return;
 
+  // 커스텀 생성 목록 사용
+  const generationList = app.state.settings.naiGenerationList || DEFAULT_EMOTIONS;
+  
   // 진행 상황 모달 상태 초기화
   const progressState = {
     isVisible: true,
     character: character,
-    emotions: DEFAULT_EMOTIONS,
+    emotions: generationList,
     currentIndex: 0,
-    totalCount: DEFAULT_EMOTIONS.length,
+    totalCount: generationList.length,
     currentEmotion: null,
     status: 'preparing',
     error: null,
@@ -301,12 +326,13 @@ async function handleGenerateCurrentCharacterStickers(app) {
     button.disabled = true;
     button.innerHTML = `
       <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
-      생성 중...
+      ${t('naiHandlers.generating')}
     `;
     if (window.lucide) window.lucide.createIcons();
 
-    // 스티커 생성
+    // 스티커 생성 (커스텀 목록 사용)
     const result = await app.stickerManager.generateBasicStickerSet(character, {
+      emotions: generationList,
       onProgress: (progress) => {
         // 진행 상황 모달 업데이트
         progressState.currentIndex = progress.current || 0;
@@ -332,17 +358,17 @@ async function handleGenerateCurrentCharacterStickers(app) {
 
     // 결과 처리
     if (result.generated.length > 0) {
-      app.showNotification(
-        `${character.name}의 스티커 ${result.generated.length}개가 생성되었습니다!`,
+      alert(
+        t('naiHandlers.stickersGenerated', { name: character.name, count: result.generated.length }),
         "success"
       );
     } else if (result.generated.length === 0 && result.failed.length === 0) {
-      app.showNotification(result.message || "이미 모든 스티커가 존재합니다.", "info");
+      alert(result.message || t('naiHandlers.allStickersExist'), "info");
     }
 
     if (result.failed.length > 0) {
-      app.showNotification(
-        `${result.failed.length}개 스티커 생성에 실패했습니다.`,
+      alert(
+        t('naiHandlers.stickerGenerationFailed', { count: result.failed.length }),
         "warning"
       );
     }
@@ -363,14 +389,14 @@ async function handleGenerateCurrentCharacterStickers(app) {
     progressState.error = error.message;
     updateStickerProgressModal(app, progressState);
     
-    app.showNotification(`스티커 생성에 실패했습니다: ${error.message}`, "error");
+    alert(t('naiHandlers.stickerGenerationError', { error: error.message }), "error");
   } finally {
     // UI 복원 - 어떤 버튼인지에 따라 다른 텍스트 사용
     button.disabled = false;
     if (button.id === "generate-character-stickers") {
       button.innerHTML = `
         <i data-lucide="image" class="w-4 h-4"></i>
-        기본 감정 생성
+${t('naiHandlers.emotionListGeneration')}
       `;
     } else {
       button.innerHTML = `
@@ -388,16 +414,19 @@ async function handleGenerateCurrentCharacterStickers(app) {
 async function handleGenerateAllCharactersStickers(app) {
   const characters = app.state.characters;
   if (!characters || characters.length === 0) {
-    app.showNotification("캐릭터가 없습니다.", "warning");
+    alert("캐릭터가 없습니다.", "warning");
     return;
   }
 
   const button = document.getElementById("generate-all-characters-stickers");
   if (!button) return;
 
+  // 커스텀 생성 목록 사용
+  const generationList = app.state.settings.naiGenerationList || DEFAULT_EMOTIONS;
+
   // 확인 대화상자
   const confirmed = confirm(
-    `모든 캐릭터(${characters.length}개)의 기본 감정 스티커를 생성하시겠습니까?\n생성 시간이 오래 걸릴 수 있습니다.`
+    t('naiHandlers.emotionListBatchConfirm', { count: characters.length })
   );
   if (!confirmed) return;
 
@@ -413,17 +442,18 @@ async function handleGenerateAllCharactersStickers(app) {
     let totalGenerated = 0;
     let totalFailed = 0;
 
-    // 스티커 생성
+    // 스티커 생성 (커스텀 목록 사용)
     const result = await app.stickerManager.generateStickersForAllCharacters({
+      emotions: generationList,
       onProgress: (progress) => {
         if (progress.type === "character") {
-          app.showNotification(
+          alert(
             `${progress.character} 처리 중... (${progress.current}/${progress.total})`,
             "info"
           );
         } else if (progress.type === "sticker") {
           if (progress.status === "generating") {
-            app.showNotification(
+            alert(
               `${progress.character}: ${progress.emotion} 스티커 생성 중...`,
               "info"
             );
@@ -447,14 +477,14 @@ async function handleGenerateAllCharactersStickers(app) {
       message += `\n• 생성된 스티커: ${totalGenerated}개`;
     }
 
-    app.showNotification(message, summary.failCount === 0 ? "success" : "warning");
+    alert(message, summary.failCount === 0 ? "success" : "warning");
 
     // 통계 업데이트
     updateNAIStats(app);
 
   } catch (error) {
     console.error("[NAI] 배치 생성 실패:", error);
-    app.showNotification(`배치 생성에 실패했습니다: ${error.message}`, "error");
+    alert(`배치 생성에 실패했습니다: ${error.message}`, "error");
   } finally {
     // UI 복원
     button.disabled = false;
@@ -557,7 +587,7 @@ async function handleVibeImageUpload(app, file) {
   
   // 파일 크기 체크 (2MB 제한)
   if (file.size > 2 * 1024 * 1024) {
-    app.showNotification("이미지 크기는 2MB 이하여야 합니다.", "error");
+    alert("이미지 크기는 2MB 이하여야 합니다.", "error");
     return;
   }
 
@@ -567,11 +597,11 @@ async function handleVibeImageUpload(app, file) {
     reader.onload = (e) => {
       const base64 = e.target.result.split(',')[1]; // data:image/... 부분 제거
       updateNAISettings(app, { vibeTransferImage: base64 });
-      app.showNotification("Vibe Transfer 이미지가 업로드되었습니다.", "success");
+      alert("Vibe Transfer 이미지가 업로드되었습니다.", "success");
     };
     reader.readAsDataURL(file);
   } catch (error) {
-    app.showNotification("이미지 업로드에 실패했습니다.", "error");
+    alert("이미지 업로드에 실패했습니다.", "error");
     console.error("[NAI] Vibe 이미지 업로드 실패:", error);
   }
 }
@@ -672,7 +702,7 @@ export async function handleAutoStickerGeneration(app, character, messageContent
       app.stickerManager.autoGenerateSticker(character, emotion)
         .then((sticker) => {
           if (sticker) {
-            app.showNotification(
+            alert(
               `${character.name}의 ${emotion} 스티커가 자동 생성되었습니다!`,
               "success"
             );
@@ -691,3 +721,276 @@ export async function handleAutoStickerGeneration(app, character, messageContent
     console.error("[NAI] 감정 분석 실패:", error);
   }
 }
+
+// ===== NAI 일괄 생성 목록 편집 관련 핸들러 =====
+
+/**
+ * NAI 일괄 생성 목록 편집기 표시
+ */
+function handleShowNaiGenerationListEditor(app) {
+  const displayDiv = document.getElementById("nai-generation-list-display");
+  const editorDiv = document.getElementById("nai-generation-list-editor");
+  
+  if (!displayDiv || !editorDiv) return;
+
+  // 현재 목록을 임시 저장
+  const currentList = app.state.settings.naiGenerationList || DEFAULT_EMOTIONS.slice();
+  app.tempNaiGenerationList = [...currentList];
+  
+  // UI 전환
+  displayDiv.style.display = "none";
+  editorDiv.classList.remove("hidden");
+  
+  // 편집 가능한 목록 렌더링
+  renderEditableNaiGenerationList(app);
+  
+  // 입력 필드 포커스
+  const input = document.getElementById("new-nai-item-input");
+  if (input) input.focus();
+}
+
+/**
+ * 편집 가능한 NAI 일괄 생성 목록 렌더링
+ */
+function renderEditableNaiGenerationList(app) {
+  const listContainer = document.getElementById("nai-editable-list");
+  if (!listContainer) return;
+
+  // tempNaiGenerationList 초기화 (방어 코드)
+  if (!app.tempNaiGenerationList) {
+    app.tempNaiGenerationList = app.state.settings.naiGenerationList || DEFAULT_EMOTIONS.slice();
+  }
+
+  const currentList = app.tempNaiGenerationList;
+
+  listContainer.innerHTML = currentList.map((naiItem, index) => {
+    // 기존 문자열 형태와 새로운 객체 형태 모두 지원
+    let displayText, itemKey;
+
+    if (typeof naiItem === 'object') {
+      // 새로운 3필드 구조
+      displayText = `${naiItem.title} (${naiItem.emotion}${naiItem.action ? ', ' + naiItem.action : ''})`;
+      itemKey = naiItem.title;
+    } else {
+      // 기존 문자열 구조 (하위 호환성)
+      const itemLabels = {
+        happy: "😊 기쁨",
+        sad: "😢 슬픔",
+        surprised: "😮 놀람",
+        angry: "😠 분노",
+        love: "💕 사랑",
+        embarrassed: "😳 부끄러움",
+        confused: "😕 혼란",
+        sleepy: "😴 졸림",
+        excited: "🤩 흥분",
+        neutral: "😐 무표정"
+      };
+      displayText = itemLabels[naiItem] || naiItem;
+      itemKey = naiItem;
+    }
+
+    return `
+      <div class="flex items-center justify-between bg-gray-600/30 rounded-lg px-3 py-2">
+        <div class="flex-1">
+          <span class="text-sm text-gray-300">${displayText}</span>
+          ${typeof naiItem === 'object' && naiItem.action ?
+            `<div class="text-xs text-gray-400 mt-1">${naiItem.action}</div>` :
+            ''
+          }
+        </div>
+        <button
+          class="remove-generation-item-btn p-1 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded transition-colors"
+          data-nai-item="${itemKey}"
+          data-index="${index}"
+          title="${t('naiHandlers.removeNaiGenerationItem')}"
+        >
+          <i data-lucide="x" class="w-3 h-3 pointer-events-none"></i>
+        </button>
+      </div>
+    `;
+  }).join("");
+
+  // 아이콘 초기화
+  if (window.lucide) window.lucide.createIcons();
+}
+
+/**
+ * 새 감정 추가
+ */
+function handleAddItemToList(app) {
+  // 3개 필드에서 값 가져오기
+  const titleInput = document.getElementById("new-nai-item-title");
+  const emotionInput = document.getElementById("new-nai-item-emotion");
+  const actionInput = document.getElementById("new-nai-item-action");
+
+  if (!titleInput || !emotionInput || !actionInput) return;
+
+  const title = titleInput.value.trim();
+  const emotion = emotionInput.value.trim();
+  const action = actionInput.value.trim();
+
+  // 필수 필드 검증
+  if (!title || !emotion) {
+    app.showNotification(t('naiHandlers.naiGenerationItemRequired'), "warning");
+    return;
+  }
+
+  // tempNaiGenerationList 초기화 (방어 코드)
+  if (!app.tempNaiGenerationList) {
+    app.tempNaiGenerationList = app.state.settings.naiGenerationList || DEFAULT_EMOTIONS.slice();
+  }
+
+  // 새로운 항목 객체 생성
+  const newItem = {
+    title: title,
+    emotion: emotion,
+    action: action || "" // 행동은 선택사항
+  };
+
+  // 중복 체크 (제목 기준)
+  const existingItem = app.tempNaiGenerationList.find(item =>
+    typeof item === 'object' ? item.title === title : item === title
+  );
+
+  if (existingItem) {
+    app.showNotification(t('naiHandlers.naiGenerationItemAlreadyExists', { naiGenerationItem: title }), "warning");
+    return;
+  }
+
+  // 목록에 추가
+  app.tempNaiGenerationList.push(newItem);
+
+  // UI 업데이트
+  renderEditableNaiGenerationList(app);
+
+  // 입력 필드 클리어
+  titleInput.value = "";
+  emotionInput.value = "";
+  actionInput.value = "";
+  titleInput.focus();
+
+  // 성공 메시지
+  app.showNotification(t('naiHandlers.naiGenerationItemAdded', { naiGenerationItem: title }));
+}
+
+/**
+ * 감정 제거
+ */
+function handleRemoveItemFromList(app, naiItem) {
+  // tempNaiGenerationList 초기화 (방어 코드)
+  if (!app.tempNaiGenerationList) {
+    app.tempNaiGenerationList = app.state.settings.naiGenerationList || DEFAULT_EMOTIONS.slice();
+  }
+
+  // 객체와 문자열 모두 처리할 수 있도록 수정
+  let indexToRemove = -1;
+
+  for (let i = 0; i < app.tempNaiGenerationList.length; i++) {
+    const currentItem = app.tempNaiGenerationList[i];
+
+    if (typeof currentItem === 'object' && currentItem.title === naiItem) {
+      indexToRemove = i;
+      break;
+    } else if (typeof currentItem === 'string' && currentItem === naiItem) {
+      indexToRemove = i;
+      break;
+    }
+  }
+
+  if (indexToRemove !== -1) {
+    app.tempNaiGenerationList.splice(indexToRemove, 1);
+    renderEditableNaiGenerationList(app);
+    app.showNotification(t('naiHandlers.naiGenerationItemRemoved', { naiGenerationItem: naiItem }), "info");
+  }
+}
+
+/**
+ * 목록 저장
+ */
+function handleSaveNaiGenerationList(app) {
+  // tempNaiGenerationList 초기화 (방어 코드)
+  if (!app.tempNaiGenerationList) {
+    app.tempNaiGenerationList = app.state.settings.naiGenerationList || DEFAULT_EMOTIONS.slice();
+  }
+  
+  if (app.tempNaiGenerationList.length === 0) {
+    alert(t('naiHandlers.naiGenerationListEmpty'), "warning");
+    return;
+  }
+  
+  // 설정에 저장
+  app.handleNaiGenerationListChange(app.tempNaiGenerationList);
+  
+  // 편집 모드 종료
+  handleCancelEditNaiGenerationList(app, false);
+  
+  // UI 업데이트
+  setTimeout(() => {
+    if (app.state.showSettingsModal && typeof app.renderSettingsModal === 'function') {
+      app.renderSettingsModal();
+    }
+    // 모바일 설정 UI 업데이트
+    if (app.state.showSettingsUI) {
+      app.setState({}); // UI 강제 업데이트
+    }
+  }, 100);
+  
+  const count = app.tempNaiGenerationList ? app.tempNaiGenerationList.length : 0;
+  alert(t('naiHandlers.naiGenerationListSaved', { count }), "success");
+  
+  // 임시 목록 정리
+  delete app.tempNaiGenerationList;
+}
+
+/**
+ * 편집 취소
+ */
+function handleCancelEditNaiGenerationList(app, showMessage = true) {
+  const displayDiv = document.getElementById("nai-generation-list-display");
+  const editorDiv = document.getElementById("nai-generation-list-editor");
+  
+  if (!displayDiv || !editorDiv) return;
+  
+  // UI 전환
+  displayDiv.style.display = "";
+  editorDiv.classList.add("hidden");
+  
+  // 임시 목록 정리
+  delete app.tempNaiGenerationList;
+  
+  if (showMessage) {
+    alert(t('naiHandlers.editCancelled'), "info");
+  }
+}
+
+/**
+ * 기본값으로 리셋
+ */
+function handleResetNaiGenerationList(app) {
+  const confirmed = confirm(t('naiHandlers.resetToDefaultConfirm'));
+  if (!confirmed) return;
+  
+  // 기본값으로 리셋
+  app.tempNaiGenerationList = DEFAULT_EMOTIONS.slice();
+  
+  // UI 업데이트
+  renderEditableNaiGenerationList(app);
+  
+  alert(t('naiHandlers.listResetToDefault'), "info");
+}
+
+/**
+ * Enter 키 처리 (새 NAI 항목 추가)
+ */
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && e.target.id === "new-nai-item-input") {
+    e.preventDefault();
+    const app = window.app; // 전역 app 객체 접근
+    if (app) {
+      handleAddItemToList(app);
+    }
+  }
+});
+
+// ===== 전역 함수 노출 (모바일에서 사용하기 위해) =====
+window.handleShowNaiGenerationListEditor = handleShowNaiGenerationListEditor;
