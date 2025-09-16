@@ -206,6 +206,12 @@ function getStatusIcon(status) {
   }
 }
 
+/**
+ * 스티커 생성 상태에 따른 텍스트 반환
+ * @param {string} status - 생성 상태 ('generating', 'completed', 'failed')
+ * @param {string|{emotion:string, title?:string, action?:string}} currentEmotion - 현재 감정 (문자열 또는 객체)
+ * @returns {string} 상태 텍스트
+ */
 function getStatusText(status, currentEmotion) {
   switch (status) {
     case 'generating': {

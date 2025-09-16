@@ -74,8 +74,8 @@ export class StickerManager {
   /**
    * 캐릭터에게 없는 감정 스티커 목록 반환
    * @param {Object} character - 캐릭터 정보
-   * @param {Array} emotionList - 확인할 감정 목록 (문자열 또는 객체)
-   * @returns {Array} 없는 감정 목록
+   * @param {Array<string|{emotion:string, title?:string, action?:string}>} emotionList - 확인할 감정 목록 (문자열 또는 객체)
+   * @returns {Array<string|{emotion:string, title?:string, action?:string}>} 없는 감정 목록
    */
   getMissingEmotions(character, emotionList = DEFAULT_EMOTIONS) {
     return emotionList.filter(emotion => !this.hasEmotionSticker(character, emotion));
