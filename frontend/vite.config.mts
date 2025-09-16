@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
@@ -39,5 +40,12 @@ export default defineConfig(({ mode }) => ({
     publicDir: "static",
     plugins: [
         ...(mode === 'production' ? prodOnlyPlugin : [])
-    ]
+    ],
+    test: {
+        environment: 'jsdom',
+        coverage: {
+            provider: 'v8',
+            reporter: ['text', 'json', 'html'],
+        },
+    },
 }));

@@ -10,7 +10,10 @@
     "prepreview": "pnpm run build",
     "preview": "pnpm run serve",
     "serve": "pnpx http-server -p 5173 -c-1 dist/",
-    "format": "prettier --write 'src/**/*.{js,ts,jsx,tsx}'"
+    "format": "prettier --write 'src/**/*.{js,ts,jsx,tsx}'",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "keywords": [],
   "author": "",
@@ -21,9 +24,13 @@
   },
   "devDependencies": {
     "@nyariv/sandboxjs": "^0.8.25",
+    "@testing-library/dom": "^10.4.0",
+    "@vitest/coverage-v8": "^2.0.4",
+    "jsdom": "^24.1.1",
     "prettier": "^3.6.2",
     "vite": "^7.1.2",
-    "vite-plugin-pwa": "^1.0.3"
+    "vite-plugin-pwa": "^1.0.3",
+    "vitest": "^2.0.4"
   },
   "dependencies": {
     "jszip": "^3.10.1",
