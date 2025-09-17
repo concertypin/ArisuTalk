@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import type { Character } from "../types/character";
 
   export let character: Character | null | undefined;
@@ -11,6 +12,12 @@
   }[size];
 
   $: initial = character?.name?.[0] || "";
+
+  onMount(() => {
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
+  });
 </script>
 
 {#if character?.avatar && character.avatar.startsWith("data:image")}
@@ -26,7 +33,7 @@
     {#if initial}
       {initial}
     {:else}
-      <i data-lucide="bot" class="w-2/3 h-2/3"></i>
+      <i data-lucide="bot"></i>
     {/if}
   </div>
 {/if}
