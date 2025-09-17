@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import type { Character } from "../types/character";
+  import { Bot } from "lucide-svelte";
 
   export let character: Character | null | undefined;
   export let size: "sm" | "md" | "lg" = "md";
@@ -12,12 +12,6 @@
   }[size];
 
   $: initial = character?.name?.[0] || "";
-
-  onMount(() => {
-    if (window.lucide) {
-      window.lucide.createIcons();
-    }
-  });
 </script>
 
 {#if character?.avatar && character.avatar.startsWith("data:image")}
@@ -33,7 +27,7 @@
     {#if initial}
       {initial}
     {:else}
-      <i data-lucide="bot"></i>
+      <Bot class="w-2/3 h-2/3" />
     {/if}
   </div>
 {/if}
