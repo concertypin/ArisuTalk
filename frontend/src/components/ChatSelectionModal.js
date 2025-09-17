@@ -1,5 +1,18 @@
 import { t } from "../i18n.js";
-import { renderAvatar } from "./Avatar.js";
+import Avatar from "./Avatar.svelte";
+
+export function setupChatSelectionModal(app) {
+  const placeholder = document.getElementById("chat-selection-avatar-placeholder");
+  if (placeholder) {
+    new Avatar({
+      target: placeholder,
+      props: {
+        character: app.state.modal.character,
+        size: "md",
+      },
+    });
+  }
+}
 
 /**
  * Renders the chat selection modal for a character with multiple chat rooms.
@@ -23,7 +36,7 @@ export function renderChatSelectionModal(app) {
     <div id="chat-selection-modal-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50" data-action="close-chat-selection">
       <div class="bg-gray-800 rounded-2xl p-6 w-full max-w-sm mx-4" data-modal-content>
         <div class="flex items-center mb-4">
-          ${renderAvatar(character, "md")}
+          <div id="chat-selection-avatar-placeholder"></div>
           <h3 class="text-lg font-semibold text-white ml-4">${character.name}</h3>
           <button id="modal-close" class="ml-auto p-2 rounded-full hover:bg-gray-700" data-action="close-chat-selection">
             <i data-lucide="x" class="w-5 h-5 text-gray-300"></i>

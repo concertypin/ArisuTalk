@@ -1,7 +1,7 @@
 import { t } from "../i18n.js";
 import { formatBytes } from "../storage.js";
 import { findMessageGroup, formatDateSeparator } from "../utils.js";
-import { renderAvatar } from "./Avatar.js";
+import Avatar from "./Avatar.svelte";
 import {
   renderLandingPage,
   setupLandingPageEventListeners,
@@ -499,7 +499,7 @@ function renderMessages(app) {
                       !msg.isMe
                         ? `<div class="shrink-0 w-10 h-10 mt-1">${
                             showSenderInfo
-                              ? renderAvatar(selectedChat, "sm")
+                              ? `<div class="message-avatar-placeholder" data-character-id="${selectedChat.id}"></div>`
                               : ""
                           }</div>`
                         : ""
@@ -543,10 +543,7 @@ function renderMessages(app) {
     if (!app.animatedMessageIds.has(typingIndicatorId)) {
       html += `
                     <div id="${typingIndicatorId}" class="flex items-start gap-3 animate-slideUp">
-                        <div class="shrink-0 w-10 h-10 mt-1">${renderAvatar(
-                          selectedChat,
-                          "sm",
-                        )}</div>
+                        <div class="typing-indicator-avatar-placeholder" data-character-id="${selectedChat.id}"></div>
                         <div class="px-4 py-3 rounded-2xl bg-gray-700">
                             <div class="flex items-center space-x-1">
                                 <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0s"></span>
@@ -698,7 +695,7 @@ export function renderMainChat(app) {
                     <button id="back-to-char-list" class="p-3 -ml-2 rounded-full hover:bg-gray-700 md:hidden">
                         <i data-lucide="arrow-left" class="h-6 w-6 text-gray-300"></i>
                     </button>
-                    ${renderAvatar(selectedChat, "sm")}
+                    <div id="main-chat-header-avatar-placeholder"></div>
                     <div>
                         <h2 class="font-semibold text-white text-lg leading-tight">${
                           selectedChat.name
@@ -737,6 +734,49 @@ export function renderMainChat(app) {
  * 관심사 분리 원칙에 따라 이벤트 핸들링을 별도 함수로 분리
  */
 export function setupMainChatEventListeners() {
+  const app = window.personaApp;
+  const headerPlaceholder = document.getElementById("main-chat-header-avatar-placeholder");
+  const selectedChatRoom = app.getCurrentChatRoom();
+  const selectedChat = selectedChatRoom ? app.state.characters.find(c => c.id === selectedChatRoom.characterId) : null;
+
+  if (headerPlaceholder && selectedChat) {
+    new Avatar({
+      target: headerPlaceholder,
+      props: {
+        character: selectedChat,
+        size: 'sm'
+      }
+    });
+  }
+
+  document.querySelectorAll(".message-avatar-placeholder").forEach(placeholder => {
+    const characterId = parseInt(placeholder.dataset.characterId, 10);
+    const character = app.state.characters.find(c => c.id === characterId);
+    if (character) {
+      new Avatar({
+        target: placeholder,
+        props: {
+          character,
+          size: 'sm'
+        }
+      });
+    }
+  });
+
+  const typingIndicatorPlaceholder = document.querySelector(".typing-indicator-avatar-placeholder");
+  if (typingIndicatorPlaceholder) {
+    const characterId = parseInt(typingIndicatorPlaceholder.dataset.characterId, 10);
+    const character = app.state.characters.find(c => c.id === characterId);
+    if (character) {
+      new Avatar({
+        target: typingIndicatorPlaceholder,
+        props: {
+          character,
+          size: 'sm'
+        }
+      });
+    }
+  }
   setupLandingPageEventListeners();
 
   const backBtn = document.getElementById("back-to-char-list");

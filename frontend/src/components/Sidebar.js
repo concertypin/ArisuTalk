@@ -1,7 +1,7 @@
 import { t } from "../i18n.js";
 import { formatTimestamp } from "../utils.js";
 
-import { renderAvatar } from "./Avatar.js";
+import Avatar from "./Avatar.svelte";
 import {
   renderGroupChatList,
   renderOpenChatList,
@@ -97,8 +97,7 @@ function renderCharacterItem(app, char) {
                     </button>
                 </div>
                 <div class="flex items-center space-x-4 md:space-x-5">
-                    <div class="character-avatar relative">
-                         ${renderAvatar(char, "md")}
+                    <div class="character-avatar-placeholder" data-character-id="${char.id}">
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center justify-between mb-1">
@@ -302,5 +301,19 @@ export function renderSidebar(app) {
     app.state.expandedCharacterIds.forEach((id) => {
       updateTreeLine(id);
     });
+  });
+
+  sidebarContent.querySelectorAll(".character-avatar-placeholder").forEach((placeholder) => {
+    const characterId = parseInt(placeholder.dataset.characterId, 10);
+    const character = filteredCharacters.find((c) => c.id === characterId);
+    if (character) {
+      new Avatar({
+        target: placeholder,
+        props: {
+          character,
+          size: "md",
+        },
+      });
+    }
   });
 }

@@ -1,6 +1,6 @@
 import { t } from "../i18n.js";
 import { formatBytes } from "../storage.js";
-import { renderAvatar } from "./Avatar.js";
+import Avatar from "./Avatar.svelte";
 
 function renderSlider(id, description, left, right, value) {
   return `
@@ -110,6 +110,19 @@ export function renderStickerGrid(app, stickers) {
     .join("");
 }
 
+export function setupCharacterModal(app) {
+  const placeholder = document.getElementById("avatar-placeholder");
+  if (placeholder) {
+    new Avatar({
+      target: placeholder,
+      props: {
+        character: app.state.editingCharacter,
+        size: "lg",
+      },
+    });
+  }
+}
+
 export function renderCharacterModal(app) {
   const { editingCharacter } = app.state;
   const isNew = !editingCharacter || !editingCharacter.id;
@@ -162,12 +175,7 @@ export function renderCharacterModal(app) {
                 </div>
                 <div class="p-6 space-y-6 overflow-y-auto">
                     <div class="flex items-center space-x-4">
-                        <div id="avatar-preview" class="w-20 h-20 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden shrink-0">
-                            ${
-                              char.avatar
-                                ? `<img src="${char.avatar}" alt="Avatar Preview" class="w-full h-full object-cover">`
-                                : `<i data-lucide="image" class="w-8 h-8 text-gray-400"></i>`
-                            }
+                        <div id="avatar-placeholder" class="w-20 h-20 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden shrink-0">
                         </div>
                         <div class="flex flex-col gap-2">
                             <button id="select-avatar-btn" class="py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2">

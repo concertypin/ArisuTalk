@@ -4,6 +4,7 @@
  */
 
 import { t } from "../i18n.js";
+import Avatar from "./Avatar.svelte";
 
 // ========== 유틸리티 함수들 ==========
 
@@ -16,25 +17,39 @@ function getGroupChatParticipants(app, groupChatId) {
     .filter(Boolean);
 }
 
-function renderAvatar(character, size = "md") {
-  const sizeClasses = {
-    sm: "w-10 h-10 text-sm",
-    md: "w-12 h-12 text-base",
-    lg: "w-16 h-16 text-lg",
-  }[size];
+// ========== 단톡방 컴포넌트들 ==========
 
-  if (character?.avatar && character.avatar.startsWith("data:image")) {
-    return `<img src="${character.avatar}" alt="${character.name}" class="${sizeClasses} rounded-full object-cover">`;
-  }
-  const initial = character?.name?.[0] || `<i data-lucide="bot"></i>`;
-  return `
-        <div class="${sizeClasses} bg-gradient-to-br from-gray-600 to-gray-700 rounded-full flex items-center justify-center text-white font-medium">
-            ${initial}
-        </div>
-    `;
+export function setupCreateGroupChatModal(app) {
+  document.querySelectorAll(".create-group-chat-avatar-placeholder").forEach((placeholder) => {
+    const characterId = parseInt(placeholder.dataset.characterId, 10);
+    const character = app.state.characters.find((c) => c.id === characterId);
+    if (character) {
+      new Avatar({
+        target: placeholder,
+        props: {
+          character,
+          size: "sm",
+        },
+      });
+    }
+  });
 }
 
-// ========== 단톡방 컴포넌트들 ==========
+export function setupEditGroupChatModal(app) {
+  document.querySelectorAll(".edit-group-chat-avatar-placeholder").forEach((placeholder) => {
+    const characterId = parseInt(placeholder.dataset.characterId, 10);
+    const character = getGroupChatParticipants(app, app.state.editingGroupChat.id).find((c) => c.id === characterId);
+    if (character) {
+      new Avatar({
+        target: placeholder,
+        props: {
+          character,
+          size: "sm",
+        },
+      });
+    }
+  });
+}
 
 export function renderCreateGroupChatModal(app) {
   const characters = app.state.characters;
@@ -73,13 +88,7 @@ export function renderCreateGroupChatModal(app) {
                                       character.id
                                     }">
                                     <div class="flex items-center space-x-3 flex-1">
-                                        <div class="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center overflow-hidden shrink-0">
-                                            ${
-                                              character.avatar
-                                                ? `<img src="${character.avatar}" alt="${character.name}" class="w-full h-full object-cover">`
-                                                : `<i data-lucide="user" class="w-5 h-5 text-gray-400"></i>`
-                                            }
-                                        </div>
+                                        <div class="create-group-chat-avatar-placeholder" data-character-id="${character.id}"></div>
                                         <div>
                                             <h4 class="font-medium text-white">${
                                               character.name
@@ -234,7 +243,7 @@ export function renderEditGroupChatModal(app) {
                                 return `
                                 <div class="bg-gray-700 p-4 rounded-lg">
                                     <div class="flex items-center gap-3 mb-3">
-                                        ${renderAvatar(participant, "sm")}
+                                        <div class="edit-group-chat-avatar-placeholder" data-character-id="${participant.id}"></div>
                                         <h4 class="font-medium text-white">${
                                           participant.name
                                         }</h4>

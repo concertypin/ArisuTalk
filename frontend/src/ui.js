@@ -13,18 +13,20 @@ import {
 } from "./components/MobileSettingsUI.js";
 import { setupDesktopSettingsEventListeners } from "./components/DesktopSettingsUI.js";
 
-import { renderCharacterModal } from "./components/CharacterModal.js";
+import { renderCharacterModal, setupCharacterModal } from "./components/CharacterModal.js";
 import { renderStickerPreviewModal } from "./components/StickerPreviewModal.js";
 import {
   renderPromptModal,
   setupPromptModalEventListeners,
 } from "./components/PromptModal.js";
 import { renderConfirmationModal } from "./components/ConfirmationModal.js";
-import { renderChatSelectionModal } from "./components/ChatSelectionModal.js";
+import { renderChatSelectionModal, setupChatSelectionModal } from "./components/ChatSelectionModal.js";
 import {
   renderCreateGroupChatModal,
   renderCreateOpenChatModal,
   renderEditGroupChatModal,
+  setupCreateGroupChatModal,
+  setupEditGroupChatModal,
 } from "./components/GroupChat.js";
 import {
   renderDebugLogsModal,
@@ -109,6 +111,18 @@ async function renderModals(app) {
   }
   if (container.innerHTML !== mainModalHtml) {
     container.innerHTML = mainModalHtml;
+    if (app.state.showCharacterModal) {
+      setupCharacterModal(app);
+    }
+    if (app.state.modal.isOpen && app.state.modal.type === "chatSelection") {
+      setupChatSelectionModal(app);
+    }
+    if (app.state.showCreateGroupChatModal) {
+      setupCreateGroupChatModal(app);
+    }
+    if (app.state.showEditGroupChatModal) {
+      setupEditGroupChatModal(app);
+    }
   }
 
   // Render confirmation modal

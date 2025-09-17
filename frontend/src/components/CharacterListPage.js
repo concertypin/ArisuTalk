@@ -1,5 +1,5 @@
 import { t } from "../i18n.js";
-import { renderAvatar } from "./Avatar.js";
+import Avatar from "./Avatar.svelte";
 import { formatTimestamp } from "../utils.js";
 
 const LONG_PRESS_DURATION_MS = 500;
@@ -117,9 +117,7 @@ export function renderCharacterItem(app, char) {
     <div class="character-list-item p-3 rounded-full cursor-pointer hover:bg-gray-800/60 transition-colors duration-200" 
          data-character-id="${char.id}">
         <div class="flex items-center space-x-5">
-            <div class="character-avatar relative">
-                ${renderAvatar(char, "lg")}
-            </div>
+            <div class="character-avatar-placeholder" data-character-id="${char.id}"></div>
             <div class="flex-1 min-w-0">
                 <div class="flex items-center mb-1">
                     <h3 class="font-semibold text-white text-lg truncate">${char.name || t("sidebar.unknownCharacter")}</h3>
@@ -151,6 +149,20 @@ export function renderCharacterList(app, container) {
   container.innerHTML = filteredCharacters
     .map((char) => renderCharacterItem(app, char))
     .join("");
+
+  container.querySelectorAll(".character-avatar-placeholder").forEach((placeholder) => {
+    const characterId = parseInt(placeholder.dataset.characterId, 10);
+    const character = filteredCharacters.find((c) => c.id === characterId);
+    if (character) {
+      new Avatar({
+        target: placeholder,
+        props: {
+          character,
+          size: "lg",
+        },
+      });
+    }
+  });
 }
 
 /**

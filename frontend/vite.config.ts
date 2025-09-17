@@ -1,5 +1,7 @@
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
+import { svelte } from "@sveltejs/vite-plugin-svelte";
+import preprocess from "svelte-preprocess";
 
 // Since it distracts debugging via service worker, enable it only on production build
 const prodOnlyPlugin = [
@@ -38,6 +40,9 @@ export default defineConfig(({ mode }) => ({
     clearScreen: false,
     publicDir: "static",
     plugins: [
+        svelte({
+            preprocess: preprocess()
+        }),
         ...(mode === 'production' ? prodOnlyPlugin : [])
     ]
 }));
