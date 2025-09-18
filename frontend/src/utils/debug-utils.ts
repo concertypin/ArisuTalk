@@ -90,7 +90,7 @@ export async function loadPreconfiguredData(
         localStorageResponse.statusText,
       );
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error loading localStorage pre-configured data:", error);
   }
 
@@ -147,7 +147,7 @@ export async function loadPreconfiguredData(
         indexedDBResponse.statusText,
       );
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error loading IndexedDB pre-configured data:", error);
   }
 
