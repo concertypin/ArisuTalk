@@ -155,9 +155,9 @@ export async function loadPreconfiguredData(
 }
 
 /**
- * Initializes the debug utility based on a query parameter.
- * If `?debug=true` is present in the URL, it clears and loads data.
- */
+ * Initializes the debug utility in development mode.
+ * When running in a development environment (import.meta.env.DEV is true),
+ * this function automatically clears all browser data and loads pre-configured data.
 export async function initializeDebugUtility(): Promise<void> {
   // Check if in development mode and if a debug flag is set (e.g., via localStorage or another env variable)
   // For now, we'll just use import.meta.env.DEV
