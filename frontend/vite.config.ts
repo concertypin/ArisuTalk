@@ -53,7 +53,10 @@ export default defineConfig(async (env) => {
     // If there is object in object, merge them recursively
     // If there is array in both configs, concatenate them
     // If there is primitive in both configs, localConfig takes precedence
-    const localConfig: Partial<UserConfig> = await import(`./vite.config.local.ts`).then(mod => mod.default(env)).catch(() => ({}))
+    const localConfig: Partial<UserConfig> =
+        //@ts-ignore
+        await import(`./vite.config.local.ts`)
+            .then(mod => mod.default(env)).catch(() => ({}))
     let mergedConfig = baseConfigFactory(env)
     mergedConfig = {
         ...mergedConfig,
