@@ -28,6 +28,8 @@ const prodOnlyPlugin = [
     })
 ]
 export default defineConfig(({ mode }) => ({
+    // import.meta.env.DEV is automatically set by Vite based on the 'mode'.
+    // It is true in development (pnpm dev:fe) and false in production (pnpm build:fe).
     server: {
         open: "index.html",
     },
