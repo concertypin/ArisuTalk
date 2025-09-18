@@ -29,6 +29,7 @@ backend/ktlint
 
 # Local files
 TODO.md
+frontend/local/
 
 # Backup files
 *.backup

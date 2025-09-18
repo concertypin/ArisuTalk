@@ -62,6 +62,22 @@
     lucide.createIcons();
   </script>
 
+  <script type="module" src="src/utils/debug-utils.ts"></script>
+  <script type="module">
+    import { initializeDebugUtility } from './src/utils/debug-utils.ts';
+    import { dumpLocalStorageToJson, dumpIndexedDBToJson } from './src/utils/dev-tools.ts';
+
+    initializeDebugUtility();
+
+    // Expose dev tools globally for easy access in console
+    if (import.meta.env.DEV) {
+      window.__dev__ = {
+        dumpLocalStorage: dumpLocalStorageToJson,
+        dumpIndexedDB: dumpIndexedDBToJson,
+      };
+      console.log("Dev tools (__dev__.dumpLocalStorage(), __dev__.dumpIndexedDB()) are available in the console.");
+    }
+  </script>
   <script type="module" src="src/index.js"></script>
   
 </body>
