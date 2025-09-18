@@ -73,7 +73,7 @@ export async function dumpIndexedDBToJson(): Promise<string | null> {
         const jsonOutput = JSON.stringify(indexedDBData, null, 2);
         console.log("IndexedDB data dumped:\n", jsonOutput);
         return jsonOutput;
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Error dumping IndexedDB:", error);
         return null;
     }
