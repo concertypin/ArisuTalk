@@ -106,7 +106,8 @@ function checkProxyNeeded(
         const url = new URL(input);
         const hostUrl = new URL(host);
         return url.origin !== hostUrl.origin; // Use proxy if origins differ.
-    } catch { }
-
-    return true; // We don't know the URL, use proxy to be safe.
+    } catch (e) {
+        console.warn(`Could not parse URL, letting native fetch handle it: ${input}`);
+        return false; // Don't use proxy for invalid URLs.
+    }
 }
