@@ -64,8 +64,12 @@ function checkProxyNeeded(
     init?: { corsProxy?: boolean },
 ): boolean {
     // It checks if the request should go through the CORS proxy.
-    // Priority: init.corsProxy > host URL check > default to true (use proxy).
+    // Priority: init.corsProxy > user setting > same-origin check > allowed origins
+
     if (init?.corsProxy !== undefined) return init.corsProxy; // Explicitly set, use it.
+
+    if (window.personaApp?.state.settings.experimental.enableCorsProxy != true)
+        return false; // User disabled CORS proxy in settings. Since this is experimental, respect it.
 
     if (!host || typeof host !== "string") {
         if (!import.meta.env.DEV)
@@ -94,9 +98,10 @@ function checkProxyNeeded(
     if (!input.startsWith("http:") && !input.startsWith("https:")) return false; // Non-http(s) URL, no proxy needed.
 
     // Check against allowed origins.
-    for (const origin of allowedOrigins) {
-        if (input.startsWith(origin)) return false; // Allowed origin, no proxy needed.
-    }
+    for (const origin of allowedOrigins)
+        if (input.startsWith(origin))
+            return false; // Allowed origin, no proxy needed.
+
     try {
         const url = new URL(input);
         const hostUrl = new URL(host);

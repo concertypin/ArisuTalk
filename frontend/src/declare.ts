@@ -1,4 +1,6 @@
-export {};
+import { PersonaChatApp } from ".";
+
+export { };
 
 declare global {
   interface Window {
@@ -6,5 +8,10 @@ declare global {
       dumpLocalStorage: () => string;
       dumpIndexedDB: () => Promise<string | null>;
     };
+    /**
+     * @deprecated Use window.personaApp instead.
+     */
+    app?: PersonaChatApp
+    personaApp?: PersonaChatApp // Same as app, why exist both?
   }
 }

@@ -146,7 +146,7 @@ export const en: LanguageStrings = {
     naiStickerPromptDescription: "This prompt is used to generate stickers through NovelAI. It analyzes emotions and situations appropriate to the conversation context to create sticker generation requests.",
     groupChatPrompt: "Group Chat Prompt",
     groupChatPromptDescription: "This prompt is used when AI characters chat in group chats. Should be written in ChatML format.",
-    openChatPrompt: "Open Chat Prompt", 
+    openChatPrompt: "Open Chat Prompt",
     openChatPromptDescription: "This prompt is used when AI characters chat in open chats. Should be written in ChatML format.",
     resetAllPrompts: "Reset All Prompts",
     resetAllPromptsConfirmation:
@@ -302,6 +302,10 @@ export const en: LanguageStrings = {
     },
     uiSizePreviewMessage1: "Hello! I'll help you adjust the UI size.",
     uiSizePreviewMessage2: "Yes, the preview is nice!",
+    experimental: {
+              enableCorsProxy: "Enable CORS Proxy",
+        enableCorsProxyInfo: "Use a CORS proxy for requests to external APIs. This may be required for some services.",
+    }
   },
   sidebar: {
     startNewChat: "Start a new chat",
@@ -507,7 +511,7 @@ export const en: LanguageStrings = {
     aiGenerationComplete: {
       title: "AI Generation Complete",
       message:
-        'Successfully generated details for character "{{characterName}}"',
+        'Successfully generated details for character "{{characterName}}" ',
     },
     generationFailed: {
       title: "Generation Failed",
@@ -789,7 +793,7 @@ export const en: LanguageStrings = {
     tagsDescription: "Frequently used tags by this character",
     postsCount: "{{count}} posts",
     noPostsYet: "No posts yet",
-    noSecretsYet: "No secrets yet", 
+    noSecretsYet: "No secrets yet",
     noTagsYet: "No tags yet",
     noPostsAvailable: "No posts available",
     noSecretsAvailable: "No secrets available",

@@ -227,6 +227,9 @@ export type LanguageStrings = {
     experimentalWarning: string;
     warningNote: string;
     experimentalComingSoon: string;
+    experimental: {
+      enableCorsProxy: string;
+    };
     applicationInfo: string;
     appName: string;
     uiMode: string;
