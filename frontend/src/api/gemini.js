@@ -4,7 +4,7 @@ import {
   buildCharacterSheetPrompt,
 } from "../prompts/builder/promptBuilder.js";
 import { t } from "../i18n.js";
-
+import fetch from "../utils/fetch.js";
 const API_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models";
 
 /**
@@ -511,7 +511,7 @@ export class GeminiClient {
     } catch (error) {
       console.error(
         t("api.profileGenerationError", { provider: "Gemini" }) +
-          " (Character Sheet)",
+        " (Character Sheet)",
         error,
       );
       return { error: error.message };

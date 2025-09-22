@@ -5,6 +5,7 @@ import {
 } from "../prompts/builder/promptBuilder.js";
 import { t } from "../i18n.js";
 import { getTokenLimitParameter } from "../utils/modelUtils.js";
+import fetch from "../utils/fetch.js";
 
 export class CustomOpenAIClient {
   /**
