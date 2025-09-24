@@ -51,16 +51,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.personaApp = new PersonaChatApp();
   window.app = window.personaApp; // SNS 편집을 위한 전역 접근
   await window.personaApp.init();
-  
+
   // 디버깅용 전역 함수 노출
   window.fixOverlays = () => window.personaApp.forceReinitialize();
 });
 
-class PersonaChatApp {
+export class PersonaChatApp {
   constructor() {
     this.apiManager = new APIManager();
     this.defaultPrompts = defaultPrompts;
     this.stickerManager = null; // NAI 스티커 매니저
+    /**
+     * @type {import("./types/state.ts").AppState}
+     */
     this.state = {
       settings: {
         // Legacy compatibility
@@ -77,6 +80,9 @@ class PersonaChatApp {
         randomMessageFrequencyMax: 120,
         fontScale: 1.0,
         snapshotsEnabled: true,
+        experimental: {
+          enableCorsProxy: false,
+        }
       },
       characters: defaultCharacters,
       chatRooms: {},
@@ -361,7 +367,7 @@ class PersonaChatApp {
 
     await render(this);
     this.addEventListeners();
-    
+
     // NAI 핸들러 초기화
     setupNAIHandlers(this);
 
@@ -408,7 +414,7 @@ class PersonaChatApp {
     // Check for changes in DOM inputs for persona fields
     const userNameInput = document.getElementById("settings-user-name");
     const userDescInput = document.getElementById("settings-user-desc");
-    
+
     let hasPersonaChanges = false;
     if (userNameInput && userNameInput.value !== (this.initialSettings?.userName || "")) {
       hasPersonaChanges = true;
@@ -416,7 +422,7 @@ class PersonaChatApp {
     if (userDescInput && userDescInput.value !== (this.initialSettings?.userDescription || "")) {
       hasPersonaChanges = true;
     }
-    
+
     const hasSettingsChanges =
       JSON.stringify(this.initialSettings) !==
       JSON.stringify(this.state.settings);
@@ -487,13 +493,13 @@ class PersonaChatApp {
   // 메모리를 SNS 포스트로 마이그레이션하는 함수
   migrateMemoriesToSNSPosts(characters) {
     let migrationNeeded = false;
-    
+
     const migratedCharacters = characters.map(character => {
       // 이미 SNS 포스트가 있고 메모리가 없으면 이미 마이그레이션됨
       if (character.snsPosts && !character.memories?.length) {
         return character;
       }
-      
+
       // 메모리가 있으면 SNS 포스트로 변환
       if (character.memories && character.memories.length > 0) {
         migrationNeeded = true;
@@ -504,7 +510,7 @@ class PersonaChatApp {
           timestamp: new Date(Date.now() - (character.memories.length - index) * 86400000).toISOString(), // 과거 날짜로 설정
           affection_state: {
             affection: 0.3,
-            intimacy: 0.2, 
+            intimacy: 0.2,
             trust: 0.25,
             romantic_interest: 0.0
           },
@@ -513,26 +519,26 @@ class PersonaChatApp {
           tags: ["기존메모리"],
           reason: "기존 메모리에서 마이그레이션"
         }));
-        
+
         return {
           ...character,
           snsPosts: [...(character.snsPosts || []), ...snsPosts],
           memories: [] // 메모리 배열 초기화
         };
       }
-      
+
       // 메모리도 SNS 포스트도 없으면 빈 배열 설정
       return {
         ...character,
         snsPosts: character.snsPosts || []
       };
     });
-    
+
     if (migrationNeeded) {
       console.log('[Migration] 메모리를 SNS 포스트로 마이그레이션했습니다.');
       this.shouldSaveCharacters = true;
     }
-    
+
     return migratedCharacters;
   }
 
@@ -544,33 +550,33 @@ class PersonaChatApp {
 
     const migratedStates = {};
     let migrationNeeded = false;
-    
+
     Object.keys(characterStates).forEach(characterId => {
       const oldState = characterStates[characterId];
-      
+
       // 이미 새 스키마인 경우 (affection이 존재하는 경우)
       if (oldState && typeof oldState === 'object' && 'affection' in oldState) {
         migratedStates[characterId] = { ...oldState };
         return;
       }
-      
+
       migrationNeeded = true;
-      
+
       // 기존 스키마인 경우 변환
       if (oldState && typeof oldState === 'object') {
         migratedStates[characterId] = {
           // mood -> affection 변환 (mood가 높을수록 호감도도 높음)
           affection: oldState.mood !== undefined ? Math.max(0, Math.min(1, oldState.mood)) : 0.3,
-          
+
           // energy -> intimacy 변환 (에너지가 높을수록 친밀감도 높음)  
           intimacy: oldState.energy !== undefined ? Math.max(0, Math.min(1, oldState.energy)) : 0.1,
-          
+
           // socialBattery -> trust 변환 (사회적 배터리가 높을수록 신뢰도 높음)
           trust: oldState.socialBattery !== undefined ? Math.max(0, Math.min(1, oldState.socialBattery)) : 0.2,
-          
+
           // romantic_interest는 새로운 값이므로 기본값 0.0
           romantic_interest: 0.0,
-          
+
           // reason도 새로운 값이므로 기본값
           reason: "기존 캐릭터 상태를 새 시스템으로 마이그레이션했습니다"
         };
@@ -585,27 +591,27 @@ class PersonaChatApp {
         };
       }
     });
-    
+
     // 마이그레이션이 필요했다면 즉시 저장하여 다음 로딩 시에는 변환 과정을 거치지 않도록 함
     if (migrationNeeded) {
       saveToBrowserStorage("personaChat_characterStates_v16", migratedStates);
       console.log("CharacterStates 마이그레이션 완료:", Object.keys(migratedStates).length, "개 캐릭터");
     }
-    
+
     return migratedStates;
   }
 
   processAutoPost(character, autoPost) {
     if (!autoPost || !autoPost.content?.trim()) return character;
-    
+
     const currentState = this.getCharacterState(character.id);
     const timestamp = new Date().toISOString();
-    
+
     // 태그가 #으로 시작하지 않으면 추가
-    const formattedTags = Array.isArray(autoPost.tags) 
+    const formattedTags = Array.isArray(autoPost.tags)
       ? autoPost.tags.map(tag => tag.startsWith('#') ? tag : `#${tag}`)
       : [];
-    
+
     const newPost = {
       id: `autopost_${character.id}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       type: autoPost.type || "memory",
@@ -622,7 +628,7 @@ class PersonaChatApp {
       tags: formattedTags,
       reason: autoPost.reason || "AI 자동 포스팅"
     };
-    
+
     return {
       ...character,
       snsPosts: [...(character.snsPosts || []), newPost]
@@ -674,7 +680,7 @@ class PersonaChatApp {
 
       // 메모리를 SNS 포스트로 마이그레이션
       const migratedCharacters = this.migrateMemoriesToSNSPosts(characters);
-      
+
       this.state.characters = migratedCharacters.map((char) => ({
         ...char,
         id: Number(char.id),
@@ -703,48 +709,48 @@ class PersonaChatApp {
           debugLogs.length > 0
             ? debugLogs
             : [
-                {
-                  id: Date.now(),
-                  timestamp: Date.now(),
-                  message: t("ui.appStarted"),
-                  level: "info",
-                  type: "simple",
-                },
-                {
-                  id: Date.now() + 1,
-                  timestamp: Date.now(),
-                  characterName: "System",
-                  chatType: "system",
-                  type: "structured",
-                  data: {
-                    personaInput: {
-                      characterName: "System",
-                      characterPrompt: "System initialization",
-                      characterMemories: [],
-                      characterId: "system",
-                    },
-                    systemPrompt: { initialization: "App startup process" },
-                    outputResponse: {
-                      messages: [],
-                      newMemory: null,
-                      characterState: null,
-                    },
-                    parameters: {
-                      model: "system",
-                      isProactive: false,
-                      forceSummary: false,
-                      messageCount: 0,
-                    },
-                    metadata: {
-                      chatId: null,
-                      chatType: "system",
-                      timestamp: Date.now(),
-                      apiProvider: "system",
-                      model: "system",
-                    },
+              {
+                id: Date.now(),
+                timestamp: Date.now(),
+                message: t("ui.appStarted"),
+                level: "info",
+                type: "simple",
+              },
+              {
+                id: Date.now() + 1,
+                timestamp: Date.now(),
+                characterName: "System",
+                chatType: "system",
+                type: "structured",
+                data: {
+                  personaInput: {
+                    characterName: "System",
+                    characterPrompt: "System initialization",
+                    characterMemories: [],
+                    characterId: "system",
+                  },
+                  systemPrompt: { initialization: "App startup process" },
+                  outputResponse: {
+                    messages: [],
+                    newMemory: null,
+                    characterState: null,
+                  },
+                  parameters: {
+                    model: "system",
+                    isProactive: false,
+                    forceSummary: false,
+                    messageCount: 0,
+                  },
+                  metadata: {
+                    chatId: null,
+                    chatType: "system",
+                    timestamp: Date.now(),
+                    apiProvider: "system",
+                    model: "system",
                   },
                 },
-              ];
+              },
+            ];
       } else {
         this.state.debugLogs = [];
       }
@@ -757,14 +763,18 @@ class PersonaChatApp {
   _stateQueue = [];
   _renderScheduled = false;
 
+  /**
+   * 
+   * @param {Partial<typeof this.state>} newState 
+   */
   async setState(newState) {
     const messagesContainerOld = document.getElementById("messages-container");
     let scrollInfo = null;
     if (messagesContainerOld) {
       const isAtBottom =
         messagesContainerOld.scrollHeight -
-          messagesContainerOld.scrollTop -
-          messagesContainerOld.clientHeight <
+        messagesContainerOld.scrollTop -
+        messagesContainerOld.clientHeight <
         10;
       scrollInfo = {
         isAtBottom,
@@ -912,7 +922,7 @@ class PersonaChatApp {
   setStateBatch(newState) {
     return new Promise((resolve, reject) => {
       this._stateQueue.push({ newState, resolve, reject });
-      
+
       if (!this._renderScheduled) {
         this._renderScheduled = true;
         // 다음 tick에서 배치 처리 (React의 패턴과 유사)
@@ -930,7 +940,7 @@ class PersonaChatApp {
     // 모든 상태 변경 합치기
     this.oldState = { ...this.state };
     const batch = this._stateQueue.splice(0); // 큐 비우기
-    
+
     const mergedState = batch.reduce((merged, { newState }) => {
       return { ...merged, ...newState };
     }, {});
@@ -1028,7 +1038,7 @@ class PersonaChatApp {
     ) {
       this.debouncedSaveDebugLogs(this.state.debugLogs);
     }
-    
+
     // 비교 완료 후 this.oldState를 현재 상태로 업데이트
     this.oldState = { ...this.state };
   }
@@ -1607,14 +1617,14 @@ class PersonaChatApp {
   }
 
   toggleStickerSize(messageId) {
-    
+
     // messageId를 숫자로 변환 (HTML data-attribute에서 가져온 값은 문자열이므로)
     const numericMessageId = parseFloat(messageId);
-    
+
     const expandedStickers = new Set(this.state.expandedStickers);
-    
+
     const wasExpanded = expandedStickers.has(numericMessageId);
-    
+
     if (wasExpanded) {
       expandedStickers.delete(numericMessageId);
       console.log(`⬇️ 축소 처리 - ID ${numericMessageId} 제거함`);
@@ -1622,8 +1632,8 @@ class PersonaChatApp {
       expandedStickers.add(numericMessageId);
       console.log(`⬆️ 확대 처리 - ID ${numericMessageId} 추가함`);
     }
-    
-    
+
+
     this.setState({ expandedStickers });
   }
 
@@ -2006,13 +2016,13 @@ class PersonaChatApp {
   _fadeOutHeaderAndCloseEditMode() {
     const header = document.getElementById("mobile-edit-header");
     if (header) {
-        header.classList.remove("animate-fade-in");
-        header.classList.add("animate-fade-out");
-        setTimeout(() => {
-            this.closeCharacterEditMode();
-        }, HEADER_FADE_OUT_DURATION_MS);
-    } else {
+      header.classList.remove("animate-fade-in");
+      header.classList.add("animate-fade-out");
+      setTimeout(() => {
         this.closeCharacterEditMode();
+      }, HEADER_FADE_OUT_DURATION_MS);
+    } else {
+      this.closeCharacterEditMode();
     }
   }
 
@@ -2164,11 +2174,11 @@ class PersonaChatApp {
     if (this.state.editingCharacter && this.state.editingCharacter.stickers) {
       const sticker = this.state.editingCharacter.stickers[index];
       if (!sticker) return;
-      
+
       // EXIF 데이터 추출 (이미지인 경우만)
       let exifData = null;
       let rerollData = null;
-      
+
       const isImage = sticker.type && sticker.type.startsWith('image/');
       if (isImage) {
         try {
@@ -2213,17 +2223,17 @@ class PersonaChatApp {
     if (this.state.editingCharacter && this.state.editingCharacter.stickers && newName && newName.trim() !== "") {
       const newStickers = [...this.state.editingCharacter.stickers];
       newStickers[index] = { ...newStickers[index], name: newName.trim() };
-      
+
       this.setState({
         editingCharacter: {
           ...this.state.editingCharacter,
           stickers: newStickers,
         },
       });
-      
+
       // 모달 닫기
       this.closeStickerPreviewModal();
-      
+
       // 성공 메시지 (선택사항)
       // alert(t("stickerPreview.nameUpdated"));
     }
@@ -2246,17 +2256,17 @@ class PersonaChatApp {
     if (this.state.editingCharacter && this.state.editingCharacter.stickers) {
       const newStickers = [...this.state.editingCharacter.stickers];
       newStickers.splice(index, 1);
-      
+
       this.setState({
         editingCharacter: {
           ...this.state.editingCharacter,
           stickers: newStickers,
         },
       });
-      
+
       // 모달 닫기
       this.closeStickerPreviewModal();
-      
+
       // 성공 메시지 표시
       this.showNotification(t('stickerPreview.stickerDeleted'), 'success');
     }
@@ -2288,7 +2298,7 @@ class PersonaChatApp {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        
+
         this.showNotification(t('stickerPreview.downloadComplete'), 'success');
       }
     }
@@ -2387,14 +2397,14 @@ class PersonaChatApp {
         ...newStickers[index],
         ...this.state.stickerPreviewModal.rerollResult
       };
-      
+
       this.setState({
         editingCharacter: {
           ...this.state.editingCharacter,
           stickers: newStickers,
         },
       });
-      
+
       this.showNotification(t('stickerPreview.rerollComplete'), 'success');
       this.closeStickerPreviewModal();
     }
@@ -2570,13 +2580,13 @@ class PersonaChatApp {
       naiSettings,
       hypnosis: {
         enabled: document.getElementById('hypnosis-enabled')?.checked || false,
-        affection: document.getElementById('hypnosis-affection-override')?.checked ? 
+        affection: document.getElementById('hypnosis-affection-override')?.checked ?
           (document.getElementById('hypnosis-affection') ? parseFloat(document.getElementById('hypnosis-affection').value) / 100 : null) : null,
-        intimacy: document.getElementById('hypnosis-affection-override')?.checked ? 
+        intimacy: document.getElementById('hypnosis-affection-override')?.checked ?
           (document.getElementById('hypnosis-intimacy') ? parseFloat(document.getElementById('hypnosis-intimacy').value) / 100 : null) : null,
-        trust: document.getElementById('hypnosis-affection-override')?.checked ? 
+        trust: document.getElementById('hypnosis-affection-override')?.checked ?
           (document.getElementById('hypnosis-trust') ? parseFloat(document.getElementById('hypnosis-trust').value) / 100 : null) : null,
-        romantic_interest: document.getElementById('hypnosis-affection-override')?.checked ? 
+        romantic_interest: document.getElementById('hypnosis-affection-override')?.checked ?
           (document.getElementById('hypnosis-romantic') ? parseFloat(document.getElementById('hypnosis-romantic').value) / 100 : null) : null,
         force_love_unlock: document.getElementById('hypnosis-force-love')?.checked || false,
         sns_edit_access: document.getElementById('hypnosis-sns-edit')?.checked || false,
@@ -2635,7 +2645,7 @@ class PersonaChatApp {
    */
   async testAppearancePrompt(e) {
     e.preventDefault();
-    
+
     // 현재 외모 입력 필드에서 값 가져오기
     const appearanceInput = document.getElementById("character-appearance");
     if (!appearanceInput) {
@@ -2664,7 +2674,7 @@ class PersonaChatApp {
 
     // 현재 편집 중인 캐릭터의 NAI 설정 가져오기
     const characterNaiSettings = this.state.editingCharacter?.naiSettings || {};
-    
+
     // 테스트 캐릭터 객체 생성 (캐릭터별 NAI 설정 포함)
     const testCharacter = {
       id: 'test',
@@ -2681,11 +2691,11 @@ class PersonaChatApp {
 
     const button = e.target.closest('button');
     const originalText = button.innerHTML;
-    
+
     try {
       button.disabled = true;
       button.innerHTML = '<i data-lucide="loader" class="w-3 h-3 animate-spin pointer-events-none"></i> 테스트 중...';
-      
+
       // happy 감정으로 테스트 스티커 생성
       const result = await this.stickerManager.naiClient.generateSticker(testCharacter, 'happy', {
         naiSettings: this.state.settings.naiSettings || {}
@@ -2703,7 +2713,7 @@ class PersonaChatApp {
           });
         };
         img.src = result.dataUrl;
-        
+
         // 내부 모달로 이미지 표시 (setState가 자동으로 UI 업데이트하고 이벤트 리스너 설정)
         this.showImageResultModal(result.dataUrl, appearance);
       } else {
@@ -3257,11 +3267,11 @@ class PersonaChatApp {
       .map((p) => {
         const basicInfo = p.prompt
           ? p.prompt
-              .split("\n")
-              .slice(0, 3)
-              .join(" ")
-              .replace(/[#*]/g, "")
-              .trim()
+            .split("\n")
+            .slice(0, 3)
+            .join(" ")
+            .replace(/[#*]/g, "")
+            .trim()
           : "";
         return `- ${p.name}: ${basicInfo || "Character"}`;
       })
@@ -3430,10 +3440,10 @@ class PersonaChatApp {
           type: msgPart.sticker ? "sticker" : "text",
           ...(msgPart.sticker
             ? {
-                sticker: msgPart.sticker,
-                stickerId: msgPart.sticker,
-                stickerData: { stickerName: msgPart.sticker },
-              }
+              sticker: msgPart.sticker,
+              stickerId: msgPart.sticker,
+              stickerData: { stickerName: msgPart.sticker },
+            }
             : {}),
         };
 
@@ -3479,11 +3489,11 @@ class PersonaChatApp {
       .map((p) => {
         const basicInfo = p.prompt
           ? p.prompt
-              .split("\n")
-              .slice(0, 3)
-              .join(" ")
-              .replace(/[#*]/g, "")
-              .trim()
+            .split("\n")
+            .slice(0, 3)
+            .join(" ")
+            .replace(/[#*]/g, "")
+            .trim()
           : "";
         return `- ${p.name}: ${basicInfo || "Character"}`;
       })
@@ -3634,10 +3644,10 @@ class PersonaChatApp {
           type: msgPart.sticker ? "sticker" : "text",
           ...(msgPart.sticker
             ? {
-                sticker: msgPart.sticker,
-                stickerId: msgPart.sticker,
-                stickerData: { stickerName: msgPart.sticker },
-              }
+              sticker: msgPart.sticker,
+              stickerId: msgPart.sticker,
+              stickerData: { stickerName: msgPart.sticker },
+            }
             : {}),
         };
 
@@ -3822,7 +3832,7 @@ class PersonaChatApp {
       if (availableCharacters.length > 0) {
         const newParticipant =
           availableCharacters[
-            Math.floor(Math.random() * availableCharacters.length)
+          Math.floor(Math.random() * availableCharacters.length)
           ];
         console.log(`${newParticipant.name} joined open chat randomly`);
         this.characterJoinOpenChat(openChatId, newParticipant.id, false);
@@ -3888,9 +3898,9 @@ class PersonaChatApp {
       const existing = this.state.characterStates[characterId];
       if (existing) {
         const minRequiredLevel = 0.5; // 50%
-        if (!(existing.affection >= minRequiredLevel && 
-              existing.intimacy >= minRequiredLevel && 
-              existing.trust >= minRequiredLevel)) {
+        if (!(existing.affection >= minRequiredLevel &&
+          existing.intimacy >= minRequiredLevel &&
+          existing.trust >= minRequiredLevel)) {
           // 조건 미충족시 romantic_interest 변화를 기존 값으로 고정
           characterState.romantic_interest = existing.romantic_interest;
         }
@@ -3906,7 +3916,7 @@ class PersonaChatApp {
 
     this.setState({ characterStates: newCharacterStates });
     saveToBrowserStorage("personaChat_characterStates_v16", newCharacterStates);
-    
+
     // Character Modal이 열려있고 해당 캐릭터의 상태가 업데이트된 경우, 최면 표시 값도 업데이트
     if (this.state.showCharacterModal && this.state.editingCharacter?.id === characterId) {
       // setState 이후 DOM이 업데이트될 때까지 기다린 후 최면 표시 값 업데이트
@@ -4096,7 +4106,7 @@ class PersonaChatApp {
       if (charIndex !== -1) {
         const updatedCharacters = [...this.state.characters];
         const charToUpdate = { ...updatedCharacters[charIndex] };
-        
+
         const legacyMemoryPost = {
           type: "memory",
           content: response.newMemory.trim(),
@@ -4105,7 +4115,7 @@ class PersonaChatApp {
           tags: ["추억", "일상"],
           reason: "개별 대화 기반 기억"
         };
-        
+
         updatedCharacters[charIndex] = this.processAutoPost(charToUpdate, legacyMemoryPost);
         this.shouldSaveCharacters = true;
         this.setState({ characters: updatedCharacters });
@@ -4114,7 +4124,7 @@ class PersonaChatApp {
         );
       }
     }
-    
+
     // 새로운 autoPost 처리
     if (response.autoPost) {
       const charIndex = this.state.characters.findIndex(
@@ -4123,7 +4133,7 @@ class PersonaChatApp {
       if (charIndex !== -1) {
         const updatedCharacters = [...this.state.characters];
         const charToUpdate = { ...updatedCharacters[charIndex] };
-        
+
         updatedCharacters[charIndex] = this.processAutoPost(charToUpdate, response.autoPost);
         this.shouldSaveCharacters = true;
         this.setState({ characters: updatedCharacters });
@@ -4264,7 +4274,7 @@ class PersonaChatApp {
     if (eligibleCharacters.length > 0) {
       const character =
         eligibleCharacters[
-          Math.floor(Math.random() * eligibleCharacters.length)
+        Math.floor(Math.random() * eligibleCharacters.length)
         ];
       console.log(`[Proactive] Sending message from ${character.name}`);
       await this.handleProactiveMessage(character);
@@ -4289,8 +4299,7 @@ class PersonaChatApp {
       const randomDelay =
         Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
       console.log(
-        `Scheduling random character ${i + 1}/${randomCharacterCount} in ${
-          randomDelay / 1000
+        `Scheduling random character ${i + 1}/${randomCharacterCount} in ${randomDelay / 1000
         } seconds.`,
       );
       setTimeout(() => this.initiateSingleRandomCharacter(), randomDelay);
@@ -4619,7 +4628,7 @@ class PersonaChatApp {
     const chatId = this.state.selectedChatId;
     const messages = this.state.messages[chatId] || [];
     const targetMessage = messages.find(msg => msg.id === messageId);
-    
+
     if (!targetMessage || targetMessage.isMe) {
       // console.log('[SNS Force] 사용자 메시지에는 SNS 포스트를 생성할 수 없습니다');
       return;
@@ -4627,7 +4636,7 @@ class PersonaChatApp {
 
     // 개별 채팅인 경우 chatId로 캐릭터 찾기
     let character = this.state.characters.find(c => c.id === chatId);
-    
+
     // 그룹 채팅인 경우 메시지 발신자로 캐릭터 찾기
     if (!character && targetMessage) {
       character = this.state.characters.find(c => c.name === targetMessage.sender);
@@ -4640,19 +4649,19 @@ class PersonaChatApp {
 
     try {
       // console.log(`[SNS Force] ${character.name}의 SNS 포스트 강제 생성 시작`);
-      
+
       // 현재 사용자 정보 안전하게 가져오기 (settings 기반)
       const currentPersona = {
         name: this.state.settings.userName || "User",
         description: this.state.settings.userDescription || ""
       };
-      
+
       // SNS 전용 프롬프트를 파일에서 로딩
       const recentConversation = messages.slice(-3).map(msg => `${msg.sender}: ${msg.content}`).join('\n');
-      
+
       // 프롬프트 템플릿을 로딩하고 변수 치환
       let snsPromptTemplate = await getPrompt('snsForce');
-      
+
       // 프롬프트 변수들을 실제 값으로 치환
       const snsPrompt = snsPromptTemplate
         .replace(/\{character\.name\}/g, character.name)
@@ -4693,10 +4702,10 @@ class PersonaChatApp {
         currentConfig.model,
         currentConfig.baseUrl
       );
-      
+
       // 직접 Gemini API 호출 (백업 방식 활용)
       const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${currentConfig.model}:generateContent?key=${currentConfig.apiKey}`;
-      
+
       const payload = {
         contents: [{
           parts: [{ text: snsPrompt }]
@@ -4727,7 +4736,7 @@ class PersonaChatApp {
       }
 
       const apiData = await apiResponse.json();
-      
+
       const responseText = apiData.candidates?.[0]?.content?.parts?.[0]?.text;
 
       if (!responseText) {
@@ -4752,14 +4761,14 @@ class PersonaChatApp {
         try {
           // 먼저 markdown 코드 블록 제거
           let cleanText = snsResponseText.trim();
-          
+
           // ```json과 ``` 제거
           if (cleanText.startsWith('```json')) {
             cleanText = cleanText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
           } else if (cleanText.startsWith('```')) {
             cleanText = cleanText.replace(/^```[a-zA-Z]*\s*/, '').replace(/\s*```$/, '');
           }
-          
+
           parsedResponse = JSON.parse(cleanText);
         } catch (e) {
           // JSON 부분만 추출 시도 (더 강력한 정규식)
@@ -4767,7 +4776,7 @@ class PersonaChatApp {
           if (jsonMatch) {
             try {
               let jsonText = jsonMatch[0];
-              
+
               // JSON이 잘렸는지 확인하고 기본 구조 완성 시도
               if (!jsonText.includes('"tags"') || !jsonText.endsWith('}')) {
                 // 기본 autoPost 구조 생성
@@ -4820,11 +4829,11 @@ class PersonaChatApp {
         if (charIndex !== -1) {
           const updatedCharacters = [...this.state.characters];
           const charToUpdate = { ...updatedCharacters[charIndex] };
-          
+
           updatedCharacters[charIndex] = this.processAutoPost(charToUpdate, parsedResponse.autoPost);
           this.setState({ characters: updatedCharacters });
           saveToBrowserStorage("personaChat_characters_v16", updatedCharacters);
-          
+
           // 사용자에게 알림
           this.showInfoModal(
             'SNS 포스트 생성 완료',
@@ -4837,7 +4846,7 @@ class PersonaChatApp {
           'SNS 포스트 생성에 실패했습니다. 다시 시도해주세요.'
         );
       }
-      
+
     } catch (error) {
       console.error('[SNS Force] SNS 포스트 생성 실패:', error);
       this.showInfoModal(
@@ -4873,8 +4882,8 @@ class PersonaChatApp {
 
       // NAI 클라이언트로 직접 스티커 생성 (저장하지 않음)
       const sticker = await this.stickerManager.naiClient.generateSticker(
-        character, 
-        emotion, 
+        character,
+        emotion,
         {
           naiSettings: naiSettings,
           customPrompt: situationPrompt,
@@ -4899,7 +4908,7 @@ class PersonaChatApp {
     const chatId = this.state.selectedChatId;
     const messages = this.state.messages[chatId] || [];
     const targetMessage = messages.find(msg => msg.id === messageId);
-    
+
     if (!targetMessage || targetMessage.isMe) {
       // console.log('[NAI Force] 사용자 메시지에는 NAI 스티커를 생성할 수 없습니다');
       return;
@@ -4921,13 +4930,13 @@ class PersonaChatApp {
       name: this.state.settings.userName || "User",
       description: this.state.settings.userDescription || ""
     };
-    
+
     try {
       // console.log(`[NAI Force] ${character.name}의 AI 기반 스티커 생성 시작`);
-      
+
       // 1단계: NAI 스티커 프롬프트로 감정과 상황 분석
       const recentConversation = messages.slice(-3).map(msg => `${msg.sender}: ${msg.content}`).join('\n');
-      
+
       let naiPromptTemplate = await getPrompt('naiSticker');
       const naiAnalysisPrompt = naiPromptTemplate
         .replace(/\{character\.name\}/g, character.name)
@@ -4953,10 +4962,10 @@ class PersonaChatApp {
         throw new Error('AI API 키가 설정되지 않았습니다.');
       }
 
-      
+
       // 직접 Gemini API 호출 (백업 방식 활용)
       const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${currentConfig.model}:generateContent?key=${currentConfig.apiKey}`;
-      
+
       const payload = {
         contents: [{
           parts: [{ text: naiAnalysisPrompt }]
@@ -4972,7 +4981,7 @@ class PersonaChatApp {
       let apiData;
       const maxRetries = 3;
       const retryDelay = 2000; // 2초
-      
+
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
           apiResponse = await fetch(apiUrl, {
@@ -4982,21 +4991,21 @@ class PersonaChatApp {
           });
 
           apiData = await apiResponse.json();
-          
+
           if (apiResponse.ok) {
             break; // 성공하면 반복문 종료
           }
-          
+
           // 5xx 서버 오류의 경우 재시도
           if (apiResponse.status >= 500 && attempt < maxRetries) {
-            console.warn(`[NAI Force] API 호출 실패 (${apiResponse.status}), ${retryDelay/1000}초 후 재시도... (${attempt}/${maxRetries})`);
+            console.warn(`[NAI Force] API 호출 실패 (${apiResponse.status}), ${retryDelay / 1000}초 후 재시도... (${attempt}/${maxRetries})`);
             await new Promise(resolve => setTimeout(resolve, retryDelay));
             continue;
           }
-          
+
           // 재시도하지 않을 오류 또는 최종 실패
           throw new Error(`AI API 호출 실패: ${apiResponse.status}${apiData?.error?.message ? ` - ${apiData.error.message}` : ''}`);
-          
+
         } catch (error) {
           if (attempt === maxRetries) {
             if (error.message.includes('fetch')) {
@@ -5004,8 +5013,8 @@ class PersonaChatApp {
             }
             throw error;
           }
-          
-          console.warn(`[NAI Force] API 호출 중 오류 발생, ${retryDelay/1000}초 후 재시도... (${attempt}/${maxRetries}):`, error.message);
+
+          console.warn(`[NAI Force] API 호출 중 오류 발생, ${retryDelay / 1000}초 후 재시도... (${attempt}/${maxRetries}):`, error.message);
           await new Promise(resolve => setTimeout(resolve, retryDelay));
         }
       }
@@ -5043,46 +5052,46 @@ class PersonaChatApp {
       const globalNAISettings = this.state.settings?.naiSettings || {};
       const charNAISettings = character.naiSettings || {};
       const mergedSettings = { ...globalNAISettings, ...charNAISettings };
-      
+
       // 이미지 크기 설정 (preferredSize 기반)
       const preferredSize = mergedSettings.preferredSize || "square";
-      const sizeConfig = NovelAIClient.UNLIMITED_SIZES.find(s => s.name === preferredSize) || 
-                        NovelAIClient.UNLIMITED_SIZES[2]; // 기본값: square
-      
+      const sizeConfig = NovelAIClient.UNLIMITED_SIZES.find(s => s.name === preferredSize) ||
+        NovelAIClient.UNLIMITED_SIZES[2]; // 기본값: square
+
       // NAI 클라이언트의 buildPrompt 메서드를 사용하여 체계적인 프롬프트 생성
       const promptData = naiClient.buildPrompt(character, emotion, { naiSettings: mergedSettings });
-      
+
       // 자동 생성과 동일한 방식으로 완전한 생성 파라미터 구성
       const generationParams = {
         // 기본 프롬프트
         prompt: promptData.prompt,
         negative_prompt: promptData.negative_prompt,
-        
+
         // 모델 및 이미지 설정
         model: naiClient.validateModel(mergedSettings.model) || "nai-diffusion-4-5-full",
         width: sizeConfig.width,
         height: sizeConfig.height,
-        
+
         // 생성 파라미터
         scale: mergedSettings.scale || 3,
         steps: mergedSettings.steps || 28,
         sampler: mergedSettings.sampler || "k_euler",
         noise_schedule: mergedSettings.noise_schedule || "native",
-        
+
         // SMEA 설정 (v3 모델 전용)
         sm: mergedSettings.sm || false,
         sm_dyn: mergedSettings.sm_dyn || false,
-        
+
         // 캐릭터 프롬프트 (v4/v4.5 전용)
         characterPrompts: promptData.characterPrompts,
-        
+
         // Vibe Transfer 설정
         ...(mergedSettings.vibeTransferEnabled && mergedSettings.vibeTransferImage ? {
           vibeTransferImage: mergedSettings.vibeTransferImage,
           reference_strength: mergedSettings.vibeTransferStrength || 0.6,
           reference_information_extracted: mergedSettings.vibeTransferInformationExtracted || 1.0
         } : {}),
-        
+
         // 고급 설정
         cfg_rescale: mergedSettings.cfg_rescale || 0,
         uncond_scale: mergedSettings.uncond_scale || 1.0,
@@ -5096,7 +5105,7 @@ class PersonaChatApp {
 
       // NAI 클라이언트로 이미지 생성
       const naiResult = await naiClient.generateImage(generationParams);
-      
+
       if (!naiResult.success) {
         throw new Error('NAI 이미지 생성에 실패했습니다.');
       }
@@ -5123,16 +5132,16 @@ class PersonaChatApp {
           dataUrl: imageDataUrl
         }
       };
-      
+
       const currentMessages = this.state.messages[chatId] || [];
       const updatedMessages = {
         ...this.state.messages,
         [chatId]: [...currentMessages, stickerMessage]
       };
-      
+
       this.setState({ messages: updatedMessages });
       saveToBrowserStorage("personaChat_messages_v16", updatedMessages);
-      
+
       // console.log(`[NAI Force] ${character.name}의 AI 기반 스티커 생성 및 표시 완료`);
 
     } catch (error) {
@@ -5245,8 +5254,8 @@ class PersonaChatApp {
     return `
         <div class="memory-item flex items-center gap-2">
             <input type="text" class="memory-input flex-1 px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" value="${memoryText}" placeholder="${t(
-              "characterModal.memoryPlaceholder",
-            )}">
+      "characterModal.memoryPlaceholder",
+    )}">
             <button class="delete-memory-btn p-2 text-gray-400 hover:text-red-400">
                 <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>
             </button>
@@ -6334,9 +6343,8 @@ class PersonaChatApp {
           />
         </div>
 
-        ${
-          provider === PROVIDERS.CUSTOM_OPENAI
-            ? `
+        ${provider === PROVIDERS.CUSTOM_OPENAI
+        ? `
           <!-- Custom OpenAI Base URL -->
           <div>
             <label class="flex items-center text-sm font-medium text-gray-300 mb-2">
@@ -6351,8 +6359,8 @@ class PersonaChatApp {
             />
           </div>
         `
-            : ""
-        }
+        : ""
+      }
 
         <!-- Model Selection -->
         <div>
@@ -6360,31 +6368,29 @@ class PersonaChatApp {
             <i data-lucide="cpu" class="w-4 h-4 mr-2"></i>Model
           </label>
 
-          ${
-            models.length > 0
-              ? `
+          ${models.length > 0
+        ? `
             <div class="grid grid-cols-1 gap-2 mb-3">
               ${models
-                .map(
-                  (model) => `
+          .map(
+            (model) => `
                 <button
                   type="button"
-                  class="model-select-btn px-3 py-2 text-left text-sm rounded-lg transition-colors ${
-                    config.model === model
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                  }"
+                  class="model-select-btn px-3 py-2 text-left text-sm rounded-lg transition-colors ${config.model === model
+                ? "bg-blue-600 text-white"
+                : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+              }"
                   data-model="${model}"
                 >
                   ${model}
                 </button>
               `,
-                )
-                .join("")}
+          )
+          .join("")}
             </div>
           `
-              : ""
-          }
+        : ""
+      }
 
           <!-- Custom Model Input -->
           <div class="flex gap-2">
@@ -6403,22 +6409,20 @@ class PersonaChatApp {
             </button>
           </div>
 
-          ${
-            customModels.length > 0
-              ? `
+          ${customModels.length > 0
+        ? `
             <div class="mt-3 space-y-1">
               <label class="text-xs text-gray-400">Custom Models</label>
               ${customModels
-                .map(
-                  (model, index) => `
+          .map(
+            (model, index) => `
                 <div class="flex items-center gap-2">
                   <button
                     type="button"
-                    class="model-select-btn flex-1 px-3 py-2 text-left text-sm rounded-lg transition-colors ${
-                      config.model === model
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                    }"
+                    class="model-select-btn flex-1 px-3 py-2 text-left text-sm rounded-lg transition-colors ${config.model === model
+                ? "bg-blue-600 text-white"
+                : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+              }"
                     data-model="${model}"
                   >
                     ${model}
@@ -6432,12 +6436,12 @@ class PersonaChatApp {
                   </button>
                 </div>
               `,
-                )
-                .join("")}
+          )
+          .join("")}
             </div>
           `
-              : ""
-          }
+        : ""
+      }
         </div>
       </div>
     `;
@@ -6867,7 +6871,7 @@ class PersonaChatApp {
   async getSystemPromptForChatType(chatType) {
     const promptFileMap = {
       'general': '/src/texts/mainChatMLPrompt.txt',
-      'normal': '/src/texts/mainChatMLPrompt.txt', 
+      'normal': '/src/texts/mainChatMLPrompt.txt',
       'group': '/src/texts/groupChatMLPrompt.txt',
       'open': '/src/texts/openChatMLPrompt.txt',
       'nai': '/src/texts/naiStickerPrompt.txt',
@@ -6876,7 +6880,7 @@ class PersonaChatApp {
     };
 
     const promptFile = promptFileMap[chatType] || promptFileMap['general'];
-    
+
     try {
       const response = await fetch(promptFile);
       if (response.ok) {
@@ -6885,7 +6889,7 @@ class PersonaChatApp {
     } catch (error) {
       console.warn(`Failed to load prompt file for chat type: ${chatType}`, error);
     }
-    
+
     return null;
   }
 
@@ -6932,9 +6936,8 @@ class PersonaChatApp {
     const dataUri =
       "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
 
-    const exportFileDefaultName = `arisutalk-debug-logs-${
-      new Date().toISOString().split("T")[0]
-    }.json`;
+    const exportFileDefaultName = `arisutalk-debug-logs-${new Date().toISOString().split("T")[0]
+      }.json`;
 
     const linkElement = document.createElement("a");
     linkElement.setAttribute("href", dataUri);
@@ -7049,11 +7052,11 @@ class PersonaChatApp {
   }
 
   // === SNS 관련 함수들 ===
-  
+
   getCharacterState(characterId) {
     return this.state.characterStates[characterId] || {
       affection: 0.2,
-      intimacy: 0.2,  
+      intimacy: 0.2,
       trust: 0.2,
       romantic_interest: 0
     };
@@ -7071,7 +7074,7 @@ class PersonaChatApp {
   checkSNSAccess(character, accessLevel) {
     let state = this.getCharacterState(character.id);
     const hypnosis = character.hypnosis || {};
-    
+
     // 최면이 활성화되고 호감도 조작이 활성화된 경우 최면 값 사용
     if (hypnosis.enabled && hypnosis.affection_override) {
       state = {
@@ -7081,11 +7084,11 @@ class PersonaChatApp {
         romantic_interest: hypnosis.romantic_interest !== null ? hypnosis.romantic_interest : state.romantic_interest
       };
     }
-    
-    
+
+
     // 최면 제어 우선 확인 (전체 권한)
     if (hypnosis.enabled) {
-      
+
       if (hypnosis.sns_full_access) {
         return true;
       }
@@ -7093,7 +7096,7 @@ class PersonaChatApp {
         return true;
       }
     }
-    
+
     // 접근 레벨별 요구사항 정의
     const requirements = {
       'main-public': { affection: 0, intimacy: 0, trust: 0, romantic_interest: 0 },        // 본계정: 상시 접근
@@ -7110,24 +7113,24 @@ class PersonaChatApp {
     if (accessLevel === 'main-public' || accessLevel === 'public') {
       return true;
     }
-    
+
     const required = requirements[accessLevel] || requirements.public;
-    
+
     const hasAccess = (
       state.affection >= required.affection &&
       state.intimacy >= required.intimacy &&
       state.trust >= required.trust &&
       state.romantic_interest >= required.romantic_interest
     );
-    
-    
+
+
     return hasAccess;
   }
 
   openSNSFeed(characterId) {
     const character = this.state.characters.find(char => char.id === characterId);
     if (!character) return;
-    
+
     this.setState({
       showSNSModal: true,
       selectedSNSCharacter: characterId,

@@ -81,7 +81,7 @@ For detailed information about specific aspects of the project:
 
 ## Recent Major Updates
 
-### v2.0 - UI Restructure & Internationalization (August 2025)
+### v2.0 - UI Restructure & Internationalization
 
 - Complete UI architecture overhaul with modular design
 - Comprehensive internationalization system implementation

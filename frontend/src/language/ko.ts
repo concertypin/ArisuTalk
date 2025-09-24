@@ -305,6 +305,10 @@ export const ko: LanguageStrings = {
     },
     uiSizePreviewMessage1: "안녕하세요! UI 크기 조절을 도와드릴게요.",
     uiSizePreviewMessage2: "네, 미리보기 좋네요!",
+    experimental: {
+              enableCorsProxy: "CORS 프록시 활성화",
+        enableCorsProxyInfo: "외부 API에 요청 시 CORS 프록시를 사용합니다. 일부 서비스에서는 이 옵션이 필요할 수 있습니다.",
+    }
   },
   sidebar: {
     startNewChat: "새로운 채팅 시작",
@@ -653,7 +657,7 @@ export const ko: LanguageStrings = {
     imageMessage: "이미지를 보냈습니다.",
     imageUnavailable: "(사용자가 이미지를 보냈지만 더 이상 사용할 수 없습니다)",
     unknownSticker: "알 수 없는 스티커",
-    stickerMessage: '[사용자가 "{{stickerName}}" 스티커를 보냄]',
+    stickerMessage: "[사용자가 \"{{stickerName}}\" 스티커를 보냄]",
     proactiveStart: "(SYSTEM: 당신이 이 대화를 시작합니다. 시작해주세요.)",
     apiError: "{{provider}} API 오류: {{status}} - {{error}}",
     invalidResponse: "{{provider}} API로부터 유효한 응답을 받지 못했습니다.",

@@ -9,6 +9,7 @@ import {
   handleModalChange,
   handleModalInput,
 } from "../handlers/modalHandlers.js";
+import { PersonaChatApp } from "../index.js";
 
 /**
  * Renders the desktop-specific settings UI
@@ -61,11 +62,11 @@ function renderDesktopSettingsHeader() {
                 </div>
                 <div>
                     <h3 class="text-xl font-semibold text-white">${t(
-                      "settings.title",
-                    )}</h3>
+    "settings.title",
+  )}</h3>
                     <p class="text-sm text-gray-400">${t(
-                      "settings.settingsDescription",
-                    )}</p>
+    "settings.settingsDescription",
+  )}</p>
                 </div>
             </div>
             <button id="close-settings-modal" class="p-2 hover:bg-gray-700 rounded-lg transition-colors group">
@@ -90,7 +91,7 @@ function renderDesktopSettingsNavigation(activePanel) {
     },
     {
       id: "nai",
-      icon: "image", 
+      icon: "image",
       label: "🧪 NAI 스티커 생성",
       description: "NovelAI 기반 스티커 자동 생성 설정",
     },
@@ -124,19 +125,18 @@ function renderDesktopSettingsNavigation(activePanel) {
         <div class="w-80 border-r border-gray-700 flex flex-col">
             <div class="p-4 border-b border-gray-700">
                 <h4 class="text-sm font-medium text-gray-400 uppercase tracking-wider">${t(
-                  "settings.settingsCategories",
-                )}</h4>
+    "settings.settingsCategories",
+  )}</h4>
             </div>
             <nav class="flex-1 p-4 space-y-2">
                 ${navItems
-                  .map(
-                    (item) => `
+      .map(
+        (item) => `
                     <button
-                        class="w-full text-left p-3 rounded-lg transition-all duration-200 flex items-start gap-3 ${
-                          activePanel === item.id
-                            ? "bg-blue-600/20 border border-blue-500/30 text-blue-400"
-                            : "hover:bg-gray-700/50 text-gray-300 hover:text-white"
-                        }"
+                        class="w-full text-left p-3 rounded-lg transition-all duration-200 flex items-start gap-3 ${activePanel === item.id
+            ? "bg-blue-600/20 border border-blue-500/30 text-blue-400"
+            : "hover:bg-gray-700/50 text-gray-300 hover:text-white"
+          }"
                         data-panel="${item.id}"
                         id="nav-${item.id}"
                     >
@@ -145,14 +145,13 @@ function renderDesktopSettingsNavigation(activePanel) {
                         </div>
                         <div class="min-w-0 flex-1">
                             <div class="font-medium text-sm">${item.label}</div>
-                            <div class="text-xs opacity-75 mt-0.5">${
-                              item.description
-                            }</div>
+                            <div class="text-xs opacity-75 mt-0.5">${item.description
+          }</div>
                         </div>
                     </button>
                 `,
-                  )
-                  .join("")}
+      )
+      .join("")}
             </nav>
         </div>
     `;
@@ -280,9 +279,8 @@ export function updateDesktopSettingsContent(app, panelId) {
     const inactiveClasses =
       "hover:bg-gray-700/50 text-gray-300 hover:text-white";
 
-    btn.className = `${baseClasses} ${
-      isActive ? activeClasses : inactiveClasses
-    }`;
+    btn.className = `${baseClasses} ${isActive ? activeClasses : inactiveClasses
+      }`;
   });
 
   // 아이콘 다시 생성
@@ -296,7 +294,7 @@ export function updateDesktopSettingsContent(app, panelId) {
 
 /**
  * 데스크톱 설정 UI 이벤트 리스너 설정
- * @param {Object} app - 애플리케이션 인스턴스
+ * @param {PersonaChatApp} app - 애플리케이션 인스턴스
  */
 export function setupDesktopSettingsEventListeners(app) {
   // DOM이 완전히 로드될 때까지 기다린 후 이벤트 리스너 설정
@@ -383,6 +381,25 @@ export function setupDesktopSettingsEventListeners(app) {
             alert(t("system.languageChangeMessage"));
             setTimeout(() => window.location.reload(), 500);
           }
+          return;
+        }
+
+        /**
+         * @type {HTMLInputElement}
+         */
+        const enableCorsProxyToggle = document.getElementById("settings-enable-cors-proxy");
+        if (enableCorsProxyToggle) {
+          const isChecked = enableCorsProxyToggle.checked;
+          app.setState({
+            settings: {
+              ...app.state.settings,
+              experimental: {
+                ...app.state.settings.experimental,
+                enableCorsProxy: isChecked,
+              }
+            }
+          });
+          console.log("CORS Proxy enabled:", isChecked);
           return;
         }
       });

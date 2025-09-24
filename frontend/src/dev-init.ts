@@ -1,7 +1,10 @@
 // frontend/src/dev-init.ts
 
-import { initializeDebugUtility } from './utils/debug-utils.ts';
-import { dumpLocalStorageToJson, dumpIndexedDBToJson } from './utils/dev-tools.ts';
+import { initializeDebugUtility } from "./utils/debug-utils.ts";
+import {
+  dumpLocalStorageToJson,
+  dumpIndexedDBToJson,
+} from "./utils/dev-tools.ts";
 
 initializeDebugUtility();
 
@@ -11,5 +14,7 @@ if (import.meta.env.DEV) {
     dumpLocalStorage: dumpLocalStorageToJson,
     dumpIndexedDB: dumpIndexedDBToJson,
   };
-  console.log("Dev tools (__dev__.dumpLocalStorage(), __dev__.dumpIndexedDB()) are available in the console.");
+  console.log(
+    "Dev tools (__dev__.dumpLocalStorage(), __dev__.dumpIndexedDB()) are available in the console.",
+  );
 }

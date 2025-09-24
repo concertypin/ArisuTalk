@@ -4,6 +4,7 @@ import {
   buildCharacterSheetPrompt,
 } from "../prompts/builder/promptBuilder.js";
 import { t } from "../i18n.js";
+import fetch from "../utils/fetch.js";
 
 const API_BASE_URL = "https://api.anthropic.com/v1";
 

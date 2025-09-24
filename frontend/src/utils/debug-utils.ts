@@ -1,5 +1,7 @@
 // frontend/src/utils/debug-utils.ts
 
+import fetch from "./fetch";
+
 /**
  * Clears all specified browser storage.
  */
@@ -98,7 +100,9 @@ export async function loadPreconfiguredData(
   try {
     const indexedDBResponse: Response = await fetch(indexedDBPath);
     if (indexedDBResponse.ok) {
-      const dbData: { [dbName: string]: { data: { key: string; value: any }[] } } = await indexedDBResponse.json();
+      const dbData: {
+        [dbName: string]: { data: { key: string; value: any }[] };
+      } = await indexedDBResponse.json();
 
       for (const dbName in dbData) {
         const dataToLoad = dbData[dbName].data;
@@ -113,32 +117,43 @@ export async function loadPreconfiguredData(
         request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
           const db: IDBDatabase = (event.target as IDBRequest).result;
           // Assuming a single object store named 'data' with 'key' as keyPath
-          if (!db.objectStoreNames.contains('data')) {
-            db.createObjectStore('data', { keyPath: 'key' });
+          if (!db.objectStoreNames.contains("data")) {
+            db.createObjectStore("data", { keyPath: "key" });
           }
         };
 
         request.onsuccess = (event: Event) => {
           const db: IDBDatabase = (event.target as IDBRequest).result;
-          const transaction: IDBTransaction = db.transaction(['data'], 'readwrite');
-          const objectStore: IDBObjectStore = transaction.objectStore('data');
+          const transaction: IDBTransaction = db.transaction(
+            ["data"],
+            "readwrite",
+          );
+          const objectStore: IDBObjectStore = transaction.objectStore("data");
 
-          dataToLoad.forEach(item => {
+          dataToLoad.forEach((item) => {
             objectStore.put(item); // Use put to add or update
           });
 
           transaction.oncomplete = () => {
-            console.log(`IndexedDB database '${dbName}' loaded with pre-configured data.`);
+            console.log(
+              `IndexedDB database '${dbName}' loaded with pre-configured data.`,
+            );
             db.close();
           };
           transaction.onerror = (transactionEvent: Event) => {
-            console.error(`Transaction error for '${dbName}':`, (transactionEvent.target as IDBRequest).error);
+            console.error(
+              `Transaction error for '${dbName}':`,
+              (transactionEvent.target as IDBRequest).error,
+            );
             db.close();
           };
         };
 
         request.onerror = (event: Event) => {
-          console.error(`Error opening IndexedDB database '${dbName}':`, (event.target as IDBRequest).error);
+          console.error(
+            `Error opening IndexedDB database '${dbName}':`,
+            (event.target as IDBRequest).error,
+          );
         };
       }
     } else {
@@ -158,7 +173,7 @@ export async function loadPreconfiguredData(
  * Initializes the debug utility in development mode.
  * When running in a development environment (import.meta.env.DEV is true),
  * this function automatically clears all browser data and loads pre-configured data.
-*/
+ */
 export async function initializeDebugUtility(): Promise<void> {
   // Check if in development mode and if a debug flag is set (e.g., via localStorage or another env variable)
   // For now, we'll just use import.meta.env.DEV
