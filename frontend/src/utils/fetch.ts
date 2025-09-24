@@ -71,7 +71,7 @@ function checkProxyNeeded(
 
     if (init?.corsProxy !== undefined) return init.corsProxy; // Explicitly set, use it.
 
-    if (window.personaApp?.state.settings.experimental.enableCorsProxy != true)
+    if (window.personaApp?.state.settings.experimental.enableCorsProxy !== true)
         return false; // User disabled CORS proxy in settings. Since this is experimental, respect it.
 
     if (!host || typeof host !== "string") {
