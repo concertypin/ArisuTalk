@@ -53,7 +53,10 @@ export default async function fetch(
         return window.fetch(proxiedUrl.toString(), {
             ...init,
             headers,
-        }).catch(() => window.fetch(input, init)) // Fallback to direct fetch on error
+        }).catch((err) => {
+            console.error("Proxy fetch failed, falling back to direct fetch:", err);
+            return window.fetch(input, init);
+        }) // Fallback to direct fetch on error
     }
     // No proxy, just fetch directly.
     return window.fetch(input, init);
