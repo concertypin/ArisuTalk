@@ -163,7 +163,14 @@
         {:else}
             <div class="grid grid-cols-4 gap-2">
                 {#each $userStickers as sticker (sticker.id)}
-                    <div on:click={() => selectSticker(sticker)} class="relative group aspect-square flex items-center justify-center p-1 rounded-lg hover:bg-gray-600 cursor-pointer bg-gray-700/50">
+                    <div 
+                        on:click={() => selectSticker(sticker)} 
+                        on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') selectSticker(sticker); }}
+                        role="button"
+                        tabindex="0"
+                        class="relative group aspect-square flex items-center justify-center p-1 rounded-lg hover:bg-gray-600 cursor-pointer bg-gray-700/50"
+                        aria-label="Select sticker {sticker.name}"
+                    >
                         {#if sticker.type?.startsWith('video')}
                             <video class="w-full h-full object-contain" muted loop autoplay src={sticker.data}></video>
                         {:else if sticker.type?.startsWith('audio')}

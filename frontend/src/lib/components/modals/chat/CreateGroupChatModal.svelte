@@ -1,4 +1,5 @@
 <script>
+  import { onMount, onDestroy } from 'svelte';
   import { t } from '../../../../i18n.js';
   import { characters } from '../../../stores/character';
   import { groupChats, selectedChatId } from '../../../stores/chat';
@@ -55,11 +56,32 @@
     closeModal();
   }
 
+  function handleKeydown(event) {
+    if (event.key === 'Escape') {
+      closeModal();
+    }
+  }
+
+  onMount(() => {
+    window.addEventListener('keydown', handleKeydown);
+  });
+
+  onDestroy(() => {
+    window.removeEventListener('keydown', handleKeydown);
+  });
+
 </script>
 
 {#if $isCreateGroupChatModalVisible}
-  <div transition:fade={{ duration: 200 }} class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" on:click={closeModal}>
-    <div class="bg-gray-800 rounded-2xl w-full max-w-md mx-auto my-auto flex flex-col max-h-[90vh]" on:click|stopPropagation>
+  <div
+    transition:fade={{ duration: 200 }}
+    class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+    on:click={closeModal}
+    role="button"
+    tabindex="0"
+    on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); closeModal(); } }}
+  >
+    <div role="dialog" aria-modal="true" tabindex="0" class="bg-gray-800 rounded-2xl w-full max-w-md mx-auto my-auto flex flex-col max-h-[90vh]" on:click|stopPropagation on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); } }}>
       <div class="flex items-center justify-between p-6 border-b border-gray-700 shrink-0">
         <h3 class="text-xl font-semibold text-white flex items-center gap-3">
           <Users class="w-6 h-6" />
@@ -71,12 +93,12 @@
       </div>
       <div class="p-6 space-y-6 overflow-y-auto">
         <div>
-          <label class="text-sm font-medium text-gray-300 mb-2 block">{t("groupChat.groupChatName")}</label>
-          <input bind:value={groupName} type="text" placeholder={t("ui.groupChatNamePlaceholder")} class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" />
+          <label for="group-name" class="text-sm font-medium text-gray-300 mb-2 block">{t("groupChat.groupChatName")}</label>
+          <input id="group-name" bind:value={groupName} type="text" placeholder={t("ui.groupChatNamePlaceholder")} class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" />
         </div>
         
-        <div>
-          <label class="text-sm font-medium text-gray-300 mb-3 block">{t("groupChat.selectParticipants")}</label>
+        <fieldset>
+          <legend class="text-sm font-medium text-gray-300 mb-3 block">{t("groupChat.selectParticipants")}</legend>
           <div class="space-y-2 max-h-60 overflow-y-auto character-list-scrollbar pr-2">
             {#each $characters as character (character.id)}
               <label class="flex items-center space-x-3 p-3 hover:bg-gray-700 rounded-lg cursor-pointer group">
@@ -92,7 +114,7 @@
             {/each}
           </div>
           <p class="text-xs text-gray-500 mt-2">{t("groupChat.minimumParticipants")}</p>
-        </div>
+        </fieldset>
       </div>
       <div class="p-6 mt-auto border-t border-gray-700 shrink-0 flex justify-end space-x-3">
         <button on:click={closeModal} class="flex-1 py-2.5 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-center">{t("common.cancel")}</button>
@@ -101,5 +123,3 @@
     </div>
   </div>
 {/if}
-
-

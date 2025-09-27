@@ -1,4 +1,5 @@
 <script>
+  import { onMount, onDestroy } from 'svelte';
   import { t } from '../../../../i18n.js';
   import { isPromptModalVisible } from '../../../stores/ui';
   import { prompts } from '../../../stores/prompts';
@@ -44,13 +45,30 @@
       }
   }
 
+  function handleKeydown(event) {
+    if (event.key === 'Escape') {
+      isPromptModalVisible.set(false);
+    }
+  }
+
+  onMount(() => {
+    window.addEventListener('keydown', handleKeydown);
+  });
+
+  onDestroy(() => {
+    window.removeEventListener('keydown', handleKeydown);
+  });
+
 </script>
 
 {#if $isPromptModalVisible}
-<div transition:fade={{ duration: 200 }} class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" on:click={() => isPromptModalVisible.set(false)}>
-    <div class="bg-gray-800 rounded-2xl w-full max-w-4xl mx-4 flex flex-col max-h-[90vh]" on:click|stopPropagation>
+<div 
+  transition:fade={{ duration: 200 }} 
+  class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+>
+    <div role="dialog" aria-modal="true" tabindex="0" aria-labelledby="prompt-modal-title" class="bg-gray-800 rounded-2xl w-full max-w-4xl mx-4 flex flex-col max-h-[90vh]" on:click|stopPropagation on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); } }}>
         <div class="flex items-center justify-between p-6 border-b border-gray-700 shrink-0">
-            <h3 class="text-lg font-semibold text-white">{t("promptModal.title")}</h3>
+            <h3 id="prompt-modal-title" class="text-lg font-semibold text-white">{t("promptModal.title")}</h3>
             <button on:click={() => isPromptModalVisible.set(false)} class="p-1 hover:bg-gray-700 rounded-full"><X class="w-5 h-5" /></button>
         </div>
         <div class="p-6 space-y-6 overflow-y-auto">

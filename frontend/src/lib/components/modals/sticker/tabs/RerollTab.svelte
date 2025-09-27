@@ -1,4 +1,3 @@
-
 <script>
   import { createEventDispatcher } from 'svelte';
   import { t } from '../../../../../i18n.js';
@@ -6,7 +5,6 @@
 
   export let rerollData = null;
   export let sticker = null;
-  export let index = null;
   export let rerollResult = null;
   export let rerolling = false;
 
@@ -94,22 +92,22 @@
       <h4 class="text-sm font-medium text-white mb-2">{t("stickerPreview.rerollSettings")}</h4>
       <div class="bg-gray-700 rounded-lg p-3 space-y-3">
         <div>
-          <label class="block text-xs text-gray-300 mb-1">{t("stickerPreview.prompt")}:</label>
-          <textarea bind:value={rerollPrompt} class="w-full px-2 py-1 bg-gray-600 text-white rounded text-xs resize-none" rows="2" placeholder={t("stickerPreview.enterPrompt")}></textarea>
+          <label for="reroll-prompt" class="block text-xs text-gray-300 mb-1">{t("stickerPreview.prompt")}:</label>
+          <textarea id="reroll-prompt" bind:value={rerollPrompt} class="w-full px-2 py-1 bg-gray-600 text-white rounded text-xs resize-none" rows="2" placeholder={t("stickerPreview.enterPrompt")}></textarea>
         </div>
 
         <div class="grid grid-cols-3 gap-2">
           <div>
-            <label class="block text-xs text-gray-300 mb-1">{t("stickerPreview.steps")}:</label>
-            <input bind:value={rerollSteps} type="number" min="1" max="50" class="w-full px-2 py-1 bg-gray-600 text-white rounded text-xs">
+            <label for="reroll-steps" class="block text-xs text-gray-300 mb-1">{t("stickerPreview.steps")}:</label>
+            <input id="reroll-steps" bind:value={rerollSteps} type="number" min="1" max="50" class="w-full px-2 py-1 bg-gray-600 text-white rounded text-xs">
           </div>
           <div>
-            <label class="block text-xs text-gray-300 mb-1">{t("stickerPreview.scale")}:</label>
-            <input bind:value={rerollScale} type="number" min="1" max="20" step="0.5" class="w-full px-2 py-1 bg-gray-600 text-white rounded text-xs">
+            <label for="reroll-scale" class="block text-xs text-gray-300 mb-1">{t("stickerPreview.scale")}:</label>
+            <input id="reroll-scale" bind:value={rerollScale} type="number" min="1" max="20" step="0.5" class="w-full px-2 py-1 bg-gray-600 text-white rounded text-xs">
           </div>
           <div>
-            <label class="block text-xs text-gray-300 mb-1">{t("stickerPreview.imageSize")}:</label>
-            <select bind:value={rerollSize} class="w-full px-2 py-1 bg-gray-600 text-white rounded text-xs">
+            <label for="reroll-size" class="block text-xs text-gray-300 mb-1">{t("stickerPreview.imageSize")}:</label>
+            <select id="reroll-size" bind:value={rerollSize} class="w-full px-2 py-1 bg-gray-600 text-white rounded text-xs">
               <option value="portrait">세로형</option>
               <option value="square">정사각형</option>
               <option value="landscape">가로형</option>

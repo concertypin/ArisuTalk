@@ -1,10 +1,8 @@
-
 <script>
   import { t } from '../../../../../i18n.js';
   import { Hash, Lock, EyeOff } from 'lucide-svelte';
 
   export let character = null;
-  export let isSecretMode = false;
 
   let allTags = [];
 

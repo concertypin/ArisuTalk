@@ -1,4 +1,3 @@
-
 <script>
   import { t } from '../../../../../i18n.js';
   import { createEventDispatcher } from 'svelte';
@@ -71,7 +70,7 @@
   {/if}
   
   {#if post.image}
-    <img src={post.image} alt="Post image" class="w-full h-64 object-cover" />
+    <img src={post.image} alt="Post content" class="w-full h-64 object-cover" />
   {/if}
   
   <div class="p-4">

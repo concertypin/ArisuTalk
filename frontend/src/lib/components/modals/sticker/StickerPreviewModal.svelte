@@ -1,21 +1,17 @@
-
 <script>
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onMount, onDestroy } from 'svelte';
   import { fade } from 'svelte/transition';
-  import { X } from 'lucide-svelte';
+  import { X, Image, Hash, Download, Copy, RefreshCw } from 'lucide-svelte';
   import { t } from '../../../../i18n.js';
-  import PreviewTab from '../sticker/tabs/PreviewTab.svelte';
-  import ExifTab from '../sticker/tabs/ExifTab.svelte';
-  import RerollTab from '../sticker/tabs/RerollTab.svelte';
-  import ActionsTab from '../sticker/tabs/ActionsTab.svelte';
+  import PreviewTab from './tabs/PreviewTab.svelte';
+  import RerollTab from './tabs/RerollTab.svelte';
+  import ActionsTab from './tabs/ActionsTab.svelte';
 
   export let isOpen = false;
   export let sticker = null;
   export let index = null;
 
   let activeTab = 'preview';
-  let exifData = null;
-  let rerollData = null;
 
   const dispatch = createEventDispatcher();
 
@@ -23,47 +19,77 @@
     dispatch('close');
   }
 
-  // TODO: Fetch EXIF and reroll data when the modal is opened
+  function handleSave(event) {
+    dispatch('save', event.detail);
+  }
+
+  function handleDelete() {
+    dispatch('delete');
+  }
+
+  function handleCopy() {
+    dispatch('copy');
+  }
+
+  function handleDownload() {
+    dispatch('download');
+  }
+
+  function handleReroll(event) {
+    dispatch('reroll', event.detail);
+  }
+
+  function handleKeydown(event) {
+    if (event.key === 'Escape') {
+      closeModal();
+    }
+  }
+
+  onMount(() => {
+    window.addEventListener('keydown', handleKeydown);
+  });
+
+  onDestroy(() => {
+    window.removeEventListener('keydown', handleKeydown);
+  });
 
 </script>
 
 {#if isOpen && sticker}
-  <div transition:fade={{ duration: 200 }} class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[9999]" on:click={closeModal}>
-    <div class="bg-gray-800 rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" on:click|stopPropagation>
-      <div class="flex items-center justify-between mb-6">
-        <h3 class="text-lg font-semibold text-white">{t("stickerPreview.title")}</h3>
-        <button on:click={closeModal} class="p-2 text-gray-400 hover:text-white transition-colors">
-          <X class="w-5 h-5" />
-        </button>
+  <div 
+    transition:fade={{ duration: 200 }} 
+    class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 w-full h-full"
+  >
+    <div role="dialog" aria-modal="true" tabindex="0" aria-labelledby="sticker-preview-title" class="bg-gray-800 rounded-2xl w-full max-w-4xl mx-4 flex flex-col max-h-[90vh]" on:click|stopPropagation on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); } }}>
+      <div class="flex items-center justify-between p-6 border-b border-gray-700 shrink-0">
+        <h3 id="sticker-preview-title" class="text-lg font-semibold text-white">{t("stickerPreview.title")}</h3>
+        <button on:click={closeModal} class="p-1 hover:bg-gray-700 rounded-full"><X class="w-5 h-5" /></button>
       </div>
-
-      <div class="flex border-b border-gray-600 mb-4">
-        <button on:click={() => activeTab = 'preview'} class="px-4 py-2 text-sm font-medium transition-colors {activeTab === 'preview' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-white'}">
-          {t("stickerPreview.tabs.preview")}
-        </button>
-        {#if sticker.type && sticker.type.startsWith('image/')}
-          <button on:click={() => activeTab = 'exif'} class="px-4 py-2 text-sm font-medium transition-colors {activeTab === 'exif' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-white'}">
-            {t("stickerPreview.tabs.exif")}
+      
+      <div class="flex flex-1 min-h-0">
+        <!-- Left Panel: Tabs -->
+        <div class="w-56 border-r border-gray-700 bg-gray-800/50 p-4 flex flex-col gap-2">
+          <button on:click={() => activeTab = 'preview'} class="w-full text-left px-3 py-2 rounded-lg text-sm flex items-center gap-3 {activeTab === 'preview' ? 'bg-blue-600 text-white' : 'hover:bg-gray-700'}">
+            <Image class="w-4 h-4" /> {t("stickerPreview.preview")}
           </button>
-          <button on:click={() => activeTab = 'reroll'} class="px-4 py-2 text-sm font-medium transition-colors {activeTab === 'reroll' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-white'}">
-            {t("stickerPreview.tabs.reroll")}
+          <button on:click={() => activeTab = 'reroll'} class="w-full text-left px-3 py-2 rounded-lg text-sm flex items-center gap-3 {activeTab === 'reroll' ? 'bg-blue-600 text-white' : 'hover:bg-gray-700'}" disabled={!sticker.generated}>
+            <RefreshCw class="w-4 h-4" /> {t("stickerPreview.reroll")}
           </button>
-        {/if}
-        <button on:click={() => activeTab = 'actions'} class="px-4 py-2 text-sm font-medium transition-colors {activeTab === 'actions' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-white'}">
-          {t("stickerPreview.tabs.actions")}
-        </button>
-      </div>
+          <button on:click={() => activeTab = 'actions'} class="w-full text-left px-3 py-2 rounded-lg text-sm flex items-center gap-3 {activeTab === 'actions' ? 'bg-blue-600 text-white' : 'hover:bg-gray-700'}">
+            <Download class="w-4 h-4" /> {t("stickerPreview.actions")}
+          </button>
+        </div>
 
-      <div>
-        {#if activeTab === 'preview'}
-          <PreviewTab {sticker} on:save={(e) => dispatch('save', e.detail)} />
-        {:else if activeTab === 'exif'}
-          <ExifTab {exifData} />
-        {:else if activeTab === 'reroll'}
-          <RerollTab {rerollData} {sticker} {index} on:reroll={(e) => dispatch('reroll', e.detail)} />
-        {:else if activeTab === 'actions'}
-          <ActionsTab {sticker} {index} on:delete={() => dispatch('delete')} on:copy={() => dispatch('copy')} on:download={() => dispatch('download')} />
-        {/if}
+        <!-- Right Panel: Content -->
+        <div class="flex-1 p-6 overflow-y-auto">
+          {#if activeTab === 'preview'}
+            <PreviewTab {sticker} on:save={handleSave} />
+          {:else if activeTab === 'reroll'}
+            <RerollTab {sticker} {index} on:reroll={handleReroll} />
+          {:else if activeTab === 'actions'}
+            <ActionsTab {sticker} {index} on:delete={handleDelete} on:copy={handleCopy} on:download={handleDownload} />
+          {/if}
+        </div>
       </div>
     </div>
   </div>

@@ -71,11 +71,12 @@
       </h4>
       <div class="space-y-3">
         <div>
-          <label class="block text-xs font-medium text-gray-300 mb-1">
+          <label for="nai-api-key-mobile" class="block text-xs font-medium text-gray-300 mb-1">
             {t("naiSettings.apiKey")}
           </label>
           <div class="flex gap-2">
             <input 
+              id="nai-api-key-mobile"
               bind:value={$settings.naiSettings.apiKey}
               type={apiKeyVisible ? 'text' : 'password'} 
               placeholder={t("naiSettings.apiKeyPlaceholder")}
@@ -116,16 +117,16 @@
       </h4>
       <div class="space-y-3">
         <div>
-          <label class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.model")}</label>
-          <select bind:value={$settings.naiSettings.model} class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-green-500/50 text-sm">
+          <label for="nai-model-mobile" class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.model")}</label>
+          <select id="nai-model-mobile" bind:value={$settings.naiSettings.model} class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-green-500/50 text-sm">
             {#each Object.entries(NovelAIClient.MODELS) as [modelId, modelInfo]}
               <option value={modelId}>{modelInfo.name} ({modelInfo.version})</option>
             {/each}
           </select>
         </div>
         <div>
-          <label class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.imageSize")}</label>
-          <select bind:value={$settings.naiSettings.preferredSize} class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-green-500/50 text-sm">
+          <label for="nai-image-size-mobile" class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.imageSize")}</label>
+          <select id="nai-image-size-mobile" bind:value={$settings.naiSettings.preferredSize} class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-green-500/50 text-sm">
             <option value="square">{t("naiSettings.imageSizeSquare")}</option>
             <option value="portrait">{t("naiSettings.imageSizePortrait")}</option>
             <option value="landscape">{t("naiSettings.imageSizeLandscape")}</option>
@@ -134,37 +135,37 @@
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.minDelayTime")}</label>
-            <input bind:value={minDelaySeconds} type="number" min="10" max="60" class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-green-500/50 text-sm">
+            <label for="nai-min-delay-mobile" class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.minDelayTime")}</label>
+            <input id="nai-min-delay-mobile" bind:value={minDelaySeconds} type="number" min="10" max="60" class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-green-500/50 text-sm">
           </div>
           <div>
-            <label class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.maxAdditionalTime")}</label>
-            <input bind:value={maxAdditionalDelaySeconds} type="number" min="0" max="30" class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-green-500/50 text-sm">
+            <label for="nai-max-additional-delay-mobile" class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.maxAdditionalTime")}</label>
+            <input id="nai-max-additional-delay-mobile" bind:value={maxAdditionalDelaySeconds} type="number" min="0" max="30" class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-green-500/50 text-sm">
           </div>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.steps")}</label>
-            <input bind:value={$settings.naiSettings.steps} type="range" min="1" max="50" class="w-full">
+            <label for="nai-steps-mobile" class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.steps")}</label>
+            <input id="nai-steps-mobile" bind:value={$settings.naiSettings.steps} type="range" min="1" max="50" class="w-full">
             <div class="text-center text-xs text-gray-400 mt-1">{$settings.naiSettings.steps}</div>
           </div>
           <div>
-            <label class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.scale")}</label>
-            <input bind:value={$settings.naiSettings.scale} type="range" min="1" max="30" step="0.5" class="w-full">
+            <label for="nai-scale-mobile" class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.scale")}</label>
+            <input id="nai-scale-mobile" bind:value={$settings.naiSettings.scale} type="range" min="1" max="30" step="0.5" class="w-full">
             <div class="text-center text-xs text-gray-400 mt-1">{$settings.naiSettings.scale}</div>
           </div>
         </div>
         <div>
-          <label class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.sampler")}</label>
-          <select bind:value={$settings.naiSettings.sampler} class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-green-500/50 text-sm">
+          <label for="nai-sampler-mobile" class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.sampler")}</label>
+          <select id="nai-sampler-mobile" bind:value={$settings.naiSettings.sampler} class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-green-500/50 text-sm">
             {#each NovelAIClient.SAMPLERS as samplerOption}
               <option value={samplerOption}>{samplerOption.replace(/_/g, " ").toUpperCase()}</option>
             {/each}
           </select>
         </div>
         <div>
-          <label class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.noiseSchedule")}</label>
-          <select bind:value={$settings.naiSettings.noise_schedule} class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-green-500/50 text-sm">
+          <label for="nai-noise-schedule-mobile" class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.noiseSchedule")}</label>
+          <select id="nai-noise-schedule-mobile" bind:value={$settings.naiSettings.noise_schedule} class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-green-500/50 text-sm">
             {#each NovelAIClient.NOISE_SCHEDULES as schedule}
               <option value={schedule}>{schedule.charAt(0).toUpperCase() + schedule.slice(1)}</option>
             {/each}
@@ -182,21 +183,21 @@
         <div class="space-y-4">
             <div class="flex items-center justify-between">
                 <div>
-                    <label class="text-sm font-medium text-gray-300">{t("naiSettings.useCharacterPrompts")}</label>
+                    <label for="nai-use-character-prompts-mobile" class="text-sm font-medium text-gray-300">{t("naiSettings.useCharacterPrompts")}</label>
                     <p class="text-xs text-gray-400 mt-1">{t("naiSettings.useCharacterPromptsHelp")}</p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
-                    <input bind:checked={$settings.naiSettings.useCharacterPrompts} type="checkbox" class="sr-only peer">
+                    <input id="nai-use-character-prompts-mobile" bind:checked={$settings.naiSettings.useCharacterPrompts} type="checkbox" class="sr-only peer">
                     <div class="w-11 h-6 bg-gray-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"></div>
                 </label>
             </div>
             <div class="flex items-center justify-between">
                 <div>
-                    <label class="text-sm font-medium text-gray-300">{t("naiSettings.vibeTransfer")}</label>
+                    <label for="nai-vibe-transfer-mobile" class="text-sm font-medium text-gray-300">{t("naiSettings.vibeTransfer")}</label>
                     <p class="text-xs text-gray-400 mt-1">{t("naiSettings.vibeTransferHelp")}</p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
-                    <input bind:checked={$settings.naiSettings.vibeTransferEnabled} type="checkbox" class="sr-only peer">
+                    <input id="nai-vibe-transfer-mobile" bind:checked={$settings.naiSettings.vibeTransferEnabled} type="checkbox" class="sr-only peer">
                     <div class="w-11 h-6 bg-gray-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"></div>
                 </label>
             </div>
@@ -204,19 +205,19 @@
             <div class="space-y-3 pt-3 border-t border-gray-700">
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.vibeStrength")}</label>
-                        <input bind:value={$settings.naiSettings.vibeTransferStrength} type="range" min="0" max="1" step="0.1" class="w-full">
+                        <label for="nai-vibe-strength-mobile" class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.vibeStrength")}</label>
+                        <input id="nai-vibe-strength-mobile" bind:value={$settings.naiSettings.vibeTransferStrength} type="range" min="0" max="1" step="0.1" class="w-full">
                         <div class="text-center text-xs text-gray-400 mt-1">{$settings.naiSettings.vibeTransferStrength}</div>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.vibeInfoExtracted")}</label>
-                        <input bind:value={$settings.naiSettings.vibeTransferInformationExtracted} type="range" min="0" max="1" step="0.1" class="w-full">
+                        <label for="nai-vibe-info-extracted-mobile" class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.vibeInfoExtracted")}</label>
+                        <input id="nai-vibe-info-extracted-mobile" bind:value={$settings.naiSettings.vibeTransferInformationExtracted} type="range" min="0" max="1" step="0.1" class="w-full">
                         <div class="text-center text-xs text-gray-400 mt-1">{$settings.naiSettings.vibeTransferInformationExtracted}</div>
                     </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.vibeImageUpload")}</label>
-                    <input type="file" accept="image/*" class="w-full text-xs text-gray-300 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-gray-700 file:text-gray-300 hover:file:bg-gray-600">
+                    <label for="nai-vibe-image-upload-mobile" class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.vibeImageUpload")}</label>
+                    <input id="nai-vibe-image-upload-mobile" type="file" accept="image/*" class="w-full text-xs text-gray-300 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-gray-700 file:text-gray-300 hover:file:bg-gray-600">
                 </div>
             </div>
             {/if}
@@ -242,13 +243,13 @@
             </div>
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.cfgRescale")}</label>
-                    <input bind:value={$settings.naiSettings.cfg_rescale} type="range" min="0" max="1" step="0.05" class="w-full">
+                    <label for="nai-cfg-rescale-mobile" class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.cfgRescale")}</label>
+                    <input id="nai-cfg-rescale-mobile" bind:value={$settings.naiSettings.cfg_rescale} type="range" min="0" max="1" step="0.05" class="w-full">
                     <div class="text-center text-xs text-gray-400 mt-1">{$settings.naiSettings.cfg_rescale}</div>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.uncondScale")}</label>
-                    <input bind:value={$settings.naiSettings.uncond_scale} type="range" min="0" max="2" step="0.1" class="w-full">
+                    <label for="nai-uncond-scale-mobile" class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.uncondScale")}</label>
+                    <input id="nai-uncond-scale-mobile" bind:value={$settings.naiSettings.uncond_scale} type="range" min="0" max="2" step="0.1" class="w-full">
                     <div class="text-center text-xs text-gray-400 mt-1">{$settings.naiSettings.uncond_scale}</div>
                 </div>
             </div>
@@ -263,12 +264,12 @@
         </h4>
         <div class="space-y-3">
             <div>
-                <label class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.customPositive")}</label>
-                <textarea bind:value={$settings.naiSettings.customPositivePrompt} placeholder={t("naiSettings.customPositivePlaceholder")} class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-purple-500/50 resize-none text-sm" rows="3"></textarea>
+                <label for="nai-custom-positive-mobile" class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.customPositive")}</label>
+                <textarea id="nai-custom-positive-mobile" bind:value={$settings.naiSettings.customPositivePrompt} placeholder={t("naiSettings.customPositivePlaceholder")} class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-purple-500/50 resize-none text-sm" rows="3"></textarea>
             </div>
             <div>
-                <label class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.customNegative")}</label>
-                <textarea bind:value={$settings.naiSettings.customNegativePrompt} placeholder={t("naiSettings.customNegativePlaceholder")} class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-purple-500/50 resize-none text-sm" rows="3"></textarea>
+                <label for="nai-custom-negative-mobile" class="block text-xs font-medium text-gray-300 mb-1">{t("naiSettings.customNegative")}</label>
+                <textarea id="nai-custom-negative-mobile" bind:value={$settings.naiSettings.customNegativePrompt} placeholder={t("naiSettings.customNegativePlaceholder")} class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-purple-500/50 resize-none text-sm" rows="3"></textarea>
             </div>
         </div>
     </div>

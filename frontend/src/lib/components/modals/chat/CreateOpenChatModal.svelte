@@ -1,4 +1,5 @@
 <script>
+  import { onMount, onDestroy } from 'svelte';
   import { get } from 'svelte/store';
   import { t } from '../../../../i18n.js';
   import { openChats, selectedChatId } from '../../../stores/chat';
@@ -24,7 +25,7 @@
     const newOpenChat = {
       id: newChatId,
       name: chatName,
-      type: 'open',
+      type: 'open', 
       createdAt: Date.now(),
       currentParticipants: [], // Initially empty, managed by openChatService
       participantHistory: [],
@@ -38,13 +39,30 @@
     selectedChatId.set(newChatId);
     closeModal();
   }
+
+  function handleKeydown(event) {
+    if (event.key === 'Escape') {
+      closeModal();
+    }
+  }
+
+  onMount(() => {
+    window.addEventListener('keydown', handleKeydown);
+  });
+
+  onDestroy(() => {
+    window.removeEventListener('keydown', handleKeydown);
+  });
 </script>
 
 {#if $isCreateOpenChatModalVisible}
-  <div transition:fade={{ duration: 200 }} class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" on:click={closeModal}>
-    <div class="bg-gray-800 rounded-2xl w-full max-w-md mx-auto my-auto flex flex-col max-h-[90vh]" on:click|stopPropagation>
+  <div 
+    transition:fade={{ duration: 200 }} 
+    class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+  >
+    <div role="dialog" aria-modal="true" tabindex="0" aria-labelledby="create-open-chat-title" class="bg-gray-800 rounded-2xl w-full max-w-md mx-auto my-auto flex flex-col max-h-[90vh]" on:click|stopPropagation on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); } }}>
       <div class="flex items-center justify-between p-6 border-b border-gray-700 shrink-0">
-        <h3 class="text-xl font-semibold text-white flex items-center gap-3">
+        <h3 id="create-open-chat-title" class="text-xl font-semibold text-white flex items-center gap-3">
             <Globe class="w-6 h-6" />
             {t("openChat.createOpenChat")}
         </h3>
@@ -54,8 +72,8 @@
       </div>
       <div class="p-6 space-y-6 overflow-y-auto">
         <div>
-          <label class="text-sm font-medium text-gray-300 mb-2 block">{t("openChat.openChatName")}</label>
-          <input bind:value={chatName} type="text" placeholder={t("openChat.openChatNamePlaceholder")} class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" />
+          <label for="open-chat-name" class="text-sm font-medium text-gray-300 mb-2 block">{t("openChat.openChatName")}</label>
+          <input id="open-chat-name" bind:value={chatName} type="text" placeholder={t("openChat.openChatNamePlaceholder")} class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" />
         </div>
         
         <div class="bg-gray-900/50 rounded-lg p-4">

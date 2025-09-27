@@ -1,4 +1,5 @@
 <script>
+  import { onMount, onDestroy } from 'svelte';
   import { t } from '../../../../i18n.js';
   import { isMasterPasswordModalVisible } from '../../../stores/ui';
   import { validatePassword, generateMasterPassword } from '../../../utils/crypto.js';
@@ -60,6 +61,20 @@
       isMasterPasswordModalVisible.set(false);
   }
 
+  function handleKeydown(event) {
+    if (event.key === 'Escape') {
+      handleSkip();
+    }
+  }
+
+  onMount(() => {
+    window.addEventListener('keydown', handleKeydown);
+  });
+
+  onDestroy(() => {
+    window.removeEventListener('keydown', handleKeydown);
+  });
+
   const strengthColors = [
     "text-red-400",
     "text-yellow-400",
@@ -76,11 +91,14 @@
 </script>
 
 {#if $isMasterPasswordModalVisible}
-<div transition:fade={{ duration: 200 }} class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" on:click={handleSkip}>
-    <div class="bg-gray-800 rounded-lg w-full max-w-lg" on:click|stopPropagation>
+<div 
+  transition:fade={{ duration: 200 }} 
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 w-full h-full"
+>
+    <div role="dialog" aria-modal="true" tabindex="0" aria-labelledby="master-password-title" class="bg-gray-800 rounded-lg w-full max-w-lg" on:click|stopPropagation on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); } }}>
         <!-- Header -->
         <div class="p-6 border-b border-gray-600">
-            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+            <h2 id="master-password-title" class="text-xl font-bold text-white flex items-center gap-2">
                 <ShieldCheck class="w-5 h-5" />
                 {t("security.encryptionSetupTitle")}
             </h2>

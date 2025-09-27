@@ -23,11 +23,12 @@
         </h4>
         <div class="space-y-4">
             <div class="relative">
-                <label class="flex items-center justify-between text-sm font-medium text-gray-300 mb-3">
+                <label for="font-scale-slider" class="flex items-center justify-between text-sm font-medium text-gray-300 mb-3">
                     <span>{t("settings.uiScale")}</span>
                     <span class="text-blue-400 font-mono text-sm">{Math.round($settings.fontScale * 100)}%</span>
                 </label>
                 <input 
+                    id="font-scale-slider"
                     type="range" 
                     min="0.8" 
                     max="1.4" 

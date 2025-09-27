@@ -1,4 +1,3 @@
-
 <script>
   import { t } from '../../../../i18n.js';
   import { get } from 'svelte/store';
@@ -261,9 +260,16 @@
                 </div>
             {:else}
                 {#each stickers as sticker, i (sticker.id)}
-                    <div on:click={() => openPreviewModal(sticker, i)} class="sticker-item relative group aspect-square flex items-center justify-center p-1 rounded-lg bg-gray-700/50 cursor-pointer">
+                    <div 
+                        on:click={() => openPreviewModal(sticker, i)} 
+                        on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') openPreviewModal(sticker, i); }}
+                        role="button"
+                        tabindex="0"
+                        class="sticker-item relative group aspect-square flex items-center justify-center p-1 rounded-lg bg-gray-700/50"
+                        aria-label="Open sticker preview for {sticker.name}"
+                    >
                         {#if selectionMode}
-                            <div class="absolute top-0 left-0 w-full h-full bg-black/30 flex items-center justify-center z-10" on:click|stopPropagation={() => {
+                            <button class="absolute top-0 left-0 w-full h-full bg-black/30 flex items-center justify-center z-10" on:click|stopPropagation={() => {
                                 const index = selectedStickers.indexOf(sticker.id);
                                 if (index > -1) {
                                     selectedStickers.splice(index, 1);
@@ -271,13 +277,13 @@
                                 } else {
                                     selectedStickers = [...selectedStickers, sticker.id];
                                 }
-                            }}>
+                            }} aria-label="Select sticker">
                                 <div class="w-6 h-6 rounded-full flex items-center justify-center transition-all {selectedStickers.includes(sticker.id) ? 'bg-blue-600' : 'bg-gray-900/50 border-2 border-white'}">
                                     {#if selectedStickers.includes(sticker.id)}
                                         <Check class="w-4 h-4 text-white" />
                                     {/if}
                                 </div>
-                            </div>
+                            </button>
                         {/if}
                         
                         {#if sticker.type?.startsWith('video')}

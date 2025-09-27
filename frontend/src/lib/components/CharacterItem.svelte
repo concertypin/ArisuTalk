@@ -42,7 +42,14 @@
 
 </script>
 
-<div class="character-list-item p-3 rounded-full cursor-pointer hover:bg-gray-800/60 transition-colors duration-200" on:click={handleSelect}>
+<div 
+  class="character-list-item p-3 rounded-full cursor-pointer hover:bg-gray-800/60 transition-colors duration-200" 
+  on:click={handleSelect}
+  on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSelect(); }}
+  role="button"
+  tabindex="0"
+  aria-label="Select character {character.name}"
+>
     <div class="flex items-center space-x-5">
         <div class="character-avatar relative">
             <Avatar {character} size="lg" />

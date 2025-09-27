@@ -1,4 +1,3 @@
-
 <script>
   import { t } from '../../../i18n.js';
   import { groupChats, selectedChatId, messages, unreadCounts, editingGroupChat } from '../../stores/chat';
@@ -49,7 +48,14 @@
         {@const isSelected = $selectedChatId === chat.id}
         {@const lastMessage = $messages[chat.id]?.[$messages[chat.id]?.length - 1]}
         {@const unreadCount = $unreadCounts[chat.id] || 0}
-        <div on:click={() => selectChat(chat.id)} class="relative group cursor-pointer rounded-xl transition-all duration-200 p-3 md:p-4 {isSelected ? 'bg-blue-600/20' : 'hover:bg-gray-800/50'}">
+        <div 
+            on:click={() => selectChat(chat.id)} 
+            on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') selectChat(chat.id); }}
+            role="button"
+            tabindex="0"
+            class="relative group rounded-xl transition-all duration-200 p-3 md:p-4 cursor-pointer {isSelected ? 'bg-blue-600/20' : 'hover:bg-gray-800/50'}"
+            aria-label="Select group chat {chat.name}"
+        >
             <div class="absolute top-2 right-2 {isSelected ? 'opacity-60 hover:opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-200 flex space-x-1 z-20">
                 <button on:click|stopPropagation={() => editGroupChat(chat)} class="p-2 bg-gray-700 hover:bg-gray-600 rounded text-gray-300 hover:text-white transition-colors" title={t("groupChat.edit")}>
                     <Edit3 class="w-3 h-3" />

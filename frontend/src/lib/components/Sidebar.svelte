@@ -1,4 +1,3 @@
-
 <script>
   import { onMount, afterUpdate } from 'svelte';
   import { t } from '../../i18n.js';
@@ -7,7 +6,7 @@
   import { isSidebarCollapsed, isCharacterModalVisible, isConfirmationModalVisible, confirmationModalData, isCreateGroupChatModalVisible, isCreateOpenChatModalVisible, isEditGroupChatModalVisible, isDesktopSettingsModalVisible, isChatSelectionModalVisible, chatSelectionModalData, isSearchModalVisible } from '../stores/ui';
   import { formatTimestamp } from '../../utils';
   import Avatar from './Avatar.svelte';
-  import { Bot, Settings, Plus, ChevronRight, ChevronLeft, ChevronDown, Edit3, Trash2, Check, Users, Globe } from 'lucide-svelte';
+  import { Bot, Settings, Plus, ChevronRight, ChevronLeft, ChevronDown, Edit3, Trash2, Check, Users, Globe, X } from 'lucide-svelte';
   import GroupChatList from './sidebar/GroupChatList.svelte';
   import OpenChatList from './sidebar/OpenChatList.svelte';
 
@@ -261,7 +260,12 @@
           {@const isExpanded = $expandedCharacterIds.has(char.id)}
           {@const lastAiMessage = characterLastAiMessages[char.id]}
           <div class="character-group" class:is-expanded={isExpanded} bind:this={characterGroupEls[char.id]}>
-            <div on:click={() => toggleCharacterExpansion(char.id)} class="character-header group p-3 md:p-4 rounded-xl cursor-pointer transition-all duration-200 relative hover:bg-gray-800/50" bind:this={headerEls[char.id]}>
+            <div on:click={() => toggleCharacterExpansion(char.id)} 
+                 on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleCharacterExpansion(char.id); }}
+                 role="button" 
+                 tabindex="0" 
+                 class="character-header group p-3 md:p-4 rounded-xl cursor-pointer transition-all duration-200 relative hover:bg-gray-800/50" 
+                 bind:this={headerEls[char.id]}>
               <div class="flex items-center space-x-4 md:space-x-5">
                 <div class="character-avatar relative" bind:this={avatarEls[char.id]}>
                   <Avatar character={char}/>
@@ -305,7 +309,11 @@
                             <Trash2 class="w-3 h-3" />
                         </button>
                     </div>
-                    <div on:click|stopPropagation={() => selectChat(room.id)} class="chat-room-item p-3 rounded-lg cursor-pointer transition-all duration-200 w-full {$selectedChatId === room.id ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'}">
+                    <div on:click|stopPropagation={() => selectChat(room.id)} 
+                         on:keydown|stopPropagation={(e) => { if (e.key === 'Enter' || e.key === ' ') selectChat(room.id); }}
+                         role="button" 
+                         tabindex="0" 
+                         class="chat-room-item p-3 rounded-lg cursor-pointer transition-all duration-200 w-full {$selectedChatId === room.id ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'}">
                         {#if $editingChatRoomId === room.id}
                             <div class="flex items-center gap-2">
                                 <input bind:value={editingName} on:keydown={e => e.key === 'Enter' && saveName(room, char.id)} type="text" class="w-full px-2 py-1 bg-gray-600 text-white rounded border-gray-500 focus:ring-1 focus:ring-blue-500 text-sm">
@@ -333,11 +341,18 @@
             {/if}
           </div>
         {/each}
+        </div>
       </div>
     </div>
   </div>
 </aside>
 
 {#if !$isSidebarCollapsed}
-  <div on:click={toggleSidebar} class="fixed inset-0 z-20 bg-black/50 md:hidden"></div>
+  <div on:click={toggleSidebar} 
+       on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleSidebar(); }}
+       role="button" 
+       tabindex="0" 
+       aria-label="Close sidebar" 
+       class="fixed inset-0 z-20 bg-black/50 md:hidden">
+  </div>
 {/if}

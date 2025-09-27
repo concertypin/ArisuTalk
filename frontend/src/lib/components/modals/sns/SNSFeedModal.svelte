@@ -1,7 +1,7 @@
 
 <script>
   import { t } from '../../../../i18n.js';
-  import { createEventDispatcher, onMount } from 'svelte';
+  import { createEventDispatcher, onMount, onDestroy } from 'svelte';
   import { get } from 'svelte/store';
   import { fade } from 'svelte/transition';
   import { X, Plus, Instagram, Lock, ShieldAlert, Image, Hash } from 'lucide-svelte';
@@ -72,11 +72,28 @@
       }
     }
   }
+
+  function handleKeydown(event) {
+    if (event.key === 'Escape') {
+      closeModal();
+    }
+  }
+
+  onMount(() => {
+    window.addEventListener('keydown', handleKeydown);
+  });
+
+  onDestroy(() => {
+    window.removeEventListener('keydown', handleKeydown);
+  });
 </script>
 
 {#if isOpen && currentCharacter}
-  <div transition:fade={{ duration: 200 }} class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" on:click={closeModal}>
-    <div class="bg-gray-900 rounded-xl w-full max-w-md max-h-[90vh] overflow-hidden shadow-2xl border border-gray-700" on:click|stopPropagation>
+  <div 
+    transition:fade={{ duration: 200 }} 
+    class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+  >
+    <div role="dialog" aria-modal="true" tabindex="0" aria-labelledby="sns-feed-title" class="bg-gray-900 rounded-xl w-full max-w-md max-h-[90vh] overflow-hidden shadow-2xl border border-gray-700" on:click|stopPropagation on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); } }}>
       <!-- Header -->
       <div class="relative {isSecretMode ? 'bg-gradient-to-r from-red-900 to-pink-900' : 'bg-gradient-to-r from-purple-900 to-pink-900'} p-6 text-white rounded-t-xl">
         <button on:click={closeModal} class="absolute top-4 right-4 p-2 rounded-full bg-black/20 hover:bg-black/40 transition-colors">
@@ -98,7 +115,7 @@
             {/if}
           </div>
           <div>
-            <h2 class="text-xl font-bold">{currentCharacter.name}</h2>
+            <h2 id="sns-feed-title" class="text-xl font-bold">{currentCharacter.name}</h2>
             <p class="text-sm opacity-90">{isSecretMode ? t("sns.secretAccount") : t("sns.mainAccount")}</p>
           </div>
         </div>

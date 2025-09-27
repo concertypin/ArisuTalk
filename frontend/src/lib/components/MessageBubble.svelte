@@ -24,9 +24,9 @@
 
 {#if message.type === 'image'}
   <div class="flex flex-col {message.isMe ? 'items-end' : 'items-start'}">
-    <div class="inline-block cursor-pointer transition-all duration-300 rounded-2xl overflow-hidden" on:click={toggleImageSize}>
+    <button class="inline-block transition-all duration-300 rounded-2xl overflow-hidden" on:click={toggleImageSize} aria-label="Toggle image size">
       <img src={message.imageUrl} alt="user upload" class="rounded-2xl object-cover pointer-events-none" style={sizeStyle}>
-    </div>
+    </button>
     {#if message.content}
       <div class="mt-2 inline-block px-4 py-2 rounded-2xl text-sm md:text-base leading-relaxed break-words {message.isMe ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-200'}">
         <p>{message.content}</p>
@@ -36,12 +36,12 @@
 {:else if message.type === 'sticker'}
   <div class="inline-block px-4 py-2 rounded-2xl text-sm md:text-base leading-relaxed break-words {message.isMe ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-200'}">
     {#if message.sticker}
-      <div class="flex flex-col items-center cursor-pointer" on:click={() => console.log('zoom sticker')}>
+      <button class="flex flex-col items-center" on:click={() => console.log('zoom sticker')} aria-label="Zoom sticker">
           <img src={message.sticker.data} alt={message.sticker.stickerName} class="max-w-[120px] h-auto">
           {#if message.content}
               <p class="mt-2 text-center">{message.content}</p>
           {/if}
-      </div>
+      </button>
     {/if}
   </div>
 {:else}

@@ -15,6 +15,7 @@
   let filteredCharacters = [];
   let modalContentEl;
   let oldHeight;
+  let inputEl;
 
   beforeUpdate(() => {
     if (!modalContentEl) return;
@@ -49,6 +50,10 @@
     });
   });
 
+  $: if (isOpen && inputEl) {
+    setTimeout(() => inputEl.focus(), 100);
+  }
+
   $: {
     const query = $searchQuery.toLowerCase().trim();
     if (query) {
@@ -72,12 +77,12 @@
 </script>
 
 {#if isOpen}
-  <div transition:fade={{ duration: 200 }} class="modal-backdrop fixed inset-0 bg-black/60 z-50" on:click={closeModal}></div>
-  <div class="search-modal-container p-4 pt-16 md:pt-24 fixed inset-0 z-50 overflow-y-auto">
-    <div class="search-modal-content bg-gray-800 rounded-2xl shadow-lg w-full max-w-lg mx-auto flex flex-col max-h-[85vh]" bind:this={modalContentEl}>
+  <button transition:fade={{ duration: 200 }} aria-label="close search" class="modal-backdrop fixed inset-0 bg-black/60 z-50" on:click={closeModal}></button>
+  <div class="search-modal-container p-4 pt-16 md:pt-24 fixed inset-0 z-50 overflow-y-auto pointer-events-none">
+    <div class="search-modal-content bg-gray-800 rounded-2xl shadow-lg w-full max-w-lg mx-auto flex flex-col max-h-[85vh] pointer-events-auto" bind:this={modalContentEl}>
         <header class="p-4 flex-shrink-0 flex items-center gap-4 border-b border-gray-700">
             <Search class="w-5 h-5 text-gray-400" />
-            <input bind:value={$searchQuery} type="text" placeholder={t("sidebar.searchPlaceholder")} class="flex-1 w-full bg-transparent text-white placeholder-gray-500 focus:outline-none text-lg" autofocus />
+            <input bind:this={inputEl} bind:value={$searchQuery} type="text" placeholder={t("sidebar.searchPlaceholder")} class="flex-1 w-full bg-transparent text-white placeholder-gray-500 focus:outline-none text-lg" />
             <button on:click={closeModal} class="p-2 -mr-2 rounded-full hover:bg-gray-700">
                 <X class="w-5 h-5 text-gray-300" />
             </button>

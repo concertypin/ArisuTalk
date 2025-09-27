@@ -1,6 +1,5 @@
-
 <script>
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onMount, onDestroy } from 'svelte';
   import { fade } from 'svelte/transition';
   import { X, Info } from 'lucide-svelte';
 
@@ -13,13 +12,30 @@
   function closeModal() {
     dispatch('close');
   }
+
+  function handleKeydown(event) {
+    if (event.key === 'Escape') {
+      closeModal();
+    }
+  }
+
+  onMount(() => {
+    window.addEventListener('keydown', handleKeydown);
+  });
+
+  onDestroy(() => {
+    window.removeEventListener('keydown', handleKeydown);
+  });
 </script>
 
 {#if isOpen}
-  <div transition:fade={{ duration: 200 }} class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-[9999] flex items-center justify-center" on:click={closeModal}>
-    <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto" on:click|stopPropagation>
+  <div 
+    transition:fade={{ duration: 200 }} 
+    class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-[9999] flex items-center justify-center"
+  >
+    <div role="dialog" aria-modal="true" tabindex="0" aria-labelledby="image-result-title" class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto" on:click|stopPropagation on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); } }}>
       <div class="border-b px-6 py-4 flex justify-between items-center sticky top-0 bg-white">
-        <h3 class="text-xl font-semibold text-gray-900">외모 프롬프트 테스트 결과</h3>
+        <h3 id="image-result-title" class="text-xl font-semibold text-gray-900">외모 프롬프트 테스트 결과</h3>
         <button on:click={closeModal} class="text-gray-400 hover:text-gray-600">
           <X class="w-6 h-6" />
         </button>

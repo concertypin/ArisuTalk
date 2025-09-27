@@ -25,7 +25,7 @@
                 <input 
                     id="settings-user-name" 
                     type="text" 
-                    placeholder={t("settings.yourNamePlaceholder")} 
+                    placeholder={t("settings.yourNamePlaceholder")}
                     bind:value={$settings.userName}
                     class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200"
                 />
@@ -92,11 +92,12 @@
                     <div class="space-y-4 ml-4">
                         <div class="bg-gray-600/20 rounded-lg p-4 space-y-4">
                             <div>
-                                <label class="flex items-center justify-between text-sm font-medium text-gray-300 mb-3">
+                                <label for="random-character-count" class="flex items-center justify-between text-sm font-medium text-gray-300 mb-3">
                                     <span>{t("settings.characterCount")}</span>
                                     <span class="text-blue-400 font-semibold">{$settings.randomCharacterCount || 3}{t("settings.characterCountUnit")}</span>
                                 </label>
                                 <input 
+                                    id="random-character-count"
                                     type="range" 
                                     min="1" 
                                     max="5" 
@@ -105,12 +106,13 @@
                                     class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer"
                                 >
                             </div>
-                            <div>
-                                <label class="text-sm font-medium text-gray-300 mb-3 block">{t("settings.messageFrequency")}</label>
+                            <fieldset>
+                                <legend class="text-sm font-medium text-gray-300 mb-3 block">{t("settings.messageFrequency")}</legend>
                                 <div class="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label class="text-xs text-gray-400 mb-1 block">{t("settings.minInterval")}</label>
+                                        <label for="random-min-interval" class="text-xs text-gray-400 mb-1 block">{t("settings.minInterval")}</label>
                                         <input 
+                                            id="random-min-interval"
                                             type="number" 
                                             min="1" 
                                             max="1440"
@@ -120,8 +122,9 @@
                                         >
                                     </div>
                                     <div>
-                                        <label class="text-xs text-gray-400 mb-1 block">{t("settings.maxInterval")}</label>
+                                        <label for="random-max-interval" class="text-xs text-gray-400 mb-1 block">{t("settings.maxInterval")}</label>
                                         <input 
+                                            id="random-max-interval"
                                             type="number" 
                                             min="1" 
                                             max="1440"
@@ -132,7 +135,7 @@
                                     </div>
                                 </div>
                                 <p class="text-xs text-gray-400 mt-2">{t("settings.messageFrequencyInfo")}</p>
-                            </div>
+                            </fieldset>
                         </div>
                     </div>
                 {/if}

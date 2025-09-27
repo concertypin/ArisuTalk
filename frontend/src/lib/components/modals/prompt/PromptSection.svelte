@@ -38,7 +38,15 @@
 <div class="bg-gray-900/50 rounded-lg p-4">
     <div class="flex items-center gap-2">
         <h4 class="text-base font-semibold text-blue-300">{title}</h4>
-        <div class="relative" on:mouseenter={showTooltip} on:mouseleave={hideTooltip}>
+        <div 
+            class="relative" 
+            role="button" 
+            tabindex="0" 
+            on:mouseenter={showTooltip} 
+            on:mouseleave={hideTooltip}
+            on:focus={showTooltip}
+            on:blur={hideTooltip}
+        >
             <HelpCircle class="w-4 h-4 text-gray-400 cursor-pointer" />
         </div>
     </div>

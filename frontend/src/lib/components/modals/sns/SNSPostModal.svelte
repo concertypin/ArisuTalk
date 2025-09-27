@@ -1,5 +1,5 @@
-
 <script>
+  import { onMount, onDestroy } from 'svelte';
   import { t } from '../../../../i18n.js';
   import { createEventDispatcher } from 'svelte';
   import { fade } from 'svelte/transition';
@@ -53,13 +53,30 @@
     return sticker ? sticker.data || sticker.dataUrl : '';
   }
 
+  function handleKeydown(event) {
+    if (event.key === 'Escape') {
+      closeModal();
+    }
+  }
+
+  onMount(() => {
+    window.addEventListener('keydown', handleKeydown);
+  });
+
+  onDestroy(() => {
+    window.removeEventListener('keydown', handleKeydown);
+  });
+
 </script>
 
 {#if isOpen && editingPost && character}
-  <div transition:fade={{ duration: 200 }} class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" on:click={closeModal}>
-    <div class="bg-gray-800 rounded-lg p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto" on:click|stopPropagation>
+  <div 
+    transition:fade={{ duration: 200 }} 
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+  >
+    <div role="dialog" aria-modal="true" tabindex="0" aria-labelledby="sns-post-modal-title" class="bg-gray-800 rounded-lg p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto" on:click|stopPropagation on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); } }}>
       <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-semibold text-white">{editingPost.isNew ? t("sns.createPost") : t("sns.editPost")}</h2>
+        <h2 id="sns-post-modal-title" class="text-lg font-semibold text-white">{editingPost.isNew ? t("sns.createPost") : t("sns.editPost")}</h2>
         <button on:click={closeModal} class="text-gray-400 hover:text-white">
           <X class="w-5 h-5" />
         </button>
@@ -121,13 +138,14 @@
         <textarea bind:value={postContent} class="w-full bg-gray-700 text-white rounded-lg p-3 resize-none h-32 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder={t("sns.postPlaceholder")}></textarea>
         
         <div class="mt-3">
-          <label class="text-sm text-gray-400 mb-1 block">{t("sns.tags")}</label>
+          <label for="sns-tags" class="text-sm text-gray-400 mb-1 block">{t("sns.tags")}</label>
+          <input type="text" id="sns-tags" class="hidden" /> <!-- Placeholder for tag input -->
           <!-- Tag input logic here -->
         </div>
         
         <div class="mt-3">
-          <label class="text-sm text-gray-400 mb-1 block">{t("sns.accessLevel")}</label>
-          <select bind:value={accessLevel} class="w-full bg-gray-700 text-white rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <label for="sns-access-level" class="text-sm text-gray-400 mb-1 block">{t("sns.accessLevel")}</label>
+          <select id="sns-access-level" bind:value={accessLevel} class="w-full bg-gray-700 text-white rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
             {#if editingPost.isSecret}
               <option value="secret-public">{t("sns.secretPublic")} - {t("sns.secretPublicDesc")}</option>
               <option value="secret-private">{t("sns.secretPrivate")} - {t("sns.secretPrivateDesc")}</option>
@@ -139,8 +157,8 @@
         </div>
         
         <div class="mt-3">
-          <label class="text-sm text-gray-400 mb-1 block">{t("sns.importance")}: <span>{importance}</span></label>
-          <input bind:value={importance} type="range" min="1" max="10" class="w-full" />
+          <label for="sns-importance" class="text-sm text-gray-400 mb-1 block">{t("sns.importance")}: <span>{importance}</span></label>
+          <input id="sns-importance" bind:value={importance} type="range" min="1" max="10" class="w-full" />
         </div>
       </div>
       

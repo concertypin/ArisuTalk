@@ -37,10 +37,11 @@
 <div class="space-y-4">
     <!-- API Key -->
     <div>
-        <label class="flex items-center text-sm font-medium text-gray-300 mb-2">
+        <label for="api-key-{provider}" class="flex items-center text-sm font-medium text-gray-300 mb-2">
             <Key class="w-4 h-4 mr-2" />{t("settings.apiKey")}
         </label>
         <input
+            id="api-key-{provider}"
             type="password"
             value={config.apiKey || ''}
             on:input={(e) => handleConfigChange('apiKey', e.target.value)}
@@ -51,10 +52,11 @@
 
     {#if provider === PROVIDERS.CUSTOM_OPENAI}
         <div>
-            <label class="flex items-center text-sm font-medium text-gray-300 mb-2">
+            <label for="base-url-{provider}" class="flex items-center text-sm font-medium text-gray-300 mb-2">
                 <Link class="w-4 h-4 mr-2" />Base URL
             </label>
             <input
+                id="base-url-{provider}"
                 type="text"
                 value={config.baseUrl || ''}
                 on:input={(e) => handleConfigChange('baseUrl', e.target.value)}
@@ -66,7 +68,7 @@
 
     <!-- Model Selection -->
     <div>
-        <label class="flex items-center text-sm font-medium text-gray-300 mb-2">
+        <label for="model-select-{provider}" class="flex items-center text-sm font-medium text-gray-300 mb-2">
             <Cpu class="w-4 h-4 mr-2" />{t("settings.model")}
         </label>
 
@@ -86,6 +88,7 @@
 
         <div class="flex gap-2">
             <input
+                id="model-select-{provider}"
                 type="text"
                 bind:value={customModelInput}
                 placeholder={t("settings.customModel")}
@@ -102,7 +105,7 @@
 
         {#if customModels.length > 0}
             <div class="mt-3 space-y-1">
-                <label class="text-xs text-gray-400">{t("settings.customModels")}</label>
+                <div class="text-xs text-gray-400">{t("settings.customModels")}</div>
                 {#each customModels as model, index}
                     <div class="flex items-center gap-2">
                         <button
@@ -136,11 +139,12 @@
         <div class="space-y-4 mt-2 p-4 bg-gray-700/30 rounded-xl">
             <!-- Max Tokens -->
             <div>
-                <label class="flex items-center justify-between text-sm font-medium text-gray-300 mb-2">
+                <label for="max-tokens-{provider}" class="flex items-center justify-between text-sm font-medium text-gray-300 mb-2">
                     <span>{t("settings.maxTokens")}</span>
                     <span class="text-blue-400 font-mono text-xs">{config.maxTokens || (provider === 'gemini' ? 4096 : 4096)}</span>
                 </label>
                 <input
+                    id="max-tokens-{provider}"
                     type="range"
                     min="512"
                     max="8192"
@@ -153,11 +157,12 @@
 
             <!-- Temperature -->
             <div>
-                <label class="flex items-center justify-between text-sm font-medium text-gray-300 mb-2">
+                <label for="temperature-{provider}" class="flex items-center justify-between text-sm font-medium text-gray-300 mb-2">
                     <span>{t("settings.temperature")}</span>
                     <span class="text-blue-400 font-mono text-xs">{config.temperature !== undefined ? config.temperature : (provider === 'gemini' ? 1.25 : 0.8)}</span>
                 </label>
                 <input
+                    id="temperature-{provider}"
                     type="range"
                     min="0"
                     max="2"
@@ -174,11 +179,12 @@
                 <div class="space-y-3">
                     <!-- Profile Max Tokens -->
                     <div>
-                        <label class="flex items-center justify-between text-sm font-medium text-gray-300 mb-2">
+                        <label for="profile-max-tokens-{provider}" class="flex items-center justify-between text-sm font-medium text-gray-300 mb-2">
                             <span>{t("settings.profileMaxTokens")}</span>
                             <span class="text-blue-400 font-mono text-xs">{config.profileMaxTokens || 1024}</span>
                         </label>
                         <input
+                            id="profile-max-tokens-{provider}"
                             type="range"
                             min="256"
                             max="2048"
@@ -191,11 +197,12 @@
 
                     <!-- Profile Temperature -->
                     <div>
-                        <label class="flex items-center justify-between text-sm font-medium text-gray-300 mb-2">
+                        <label for="profile-temperature-{provider}" class="flex items-center justify-between text-sm font-medium text-gray-300 mb-2">
                             <span>{t("settings.profileTemperature")}</span>
                             <span class="text-blue-400 font-mono text-xs">{config.profileTemperature !== undefined ? config.profileTemperature : 1.2}</span>
                         </label>
                         <input
+                            id="profile-temperature-{provider}"
                             type="range"
                             min="0.5"
                             max="2"

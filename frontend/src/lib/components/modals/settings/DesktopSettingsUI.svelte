@@ -1,4 +1,5 @@
 <script>
+    import { onMount, onDestroy } from 'svelte';
     import { t } from '../../../../i18n.js';
     import { isDesktopSettingsModalVisible } from '../../../stores/ui';
     import { Settings, X, Globe, Palette, User, HardDrive, Cog, Info, Image, Shield } from 'lucide-svelte';
@@ -45,11 +46,25 @@
         handleClose();
     }
 
+    function handleKeydown(event) {
+        if (event.key === 'Escape') {
+            handleClose();
+        }
+    }
+
+    onMount(() => {
+        window.addEventListener('keydown', handleKeydown);
+    });
+
+    onDestroy(() => {
+        window.removeEventListener('keydown', handleKeydown);
+    });
+
 </script>
 
 {#if $isDesktopSettingsModalVisible}
-<div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" on:click|self={handleClose} transition:fade={{ duration: 150 }}>
-    <div class="bg-gray-800 rounded-2xl w-full max-w-6xl h-full max-h-[90vh] flex flex-col shadow-2xl border border-gray-700" on:click|stopPropagation>
+<div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 w-full h-full" transition:fade={{ duration: 150 }}>
+    <div role="dialog" aria-modal="true" tabindex="0" aria-labelledby="settings-modal-title" class="bg-gray-800 rounded-2xl w-full max-w-6xl h-full max-h-[90vh] flex flex-col shadow-2xl border border-gray-700" on:click|stopPropagation on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); } }}>
         <!-- Header -->
         <div class="flex items-center justify-between p-6 border-b border-gray-700 shrink-0">
             <div class="flex items-center gap-3">
@@ -57,7 +72,7 @@
                     <Settings class="w-5 h-5 text-white" />
                 </div>
                 <div>
-                    <h3 class="text-xl font-semibold text-white">{t("settings.title")}</h3>
+                    <h3 id="settings-modal-title" class="text-xl font-semibold text-white">{t("settings.title")}</h3>
                     <p class="text-sm text-gray-400">{t("settings.settingsDescription")}</p>
                 </div>
             </div>

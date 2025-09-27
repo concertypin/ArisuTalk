@@ -1,4 +1,5 @@
 <script>
+  import { onMount, onDestroy } from 'svelte';
   import { AlertTriangle } from 'lucide-svelte';
   import { isConfirmationModalVisible, confirmationModalData } from '../stores/ui.ts';
   import { t } from '../../i18n.js';
@@ -14,11 +15,27 @@
     }
     handleCancel(); // Close modal after confirm
   }
+
+  function handleKeydown(event) {
+    if (event.key === 'Escape') {
+      handleCancel();
+    }
+  }
+
+  onMount(() => {
+    window.addEventListener('keydown', handleKeydown);
+  });
+
+  onDestroy(() => {
+    window.removeEventListener('keydown', handleKeydown);
+  });
 </script>
 
 {#if $isConfirmationModalVisible}
-  <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60]" on:click={handleCancel}>
-    <div class="bg-gray-800 rounded-2xl p-6 w-full max-w-sm mx-4 text-center" on:click|stopPropagation>
+  <div
+    class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60]"
+  >
+    <div role="dialog" aria-modal="true" tabindex="0" class="bg-gray-800 rounded-2xl p-6 w-full max-w-sm mx-4 text-center" on:click|stopPropagation on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleConfirm(); } }}>
       <div class="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center mx-auto mb-4">
         <AlertTriangle class="w-6 h-6 {$confirmationModalData.onConfirm ? 'text-red-400' : 'text-blue-400'}" />
       </div>

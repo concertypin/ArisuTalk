@@ -86,26 +86,26 @@
                 {#if $settings.randomFirstMessageEnabled}
                     <div class="space-y-3 ml-4 pl-3 border-l-2 border-gray-700">
                         <div>
-                            <label class="flex items-center justify-between text-sm font-medium text-gray-300 mb-2">
+                            <label for="random-character-count-mobile" class="flex items-center justify-between text-sm font-medium text-gray-300 mb-2">
                                 <span>{t("settings.characterCount")}</span>
                                 <span class="text-blue-400 font-semibold">{$settings.randomCharacterCount || 3}{t("settings.characterCountUnit")}</span>
                             </label>
-                            <input type="range" min="1" max="5" step="1" bind:value={$settings.randomCharacterCount} class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer">
+                            <input id="random-character-count-mobile" type="range" min="1" max="5" step="1" bind:value={$settings.randomCharacterCount} class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer">
                         </div>
-                        <div>
-                            <label class="text-sm font-medium text-gray-300 mb-2 block">{t("settings.messageFrequency")}</label>
+                        <fieldset>
+                            <legend class="text-sm font-medium text-gray-300 mb-2 block">{t("settings.messageFrequency")}</legend>
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
-                                    <label class="text-xs text-gray-400 mb-1 block">{t("settings.minInterval")}</label>
-                                    <input type="number" min="1" max="1440" placeholder="30" bind:value={$settings.randomMessageFrequencyMin} class="w-full px-2 py-1.5 bg-gray-700 text-white rounded-md border-0 text-sm">
+                                    <label for="random-min-interval-mobile" class="text-xs text-gray-400 mb-1 block">{t("settings.minInterval")}</label>
+                                    <input id="random-min-interval-mobile" type="number" min="1" max="1440" placeholder="30" bind:value={$settings.randomMessageFrequencyMin} class="w-full px-2 py-1.5 bg-gray-700 text-white rounded-md border-0 text-sm">
                                 </div>
                                 <div>
-                                    <label class="text-xs text-gray-400 mb-1 block">{t("settings.maxInterval")}</label>
-                                    <input type="number" min="1" max="1440" placeholder="120" bind:value={$settings.randomMessageFrequencyMax} class="w-full px-2 py-1.5 bg-gray-700 text-white rounded-md border-0 text-sm">
+                                    <label for="random-max-interval-mobile" class="text-xs text-gray-400 mb-1 block">{t("settings.maxInterval")}</label>
+                                    <input id="random-max-interval-mobile" type="number" min="1" max="1440" placeholder="120" bind:value={$settings.randomMessageFrequencyMax} class="w-full px-2 py-1.5 bg-gray-700 text-white rounded-md border-0 text-sm">
                                 </div>
                             </div>
                             <p class="text-xs text-gray-400 mt-2">{t("settings.messageFrequencyInfo")}</p>
-                        </div>
+                        </fieldset>
                     </div>
                 {/if}
             </div>

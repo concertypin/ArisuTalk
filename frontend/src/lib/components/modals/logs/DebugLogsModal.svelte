@@ -1,4 +1,5 @@
 <script>
+  import { onMount, onDestroy } from 'svelte';
   import { t } from '../../../../i18n.js';
   import { isDebugLogModalVisible } from '../../../stores/ui';
   import { debugLogs } from '../../../stores/logs';
@@ -17,16 +18,33 @@
       }
   }
 
+  function handleKeydown(event) {
+    if (event.key === 'Escape') {
+      isDebugLogModalVisible.set(false);
+    }
+  }
+
+  onMount(() => {
+    window.addEventListener('keydown', handleKeydown);
+  });
+
+  onDestroy(() => {
+    window.removeEventListener('keydown', handleKeydown);
+  });
+
 </script>
 
 {#if $isDebugLogModalVisible}
-<div transition:fade={{ duration: 200 }} class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" on:click={() => isDebugLogModalVisible.set(false)}>
-    <div class="bg-gray-800 rounded-lg w-full max-w-6xl h-[90vh] flex flex-col" on:click|stopPropagation>
+<div 
+  transition:fade={{ duration: 200 }} 
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+>
+    <div role="dialog" aria-modal="true" tabindex="0" aria-labelledby="debug-logs-title" class="bg-gray-800 rounded-lg w-full max-w-6xl h-[90vh] flex flex-col" on:click|stopPropagation on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); } }}>
         <!-- Header -->
         <div class="p-6 border-b border-gray-600">
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                 <div>
-                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                    <h2 id="debug-logs-title" class="text-xl font-bold text-white flex items-center gap-2">
                         <BarChart3 class="w-5 h-5" />
                         {t("debugLogs.systemDebugLogs")}
                     </h2>

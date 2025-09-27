@@ -5,7 +5,7 @@
   import { isEditGroupChatModalVisible } from '../../../stores/ui';
   import { X, Users } from 'lucide-svelte';
   import { fade } from 'svelte/transition';
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import Avatar from '../../Avatar.svelte';
 
   let chatName = '';
@@ -63,13 +63,30 @@
     closeModal();
   }
 
+  function handleKeydown(event) {
+    if (event.key === 'Escape') {
+      closeModal();
+    }
+  }
+
+  onMount(() => {
+    window.addEventListener('keydown', handleKeydown);
+  });
+
+  onDestroy(() => {
+    window.removeEventListener('keydown', handleKeydown);
+  });
+
 </script>
 
 {#if $editingGroupChat}
-  <div transition:fade={{ duration: 200 }} class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" on:click={closeModal}>
-    <div class="bg-gray-800 rounded-2xl w-full max-w-2xl mx-auto my-auto flex flex-col max-h-[90vh]" on:click|stopPropagation>
+  <div 
+    transition:fade={{ duration: 200 }} 
+    class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+  >
+    <div role="dialog" aria-modal="true" tabindex="0" aria-labelledby="edit-group-chat-title" class="bg-gray-800 rounded-2xl w-full max-w-2xl mx-auto my-auto flex flex-col max-h-[90vh]" on:click|stopPropagation on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); } }}>
         <div class="flex items-center justify-between p-6 border-b border-gray-700 shrink-0 sticky top-0 bg-gray-800 z-10">
-            <h3 class="text-xl font-semibold text-white flex items-center gap-3">
+            <h3 id="edit-group-chat-title" class="text-xl font-semibold text-white flex items-center gap-3">
                 <Users class="w-6 h-6" />
                 {t("groupChat.groupChatSettings")}
             </h3>
@@ -81,18 +98,19 @@
         <div class="p-6 space-y-6 overflow-y-auto">
             <!-- Chat Name -->
             <div>
-                <label class="block text-sm font-medium text-gray-300 mb-2">{t("groupChat.groupChatName")}</label>
-                <input bind:value={chatName} type="text" class="w-full p-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                <label for="group-chat-name" class="block text-sm font-medium text-gray-300 mb-2">{t("groupChat.groupChatName")}</label>
+                <input id="group-chat-name" bind:value={chatName} type="text" class="w-full p-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
             </div>
 
             <!-- General Settings -->
             <div class="space-y-4 pt-4 border-t border-gray-700/50">
                 <h3 class="text-lg font-semibold text-white">{t("groupChat.responseSettings")}</h3>
                 <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                    <label for="response-frequency" class="block text-sm font-medium text-gray-300 mb-2">
                         {t("groupChat.overallResponseFrequency")} ({responseFrequency}%)
                     </label>
                     <input
+                        id="response-frequency"
                         type="range"
                         bind:value={responseFrequency}
                         min="0"
@@ -103,8 +121,8 @@
                     <p class="text-xs text-gray-400 mt-1">{t("groupChat.responseFrequencyInfo")}</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">{t("groupChat.maxSimultaneousResponders")}</label>
-                    <select bind:value={maxRespondingCharacters} class="w-full p-3 bg-gray-700 text-white rounded-lg border border-gray-600">
+                    <label for="max-responders" class="block text-sm font-medium text-gray-300 mb-2">{t("groupChat.maxSimultaneousResponders")}</label>
+                    <select id="max-responders" bind:value={maxRespondingCharacters} class="w-full p-3 bg-gray-700 text-white rounded-lg border border-gray-600">
                         <option value={1}>{t("groupChat.people1")}</option>
                         <option value={2}>{t("groupChat.people2")}</option>
                         <option value={3}>{t("groupChat.people3")}</option>
@@ -112,10 +130,11 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                    <label for="response-delay" class="block text-sm font-medium text-gray-300 mb-2">
                         {t("groupChat.responseInterval")} ({responseDelay} {t("groupChat.seconds")})
                     </label>
                     <input
+                        id="response-delay"
                         type="range"
                         bind:value={responseDelay}
                         min="1"
@@ -144,10 +163,11 @@
                                     <label for={`active-${participant.id}`} class="text-sm text-gray-300">{t("groupChat.responseEnabled")}</label>
                                 </div>
                                 <div>
-                                    <label class="block text-sm text-gray-300 mb-1">
+                                    <label for={`response-prob-${participant.id}`} class="block text-sm text-gray-300 mb-1">
                                         {t("groupChat.individualResponseProbability")} ({Math.round(settings.responseProbability * 100)}%)
                                     </label>
                                     <input
+                                        id={`response-prob-${participant.id}`}
                                         type="range"
                                         bind:value={settings.responseProbability}
                                         min="0"
@@ -158,8 +178,8 @@
                                     >
                                 </div>
                                 <div>
-                                    <label class="block text-sm text-gray-300 mb-1">{t("groupChat.characterRole")}</label>
-                                    <select bind:value={settings.characterRole} class="w-full p-2 bg-gray-600 text-white rounded border border-gray-500 text-sm">
+                                    <label for={`role-${participant.id}`} class="block text-sm text-gray-300 mb-1">{t("groupChat.characterRole")}</label>
+                                    <select id={`role-${participant.id}`} bind:value={settings.characterRole} class="w-full p-2 bg-gray-600 text-white rounded border border-gray-500 text-sm">
                                         <option value="normal">{t("groupChat.roleNormal")}</option>
                                         <option value="leader">{t("groupChat.roleLeader")}</option>
                                         <option value="quiet">{t("groupChat.roleQuiet")}</option>

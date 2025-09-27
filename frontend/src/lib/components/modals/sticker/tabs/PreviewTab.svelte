@@ -1,4 +1,3 @@
-
 <script>
   import { createEventDispatcher } from 'svelte';
   import { t } from '../../../../../i18n.js';
@@ -36,6 +35,7 @@
         <div class="flex justify-center">
           <video controls class="max-w-full max-h-64 rounded-lg">
             <source src={sticker.dataUrl} type={sticker.type}>
+            <track kind="captions" />
           </video>
         </div>
       {:else}
@@ -46,10 +46,10 @@
     </div>
 
     <div>
-      <label class="block text-sm font-medium text-gray-300 mb-2">
+      <label for="sticker-name" class="block text-sm font-medium text-gray-300 mb-2">
         {t("stickerPreview.stickerName")}
       </label>
-      <input bind:value={stickerName} type="text" class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" placeholder={t("stickerPreview.enterStickerName")}>
+      <input id="sticker-name" bind:value={stickerName} type="text" class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" placeholder={t("stickerPreview.enterStickerName")}>
     </div>
 
     <div class="text-xs text-gray-400 space-y-1">

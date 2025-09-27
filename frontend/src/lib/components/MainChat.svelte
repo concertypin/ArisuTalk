@@ -363,7 +363,7 @@
       {/if}
       {#if $imageToSend}
         <div class="relative mb-2 p-2 bg-gray-800 rounded-lg">
-            <img src={$imageToSend} alt="Image preview" class="max-h-40 rounded-md">
+            <img src={$imageToSend} alt="Preview" class="max-h-40 rounded-md">
             <button on:click={removeImage} class="absolute top-1 right-1 p-1 bg-black/50 rounded-full text-white">
                 <X class="w-4 h-4" />
             </button>

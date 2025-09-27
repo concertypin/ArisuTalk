@@ -1,11 +1,7 @@
-
 <script>
   import { createEventDispatcher } from 'svelte';
   import { t } from '../../../../../i18n.js';
   import { Trash2, Copy, Download } from 'lucide-svelte';
-
-  export let sticker = null;
-  export let index = null;
 
   const dispatch = createEventDispatcher();
 

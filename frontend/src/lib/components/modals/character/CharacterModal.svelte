@@ -1,5 +1,5 @@
-
 <script>
+  import { onMount, onDestroy } from 'svelte';
   import { t } from '../../../../i18n.js';
   import { characters, editingCharacter } from '../../../stores/character';
   import { settings } from '../../../stores/settings';
@@ -161,7 +161,7 @@
           let jsonString;
 
           if (chunkData) {
-            const decompressedData = await decompressData(chunkData);
+            const decompressedData = await compressData(chunkData);
             jsonString = new TextDecoder().decode(decompressedData);
           } else {
             chunkData = extractPngChunk(pngData, "chAr");
@@ -245,13 +245,31 @@
       image.src = characterData.avatar;
   }
 
+  function handleKeydown(event) {
+    if (event.key === 'Escape') {
+      closeModal();
+    }
+  }
+
+  onMount(() => {
+    window.addEventListener('keydown', handleKeydown);
+  });
+
+  onDestroy(() => {
+    window.removeEventListener('keydown', handleKeydown);
+  });
+
 </script>
 
 {#if $isCharacterModalVisible}
-  <div transition:fade={{ duration: 200 }} id="character-modal-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" on:click={closeModal}>
-    <div id="character-modal-panel" class="bg-gray-800 rounded-2xl w-full max-w-md mx-auto my-auto flex flex-col max-h-[90vh]" on:click|stopPropagation>
+  <div 
+    transition:fade={{ duration: 200 }} 
+    id="character-modal-backdrop" 
+    class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+  >
+    <div id="character-modal-panel" role="dialog" aria-modal="true" tabindex="0" aria-labelledby="character-modal-title" class="bg-gray-800 rounded-2xl w-full max-w-md mx-auto my-auto flex flex-col max-h-[90vh]" on:click|stopPropagation on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); } }}>
       <div class="flex items-center justify-between px-6 py-4 border-b border-gray-700 shrink-0">
-        <h3 class="text-xl font-semibold text-white">{isNew ? t("characterModal.addContact") : t("characterModal.editContact")}</h3>
+        <h3 id="character-modal-title" class="text-xl font-semibold text-white">{isNew ? t("characterModal.addContact") : t("characterModal.editContact")}</h3>
         <div class="flex items-center gap-2">
           {#if !isNew}
             <button on:click={() => isSNSCharacterListModalVisible.set(true)} class="p-2 md:p-2 hover:bg-gray-700 rounded-full transition-colors z-20" title={t("characterModal.openSNS")}>
@@ -288,12 +306,12 @@
             <input type="file" accept="image/png" bind:this={cardInput} on:change={handleCardChange} class="hidden" />
         </div>
         <div>
-            <label class="text-sm font-medium text-gray-300 mb-2 block">{t("characterModal.nameLabel")}</label>
-            <input bind:value={characterData.name} type="text" placeholder={t("characterModal.namePlaceholder")} class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" />
+            <label for="character-name" class="text-sm font-medium text-gray-300 mb-2 block">{t("characterModal.nameLabel")}</label>
+            <input id="character-name" bind:value={characterData.name} type="text" placeholder={t("characterModal.namePlaceholder")} class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" />
         </div>
         <div>
             <div class="flex items-center justify-between mb-2">
-                <label class="text-sm font-medium text-gray-300">{t("characterModal.promptLabel")}</label>
+                <label for="character-prompt" class="text-sm font-medium text-gray-300">{t("characterModal.promptLabel")}</label>
                 <button on:click={generatePersona} disabled={isGeneratingPersona} class="py-1 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-xs flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed">
                     {#if isGeneratingPersona}
                         <div class="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
@@ -302,7 +320,7 @@
                     {/if}
                 </button>
             </div>
-            <textarea bind:value={characterData.prompt} placeholder={t("characterModal.promptPlaceholder")} class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" rows="6"></textarea>
+            <textarea id="character-prompt" bind:value={characterData.prompt} placeholder={t("characterModal.promptPlaceholder")} class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 text-sm" rows="6"></textarea>
         </div>
 
         <CharacterAISettings 

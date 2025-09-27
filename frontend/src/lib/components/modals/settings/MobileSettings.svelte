@@ -71,7 +71,7 @@
         </header>
         <div class="flex-1 overflow-y-auto space-y-1 mt-[88px] px-4">
           {#each menuItems as item}
-            <div on:click={() => navigateTo(item.id)} class="group border-b border-gray-800 last:border-b-0 cursor-pointer">
+            <button on:click={() => navigateTo(item.id)} class="group border-b border-gray-800 last:border-b-0 w-full text-left">
               <div class="flex items-center justify-between list-none py-4">
                 <span class="text-lg font-medium text-gray-200 flex items-center">
                   <svelte:component this={item.icon} class="w-5 h-5 mr-4 text-gray-400" />
@@ -79,7 +79,7 @@
                 </span>
                 <ChevronRight class="w-6 h-6 text-gray-400" />
               </div>
-            </div>
+            </button>
           {/each}
         </div>
       </div>

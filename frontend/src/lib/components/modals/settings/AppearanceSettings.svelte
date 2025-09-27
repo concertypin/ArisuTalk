@@ -35,11 +35,11 @@
         </h4>
         <div class="space-y-3">
             <div class="relative">
-                <label class="flex items-center justify-between text-sm font-medium text-gray-300 mb-2">
+                <label for="font-scale-slider-mobile" class="flex items-center justify-between text-sm font-medium text-gray-300 mb-2">
                     <span>{t("settings.uiScale")}</span>
                     <span class="text-blue-400 font-mono text-sm">{Math.round($settings.fontScale * 100)}%</span>
                 </label>
-                <input type="range" min="0.8" max="1.4" step="0.1" bind:value={$settings.fontScale} class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                <input id="font-scale-slider-mobile" type="range" min="0.8" max="1.4" step="0.1" bind:value={$settings.fontScale} class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
                 <div class="w-full flex justify-between text-xs text-gray-400 mt-1">
                     <span>80%</span>
                     <span>100%</span>
