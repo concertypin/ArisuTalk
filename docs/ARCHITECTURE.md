@@ -14,7 +14,7 @@ This document provides a comprehensive overview of ArisuTalk's architecture, foc
 
 ## System Overview
 
-ArisuTalk follows a **client-server architecture** with a modern JavaScript frontend and a Kotlin-based backend. The system is designed with modularity, responsiveness, and internationalization as core principles.
+ArisuTalk follows a **client-server architecture** with a modern Svelte 5 frontend and a Kotlin-based backend. The system is designed with modularity, responsiveness, and internationalization as core principles.
 
 ### High-Level Architecture
 
@@ -22,9 +22,9 @@ ArisuTalk follows a **client-server architecture** with a modern JavaScript fron
 ┌─────────────────────────────────────────────────────────────┐
 │                    ArisuTalk System                         │
 ├─────────────────────────────────────────────────────────────┤
-│  Frontend (JavaScript/Vite)                                
-│  ├── UI Layer (Components)                                 │
-│  ├── State Management (index.js)                           │
+│  Frontend (Svelte 5/Vite)                                  │
+│  ├── Svelte Components                                     │
+│  ├── Svelte Stores (State Management)                      │
 │  ├── API Integration Layer                                 │
 │  ├── Internationalization (i18n)                          │
 │  └── Event Handling System                                 │
@@ -46,99 +46,51 @@ ArisuTalk follows a **client-server architecture** with a modern JavaScript fron
 
 ## Frontend Architecture
 
-### Component Hierarchy
+The frontend is currently undergoing a significant migration from a legacy vanilla JavaScript codebase to **Svelte 5**. This transition aims to leverage Svelte's reactivity, component-based model, and performance benefits for a more maintainable and scalable application.
 
-The frontend follows a **component-based architecture** with clear separation of concerns. The new architecture emphasizes a mobile-first approach with distinct page components for different views on mobile devices.
+For a detailed breakdown of the Svelte 5 frontend architecture, including its component hierarchy, core concepts, and specific file structures, please refer to the dedicated document: [`frontend/docs/architecture.md`](./frontend/docs/architecture.md).
 
-```
-Application Root (index.js)
-├── UI Manager (ui.js)
-├── State Manager (index.js)
-├── Page Containers
-│   ├── Character List Page (CharacterListPage.js)
-│   ├── Main Chat Page (MainChat.js)
-│   ├── Mobile Settings Page (MobileSettingsUI.js)
-│   └── Landing Page (LandingPage.js)
-├── Desktop-specific Components
-│   ├── Sidebar (Sidebar.js)
-│   └── Desktop Settings (DesktopSettingsModal.js & DesktopSettingsUI.js)
-│       ├── API Settings Panel
-│       ├── Appearance Settings Panel
-│       ├── Character Defaults Panel
-│       ├── Data Management Panel
-│       ├── Scale Settings Panel
-│       └── Advanced Settings Panel
-└── Modal System
-    ├── Character Modal
-    ├── Prompt Modal
-    ├── Debug Logs Modal
-    ├── Master Password Modal
-    ├── Confirmation Modal
-    ├── Chat Selection Modal
-    └── Search Modal
-```
+### Key Principles of Svelte 5 Frontend
 
-### Design Patterns
+#### 1. **Reactivity and Runes**
+Svelte 5 utilizes a highly reactive programming model with **runes** for efficient state management and automatic UI updates. This eliminates the need for a virtual DOM and reduces boilerplate code.
 
-#### 1. **Module Pattern**
-Each component is encapsulated as a module with clear interfaces:
+#### 2. **Component-Based Development**
+All UI elements are encapsulated as reusable Svelte components (`.svelte` files). This promotes modularity, reusability, and easier maintenance.
 
-```javascript
-// Example component structure
-export function ComponentName() {
-    // Private variables and functions
-    let privateState = {};
-    
-    function privateMethod() {
-        // Implementation
-    }
-    
-    // Public interface
-    return {
-        init: function() { /* Initialize component */ },
-        render: function() { /* Render UI */ },
-        cleanup: function() { /* Cleanup resources */ }
-    };
-}
-```
+#### 3. **Svelte Stores for State Management**
+Global and shared application state is managed using Svelte stores. These provide a simple yet powerful mechanism for reactive data flow across components.
 
-#### 2. **Observer Pattern**
-State changes trigger UI updates through event listeners:
-
-```javascript
-// State change notification
-window.dispatchEvent(new CustomEvent('settingsChanged', {
-    detail: { section: 'api', data: newSettings }
-}));
-```
-
-#### 3. **Page-Based UI for Mobile**
-On mobile devices, the UI is organized into pages that transition smoothly. This is managed by showing and hiding different page containers within the `index.html`.
+#### 4. **Modular Services**
+Business logic and complex operations are abstracted into TypeScript services, ensuring a clean separation of concerns from UI components.
 
 ## Settings System Architecture
 
+The settings system is built with **Svelte components**, providing a modular and responsive user interface for managing application configurations. It features distinct layouts for desktop and mobile devices, ensuring an optimized experience across platforms.
+
+For detailed information on the settings system's component structure and implementation, refer to [`frontend/docs/architecture.md`](./frontend/docs/architecture.md).
+
 ### Modular Panel System
 
-The settings system is structured into a modular architecture, with a clear distinction between mobile and desktop interfaces.
+The settings are organized into modular panels, each responsible for a specific category of settings (e.g., API configurations, appearance, character defaults). These panels are implemented as Svelte components, allowing for easy extension and maintenance.
 
 ```
-Settings Architecture
-├── UI Layer
-│   ├── Desktop Interface (DesktopSettingsModal.js & DesktopSettingsUI.js)
+Settings Architecture (Svelte-based)
+├── UI Layer (Svelte Components)
+│   ├── Desktop Settings UI (e.g., DesktopSettingsUI.svelte)
 │   │   ├── Tab Navigation
 │   │   ├── Centered Layout
 │   │   └── Panel Container
-│   └── Mobile Interface (MobileSettingsUI.js)
+│   └── Mobile Settings UI (e.g., MobileSettings.svelte)
 │       ├── Page-based Navigation
 │       ├── Touch Optimization
 │       └── Responsive Design
-└── Panel Layer (settings/panels/)
-    ├── APISettingsPanel.js
-    ├── AppearanceSettingsPanel.js
-    ├── CharacterDefaultsPanel.js
-    ├── DataManagementPanel.js
-    ├── ScaleSettingsPanel.js
-    └── AdvancedSettingsPanel.js
+└── Settings Panels (Svelte Components in src/lib/components/modals/settings/panels/)
+    ├── APISettingsPanel.svelte
+    ├── AppearanceSettingsPanel.svelte
+    ├── CharacterDefaultsPanel.svelte
+    ├── DataManagementPanel.svelte
+    └── AdvancedSettingsPanel.svelte
 ```
 
 ### Settings Flow
@@ -146,181 +98,108 @@ Settings Architecture
 ```mermaid
 graph TB
     A[User Opens Settings] --> C{Device Type?}
-    C -->|Desktop| D[DesktopSettingsModal]
-    C -->|Mobile| E[MobileSettingsUI]
-    D --> F[Load Selected Panel]
+    C -->|Desktop| D[DesktopSettingsUI.svelte]
+    C -->|Mobile| E[MobileSettings.svelte]
+    D --> F[Load Selected Svelte Panel Component]
     E --> F
     F --> G[Render Panel Content]
-    G --> H[Setup Event Listeners]
-    H --> I[User Interaction]
-    I --> J[State Update]
-    J --> K[Save to Storage]
-    K --> L[Update UI]
-    L --> M[Notify Other Components]
-```
-
-### Panel Architecture
-
-Each settings panel follows a consistent structure:
-
-```javascript
-// Panel Structure Template
-export function PanelName() {
-    return {
-        id: 'panel-id',
-        title: 'Panel Title',
-        render: function(container) {
-            // Generate panel HTML
-            container.innerHTML = this.generateHTML();
-            this.setupEventListeners(container);
-        },
-        generateHTML: function() {
-            // Return panel HTML content
-        },
-        setupEventListeners: function(container) {
-            // Add event listeners for panel interactions
-        },
-        validate: function() {
-            // Validate panel data
-        },
-        getData: function() {
-            // Return current panel data
-        },
-        setData: function(data) {
-            // Set panel data
-        }
-    };
-}
+    G --> H[User Interaction (Svelte Events)]
+    H --> I[Svelte Store Update]
+    I --> J[Save to Storage]
+    J --> K[Update UI (Svelte Reactivity)]
+    K --> L[Notify Other Components (Svelte Events/Stores)]
 ```
 
 ## Internationalization Architecture
 
-### i18n System Structure
+ArisuTalk features a comprehensive internationalization (i18n) system, fully integrated with the Svelte frontend. This system allows for real-time language switching and ensures that all user-facing text is translatable.
+
+For a detailed guide on the i18n system, including its structure, language file organization, translation functions, and how to add new languages, please refer to the dedicated document: [`docs/I18N.md`](./docs/I18N.md).
+
+### i18n System Structure (Svelte Integrated)
 
 ```
 Internationalization Layer
-├── Core System (i18n.js)
+├── Core Module (src/i18n.js)
 │   ├── Language Detection
 │   ├── Translation Function (t())
-│   ├── Language Switching
+│   ├── Language Switching Logic
 │   └── Fallback Handling
-├── Language Files
-│   ├── Korean (ko.js)
-│   │   ├── UI Translations
-│   │   ├── API Messages
-│   │   ├── Error Messages
-│   │   └── System Notifications
-│   └── English (en.js)
-│       ├── UI Translations
-│       ├── API Messages
-│       ├── Error Messages
-│       └── System Notifications
-└── Integration Points
-    ├── Component Templates
+├── Language Files (src/language/)
+│   ├── Korean (ko.ts)
+│   └── English (en.ts)
+└── Integration Points (Svelte Components)
+    ├── Component Templates (using t() function)
     ├── Dynamic Content
     ├── API Responses
     └── Error Handling
 ```
 
-### Translation Key Organization
-
-```javascript
-// Language file structure
-export const translations = {
-    // UI Components
-    ui: {
-        buttons: { /* button texts */ },
-        labels: { /* form labels */ },
-        placeholders: { /* input placeholders */ }
-    },
-    
-    // API Integration
-    api: {
-        errors: { /* API error messages */ },
-        success: { /* success messages */ },
-        providers: { /* provider-specific texts */ }
-    },
-    
-    // Modals and Dialogs
-    modal: {
-        titles: { /* modal titles */ },
-        messages: { /* modal content */ },
-        actions: { /* action buttons */ }
-    },
-    
-    // Settings Panels
-    settings: {
-        api: { /* API settings */ },
-        appearance: { /* appearance settings */ },
-        character: { /* character settings */ },
-        data: { /* data management */ },
-        advanced: { /* advanced settings */ }
-    }
-};
-```
-
 ## State Management
 
-### Central State Architecture
+In the Svelte frontend, state management is primarily handled through **Svelte stores**. These reactive stores provide a centralized and efficient way to manage application data and ensure that UI components automatically update when the underlying state changes.
+
+### Central State Architecture (Svelte Stores)
 
 ```
 State Management System
-├── Application State (index.js)
-│   ├── User Settings
-│   ├── Chat State
-│   ├── UI State
-│   └── Cache Management
-├── Storage Layer (storage.js)
+├── Application State (Svelte Stores in src/lib/stores/)
+│   ├── User Settings (settings.ts)
+│   ├── Chat State (chat.ts)
+│   ├── UI State (ui.ts)
+│   └── Character Data (character.ts)
+├── Storage Layer (src/storage.ts & src/lib/utils/secureStorage.js)
 │   ├── IndexedDB Interface
 │   ├── localStorage Fallback
 │   ├── Data Serialization
 │   └── Migration Handling
-├── Secure Storage (secureStorage.js)
+├── Secure Storage (src/lib/utils/secureStorage.js)
 │   ├── Encryption/Decryption
 │   ├── Key Management
-│   └── Secure Data Handling
+│   └── Master Password System
 └── State Synchronization
-    ├── Component Updates
+    ├── Component Updates (Svelte Reactivity)
     ├── Cross-tab Sync
     └── Persistence Management
 ```
 
-### State Flow Pattern
+### State Flow Pattern (Svelte)
 
 ```mermaid
 graph LR
-    A[User Action] --> B[Event Handler]
-    B --> C[State Update]
-    C --> D[Storage Write]
-    D --> E[UI Update]
-    E --> F[Component Refresh]
-    F --> G[Event Notification]
+    A[User Action (e.g., Svelte Event)] --> B[Svelte Component Logic]
+    B --> C[Svelte Store Update]
+    C --> D[Storage Write (via service/utility)]
+    D --> E[UI Update (Svelte Reactivity)]
+    E --> F[Other Components React (Svelte Subscriptions)]
 ```
 
 ## API Integration Layer
 
-### API Architecture
+The API integration layer facilitates communication with various external AI providers and the ArisuTalk backend. In the Svelte frontend, API calls are typically initiated from services or directly from Svelte components, leveraging a centralized API manager.
+
+### API Architecture (Svelte Integrated)
 
 ```
 API Integration Layer
-├── API Manager (apiManager.js)
+├── API Manager (src/lib/api/apiManager.js)
 │   ├── Provider Selection
 │   ├── Request Routing
 │   ├── Response Handling
 │   └── Error Management
-├── Provider Modules
+├── Provider Modules (src/lib/api/)
 │   ├── OpenAI (openai.js)
 │   ├── Claude (claude.js)
 │   ├── Gemini (gemini.js)
 │   ├── Grok (grok.js)
 │   ├── OpenRouter (openrouter.js)
 │   └── Custom OpenAI (customopenai.js)
-├── Prompt System
+├── Prompt System (src/prompts/)
 │   ├── Prompt Builder (promptBuilder.js)
-│   ├── Template Management (prompts.js)
+│   ├── Template Management (chatMLPrompts.ts)
 │   └── Context Handling
 └── Configuration
-    ├── Provider Constants (providers.js)
+    ├── Provider Constants (src/constants/providers.ts)
     ├── Model Definitions
     └── Default Settings
 ```
@@ -329,12 +208,14 @@ API Integration Layer
 
 ```mermaid
 sequenceDiagram
-    participant U as User
+    participant U as User (Svelte UI)
+    participant C as Svelte Component/Service
     participant M as API Manager
     participant P as Provider Module
     participant E as External API
     
-    U->>M: Send Chat Message
+    U->>C: User Action (e.g., Send Message)
+    C->>M: Call API (via service)
     M->>M: Select Provider
     M->>P: Route to Provider
     P->>P: Build Request
@@ -342,61 +223,56 @@ sequenceDiagram
     E->>P: Return Response
     P->>P: Process Response
     P->>M: Return Processed Data
-    M->>U: Display Response
+    M->>C: Return Data/Error
+    C->>U: Update UI (Svelte Reactivity)
 ```
 
 ## Event Handling System
 
-### Event Architecture
+In the Svelte frontend, event handling primarily relies on Svelte's built-in event directives (`on:event`) and custom event dispatching. This provides a declarative and efficient way to manage user interactions and inter-component communication.
+
+### Event Architecture (Svelte)
 
 ```
 Event Handling System
-├── Modal Handlers (modalHandlers.js)
-│   ├── Modal Lifecycle
-│   ├── Form Validation
-│   └── Data Persistence
-├── Chat Handlers
-│   ├── Main Chat (mainChatHandlers.js)
-│   ├── Group Chat (groupChatHandlers.js)
-│   └── Message Processing
-├── UI Handlers
-│   ├── Sidebar (sidebarHandlers.js)
-│   ├── Settings Panels
-│   └── Component Interactions
-└── System Events
-    ├── Language Changes
-    ├── Theme Updates
-    └── Settings Synchronization
+├── Svelte Event Directives (on:click, on:input, etc.)
+├── Custom Events (createEventDispatcher)
+├── Svelte Stores (for global events/state changes)
+├── Component Lifecycle Events (onMount, onDestroy)
+└── Global Event Listeners (for window/document level events, with cleanup)
 ```
 
-### Event Listener Management
+### Event Listener Management (Svelte)
 
-```javascript
-// Event listener pattern with cleanup
-function setupEventListeners(container) {
-    const elements = container.querySelectorAll('[data-action]');
-    
-    elements.forEach(element => {
-        if (!element.dataset.listenerAdded) {
-            element.addEventListener('click', handleAction);
-            element.dataset.listenerAdded = 'true';
-        }
-    });
-}
+Svelte components automatically manage event listeners declared with `on:event` directives. For global event listeners or those attached to elements outside the component's direct control, `onMount` and `onDestroy` lifecycle hooks are used for proper setup and cleanup.
 
-function handleAction(event) {
-    const action = event.target.dataset.action;
-    // Handle specific actions
-}
+```svelte
+<script>
+  import { onMount, onDestroy } from 'svelte';
 
-// Cleanup when component is destroyed
-function cleanup(container) {
-    const elements = container.querySelectorAll('[data-listener-added]');
-    elements.forEach(element => {
-        element.removeEventListener('click', handleAction);
-        delete element.dataset.listenerAdded;
-    });
-}
+  let count = 0;
+
+  function handleClick() {
+    count += 1;
+  }
+
+  // Example of a global event listener with cleanup
+  function handleKeydown(event) {
+    if (event.key === 'Escape') {
+      console.log('Escape pressed!');
+    }
+  }
+
+  onMount(() => {
+    window.addEventListener('keydown', handleKeydown);
+  });
+
+  onDestroy(() => {
+    window.removeEventListener('keydown', handleKeydown);
+  });
+</script>
+
+<button on:click={handleClick}>Clicked {count} times</button>
 ```
 
 ## Security Architecture
@@ -405,19 +281,19 @@ function cleanup(container) {
 
 ```
 Security Architecture
-├── Data Encryption (crypto.js)
+├── Data Encryption (src/lib/utils/crypto.js)
 │   ├── AES Encryption
 │   ├── Key Derivation
 │   └── Salt Generation
-├── Secure Storage (secureStorage.js)
+├── Secure Storage (src/lib/utils/secureStorage.js)
 │   ├── API Key Protection
 │   ├── User Data Encryption
 │   └── Master Password System
-├── Input Validation
-│   ├── Form Validation
+├── Input Validation (Frontend & Backend)
+│   ├── Form Validation (Svelte components)
 │   ├── XSS Prevention
 │   └── Data Sanitization
-└── API Security
+└── API Security (Backend & External APIs)
     ├── Request Signing
     ├── Rate Limiting
     └── Error Handling
@@ -427,41 +303,43 @@ Security Architecture
 
 ```mermaid
 graph TD
-    A[User Input] --> B[Input Validation]
+    A[User Input (Svelte UI)] --> B[Input Validation (Svelte Component)]
     B --> C[Data Sanitization]
     C --> D[Encryption Layer]
     D --> E[Secure Storage]
     E --> F[API Transmission]
     F --> G[Response Processing]
     G --> H[Decryption]
-    H --> I[UI Display]
+    H --> I[UI Display (Svelte Reactivity)]
 ```
 
 ## Performance Considerations
 
 ### Optimization Strategies
 
-1. **Lazy Loading**: Components and panels are loaded on demand
-2. **Event Debouncing**: Rapid user inputs are debounced to prevent excessive API calls
-3. **Caching**: API responses and UI states are cached for improved performance
-4. **Memory Management**: Event listeners are properly cleaned up to prevent memory leaks
-5. **Bundle Optimization**: Vite optimizes the JavaScript bundle for production
+1.  **Lazy Loading**: Components and panels are loaded on demand.
+2.  **Event Debouncing**: Rapid user inputs are debounced to prevent excessive API calls.
+3.  **Caching**: API responses and UI states are cached for improved performance.
+4.  **Memory Management**: Svelte's automatic reactivity minimizes manual memory management, but global event listeners are properly cleaned up.
+5.  **Bundle Optimization**: Vite optimizes the JavaScript bundle for production, including tree-shaking and code splitting.
 
 ### Scalability Patterns
 
-1. **Modular Architecture**: New features can be added as independent modules
-2. **Plugin System**: Components use ID attributes for potential plugin integration
-3. **Configuration-Driven**: Settings and providers are configuration-driven for easy extension
-4. **Internationalization Ready**: New languages can be added by extending language files
+1.  **Modular Architecture**: New features can be added as independent Svelte modules and components.
+2.  **Plugin System**: Components use ID attributes for potential plugin integration.
+3.  **Configuration-Driven**: Settings and providers are configuration-driven for easy extension.
+4.  **Internationalization Ready**: New languages can be added by extending language files.
 
 ## Conclusion
 
 ArisuTalk's architecture emphasizes:
-- **Modularity**: Components are loosely coupled and independently testable
-- **Responsiveness**: Adaptive UI for different device types
-- **Internationalization**: Comprehensive multi-language support
-- **Security**: Multiple layers of data protection
-- **Maintainability**: Clear separation of concerns and consistent patterns
-- **Extensibility**: Easy to add new features, languages, and API providers
+
+-   **Modularity**: Components are loosely coupled and independently testable.
+-   **Reactivity**: Leveraging Svelte 5 for efficient UI updates and state management.
+-   **Responsiveness**: Adaptive UI for different device types.
+-   **Internationalization**: Comprehensive multi-language support.
+-   **Security**: Multiple layers of data protection.
+-   **Maintainability**: Clear separation of concerns and consistent patterns.
+-   **Extensibility**: Easy to add new features, languages, and API providers.
 
 This architecture supports the current feature set while providing a solid foundation for future enhancements and scalability.

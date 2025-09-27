@@ -9,12 +9,14 @@ This project is a monorepo with a frontend and a backend. Please refer to the `A
 
 ## Project Overview
 
-This project is an AI chat frontend application forked from [`github.com/dkfk5326/ArisuTalk`](https://github.com/dkfk5326/ArisuTalk). ArisuTalk provides a modern, responsive AI chat interface with comprehensive internationalization support and modular architecture.
+This project is an AI chat application with a modern, responsive interface built with Svelte 5. It features comprehensive internationalization support and a modular architecture.
 
 ### Key Features
 
-- **Bot Management**: Create and manage various AI bots with customizable personas
-- **Multi-Chat Rooms**: Operate multiple chat rooms simultaneously with group chat support
+- **Bot Management**: Create and manage various AI bots with customizable personas.
+- **Multi-Chat Rooms**: Operate multiple chat rooms simultaneously, including:
+  - **Group Chat**: Conversations with a manually selected group of AI characters.
+  - **Open Chat**: Dynamic chatrooms where AI characters autonomously join or leave based on conversation context.
 - **Multi-Provider AI Integration**: Supports multiple AI providers including Google Gemini, OpenAI, Claude, Grok, OpenRouter, and custom OpenAI-compatible APIs.
 - **Responsive Design**: Optimized for both desktop and mobile devices.
 - **PWA Support**: Progressive Web App capabilities with offline functionality.
@@ -32,9 +34,3 @@ This project is an AI chat frontend application forked from [`github.com/dkfk532
 - Follow the [Conventional Commits](https://www.conventionalcommits.org) style.
 - Write meaningful commit messages (e.g., `fix: typo in README`, `feat: add feature X`, `chore: update dependency Y`).
 - Do not include too many changes in one commit.
-
-## Svelte 5 Migration
-
-**Attention**: The frontend is currently undergoing a migration from Vanilla JavaScript to Svelte 5. All new frontend development should be done using Svelte components and stores.
-
-Please refer to the `MIGRATION_PLAN.md` file for the detailed strategy and follow the established phases. Any new work should align with the goal of completing this migration.

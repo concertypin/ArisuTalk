@@ -1,6 +1,16 @@
 # ArisuTalk Frontend
 
-This is the frontend component of the ArisuTalk AI chat application, built with modern JavaScript and featuring a modular, responsive architecture with comprehensive internationalization support.
+This is the frontend component of the ArisuTalk AI chat application, built with Svelte 5. It features a modular, responsive architecture with comprehensive internationalization support.
+
+## Key Features
+
+- **Multi-Chat Modes:**
+  - **Main Chat:** One-on-one conversations with a single AI character.
+  - **Group Chat:** Chat with a manually selected group of AI characters.
+  - **Open Chat:** A dynamic chatroom where AI characters autonomously join or leave based on the conversation's context and their internal state, creating a lively and unpredictable experience.
+- **Svelte 5 Migration:** The frontend is actively being migrated to Svelte 5, utilizing modern, reactive, component-based patterns.
+- **Extensive AI Provider Support:** Integrates with a wide range of AI models.
+- **Comprehensive Internationalization:** Fully translated into multiple languages with real-time switching.
 
 ## Development Guidelines
 
