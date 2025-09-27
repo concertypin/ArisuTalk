@@ -6,7 +6,7 @@ import { getPrompt } from "../promptManager.ts";
 import {
   parseChatML,
   chatMLToPromptStructure,
-} from "../../api/chatMLParser.js";
+} from "../../lib/api/chatMLParser.js";
 import { parseMagicPatterns } from "./magicPatternParser.ts";
 
 /**
@@ -65,6 +65,28 @@ async function populateTemplate(template, context) {
 }
 
 /**
+ * Formats group chat messages with sender names and timestamps
+ * @param {Array<object>} messages - The conversation history
+ * @returns {string} - Formatted messages with sender info and timestamps
+ */
+function formatGroupChatMessages(messages) {
+  if (!messages || messages.length === 0) {
+    return "No recent messages.";
+  }
+
+  return messages
+    .map(msg => {
+      const timestamp = new Date(msg.timestamp).toLocaleTimeString('ko-KR', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      const sender = msg.isMe ? 'User' : msg.sender;
+      return `[${timestamp}] ${sender}: ${msg.content || '(No content)'}`;
+    })
+    .join('\n');
+}
+
+/**
  * Builds the contents and system prompt for a content generation request.
  * @param {object} params - The parameters for building the prompt.
  * @param {string} params.userName - The user's name.
@@ -73,6 +95,8 @@ async function populateTemplate(template, context) {
  * @param {Array<object>} params.history - The conversation history.
  * @param {boolean} [params.isProactive=false] - Whether the AI is initiating the conversation.
  * @param {boolean} [params.forceSummary=false] - Whether to force a memory summary.
+ * @param {boolean} [params.isGroupChat=false] - Whether this is a group chat context.
+ * @param {boolean} [params.isOpenChat=false] - Whether this is an open chat context.
  * @returns {Promise<{contents: Array<object>, systemPrompt: string}>} - The generated contents and system prompt.
  */
 export async function buildContentPrompt({
@@ -82,6 +106,8 @@ export async function buildContentPrompt({
   history,
   isProactive = false,
   forceSummary = false,
+  isGroupChat = false,
+  isOpenChat = false,
 }) {
   const chatMLTemplate = await getPrompt("mainChat");
 
@@ -94,11 +120,11 @@ export async function buildContentPrompt({
   if (isProactive) {
     const isFirstContactEver = history.length === 0;
     if (character.isRandom && isFirstContactEver) {
-      timeContext += ` You are initiating contact for the very first time. You found the user's profile interesting and decided to reach out. Your first message MUST reflect this. Greet them and explain why you're contacting them, referencing their persona. This is a special instruction just for this one time.)`;
+      timeContext += ` You are initiating contact for the very first time. You found the user\'s profile interesting and decided to reach out. Your first message MUST reflect this. Greet them and explain why you\'re contacting them, referencing their persona. This is a special instruction just for this one time.)`;
     } else if (isFirstContactEver) {
       timeContext += ` You are starting this conversation for the first time. Greet the user and start a friendly conversation.)`;
     } else {
-      timeContext += ` It's been ${timeDiff} minutes since the conversation paused. You MUST initiate a new conversation topic. Ask a question or make an observation completely unrelated to the last few messages. Your goal is to re-engage the user with something fresh. Do not continue the previous train of thought.)`;
+      timeContext += ` It\'s been ${timeDiff} minutes since the conversation paused. You MUST initiate a new conversation topic. Ask a question or make an observation completely unrelated to the last few messages. Your goal is to re-engage the user with something fresh. Do not continue the previous train of thought.)`;
     }
   } else {
     if (history.length > 0) {
@@ -189,6 +215,11 @@ export async function buildContentPrompt({
   };
   data.char = data.character.name;
   data.user = data.persona.name;
+
+  // Add formatted recent messages for group/open chat contexts
+  if (isGroupChat || isOpenChat) {
+    data.formatted_recent_messages = formatGroupChatMessages(history);
+  }
 
   const populatedPrompt = await populateTemplate(chatMLTemplate, data);
   const chatMLMessages = parseChatML(populatedPrompt);

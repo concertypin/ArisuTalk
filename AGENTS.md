@@ -32,3 +32,9 @@ This project is an AI chat frontend application forked from [`github.com/dkfk532
 - Follow the [Conventional Commits](https://www.conventionalcommits.org) style.
 - Write meaningful commit messages (e.g., `fix: typo in README`, `feat: add feature X`, `chore: update dependency Y`).
 - Do not include too many changes in one commit.
+
+## Svelte 5 Migration
+
+**Attention**: The frontend is currently undergoing a migration from Vanilla JavaScript to Svelte 5. All new frontend development should be done using Svelte components and stores.
+
+Please refer to the `MIGRATION_PLAN.md` file for the detailed strategy and follow the established phases. Any new work should align with the goal of completing this migration.

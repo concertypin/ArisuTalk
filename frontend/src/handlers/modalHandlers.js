@@ -1,7 +1,9 @@
+import { isPromptModalVisible, isSettingsModalVisible } from "../lib/stores/ui.js";
 import { debounce } from "../utils.js";
-import { t, setLanguage } from "../i18n.js";
+import { t, setLanguage } from "../../i18n.js";
 import { setupDesktopSettingsEventListeners } from "../components/DesktopSettingsUI.js";
 import { handleSNSClick } from "./snsHandlers.js";
+import { debouncedCreateSettingsSnapshot } from "../lib/services/dataService.js";
 
 export function handleModalClick(e, app) {
   // 🎯 SNS 핸들러 먼저 시도
@@ -26,8 +28,9 @@ export function handleModalClick(e, app) {
   if (
     e.target.closest("#open-settings-modal") ||
     e.target.closest("#open-settings-modal-mobile")
-  )
-    app.openSettingsModal();
+  ) {
+    isSettingsModalVisible.set(true);
+  }
   if (e.target.closest("#close-settings-modal")) app.handleCancelSettings();
   if (
     e.target.closest("#save-settings") ||
@@ -40,10 +43,12 @@ export function handleModalClick(e, app) {
     app.openNewCharacterModal(e);
 
   // Prompt Modal
-  if (e.target.closest("#open-prompt-modal"))
-    app.setState({ showPromptModal: true });
-  if (e.target.closest("#close-prompt-modal"))
-    app.setState({ showPromptModal: false });
+  if (e.target.closest("#open-prompt-modal")) {
+    isPromptModalVisible.set(true);
+  }
+  if (e.target.closest("#close-prompt-modal")) {
+    isPromptModalVisible.set(false);
+  }
   if (e.target.closest("#save-prompts")) app.handleSavePrompts();
 
   // ChatML handlers
@@ -72,7 +77,7 @@ export function handleModalClick(e, app) {
   }
 
   const closeChatSelection = e.target.closest(
-    '[data-action="close-chat-selection"]',
+    '[data-action="close-chat-selection"]'
   );
   if (closeChatSelection) {
     app.closeChatSelectionModal();
@@ -126,14 +131,19 @@ export function handleModalClick(e, app) {
   }
 
   // 스티커 미리보기 모달 - 닫기
-  if (e.target.closest("#close-sticker-preview-modal") || e.target.closest("#cancel-sticker-edit")) {
+  if (
+    e.target.closest("#close-sticker-preview-modal") ||
+    e.target.closest("#cancel-sticker-edit")
+  ) {
     app.closeStickerPreviewModal();
     return;
   }
 
   // 스티커 미리보기 모달 - 저장
   if (e.target.closest("#save-sticker-name")) {
-    const index = parseInt(e.target.closest("#save-sticker-name").dataset.index);
+    const index = parseInt(
+      e.target.closest("#save-sticker-name").dataset.index
+    );
     const nameInput = document.getElementById("sticker-name-input");
     if (nameInput) {
       app.saveStickerName(index, nameInput.value);
@@ -158,7 +168,9 @@ export function handleModalClick(e, app) {
 
   // 스티커 미리보기 모달 - 클립보드 복사
   if (e.target.closest("#copy-sticker-data")) {
-    const index = parseInt(e.target.closest("#copy-sticker-data").dataset.index);
+    const index = parseInt(
+      e.target.closest("#copy-sticker-data").dataset.index
+    );
     app.copyStickerToClipboard(index);
     return;
   }
@@ -179,13 +191,12 @@ export function handleModalClick(e, app) {
     const scaleInput = document.getElementById("reroll-scale");
     const sizeInput = document.getElementById("reroll-size");
 
-
     if (promptInput && stepsInput && scaleInput && sizeInput) {
       const promptData = {
         prompt: promptInput.value,
         steps: parseInt(stepsInput.value) || 28,
         scale: parseFloat(scaleInput.value) || 3,
-        imageSize: sizeInput.value || 'square'
+        imageSize: sizeInput.value || "square",
       };
       app.startNAIReroll(index, promptData);
     } else {
@@ -195,14 +206,14 @@ export function handleModalClick(e, app) {
 
   // 스티커 미리보기 모달 - 원본 선택
   if (e.target.closest("#select-original")) {
-    app.rejectRerollResult();  // 원본을 선택하면 리롤을 거부
+    app.rejectRerollResult(); // 원본을 선택하면 리롤을 거부
     return;
   }
 
   // 스티커 미리보기 모달 - 리롤 선택
   if (e.target.closest("#select-reroll")) {
     const index = parseInt(e.target.closest("#select-reroll").dataset.index);
-    app.acceptRerollResult(index);  // 리롤을 선택하면 리롤을 수락
+    app.acceptRerollResult(index); // 리롤을 선택하면 리롤을 수락
     return;
   }
 
@@ -301,23 +312,23 @@ export function handleModalClick(e, app) {
 
   // Hypnosis control event handlers
   if (e.target.closest("#hypnosis-enabled")) {
-    const controls = document.getElementById('hypnosis-controls');
+    const controls = document.getElementById("hypnosis-controls");
     if (controls) {
       if (e.target.checked) {
-        controls.classList.remove('opacity-50', 'pointer-events-none');
+        controls.classList.remove("opacity-50", "pointer-events-none");
       } else {
-        controls.classList.add('opacity-50', 'pointer-events-none');
+        controls.classList.add("opacity-50", "pointer-events-none");
       }
     }
   }
 
   if (e.target.closest("#hypnosis-affection-override")) {
-    const controls = document.getElementById('affection-controls');
+    const controls = document.getElementById("affection-controls");
     if (controls) {
       if (e.target.checked) {
-        controls.classList.remove('opacity-50', 'pointer-events-none');
+        controls.classList.remove("opacity-50", "pointer-events-none");
       } else {
-        controls.classList.add('opacity-50', 'pointer-events-none');
+        controls.classList.add("opacity-50", "pointer-events-none");
       }
     }
   }
@@ -328,30 +339,38 @@ export function handleModalClick(e, app) {
       snsModals: {
         ...app.state.snsModals,
         character: null,
-        isOpen: false
-      }
+        isOpen: false,
+      },
     });
   }
 
   if (e.target.closest('[data-action="open-sns"]')) {
-    const characterId = parseInt(e.target.closest('[data-character-id]').dataset.characterId);
-    app.openSNSModal(characterId, 'posts');
+    const characterId = parseInt(
+      e.target.closest("[data-character-id]").dataset.characterId
+    );
+    app.openSNSModal(characterId, "posts");
   }
 
   // ImageResultModal
-  if (e.target.closest("#close-image-result-modal") || e.target.closest("#close-image-result-modal-btn")) {
+  if (
+    e.target.closest("#close-image-result-modal") ||
+    e.target.closest("#close-image-result-modal-btn")
+  ) {
     app.setState({
       imageResultModal: {
         isOpen: false,
         imageUrl: null,
-        promptText: null
-      }
+        promptText: null,
+      },
     });
     return;
   }
 
   // ImageZoomModal
-  if (e.target.closest("#close-image-zoom") || e.target.closest("#image-zoom-modal")) {
+  if (
+    e.target.closest("#close-image-zoom") ||
+    e.target.closest("#image-zoom-modal")
+  ) {
     if (e.target.closest("#zoomed-image")) {
       // 이미지 자체 클릭은 무시 (확대 유지)
       return;
@@ -365,25 +384,25 @@ export function handleModalClick(e, app) {
 // This prevents the UI from re-rendering on every keystroke, improving user experience.
 const debouncedUpdateSettings = debounce((app, newSetting) => {
   app.setState({ settings: { ...app.state.settings, ...newSetting } });
-  app.debouncedCreateSettingsSnapshot();
+  debouncedCreateSettingsSnapshot();
 }, 500);
 
 // Function to save persona settings from DOM inputs
 function savePersonaSettings(app) {
   const userNameInput = document.getElementById("settings-user-name");
   const userDescInput = document.getElementById("settings-user-desc");
-  
+
   if (userNameInput || userDescInput) {
     const updates = {};
-    
+
     if (userNameInput) {
       updates.userName = userNameInput.value;
     }
-    
+
     if (userDescInput) {
       updates.userDescription = userDescInput.value;
     }
-    
+
     // Update state with persona info (최상위 속성으로 저장)
     if (Object.keys(updates).length > 0) {
       app.setState(updates);
@@ -470,7 +489,7 @@ export function handleModalInput(e, app) {
     app.setState({ userName: e.target.value });
     return;
   }
-  
+
   if (e.target.id === "settings-user-desc") {
     app.setState({ userDescription: e.target.value });
     return;
@@ -481,7 +500,7 @@ export function handleModalInput(e, app) {
     const value =
       e.target.type === "checkbox" ? e.target.checked : e.target.value;
     const newSetting = updater(app, value);
-    
+
     // Call the debounced function to update settings
     debouncedUpdateSettings(app, newSetting);
 
@@ -533,7 +552,7 @@ export function handleModalChange(e, app) {
   // SNS character search
   if (e.target.closest('[data-action="sns-character-search"]')) {
     app.setState({
-      snsCharacterSearchTerm: e.target.value
+      snsCharacterSearchTerm: e.target.value,
     });
   }
 

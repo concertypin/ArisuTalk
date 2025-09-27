@@ -193,7 +193,7 @@ If it has been a while ({time.diff} minutes) since the last message, consider st
 
 <|im_start|>user
 Group chat "{groupChatName}" recent messages:
-{recent_messages}
+{formatted_recent_messages}
 
 Please respond as {characterName} to continue this group conversation naturally. Remember you are exclusively {characterName} in this group chat - maintain your unique personality and don't mimic other characters.
 <|im_end|>

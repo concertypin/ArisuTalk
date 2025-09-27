@@ -6,7 +6,7 @@
 The application features a completely restructured settings system with device-specific UI components:
 
 - [DesktopSettingsUI.js](./src/components/DesktopSettingsUI.js) - Desktop interface with centered layout and tab navigation
-- [MobileSettingsUI.js](./src/components/MobileSettingsUI.js) - Mobile-optimized modal interface
+- [MobileSettingsModal.js](./src/components/MobileSettingsModal.js) - Mobile-optimized modal interface
 - [SettingsRouter.js](./src/components/SettingsRouter.js) - Automatic device detection and UI routing
 
 ### Settings Panels
@@ -42,7 +42,7 @@ Application Root (index.js)
 │   │   ├── Character Defaults Panel
 │   │   ├── Data Management Panel
 │   │   └── Advanced Settings Panel
-│   └── Mobile Settings (MobileSettingsUI.js)
+│   └── Mobile Settings (MobileSettingsModal.js)
 ├── Main Chat (MainChat.js)
 ├── Group Chat (GroupChat.js)
 ├── Sidebar (Sidebar.js)

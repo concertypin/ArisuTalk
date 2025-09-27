@@ -2,6 +2,16 @@
 
 This file provides guidance for AI coding agents working on the frontend of this project.
 
+## Svelte 5 Migration Notice
+
+**Important**: This frontend is being migrated from Vanilla JS to Svelte 5. Please adhere to the following guidelines:
+
+-   All new features and components **must** be written in Svelte.
+-   Refer to the root `MIGRATION_PLAN.md` for the overall strategy.
+-   A significant portion of the application has already been migrated, and most new development will involve interacting with or extending existing Svelte components and stores.
+-   Prioritize converting existing JS modules to Svelte components (`.svelte`) and stores (`.ts`) as part of your tasks.
+-   Avoid adding new logic to the old `PersonaChatApp` (`index.js`) or `ui.js`.
+
 ## Build and Test Commands
 
 - **Install dependencies**: `pnpm install`

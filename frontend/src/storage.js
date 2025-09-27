@@ -1,4 +1,5 @@
 import { t } from "./i18n.js";
+import { getStorageKey } from "./lib/utils/storageKey";
 
 export async function loadFromBrowserStorage(key, defaultValue) {
   try {
@@ -26,7 +27,7 @@ export async function saveToBrowserStorage(key, value) {
 
 export async function loadFromIndexedDB(key) {
   return new Promise((resolve, reject) => {
-    const dbName = "PersonaChatDB";
+    const dbName = getStorageKey("PersonaChatDB");
     const request = indexedDB.open(dbName, 1);
 
     request.onerror = () => reject(request.error);
@@ -59,7 +60,7 @@ export async function loadFromIndexedDB(key) {
  */
 export async function saveToIndexedDB(key, value) {
   return new Promise((resolve, reject) => {
-    const dbName = "PersonaChatDB";
+    const dbName = getStorageKey("PersonaChatDB");
     const request = indexedDB.open(dbName, 1);
 
     request.onerror = () => reject(request.error);
