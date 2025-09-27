@@ -5,7 +5,7 @@
   import { settings, settingsSnapshots } from '../../../stores/settings';
   import { backupData, restoreData, resetAllData } from '../../../services/dataService';
   import { prompts } from '../../../stores/prompts';
-  import SnapshotList from '../../settings/panels/SnapshotList.svelte';
+  import SnapshotList from './panels/SnapshotList.svelte';
 
   const dispatch = createEventDispatcher();
   let restoreFileInput;
