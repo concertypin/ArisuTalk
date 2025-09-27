@@ -37,6 +37,16 @@ export default defineConfig(({ mode }) => ({
     build: {
         outDir: "dist",
         sourcemap: "inline",
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    // 벤더 라이브러리들을 별도 청크로 분리
+                    'vendor-core': ['svelte', 'svelte/internal'],
+                    'vendor-ui': ['lucide-svelte'],
+                    'vendor-utils': ['jszip'],
+                }
+            }
+        }
     },
     clearScreen: false,
     publicDir: "static",

@@ -10,31 +10,48 @@
   import { stickerManager } from './stores/services';
   import { StickerManager } from './services/stickerManager.js';
 
-  // Import migrated components
+  // Core components - always loaded
   import Sidebar from './components/Sidebar.svelte';
   import LandingPage from './components/LandingPage.svelte';
-  import ConfirmationModal from './components/ConfirmationModal.svelte';
-  import ImageZoomModal from './components/ImageZoomModal.svelte';
   import MainChat from './components/MainChat.svelte';
-  import CreateGroupChatModal from './components/modals/chat/CreateGroupChatModal.svelte';
-  import CreateOpenChatModal from './components/modals/chat/CreateOpenChatModal.svelte';
-  import EditGroupChatModal from './components/modals/chat/EditGroupChatModal.svelte';
-  import CharacterModal from './components/modals/character/CharacterModal.svelte';
-  import DesktopSettingsUI from './components/modals/settings/DesktopSettingsUI.svelte';
-  import MasterPasswordModal from './components/modals/security/MasterPasswordModal.svelte';
-  import ChatSelectionModal from './components/modals/chat/ChatSelectionModal.svelte';
-  import SearchModal from './components/modals/search/SearchModal.svelte';
-  import CharacterListPage from './components/mobile/CharacterListPage.svelte';
-  import MobileSettings from './components/modals/settings/MobileSettings.svelte';
-  import SNSCharacterListModal from './components/modals/sns/SNSCharacterListModal.svelte';
-  import SNSFeedModal from './components/modals/sns/SNSFeedModal.svelte';
-  import SNSPostModal from './components/modals/sns/SNSPostModal.svelte';
-  import PromptModal from './components/modals/prompt/PromptModal.svelte';
-  import DebugLogsModal from './components/modals/logs/DebugLogsModal.svelte';
   import DevModeIndicator from './components/DevModeIndicator.svelte';
+
+  // Lazy load heavy components
+  let ConfirmationModal, ImageZoomModal, CreateGroupChatModal, CreateOpenChatModal,
+      EditGroupChatModal, CharacterModal, DesktopSettingsUI, MasterPasswordModal,
+      ChatSelectionModal, SearchModal, CharacterListPage, MobileSettings,
+      SNSCharacterListModal, SNSFeedModal, SNSPostModal, PromptModal, DebugLogsModal;
   import { settings } from './stores/settings';
   import { enableAutoSnapshots } from './services/dataService';
   import { addLog } from './services/logService';
+
+  // Dynamic import functions for code splitting
+  const loadConfirmationModal = () => import('./components/ConfirmationModal.svelte');
+  const loadImageZoomModal = () => import('./components/ImageZoomModal.svelte');
+  const loadCreateGroupChatModal = () => import('./components/modals/chat/CreateGroupChatModal.svelte');
+  const loadCreateOpenChatModal = () => import('./components/modals/chat/CreateOpenChatModal.svelte');
+  const loadEditGroupChatModal = () => import('./components/modals/chat/EditGroupChatModal.svelte');
+  const loadCharacterModal = () => import('./components/modals/character/CharacterModal.svelte');
+  const loadDesktopSettingsUI = () => import('./components/modals/settings/DesktopSettingsUI.svelte');
+  const loadMasterPasswordModal = () => import('./components/modals/security/MasterPasswordModal.svelte');
+  const loadChatSelectionModal = () => import('./components/modals/chat/ChatSelectionModal.svelte');
+  const loadSearchModal = () => import('./components/modals/search/SearchModal.svelte');
+  const loadCharacterListPage = () => import('./components/mobile/CharacterListPage.svelte');
+  const loadMobileSettings = () => import('./components/modals/settings/MobileSettings.svelte');
+  const loadSNSCharacterListModal = () => import('./components/modals/sns/SNSCharacterListModal.svelte');
+  const loadSNSFeedModal = () => import('./components/modals/sns/SNSFeedModal.svelte');
+  const loadSNSPostModal = () => import('./components/modals/sns/SNSPostModal.svelte');
+  const loadPromptModal = () => import('./components/modals/prompt/PromptModal.svelte');
+  const loadDebugLogsModal = () => import('./components/modals/logs/DebugLogsModal.svelte');
+
+  // Lazy load components when needed
+  async function lazyLoadComponent(loadFunction, componentVar) {
+    if (!componentVar) {
+      const module = await loadFunction();
+      componentVar = module.default;
+    }
+    return componentVar;
+  }
 
   onMount(() => {
     addLog({
@@ -65,7 +82,9 @@
     return () => window.removeEventListener('resize', handleResize);
   });
 
-  function handleCreateNewChat() {
+  async function handleCreateNewChat() {
+    // Lazy load ChatSelectionModal if needed
+    ChatSelectionModal = await lazyLoadComponent(loadChatSelectionModal, ChatSelectionModal);
     const character = get(chatSelectionModalData).character;
     if (character) {
       const newChatRoomId = createNewChatRoom(character.id);
@@ -74,7 +93,9 @@
     }
   }
 
-  function handleCharacterSelect(event) {
+  async function handleCharacterSelect(event) {
+    // Lazy load SearchModal if needed
+    SearchModal = await lazyLoadComponent(loadSearchModal, SearchModal);
     const character = event.detail;
     const rooms = get(chatRooms)[character.id] || [];
     if (rooms.length === 1) {
@@ -88,28 +109,39 @@
     }
   }
 
-  function handleMobileCharacterSelect(event) {
+  async function handleMobileCharacterSelect(event) {
+    // Lazy load CharacterListPage if needed
+    CharacterListPage = await lazyLoadComponent(loadCharacterListPage, CharacterListPage);
     const character = event.detail;
     chatSelectionModalData.set({ character });
     isChatSelectionModalVisible.set(true);
   }
 
-  function handleOpenSns(event) {
+  async function handleOpenSns(event) {
+    // Lazy load SNS components if needed
+    SNSCharacterListModal = await lazyLoadComponent(loadSNSCharacterListModal, SNSCharacterListModal);
+    SNSFeedModal = await lazyLoadComponent(loadSNSFeedModal, SNSFeedModal);
     snsFeedCharacter.set(event.detail);
     isSNSFeedModalVisible.set(true);
   }
 
-  function handleCharacterSettings(event) {
+  async function handleCharacterSettings(event) {
+    // Lazy load CharacterModal if needed
+    CharacterModal = await lazyLoadComponent(loadCharacterModal, CharacterModal);
     editingCharacter.set(event.detail);
     isCharacterModalVisible.set(true);
   }
 
-  function handleNewCharacter() {
+  async function handleNewCharacter() {
+    // Lazy load CharacterModal if needed
+    CharacterModal = await lazyLoadComponent(loadCharacterModal, CharacterModal);
     editingCharacter.set(null);
     isCharacterModalVisible.set(true);
   }
 
-  function handleSaveSNSPost(event) {
+  async function handleSaveSNSPost(event) {
+    // Lazy load SNSPostModal if needed
+    SNSPostModal = await lazyLoadComponent(loadSNSPostModal, SNSPostModal);
     const post = event.detail;
     characters.update(chars => {
       const charIndex = chars.findIndex(c => c.id === post.characterId);
