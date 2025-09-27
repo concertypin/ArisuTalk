@@ -2,11 +2,30 @@ import { writable } from 'svelte/store';
 import { persistentStore } from './persistentStore';
 import { t } from '../../i18n';
 
-export const chatRooms = persistentStore('personaChat_chatRooms_v16', {});
-export const groupChats = persistentStore('personaChat_groupChats_v16', {});
-export const openChats = persistentStore('personaChat_openChats_v16', {});
-export const messages = persistentStore('personaChat_messages_v16', {});
-export const unreadCounts = persistentStore('personaChat_unreadCounts_v16', {});
+export interface Message {
+  id: number;
+  sender: string;
+  characterId?: string;
+  content: string;
+  time: string;
+  timestamp: number;
+  isMe: boolean;
+  isError: boolean;
+  type: string;
+  hasText?: boolean;
+  sticker?: any;
+  imageUrl?: string;
+}
+
+export interface MessagesStore {
+  [chatId: string]: Message[];
+}
+
+export const chatRooms = persistentStore<Record<string, any[]>>('personaChat_chatRooms_v16', {});
+export const groupChats = persistentStore<Record<string, any>>('personaChat_groupChats_v16', {});
+export const openChats = persistentStore<Record<string, any>>('personaChat_openChats_v16', {});
+export const messages = persistentStore<MessagesStore>('personaChat_messages_v16', {});
+export const unreadCounts = persistentStore<Record<string, number>>('personaChat_unreadCounts_v16', {});
 
 // Forcing the landing page to be visible on refresh.
 export const selectedChatId = writable(null);

@@ -1,6 +1,6 @@
-import { writable } from "svelte/store";
-import { saveToBrowserStorage, loadFromBrowserStorage } from "../../storage.js";
-import { debounce } from "../../utils.js";
+import { writable, type Writable } from "svelte/store";
+import { saveToBrowserStorage, loadFromBrowserStorage } from "../../storage";
+import { debounce } from "../../utils";
 import { getStorageKey } from "../utils/storageKey";
 
 /**
@@ -10,7 +10,7 @@ import { getStorageKey } from "../utils/storageKey";
  * @param {number} debounceMs The debounce delay for saving to storage.
  * @returns A Svelte store.
  */
-export function persistentStore(key, initialValue, debounceMs = 500) {
+export function persistentStore<T>(key: string, initialValue: T, debounceMs = 500): Writable<T> {
   const prefixedKey = getStorageKey(key);
   const store = writable(initialValue);
   let loaded = false;

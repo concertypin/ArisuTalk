@@ -5,7 +5,7 @@
   import { characters, expandedCharacterIds, editingCharacter } from '../stores/character';
   import { chatRooms, selectedChatId, searchQuery, messages, groupChats, openChats, unreadCounts, editingGroupChat, editingChatRoomId } from '../stores/chat';
   import { isSidebarCollapsed, isCharacterModalVisible, isConfirmationModalVisible, confirmationModalData, isCreateGroupChatModalVisible, isCreateOpenChatModalVisible, isEditGroupChatModalVisible, isDesktopSettingsModalVisible, isChatSelectionModalVisible, chatSelectionModalData, isSearchModalVisible } from '../stores/ui';
-  import { formatTimestamp } from '../../utils.js';
+  import { formatTimestamp } from '../../utils';
   import Avatar from './Avatar.svelte';
   import { Bot, Settings, Plus, ChevronRight, ChevronLeft, ChevronDown, Edit3, Trash2, Check, Users, Globe } from 'lucide-svelte';
   import GroupChatList from './sidebar/GroupChatList.svelte';

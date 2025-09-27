@@ -4,7 +4,7 @@
   import { groupChats, selectedChatId, messages, unreadCounts, editingGroupChat } from '../../stores/chat';
   import { isCreateGroupChatModalVisible, isEditGroupChatModalVisible, isConfirmationModalVisible, confirmationModalData } from '../../stores/ui';
   import { Users, Plus, Edit3, Trash2 } from 'lucide-svelte';
-  import { formatTimestamp } from '../../../utils.js';
+  import { formatTimestamp } from '../../../utils';
 
   function openCreateGroupChatModal() {
     isCreateGroupChatModalVisible.set(true);

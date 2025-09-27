@@ -3,7 +3,7 @@
   import { t } from '../../i18n.js';
   import { createEventDispatcher } from 'svelte';
   import { chatRooms, messages, unreadCounts } from '../stores/chat';
-  import { formatTimestamp } from '../../utils.js';
+  import { formatTimestamp } from '../../utils';
   import Avatar from './Avatar.svelte';
   import { Instagram, Settings } from 'lucide-svelte';
 

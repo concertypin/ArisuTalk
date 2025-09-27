@@ -3,7 +3,7 @@
   import { openChats, selectedChatId, messages, unreadCounts } from '../../stores/chat';
   import { isCreateOpenChatModalVisible, isConfirmationModalVisible, confirmationModalData } from '../../stores/ui';
   import { Globe, Plus, Trash2 } from 'lucide-svelte';
-  import { formatTimestamp } from '../../../utils.js';
+  import { formatTimestamp } from '../../../utils';
 
   function openCreateOpenChatModal() {
     isCreateOpenChatModalVisible.set(true);

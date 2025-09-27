@@ -1,6 +1,10 @@
 import { get } from "svelte/store";
-import { settings, settingsSnapshots } from "../stores/settings";
-import { characters, characterStateStore, userStickers } from "../stores/character";
+import { settings, settingsSnapshots, type SettingsSnapshot } from "../stores/settings";
+import {
+  characters,
+  characterStateStore,
+  userStickers,
+} from "../stores/character";
 import {
   chatRooms,
   groupChats,
@@ -9,14 +13,14 @@ import {
   unreadCounts,
 } from "../stores/chat";
 import { t } from "../../i18n";
-import { saveToBrowserStorage } from "../../storage.js";
+import { saveToBrowserStorage } from "../../storage";
 import { secureStorage } from "../utils/secureStorage";
 import { getStorageKey } from "../utils/storageKey";
 import { showNotification, showConfirmation } from "./notificationService";
 
 // Debounce utility function
 function debounce(func: Function, wait: number) {
-  let timeout: NodeJS.Timeout | null = null;
+  let timeout: number | null = null;
   return function executedFunction(...args: any[]) {
     const later = () => {
       timeout = null;
@@ -160,13 +164,13 @@ export async function resetAllData() {
     window.location.reload();
   } catch (error) {
     console.error("Failed to reset all data:", error);
-    alert(t("confirm.resetDataFailed") + error.message);
+    alert(t("confirm.resetDataFailed") + (error as Error).message);
   }
 }
 
 export function restoreSnapshot(timestamp: number) {
   const snapshot = get(settingsSnapshots).find(
-    (s) => s.timestamp === timestamp
+    (s: SettingsSnapshot) => s.timestamp === timestamp
   );
   if (snapshot) {
     settings.set(snapshot.settings);
@@ -190,7 +194,7 @@ export function createSettingsSnapshot() {
     },
   };
 
-  settingsSnapshots.update((snapshots) => {
+  settingsSnapshots.update((snapshots: SettingsSnapshot[]) => {
     // 최대 10개의 스냅샷만 유지
     const updatedSnapshots = [snapshot, ...snapshots].slice(0, 10);
     return updatedSnapshots;
@@ -200,7 +204,7 @@ export function createSettingsSnapshot() {
 }
 
 export function deleteSnapshot(timestamp: number) {
-  settingsSnapshots.update((snapshots) =>
+  settingsSnapshots.update((snapshots: SettingsSnapshot[]) =>
     snapshots.filter((s) => s.timestamp !== timestamp)
   );
 }

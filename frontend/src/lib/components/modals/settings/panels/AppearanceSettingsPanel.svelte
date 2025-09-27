@@ -1,5 +1,5 @@
 <script>
-  import { t, getLanguage, setLanguage } from '../../../../i18n.js';
+  import { t, getLanguage, setLanguage } from '../../../../../i18n.js';
   import { settings } from '../../../../stores/settings';
   import { Type, Info, Globe, Palette, Moon, Clock, Zap } from 'lucide-svelte';
 

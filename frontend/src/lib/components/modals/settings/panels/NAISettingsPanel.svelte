@@ -1,10 +1,10 @@
 <script>
   import { onMount } from 'svelte';
-  import { t } from '../../../../i18n.js';
+  import { t } from '../../../../../i18n.js';
   import { settings } from '../../../../stores/settings';
   import { Image, Cpu, UserPlus, Settings, Edit, Smile, Download, BarChart3, HelpCircle, Eye, EyeOff, Plus, Check, X, RefreshCw, Users, Trash2, Loader2 } from 'lucide-svelte';
-  import { NovelAIClient } from '../../../api/novelai.js';
-  import { DEFAULT_EMOTIONS } from '../../../../defaults.js';
+  import { NovelAIClient } from '../../../../api/novelai.js';
+  import { DEFAULT_EMOTIONS } from '../../../../../defaults.js';
 
   import { characters } from '../../../../stores/character';
 

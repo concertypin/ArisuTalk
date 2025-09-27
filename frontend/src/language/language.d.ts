@@ -302,6 +302,7 @@ export type LanguageStrings = {
     description: string;
     searchPlaceholder: string;
     invite: string;
+    lastAiMessage: string;
   };
   defaultCharacter: {
     name: string;
@@ -624,6 +625,8 @@ export type LanguageStrings = {
     logsDisabled: string;
     unknown: string;
     invalidDate: string;
+    naiGeneration: string;
+    snsPostType: string;
   };
   api: {
     imageMessage: string;
@@ -776,6 +779,7 @@ export type LanguageStrings = {
     daysAgo: string;
     weeksAgo: string;
     monthsAgo: string;
+    yearsAgo: string;
     characterList: {
       searchPlaceholder: string;
       availableCharacters: string;
@@ -797,6 +801,7 @@ export type LanguageStrings = {
     romanticInterest: string;
     openSNSList: string;
     viewSNS: string;
+    requiredPermissions: string;
   };
   naiSettings: {
     title: string;
@@ -939,6 +944,7 @@ export type LanguageStrings = {
     currentList: string;
     itemTitleLabel: string;
     itemTitlePlaceholder: string;
+    itemTitleHelp: string;
     emotionLabel: string;
     actionSituationLabel: string;
     actionSituationPlaceholder: string;
@@ -964,6 +970,7 @@ export type LanguageStrings = {
     stickerGenerationError: string;
     stickerGenerationFailed: string;
     stickersGenerated: string;
+    emotionHelp: string;
   };
   stickerProgress: {
     title: string;

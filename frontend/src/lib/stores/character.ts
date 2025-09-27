@@ -19,6 +19,11 @@ export interface CharacterState {
   };
   currentRooms: string[];
   lastActivity: number;
+  affection?: number; // 0.0 ~ 1.0
+  intimacy?: number; // 0.0 ~ 1.0
+  trust?: number; // 0.0 ~ 1.0
+  romantic_interest?: number; // 0.0 ~ 1.0
+  messageCount?: number;
 }
 
 export const characterStateStore = persistentStore<Record<string, CharacterState>>('personaChat_characterStates_v16', {});

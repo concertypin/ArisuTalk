@@ -4,7 +4,7 @@
  */
 
 import { encryptText, decryptText, generateMasterPassword } from "./crypto.js";
-import { loadFromBrowserStorage, saveToBrowserStorage } from "../../storage.js";
+import { loadFromBrowserStorage, saveToBrowserStorage } from "../../storage";
 import { t } from "../../i18n.js";
 import { getStorageKey } from "./storageKey";
 

@@ -3,7 +3,7 @@
   import { createEventDispatcher } from 'svelte';
   import { ArrowLeft, Save, RefreshCw, Download, Upload } from 'lucide-svelte';
   import { prompts } from '../../../stores/prompts';
-  import PromptSection from '../PromptSection.svelte';
+  import PromptSection from '../prompt/PromptSection.svelte';
 
   const dispatch = createEventDispatcher();
 

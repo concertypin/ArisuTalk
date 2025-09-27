@@ -1,10 +1,10 @@
-import { get } from 'svelte/store';
+import { get } from "svelte/store";
 import { NovelAIClient, validateNAIApiKey } from "../api/novelai.js";
 import { DEFAULT_EMOTIONS } from "../../defaults.js";
-import { saveToBrowserStorage } from "../../storage.js";
+import { saveToBrowserStorage } from "../../storage";
 import { t } from "../../i18n.js";
-import { settings } from '../stores/settings';
-import { characters } from '../stores/character';
+import { settings } from "../stores/settings";
+import { characters } from "../stores/character";
 
 /**
  * @typedef {Object} EmotionObject
@@ -247,10 +247,8 @@ export class StickerManager {
       character.stickers.push(sticker);
 
       // 캐릭터 정보 즉시 저장
-      characters.update(chars => 
-        chars.map((c) =>
-          c.id === character.id ? character : c
-        )
+      characters.update((chars) =>
+        chars.map((c) => (c.id === character.id ? character : c))
       );
 
       // console.log(`[StickerManager] ${character.name}의 ${emotion} 스티커가 자동 생성되어 저장되었습니다.`);
@@ -305,8 +303,7 @@ export class StickerManager {
             character,
             emotion,
             {
-              size:
-                get(settings).naiSettings?.preferredSize || "square",
+              size: get(settings).naiSettings?.preferredSize || "square",
               naiSettings: get(settings).naiSettings || {},
             }
           );
@@ -318,10 +315,8 @@ export class StickerManager {
           character.stickers.push(sticker);
 
           // 캐릭터 정보 즉시 저장
-          characters.update(chars =>
-            chars.map((c) =>
-              c.id === character.id ? character : c
-            )
+          characters.update((chars) =>
+            chars.map((c) => (c.id === character.id ? character : c))
           );
 
           results.push({ success: true, sticker, emotion });

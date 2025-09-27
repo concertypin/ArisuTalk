@@ -16,21 +16,21 @@
   import ConfirmationModal from './components/ConfirmationModal.svelte';
   import ImageZoomModal from './components/ImageZoomModal.svelte';
   import MainChat from './components/MainChat.svelte';
-  import CreateGroupChatModal from './components/modals/CreateGroupChatModal.svelte';
-  import CreateOpenChatModal from './components/modals/CreateOpenChatModal.svelte';
-  import EditGroupChatModal from './components/modals/EditGroupChatModal.svelte';
-  import CharacterModal from './components/modals/CharacterModal.svelte';
-  import DesktopSettingsModal from './components/modals/DesktopSettingsModal.svelte';
-  import MasterPasswordModal from './components/modals/MasterPasswordModal.svelte';
-  import ChatSelectionModal from './components/modals/ChatSelectionModal.svelte';
-  import SearchModal from './components/modals/SearchModal.svelte';
+  import CreateGroupChatModal from './components/modals/chat/CreateGroupChatModal.svelte';
+  import CreateOpenChatModal from './components/modals/chat/CreateOpenChatModal.svelte';
+  import EditGroupChatModal from './components/modals/chat/EditGroupChatModal.svelte';
+  import CharacterModal from './components/modals/character/CharacterModal.svelte';
+  import DesktopSettingsUI from './components/modals/settings/DesktopSettingsUI.svelte';
+  import MasterPasswordModal from './components/modals/security/MasterPasswordModal.svelte';
+  import ChatSelectionModal from './components/modals/chat/ChatSelectionModal.svelte';
+  import SearchModal from './components/modals/search/SearchModal.svelte';
   import CharacterListPage from './components/mobile/CharacterListPage.svelte';
-  import MobileSettings from './components/modals/MobileSettings.svelte';
-  import SNSCharacterListModal from './components/modals/SNSCharacterListModal.svelte';
-  import SNSFeedModal from './components/modals/SNSFeedModal.svelte';
-  import SNSPostModal from './components/modals/SNSPostModal.svelte';
-  import PromptModal from './components/modals/PromptModal.svelte';
-  import DebugLogsModal from './components/modals/DebugLogsModal.svelte';
+  import MobileSettings from './components/modals/settings/MobileSettings.svelte';
+  import SNSCharacterListModal from './components/modals/sns/SNSCharacterListModal.svelte';
+  import SNSFeedModal from './components/modals/sns/SNSFeedModal.svelte';
+  import SNSPostModal from './components/modals/sns/SNSPostModal.svelte';
+  import PromptModal from './components/modals/prompt/PromptModal.svelte';
+  import DebugLogsModal from './components/modals/logs/DebugLogsModal.svelte';
   import DevModeIndicator from './components/DevModeIndicator.svelte';
   import { settings } from './stores/settings';
   import { enableAutoSnapshots } from './services/dataService';
@@ -141,7 +141,7 @@
 <CreateOpenChatModal />
 <EditGroupChatModal />
 <CharacterModal />
-<DesktopSettingsModal />
+<DesktopSettingsUI />
 <MasterPasswordModal />
 <ChatSelectionModal
   isOpen={$isChatSelectionModalVisible}
