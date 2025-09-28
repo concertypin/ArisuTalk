@@ -1,33 +1,26 @@
-# Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+# Simple workflow for deploying static content
+name: Deploy static content
 
 on:
-  # Runs on pushes targeting the default branch
   push:
     branches: ["main"]
     paths:
-      - 'frontend/**'
-      - '.github/workflows/pages.yml'
+      - "frontend/**"
+      - ".github/workflows/pages.yml"
+      - "pnpm*"
+      - "package.json"
+    tags:
+      - "v*" # production
+      - "dev*" # development
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
 jobs:
-  # Single deploy job since we're just deploying
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -35,32 +28,93 @@ jobs:
         with:
           sparse-checkout: frontend
 
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         with:
           package_json_file: "frontend/package.json"
           run_install: false
-    
+
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
           node-version-file: "frontend/package.json"
-          cache: 'pnpm'
-    
-      - name: Install deps
-        run: pnpm install
+          cache: "pnpm"
+          cache-dependency-path: "frontend/pnpm-lock.yaml"
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-       
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: ./frontend
+
       - name: Build page
-        run: pnpm --filter frontend build
+        run: pnpm build
+        working-directory: ./frontend
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          path: 'frontend/dist'
-        
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          name: pages-artifact
+          path: frontend/dist/
+
+  # Spark deployment (all main branch and tags)
+  publish-spark:
+    needs: build
+    concurrency:
+      group: "deploy-spark"
+      cancel-in-progress: false
+
+    # Check if we should publish to spark (main branch or tags starting with v or dev)
+    # It includes both prod and dev deployments
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v') || startsWith(github.ref, 'refs/tags/dev')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: pages-artifact
+
+      - name: Deploy to Cloudflare (spark)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy . --project-name=arisutalk-canaria
+
+  publish-dev:
+    needs: [build, publish-spark] # Depends on Spark deployment to ensure it works
+    concurrency:
+      group: "deploy-dev"
+      cancel-in-progress: false
+    if: startsWith(github.ref, 'refs/tags/dev')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: pages-artifact
+
+      - name: Deploy to Cloudflare (dev)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy . --project-name=arisutalk-dev
+
+  publish-prod:
+    needs: [build, publish-spark]
+    if: startsWith(github.ref, 'refs/tags/v')
+    concurrency:
+      group: "deploy-prod"
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: pages-artifact
+
+      - name: Deploy to Cloudflare (prod)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy . --project-name=arisutalk-prod
