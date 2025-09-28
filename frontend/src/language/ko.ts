@@ -585,13 +585,14 @@ export const ko: LanguageStrings = {
     initialParticipants: "처음에는 랜덤하게 2-4명이 입장합니다",
     availableCharacters: "{{count}}명의 캐릭터 참여 가능",
     deleteOpenChatTitle: "오픈톡방 삭제",
-    deleteOpenChatConfirm: "이 오픈톡방을 삭제하시겠습니까? 모든 대화 내용이 사라집니다.",
+    deleteOpenChatConfirm:
+      "이 오픈톡방을 삭제하시겠습니까? 모든 대화 내용이 사라집니다.",
     openChatNameRequired: "오픈톡방 이름 필요",
     openChatNameRequiredMessage: "오픈톡방 이름을 입력해주세요.",
     participantsConnected: "{{count}}명 접속중",
     startConversation: "대화를 시작해보세요",
-    'openchat.joined': '{name}님이 입장했습니다.',
-    'openchat.left': '{name}님이 퇴장했습니다.',
+    "openchat.joined": "{name}님이 입장했습니다.",
+    "openchat.left": "{name}님이 퇴장했습니다.",
   },
   groupChat: {
     groupChat: "단톡방",
@@ -674,7 +675,8 @@ export const ko: LanguageStrings = {
     export: "내보내기",
     clearAll: "전체 삭제",
     close: "닫기",
-    clearAllConfirm: "모든 디버그 로그를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+    clearAllConfirm:
+      "모든 디버그 로그를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
     noLogs: "로그가 없습니다",
     noLogsCollected:
       "아직 수집된 로그가 없습니다.<br/>채팅을 시작하면 로그가 생성됩니다.",
@@ -1021,7 +1023,8 @@ export const ko: LanguageStrings = {
     actionSituationPlaceholder: "액션이나 상황을 입력하세요",
     itemTitleHelp: "스티커의 제목입니다. (예: '인사')",
     emotionHelp: "스티커에 표현될 감정입니다. (예: '기쁨', '미소')",
-    actionSituationHelp: "스티커의 구체적인 행동이나 상황입니다. (예: '손 흔들며', '밝게 웃으며')",
+    actionSituationHelp:
+      "스티커의 구체적인 행동이나 상황입니다. (예: '손 흔들며', '밝게 웃으며')",
     addNaiGenerationItem: "항목 추가",
     saveList: "목록 저장",
     cancel: "취소",

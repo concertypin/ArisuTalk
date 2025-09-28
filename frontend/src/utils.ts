@@ -14,12 +14,18 @@ interface MessageGroup {
   lastMessageId: number;
 }
 
-export function debounce<T extends (...args: any[]) => any>(func: T, delay: number): T & { cancel: () => void } {
+export function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  delay: number,
+): T & { cancel: () => void } {
   let timeout: number;
   const debounced = function (this: any, ...args: Parameters<T>) {
     const context = this;
     clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(context, args), delay) as unknown as number;
+    timeout = setTimeout(
+      () => func.apply(context, args),
+      delay,
+    ) as unknown as number;
   } as T;
 
   (debounced as any).cancel = function () {
@@ -29,7 +35,11 @@ export function debounce<T extends (...args: any[]) => any>(func: T, delay: numb
   return debounced as T & { cancel: () => void };
 }
 
-export function findMessageGroup(messages: Message[], targetIndex: number, characterName: string): MessageGroup | null {
+export function findMessageGroup(
+  messages: Message[],
+  targetIndex: number,
+  characterName: string,
+): MessageGroup | null {
   if (targetIndex < 0 || targetIndex >= messages.length) {
     return null;
   }
@@ -81,7 +91,9 @@ export function formatDateSeparator(dateString: string): string {
   return date.toLocaleDateString(getLanguage(), options);
 }
 
-export function formatTimestamp(timestamp: string | number | Date | null | undefined): string {
+export function formatTimestamp(
+  timestamp: string | number | Date | null | undefined,
+): string {
   if (!timestamp) return "";
 
   const now = new Date();

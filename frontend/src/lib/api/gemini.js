@@ -61,9 +61,11 @@ export class GeminiClient {
     chatId = null,
   }) {
     // Determine chat type from chatId
-    const isGroupChat = chatId && typeof chatId === "string" && chatId.startsWith("group_");
-    const isOpenChat = chatId && typeof chatId === "string" && chatId.startsWith("open_");
-    
+    const isGroupChat =
+      chatId && typeof chatId === "string" && chatId.startsWith("group_");
+    const isOpenChat =
+      chatId && typeof chatId === "string" && chatId.startsWith("open_");
+
     const { contents, systemPrompt } = await buildContentPrompt({
       userName,
       userDescription,
@@ -112,7 +114,13 @@ export class GeminiClient {
                 romantic_interest: { type: "NUMBER" },
                 reason: { type: "STRING" },
               },
-              required: ["affection", "intimacy", "trust", "romantic_interest", "reason"],
+              required: [
+                "affection",
+                "intimacy",
+                "trust",
+                "romantic_interest",
+                "reason",
+              ],
             },
             autoPost: {
               type: "OBJECT",
@@ -127,7 +135,14 @@ export class GeminiClient {
                 },
                 emotion: { type: "STRING" },
               },
-              required: ["type", "content", "access_level", "importance", "tags", "emotion"],
+              required: [
+                "type",
+                "content",
+                "access_level",
+                "importance",
+                "tags",
+                "emotion",
+              ],
             },
             naiSticker: {
               type: "OBJECT",

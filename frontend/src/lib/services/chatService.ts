@@ -47,7 +47,7 @@ async function handleVirtualStream(chatId, character, messageParts) {
     // 1. Show typing indicator
     virtualStream.update((s) => ({ ...s, isTyping: true }));
     await new Promise((resolve) =>
-      setTimeout(resolve, messagePart.delay || 1000)
+      setTimeout(resolve, messagePart.delay || 1000),
     );
 
     // 2. Add message and hide typing indicator
@@ -173,7 +173,7 @@ async function callApiAndHandleResponse(
   character,
   history,
   isProactive = false,
-  forceSummary = false
+  forceSummary = false,
 ) {
   const currentSettings = get(settings);
   const apiProvider = currentSettings.apiProvider || "gemini";
@@ -212,7 +212,7 @@ async function callApiAndHandleResponse(
         chatId, // Add chatId to pass to buildContentPrompt
       },
       currentConfig.baseUrl,
-      options
+      options,
     );
 
     const chatType = isGroupChat(chatId)
@@ -279,7 +279,7 @@ async function callApiAndHandleResponse(
           const newChars = [...chars];
           newChars[charIndex] = processAutoPost(
             newChars[charIndex],
-            legacyMemoryPost
+            legacyMemoryPost,
           );
           return newChars;
         }
@@ -294,7 +294,7 @@ async function callApiAndHandleResponse(
           const newChars = [...chars];
           newChars[charIndex] = processAutoPost(
             newChars[charIndex],
-            response.autoPost
+            response.autoPost,
           );
           return newChars;
         }
@@ -335,7 +335,7 @@ async function callApiAndHandleResponse(
 
 export async function sendMessage(content, type = "text", payload = {}) {
   console.log(
-    `sendMessage called with chatId: ${get(selectedChatId)}, isGroupChat: ${isGroupChat(get(selectedChatId))}`
+    `sendMessage called with chatId: ${get(selectedChatId)}, isGroupChat: ${isGroupChat(get(selectedChatId))}`,
   );
   const chatId = get(selectedChatId);
   if (!chatId) return;
@@ -404,10 +404,10 @@ export async function sendMessage(content, type = "text", payload = {}) {
     // Limit number of responding characters
     const maxResponders = Math.min(
       groupSettings.maxRespondingCharacters,
-      activeParticipants.length
+      activeParticipants.length,
     );
     const shuffledParticipants = [...activeParticipants].sort(
-      () => Math.random() - 0.5
+      () => Math.random() - 0.5,
     );
     const respondingCharacterIds = shuffledParticipants.slice(0, maxResponders);
 
@@ -421,7 +421,7 @@ export async function sendMessage(content, type = "text", payload = {}) {
       // Add delay between responses if not the first one
       if (i > 0) {
         await new Promise((resolve) =>
-          setTimeout(resolve, groupSettings.responseDelay)
+          setTimeout(resolve, groupSettings.responseDelay),
         );
       }
 
@@ -430,7 +430,7 @@ export async function sendMessage(content, type = "text", payload = {}) {
       } catch (error) {
         console.error(
           `Error in group chat response for ${character.name}:`,
-          error
+          error,
         );
       }
     }
@@ -453,7 +453,7 @@ export async function sendMessage(content, type = "text", payload = {}) {
     const respondingCharacterId =
       participants[Math.floor(Math.random() * participants.length)];
     const character = get(characters).find(
-      (c) => c.id === respondingCharacterId
+      (c) => c.id === respondingCharacterId,
     );
 
     if (!character) {
@@ -498,7 +498,7 @@ export function deleteMessageGroup(messageId) {
       const currentMessages = allMessages[chatId] || [];
 
       const messageIndex = currentMessages.findIndex(
-        (msg) => msg.id === messageId
+        (msg) => msg.id === messageId,
       );
       const messageAtTarget = currentMessages[messageIndex];
       const characterName = messageAtTarget?.sender || "";
@@ -506,7 +506,7 @@ export function deleteMessageGroup(messageId) {
       const groupInfo = findMessageGroup(
         currentMessages,
         messageIndex,
-        characterName
+        characterName,
       );
 
       if (!groupInfo) return;
@@ -543,7 +543,7 @@ export async function saveEditedMessage(messageId, newContent) {
   const groupInfo = findMessageGroup(
     currentMessages,
     messageIndex,
-    characterName
+    characterName,
   );
 
   if (!groupInfo) return;
@@ -573,7 +573,7 @@ export async function saveEditedMessage(messageId, newContent) {
   isWaitingForResponse.set(true);
 
   const character = get(characters).find(
-    (c) => c.id === getCurrentChatRoom(chatId)?.characterId
+    (c) => c.id === getCurrentChatRoom(chatId)?.characterId,
   );
   if (!character) {
     isWaitingForResponse.set(false);
@@ -586,7 +586,7 @@ export async function saveEditedMessage(messageId, newContent) {
       character,
       updatedMessages,
       false,
-      true
+      true,
     );
   } finally {
     isWaitingForResponse.set(false);
@@ -608,7 +608,7 @@ export async function rerollMessage(messageId) {
   const groupInfo = findMessageGroup(
     currentMessages,
     messageIndex,
-    characterName
+    characterName,
   );
 
   if (!groupInfo) return;
@@ -642,7 +642,7 @@ export async function rerollMessage(messageId) {
   // For regular chats, use the chat room's characterId
   else {
     character = get(characters).find(
-      (c) => c.id === getCurrentChatRoom(chatId)?.characterId
+      (c) => c.id === getCurrentChatRoom(chatId)?.characterId,
     );
   }
 
@@ -667,7 +667,7 @@ export async function rerollMessage(messageId) {
       character,
       truncatedMessages,
       false,
-      true
+      true,
     );
   } finally {
     isWaitingForResponse.set(false);
@@ -684,7 +684,7 @@ export async function generateSnsPost(messageId) {
   if (!targetMessage || targetMessage.isMe) return;
 
   let character = get(characters).find(
-    (c) => c.id === getCurrentChatRoom(chatId)?.characterId
+    (c) => c.id === getCurrentChatRoom(chatId)?.characterId,
   );
   if (!character && targetMessage) {
     character = get(characters).find((c) => c.name === targetMessage.sender);
@@ -705,7 +705,7 @@ export async function generateSnsPost(messageId) {
       .replace(/\{persona\.name\}/g, currentSettings.userName || "User")
       .replace(
         /\{persona\.description\}/g,
-        currentSettings.userDescription || ""
+        currentSettings.userDescription || "",
       )
       .replace(/\{character\.prompt\}/g, character.prompt || "")
       .replace(/\{recentContext\}/g, recentConversation);
@@ -747,7 +747,7 @@ export async function generateSnsPost(messageId) {
       responseText
         .trim()
         .replace(/^```json/, "")
-        .replace(/```$/, "")
+        .replace(/```$/, ""),
     );
 
     if (parsedResponse && parsedResponse.autoPost) {
@@ -757,7 +757,7 @@ export async function generateSnsPost(messageId) {
           const newChars = [...chars];
           newChars[charIndex] = processAutoPost(
             newChars[charIndex],
-            parsedResponse.autoPost
+            parsedResponse.autoPost,
           );
           return newChars;
         }

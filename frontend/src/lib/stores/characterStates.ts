@@ -1,3 +1,6 @@
-import { persistentStore } from './persistentStore';
+import { persistentStore } from "./persistentStore";
 
-export const characterStates = persistentStore('personaChat_characterStates_v16', {});
+export const characterStates = persistentStore(
+  "personaChat_characterStates_v16",
+  {},
+);

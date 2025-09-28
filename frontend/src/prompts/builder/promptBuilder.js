@@ -45,21 +45,21 @@ async function populateTemplate(template, context) {
       allowed[key] = JSON.parse(JSON.stringify(context[key]));
     }
   }
-  
+
   // 먼저 간단한 변수 치환을 처리
   let result = template;
-  
+
   // {character.memories}, {character.name} 등의 중첩된 속성 치환
   result = result.replace(/\{([^{}|]+)\}/g, (match, path) => {
     try {
-      const value = path.split('.').reduce((obj, key) => obj?.[key], allowed);
+      const value = path.split(".").reduce((obj, key) => obj?.[key], allowed);
       return value !== undefined ? String(value) : match;
     } catch (e) {
       console.warn(`[populateTemplate] 변수 치환 실패: ${path}`, e);
       return match;
     }
   });
-  
+
   // 그 다음 magic patterns 처리
   return await parseMagicPatterns(result, allowed);
 }
@@ -75,15 +75,15 @@ function formatGroupChatMessages(messages) {
   }
 
   return messages
-    .map(msg => {
-      const timestamp = new Date(msg.timestamp).toLocaleTimeString('ko-KR', {
-        hour: '2-digit',
-        minute: '2-digit'
+    .map((msg) => {
+      const timestamp = new Date(msg.timestamp).toLocaleTimeString("ko-KR", {
+        hour: "2-digit",
+        minute: "2-digit",
       });
-      const sender = msg.isMe ? 'User' : msg.sender;
-      return `[${timestamp}] ${sender}: ${msg.content || '(No content)'}`;
+      const sender = msg.isMe ? "User" : msg.sender;
+      return `[${timestamp}] ${sender}: ${msg.content || "(No content)"}`;
     })
-    .join('\n');
+    .join("\n");
 }
 
 /**
@@ -153,19 +153,22 @@ export async function buildContentPrompt({
       return character.snsPosts
         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) // 최신순 정렬
         .slice(0, 15) // 최근 15개만 사용 (컨텍스트 제한)
-        .map(post => {
-          const tags = post.tags && post.tags.length > 0 ? ` [${post.tags.join(', ')}]` : '';
-          const date = new Date(post.timestamp).toLocaleDateString('ko-KR');
+        .map((post) => {
+          const tags =
+            post.tags && post.tags.length > 0
+              ? ` [${post.tags.join(", ")}]`
+              : "";
+          const date = new Date(post.timestamp).toLocaleDateString("ko-KR");
           return `- ${post.content}${tags} (${date})`;
         })
         .join("\n");
     }
-    
+
     // 2. 기존 텍스트 메모리가 있으면 그것을 사용 (하위 호환성)
     if (character.memories && character.memories.length > 0) {
       return character.memories.map((mem) => `- ${mem}`).join("\n");
     }
-    
+
     // 3. 둘 다 없으면 기본 메시지
     return "No specific memories recorded yet.";
   })();

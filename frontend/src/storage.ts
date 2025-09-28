@@ -12,7 +12,10 @@ interface StorageQuota {
   total?: string;
 }
 
-export async function loadFromBrowserStorage<T>(key: string, defaultValue: T): Promise<T> {
+export async function loadFromBrowserStorage<T>(
+  key: string,
+  defaultValue: T,
+): Promise<T> {
   try {
     const value = await loadFromIndexedDB(key);
     return value !== null ? value : defaultValue;
@@ -22,7 +25,10 @@ export async function loadFromBrowserStorage<T>(key: string, defaultValue: T): P
   }
 }
 
-export async function saveToBrowserStorage(key: string, value: any): Promise<void> {
+export async function saveToBrowserStorage(
+  key: string,
+  value: any,
+): Promise<void> {
   try {
     await saveToIndexedDB(key, value);
   } catch (error) {
@@ -125,7 +131,10 @@ export async function getIndexedDBUsage(): Promise<number> {
   return totalSize;
 }
 
-export async function checkIndexedDBQuota(newData: string = "", existingKey: string = ""): Promise<StorageQuota> {
+export async function checkIndexedDBQuota(
+  newData: string = "",
+  existingKey: string = "",
+): Promise<StorageQuota> {
   // IndexedDB는 일반적으로 수 GB의 용량을 지원하므로 용량 체크를 단순화
   try {
     if ("storage" in navigator && "estimate" in navigator.storage) {

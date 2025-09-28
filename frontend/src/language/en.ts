@@ -588,13 +588,14 @@ export const en: LanguageStrings = {
     initialParticipants: "Initially, 2-4 characters randomly enter",
     availableCharacters: "{{count}} characters available",
     deleteOpenChatTitle: "Delete Open Chat",
-    deleteOpenChatConfirm: "Are you sure you want to delete this open chat? All conversation history will be lost.",
+    deleteOpenChatConfirm:
+      "Are you sure you want to delete this open chat? All conversation history will be lost.",
     openChatNameRequired: "Open Chat Name Required",
     openChatNameRequiredMessage: "Please enter an open chat name.",
     participantsConnected: "{{count}} connected",
     startConversation: "Start a conversation",
-    'openchat.joined': '{name} has joined.',
-    'openchat.left': '{name} has left.',
+    "openchat.joined": "{name} has joined.",
+    "openchat.left": "{name} has left.",
   },
   groupChat: {
     groupChat: "Group Chat",
@@ -678,7 +679,8 @@ export const en: LanguageStrings = {
     export: "Export",
     clearAll: "Clear All",
     close: "Close",
-    clearAllConfirm: "Are you sure you want to clear all debug logs? This action cannot be undone.",
+    clearAllConfirm:
+      "Are you sure you want to clear all debug logs? This action cannot be undone.",
     noLogs: "No logs",
     noLogsCollected:
       "No logs collected yet.<br/>Logs will be generated when you start chatting.",
@@ -1031,8 +1033,10 @@ export const en: LanguageStrings = {
     actionSituationLabel: "Action/Situation",
     actionSituationPlaceholder: "Enter action or situation",
     itemTitleHelp: "The title of the sticker. (e.g., 'Greeting')",
-    emotionHelp: "The emotion to be expressed in the sticker. (e.g., 'Happy', 'Smile')",
-    actionSituationHelp: "The specific action or situation for the sticker. (e.g., 'Waving hand', 'Smiling brightly')",
+    emotionHelp:
+      "The emotion to be expressed in the sticker. (e.g., 'Happy', 'Smile')",
+    actionSituationHelp:
+      "The specific action or situation for the sticker. (e.g., 'Waving hand', 'Smiling brightly')",
     addNaiGenerationItem: "Add Item",
     saveList: "Save List",
     cancel: "Cancel",

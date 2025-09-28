@@ -89,7 +89,7 @@ export class NovelAIClient {
    */
   calculateDelay() {
     const randomDelay = Math.floor(
-      Math.random() * this.options.maxAdditionalDelay
+      Math.random() * this.options.maxAdditionalDelay,
     );
     return this.options.minDelay + randomDelay;
   }
@@ -195,11 +195,11 @@ export class NovelAIClient {
     // Local Header 정보 읽기
     const localFileNameLength = dataView.getUint16(
       localHeaderOffset + 26,
-      true
+      true,
     );
     const localExtraFieldLength = dataView.getUint16(
       localHeaderOffset + 28,
-      true
+      true,
     );
     const compressedSize = dataView.getUint32(localHeaderOffset + 18, true);
     const compressionMethod = dataView.getUint16(localHeaderOffset + 8, true);
@@ -214,7 +214,7 @@ export class NovelAIClient {
 
     const fileData = zipData.slice(
       fileDataOffset,
-      fileDataOffset + compressedSize
+      fileDataOffset + compressedSize,
     );
 
     if (fileData.length === 0) {
@@ -413,7 +413,7 @@ export class NovelAIClient {
         // 모든 방법 실패 시 원본 데이터 반환
         console.warn(
           "[NAI] Deflate 압축 해제 실패, 원본 데이터 사용:",
-          fallbackError.message
+          fallbackError.message,
         );
         return compressedData;
       }
@@ -531,7 +531,7 @@ export class NovelAIClient {
     }
 
     console.error(
-      `[NAI] 지원하지 않는 모델명: "${modelName}". 기본 모델 사용.`
+      `[NAI] 지원하지 않는 모델명: "${modelName}". 기본 모델 사용.`,
     );
     return null;
   }
@@ -772,7 +772,7 @@ export class NovelAIClient {
         this.lastGenerationTime = Date.now();
 
         throw new Error(
-          `NAI API 오류: ${response.status} ${response.statusText} - ${errorText}`
+          `NAI API 오류: ${response.status} ${response.statusText} - ${errorText}`,
         );
       }
 
@@ -909,7 +909,7 @@ export class NovelAIClient {
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(
-        `Failed to get NAI user subscription: ${response.status} ${response.statusText} - ${errorText}`
+        `Failed to get NAI user subscription: ${response.status} ${response.statusText} - ${errorText}`,
       );
     }
 
@@ -1008,10 +1008,10 @@ export class NovelAIClient {
     };
 
     const logData = {
-      type: 'structured',
+      type: "structured",
       characterName: character.name,
       chatId: null,
-      chatType: 'nai_generation',
+      chatType: "nai_generation",
       data: {
         personaInput: {
           characterName: character.name,
@@ -1022,10 +1022,10 @@ export class NovelAIClient {
         parameters: generationParams,
         metadata: {
           timestamp: new Date().toISOString(),
-          apiProvider: 'novelai',
+          apiProvider: "novelai",
           model: generationParams.model,
         },
-      }
+      },
     };
 
     try {
@@ -1147,8 +1147,6 @@ export class NovelAIClient {
   }
 }
 
-
-
 /**
  * NAI 일괄 생성 목록 (새로운 3필드 구조)
  */
@@ -1156,53 +1154,53 @@ export const DEFAULT_EMOTIONS = [
   {
     title: "기쁨",
     emotion: "smiling, cheerful, bright eyes, joyful expression",
-    action: ""
+    action: "",
   },
   {
     title: "슬픔",
     emotion: "sad expression, downcast eyes, melancholic, tears",
-    action: ""
+    action: "",
   },
   {
     title: "놀람",
     emotion: "wide eyes, surprised, shocked expression, open mouth",
-    action: ""
+    action: "",
   },
   {
     title: "분노",
     emotion: "angry, frowning, intense gaze, fierce expression",
-    action: ""
+    action: "",
   },
   {
     title: "사랑",
     emotion: "loving gaze, romantic, heart eyes, affectionate",
-    action: ""
+    action: "",
   },
   {
     title: "부끄러움",
     emotion: "blushing, shy, embarrassed, covering face",
-    action: ""
+    action: "",
   },
   {
     title: "혼란",
     emotion: "confused, tilted head, questioning look",
-    action: ""
+    action: "",
   },
   {
     title: "졸림",
     emotion: "sleepy, drowsy, tired, yawning",
-    action: ""
+    action: "",
   },
   {
     title: "흥분",
     emotion: "excited, energetic, sparkling eyes",
-    action: ""
+    action: "",
   },
   {
     title: "무표정",
     emotion: "neutral expression, calm, serene",
-    action: ""
-  }
+    action: "",
+  },
 ];
 
 /**

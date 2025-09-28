@@ -4,7 +4,10 @@ import {
   saveAllPrompts as saveAll,
   resetAllPrompts as resetAll,
 } from "../../prompts/promptManager";
-import { showNotification, showConfirmation } from "../services/notificationService";
+import {
+  showNotification,
+  showConfirmation,
+} from "../services/notificationService";
 import { t } from "../../i18n";
 
 function createPromptsStore() {
@@ -42,7 +45,7 @@ function createPromptsStore() {
       URL.revokeObjectURL(url);
       showNotification(
         t("modal.promptBackupComplete.title"),
-        t("modal.promptBackupComplete.message")
+        t("modal.promptBackupComplete.message"),
       );
     },
     restore: async () => {
@@ -64,12 +67,12 @@ function createPromptsStore() {
                   set(newPrompts);
                   showNotification(
                     t("modal.promptRestoreComplete.title"),
-                    t("modal.promptRestoreComplete.message")
+                    t("modal.promptRestoreComplete.message"),
                   );
                 } catch (error) {
                   showNotification(
                     t("modal.promptRestoreFailed.title"),
-                    t("modal.promptRestoreFailed.message")
+                    t("modal.promptRestoreFailed.message"),
                   );
                 }
               };
@@ -77,7 +80,7 @@ function createPromptsStore() {
             }
           };
           input.click();
-        }
+        },
       );
     },
   };

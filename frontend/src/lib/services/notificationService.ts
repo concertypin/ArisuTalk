@@ -1,4 +1,7 @@
-import { isConfirmationModalVisible, confirmationModalData } from '../stores/ui';
+import {
+  isConfirmationModalVisible,
+  confirmationModalData,
+} from "../stores/ui";
 
 export function showNotification(title: string, message: string) {
   confirmationModalData.set({
@@ -9,7 +12,11 @@ export function showNotification(title: string, message: string) {
   isConfirmationModalVisible.set(true);
 }
 
-export function showConfirmation(title: string, message: string, onConfirm: () => void) {
+export function showConfirmation(
+  title: string,
+  message: string,
+  onConfirm: () => void,
+) {
   confirmationModalData.set({
     title,
     message,

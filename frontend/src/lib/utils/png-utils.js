@@ -1,4 +1,3 @@
-
 // --- PNG Chunk Utilities ---
 
 export function dataUrlToUint8Array(dataUrl) {
@@ -11,7 +10,7 @@ export function dataUrlToUint8Array(dataUrl) {
   return bytes;
 }
 
-export function uint8ArrayToDataUrl(uint8Array, mimeType = 'image/png') {
+export function uint8ArrayToDataUrl(uint8Array, mimeType = "image/png") {
   const binaryString = Array.from(uint8Array)
     .map((byte) => String.fromCharCode(byte))
     .join("");

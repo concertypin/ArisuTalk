@@ -5,7 +5,7 @@
  */
 export function getStorageKey(key: string): string {
   if (import.meta.env.DEV) {
-    return 'debug_' + key;
+    return "debug_" + key;
   }
   return key;
 }

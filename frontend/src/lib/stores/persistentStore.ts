@@ -10,14 +10,18 @@ import { getStorageKey } from "../utils/storageKey";
  * @param {number} debounceMs The debounce delay for saving to storage.
  * @returns A Svelte store.
  */
-export function persistentStore<T>(key: string, initialValue: T, debounceMs = 500): Writable<T> {
+export function persistentStore<T>(
+  key: string,
+  initialValue: T,
+  debounceMs = 500,
+): Writable<T> {
   const prefixedKey = getStorageKey(key);
   const store = writable(initialValue);
   let loaded = false;
 
   // Load the initial value from storage asynchronously.
   loadFromBrowserStorage(prefixedKey, initialValue).then((value) => {
-    if (value && typeof value === 'object' && !Array.isArray(value)) {
+    if (value && typeof value === "object" && !Array.isArray(value)) {
       const merged = { ...initialValue, ...value };
       store.set(merged);
     } else {

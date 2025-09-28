@@ -231,7 +231,9 @@
 />
 <svelte:component this={PromptModal} />
 <svelte:component this={DebugLogsModal} />
-<DevModeIndicator />
+{#if import.meta.env.DEV}
+  <DevModeIndicator />
+{/if}
 
 {#if $isMobile}
   <div class="w-full h-full overflow-hidden relative">

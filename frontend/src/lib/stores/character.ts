@@ -1,13 +1,15 @@
-import { writable } from 'svelte/store';
-import { persistentStore } from './persistentStore';
-import { defaultCharacters } from '../../defaults.js';
+import { writable } from "svelte/store";
+import { persistentStore } from "./persistentStore";
+import { defaultCharacters } from "../../defaults.js";
 
-export const characters = persistentStore('personaChat_characters_v16', defaultCharacters);
-export const userStickers = persistentStore('personaChat_userStickers_v16', []);
+export const characters = persistentStore(
+  "personaChat_characters_v16",
+  defaultCharacters,
+);
+export const userStickers = persistentStore("personaChat_userStickers_v16", []);
 
 export const editingCharacter = writable(null);
 export const expandedCharacterIds = writable(new Set());
-
 
 // Character State Management
 export interface CharacterState {
@@ -26,10 +28,15 @@ export interface CharacterState {
   messageCount?: number;
 }
 
-export const characterStateStore = persistentStore<Record<string, CharacterState>>('personaChat_characterStates_v16', {});
+export const characterStateStore = persistentStore<
+  Record<string, CharacterState>
+>("personaChat_characterStates_v16", {});
 
-export function initializeCharacterState(characterId: string, personality: { extroversion: number } = { extroversion: 0.5 }) {
-  characterStateStore.update(states => {
+export function initializeCharacterState(
+  characterId: string,
+  personality: { extroversion: number } = { extroversion: 0.5 },
+) {
+  characterStateStore.update((states) => {
     if (!states[characterId]) {
       states[characterId] = {
         mood: 0.8,
@@ -44,10 +51,17 @@ export function initializeCharacterState(characterId: string, personality: { ext
   });
 }
 
-export function updateCharacterState(characterId: string, newState: Partial<CharacterState>) {
-  characterStateStore.update(states => {
+export function updateCharacterState(
+  characterId: string,
+  newState: Partial<CharacterState>,
+) {
+  characterStateStore.update((states) => {
     if (states[characterId]) {
-      states[characterId] = { ...states[characterId], ...newState, lastActivity: Date.now() };
+      states[characterId] = {
+        ...states[characterId],
+        ...newState,
+        lastActivity: Date.now(),
+      };
     }
     return states;
   });

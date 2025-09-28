@@ -1,4 +1,4 @@
-import { writable } from 'svelte/store';
+import { writable } from "svelte/store";
 
 // Modal states
 export const isDesktopSettingsModalVisible = writable(false);
@@ -11,7 +11,11 @@ export const isEditGroupChatModalVisible = writable(false);
 export const isDebugLogModalVisible = writable(false);
 export const isConfirmationModalVisible = writable(false);
 export const isMasterPasswordModalVisible = writable(false);
-export const confirmationModalData = writable({ title: '', message: '', onConfirm: null });
+export const confirmationModalData = writable({
+  title: "",
+  message: "",
+  onConfirm: null,
+});
 export const isSearchModalVisible = writable(false);
 export const isSNSCharacterListModalVisible = writable(false);
 export const isSNSFeedModalVisible = writable(false);
@@ -40,11 +44,11 @@ export const expandedImages = writable(new Set());
 
 // Desktop UI states
 export const desktopSettings = writable({
-  activePanel: 'api', // 'api' | 'appearance' | 'character' | 'data' | 'advanced'
+  activePanel: "api", // 'api' | 'appearance' | 'character' | 'data' | 'advanced'
   isVisible: false,
 });
 
 // Generic UI states
-export const openSettingsSections = writable(['ai']);
+export const openSettingsSections = writable(["ai"]);
 export const fontScale = writable(1.0);
 export const isDevModeActive = writable(import.meta.env.DEV);

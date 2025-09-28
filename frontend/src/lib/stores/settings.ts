@@ -29,7 +29,7 @@ const initialSettings = {
 
 export const settings = persistentStore(
   "personaChat_settings_v16",
-  initialSettings
+  initialSettings,
 );
 export interface SettingsSnapshot {
   timestamp: number;
@@ -42,5 +42,5 @@ export interface SettingsSnapshot {
 
 export const settingsSnapshots = persistentStore<SettingsSnapshot[]>(
   "personaChat_settingsSnapshots_v16",
-  []
+  [],
 );

@@ -1,17 +1,25 @@
-import { get } from 'svelte/store';
-import { openChats } from '../stores/chat';
-import { characters, characterStateStore, initializeCharacterState, updateCharacterState } from '../stores/character';
-import { addSystemMessage } from './chatService';
-import { t } from '../../i18n';
+import { get } from "svelte/store";
+import { openChats } from "../stores/chat";
+import {
+  characters,
+  characterStateStore,
+  initializeCharacterState,
+  updateCharacterState,
+} from "../stores/character";
+import { addSystemMessage } from "./chatService";
+import { t } from "../../i18n";
 
 /**
  * 캐릭터를 OpenChat에 참여시킵니다.
  */
-export function characterJoinOpenChat(chatId: string, characterId: string): void {
-  const character = get(characters).find(c => c.id === characterId);
+export function characterJoinOpenChat(
+  chatId: string,
+  characterId: string,
+): void {
+  const character = get(characters).find((c) => c.id === characterId);
   if (!character) return;
 
-  openChats.update(chats => {
+  openChats.update((chats) => {
     const chat = chats[chatId];
     if (chat && !chat.currentParticipants.includes(characterId)) {
       chat.currentParticipants.push(characterId);
@@ -21,36 +29,45 @@ export function characterJoinOpenChat(chatId: string, characterId: string): void
   });
 
   initializeCharacterState(characterId, character.personality);
-  updateCharacterState(characterId, { 
-    currentRooms: [...(get(characterStateStore)[characterId]?.currentRooms || []), chatId]
+  updateCharacterState(characterId, {
+    currentRooms: [
+      ...(get(characterStateStore)[characterId]?.currentRooms || []),
+      chatId,
+    ],
   });
 
-  addSystemMessage(chatId, get(t)('openChat.joined', { name: character.name }));
+  addSystemMessage(chatId, get(t)("openChat.joined", { name: character.name }));
 }
 
 /**
  * 캐릭터를 OpenChat에서 퇴장시킵니다.
  */
-export function characterLeaveOpenChat(chatId: string, characterId: string, reason: string = 'tired'): void {
-  const character = get(characters).find(c => c.id === characterId);
+export function characterLeaveOpenChat(
+  chatId: string,
+  characterId: string,
+  reason: string = "tired",
+): void {
+  const character = get(characters).find((c) => c.id === characterId);
   if (!character) return;
 
-  openChats.update(chats => {
+  openChats.update((chats) => {
     const chat = chats[chatId];
     if (chat) {
-      chat.currentParticipants = chat.currentParticipants.filter(id => id !== characterId);
+      chat.currentParticipants = chat.currentParticipants.filter(
+        (id) => id !== characterId,
+      );
     }
     return chats;
   });
 
   const currentState = get(characterStateStore)[characterId];
   if (currentState) {
-    updateCharacterState(characterId, { 
-      currentRooms: currentState.currentRooms.filter(id => id !== chatId)
+    updateCharacterState(characterId, {
+      currentRooms: currentState.currentRooms.filter((id) => id !== chatId),
     });
   }
 
-  addSystemMessage(chatId, get(t)('openChat.left', { name: character.name }));
+  addSystemMessage(chatId, get(t)("openChat.left", { name: character.name }));
 }
 
 /**
@@ -82,7 +99,7 @@ export function updateParticipantStates(chatId: string): void {
   const currentParticipants = chat.currentParticipants;
 
   for (const participantId of currentParticipants) {
-    const character = get(characters).find(c => c.id === participantId);
+    const character = get(characters).find((c) => c.id === participantId);
     if (!character) continue;
 
     let state = get(characterStateStore)[participantId];
@@ -106,14 +123,18 @@ export function updateParticipantStates(chatId: string): void {
 
   // Possibility of a new participant joining
   const updatedChat = get(openChats)[chatId];
-  const shouldAddNewParticipant = Math.random() < 0.3 && updatedChat.currentParticipants.length < 6;
+  const shouldAddNewParticipant =
+    Math.random() < 0.3 && updatedChat.currentParticipants.length < 6;
 
   if (shouldAddNewParticipant) {
     const availableCharacters = get(characters).filter(
       (c) => !updatedChat.currentParticipants.includes(c.id) && c.id,
     );
     if (availableCharacters.length > 0) {
-      const newParticipant = availableCharacters[Math.floor(Math.random() * availableCharacters.length)];
+      const newParticipant =
+        availableCharacters[
+          Math.floor(Math.random() * availableCharacters.length)
+        ];
       characterJoinOpenChat(chatId, newParticipant.id);
     }
   }

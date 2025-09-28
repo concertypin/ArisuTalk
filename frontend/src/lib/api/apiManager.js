@@ -12,7 +12,7 @@ import {
 } from "../../constants/providers.ts";
 
 import { secureStorage } from "../utils/secureStorage.js";
-import { addLog } from '../services/logService.ts';
+import { addLog } from "../services/logService.ts";
 
 /**
  * API Manager that handles multiple AI providers
@@ -108,8 +108,6 @@ export class APIManager {
     baseUrl = null,
     options = {},
   ) {
-
-
     try {
       // Resolve actual API key if encrypted
       const actualApiKey = await this.resolveApiKey(provider, apiKey);
@@ -121,8 +119,6 @@ export class APIManager {
         options,
       );
       const response = await client.generateContent(params);
-
-
 
       return response;
     } catch (error) {
@@ -148,8 +144,6 @@ export class APIManager {
     baseUrl = null,
     options = {},
   ) {
-
-
     try {
       // Resolve actual API key if encrypted
       const actualApiKey = await this.resolveApiKey(provider, apiKey);
@@ -161,8 +155,6 @@ export class APIManager {
         options,
       );
       const response = await client.generateProfile(params);
-
-
 
       return response;
     } catch (error) {
@@ -188,8 +180,6 @@ export class APIManager {
     baseUrl = null,
     options = {},
   ) {
-
-
     try {
       // Resolve actual API key if encrypted
       const actualApiKey = await this.resolveApiKey(provider, apiKey);
@@ -201,8 +191,6 @@ export class APIManager {
         options,
       );
       const response = await client.generateCharacterSheet(params);
-
-
 
       return response;
     } catch (error) {

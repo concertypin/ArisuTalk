@@ -1,7 +1,7 @@
 // frontend/src/utils/debug-utils.ts
 
-import { isDevModeActive } from '../stores/ui';
-import { getStorageKey } from './storageKey';
+import { isDevModeActive } from "../stores/ui";
+import { getStorageKey } from "./storageKey";
 
 /**
  * Clears all specified browser storage.
@@ -10,7 +10,7 @@ export async function clearAllBrowserData(): Promise<void> {
   console.log("Clearing all browser data...");
 
   // Clear localStorage, preserving the reset on refresh setting
-  const resetOnRefreshKey = 'debug-reset-on-refresh';
+  const resetOnRefreshKey = "debug-reset-on-refresh";
   for (let i = localStorage.length - 1; i >= 0; i--) {
     const key = localStorage.key(i);
     if (key !== resetOnRefreshKey) {
@@ -76,14 +76,18 @@ export async function loadPreconfiguredData(
   try {
     const localStorageResponse: Response = await fetch(localStoragePath);
     const contentTypeLS = localStorageResponse.headers.get("content-type");
-    if (localStorageResponse.ok && contentTypeLS && contentTypeLS.includes("application/json")) {
+    if (
+      localStorageResponse.ok &&
+      contentTypeLS &&
+      contentTypeLS.includes("application/json")
+    ) {
       const data: { [key: string]: any } = await localStorageResponse.json();
       for (const key in data) {
         localStorage.setItem(key, JSON.stringify(data[key]));
       }
       console.log("localStorage pre-configured data loaded.");
     } else if (localStorageResponse.ok) {
-        // Response is ok, but not JSON. Ignore.
+      // Response is ok, but not JSON. Ignore.
     } else {
       console.warn(
         `Could not load localStorage data from ${localStoragePath}:`,
@@ -98,8 +102,14 @@ export async function loadPreconfiguredData(
   try {
     const indexedDBResponse: Response = await fetch(indexedDBPath);
     const contentTypeIDB = indexedDBResponse.headers.get("content-type");
-    if (indexedDBResponse.ok && contentTypeIDB && contentTypeIDB.includes("application/json")) {
-      const dbData: { [dbName: string]: { data: { key: string; value: any }[] } } = await indexedDBResponse.json();
+    if (
+      indexedDBResponse.ok &&
+      contentTypeIDB &&
+      contentTypeIDB.includes("application/json")
+    ) {
+      const dbData: {
+        [dbName: string]: { data: { key: string; value: any }[] };
+      } = await indexedDBResponse.json();
 
       for (const dbName in dbData) {
         const dataToLoad = dbData[dbName].data;
@@ -114,36 +124,47 @@ export async function loadPreconfiguredData(
         request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
           const db: IDBDatabase = (event.target as IDBRequest).result;
           // Assuming a single object store named 'data' with 'key' as keyPath
-          if (!db.objectStoreNames.contains('data')) {
-            db.createObjectStore('data', { keyPath: 'key' });
+          if (!db.objectStoreNames.contains("data")) {
+            db.createObjectStore("data", { keyPath: "key" });
           }
         };
 
         request.onsuccess = (event: Event) => {
           const db: IDBDatabase = (event.target as IDBRequest).result;
-          const transaction: IDBTransaction = db.transaction(['data'], 'readwrite');
-          const objectStore: IDBObjectStore = transaction.objectStore('data');
+          const transaction: IDBTransaction = db.transaction(
+            ["data"],
+            "readwrite",
+          );
+          const objectStore: IDBObjectStore = transaction.objectStore("data");
 
-          dataToLoad.forEach(item => {
+          dataToLoad.forEach((item) => {
             objectStore.put(item); // Use put to add or update
           });
 
           transaction.oncomplete = () => {
-            console.log(`IndexedDB database '${dbName}' loaded with pre-configured data.`);
+            console.log(
+              `IndexedDB database '${dbName}' loaded with pre-configured data.`,
+            );
             db.close();
           };
           transaction.onerror = (transactionEvent: Event) => {
-            console.error(`Transaction error for '${dbName}':`, (transactionEvent.target as IDBRequest).error);
+            console.error(
+              `Transaction error for '${dbName}':`,
+              (transactionEvent.target as IDBRequest).error,
+            );
             db.close();
           };
         };
 
         request.onerror = (event: Event) => {
-          console.error(`Error opening IndexedDB database '${dbName}':`, (event.target as IDBRequest).error);
+          console.error(
+            `Error opening IndexedDB database '${dbName}':`,
+            (event.target as IDBRequest).error,
+          );
         };
       }
     } else if (indexedDBResponse.ok) {
-        // Response is ok, but not JSON. Ignore.
+      // Response is ok, but not JSON. Ignore.
     } else {
       console.warn(
         `Could not load IndexedDB data from ${indexedDBPath}:`,
@@ -161,7 +182,7 @@ export async function loadPreconfiguredData(
  * Initializes the debug utility in development mode.
  * When running in a development environment (import.meta.env.DEV is true),
  * this function automatically clears all browser data and loads pre-configured data.
-*/
+ */
 export async function initializeDebugUtility(): Promise<void> {
   // Check if in development mode and if a debug flag is set (e.g., via localStorage or another env variable)
   // For now, we'll just use import.meta.env.DEV

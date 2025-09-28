@@ -28,9 +28,11 @@ export class CustomOpenAIClient {
     chatId = null,
   }) {
     // Determine chat type from chatId
-    const isGroupChat = chatId && typeof chatId === "string" && chatId.startsWith("group_");
-    const isOpenChat = chatId && typeof chatId === "string" && chatId.startsWith("open_");
-    
+    const isGroupChat =
+      chatId && typeof chatId === "string" && chatId.startsWith("group_");
+    const isOpenChat =
+      chatId && typeof chatId === "string" && chatId.startsWith("open_");
+
     const { systemPrompt, contents } = await buildContentPrompt({
       userName,
       userDescription,
@@ -76,7 +78,7 @@ export class CustomOpenAIClient {
             provider: "Custom OpenAI",
             status: response.status,
             error: errorData.error.message,
-          })
+          }),
         );
       }
 
@@ -165,14 +167,14 @@ export class CustomOpenAIClient {
         const reason = data.choices[0].finish_reason || t("api.unknownReason");
         console.warn(
           "Custom OpenAI Profile Gen API 응답에 유효한 content가 없습니다.",
-          data
+          data,
         );
         throw new Error(t("api.profileNotGenerated", { reason: reason }));
       }
     } catch (error) {
       console.error(
         t("api.profileGenerationError", { provider: "Custom OpenAI" }),
-        error
+        error,
       );
       return { error: error.message };
     }
@@ -234,14 +236,14 @@ export class CustomOpenAIClient {
         throw new Error(
           t("api.profileNotGenerated", {
             reason: data.choices[0].finish_reason || t("api.unknownReason"),
-          })
+          }),
         );
       }
     } catch (error) {
       console.error(
         t("api.profileGenerationError", { provider: "Custom OpenAI" }) +
           " (Character Sheet)",
-        error
+        error,
       );
       return { error: error.message };
     }

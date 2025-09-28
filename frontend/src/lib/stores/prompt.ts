@@ -1,7 +1,7 @@
-import { readable } from 'svelte/store';
-import { getAllPrompts } from '../../prompts/promptManager';
+import { readable } from "svelte/store";
+import { getAllPrompts } from "../../prompts/promptManager";
 
 export const prompts = readable({}, (set) => {
-    getAllPrompts().then(set);
-    return () => {};
+  getAllPrompts().then(set);
+  return () => {};
 });

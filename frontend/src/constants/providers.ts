@@ -13,7 +13,7 @@ export const PROVIDERS = {
   CUSTOM_OPENAI: "custom_openai",
 } as const;
 
-export type Provider = typeof PROVIDERS[keyof typeof PROVIDERS];
+export type Provider = (typeof PROVIDERS)[keyof typeof PROVIDERS];
 
 // Array of all supported providers
 export const SUPPORTED_PROVIDERS: Provider[] = [
