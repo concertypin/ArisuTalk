@@ -20,12 +20,14 @@
   let ConfirmationModal, ImageZoomModal, CreateGroupChatModal, CreateOpenChatModal,
       EditGroupChatModal, CharacterModal, DesktopSettingsUI, MasterPasswordModal,
       ChatSelectionModal, SearchModal, CharacterListPage, MobileSettings,
-      SNSCharacterListModal, SNSFeedModal, SNSPostModal, PromptModal, DebugLogsModal;
+      SNSCharacterListModal, SNSFeedModal, SNSPostModal, PromptModal, DebugLogsModal,
+      DataBrowserModal;
   import { settings } from './stores/settings';
   import {
     isConfirmationModalVisible, isImageZoomModalVisible, isCreateGroupChatModalVisible,
     isCreateOpenChatModalVisible, isEditGroupChatModalVisible, isPromptModalVisible,
-    isDebugLogModalVisible, isMasterPasswordModalVisible, desktopSettings, isDesktopSettingsModalVisible
+    isDebugLogModalVisible, isDataBrowserModalVisible, isMasterPasswordModalVisible,
+    desktopSettings, isDesktopSettingsModalVisible
   } from './stores/ui';
   import { enableAutoSnapshots } from './services/dataService';
   import { addLog } from './services/logService';
@@ -48,6 +50,7 @@
   const loadSNSPostModal = () => import('./components/modals/sns/SNSPostModal.svelte');
   const loadPromptModal = () => import('./components/modals/prompt/PromptModal.svelte');
   const loadDebugLogsModal = () => import('./components/modals/logs/DebugLogsModal.svelte');
+  const loadDataBrowserModal = () => import('./components/modals/debug/DataBrowserModal.svelte');
 
   $: if ($isConfirmationModalVisible && !ConfirmationModal) { loadConfirmationModal().then(m => ConfirmationModal = m.default); }
   $: if ($isImageZoomModalVisible && !ImageZoomModal) { loadImageZoomModal().then(m => ImageZoomModal = m.default); }
@@ -58,6 +61,7 @@
   $: if ($isMasterPasswordModalVisible && !MasterPasswordModal) { loadMasterPasswordModal().then(m => MasterPasswordModal = m.default); }
   $: if ($isPromptModalVisible && !PromptModal) { loadPromptModal().then(m => PromptModal = m.default); }
   $: if ($isDebugLogModalVisible && !DebugLogsModal) { loadDebugLogsModal().then(m => DebugLogsModal = m.default); }
+  $: if ($isDataBrowserModalVisible && !DataBrowserModal) { loadDataBrowserModal().then(m => DataBrowserModal = m.default); }
   $: if ($isMobileSettingsPageVisible && !MobileSettings) { loadMobileSettings().then(m => MobileSettings = m.default); }
   $: if ($isMobile && !CharacterListPage) { loadCharacterListPage().then(m => CharacterListPage = m.default); }
   $: if ($isCharacterModalVisible && !CharacterModal) { loadCharacterModal().then(m => CharacterModal = m.default); }
@@ -231,6 +235,7 @@
 />
 <svelte:component this={PromptModal} />
 <svelte:component this={DebugLogsModal} />
+<svelte:component this={DataBrowserModal} />
 {#if import.meta.env.DEV}
   <DevModeIndicator />
 {/if}

@@ -685,6 +685,21 @@ export const ko: LanguageStrings = {
     unknown: "알 수 없음",
     invalidDate: "유효하지 않은 날짜",
   },
+  dataBrowser: {
+    title: "데이터 브라우저",
+    subtitle: "애플리케이션 데이터 저장소 탐색 및 검사",
+    selectStore: "저장소 선택",
+    search: "검색",
+    searchPlaceholder: "데이터 검색...",
+    export: "내보내기",
+    refresh: "새로고침",
+    close: "닫기",
+    showingResults: "{count}개 결과 표시 중",
+    noResults: "일치하는 결과 없음",
+    noData: "사용 가능한 데이터 없음",
+    tryDifferentQuery: "다른 검색어로 시도해보세요",
+    selectDifferentStore: "다른 데이터 저장소 선택"
+  },
   api: {
     imageMessage: "이미지를 보냈습니다.",
     imageUnavailable: "(사용자가 이미지를 보냈지만 더 이상 사용할 수 없습니다)",

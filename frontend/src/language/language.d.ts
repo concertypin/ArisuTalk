@@ -628,6 +628,21 @@ export type LanguageStrings = {
     naiGeneration: string;
     snsPostType: string;
   };
+  dataBrowser: {
+    title: string;
+    subtitle: string;
+    selectStore: string;
+    search: string;
+    searchPlaceholder: string;
+    export: string;
+    refresh: string;
+    close: string;
+    showingResults: string;
+    noResults: string;
+    noData: string;
+    tryDifferentQuery: string;
+    selectDifferentStore: string;
+  };
   api: {
     imageMessage: string;
     imageUnavailable: string;

@@ -689,6 +689,21 @@ export const en: LanguageStrings = {
     unknown: "Unknown",
     invalidDate: "Invalid Date",
   },
+  dataBrowser: {
+    title: "Data Browser",
+    subtitle: "Browse and inspect application data stores",
+    selectStore: "Select Store",
+    search: "Search",
+    searchPlaceholder: "Search data...",
+    export: "Export",
+    refresh: "Refresh",
+    close: "Close",
+    showingResults: "Showing {count} results",
+    noResults: "No matching results",
+    noData: "No data available",
+    tryDifferentQuery: "Try a different search query",
+    selectDifferentStore: "Select a different data store"
+  },
   api: {
     imageMessage: "Image sent.",
     imageUnavailable: "(User sent an image but it is no longer available)",

@@ -9,6 +9,7 @@ export const isCreateGroupChatModalVisible = writable(false);
 export const isCreateOpenChatModalVisible = writable(false);
 export const isEditGroupChatModalVisible = writable(false);
 export const isDebugLogModalVisible = writable(false);
+export const isDataBrowserModalVisible = writable(false);
 export const isConfirmationModalVisible = writable(false);
 export const isMasterPasswordModalVisible = writable(false);
 export const confirmationModalData = writable({
