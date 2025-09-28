@@ -77,7 +77,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy . --project-name=arisutalk-canaria
+          command: pages deploy . --project-name=arisutalk-spark
 
   publish-dev:
     needs: [build, publish-spark] # Depends on Spark deployment to ensure it works
