@@ -46,3 +46,10 @@ backups/
 CLAUDE.MD
 CLAUDE.md
 claude.md
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+# It is used to store environment variables for frontend development(no sensitive info)
+!frontend/.env
