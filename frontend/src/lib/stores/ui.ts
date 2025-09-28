@@ -52,7 +52,15 @@ export const desktopSettings = writable({
 // Generic UI states
 export const openSettingsSections = writable(["ai"]);
 export const fontScale = writable(1.0);
-export const isDevModeActive = writable(import.meta.env.DEV);
+
+// 개발 모드 활성화 상태 (동적으로 결정)
+export const isDevModeActive = writable(false);
 
 // 개발 환경 확인을 위한 유틸리티 함수
-export const isDevelopment = () => import.meta.env.DEV;
+export const isDevelopment = () => {
+  // 동적으로 개발 환경 확인 (dev-init.ts에서 설정된 값 사용)
+  const { subscribe } = isDevModeActive;
+  let currentValue = false;
+  subscribe(value => currentValue = value)();
+  return currentValue;
+};
