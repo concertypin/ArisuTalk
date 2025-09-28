@@ -32,7 +32,7 @@ jobs:
 
           # Ensure that the issue body is properly escaped for JSON
           issue_body = os.environ.get("ISSUE_BODY", "")
-          
+
           class Label:
               def __init__(self, name: str, description: str):
                   self.name = name
@@ -97,12 +97,7 @@ jobs:
           print(json.dumps(body))
           EOF
 
-          GEMINI_PAYLOAD=$(python prepare_payload.py)
-          {
-            echo 'GEMINI_PAYLOAD<<EOF'
-            echo "$GEMINI_PAYLOAD"
-            echo 'EOF'
-          } >> $GITHUB_ENV
+          python prepare_payload.py > payload.json
         env:
           ISSUE_TITLE: ${{ github.event.issue.title }}
           ISSUE_BODY: ${{ github.event.issue.body }}
@@ -113,11 +108,10 @@ jobs:
         run: |
           # CORRECTION: Use single quotes around the environment variable to prevent
           # the shell from interpreting special characters like '<' and '>'.
-          echo '${{ env.GEMINI_PAYLOAD }}' > payload.json
 
           GEMINI_RESPONSE=$(curl -sf -H "Content-Type: application/json" \
             -d @payload.json \
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${{ secrets.GEMINI_API_KEY }}")
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${{ secrets.GEMINI_API_KEY }}")
 
           # A more robust python script to handle potential errors in the JSON response.
           LABELS_TO_APPLY=$(echo "$GEMINI_RESPONSE" | python -c '
