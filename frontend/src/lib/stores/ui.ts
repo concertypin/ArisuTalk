@@ -52,3 +52,6 @@ export const desktopSettings = writable({
 export const openSettingsSections = writable(["ai"]);
 export const fontScale = writable(1.0);
 export const isDevModeActive = writable(import.meta.env.DEV);
+
+// 개발 환경 확인을 위한 유틸리티 함수
+export const isDevelopment = () => import.meta.env.DEV;

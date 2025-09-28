@@ -13,7 +13,7 @@ export async function clearAllBrowserData(): Promise<void> {
   const resetOnRefreshKey = "debug-reset-on-refresh";
   for (let i = localStorage.length - 1; i >= 0; i--) {
     const key = localStorage.key(i);
-    if (key !== resetOnRefreshKey) {
+    if (key && key !== resetOnRefreshKey) {
       localStorage.removeItem(key);
     }
   }
@@ -181,11 +181,10 @@ export async function loadPreconfiguredData(
 /**
  * Initializes the debug utility in development mode.
  * When running in a development environment (import.meta.env.DEV is true),
- * this function automatically clears all browser data and loads pre-configured data.
+ * this function automatically activates debug mode.
  */
 export async function initializeDebugUtility(): Promise<void> {
-  // Check if in development mode and if a debug flag is set (e.g., via localStorage or another env variable)
-  // For now, we'll just use import.meta.env.DEV
+  // Always activate debug mode in development environment
   if (import.meta.env.DEV) {
     isDevModeActive.set(true);
     console.log("Debug mode activated in development environment.");
