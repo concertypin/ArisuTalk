@@ -232,7 +232,7 @@
       </div>
       <div class="relative">
         <Bot class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4" />
-        <input on:focus={() => isSearchModalVisible.set(true)} type="text" placeholder={t("sidebar.searchPlaceholder")} class="w-full pl-11 pr-4 py-2 md:py-3 bg-gray-800 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/30 focus:bg-gray-750 transition-all duration-200 text-sm placeholder-gray-500" />
+        <input bind:value={$searchQuery} type="text" placeholder={t("sidebar.searchPlaceholder")} class="w-full pl-11 pr-4 py-2 md:py-3 bg-gray-800 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/30 focus:bg-gray-750 transition-all duration-200 text-sm placeholder-gray-500" />
       </div>
     </header>
 

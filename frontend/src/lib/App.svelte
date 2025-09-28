@@ -22,6 +22,11 @@
       ChatSelectionModal, SearchModal, CharacterListPage, MobileSettings,
       SNSCharacterListModal, SNSFeedModal, SNSPostModal, PromptModal, DebugLogsModal;
   import { settings } from './stores/settings';
+  import {
+    isConfirmationModalVisible, isImageZoomModalVisible, isCreateGroupChatModalVisible,
+    isCreateOpenChatModalVisible, isEditGroupChatModalVisible, isPromptModalVisible,
+    isDebugLogModalVisible, isMasterPasswordModalVisible, desktopSettings, isDesktopSettingsModalVisible
+  } from './stores/ui';
   import { enableAutoSnapshots } from './services/dataService';
   import { addLog } from './services/logService';
 
@@ -43,6 +48,23 @@
   const loadSNSPostModal = () => import('./components/modals/sns/SNSPostModal.svelte');
   const loadPromptModal = () => import('./components/modals/prompt/PromptModal.svelte');
   const loadDebugLogsModal = () => import('./components/modals/logs/DebugLogsModal.svelte');
+
+  $: if ($isConfirmationModalVisible && !ConfirmationModal) { loadConfirmationModal().then(m => ConfirmationModal = m.default); }
+  $: if ($isImageZoomModalVisible && !ImageZoomModal) { loadImageZoomModal().then(m => ImageZoomModal = m.default); }
+  $: if ($isCreateGroupChatModalVisible && !CreateGroupChatModal) { loadCreateGroupChatModal().then(m => CreateGroupChatModal = m.default); }
+  $: if ($isCreateOpenChatModalVisible && !CreateOpenChatModal) { loadCreateOpenChatModal().then(m => CreateOpenChatModal = m.default); }
+  $: if ($isEditGroupChatModalVisible && !EditGroupChatModal) { loadEditGroupChatModal().then(m => EditGroupChatModal = m.default); }
+  $: if ($isDesktopSettingsModalVisible && !DesktopSettingsUI) { loadDesktopSettingsUI().then(m => DesktopSettingsUI = m.default); }
+  $: if ($isMasterPasswordModalVisible && !MasterPasswordModal) { loadMasterPasswordModal().then(m => MasterPasswordModal = m.default); }
+  $: if ($isPromptModalVisible && !PromptModal) { loadPromptModal().then(m => PromptModal = m.default); }
+  $: if ($isDebugLogModalVisible && !DebugLogsModal) { loadDebugLogsModal().then(m => DebugLogsModal = m.default); }
+  $: if ($isMobileSettingsPageVisible && !MobileSettings) { loadMobileSettings().then(m => MobileSettings = m.default); }
+  $: if ($isMobile && !CharacterListPage) { loadCharacterListPage().then(m => CharacterListPage = m.default); }
+  $: if ($isCharacterModalVisible && !CharacterModal) { loadCharacterModal().then(m => CharacterModal = m.default); }
+  $: if ($isSearchModalVisible && !SearchModal) { loadSearchModal().then(m => SearchModal = m.default); }
+  $: if ($isSNSFeedModalVisible && !SNSFeedModal) { loadSNSFeedModal().then(m => SNSFeedModal = m.default); }
+  $: if ($isSNSCharacterListModalVisible && !SNSCharacterListModal) { loadSNSCharacterListModal().then(m => SNSCharacterListModal = m.default); }
+  $: if ($isSNSPostModalVisible && !SNSPostModal) { loadSNSPostModal().then(m => SNSPostModal = m.default); }
 
   // Lazy load components when needed
   async function lazyLoadComponent(loadFunction, componentVar) {
@@ -110,8 +132,8 @@
   }
 
   async function handleMobileCharacterSelect(event) {
-    // Lazy load CharacterListPage if needed
-    CharacterListPage = await lazyLoadComponent(loadCharacterListPage, CharacterListPage);
+    // Lazy load ChatSelectionModal if needed
+    ChatSelectionModal = await lazyLoadComponent(loadChatSelectionModal, ChatSelectionModal);
     const character = event.detail;
     chatSelectionModalData.set({ character });
     isChatSelectionModalVisible.set(true);
@@ -167,43 +189,48 @@
 
 </script>
 
-<ConfirmationModal />
-<ImageZoomModal />
-<CreateGroupChatModal />
-<CreateOpenChatModal />
-<EditGroupChatModal />
-<CharacterModal />
-<DesktopSettingsUI />
-<MasterPasswordModal />
-<ChatSelectionModal
+<svelte:component this={ConfirmationModal} />
+<svelte:component this={ImageZoomModal} />
+<svelte:component this={CreateGroupChatModal} />
+<svelte:component this={CreateOpenChatModal} />
+<svelte:component this={EditGroupChatModal} />
+<svelte:component this={CharacterModal} />
+<svelte:component this={DesktopSettingsUI} />
+<svelte:component this={MasterPasswordModal} />
+<svelte:component
+  this={ChatSelectionModal}
   isOpen={$isChatSelectionModalVisible}
   character={$chatSelectionModalData.character}
   on:close={() => isChatSelectionModalVisible.set(false)}
   on:createNewChat={handleCreateNewChat}
 />
-<SearchModal
+<svelte:component
+  this={SearchModal}
   isOpen={$isSearchModalVisible}
   on:close={() => isSearchModalVisible.set(false)}
   on:select={handleCharacterSelect}
 />
-<SNSCharacterListModal
+<svelte:component
+  this={SNSCharacterListModal}
   isOpen={$isSNSCharacterListModalVisible}
   on:close={() => isSNSCharacterListModalVisible.set(false)}
   on:openSns={handleOpenSns}
 />
-<SNSFeedModal
+<svelte:component
+  this={SNSFeedModal}
   isOpen={$isSNSFeedModalVisible}
   character={$snsFeedCharacter}
   on:close={() => isSNSFeedModalVisible.set(false)}
 />
-<SNSPostModal
+<svelte:component
+  this={SNSPostModal}
   isOpen={$isSNSPostModalVisible}
   editingPost={$editingSNSPost}
   on:close={() => isSNSPostModalVisible.set(false)}
   on:save={handleSaveSNSPost}
 />
-<PromptModal />
-<DebugLogsModal />
+<svelte:component this={PromptModal} />
+<svelte:component this={DebugLogsModal} />
 <DevModeIndicator />
 
 {#if $isMobile}
@@ -218,7 +245,7 @@
 
         <!-- Character List -->
         <div class="w-full h-full absolute top-0 left-0" style="transform: translateX(0);">
-          <CharacterListPage on:characterselect={handleMobileCharacterSelect} on:sns={handleOpenSns} on:settings={handleCharacterSettings} on:newcharacter={handleNewCharacter} />
+          <svelte:component this={CharacterListPage} on:characterselect={handleMobileCharacterSelect} on:sns={handleOpenSns} on:settings={handleCharacterSettings} on:newcharacter={handleNewCharacter} />
         </div>
 
         <!-- Main Chat -->
@@ -233,7 +260,7 @@
     <!-- Settings View -->
     <div class="w-full h-full absolute top-0 left-0 transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]"
          style="transform: translateX({$isMobileSettingsPageVisible ? '0' : '100%'});">
-      <MobileSettings isOpen={$isMobileSettingsPageVisible} />
+      <svelte:component this={MobileSettings} isOpen={$isMobileSettingsPageVisible} />
     </div>
   </div>
 {:else}

@@ -283,7 +283,7 @@
           bind:value={$settings.naiSettings.sampler}
           class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-green-500/50"
         >
-          {#each Object.entries(NovelAIClient.SAMPLERS) as samplerOption}
+          {#each NovelAIClient.SAMPLERS as samplerOption}
             <option value={samplerOption}>
               {samplerOption.replace(/_/g, " ").toUpperCase()}
             </option>
