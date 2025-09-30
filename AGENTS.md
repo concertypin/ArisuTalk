@@ -9,12 +9,14 @@ This project is a monorepo with a frontend and a backend. Please refer to the `A
 
 ## Project Overview
 
-This project is an AI chat frontend application forked from [`github.com/dkfk5326/ArisuTalk`](https://github.com/dkfk5326/ArisuTalk). ArisuTalk provides a modern, responsive AI chat interface with comprehensive internationalization support and modular architecture.
+This project is an AI chat application with a modern, responsive interface built with Svelte 5. It features comprehensive internationalization support and a modular architecture.
 
 ### Key Features
 
-- **Bot Management**: Create and manage various AI bots with customizable personas
-- **Multi-Chat Rooms**: Operate multiple chat rooms simultaneously with group chat support
+- **Bot Management**: Create and manage various AI bots with customizable personas.
+- **Multi-Chat Rooms**: Operate multiple chat rooms simultaneously, including:
+  - **Group Chat**: Conversations with a manually selected group of AI characters.
+  - **Open Chat**: Dynamic chatrooms where AI characters autonomously join or leave based on conversation context.
 - **Multi-Provider AI Integration**: Supports multiple AI providers including Google Gemini, OpenAI, Claude, Grok, OpenRouter, and custom OpenAI-compatible APIs.
 - **Responsive Design**: Optimized for both desktop and mobile devices.
 - **PWA Support**: Progressive Web App capabilities with offline functionality.

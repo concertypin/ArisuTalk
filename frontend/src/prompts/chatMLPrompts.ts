@@ -18,5 +18,5 @@ export const defaultChatMLPrompts = {
   snsForce: snsForcePrompt,
   naiSticker: naiStickerPrompt,
   groupChat: groupChatPrompt,
-  openChat: openChatPrompt
+  openChat: openChatPrompt,
 };

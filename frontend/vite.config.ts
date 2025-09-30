@@ -1,4 +1,5 @@
 import { defineConfig } from "vite";
+import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { VitePWA } from "vite-plugin-pwa";
 
 // Since it distracts debugging via service worker, enable it only on production build
@@ -36,10 +37,21 @@ export default defineConfig(({ mode }) => ({
     build: {
         outDir: "dist",
         sourcemap: "inline",
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    // 벤더 라이브러리들을 별도 청크로 분리
+                    'vendor-core': ['svelte', 'svelte/internal'],
+                    'vendor-ui': ['lucide-svelte'],
+                    'vendor-utils': ['jszip'],
+                }
+            }
+        }
     },
     clearScreen: false,
     publicDir: "static",
     plugins: [
+        svelte(),
         ...(mode === 'production' ? prodOnlyPlugin : [])
     ]
 }));

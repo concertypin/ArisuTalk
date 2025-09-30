@@ -10,6 +10,8 @@ export type LanguageStrings = {
     edit: string;
     done: string;
     setupLater: string;
+    yes: string;
+    no: string;
   };
   characterModal: {
     memoryPlaceholder: string;
@@ -200,6 +202,7 @@ export type LanguageStrings = {
     promptBackup: string;
     promptRestore: string;
     promptBackupInfo: string;
+    promptBackupRestore: string;
     dangerZone: string;
     resetAllData: string;
     resetAllDataInfo: string;
@@ -214,6 +217,7 @@ export type LanguageStrings = {
     themeComingSoon: string;
     animationSettings: string;
     animationComingSoon: string;
+    debug: string;
     debugSettings: string;
     debugLogs: string;
     enableDebugLogs: string;
@@ -227,9 +231,6 @@ export type LanguageStrings = {
     experimentalWarning: string;
     warningNote: string;
     experimentalComingSoon: string;
-    experimental: {
-      enableCorsProxy: string;
-    };
     applicationInfo: string;
     appName: string;
     uiMode: string;
@@ -280,8 +281,14 @@ export type LanguageStrings = {
     };
     uiSizePreviewMessage1: string;
     uiSizePreviewMessage2: string;
+    backupRestore: string;
+    snapshotRestored: {
+      title: string;
+      messages: string;
+    };
   };
   sidebar: {
+    characters: string;
     startNewChat: string;
     imageSent: string;
     newChatRoom: string;
@@ -295,6 +302,7 @@ export type LanguageStrings = {
     description: string;
     searchPlaceholder: string;
     invite: string;
+    lastAiMessage: string;
   };
   defaultCharacter: {
     name: string;
@@ -570,6 +578,8 @@ export type LanguageStrings = {
     charactersMoodBased: string;
     naturalConversation: string;
     initialParticipants: string;
+    deleteGroupChat: string;
+    deleteGroupChatConfirm: string;
     deleteGroupChatTitle: string;
     deleteGroupChatMessage: string;
     deleteOpenChatTitle: string;
@@ -582,6 +592,17 @@ export type LanguageStrings = {
     openChatNameRequiredMessage: string;
     noCharactersAvailable: string;
     noCharactersAvailableMessage: string;
+  };
+  debug: {
+    quickPanel: {
+      title: string;
+      resetOnRefresh: {
+        title: string;
+        enabled: string;
+        disabled: string;
+      };
+      resetData: string;
+    };
   };
   debugLogs: {
     systemDebugLogs: string;
@@ -604,6 +625,23 @@ export type LanguageStrings = {
     logsDisabled: string;
     unknown: string;
     invalidDate: string;
+    naiGeneration: string;
+    snsPostType: string;
+  };
+  dataBrowser: {
+    title: string;
+    subtitle: string;
+    selectStore: string;
+    search: string;
+    searchPlaceholder: string;
+    export: string;
+    refresh: string;
+    close: string;
+    showingResults: string;
+    noResults: string;
+    noData: string;
+    tryDifferentQuery: string;
+    selectDifferentStore: string;
   };
   api: {
     imageMessage: string;
@@ -633,12 +671,15 @@ export type LanguageStrings = {
     selectModeDeselect: string;
     selectModeSelect: string;
     selectAll: string;
+    default: string;
   };
   landing: {
     welcomeTitle: string;
     welcomeMessage: string;
     newCharacterButton: string;
     selectCharacterButton: string;
+    debugModeTitle: string;
+    debugModeMessage: string;
   };
   security: {
     masterPasswordPlaceholder: string;
@@ -753,6 +794,7 @@ export type LanguageStrings = {
     daysAgo: string;
     weeksAgo: string;
     monthsAgo: string;
+    yearsAgo: string;
     characterList: {
       searchPlaceholder: string;
       availableCharacters: string;
@@ -774,6 +816,7 @@ export type LanguageStrings = {
     romanticInterest: string;
     openSNSList: string;
     viewSNS: string;
+    requiredPermissions: string;
   };
   naiSettings: {
     title: string;
@@ -830,22 +873,38 @@ export type LanguageStrings = {
     customNegativePlaceholder: string;
     customNegativeHelp: string;
     naiGenerationListTitle: string;
-    emotionHappy: string;
-    emotionSad: string;
-    emotionSurprised: string;
-    emotionAngry: string;
-    emotionLove: string;
-    emotionEmbarrassed: string;
-    emotionConfused: string;
-    emotionSleepy: string;
-    emotionExcited: string;
-    emotionNeutral: string;
+    emotion: {
+      happy: string;
+      sad: string;
+      surprised: string;
+      angry: string;
+      love: string;
+      embarrassed: string;
+      confused: string;
+      sleepy: string;
+      excited: string;
+      neutral: string;
+    };
     emotionStickersHelp: string;
     batchGenerationTitle: string;
     generateAllCharacters: string;
     batchGenerationDisabled: string;
     batchGenerationHelp: string;
     statsTitle: string;
+    stats: {
+      apiKeyRequired: string;
+      refresh: string;
+      loading: string;
+      errorTitle: string;
+      tier: string;
+      status: string;
+      active: string;
+      inactive: string;
+      expires: string;
+      unlimitedGenerations: string;
+      trainingStepsLeft: string;
+      noData: string;
+    };
     generatedStickers: string;
     generatedCharacters: string;
     totalStickers: string;
@@ -900,6 +959,7 @@ export type LanguageStrings = {
     currentList: string;
     itemTitleLabel: string;
     itemTitlePlaceholder: string;
+    itemTitleHelp: string;
     emotionLabel: string;
     actionSituationLabel: string;
     actionSituationPlaceholder: string;
@@ -925,6 +985,7 @@ export type LanguageStrings = {
     stickerGenerationError: string;
     stickerGenerationFailed: string;
     stickersGenerated: string;
+    emotionHelp: string;
   };
   stickerProgress: {
     title: string;
@@ -968,6 +1029,7 @@ export type LanguageStrings = {
     stickerSaved: string;
     stickerRemoved: string;
     confirmRemove: string;
+    confirmRemoveMultiple: string;
     previewMode: string;
     imageDetails: string;
     character: string;

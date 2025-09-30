@@ -196,7 +196,7 @@ Consider your character's current state when deciding engagement level:
 
 <|im_start|>user
 Open chat "{openChatName}" recent messages:
-{recent_messages}
+{formatted_recent_messages}
 
 Please respond as {characterName} to continue this open chat conversation naturally. Remember to include your characterState in the response reflecting your current mood, energy, and social engagement level. Consider the casual, free atmosphere of this open chat room and whether your character wants to actively participate or step back based on their current state.
 <|im_end|>

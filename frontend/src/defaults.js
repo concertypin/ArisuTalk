@@ -1,5 +1,53 @@
 import { t } from "./i18n.js";
-import { DEFAULT_EMOTIONS } from "./api/novelai.js";
+
+export const DEFAULT_EMOTIONS = [
+  {
+    titleKey: "happy",
+    emotion: "smiling, cheerful, bright eyes, joyful expression",
+    action: "",
+  },
+  {
+    titleKey: "sad",
+    emotion: "sad expression, downcast eyes, melancholic, tears",
+    action: "",
+  },
+  {
+    titleKey: "surprised",
+    emotion: "wide eyes, surprised, shocked expression, open mouth",
+    action: "",
+  },
+  {
+    titleKey: "angry",
+    emotion: "angry, frowning, intense gaze, fierce expression",
+    action: "",
+  },
+  {
+    titleKey: "love",
+    emotion: "loving gaze, romantic, heart eyes, affectionate",
+    action: "",
+  },
+  {
+    titleKey: "embarrassed",
+    emotion: "blushing, shy, embarrassed, covering face",
+    action: "",
+  },
+  {
+    titleKey: "confused",
+    emotion: "confused, tilted head, questioning look",
+    action: "",
+  },
+  { titleKey: "sleepy", emotion: "sleepy, drowsy, tired, yawning", action: "" },
+  {
+    titleKey: "excited",
+    emotion: "excited, energetic, sparkling eyes",
+    action: "",
+  },
+  {
+    titleKey: "neutral",
+    emotion: "neutral expression, calm, serene",
+    action: "",
+  },
+];
 
 export const defaultPrompts = {
   main: {
@@ -75,6 +123,9 @@ export const defaultAPISettings = {
       baseUrl: "",
       model: "",
       customModels: [],
+    },
+    novelai: {
+      apiKey: "",
     },
   },
 };

@@ -16,7 +16,7 @@ This file provides guidance for AI coding agents working on the frontend of this
 - Follow the style of the existing codebase.
 - Maintain consistency in indentation, variable names, and function names.
 - Use the linter or formatter configured in the project to prettify your code.
-- Use JSDoc for all functions and components. You can also use `.d.ts` files.
+- **TypeScript Types**: Leverage TypeScript for type safety in all Svelte components (`<script lang="ts">`) and utility files (`.ts`). Use JSDoc for additional documentation where complex logic or API contracts require it.
 - Do not use the `Object` type as it does not provide enough type information.
 - Create `id` attributes for elements.
 - Keep files under 300 lines when possible.
@@ -26,14 +26,13 @@ This file provides guidance for AI coding agents working on the frontend of this
 
 ### Internationalization
 - Use the `t()` function for all user-facing text.
-- Add new translation keys to both `ko.js` and `en.js`.
+- Add new translation keys to both `ko.ts` and `en.ts`.
 - Use descriptive keys that indicate context.
 - Maintain consistent terminology across translations.
 
 ### Event Handling
-- Use the `data-listener-added` attribute to prevent duplicate event listeners.
-- Ensure DOM elements exist before adding event listeners.
-- Remove event listeners when components are destroyed.
+- Use Svelte's event handling mechanisms (`on:click`, custom events) for component interactions.
+- For global event listeners, ensure they are properly cleaned up in the `onDestroy` lifecycle hook to prevent memory leaks.
 
 ## Testing Instructions
 

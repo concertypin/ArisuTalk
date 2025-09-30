@@ -12,6 +12,8 @@ export const ko: LanguageStrings = {
     edit: "수정",
     done: "완료",
     setupLater: "나중에 설정",
+    yes: "예",
+    no: "아니오",
   },
   characterModal: {
     memoryPlaceholder: "기억할 내용을 입력하세요...",
@@ -220,6 +222,7 @@ export const ko: LanguageStrings = {
     backupInfoTitle: "백업 파일 포함 내용",
     promptBackup: "프롬프트 백업",
     promptRestore: "프롬프트 불러오기",
+    promptBackupRestore: "프롬프트 백업 및 복원",
     promptBackupInfo:
       "커스텀 프롬프트 설정만 별도로 백업하고 복원할 수 있습니다.",
     dangerZone: "위험 구역",
@@ -238,6 +241,7 @@ export const ko: LanguageStrings = {
     animationSettings: "애니메이션 및 효과",
     animationComingSoon:
       "애니메이션 설정은 향후 업데이트에서 지원될 예정입니다.",
+    debug: "디버그",
     debugSettings: "디버그 및 개발자 옵션",
     debugLogs: "디버그 로그",
     enableDebugLogs: "디버그 로그 활성화",
@@ -305,12 +309,15 @@ export const ko: LanguageStrings = {
     },
     uiSizePreviewMessage1: "안녕하세요! UI 크기 조절을 도와드릴게요.",
     uiSizePreviewMessage2: "네, 미리보기 좋네요!",
-    experimental: {
-              enableCorsProxy: "CORS 프록시 활성화",
-        enableCorsProxyInfo: "외부 API에 요청 시 CORS 프록시를 사용합니다. 일부 서비스에서는 이 옵션이 필요할 수 있습니다.",
-    }
+    backupRestore: "백업 및 복원",
+    snapshotRestored: {
+      title: "스냅샷 복원",
+      messages: "설정 스냅샷이 성공적으로 복원되었습니다.",
+    },
   },
   sidebar: {
+    characters: "연락처 목록",
+    lastAiMessage: "마지막 AI 메시지",
     startNewChat: "새로운 채팅 시작",
     imageSent: "사진을 보냈습니다",
     newChatRoom: "새 채팅방",
@@ -565,18 +572,34 @@ export const ko: LanguageStrings = {
     imageSent: "사진을 보냈습니다.",
     messageGenerationError: "메시지를 생성하지 못했습니다.",
   },
-  groupChat: {
-    groupChat: "단톡방",
+  openChat: {
     openChat: "오픈톡방",
-    createGroupChat: "단톡방 만들기",
     createOpenChat: "오픈톡방 만들기",
-    groupChatName: "단톡방 이름",
+    newOpenChat: "새 오픈톡방",
     openChatName: "오픈톡방 이름",
     openChatNamePlaceholder: "오픈톡방 이름을 입력하세요",
-    groupChatSettings: "단톡방 설정",
     openChatInfo: "오픈톡방이란?",
+    openChatAutoManagement: "AI가 자동으로 캐릭터들의 입장/퇴장을 관리합니다",
+    charactersMoodBased: "캐릭터들은 각자의 기분과 상태에 따라 참여합니다",
+    naturalConversation: "자연스러운 대화 흐름이 자동으로 만들어집니다",
+    initialParticipants: "처음에는 랜덤하게 2-4명이 입장합니다",
+    availableCharacters: "{{count}}명의 캐릭터 참여 가능",
+    deleteOpenChatTitle: "오픈톡방 삭제",
+    deleteOpenChatConfirm:
+      "이 오픈톡방을 삭제하시겠습니까? 모든 대화 내용이 사라집니다.",
+    openChatNameRequired: "오픈톡방 이름 필요",
+    openChatNameRequiredMessage: "오픈톡방 이름을 입력해주세요.",
+    participantsConnected: "{{count}}명 접속중",
+    startConversation: "대화를 시작해보세요",
+    "openchat.joined": "{name}님이 입장했습니다.",
+    "openchat.left": "{name}님이 퇴장했습니다.",
+  },
+  groupChat: {
+    groupChat: "단톡방",
+    createGroupChat: "단톡방 만들기",
+    groupChatName: "단톡방 이름",
+    groupChatSettings: "단톡방 설정",
     newGroupChat: "새 단톡방",
-    newOpenChat: "새 오픈톡방",
     calculatingStorage: "계산 중...",
     responseSettings: "응답 설정",
     overallResponseFrequency: "전체 응답 빈도",
@@ -609,30 +632,37 @@ export const ko: LanguageStrings = {
     startConversation: "대화를 시작해보세요",
     imageSent: "이미지를 보냈습니다",
     stickerSent: "스티커를 보냈습니다",
-    openChatAutoManagement: "AI가 자동으로 캐릭터들의 입장/퇴장을 관리합니다",
-    charactersMoodBased: "캐릭터들은 각자의 기분과 상태에 따라 참여합니다",
-    naturalConversation: "자연스러운 대화 흐름이 자동으로 만들어집니다",
-    initialParticipants: "처음에는 랜덤하게 2-4명이 입장합니다",
+    deleteGroupChat: "단톡방 삭제",
+    deleteGroupChatConfirm:
+      "'{name}' 단톡방을 삭제하시겠습니까? 모든 대화 내용이 사라집니다.",
     deleteGroupChatTitle: "단톡방 삭제",
     deleteGroupChatMessage:
       "이 단톡방을 삭제하시겠습니까? 모든 대화 내용이 사라집니다.",
-    deleteOpenChatTitle: "오픈톡방 삭제",
-    deleteOpenChatMessage:
-      "이 오픈톡방을 삭제하시겠습니까? 모든 대화 내용이 사라집니다.",
     groupChatNameRequired: "단톡방 이름 필요",
     groupChatNameRequiredMessage: "단톡방 이름을 입력해주세요.",
     participantsRequired: "참여자 부족",
     participantsRequiredMessage: "최소 2명 이상의 캐릭터를 선택해주세요.",
-    openChatNameRequired: "오픈톡방 이름 필요",
-    openChatNameRequiredMessage: "오픈톡방 이름을 입력해주세요.",
     noCharactersAvailable: "캐릭터 없음",
     noCharactersAvailableMessage:
       "참여할 캐릭터가 없습니다. 먼저 캐릭터를 추가해주세요.",
+  },
+  debug: {
+    quickPanel: {
+      title: "디버그 퀵 패널",
+      resetOnRefresh: {
+        title: "새로고침 시 초기화",
+        enabled: "초기화: 켜짐",
+        disabled: "초기화: 꺼짐",
+      },
+      resetData: "데이터 초기화",
+    },
   },
   debugLogs: {
     systemDebugLogs: "시스템 디버그 로그",
     groupChatType: "단톡방",
     openChatType: "오픈톡방",
+    naiGeneration: "NovelAI 이미지 생성",
+    snsPostType: "SNS 포스트",
     normalChatType: "일반 채팅",
     totalLogItems: "총",
     maxLogItems: "개의 로그 항목",
@@ -645,6 +675,8 @@ export const ko: LanguageStrings = {
     export: "내보내기",
     clearAll: "전체 삭제",
     close: "닫기",
+    clearAllConfirm:
+      "모든 디버그 로그를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
     noLogs: "로그가 없습니다",
     noLogsCollected:
       "아직 수집된 로그가 없습니다.<br/>채팅을 시작하면 로그가 생성됩니다.",
@@ -653,11 +685,26 @@ export const ko: LanguageStrings = {
     unknown: "알 수 없음",
     invalidDate: "유효하지 않은 날짜",
   },
+  dataBrowser: {
+    title: "데이터 브라우저",
+    subtitle: "애플리케이션 데이터 저장소 탐색 및 검사",
+    selectStore: "저장소 선택",
+    search: "검색",
+    searchPlaceholder: "데이터 검색...",
+    export: "내보내기",
+    refresh: "새로고침",
+    close: "닫기",
+    showingResults: "{count}개 결과 표시 중",
+    noResults: "일치하는 결과 없음",
+    noData: "사용 가능한 데이터 없음",
+    tryDifferentQuery: "다른 검색어로 시도해보세요",
+    selectDifferentStore: "다른 데이터 저장소 선택"
+  },
   api: {
     imageMessage: "이미지를 보냈습니다.",
     imageUnavailable: "(사용자가 이미지를 보냈지만 더 이상 사용할 수 없습니다)",
     unknownSticker: "알 수 없는 스티커",
-    stickerMessage: "[사용자가 \"{{stickerName}}\" 스티커를 보냄]",
+    stickerMessage: '[사용자가 "{{stickerName}}" 스티커를 보냄]',
     proactiveStart: "(SYSTEM: 당신이 이 대화를 시작합니다. 시작해주세요.)",
     apiError: "{{provider}} API 오류: {{status}} - {{error}}",
     invalidResponse: "{{provider}} API로부터 유효한 응답을 받지 못했습니다.",
@@ -684,13 +731,17 @@ export const ko: LanguageStrings = {
     selectModeDeselect: "선택<br>해제",
     selectModeSelect: "선택<br>모드",
     selectAll: "전체<br>선택",
+    default: "기본",
   },
   landing: {
     welcomeTitle: "아리스톡에 오신 것을 환영합니다",
     welcomeMessage:
-      "이곳은 당신만의 AI 캐릭터들과 자유롭게 대화할 수 있는 공간입니다. 사이드바에서 캐릭터를 선택하거나 새 캐릭터를 만들어 대화를 시작해보세요.",
+      "사이드바에서 캐릭터를 선택하거나 새 캐릭터를 만들어 대화를 시작해보세요.",
     newCharacterButton: "새 캐릭터 만들기",
     selectCharacterButton: "캐릭터 선택",
+    debugModeTitle: "디버그 모드",
+    debugModeMessage:
+      "디버그 모드가 활성화 되었습니다. 모든 데이터는 테스트와 디버깅 목적의 개별 스토리지에 저장됩니다.",
   },
   security: {
     masterPasswordPlaceholder: "안전한 마스터 비밀번호를 입력하세요",
@@ -812,6 +863,7 @@ export const ko: LanguageStrings = {
     daysAgo: "{{days}}일 전",
     weeksAgo: "{{weeks}}주 전",
     monthsAgo: "{{months}}개월 전",
+    yearsAgo: "{{years}}년 전",
     characterList: {
       searchPlaceholder: "캐릭터 이름으로 검색...",
       availableCharacters: "접근 가능한 캐릭터",
@@ -822,6 +874,7 @@ export const ko: LanguageStrings = {
       romanceLevel: "연애감정: {{level}}%",
     },
     accessDeniedDescription: "이 콘텐츠를 보려면 더 높은 호감도가 필요합니다.",
+    requiredPermissions: "필요 권한",
     requiresAffection: "호감도 {{level}}% 이상 필요",
     requiresIntimacy: "친밀도 {{level}}% 이상 필요",
     requiresTrust: "신뢰도 {{level}}% 이상 필요",
@@ -857,6 +910,8 @@ export const ko: LanguageStrings = {
     maxAdditionalHelp: "최소 시간에 추가되는 랜덤 시간",
     sampler: "샘플러",
     noiseSchedule: "노이즈 스케줄",
+    steps: "스텝",
+    scale: "스케일",
     characterImageSettingsTitle: "캐릭터 및 이미지 설정",
     useCharacterPrompts: "캐릭터 프롬프트 사용 (v4/v4.5 전용)",
     useCharacterPromptsHelp: "특정 캐릭터를 일관성 있게 생성합니다",
@@ -887,22 +942,41 @@ export const ko: LanguageStrings = {
     customNegativePlaceholder: "제외할 요소들을 입력하세요...",
     customNegativeHelp: "기본 negative 프롬프트에 추가됩니다",
     naiGenerationListTitle: "NAI 일괄 생성 목록",
-    emotionHappy: "😊 기쁨",
-    emotionSad: "😢 슬픔",
-    emotionSurprised: "😮 놀람",
-    emotionAngry: "😠 분노",
-    emotionLove: "💕 사랑",
-    emotionEmbarrassed: "😳 부끄러움",
-    emotionConfused: "😕 혼란",
-    emotionSleepy: "😴 졸림",
-    emotionExcited: "🤩 흥분",
-    emotionNeutral: "😐 무표정",
-    emotionStickersHelp: "위 감정들에 대한 스티커가 자동으로 생성됩니다. 새 캐릭터 생성 시 또는 일괄 생성을 통해 모든 기본 감정 스티커를 만들 수 있습니다.",
+    emotion: {
+      happy: "😊 기쁨",
+      sad: "😢 슬픔",
+      surprised: "😮 놀람",
+      angry: "😠 분노",
+      love: "💕 사랑",
+      embarrassed: "😳 부끄러움",
+      confused: "😕 혼란",
+      sleepy: "😴 졸림",
+      excited: "🤩 흥분",
+      neutral: "😐 무표정",
+    },
+    emotionStickersHelp:
+      "위 감정들에 대한 스티커가 자동으로 생성됩니다. 새 캐릭터 생성 시 또는 일괄 생성을 통해 모든 기본 감정 스티커를 만들 수 있습니다.",
     batchGenerationTitle: "배치 생성",
     generateAllCharacters: "모든 캐릭터 기본 감정 생성",
-    batchGenerationDisabled: "⚠ API 키를 설정해야 배치 생성을 사용할 수 있습니다",
-    batchGenerationHelp: "모든 캐릭터의 누락된 기본 감정 스티커를 한 번에 생성합니다. 개별 캐릭터 생성은 각 캐릭터 수정 화면에서 가능합니다.",
+    batchGenerationDisabled:
+      "⚠ API 키를 설정해야 배치 생성을 사용할 수 있습니다",
+    batchGenerationHelp:
+      "모든 캐릭터의 누락된 기본 감정 스티커를 한 번에 생성합니다. 개별 캐릭터 생성은 각 캐릭터 수정 화면에서 가능합니다.",
     statsTitle: "생성 통계",
+    stats: {
+      apiKeyRequired: "통계를 가져오려면 API 키가 필요합니다.",
+      refresh: "새로고침",
+      loading: "통계 로딩 중...",
+      errorTitle: "통계 로드 오류",
+      tier: "구독 등급",
+      status: "상태",
+      active: "활성",
+      inactive: "비활성",
+      expires: "만료일",
+      unlimitedGenerations: "무제한 생성",
+      trainingStepsLeft: "남은 학습 스텝",
+      noData: "표시할 데이터가 없습니다. 새로고침하거나 API 키를 확인하세요.",
+    },
     generatedStickers: "생성된 스티커",
     generatedCharacters: "생성된 캐릭터",
     totalStickers: "총 스티커 수",
@@ -913,8 +987,10 @@ export const ko: LanguageStrings = {
     helpApiKey: "• NovelAI Persistent API Token이 필요합니다",
     helpImageSizes: "• 무제한 생성 크기만 지원: 1024×1024, 832×1216, 1216×832",
     helpDelay: "• 부정사용 방지를 위해 생성 간 20-30초 대기시간이 적용됩니다",
-    helpAutoGeneration: "• 대화 중 감정이 감지되면 자동으로 해당 감정 스티커를 생성합니다",
-    helpBatchGeneration: "• 배치 생성으로 모든 기본 감정 스티커를 한 번에 만들 수 있습니다"
+    helpAutoGeneration:
+      "• 대화 중 감정이 감지되면 자동으로 해당 감정 스티커를 생성합니다",
+    helpBatchGeneration:
+      "• 배치 생성으로 모든 기본 감정 스티커를 한 번에 만들 수 있습니다",
   },
   naiHandlers: {
     pleaseSelectCharacter: "캐릭터를 선택해주세요.",
@@ -960,6 +1036,10 @@ export const ko: LanguageStrings = {
     emotionLabel: "감정",
     actionSituationLabel: "액션/상황",
     actionSituationPlaceholder: "액션이나 상황을 입력하세요",
+    itemTitleHelp: "스티커의 제목입니다. (예: '인사')",
+    emotionHelp: "스티커에 표현될 감정입니다. (예: '기쁨', '미소')",
+    actionSituationHelp:
+      "스티커의 구체적인 행동이나 상황입니다. (예: '손 흔들며', '밝게 웃으며')",
     addNaiGenerationItem: "항목 추가",
     saveList: "목록 저장",
     cancel: "취소",
@@ -968,7 +1048,8 @@ export const ko: LanguageStrings = {
     emotionListGeneration: "감정 목록 생성",
     allStickersExist: "모든 스티커가 이미 존재합니다.",
     editCancelled: "편집이 취소되었습니다.",
-    emotionListBatchConfirm: "선택된 캐릭터들의 감정 스티커를 일괄 생성하시겠습니까?",
+    emotionListBatchConfirm:
+      "선택된 캐릭터들의 감정 스티커를 일괄 생성하시겠습니까?",
     emotionListBatchDescription: "목록의 모든 감정에 대해 스티커를 생성합니다.",
     generateAllCharacterEmotions: "모든 캐릭터 감정 생성",
     listResetToDefault: "목록이 기본값으로 재설정되었습니다.",
@@ -981,7 +1062,7 @@ export const ko: LanguageStrings = {
     resetToDefaultConfirm: "목록을 기본값으로 재설정하시겠습니까?",
     stickerGenerationError: "스티커 생성 중 오류가 발생했습니다.",
     stickerGenerationFailed: "스티커 생성에 실패했습니다.",
-    stickersGenerated: "{{count}}개의 스티커가 생성되었습니다."
+    stickersGenerated: "{{count}}개의 스티커가 생성되었습니다.",
   },
   stickerProgress: {
     title: "스티커 생성 진행 상황",
@@ -1012,8 +1093,8 @@ export const ko: LanguageStrings = {
       confused: "혼란",
       sleepy: "졸림",
       excited: "흥분",
-      neutral: "무표정"
-    }
+      neutral: "무표정",
+    },
   },
   stickerPreview: {
     title: "스티커 프리뷰",
@@ -1025,6 +1106,7 @@ export const ko: LanguageStrings = {
     stickerSaved: "스티커가 저장되었습니다.",
     stickerRemoved: "스티커가 제거되었습니다.",
     confirmRemove: "정말로 이 스티커를 제거하시겠습니까?",
+    confirmRemoveMultiple: "{{count}}개의 스티커를 정말로 제거하시겠습니까?",
     previewMode: "프리뷰 모드",
     imageDetails: "이미지 세부 정보",
     character: "캐릭터",
@@ -1037,7 +1119,8 @@ export const ko: LanguageStrings = {
     rerollComplete: "리롤 완료",
     rerollFailed: "리롤 실패",
     confirmReroll: "리롤 확인",
-    rerollConfirmation: "이 스티커를 새로 생성하시겠습니까? 기존 스티커는 교체됩니다.",
+    rerollConfirmation:
+      "이 스티커를 새로 생성하시겠습니까? 기존 스티커는 교체됩니다.",
     exifInfo: "EXIF 정보",
     model: "모델",
     steps: "스텝",
@@ -1091,7 +1174,7 @@ export const ko: LanguageStrings = {
       actions: "작업",
       exif: "EXIF",
       preview: "프리뷰",
-      reroll: "리롤"
-    }
+      reroll: "리롤",
+    },
   },
 };

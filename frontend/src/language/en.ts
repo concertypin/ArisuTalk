@@ -12,6 +12,8 @@ export const en: LanguageStrings = {
     edit: "Edit",
     done: "Done",
     setupLater: "Set up later",
+    yes: "Yes",
+    no: "No",
   },
   characterModal: {
     memoryPlaceholder: "Enter something to remember...",
@@ -141,13 +143,17 @@ export const en: LanguageStrings = {
     randomFirstMessagePromptDescription:
       "This prompt is used when generating a new first message.",
     snsForcePrompt: "SNS Force Generation Prompt",
-    snsForcePromptDescription: "This prompt is used to forcibly generate SNS posts. It creates character SNS posts based on recent conversation content.",
+    snsForcePromptDescription:
+      "This prompt is used to forcibly generate SNS posts. It creates character SNS posts based on recent conversation content.",
     naiStickerPrompt: "NAI Sticker Generation Prompt",
-    naiStickerPromptDescription: "This prompt is used to generate stickers through NovelAI. It analyzes emotions and situations appropriate to the conversation context to create sticker generation requests.",
+    naiStickerPromptDescription:
+      "This prompt is used to generate stickers through NovelAI. It analyzes emotions and situations appropriate to the conversation context to create sticker generation requests.",
     groupChatPrompt: "Group Chat Prompt",
-    groupChatPromptDescription: "This prompt is used when AI characters chat in group chats. Should be written in ChatML format.",
+    groupChatPromptDescription:
+      "This prompt is used when AI characters chat in group chats. Should be written in ChatML format.",
     openChatPrompt: "Open Chat Prompt",
-    openChatPromptDescription: "This prompt is used when AI characters chat in open chats. Should be written in ChatML format.",
+    openChatPromptDescription:
+      "This prompt is used when AI characters chat in open chats. Should be written in ChatML format.",
     resetAllPrompts: "Reset All Prompts",
     resetAllPromptsConfirmation:
       "Are you really sure you want to reset all prompts? This action cannot be undone.",
@@ -217,6 +223,7 @@ export const en: LanguageStrings = {
     backupInfoTitle: "Backup File Contents",
     promptBackup: "Backup Prompts",
     promptRestore: "Restore Prompts",
+    promptBackupRestore: "Prompt Backup & Restore",
     promptBackupInfo:
       "You can backup and restore custom prompt settings separately.",
     dangerZone: "Danger Zone",
@@ -235,6 +242,7 @@ export const en: LanguageStrings = {
     animationSettings: "Animation and Effects",
     animationComingSoon:
       "Animation settings will be supported in future updates.",
+    debug: "Debug",
     debugSettings: "Debug and Developer Options",
     debugLogs: "Debug Logs",
     enableDebugLogs: "Enable Debug Logs",
@@ -302,12 +310,15 @@ export const en: LanguageStrings = {
     },
     uiSizePreviewMessage1: "Hello! I'll help you adjust the UI size.",
     uiSizePreviewMessage2: "Yes, the preview is nice!",
-    experimental: {
-              enableCorsProxy: "Enable CORS Proxy",
-        enableCorsProxyInfo: "Use a CORS proxy for requests to external APIs. This may be required for some services.",
-    }
+    backupRestore: "Backup & Restore",
+    snapshotRestored: {
+      title: "Restore Snapshot",
+      messages: "Settings snapshot has been restored successfully.",
+    },
   },
   sidebar: {
+    characters: "Contacts",
+    lastAiMessage: "Last AI Message",
     startNewChat: "Start a new chat",
     imageSent: "Image sent",
     newChatRoom: "New Chat Room",
@@ -511,7 +522,7 @@ export const en: LanguageStrings = {
     aiGenerationComplete: {
       title: "AI Generation Complete",
       message:
-        'Successfully generated details for character "{{characterName}}" ',
+        'Successfully generated details for character "{{characterName}}"',
     },
     generationFailed: {
       title: "Generation Failed",
@@ -564,18 +575,34 @@ export const en: LanguageStrings = {
     imageSent: "Image sent.",
     messageGenerationError: "Failed to generate message.",
   },
-  groupChat: {
-    groupChat: "Group Chat",
+  openChat: {
     openChat: "Open Chat",
-    createGroupChat: "Create Group Chat",
     createOpenChat: "Create Open Chat",
-    groupChatName: "Group Chat Name",
+    newOpenChat: "New Open Chat",
     openChatName: "Open Chat Name",
     openChatNamePlaceholder: "Enter open chat name",
-    groupChatSettings: "Group Chat Settings",
     openChatInfo: "What is Open Chat?",
+    openChatAutoManagement: "AI automatically manages character entry and exit",
+    charactersMoodBased: "Characters participate based on their mood and state",
+    naturalConversation: "Natural conversation flow is automatically created",
+    initialParticipants: "Initially, 2-4 characters randomly enter",
+    availableCharacters: "{{count}} characters available",
+    deleteOpenChatTitle: "Delete Open Chat",
+    deleteOpenChatConfirm:
+      "Are you sure you want to delete this open chat? All conversation history will be lost.",
+    openChatNameRequired: "Open Chat Name Required",
+    openChatNameRequiredMessage: "Please enter an open chat name.",
+    participantsConnected: "{{count}} connected",
+    startConversation: "Start a conversation",
+    "openchat.joined": "{name} has joined.",
+    "openchat.left": "{name} has left.",
+  },
+  groupChat: {
+    groupChat: "Group Chat",
+    createGroupChat: "Create Group Chat",
+    groupChatName: "Group Chat Name",
+    groupChatSettings: "Group Chat Settings",
     newGroupChat: "New Group Chat",
-    newOpenChat: "New Open Chat",
     calculatingStorage: "Calculating...",
     responseSettings: "Response Settings",
     overallResponseFrequency: "Overall Response Frequency",
@@ -609,30 +636,37 @@ export const en: LanguageStrings = {
     startConversation: "Start a conversation",
     imageSent: "Image sent",
     stickerSent: "Sticker sent",
-    openChatAutoManagement: "AI automatically manages character entry and exit",
-    charactersMoodBased: "Characters participate based on their mood and state",
-    naturalConversation: "Natural conversation flow is automatically created",
-    initialParticipants: "Initially, 2-4 characters randomly enter",
+    deleteGroupChat: "Delete Group Chat",
+    deleteGroupChatConfirm:
+      "Are you sure you want to delete the group chat '{name}'? All conversation history will be lost.",
     deleteGroupChatTitle: "Delete Group Chat",
     deleteGroupChatMessage:
       "Are you sure you want to delete this group chat? All conversation history will be lost.",
-    deleteOpenChatTitle: "Delete Open Chat",
-    deleteOpenChatMessage:
-      "Are you sure you want to delete this open chat? All conversation history will be lost.",
     groupChatNameRequired: "Group Chat Name Required",
     groupChatNameRequiredMessage: "Please enter a group chat name.",
     participantsRequired: "Insufficient Participants",
     participantsRequiredMessage: "Please select at least 2 characters.",
-    openChatNameRequired: "Open Chat Name Required",
-    openChatNameRequiredMessage: "Please enter an open chat name.",
     noCharactersAvailable: "No Characters",
     noCharactersAvailableMessage:
       "No characters available to participate. Please add characters first.",
+  },
+  debug: {
+    quickPanel: {
+      title: "Debug Quick Panel",
+      resetOnRefresh: {
+        title: "Reset at Refresh",
+        enabled: "Reset: On",
+        disabled: "Reset: Off",
+      },
+      resetData: "Reset Data",
+    },
   },
   debugLogs: {
     systemDebugLogs: "System Debug Logs",
     groupChatType: "Group Chat",
     openChatType: "Open Chat",
+    naiGeneration: "NovelAI Image Generation",
+    snsPostType: "SNS Post",
     normalChatType: "Normal Chat",
     totalLogItems: "Total",
     maxLogItems: "log items",
@@ -645,6 +679,8 @@ export const en: LanguageStrings = {
     export: "Export",
     clearAll: "Clear All",
     close: "Close",
+    clearAllConfirm:
+      "Are you sure you want to clear all debug logs? This action cannot be undone.",
     noLogs: "No logs",
     noLogsCollected:
       "No logs collected yet.<br/>Logs will be generated when you start chatting.",
@@ -652,6 +688,21 @@ export const en: LanguageStrings = {
       'Log collection is disabled.<br/>Please enable "Debug Logs" in settings.',
     unknown: "Unknown",
     invalidDate: "Invalid Date",
+  },
+  dataBrowser: {
+    title: "Data Browser",
+    subtitle: "Browse and inspect application data stores",
+    selectStore: "Select Store",
+    search: "Search",
+    searchPlaceholder: "Search data...",
+    export: "Export",
+    refresh: "Refresh",
+    close: "Close",
+    showingResults: "Showing {count} results",
+    noResults: "No matching results",
+    noData: "No data available",
+    tryDifferentQuery: "Try a different search query",
+    selectDifferentStore: "Select a different data store"
   },
   api: {
     imageMessage: "Image sent.",
@@ -686,13 +737,17 @@ export const en: LanguageStrings = {
     selectModeDeselect: "Deselect<br>Mode",
     selectModeSelect: "Select<br>Mode",
     selectAll: "Select<br>All",
+    default: "Default",
   },
   landing: {
     welcomeTitle: "Welcome to ArisuTalk",
     welcomeMessage:
-      "This is a space where you can freely chat with your own AI characters. Select a character from the sidebar or create a new one to start a conversation.",
+      "Select a character from the sidebar or create a new one to start a conversation.",
     newCharacterButton: "New Character",
     selectCharacterButton: "Select Character",
+    debugModeTitle: "Debug Mode",
+    debugModeMessage:
+      "Debug mode is enabled. All data is stored in separate storage for testing and debugging purposes only.",
   },
   security: {
     masterPasswordPlaceholder: "Enter a secure master password",
@@ -766,7 +821,8 @@ export const en: LanguageStrings = {
     naturalValue: "Natural value: {{level}}%",
     hypnosisValue: "Hypnosis value: {{level}}%",
     settingsWarning: "Hypnosis control overrides character's natural emotions",
-    dangerousFeature: "⚠️ This feature may interfere with natural story progression"
+    dangerousFeature:
+      "⚠️ This feature may interfere with natural story progression",
   },
   sns: {
     characterListTitle: "Character List",
@@ -815,6 +871,7 @@ export const en: LanguageStrings = {
     daysAgo: "{{days}}d ago",
     weeksAgo: "{{weeks}}w ago",
     monthsAgo: "{{months}}mo ago",
+    yearsAgo: "{{years}}y ago",
     characterList: {
       searchPlaceholder: "Search by character name...",
       availableCharacters: "Available Characters",
@@ -822,9 +879,11 @@ export const en: LanguageStrings = {
       affectionLevel: "Affection: {{level}}%",
       intimacyLevel: "Intimacy: {{level}}%",
       trustLevel: "Trust: {{level}}%",
-      romanceLevel: "Romance: {{level}}%"
+      romanceLevel: "Romance: {{level}}%",
     },
-    accessDeniedDescription: "Higher affection is required to view this content.",
+    accessDeniedDescription:
+      "Higher affection is required to view this content.",
+    requiredPermissions: "Required Permissions",
     requiresAffection: "Requires {{level}}% affection",
     requiresIntimacy: "Requires {{level}}% intimacy",
     requiresTrust: "Requires {{level}}% trust",
@@ -835,7 +894,7 @@ export const en: LanguageStrings = {
     trust: "Trust",
     romanticInterest: "Romance",
     openSNSList: "View SNS List",
-    viewSNS: "View {{name}}'s SNS"
+    viewSNS: "View {{name}}'s SNS",
   },
   naiSettings: {
     title: "NAI Sticker Auto-Generation Settings Panel",
@@ -860,6 +919,8 @@ export const en: LanguageStrings = {
     maxAdditionalHelp: "Random time added to minimum time",
     sampler: "Sampler",
     noiseSchedule: "Noise Schedule",
+    steps: "Steps",
+    scale: "Scale",
     characterImageSettingsTitle: "Character and Image Settings",
     useCharacterPrompts: "Use Character Prompts (v4/v4.5 only)",
     useCharacterPromptsHelp: "Generate specific characters consistently",
@@ -871,9 +932,11 @@ export const en: LanguageStrings = {
     vibeImageHelp: "Supports JPG, PNG files (max 2MB)",
     advancedSettingsTitle: "Advanced Settings",
     smeaEnable: "Enable SMEA",
-    smeaHelp: "Smooth Mode Enhanced Annealing - Improves consistency at high resolutions",
+    smeaHelp:
+      "Smooth Mode Enhanced Annealing - Improves consistency at high resolutions",
     smeaDynEnable: "Enable SMEA DYN",
-    smeaDynHelp: "Dynamic SMEA - Consistency improvement without smooth effects",
+    smeaDynHelp:
+      "Dynamic SMEA - Consistency improvement without smooth effects",
     cfgRescale: "CFG Rescale",
     uncondScale: "Unconditional Scale",
     dynamicThresholding: "Dynamic Thresholding",
@@ -890,22 +953,40 @@ export const en: LanguageStrings = {
     customNegativePlaceholder: "Enter elements to exclude...",
     customNegativeHelp: "Added to the base negative prompt",
     naiGenerationListTitle: "NAI Batch Generation List",
-    emotionHappy: "😊 Happy",
-    emotionSad: "😢 Sad",
-    emotionSurprised: "😮 Surprised",
-    emotionAngry: "😠 Angry",
-    emotionLove: "💕 Love",
-    emotionEmbarrassed: "😳 Embarrassed",
-    emotionConfused: "😕 Confused",
-    emotionSleepy: "😴 Sleepy",
-    emotionExcited: "🤩 Excited",
-    emotionNeutral: "😐 Neutral",
-    emotionStickersHelp: "Stickers for the above emotions are automatically generated. You can create all default emotion stickers when creating new characters or through batch generation.",
+    emotion: {
+      happy: "😊 Happy",
+      sad: "😢 Sad",
+      surprised: "😮 Surprised",
+      angry: "😠 Angry",
+      love: "💕 Love",
+      embarrassed: "😳 Embarrassed",
+      confused: "😕 Confused",
+      sleepy: "😴 Sleepy",
+      excited: "🤩 Excited",
+      neutral: "😐 Neutral",
+    },
+    emotionStickersHelp:
+      "Stickers for the above emotions are automatically generated. You can create all default emotion stickers when creating new characters or through batch generation.",
     batchGenerationTitle: "Batch Generation",
     generateAllCharacters: "Generate All Characters' Default Emotions",
     batchGenerationDisabled: "⚠ API key must be set to use batch generation",
-    batchGenerationHelp: "Generate all missing default emotion stickers for all characters at once. Individual character generation is available in each character edit screen.",
+    batchGenerationHelp:
+      "Generate all missing default emotion stickers for all characters at once. Individual character generation is available in each character edit screen.",
     statsTitle: "Generation Statistics",
+    stats: {
+      apiKeyRequired: "API key is required to fetch stats.",
+      refresh: "Refresh",
+      loading: "Loading stats...",
+      errorTitle: "Error fetching stats",
+      tier: "Subscription Tier",
+      status: "Status",
+      active: "Active",
+      inactive: "Inactive",
+      expires: "Expires At",
+      unlimitedGenerations: "Unlimited Generations",
+      trainingStepsLeft: "Training Steps Left",
+      noData: "No data to display. Refresh or check your API key.",
+    },
     generatedStickers: "Generated Stickers",
     generatedCharacters: "Generated Characters",
     totalStickers: "Total Stickers",
@@ -914,10 +995,13 @@ export const en: LanguageStrings = {
     stickerCount: "{{count}} stickers",
     helpTitle: "Usage Guide",
     helpApiKey: "• NovelAI Persistent API Token is required",
-    helpImageSizes: "• Only unlimited generation sizes supported: 1024×1024, 832×1216, 1216×832",
+    helpImageSizes:
+      "• Only unlimited generation sizes supported: 1024×1024, 832×1216, 1216×832",
     helpDelay: "• 20-30 second wait time between generations to prevent abuse",
-    helpAutoGeneration: "• Automatically generates corresponding emotion stickers when emotions are detected in conversation",
-    helpBatchGeneration: "• Batch generation allows creating all default emotion stickers at once"
+    helpAutoGeneration:
+      "• Automatically generates corresponding emotion stickers when emotions are detected in conversation",
+    helpBatchGeneration:
+      "• Batch generation allows creating all default emotion stickers at once",
   },
   naiHandlers: {
     pleaseSelectCharacter: "Please select a character.",
@@ -963,6 +1047,11 @@ export const en: LanguageStrings = {
     emotionLabel: "Emotion",
     actionSituationLabel: "Action/Situation",
     actionSituationPlaceholder: "Enter action or situation",
+    itemTitleHelp: "The title of the sticker. (e.g., 'Greeting')",
+    emotionHelp:
+      "The emotion to be expressed in the sticker. (e.g., 'Happy', 'Smile')",
+    actionSituationHelp:
+      "The specific action or situation for the sticker. (e.g., 'Waving hand', 'Smiling brightly')",
     addNaiGenerationItem: "Add Item",
     saveList: "Save List",
     cancel: "Cancel",
@@ -971,8 +1060,10 @@ export const en: LanguageStrings = {
     emotionListGeneration: "Emotion List Generation",
     allStickersExist: "All stickers already exist.",
     editCancelled: "Edit has been cancelled.",
-    emotionListBatchConfirm: "Do you want to batch generate emotion stickers for the selected characters?",
-    emotionListBatchDescription: "Generate stickers for all emotions in the list.",
+    emotionListBatchConfirm:
+      "Do you want to batch generate emotion stickers for the selected characters?",
+    emotionListBatchDescription:
+      "Generate stickers for all emotions in the list.",
     generateAllCharacterEmotions: "Generate All Character Emotions",
     listResetToDefault: "List has been reset to default.",
     naiGenerationItemAlreadyExists: "Item already exists.",
@@ -984,7 +1075,7 @@ export const en: LanguageStrings = {
     resetToDefaultConfirm: "Do you want to reset the list to default?",
     stickerGenerationError: "An error occurred while generating stickers.",
     stickerGenerationFailed: "Failed to generate stickers.",
-    stickersGenerated: "{{count}} stickers have been generated."
+    stickersGenerated: "{{count}} stickers have been generated.",
   },
   stickerProgress: {
     title: "Sticker Generation Progress",
@@ -1015,8 +1106,8 @@ export const en: LanguageStrings = {
       confused: "Confused",
       sleepy: "Sleepy",
       excited: "Excited",
-      neutral: "Neutral"
-    }
+      neutral: "Neutral",
+    },
   },
   stickerPreview: {
     title: "Sticker Preview",
@@ -1028,6 +1119,8 @@ export const en: LanguageStrings = {
     stickerSaved: "Sticker has been saved.",
     stickerRemoved: "Sticker has been removed.",
     confirmRemove: "Are you sure you want to remove this sticker?",
+    confirmRemoveMultiple:
+      "Are you sure you want to remove {{count}} stickers?",
     previewMode: "Preview Mode",
     imageDetails: "Image Details",
     character: "Character",
@@ -1040,7 +1133,8 @@ export const en: LanguageStrings = {
     rerollComplete: "Reroll Complete",
     rerollFailed: "Reroll Failed",
     confirmReroll: "Confirm Reroll",
-    rerollConfirmation: "Do you want to regenerate this sticker? The existing sticker will be replaced.",
+    rerollConfirmation:
+      "Do you want to regenerate this sticker? The existing sticker will be replaced.",
     exifInfo: "EXIF Information",
     model: "Model",
     steps: "Steps",
@@ -1094,7 +1188,7 @@ export const en: LanguageStrings = {
       actions: "Actions",
       exif: "EXIF",
       preview: "Preview",
-      reroll: "Reroll"
-    }
+      reroll: "Reroll",
+    },
   },
 };

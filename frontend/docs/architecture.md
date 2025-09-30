@@ -1,55 +1,93 @@
-## Architecture Overview
+# Frontend Architecture
 
+## Overview
 
-### Modular Settings System
+The ArisuTalk frontend is a modern web application built with **Svelte 5**. It embraces a reactive, component-based architecture, designed for modularity and extensibility. The ongoing migration from a legacy vanilla JavaScript structure to Svelte 5 is a core aspect of current development.
 
-The application features a completely restructured settings system with device-specific UI components:
+## Core Concepts
 
-- [DesktopSettingsUI.js](./src/components/DesktopSettingsUI.js) - Desktop interface with centered layout and tab navigation
-- [MobileSettingsUI.js](./src/components/MobileSettingsUI.js) - Mobile-optimized modal interface
-- [SettingsRouter.js](./src/components/SettingsRouter.js) - Automatic device detection and UI routing
+-   **Svelte 5:** We leverage modern Svelte features, including **runes**, for fine-grained reactivity and state management. This allows for a more declarative and efficient component logic.
+-   **Component-Based Structure:** The entire UI is decomposed into reusable Svelte components, located in `src/lib/components`. This promotes separation of concerns and maintainability.
+-   **Global Stores:** Shared application state (e.g., chat sessions, character data, user settings) is managed through Svelte stores in `src/lib/stores`. These stores provide a single source of truth and allow for seamless reactivity across the application.
+-   **Services:** Business logic that is not directly tied to a specific UI component is abstracted into services within `src/lib/services`. Examples include `chatService.ts` for managing chat interactions and `openChatService.ts` for handling the logic of dynamic open chats.
+-   **Legacy Code:** Some older vanilla JS code still exists (e.g., `MainChat.js`, `groupChatHandlers.js`). A key architectural goal is to progressively refactor this logic into Svelte components and stores.
 
-### Settings Panels
+## Chat Types
 
-The settings are organized into five modular panels in `src/components/settings/panels/`:
+The application supports several distinct chat modes:
 
-- [APISettingsPanel.js](./src/components/settings/panels/APISettingsPanel.js) - API provider configuration
-- [AppearanceSettingsPanel.js](./src/components/settings/panels/AppearanceSettingsPanel.js) - Theme, language, and display settings
-- [CharacterDefaultsPanel.js](./src/components/settings/panels/CharacterDefaultsPanel.js) - Default character configurations
-- [DataManagementPanel.js](./src/components/settings/panels/DataManagementPanel.js) - Data import/export and management
-- [AdvancedSettingsPanel.js](./src/components/settings/panels/AdvancedSettingsPanel.js) - Advanced configuration options
+-   **Main Chat:** A standard one-on-one chat with a single AI character.
+-   **Group Chat:** A chat with a manually selected, fixed group of AI characters.
+-   **Open Chat:** A dynamic group chat where AI characters can autonomously join or leave the conversation. This is driven by the flow of the dialogue and each character's internal "mood," creating a more natural and unpredictable chat experience.
 
-### Internationalization (i18n) System
+## Directory Structure
 
-Complete i18n Integration: All hardcoded strings have been replaced with translation functions:
-
-- Language Files: `src/language/ko.ts` and `src/language/en.ts` with 100+ translation keys
-- Real-time Switching: Language changes apply immediately without page refresh
-- Comprehensive Coverage: API files, UI components, modals, and system messages are fully internationalized
-
-### Component Hierarchy
-
-The frontend follows a **component-based architecture** with clear separation of concerns:
+The following is a detailed breakdown of the `frontend` directory, highlighting key files and their purposes.
 
 ```
-Application Root (index.js)
-├── UI Manager (ui.js)
-├── State Manager (index.js)
-├── Settings Router (SettingsRouter.js)
-│   ├── Desktop Settings (DesktopSettingsUI.js)
-│   │   ├── API Settings Panel
-│   │   ├── Appearance Settings Panel
-│   │   ├── Character Defaults Panel
-│   │   ├── Data Management Panel
-│   │   └── Advanced Settings Panel
-│   └── Mobile Settings (MobileSettingsUI.js)
-├── Main Chat (MainChat.js)
-├── Group Chat (GroupChat.js)
-├── Sidebar (Sidebar.js)
-└── Modal System
-    ├── Character Modal
-    ├── Prompt Modal
-    ├── Debug Logs Modal
-    ├── Master Password Modal
-    └── Confirmation Modal
+/frontend
+├── src/
+│   ├── lib/
+│   │   ├── App.svelte            # Root component of the Svelte application.
+│   │   │
+│   │   ├── api/                  # Modules for interacting with various AI provider APIs.
+│   │   │   ├── openai.js
+│   │   │   ├── gemini.js
+│   │   │   └── ...
+│   │   │
+│   │   ├── components/           # Reusable Svelte UI components.
+│   │   │   ├── Sidebar.svelte      # Main navigation sidebar.
+│   │   │   ├── MainChat.svelte     # The main chat interface.
+│   │   │   ├── Message.svelte      # Individual chat message component.
+│   │   │   ├── modals/             # Modal dialogs for various functions.
+│   │   │   │   ├── character/      # Modals for character creation and settings.
+│   │   │   │   │   └── CharacterModal.svelte
+│   │   │   │   ├── chat/           # Modals for creating different chat types.
+│   │   │   │   │   ├── CreateOpenChatModal.svelte
+│   │   │   │   │   └── CreateGroupChatModal.svelte
+│   │   │   │   └── settings/       # Modals for application settings.
+│   │   │   │       └── DesktopSettingsUI.svelte
+│   │   │   └── ...
+│   │   │
+│   │   ├── services/             # Business logic and data handling services.
+│   │   │   ├── chatService.ts      # Core logic for chat functionalities.
+│   │   │   ├── openChatService.ts  # Logic specific to Open Chat dynamics.
+│   │   │   ├── dataService.ts      # Handles data import/export and storage.
+│   │   │   └── ...
+│   │   │
+│   │   ├── stores/               # Global Svelte stores for state management.
+│   │   │   ├── chat.ts             # Store for chat rooms and messages.
+│   │   │   ├── character.ts        # Store for AI character data.
+│   │   │   ├── settings.ts         # Store for user and application settings.
+│   │   │   ├── ui.ts               # Store for UI state (e.g., modal visibility).
+│   │   │   └── ...
+│   │   │
+│   │   └── utils/                # Utility functions (crypto, storage, etc.).
+│   │       ├── secureStorage.js
+│   │       └── ...
+│   │
+│   ├── language/               # Internationalization (i18n) files.
+│   │   ├── en.ts
+│   │   └── ko.ts
+│   │
+│   ├── prompts/                # Manages and builds prompts for AI models.
+│   │   └── promptManager.ts
+│   │
+│   ├── main.ts                 # Main entry point for the application.
+│   └── app.css                 # Global CSS styles.
+│
+├── static/                     # Static assets like icons and manifest.
+│   └── manifest.webmanifest
+│
+├── package.json                # Project dependencies and scripts.
+├── svelte.config.js            # Svelte compiler configuration.
+└── vite.config.ts              # Vite build tool configuration.
 ```
+
+## Internationalization (i18n)
+
+The application is fully internationalized.
+
+-   **Translation Keys:** All user-facing strings are replaced with keys that are resolved by the `t()` function from our i18n module.
+-   **Language Files:** Translations are maintained in `src/language/en.ts` and `src/language/ko.ts`.
+-   **Real-time Switching:** The language can be changed in the settings, and the UI updates instantly without a page reload, thanks to Svelte's reactivity.
