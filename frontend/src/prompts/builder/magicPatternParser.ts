@@ -1,5 +1,3 @@
-import Sandbox from "@nyariv/sandboxjs";
-
 /**
  * Parses and executes magic patterns in a string.
  * @param template - The string template with magic patterns.
@@ -40,6 +38,7 @@ export async function parseMagicPatterns(
  * @returns A promise that resolves to the result of the code execution as a string.
  */
 async function runMagicPattern(code: string, context: object): Promise<string> {
+  const Sandbox = (await import("@nyariv/sandboxjs")).default;
   const sandbox = new Sandbox();
   return new Promise<string>((resolve) => {
     sandbox
