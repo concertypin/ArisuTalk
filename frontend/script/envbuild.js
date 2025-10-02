@@ -20,13 +20,13 @@ export default function getEnvVar(env) {
         if (ref.startsWith('refs/tags/v')) {
             const tag = ref.replace('refs/tags/', '');
             versionChannel = 'prod';
-            versionName = tag.substring(1); // 'v' prefix elemination
+            versionName = tag.substring(1); // 'v' prefix elimination
             versionUrl = `${GITHUB_REPO_URL}/tree/${tag}`;
         }
         else if (ref.startsWith('refs/tags/dev')) {
             const tag = ref.replace('refs/tags/', '');
             versionChannel = 'dev';
-            versionName = tag.substring(3); // 'dev' prefix elemination
+            versionName = tag.substring(3); // 'dev' prefix elimination
             versionUrl = `${GITHUB_REPO_URL}/tree/${tag}`;
         }
         else if (ref === 'refs/heads/main') {
