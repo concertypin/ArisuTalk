@@ -53,3 +53,6 @@ claude.md
 .env.*.local
 # It is used to store environment variables for frontend development(no sensitive info)
 !frontend/.env
+
+# lockfiles should be ignored except for the root one
+frontend/pnpm-lock.yaml

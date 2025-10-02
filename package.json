@@ -17,8 +17,5 @@
   "packageManager": "pnpm@10.17.1",
   "engines": {
     "node": ">20"
-  },
-  "dependencies": {
-    "nanoid": "^5.1.6"
   }
 }

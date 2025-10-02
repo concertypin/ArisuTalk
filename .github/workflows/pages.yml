@@ -21,6 +21,7 @@ permissions:
 
 jobs:
   build:
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -31,23 +32,22 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          package_json_file: "frontend/package.json"
+          package_json_file: "package.json"
           run_install: false
 
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: "frontend/package.json"
+          node-version-file: "package.json"
           cache: "pnpm"
-          cache-dependency-path: "frontend/pnpm-lock.yaml"
+          cache-dependency-path: "pnpm-lock.yaml"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        working-directory: ./frontend
 
       - name: Build page
-        run: pnpm build
-        working-directory: ./frontend
+        timeout-minutes: 5 # It usually takes less than 30 seconds, but just in case
+        run: pnpm run build:fe
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -80,7 +80,7 @@ jobs:
           command: pages deploy . --project-name=arisutalk-spark
 
   publish-dev:
-    needs: [build, publish-spark] # Depends on Spark deployment to ensure it works
+    needs: [build]
     concurrency:
       group: "deploy-dev"
       cancel-in-progress: false
@@ -100,7 +100,7 @@ jobs:
           command: pages deploy . --project-name=arisutalk-dev
 
   publish-prod:
-    needs: [build, publish-spark]
+    needs: [build]
     if: startsWith(github.ref, 'refs/tags/v')
     concurrency:
       group: "deploy-prod"

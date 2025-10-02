@@ -11,7 +11,7 @@
     "prepreview": "pnpm run build",
     "preview": "pnpm run serve",
     "serve": "pnpx http-server -p 5173 -c-1 dist/",
-    "format": "prettier --write 'src/**/*.{js,ts,jsx,tsx}'"
+    "format": "prettier --write 'src/**/*.{js,ts,svelte}'"
   },
   "keywords": [],
   "author": "",
@@ -21,20 +21,20 @@
     "node": ">20"
   },
   "devDependencies": {
-    "@nyariv/sandboxjs": "^0.8.25",
     "@sveltejs/vite-plugin-svelte": "^6.2.0",
-    "daisyui": "^5.1.18",
     "lucide-svelte": "^0.544.0",
     "prettier": "^3.6.2",
     "svelte": "^5.39.3",
     "vite": "^7.1.2",
+    "tailwindcss": "^4.1.13",
+    "postcss": "^8.5.6",
+    "@tailwindcss/postcss": "^4.1.13",
     "vite-plugin-pwa": "^1.0.3"
   },
   "dependencies": {
-    "@tailwindcss/postcss": "^4.1.13",
+    "@nyariv/sandboxjs": "^0.8.25",
     "jszip": "^3.10.1",
     "pako": "^2.1.0",
-    "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.13"
+    "nanoid": "^5.1.6"
   }
 }
