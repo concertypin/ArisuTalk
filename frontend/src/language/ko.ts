@@ -314,6 +314,7 @@ export const ko: LanguageStrings = {
       title: "스냅샷 복원",
       messages: "설정 스냅샷이 성공적으로 복원되었습니다.",
     },
+    appVersion: "앱 버전",
   },
   sidebar: {
     characters: "연락처 목록",
@@ -698,7 +699,7 @@ export const ko: LanguageStrings = {
     noResults: "일치하는 결과 없음",
     noData: "사용 가능한 데이터 없음",
     tryDifferentQuery: "다른 검색어로 시도해보세요",
-    selectDifferentStore: "다른 데이터 저장소 선택"
+    selectDifferentStore: "다른 데이터 저장소 선택",
   },
   api: {
     imageMessage: "이미지를 보냈습니다.",

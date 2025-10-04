@@ -4,7 +4,7 @@
   import { debugLogs } from '../../../../stores/logs';
   import { isDebugLogModalVisible, isMasterPasswordModalVisible } from '../../../../stores/ui';
   import { clearDebugLogs } from '../../../../services/logService';
-  import { Bug, Activity, BarChart3, Trash2, Gauge, Clock, FlaskConical, AlertTriangle, Info, Key } from 'lucide-svelte';
+  import { Bug, Activity, BarChart3, Trash2, Gauge, Clock, FlaskConical, AlertTriangle, Info, Link } from 'lucide-svelte';
 
   function handleClearLogs() {
       if (confirm(t('debugLogs.clearAllConfirm', { defaultValue: 'Are you sure you want to clear all debug logs?' }))) {
@@ -113,6 +113,13 @@
             <div class="flex justify-between items-center">
                 <span class="text-sm text-gray-300">{t("settings.screenResolution")}</span>
                 <span class="text-sm font-mono text-blue-400">{window.screen.width}×{window.screen.height}</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-300">{t("settings.appVersion")}</span>
+                <a href={import.meta.env.VITE_VERSION_URL} target="_blank" rel="noopener noreferrer" class="text-sm font-mono text-blue-400 hover:underline flex items-center gap-2">
+                    <Link class="w-4 h-4 inline-block text-blue-400" />
+                    <span class="inline-block">{import.meta.env.VITE_VERSION_CHANNEL} ({import.meta.env.VITE_VERSION_NAME})</span>
+                </a>
             </div>
         </div>
     </div>

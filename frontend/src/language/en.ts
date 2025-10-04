@@ -315,6 +315,7 @@ export const en: LanguageStrings = {
       title: "Restore Snapshot",
       messages: "Settings snapshot has been restored successfully.",
     },
+    appVersion: "App Version",
   },
   sidebar: {
     characters: "Contacts",
@@ -702,7 +703,7 @@ export const en: LanguageStrings = {
     noResults: "No matching results",
     noData: "No data available",
     tryDifferentQuery: "Try a different search query",
-    selectDifferentStore: "Select a different data store"
+    selectDifferentStore: "Select a different data store",
   },
   api: {
     imageMessage: "Image sent.",

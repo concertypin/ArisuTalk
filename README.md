@@ -1,5 +1,11 @@
 # ArisuTalk
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/concertypin/ArisuTalk)
+[![Deploy static content](https://github.com/concertypin/ArisuTalk/actions/workflows/pages.yml/badge.svg)](https://github.com/concertypin/ArisuTalk/actions/workflows/pages.yml)
+
+We're up and running at here!
+- [arisutalk.moe](https://arisutalk.moe): Production
+- [dev.arisutalk.moe](https://dev.arisutalk.moe): Dev builds for early testers
+- [spark.arisutalk.moe](https://spark.arisutalk.moe): Spark builds for super-earlybird testers
 
 This project is an AI chat frontend application forked from `github.com/dkfk5326/ArisuTalk`. ArisuTalk provides a modern, responsive AI chat interface with comprehensive internationalization support and modular architecture.
 

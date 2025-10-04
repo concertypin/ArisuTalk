@@ -286,6 +286,7 @@ export type LanguageStrings = {
       title: string;
       messages: string;
     };
+    appVersion: string;
   };
   sidebar: {
     characters: string;
