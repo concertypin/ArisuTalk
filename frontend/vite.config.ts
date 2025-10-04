@@ -29,16 +29,17 @@ const prodOnlyPlugin = [
         }
     })
 ]
-export default defineConfig(async ({ mode }) => {
+export default defineConfig(async ctx => {
+    const mode = ctx.mode;
     const env = loadEnv(mode, process.cwd(), '');
     const defines: Record<string, any> = {
-        ...getEnvVar(env)
+        ...getEnvVar(ctx, env)
     }
 
-    const defineConfigReady = Object.fromEntries(Object.entries(defines).map(([k, v]) => [`import.meta.env.${k}`, JSON.stringify(v)]))
+    const defineConfigReady = Object.fromEntries(Object.entries(defines)
+        .map(([k, v]) => [`import.meta.env.${k}`, JSON.stringify(v)])
+    )
     let baseConfig: UserConfig = {
-        // import.meta.env.DEV is automatically set by Vite based on the 'mode'.
-        // It is true in development (pnpm dev:fe) and false in production (pnpm build:fe).
         server: {
             open: "index.html",
         },
