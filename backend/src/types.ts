@@ -8,21 +8,34 @@ import { Context, Hono } from "hono";
 import { Bindings } from "./platform";
 import z from "zod";
 
+type AllOrNothing<T> = T | { [K in keyof T]?: never };
+type AzureCosmosDBSecretEnv = AllOrNothing<{
+    readonly SECRET_AZURE_COSMOSDB_CONNECTION_STRING: string;
+    readonly SECRET_AZURE_COSMOSDB_DATABASE_NAME: string;
+    readonly SECRET_AZURE_COSMOSDB_CONTAINER_NAME: string;
+}>;
+
+type S3SecretEnv = AllOrNothing<{
+    readonly SECRET_S3_ACCESS_KEY: string;
+    readonly SECRET_S3_SECRET_KEY: string;
+    readonly SECRET_S3_BUCKET_NAME: string;
+    readonly SECRET_S3_REGION: string;
+    readonly SECRET_S3_ENDPOINT: string;
+}>;
 /**
  * Environment secrets required for the application.
  * These should be provided via platform-specific secret management, not environment variables.
  */
-export type EnvironmentSecret = {
-    readonly SECRET_S3_ACCESS_KEY: string;
-    readonly SECRET_S3_SECRET_KEY: string;
+export type RuntimeSecret = {
     readonly SECRET_CLERK_SECRET_KEY: string;
-};
+} & S3SecretEnv &
+    AzureCosmosDBSecretEnv;
 /**
  * Environment variables required for the application.
  * These can be provided via environment variables or platform-specific configuration.
  * It is not-so secure to store sensitive information here.
  */
-export type EnvironmentVariable = {
+export type RuntimeVariable = {
     readonly ENV_CLERK_PUBLIC_KEY: string;
 };
 
@@ -50,7 +63,7 @@ export const UserSchema = z.object({
 
 export type UserType = z.infer<typeof UserSchema>;
 
-export type AuthenticatedContext = {
+type AuthenticatedContext = {
     Variables: { user: UserType };
 } & Context;
 

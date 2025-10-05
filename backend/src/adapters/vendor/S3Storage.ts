@@ -1,3 +1,4 @@
+import { DBEnv } from "../client";
 import { BaseBlobStorageClient } from "../StorageClientBase";
 import {
     S3Client,
@@ -10,15 +11,23 @@ export default class S3BlobStorageClient implements BaseBlobStorageClient {
     private s3: S3Client;
     private bucket: string;
 
-    constructor() {
-        this.bucket = import.meta.env.S3_BUCKET;
-        const endpoint = import.meta.env.S3_ENDPOINT;
+    constructor(env: DBEnv) {
+        if (env.SECRET_S3_ACCESS_KEY === undefined)
+            throw new Error("S3 environment variables are not properly set");
+        const bucket = env.SECRET_S3_BUCKET_NAME;
+        this.bucket = bucket;
+
+        const region = env.SECRET_S3_REGION;
+        const endpoint = env.SECRET_S3_ENDPOINT;
+        const accessKeyId = env.SECRET_S3_ACCESS_KEY;
+        const secretAccessKey = env.SECRET_S3_SECRET_KEY;
+
         this.s3 = new S3Client({
-            ...(endpoint ? { endpoint, forcePathStyle: true } : {}),
-            region: import.meta.env.S3_REGION,
+            region: region,
+            endpoint: endpoint,
             credentials: {
-                accessKeyId: import.meta.env.S3_ACCESS_KEY_ID,
-                secretAccessKey: import.meta.env.S3_SECRET_ACCESS_KEY,
+                secretAccessKey: secretAccessKey,
+                accessKeyId: accessKeyId,
             },
         });
     }

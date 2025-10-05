@@ -1,7 +1,12 @@
 import z from "zod";
 import { DataDBClient, BlobClient } from "../adapters/client";
-import { DataType, DataSchema, PartialDataSchema } from "../schema";
-import { describeRoute, validator } from "hono-openapi";
+import {
+    DataType,
+    DataSchema,
+    PartialDataSchema,
+    PartialData,
+} from "../schema";
+import { describeRoute, resolver, validator } from "hono-openapi";
 import { createAuthedHonoRouter } from "../lib/auth";
 
 let router = createAuthedHonoRouter();
@@ -13,12 +18,28 @@ const UpdateDataSchema = PartialDataSchema.partial();
 const QueryNameSchema = z.object({ name: z.string().min(1).optional() });
 
 // Create
-router.post(
+router = router.post(
     "/data",
     describeRoute({
         summary: "Create a new Data item",
         description: "Creates a new Data item in the database.",
         tags: ["Data"],
+        requestBody: {
+            content: {
+                "application/json": {},
+            },
+            required: true,
+        },
+        responses: {
+            201: {
+                description: "Data item created successfully",
+                content: {
+                    "application/json": { schema: resolver(DataSchema) },
+                },
+            },
+            400: { description: "Invalid request body" },
+            403: { description: "Forbidden" },
+        },
     }),
     validator("json", PartialDataSchema),
 
@@ -32,29 +53,28 @@ router.post(
     async (c) => {
         const user = c.get("user");
         const body = c.req.valid("json");
-        const id = crypto.randomUUID();
 
-        const item: DataType = {
-            id,
+        const item: PartialData = {
             name: body.name,
             description: body.description,
             author: user.authUid,
             additionalData: body.additionalData,
             downloadCount: 0,
             encrypted: body.encrypted,
+            uploadedAt: Date.now(),
         };
 
         // Validate with canonical DataSchema before persisting
         const validated = DataSchema.parse(item);
 
-        const db = await DataDBClient();
+        const db = await DataDBClient(c.env);
         await db.put(validated);
         return c.json(validated, 201);
     }
 );
 
 // Read list / query
-router.get(
+router = router.get(
     "/data",
     describeRoute({
         summary: "List or query Data items",
@@ -79,7 +99,7 @@ router.get(
             return c.json({ error: maybe.error.message }, 400);
         }
 
-        const db = await DataDBClient();
+        const db = await DataDBClient(c.env);
         if (q) {
             const results = await db.queryByName(q);
             // validate each result
@@ -94,100 +114,191 @@ router.get(
 );
 
 // Read single
-router.get("/data/:id", async (c) => {
-    const id = c.req.param("id");
-    const parsed = IdParamSchema.safeParse({ id });
-    if (!parsed.success) return c.json({ error: "invalid id" }, 400);
+router = router.get(
+    "/data/:id",
+    describeRoute({
+        summary: "Get a single Data item by ID",
+        description: "Retrieves a single Data item by its ID.",
+        tags: ["Data"],
+        parameters: [
+            {
+                name: "id",
+                in: "path",
+                description: "The ID of the Data item",
+                required: true,
+                schema: { type: "string" },
+            },
+        ],
+        responses: {
+            200: {
+                description: "Successful response",
+                content: {
+                    "application/json": { schema: resolver(DataSchema) },
+                },
+            },
+            400: { description: "Invalid ID supplied" },
+            404: { description: "Data item not found" },
+        },
+    }),
+    async (c) => {
+        const id = c.req.param("id");
+        const parsed = IdParamSchema.safeParse({ id });
+        if (!parsed.success) return c.text("Invalid ID", 400);
 
-    const db = await DataDBClient();
-    const item = await db.get(id);
-    if (!item) return c.json({ error: "not found" }, 404);
+        const db = await DataDBClient(c.env);
+        const item = await db.get(id);
+        if (!item) return c.text("Not Found", 404);
 
-    const validated = DataSchema.parse(item);
-    return c.json(validated);
-});
+        const validated = DataSchema.parse(item);
+        return c.json(validated);
+    }
+);
 
 // Update
-router.put("/data/:id", validator("json", UpdateDataSchema), async (c) => {
-    const id = c.req.param("id");
-    const idOk = IdParamSchema.safeParse({ id });
-    if (!idOk.success) return c.json({ error: "invalid id" }, 400);
+router.patch(
+    "/data/:id",
+    describeRoute({
+        summary: "Update a Data item by ID",
+        description: "Updates a Data item by its ID.",
+        tags: ["Data"],
+        responses: {
+            200: {
+                description: "Data item updated successfully",
+                content: {
+                    "application/json": { schema: resolver(DataSchema) },
+                },
+            },
+            400: { description: "Invalid ID or request body" },
+            404: { description: "Data item not found" },
+            403: { description: "Forbidden" },
+        },
+    }),
+    validator("json", UpdateDataSchema),
+    async (c) => {
+        const id = c.req.param("id");
+        const idOk = IdParamSchema.safeParse({ id });
+        if (!idOk.success) return c.json({ error: "invalid id" }, 400);
 
-    const body = c.req.valid("json");
-    const db = await DataDBClient();
+        const body = c.req.valid("json");
+        const db = await DataDBClient(c.env);
 
-    const existing = await db.get(id);
-    if (!existing) return c.json({ error: "not found" }, 404);
+        const existing = await db.get(id);
+        if (!existing) return c.json({ error: "not found" }, 404);
 
-    const updated: DataType = {
-        id: existing.id,
-        author: existing.author,
-        name: body.name ?? existing.name,
-        description: body.description ?? existing.description,
-        additionalData: body.additionalData ?? existing.additionalData,
-        encrypted: body.encrypted ?? existing.encrypted,
-        downloadCount: body.downloadCount ?? existing.downloadCount,
-    };
+        const updated: DataType = {
+            id: existing.id,
+            author: existing.author,
+            name: body.name ?? existing.name,
+            description: body.description ?? existing.description,
+            additionalData: body.additionalData ?? existing.additionalData,
+            encrypted: body.encrypted ?? existing.encrypted,
+            downloadCount: body.downloadCount ?? existing.downloadCount,
+            uploadedAt: Date.now(),
+        };
 
-    const validated = DataSchema.parse(updated);
-    await db.put(validated);
-    return c.json(validated);
-});
+        const validated = DataSchema.parse(updated);
+        await db.put(validated);
+        return c.json(validated);
+    }
+);
 
 // Delete
-router.delete("/data/:id", async (c) => {
-    const id = c.req.param("id");
-    const idOk = IdParamSchema.safeParse({ id });
-    if (!idOk.success) return c.json({ error: "invalid id" }, 400);
+router = router.delete(
+    "/data/:id",
+    describeRoute({
+        summary: "Delete a Data item by ID",
+        description: "Deletes a Data item by its ID.",
+        tags: ["Data"],
+        responses: {
+            200: { description: "Data item deleted successfully" },
+            400: { description: "Invalid ID" },
+            404: { description: "Data item not found" },
+            403: { description: "Forbidden" },
+        },
+    }),
+    validator("param", IdParamSchema),
+    async (c) => {
+        const id = c.req.param("id");
+        const idOk = IdParamSchema.safeParse({ id });
+        if (!idOk.success) return c.json({ error: "invalid id" }, 400);
 
-    const db = await DataDBClient();
-    const existing = await db.get(id);
-    if (!existing) return c.json({ error: "not found" }, 404);
+        const db = await DataDBClient(c.env);
+        const existing = await db.get(id);
+        if (!existing) return c.json({ error: "not found" }, 404);
 
-    // validate stored item before acting
-    const validated = DataSchema.parse(existing);
+        // validate stored item before acting
+        const validated = DataSchema.parse(existing);
 
-    // If additionalData points to a blob URL stored in storage, attempt delete
-    const storage = await BlobClient();
-    if (validated.additionalData) {
-        try {
-            await storage.delete(validated.additionalData);
-        } catch (e) {
-            // ignore storage delete errors for now
+        // If additionalData points to a blob URL stored in storage, attempt delete
+        const storage = await BlobClient(c.env);
+        if (validated.additionalData) {
+            try {
+                await storage.delete(validated.additionalData);
+            } catch (e) {
+                // ignore storage delete errors for now
+            }
         }
-    }
 
-    await db.delete(id);
-    return c.json({ ok: true });
-});
+        await db.delete(id);
+        return c.json({ ok: true });
+    }
+);
 
 // Upload blob
 // Accepts binary body and returns a blob URL stored in the storage client.
-router.post("/data/:id/blob", async (c) => {
-    const id = c.req.param("id");
-    const idOk = IdParamSchema.safeParse({ id });
-    if (!idOk.success) return c.json({ error: "invalid id" }, 400);
+router = router.post(
+    "/data/:id/blob",
+    describeRoute({
+        summary: "Upload a blob for a Data item",
+        description:
+            "Uploads a binary blob and associates it with the Data item.",
+        tags: ["Blob"],
+        responses: {
+            200: {
+                description: "Blob uploaded successfully",
+                content: {
+                    "application/json": {
+                        schema: {
+                            type: "object",
+                            properties: {
+                                url: { type: "string", format: "url" },
+                            },
+                        },
+                    },
+                },
+            },
+            400: { description: "Invalid ID or request" },
+            404: { description: "Data item not found" },
+            500: { description: "Blob upload failed" },
+        },
+    }),
+    validator("param", IdParamSchema),
+    async (c) => {
+        const id = c.req.param("id");
+        const idOk = IdParamSchema.safeParse({ id });
+        if (!idOk.success) return c.json({ error: "invalid id" }, 400);
 
-    const db = await DataDBClient();
-    const existing = await db.get(id);
-    if (!existing) return c.json({ error: "not found" }, 404);
+        const db = await DataDBClient(c.env);
+        const existing = await db.get(id);
+        if (!existing) return c.json({ error: "not found" }, 404);
 
-    const storage = await BlobClient();
-    const ab = await c.req.arrayBuffer();
-    const contentType =
-        c.req.header("content-type") ?? "application/octet-stream";
-    const url = await storage.upload(ab, contentType);
+        const storage = await BlobClient(c.env);
+        const ab = await c.req.arrayBuffer();
+        const contentType =
+            c.req.header("content-type") ?? "application/octet-stream";
+        const url = await storage.upload(ab, contentType);
 
-    // ensure url is valid
-    const urlOk = z.url().safeParse(url);
-    if (!urlOk.success)
-        return c.json({ error: "invalid blob url returned" }, 500);
+        // ensure url is valid
+        const urlOk = z.url().safeParse(url);
+        if (!urlOk.success)
+            return c.json({ error: "invalid blob url returned" }, 500);
 
-    existing.additionalData = url;
-    const validated = DataSchema.parse(existing);
-    await db.put(validated);
+        existing.additionalData = url;
+        const validated = DataSchema.parse(existing);
+        await db.put(validated);
 
-    return c.json({ url });
-});
+        return c.json({ url });
+    }
+);
 
 export default router;

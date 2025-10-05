@@ -1,3 +1,4 @@
+import { DBEnv } from "../client";
 import { BaseBlobStorageClient } from "../StorageClientBase";
 
 /**
@@ -10,6 +11,8 @@ export default class InMemoryBlob implements BaseBlobStorageClient {
         { data: ArrayBuffer; contentType?: string; createdAt: number }
     >();
     private static counter = 0;
+
+    constructor(env: DBEnv) {}
 
     /**
      * Uploads a buffer and returns a generated in-memory URL.

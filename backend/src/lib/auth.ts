@@ -1,4 +1,4 @@
-import { Env, Hono } from "hono";
+import { Hono } from "hono";
 import { AuthenticatedBindings, UserType } from "../types";
 import { clerkMiddleware, getAuth } from "@hono/clerk-auth";
 

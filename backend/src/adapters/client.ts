@@ -5,23 +5,48 @@
  * loading unnecessary code in environments that don't need it.
  */
 
+import { RuntimeSecret, RuntimeVariable } from "../types";
 import { BaseBlobStorageClient, BaseDataDBClient } from "./StorageClientBase";
+
+/**
+ * Environment variables required by the database and blob storage clients.
+ * It will be passed to the client constructors.
+ * Sorry for confusing naming, idk how to name it better.
+ */
+export type DBEnv = RuntimeSecret & RuntimeVariable;
+
+let cachedDBClient: BaseDataDBClient | null = null;
+let cachedBlobClient: BaseBlobStorageClient | null = null;
 
 /**
  * Dynamically imports and returns the DatabaseClient.
  * Temporarily using InMemoryBlob as a placeholder.
+ * It is created once and cached for subsequent calls.
  */
-export const DataDBClient: () => Promise<BaseDataDBClient> = async () => {
-    return new (await import("./vendor/InMemoryDB")).InMemoryDataDBClient();
-};
+export async function DataDBClient(env: DBEnv): Promise<BaseDataDBClient> {
+    if (cachedDBClient) return cachedDBClient;
+    if (env.SECRET_AZURE_COSMOSDB_CONNECTION_STRING) {
+        cachedDBClient = new (await import("./vendor/AzureCosmosDB")).default(
+            env
+        );
+    } else {
+        cachedDBClient = new (await import("./vendor/InMemoryDB")).default(env);
+    }
+    return cachedDBClient;
+}
 
 /**
  * Dynamically imports and returns the BlobClient.
- * If S3_ENDPOINT is set in env, uses S3BlobStorageClient, otherwise InMemoryBlob.
+ * If S3 environment variables are set, it uses S3Storage.
  */
-export const BlobClient: () => Promise<BaseBlobStorageClient> = async () => {
-    if (import.meta.env.S3_ENDPOINT) {
-        return new (await import("./vendor/s3-storage")).default();
+export async function BlobClient(env: DBEnv): Promise<BaseBlobStorageClient> {
+    if (cachedBlobClient) return cachedBlobClient;
+    if (env.SECRET_S3_BUCKET_NAME) {
+        return (cachedBlobClient = new (
+            await import("./vendor/S3Storage")
+        ).default(env));
     }
-    return new (await import("./vendor/InMemoryBlob")).default();
-};
+    return (cachedBlobClient = new (
+        await import("./vendor/InMemoryBlob")
+    ).default(env));
+}

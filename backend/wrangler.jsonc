@@ -3,12 +3,5 @@
     "name": "arisutalk-backend",
     "compatibility_date": "2025-08-03",
     "main": "./src/main.ts",
-    "upload_source_maps": true,
-    "env": {
-        "development": {
-            "compatibility_flags": [
-                "node_compat"
-            ]
-        }
-    }
+    "upload_source_maps": true
 }

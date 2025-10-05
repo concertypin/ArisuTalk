@@ -83,6 +83,10 @@ export const PartialDataSchema = z.object({
         .describe(
             "Number of times the data has been downloaded. It is not guaranteed to be accurate."
         ),
+    uploadedAt: z
+        .number()
+        .describe("Timestamp when the data was uploaded.")
+        .optional(),
 });
 
 export const DataSchema = PartialDataSchema.and(Queryable);

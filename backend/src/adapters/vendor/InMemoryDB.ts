@@ -1,4 +1,5 @@
 import { DataType } from "../../schema";
+import { DBEnv } from "../client";
 import { BaseDataDBClient, DataListOrder } from "../StorageClientBase";
 
 /**{
@@ -8,9 +9,11 @@ import { BaseDataDBClient, DataListOrder } from "../StorageClientBase";
  * - IDs are generated deterministically using a counter + timestamp to avoid external deps.
  * - queryByName performs a case-insensitive substring match on a `name` property if present.
  */
-export class InMemoryDataDBClient implements BaseDataDBClient {
+export default class InMemoryDataDBClient implements BaseDataDBClient {
     private store: Map<string, DataType> = new Map();
     private counter = 0;
+
+    constructor(env: DBEnv) {}
 
     private generateId(): string {
         // Simple, collision-resistant-enough id for in-memory usage

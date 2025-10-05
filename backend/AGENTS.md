@@ -28,4 +28,4 @@ This file provides guidance for AI coding agents working on the backend of this 
 
 - Make code stateless to reduce trouble with containers, auto-scaling, etc.
 - Use `pnpm add` instead of editing `package.json` directly.
-- Use `import.meta.env` for environment variables.
+- Use `import.meta.env`(injected at build time) or `c.env`(injected at runtime, per HTTP call) for environment variables.

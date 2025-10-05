@@ -3,16 +3,18 @@ import { Bindings } from "./platform";
 import dataRoutes from "./routes/data";
 import { Scalar } from "@scalar/hono-api-reference";
 import { openAPIRouteHandler } from "hono-openapi";
+import { tr } from "zod/locales";
 
 let app = new Hono<Bindings>();
 
 app = app.get("/", (c) => c.text("Oh hi"));
 
 // Mount API routes under /api
-app = app.route("/api", dataRoutes);
-app = app.get(
+//rapp = app.route("/api", dataRoutes);
+app.get(
     "/openapi.json",
-    openAPIRouteHandler(app, {
+    openAPIRouteHandler(dataRoutes, {
+        includeEmptyPaths: true,
         documentation: {
             info: {
                 title: "ArisuTalk Phonebook API",
@@ -23,7 +25,7 @@ app = app.get(
         },
     })
 );
-app = app.get(
+app.get(
     "/docs",
     Scalar({
         title: "ArisuTalk Phonebook API",
