@@ -29,6 +29,10 @@ const prodOnlyPlugin = [
         }
     })
 ]
+declare const process: {
+    cwd: () => string,
+}
+
 export default defineConfig(async ctx => {
     const mode = ctx.mode;
     const env = loadEnv(mode, process.cwd(), '');

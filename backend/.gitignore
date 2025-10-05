@@ -6,11 +6,15 @@ dist-server/
 .yarn/
 !.yarn/releases
 .vscode/*
-!.vscode/launch.json
-!.vscode/*.code-snippets
 .idea/workspace.xml
 .idea/usage.statistics.xml
 .idea/shelf
+
+# ...But except project config files
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/*.code-snippets
 
 # deps
 node_modules/
@@ -35,3 +39,4 @@ lerna-debug.log*
 
 # Generated files
 worker-configuration.d.ts
+

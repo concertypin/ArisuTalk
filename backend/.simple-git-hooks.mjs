@@ -1,3 +1,3 @@
 export default {
-  "pre-commit": "pnpm run format",
+    "pre-commit": "pnpm run format",
 };

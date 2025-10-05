@@ -1,0 +1,10 @@
+{
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "typescript.preferences.preferTypeOnlyAutoImports": false,
+    "js/ts.implicitProjectConfig.target": "ESNext"
+}
