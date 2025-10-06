@@ -3,5 +3,5 @@
     "name": "arisutalk-backend-phonebook",
     "compatibility_date": "2025-08-03",
     "main": "./src/main.ts",
-    "upload_source_maps": true
+    "upload_source_maps": true,
 }

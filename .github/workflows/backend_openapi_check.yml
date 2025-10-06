@@ -1,0 +1,101 @@
+name: Check OpenAPI breaking changes
+on:
+  pull_request:
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend_openapi_check.yml'
+jobs:
+  head-openapi:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: backend
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: "package.json"
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: "package.json"
+          cache: "pnpm"
+          cache-dependency-path: "pnpm-lock.yaml"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Get OpenAPI spec
+        run: |
+          pnpm run dev:be &
+          pnpx wait-on http://localhost:5173/openapi.json
+          curl -o openapi.json http://localhost:5173/openapi.json
+          pkill -f "pnpm"
+      - name: Export head OpenAPI spec
+        uses: actions/upload-artifact@v3
+        with:
+          name: openapi-head
+          path: openapi.json
+  base-openapi:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          sparse-checkout: backend
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: "package.json"
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: "package.json"
+          cache: "pnpm"
+          cache-dependency-path: "pnpm-lock.yaml"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Get OpenAPI spec
+        run: |
+          pnpm run dev:be &
+          pnpx wait-on http://localhost:5173/openapi.json
+          curl -o openapi.json http://localhost:5173/openapi.json
+          pkill -f "pnpm"
+      - name: Export base OpenAPI spec
+        uses: actions/upload-artifact@v3
+        with:
+          name: openapi-base
+          path: openapi.json
+  compare:
+    needs: [head-openapi, base-openapi]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download head OpenAPI spec
+        uses: actions/download-artifact@v3
+        with:
+          name: openapi-head
+      - name: Download base OpenAPI spec
+        uses: actions/download-artifact@v3
+        with:
+          name: openapi-base
+      - name: Compare OpenAPI specs
+        run: |
+          docker run --rm -t \
+            -v ${PWD}/openapi-base:/base:ro \
+            -v ${PWD}/openapi-head:/head:ro \
+            openapitools/openapi-diff:latest \
+            --state incompatible \
+            --fail-on-incompatible \
+            /base/openapi.json /head/openapi.json

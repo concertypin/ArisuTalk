@@ -11,9 +11,8 @@
     "prepreview": "pnpm run build",
     "preview": "pnpm run serve",
     "serve": "pnpx http-server -p 5173 -c-1 dist/",
-    "format": "prettier --write 'src/**/*.{js,ts,svelte}'"
+    "format": "prettier --write 'src/**/*.{js,ts,svelte,json,md}'"
   },
-  "keywords": [],
   "author": "",
   "license": "(Apache-2.0 OR CC-BY-NC-4.0)",
   "packageManager": "pnpm@10.14.0+sha512.ad27a79641b49c3e481a16a805baa71817a04bbe06a38d17e60e2eaee83f6a146c6a688125f5792e48dd5ba30e7da52a5cda4c3992b9ccf333f9ce223af84748",
@@ -25,7 +24,6 @@
     "@tailwindcss/postcss": "^4.1.13",
     "lucide-svelte": "^0.544.0",
     "postcss": "^8.5.6",
-    "prettier": "^3.6.2",
     "prettier-plugin-svelte": "^3.4.0",
     "svelte": "^5.39.3",
     "tailwindcss": "^4.1.13",
