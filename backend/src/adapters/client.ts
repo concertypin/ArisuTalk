@@ -43,7 +43,7 @@ export async function BlobClient(env: DBEnv): Promise<BaseBlobStorageClient> {
     if (cachedBlobClient) return cachedBlobClient;
     if (env.SECRET_S3_BUCKET_NAME) {
         return (cachedBlobClient = new (
-            await import("./vendor/S3Storage")
+            await import("./vendor/S3CompatibleBlob")
         ).default(env));
     }
     return (cachedBlobClient = new (

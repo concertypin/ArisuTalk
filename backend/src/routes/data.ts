@@ -9,7 +9,7 @@ import {
 import { describeRoute, resolver, validator } from "hono-openapi";
 import { createAuthedHonoRouter } from "../lib/auth";
 
-let router = createAuthedHonoRouter();
+let router = createAuthedHonoRouter("user");
 // Schemas
 const IdParamSchema = z.object({ id: z.string().min(1) });
 
@@ -30,6 +30,7 @@ router = router.post(
             },
             required: true,
         },
+        security: [{ ClerkUser: [] }],
         responses: {
             201: {
                 description: "Data item created successfully",
@@ -65,11 +66,10 @@ router = router.post(
         };
 
         // Validate with canonical DataSchema before persisting
-        const validated = DataSchema.parse(item);
+        const validated = PartialDataSchema.parse(item);
 
         const db = await DataDBClient(c.env);
-        await db.put(validated);
-        return c.json(validated, 201);
+        return c.json(await db.put(validated), 201);
     }
 );
 
@@ -161,6 +161,7 @@ router.patch(
         summary: "Update a Data item by ID",
         description: "Updates a Data item by its ID.",
         tags: ["Data"],
+        security: [{ ClerkUser: [] }],
         responses: {
             200: {
                 description: "Data item updated successfully",
@@ -215,6 +216,7 @@ router = router.delete(
             404: { description: "Data item not found" },
             403: { description: "Forbidden" },
         },
+        security: [{ ClerkUser: [] }],
     }),
     validator("param", IdParamSchema),
     async (c) => {
@@ -271,6 +273,7 @@ router = router.post(
             404: { description: "Data item not found" },
             500: { description: "Blob upload failed" },
         },
+        security: [{ ClerkUser: [] }],
     }),
     validator("param", IdParamSchema),
     async (c) => {

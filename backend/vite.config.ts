@@ -12,6 +12,8 @@ export default defineConfig({
             entry: "src/main.ts",
             formats: ["es"],
         },
+        outDir: "dist",
     },
+    preview: { port: 5179 },
     clearScreen: false,
 });

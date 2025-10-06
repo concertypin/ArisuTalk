@@ -12,7 +12,6 @@ import { BaseDataDBClient, DataListOrder } from "../StorageClientBase";
  * or unit tests when a real Azure Cosmos DB connection is not available.
  */
 export default class AzureCosmosDB implements BaseDataDBClient {
-    private store: Map<string, DataType> = new Map();
     private client: CosmosClient;
     private database: Database;
     private container: Container;
