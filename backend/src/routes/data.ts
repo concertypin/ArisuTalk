@@ -3,6 +3,7 @@ import { DataDBClient, BlobClient } from "@/adapters/client";
 import { DataType, DataSchema, PartialDataSchema, PartialData } from "@/schema";
 import { describeRoute, resolver, validator } from "hono-openapi";
 import { createAuthedHonoRouter } from "@/lib/auth";
+import { DataListOrder } from "@/adapters/StorageClientBase";
 
 let router = createAuthedHonoRouter("user");
 // Schemas
@@ -88,7 +89,7 @@ router = router.get(
     validator("query", QueryNameSchema),
     async (c) => {
         // validate optional query param 'name'
-        const q = c.req.query("name");
+        const q = c.req.query("name")?.trim();
         const maybe = QueryNameSchema.safeParse({ name: q });
         if (!maybe.success) {
             return c.json({ error: maybe.error.message }, 400);
@@ -100,11 +101,11 @@ router = router.get(
             // validate each result
             const validated = results.map((r: any) => DataSchema.parse(r));
             return c.json(validated);
+        } else {
+            const all = await db.list(DataListOrder.Undefined);
+            const validatedAll = all.map((r: any) => DataSchema.parse(r));
+            return c.json(validatedAll);
         }
-
-        const all = await db.list();
-        const validatedAll = all.map((r: any) => DataSchema.parse(r));
-        return c.json(validatedAll);
     }
 );
 

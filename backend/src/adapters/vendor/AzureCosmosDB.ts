@@ -41,7 +41,7 @@ export default class AzureCosmosDB implements BaseDataDBClient {
         const { resources } = await this.container.items
             .query<DataType>({
                 query:
-                    `SELECT * FROM c ` +
+                    `SELECT * FROM ${this.containerName} ` +
                     `WHERE CONTAINS(LOWER(c.name), LOWER(@name))`,
                 parameters: [
                     {
@@ -55,17 +55,21 @@ export default class AzureCosmosDB implements BaseDataDBClient {
     }
 
     async list(order?: DataListOrder): Promise<DataType[]> {
-        let orderBy = "ORDER BY c.";
+        let orderBy = `ORDER BY ${this.containerName}.`;
         if (order === DataListOrder.NewestFirst) {
             orderBy += "uploadedAt DESC";
         } else if (order === DataListOrder.DownloadsFirst) {
             orderBy = "downloadCount DESC";
         } else orderBy = "";
 
+        const query = `SELECT * FROM ${this.containerName} ${orderBy}`;
+        console.log("CosmosDB list query:", query);
+
+        //(await this.client.databases.query<DataType>("").fetchAll()).resources
         return (
             await this.container.items
                 .query<DataType>({
-                    query: `SELECT * FROM c ${orderBy}`,
+                    query: query,
                 })
                 .fetchAll()
         ).resources;
