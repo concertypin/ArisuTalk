@@ -5,8 +5,11 @@
  * loading unnecessary code in environments that don't need it.
  */
 
-import { RuntimeSecret, RuntimeVariable } from "../types";
-import { BaseBlobStorageClient, BaseDataDBClient } from "./StorageClientBase";
+import { RuntimeSecret, RuntimeVariable } from "types";
+import {
+    BaseBlobStorageClient,
+    BaseDataDBClient,
+} from "adapters/StorageClientBase";
 
 /**
  * Environment variables required by the database and blob storage clients.

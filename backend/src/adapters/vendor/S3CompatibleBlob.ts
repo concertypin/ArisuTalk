@@ -1,5 +1,5 @@
-import { DBEnv } from "../client";
-import { BaseBlobStorageClient } from "../StorageClientBase";
+import { DBEnv } from "adapters/client";
+import { BaseBlobStorageClient } from "adapters/StorageClientBase";
 import {
     S3Client,
     PutObjectCommand,

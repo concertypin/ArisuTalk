@@ -4,8 +4,8 @@
  * Platform-specific code should only be included here.
  */
 
-import { RuntimeSecret, RuntimeVariable } from "./types";
+import { RuntimeSecret, RuntimeVariable } from "types";
 
 export type Bindings = {
-    Bindings: CloudflareBindings & RuntimeSecret & RuntimeVariable;
+    Bindings: RuntimeSecret & RuntimeVariable;
 };

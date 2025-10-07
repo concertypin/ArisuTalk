@@ -1,11 +1,13 @@
 import { Hono } from "hono";
-import { Bindings } from "./platform";
-import dataRoutes from "./routes/data";
+import { Bindings } from "platform";
+import dataRoutes from "routes/data";
 import { Scalar } from "@scalar/hono-api-reference";
 import { openAPIRouteHandler } from "hono-openapi";
-import { tr } from "zod/locales";
+import { cors } from "lib/cors";
 
 let app = new Hono<Bindings>();
+
+app = app.use("*", cors);
 
 app = app.get("/", (c) => c.text("Oh hi"));
 

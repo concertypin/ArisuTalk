@@ -5,7 +5,17 @@
         "moduleResolution": "Bundler",
         "strict": true,
         "skipLibCheck": true,
-        "lib": ["ESNext", "WebWorker"],
-        "types": ["vite/client"]
-    }
+        "lib": [
+            "ESNext",
+            "WebWorker"
+        ],
+        "types": [
+            "vite/client"
+        ],
+        "baseUrl": "./src",
+        "outDir": "dist"
+    },
+    "include": [
+        "src"
+    ]
 }

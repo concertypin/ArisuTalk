@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { AuthenticatedBindings, UserType } from "../types";
+import { AuthenticatedBindings, UserType } from "types";
 import { clerkMiddleware, getAuth } from "@hono/clerk-auth";
 
 const authLevels = ["admin", "trusted", "user", "anonymous"] as const;

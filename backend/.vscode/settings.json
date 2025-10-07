@@ -5,6 +5,8 @@
     "[typescript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
-    "typescript.preferences.preferTypeOnlyAutoImports": false,
-    "js/ts.implicitProjectConfig.target": "ESNext"
+    "typescript.preferences.preferTypeOnlyAutoImports": true,
+    "js/ts.implicitProjectConfig.target": "ESNext",
+    "typescript.preferences.importModuleSpecifier": "non-relative",
+    "javascript.preferences.importModuleSpecifier": "non-relative"
 }

@@ -1,6 +1,6 @@
-import { DataType } from "../../schema";
-import { DBEnv } from "../client";
-import { BaseDataDBClient, DataListOrder } from "../StorageClientBase";
+import { DataType } from "schema";
+import { DBEnv } from "adapters/client";
+import { BaseDataDBClient, DataListOrder } from "adapters/StorageClientBase";
 
 /**{
  * Simple in-memory implementation of BaseDataDBClient for tests and local usage.
