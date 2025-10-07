@@ -1,69 +1,93 @@
 <script>
-  import { onMount, onDestroy } from 'svelte';
-  import { t } from '../../../../i18n.js';
-  import { createEventDispatcher } from 'svelte';
-  import { fade } from 'svelte/transition';
-  import { X, Search, ChevronRight, Lock } from 'lucide-svelte';
-  import { characters, characterStateStore } from '../../../stores/character';
-  import { checkSNSAccess } from '../../../utils/sns';
+  import { onMount, onDestroy } from "svelte";
+  import { t } from "../../../../i18n.js";
+  import { createEventDispatcher } from "svelte";
+  import { fade } from "svelte/transition";
+  import { X, Search, ChevronRight, Lock } from "lucide-svelte";
+  import { characters, characterStateStore } from "../../../stores/character";
+  import { checkSNSAccess } from "../../../utils/sns";
 
   export let isOpen = false;
 
-  let searchTerm = '';
+  let searchTerm = "";
   let accessibleCharacters = [];
   let inaccessibleCharacters = [];
 
   const dispatch = createEventDispatcher();
 
   $: {
-    const filtered = $characters.filter(char => 
-      char.id !== 0 && char.name.toLowerCase().includes(searchTerm.toLowerCase())
+    const filtered = $characters.filter(
+      (char) =>
+        char.id !== 0 &&
+        char.name.toLowerCase().includes(searchTerm.toLowerCase()),
     );
-    accessibleCharacters = filtered.filter(char => checkSNSAccess(char, 'public', $characterStateStore[char.id]));
-    inaccessibleCharacters = filtered.filter(char => !checkSNSAccess(char, 'public', $characterStateStore[char.id]));
+    accessibleCharacters = filtered.filter((char) =>
+      checkSNSAccess(char, "public", $characterStateStore[char.id]),
+    );
+    inaccessibleCharacters = filtered.filter(
+      (char) => !checkSNSAccess(char, "public", $characterStateStore[char.id]),
+    );
   }
 
   function closeModal() {
-    dispatch('close');
+    dispatch("close");
   }
 
   function openSns(character) {
-    dispatch('openSns', character);
+    dispatch("openSns", character);
     closeModal();
   }
 
   function handleKeydown(event) {
-    if (event.key === 'Escape') {
+    if (event.key === "Escape") {
       closeModal();
     }
   }
 
   onMount(() => {
-    window.addEventListener('keydown', handleKeydown);
+    window.addEventListener("keydown", handleKeydown);
   });
 
   onDestroy(() => {
-    window.removeEventListener('keydown', handleKeydown);
+    window.removeEventListener("keydown", handleKeydown);
   });
-
 </script>
 
 {#if isOpen}
-  <div 
-    transition:fade={{ duration: 200 }} 
+  <div
+    transition:fade={{ duration: 200 }}
     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 w-full h-full"
   >
-    <div role="dialog" aria-modal="true" tabindex="0" aria-labelledby="sns-character-list-title" class="bg-gray-900 rounded-xl p-6 w-full max-w-md max-h-[80vh] overflow-y-auto" on:click|stopPropagation on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); } }}>
+    <div
+      role="dialog"
+      aria-modal="true"
+      tabindex="0"
+      aria-labelledby="sns-character-list-title"
+      class="bg-gray-900 rounded-xl p-6 w-full max-w-md max-h-[80vh] overflow-y-auto"
+      on:click|stopPropagation
+      on:keydown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+        }
+      }}
+    >
       <div class="flex justify-between items-center mb-6">
-        <h2 id="sns-character-list-title" class="text-xl font-bold text-white">{t("sns.characterListTitle")}</h2>
-        <button on:click={closeModal} class="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
+        <h2 id="sns-character-list-title" class="text-xl font-bold text-white">
+          {t("sns.characterListTitle")}
+        </h2>
+        <button
+          on:click={closeModal}
+          class="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
+        >
           <X class="w-5 h-5 text-gray-300" />
         </button>
       </div>
 
       <div class="mb-4">
         <div class="relative">
-          <Search class="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <Search
+            class="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+          />
           <input
             bind:value={searchTerm}
             type="text"
@@ -75,16 +99,28 @@
 
       {#if accessibleCharacters.length > 0}
         <div class="mb-6">
-          <h3 class="text-sm font-medium text-green-400 mb-3">{t("sns.characterList.availableCharacters")}</h3>
+          <h3 class="text-sm font-medium text-green-400 mb-3">
+            {t("sns.characterList.availableCharacters")}
+          </h3>
           <div class="space-y-2">
             {#each accessibleCharacters as char (char.id)}
-              <button on:click={() => openSns(char)} class="bg-gray-800 p-3 rounded-lg hover:bg-gray-700 w-full text-left">
+              <button
+                on:click={() => openSns(char)}
+                class="bg-gray-800 p-3 rounded-lg hover:bg-gray-700 w-full text-left"
+              >
                 <div class="flex items-center space-x-3">
-                  <div class="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center overflow-hidden">
+                  <div
+                    class="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center overflow-hidden"
+                  >
                     {#if char.avatar}
-                      <img src={char.avatar} alt={char.name} class="w-full h-full object-cover" />
+                      <img
+                        src={char.avatar}
+                        alt={char.name}
+                        class="w-full h-full object-cover"
+                      />
                     {:else}
-                      <i data-lucide="instagram" class="w-6 h-6 text-gray-400"></i>
+                      <i data-lucide="instagram" class="w-6 h-6 text-gray-400"
+                      ></i>
                     {/if}
                   </div>
                   <div class="flex-1">
@@ -101,16 +137,27 @@
 
       {#if inaccessibleCharacters.length > 0}
         <div>
-          <h3 class="text-sm font-medium text-red-400 mb-3">{t("sns.characterList.noAccessCharacters")}</h3>
+          <h3 class="text-sm font-medium text-red-400 mb-3">
+            {t("sns.characterList.noAccessCharacters")}
+          </h3>
           <div class="space-y-2">
             {#each inaccessibleCharacters as char (char.id)}
-            <div class="bg-gray-800 p-3 rounded-lg cursor-not-allowed opacity-60">
+              <div
+                class="bg-gray-800 p-3 rounded-lg cursor-not-allowed opacity-60"
+              >
                 <div class="flex items-center space-x-3">
-                  <div class="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center overflow-hidden">
+                  <div
+                    class="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center overflow-hidden"
+                  >
                     {#if char.avatar}
-                      <img src={char.avatar} alt={char.name} class="w-full h-full object-cover" />
+                      <img
+                        src={char.avatar}
+                        alt={char.name}
+                        class="w-full h-full object-cover"
+                      />
                     {:else}
-                      <i data-lucide="instagram" class="w-6 h-6 text-gray-400"></i>
+                      <i data-lucide="instagram" class="w-6 h-6 text-gray-400"
+                      ></i>
                     {/if}
                   </div>
                   <div class="flex-1">
@@ -127,7 +174,9 @@
 
       {#if accessibleCharacters.length === 0 && inaccessibleCharacters.length === 0}
         <div class="text-center py-8 text-gray-400">
-          {searchTerm ? t("sns.characterList.noSearchResults", { searchTerm }) : t("sns.characterList.noCharacters")}
+          {searchTerm
+            ? t("sns.characterList.noSearchResults", { searchTerm })
+            : t("sns.characterList.noCharacters")}
         </div>
       {/if}
     </div>

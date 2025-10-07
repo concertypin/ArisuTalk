@@ -1,17 +1,20 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_APP_TITLE: string
+  readonly VITE_APP_TITLE: string;
   // more env variables...
   readonly DEV: boolean; // Explicitly define DEV
 
   readonly VITE_VERSION_CHANNEL: string;
   readonly VITE_VERSION_NAME: string;
   readonly VITE_VERSION_URL: string;
+
+  readonly VITE_CLERK_PUBLISHABLE_KEY: string;
+  readonly VITE_PHONEBOOK_BASE_URL: string
 }
 
 interface ImportMeta {
-  readonly env: ImportMetaEnv
+  readonly env: ImportMetaEnv;
 }
 
 interface Window {

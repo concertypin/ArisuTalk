@@ -8,7 +8,7 @@ const prodOnlyPlugin = [
     VitePWA({
         registerType: "autoUpdate",
         workbox: {
-            maximumFileSizeToCacheInBytes: 4000000, // 4MB로 증가 (기본값: 2MB)
+            maximumFileSizeToCacheInBytes: 12 * 1024 * 1024, // Allow precaching bundles up to 12MB
         },
         manifest: {
             name: "ArisuTalk",

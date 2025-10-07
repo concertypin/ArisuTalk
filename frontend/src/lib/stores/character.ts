@@ -10,6 +10,30 @@ export const userStickers = persistentStore("personaChat_userStickers_v16", []);
 
 export const editingCharacter = writable(null);
 export const expandedCharacterIds = writable(new Set());
+export interface ImportedCharacterData {
+  name: string;
+  prompt: string;
+  avatar?: string | null;
+  appearance?: string;
+  proactiveEnabled?: boolean;
+  responseTime?: number;
+  thinkingTime?: number;
+  reactivity?: number;
+  tone?: number;
+  memories?: unknown[];
+  stickers?: unknown[];
+  naiSettings?: Record<string, unknown>;
+  hypnosis?: Record<string, unknown>;
+}
+
+export interface PhonebookImportResult {
+  character: ImportedCharacterData;
+  sourceId: string;
+}
+
+export const phonebookImportResult = writable<PhonebookImportResult | null>(
+  null,
+);
 
 // Character State Management
 export interface CharacterState {

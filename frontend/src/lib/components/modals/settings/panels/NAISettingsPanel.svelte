@@ -1,25 +1,47 @@
 <script>
-  import { onMount } from 'svelte';
-  import { t } from '../../../../../i18n.js';
-  import { settings } from '../../../../stores/settings';
-  import { Image, Cpu, UserPlus, Settings, Edit, Smile, Download, BarChart3, HelpCircle, Eye, EyeOff, Plus, Check, X, RefreshCw, Users, Trash2, Loader2 } from 'lucide-svelte';
-  import { NovelAIClient } from '../../../../api/novelai.js';
-  import { DEFAULT_EMOTIONS } from '../../../../../defaults.js';
+  import { onMount } from "svelte";
+  import { t } from "../../../../../i18n.js";
+  import { settings } from "../../../../stores/settings";
+  import {
+    Image,
+    Cpu,
+    UserPlus,
+    Settings,
+    Edit,
+    Smile,
+    Download,
+    BarChart3,
+    HelpCircle,
+    Eye,
+    EyeOff,
+    Plus,
+    Check,
+    X,
+    RefreshCw,
+    Users,
+    Trash2,
+    Loader2,
+  } from "lucide-svelte";
+  import { NovelAIClient } from "../../../../api/novelai.js";
+  import { DEFAULT_EMOTIONS } from "../../../../../defaults.js";
 
-  import { characters } from '../../../../stores/character';
+  import { characters } from "../../../../stores/character";
 
   if (!$settings.naiSettings) {
     $settings.naiSettings = {};
   }
 
   let apiKeyVisible = false;
-  let maskedApiKey = '●'.repeat(8) + ($settings.naiSettings?.apiKey?.slice(-4) || '');
+  let maskedApiKey =
+    "●".repeat(8) + ($settings.naiSettings?.apiKey?.slice(-4) || "");
 
   let minDelaySeconds = $settings.naiSettings?.minDelay / 1000;
-  let maxAdditionalDelaySeconds = $settings.naiSettings?.maxAdditionalDelay / 1000;
+  let maxAdditionalDelaySeconds =
+    $settings.naiSettings?.maxAdditionalDelay / 1000;
 
   $: $settings.naiSettings.minDelay = minDelaySeconds * 1000;
-  $: $settings.naiSettings.maxAdditionalDelay = maxAdditionalDelaySeconds * 1000;
+  $: $settings.naiSettings.maxAdditionalDelay =
+    maxAdditionalDelaySeconds * 1000;
 
   let isEditingNaiList = false;
   const emotionLabels = {
@@ -32,10 +54,10 @@
     confused: "😕 혼란",
     sleepy: "😴 졸림",
     excited: "🤩 흥분",
-    neutral: "😐 무표정"
+    neutral: "😐 무표정",
   };
 
-  let newNaiItem = { title: '', emotion: '', action: '' };
+  let newNaiItem = { title: "", emotion: "", action: "" };
 
   let totalGenerated = 0;
   let charactersWithGenerated = 0;
@@ -49,10 +71,10 @@
     let total = 0;
     let stats = [];
 
-    $characters.forEach(character => {
+    $characters.forEach((character) => {
       if (character.stickers && character.stickers.length > 0) {
         total += character.stickers.length;
-        const generatedStickers = character.stickers.filter(s => s.generated);
+        const generatedStickers = character.stickers.filter((s) => s.generated);
         const generatedCount = generatedStickers.length;
         generated += generatedCount;
         if (generatedCount > 0) {
@@ -65,7 +87,7 @@
     totalGenerated = generated;
     charactersWithGenerated = withGenerated;
     totalStickers = total;
-    generationRate = total > 0 ? (generated / total * 100).toFixed(1) : 0;
+    generationRate = total > 0 ? ((generated / total) * 100).toFixed(1) : 0;
     characterStats = stats.sort((a, b) => b.count - a.count);
   }
 
@@ -74,13 +96,17 @@
     if (!$settings.naiSettings.naiGenerationList) {
       $settings.naiSettings.naiGenerationList = [];
     }
-    $settings.naiSettings.naiGenerationList = [...$settings.naiSettings.naiGenerationList, { ...newNaiItem }];
-    newNaiItem = { title: '', emotion: '', action: '' };
+    $settings.naiSettings.naiGenerationList = [
+      ...$settings.naiSettings.naiGenerationList,
+      { ...newNaiItem },
+    ];
+    newNaiItem = { title: "", emotion: "", action: "" };
   }
 
   function deleteNaiItem(index) {
     $settings.naiSettings.naiGenerationList.splice(index, 1);
-    $settings.naiSettings.naiGenerationList = $settings.naiSettings.naiGenerationList;
+    $settings.naiSettings.naiGenerationList =
+      $settings.naiSettings.naiGenerationList;
   }
 
   function saveNaiList() {
@@ -92,11 +118,8 @@
   }
 
   function generateAllStickers() {
-    console.log('generateAllStickers');
+    console.log("generateAllStickers");
   }
-
-
-
 </script>
 
 <div class="space-y-6">
@@ -106,22 +129,25 @@
       <Image class="w-5 h-5 mr-3 text-purple-400" />
       {t("naiSettings.apiSettingsTitle")}
     </h4>
-    
+
     <div class="space-y-4">
       <div>
-        <label for="nai-api-key" class="block text-sm font-medium text-gray-300 mb-2">
+        <label
+          for="nai-api-key"
+          class="block text-sm font-medium text-gray-300 mb-2"
+        >
           {t("naiSettings.apiKey")}
         </label>
         <div class="flex gap-2">
-          <input 
+          <input
             id="nai-api-key"
             bind:value={$settings.naiSettings.apiKey}
-            type={apiKeyVisible ? 'text' : 'password'} 
+            type={apiKeyVisible ? "text" : "password"}
             placeholder={t("naiSettings.apiKeyPlaceholder")}
             class="flex-1 px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-purple-500/50 transition-all duration-200"
-          >
-          <button 
-            on:click={() => apiKeyVisible = !apiKeyVisible}
+          />
+          <button
+            on:click={() => (apiKeyVisible = !apiKeyVisible)}
             type="button"
             class="px-3 py-3 rounded-full bg-gray-800 hover:bg-gray-700 text-gray-300 transition-colors"
             title={t("naiSettings.apiKeyToggle")}
@@ -134,12 +160,20 @@
           </button>
         </div>
         {#if $settings.naiSettings.apiKey}
-          <div class="text-xs text-green-400 mt-1">{t("naiSettings.apiKeySet", { maskedKey: maskedApiKey })}</div>
+          <div class="text-xs text-green-400 mt-1">
+            {t("naiSettings.apiKeySet", { maskedKey: maskedApiKey })}
+          </div>
         {:else}
-          <div class="text-xs text-red-400 mt-1">{t("naiSettings.apiKeyRequired")}</div>
+          <div class="text-xs text-red-400 mt-1">
+            {t("naiSettings.apiKeyRequired")}
+          </div>
         {/if}
         <div class="text-xs text-gray-400 mt-2">
-          <a href="https://novelai.net/account" target="_blank" class="text-purple-400 hover:text-purple-300">
+          <a
+            href="https://novelai.net/account"
+            target="_blank"
+            class="text-purple-400 hover:text-purple-300"
+          >
             {t("naiSettings.apiKeyHelp")}
           </a>
         </div>
@@ -147,23 +181,24 @@
     </div>
   </div>
 
-
-
   <!-- Model and Generation Settings -->
   <div class="bg-gray-700/30 rounded-xl p-6">
     <h4 class="text-lg font-semibold text-white mb-4 flex items-center">
       <Cpu class="w-5 h-5 mr-3 text-green-400" />
       {t("naiSettings.modelSettingsTitle")}
     </h4>
-    
+
     <div class="space-y-4">
       <div>
-        <label for="nai-model" class="block text-sm font-medium text-gray-300 mb-2">
+        <label
+          for="nai-model"
+          class="block text-sm font-medium text-gray-300 mb-2"
+        >
           {t("naiSettings.model")}
         </label>
-        <select 
+        <select
           id="nai-model"
-          bind:value={$settings.naiSettings.model} 
+          bind:value={$settings.naiSettings.model}
           class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-green-500/50"
         >
           {#each Object.entries(NovelAIClient.MODELS) as [modelId, modelInfo]}
@@ -178,17 +213,22 @@
       </div>
 
       <div>
-        <label for="nai-image-size" class="block text-sm font-medium text-gray-300 mb-2">
+        <label
+          for="nai-image-size"
+          class="block text-sm font-medium text-gray-300 mb-2"
+        >
           {t("naiSettings.imageSize")}
         </label>
-        <select 
+        <select
           id="nai-image-size"
           bind:value={$settings.naiSettings.preferredSize}
           class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-green-500/50"
         >
           <option value="square">{t("naiSettings.imageSizeSquare")}</option>
           <option value="portrait">{t("naiSettings.imageSizePortrait")}</option>
-          <option value="landscape">{t("naiSettings.imageSizeLandscape")}</option>
+          <option value="landscape"
+            >{t("naiSettings.imageSizeLandscape")}</option
+          >
         </select>
         <div class="text-xs text-gray-400 mt-1">
           {t("naiSettings.imageSizeHelp")}
@@ -197,34 +237,40 @@
 
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label for="nai-min-delay" class="block text-sm font-medium text-gray-300 mb-2">
+          <label
+            for="nai-min-delay"
+            class="block text-sm font-medium text-gray-300 mb-2"
+          >
             {t("naiSettings.minDelayTime")}
           </label>
-          <input 
+          <input
             id="nai-min-delay"
             bind:value={minDelaySeconds}
-            type="number" 
-            min="10" 
-            max="60" 
+            type="number"
+            min="10"
+            max="60"
             class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-green-500/50"
-          >
+          />
           <div class="text-xs text-gray-400 mt-1">
             {t("naiSettings.minDelayHelp")}
           </div>
         </div>
-        
+
         <div>
-          <label for="nai-max-additional-delay" class="block text-sm font-medium text-gray-300 mb-2">
+          <label
+            for="nai-max-additional-delay"
+            class="block text-sm font-medium text-gray-300 mb-2"
+          >
             {t("naiSettings.maxAdditionalTime")}
           </label>
-          <input 
+          <input
             id="nai-max-additional-delay"
             bind:value={maxAdditionalDelaySeconds}
-            type="number" 
-            min="0" 
-            max="30" 
+            type="number"
+            min="0"
+            max="30"
             class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-green-500/50"
-          >
+          />
           <div class="text-xs text-gray-400 mt-1">
             {t("naiSettings.maxAdditionalHelp")}
           </div>
@@ -235,37 +281,43 @@
 
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label for="nai-steps" class="block text-sm font-medium text-gray-300 mb-2">
+          <label
+            for="nai-steps"
+            class="block text-sm font-medium text-gray-300 mb-2"
+          >
             {t("naiSettings.steps")}
           </label>
-          <input 
+          <input
             id="nai-steps"
             bind:value={$settings.naiSettings.steps}
-            type="range" 
-            min="1" 
-            max="50" 
+            type="range"
+            min="1"
+            max="50"
             class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
-          >
+          />
           <div class="flex justify-between text-xs text-gray-400 mt-1">
             <span>1</span>
             <span>{$settings.naiSettings.steps}</span>
             <span>50</span>
           </div>
         </div>
-        
+
         <div>
-          <label for="nai-scale" class="block text-sm font-medium text-gray-300 mb-2">
+          <label
+            for="nai-scale"
+            class="block text-sm font-medium text-gray-300 mb-2"
+          >
             {t("naiSettings.scale")}
           </label>
-          <input 
+          <input
             id="nai-scale"
             bind:value={$settings.naiSettings.scale}
-            type="range" 
-            min="1" 
-            max="30" 
+            type="range"
+            min="1"
+            max="30"
             step="0.5"
             class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
-          >
+          />
           <div class="flex justify-between text-xs text-gray-400 mt-1">
             <span>1.0</span>
             <span>{$settings.naiSettings.scale}</span>
@@ -275,10 +327,13 @@
       </div>
 
       <div>
-        <label for="nai-sampler" class="block text-sm font-medium text-gray-300 mb-2">
+        <label
+          for="nai-sampler"
+          class="block text-sm font-medium text-gray-300 mb-2"
+        >
           {t("naiSettings.sampler")}
         </label>
-        <select 
+        <select
           id="nai-sampler"
           bind:value={$settings.naiSettings.sampler}
           class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-green-500/50"
@@ -292,10 +347,13 @@
       </div>
 
       <div>
-        <label for="nai-noise-schedule" class="block text-sm font-medium text-gray-300 mb-2">
+        <label
+          for="nai-noise-schedule"
+          class="block text-sm font-medium text-gray-300 mb-2"
+        >
           {t("naiSettings.noiseSchedule")}
         </label>
-        <select 
+        <select
           id="nai-noise-schedule"
           bind:value={$settings.naiSettings.noise_schedule}
           class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-green-500/50"
@@ -316,11 +374,14 @@
       <UserPlus class="w-5 h-5 mr-3 text-pink-400" />
       {t("naiSettings.characterImageSettingsTitle")}
     </h4>
-    
+
     <div class="space-y-4">
       <div class="flex items-center justify-between">
         <div>
-          <label for="nai-use-character-prompts" class="text-sm font-medium text-gray-300">
+          <label
+            for="nai-use-character-prompts"
+            class="text-sm font-medium text-gray-300"
+          >
             {t("naiSettings.useCharacterPrompts")}
           </label>
           <p class="text-xs text-gray-400 mt-1">
@@ -328,19 +389,24 @@
           </p>
         </div>
         <label class="relative inline-flex items-center cursor-pointer">
-          <input 
+          <input
             id="nai-use-character-prompts"
-            bind:checked={$settings.naiSettings.useCharacterPrompts} 
-            type="checkbox" 
+            bind:checked={$settings.naiSettings.useCharacterPrompts}
+            type="checkbox"
             class="sr-only peer"
-          >
-          <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-pink-500/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"></div>
+          />
+          <div
+            class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-pink-500/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"
+          ></div>
         </label>
       </div>
 
       <div class="flex items-center justify-between">
         <div>
-          <label for="nai-vibe-transfer" class="text-sm font-medium text-gray-300">
+          <label
+            for="nai-vibe-transfer"
+            class="text-sm font-medium text-gray-300"
+          >
             {t("naiSettings.vibeTransfer")}
           </label>
           <p class="text-xs text-gray-400 mt-1">
@@ -348,65 +414,80 @@
           </p>
         </div>
         <label class="relative inline-flex items-center cursor-pointer">
-          <input 
+          <input
             id="nai-vibe-transfer"
-            bind:checked={$settings.naiSettings.vibeTransferEnabled} 
-            type="checkbox" 
+            bind:checked={$settings.naiSettings.vibeTransferEnabled}
+            type="checkbox"
             class="sr-only peer"
-          >
-          <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-pink-500/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"></div>
+          />
+          <div
+            class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-pink-500/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"
+          ></div>
         </label>
       </div>
 
       {#if $settings.naiSettings.vibeTransferEnabled}
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label for="nai-vibe-strength" class="block text-sm font-medium text-gray-300 mb-2">
+            <label
+              for="nai-vibe-strength"
+              class="block text-sm font-medium text-gray-300 mb-2"
+            >
               {t("naiSettings.vibeStrength")}
             </label>
-            <input 
+            <input
               id="nai-vibe-strength"
               bind:value={$settings.naiSettings.vibeTransferStrength}
-              type="range" 
-              min="0" 
-              max="1" 
+              type="range"
+              min="0"
+              max="1"
               step="0.1"
               class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
-            >
+            />
             <div class="text-xs text-gray-400 mt-1 text-center">
               <span>{$settings.naiSettings.vibeTransferStrength}</span>
             </div>
           </div>
-          
+
           <div>
-            <label for="nai-vibe-info-extracted" class="block text-sm font-medium text-gray-300 mb-2">
+            <label
+              for="nai-vibe-info-extracted"
+              class="block text-sm font-medium text-gray-300 mb-2"
+            >
               {t("naiSettings.vibeInfoExtracted")}
             </label>
-            <input 
+            <input
               id="nai-vibe-info-extracted"
-              bind:value={$settings.naiSettings.vibeTransferInformationExtracted}
-              type="range" 
-              min="0" 
-              max="1" 
+              bind:value={
+                $settings.naiSettings.vibeTransferInformationExtracted
+              }
+              type="range"
+              min="0"
+              max="1"
               step="0.1"
               class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
-            >
+            />
             <div class="text-xs text-gray-400 mt-1 text-center">
-              <span>{$settings.naiSettings.vibeTransferInformationExtracted}</span>
+              <span
+                >{$settings.naiSettings.vibeTransferInformationExtracted}</span
+              >
             </div>
           </div>
         </div>
 
         <div>
-          <label for="nai-vibe-image-upload" class="block text-sm font-medium text-gray-300 mb-2">
+          <label
+            for="nai-vibe-image-upload"
+            class="block text-sm font-medium text-gray-300 mb-2"
+          >
             {t("naiSettings.vibeImageUpload")}
           </label>
-          <input 
+          <input
             id="nai-vibe-image-upload"
-            type="file" 
+            type="file"
             accept="image/*"
             class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-pink-500/50 file:mr-3 file:py-2 file:px-4 file:rounded file:border-0 file:bg-gray-600 file:text-white hover:file:bg-gray-500"
-          >
+          />
           <div class="text-xs text-gray-400 mt-1">
             {t("naiSettings.vibeImageHelp")}
           </div>
@@ -421,18 +502,21 @@
       <Settings class="w-5 h-5 mr-3 text-yellow-400" />
       {t("naiSettings.advancedSettingsTitle")}
     </h4>
-    
+
     <div class="space-y-4">
       <!-- SMEA Settings (v3 models only) -->
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <input 
+          <input
             id="nai-smea-enable"
             bind:checked={$settings.naiSettings.sm}
-            type="checkbox" 
+            type="checkbox"
             class="w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500 focus:ring-2"
+          />
+          <label
+            for="nai-smea-enable"
+            class="flex items-center space-x-2 cursor-pointer"
           >
-          <label for="nai-smea-enable" class="flex items-center space-x-2 cursor-pointer">
             <span class="text-sm font-medium text-gray-300">
               {t("naiSettings.smeaEnable")}
             </span>
@@ -441,15 +525,18 @@
             {t("naiSettings.smeaHelp")}
           </div>
         </div>
-        
+
         <div>
-          <input 
+          <input
             id="nai-smea-dyn-enable"
             bind:checked={$settings.naiSettings.sm_dyn}
-            type="checkbox" 
+            type="checkbox"
             class="w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500 focus:ring-2"
+          />
+          <label
+            for="nai-smea-dyn-enable"
+            class="flex items-center space-x-2 cursor-pointer"
           >
-          <label for="nai-smea-dyn-enable" class="flex items-center space-x-2 cursor-pointer">
             <span class="text-sm font-medium text-gray-300">
               {t("naiSettings.smeaDynEnable")}
             </span>
@@ -462,36 +549,42 @@
 
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label for="nai-cfg-rescale" class="block text-sm font-medium text-gray-300 mb-2">
+          <label
+            for="nai-cfg-rescale"
+            class="block text-sm font-medium text-gray-300 mb-2"
+          >
             {t("naiSettings.cfgRescale")}
           </label>
-          <input 
+          <input
             id="nai-cfg-rescale"
             bind:value={$settings.naiSettings.cfg_rescale}
-            type="range" 
-            min="0" 
-            max="1" 
+            type="range"
+            min="0"
+            max="1"
             step="0.05"
             class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
-          >
+          />
           <div class="text-xs text-gray-400 mt-1 text-center">
             <span>{$settings.naiSettings.cfg_rescale}</span>
           </div>
         </div>
-        
+
         <div>
-          <label for="nai-uncond-scale" class="block text-sm font-medium text-gray-300 mb-2">
+          <label
+            for="nai-uncond-scale"
+            class="block text-sm font-medium text-gray-300 mb-2"
+          >
             {t("naiSettings.uncondScale")}
           </label>
-          <input 
+          <input
             id="nai-uncond-scale"
             bind:value={$settings.naiSettings.uncond_scale}
-            type="range" 
-            min="0" 
-            max="2" 
+            type="range"
+            min="0"
+            max="2"
             step="0.1"
             class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
-          >
+          />
           <div class="text-xs text-gray-400 mt-1 text-center">
             <span>{$settings.naiSettings.uncond_scale}</span>
           </div>
@@ -500,118 +593,148 @@
 
       <div class="flex items-center justify-between">
         <div>
-          <label for="nai-dynamic-thresholding" class="text-sm font-medium text-gray-300">
+          <label
+            for="nai-dynamic-thresholding"
+            class="text-sm font-medium text-gray-300"
+          >
             {t("naiSettings.dynamicThresholding")}
           </label>
           <p class="text-xs text-gray-400 mt-1">
             {t("naiSettings.dynamicThresholdingHelp")}
           </p>
         </div>
-        <input 
+        <input
           id="nai-dynamic-thresholding"
           bind:checked={$settings.naiSettings.dynamic_thresholding}
-          type="checkbox" 
+          type="checkbox"
           class="sr-only peer"
+        />
+        <label
+          for="nai-dynamic-thresholding"
+          class="relative inline-flex items-center cursor-pointer"
         >
-        <label for="nai-dynamic-thresholding" class="relative inline-flex items-center cursor-pointer">
-          <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-yellow-500/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-600"></div>
+          <div
+            class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-yellow-500/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-600"
+          ></div>
         </label>
       </div>
 
       {#if $settings.naiSettings.dynamic_thresholding}
-        <div class="grid grid-cols-2 gap-4 pl-4 border-l-2 border-yellow-500/30">
+        <div
+          class="grid grid-cols-2 gap-4 pl-4 border-l-2 border-yellow-500/30"
+        >
           <div>
-            <label for="nai-dt-percentile" class="block text-sm font-medium text-gray-300 mb-2">
+            <label
+              for="nai-dt-percentile"
+              class="block text-sm font-medium text-gray-300 mb-2"
+            >
               {t("naiSettings.dtPercentile")}
             </label>
-            <input 
+            <input
               id="nai-dt-percentile"
               bind:value={$settings.naiSettings.dynamic_thresholding_percentile}
-              type="range" 
-              min="0.9" 
-              max="1" 
+              type="range"
+              min="0.9"
+              max="1"
               step="0.001"
               class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
-            >
+            />
             <div class="text-xs text-gray-400 mt-1 text-center">
-              <span>{$settings.naiSettings.dynamic_thresholding_percentile}</span>
+              <span
+                >{$settings.naiSettings.dynamic_thresholding_percentile}</span
+              >
             </div>
           </div>
-          
+
           <div>
-            <label for="nai-dt-mimic-scale" class="block text-sm font-medium text-gray-300 mb-2">
+            <label
+              for="nai-dt-mimic-scale"
+              class="block text-sm font-medium text-gray-300 mb-2"
+            >
               {t("naiSettings.dtMimicScale")}
             </label>
-            <input 
+            <input
               id="nai-dt-mimic-scale"
-              bind:value={$settings.naiSettings.dynamic_thresholding_mimic_scale}
-              type="range" 
-              min="1" 
-              max="20" 
+              bind:value={
+                $settings.naiSettings.dynamic_thresholding_mimic_scale
+              }
+              type="range"
+              min="1"
+              max="20"
               step="0.5"
               class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
-            >
+            />
             <div class="text-xs text-gray-400 mt-1 text-center">
-              <span>{$settings.naiSettings.dynamic_thresholding_mimic_scale}</span>
+              <span
+                >{$settings.naiSettings.dynamic_thresholding_mimic_scale}</span
+              >
             </div>
           </div>
         </div>
       {/if}
 
       <div class="flex flex-wrap gap-4">
-        <input 
+        <input
           id="nai-legacy"
           bind:checked={$settings.naiSettings.legacy}
-          type="checkbox" 
+          type="checkbox"
           class="mr-2 rounded border-gray-600 text-yellow-600 focus:ring-yellow-500"
-        >
+        />
         <label for="nai-legacy" class="flex items-center cursor-pointer">
-          <span class="text-sm text-gray-300">{t("naiSettings.legacyMode")}</span>
+          <span class="text-sm text-gray-300"
+            >{t("naiSettings.legacyMode")}</span
+          >
         </label>
-        
-        <input 
+
+        <input
           id="nai-add-original-image"
           bind:checked={$settings.naiSettings.add_original_image}
-          type="checkbox" 
+          type="checkbox"
           class="mr-2 rounded border-gray-600 text-yellow-600 focus:ring-yellow-500"
+        />
+        <label
+          for="nai-add-original-image"
+          class="flex items-center cursor-pointer"
         >
-        <label for="nai-add-original-image" class="flex items-center cursor-pointer">
-          <span class="text-sm text-gray-300">{t("naiSettings.addOriginalImage")}</span>
+          <span class="text-sm text-gray-300"
+            >{t("naiSettings.addOriginalImage")}</span
+          >
         </label>
       </div>
     </div>
   </div>
 
-
-
-
   <!-- NAI 일괄 생성 목록 -->
   <div class="bg-gray-700/30 rounded-xl p-6">
-    <h4 class="text-lg font-semibold text-white mb-4 flex items-center justify-between">
+    <h4
+      class="text-lg font-semibold text-white mb-4 flex items-center justify-between"
+    >
       <div class="flex items-center">
         <Smile class="w-5 h-5 mr-3 text-blue-400" />
         {t("naiSettings.naiGenerationListTitle")}
       </div>
       <button
-        on:click={() => isEditingNaiList = !isEditingNaiList}
+        on:click={() => (isEditingNaiList = !isEditingNaiList)}
         class="px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-1"
       >
         <Edit class="w-3 h-3" />
-        {t('naiHandlers.editNaiGenerationList')}
+        {t("naiHandlers.editNaiGenerationList")}
       </button>
     </h4>
 
     <!-- 현재 목록 표시 -->
     {#if !isEditingNaiList}
-    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
-      {#each ($settings.naiSettings.naiGenerationList || DEFAULT_EMOTIONS) as item}
-        {@const fullKey = item.titleKey ? `naiSettings.emotion.${item.titleKey}` : null}
-        {@const displayText = fullKey ? t(fullKey) : item.title}
-        <div class="bg-gray-600/50 rounded-lg px-3 py-2 text-center">
-          <span class="text-xs text-gray-300">{displayText}</span>
-        </div>
-      {/each}
-    </div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
+        {#each $settings.naiSettings.naiGenerationList || DEFAULT_EMOTIONS as item}
+          {@const fullKey = item.titleKey
+            ? `naiSettings.emotion.${item.titleKey}`
+            : null}
+          {@const displayText = fullKey ? t(fullKey) : item.title}
+          <div class="bg-gray-600/50 rounded-lg px-3 py-2 text-center">
+            <span class="text-xs text-gray-300">{displayText}</span>
+          </div>
+        {/each}
+      </div>
     {/if}
 
     <!-- 편집 UI -->
@@ -620,15 +743,27 @@
         <!-- 현재 목록 편집 -->
         <div>
           <h5 class="block text-sm font-medium text-gray-300 mb-2">
-            {t('naiHandlers.currentList')}
+            {t("naiHandlers.currentList")}
           </h5>
           <div class="space-y-2 max-h-32 overflow-y-auto">
             {#each $settings.naiSettings.naiGenerationList as item, index}
-              {@const fullKey = item.titleKey ? `naiSettings.emotion.${item.titleKey}` : null}
+              {@const fullKey = item.titleKey
+                ? `naiSettings.emotion.${item.titleKey}`
+                : null}
               {@const displayText = fullKey ? t(fullKey) : item.title}
-              <div class="flex items-center gap-2 bg-gray-600/30 p-2 rounded-lg">
-                <span class="flex-1 text-sm text-gray-300 truncate">{displayText}</span>
-                <button on:click={() => deleteNaiItem(index)} class="p-1.5 bg-red-600 hover:bg-red-700 rounded-md" aria-label={t('naiHandlers.deleteItem', { item: displayText })}>
+              <div
+                class="flex items-center gap-2 bg-gray-600/30 p-2 rounded-lg"
+              >
+                <span class="flex-1 text-sm text-gray-300 truncate"
+                  >{displayText}</span
+                >
+                <button
+                  on:click={() => deleteNaiItem(index)}
+                  class="p-1.5 bg-red-600 hover:bg-red-700 rounded-md"
+                  aria-label={t("naiHandlers.deleteItem", {
+                    item: displayText,
+                  })}
+                >
                   <Trash2 class="w-3 h-3 text-white" />
                 </button>
               </div>
@@ -639,50 +774,59 @@
         <!-- 새 항목 추가 -->
         <div class="space-y-3">
           <div>
-            <label for="nai-new-item-title" class="block text-sm font-medium text-gray-300 mb-2">
-              {t('naiHandlers.itemTitleLabel')}
+            <label
+              for="nai-new-item-title"
+              class="block text-sm font-medium text-gray-300 mb-2"
+            >
+              {t("naiHandlers.itemTitleLabel")}
             </label>
             <input
               id="nai-new-item-title"
               bind:value={newNaiItem.title}
               type="text"
-              placeholder={t('naiHandlers.itemTitlePlaceholder')}
+              placeholder={t("naiHandlers.itemTitlePlaceholder")}
               class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm"
-            >
+            />
             <div class="text-xs text-gray-400 mt-1">
-              {t('naiHandlers.itemTitleHelp')}
+              {t("naiHandlers.itemTitleHelp")}
             </div>
           </div>
 
           <div>
-            <label for="nai-new-item-emotion" class="block text-sm font-medium text-gray-300 mb-2">
-              {t('naiHandlers.emotionLabel')}
+            <label
+              for="nai-new-item-emotion"
+              class="block text-sm font-medium text-gray-300 mb-2"
+            >
+              {t("naiHandlers.emotionLabel")}
             </label>
             <input
               id="nai-new-item-emotion"
               bind:value={newNaiItem.emotion}
               type="text"
-              placeholder={t('naiHandlers.emotionPlaceholder')}
+              placeholder={t("naiHandlers.emotionPlaceholder")}
               class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm"
-            >
+            />
             <div class="text-xs text-gray-400 mt-1">
-              {t('naiHandlers.emotionHelp')}
+              {t("naiHandlers.emotionHelp")}
             </div>
           </div>
 
           <div>
-            <label for="nai-new-item-action" class="block text-sm font-medium text-gray-300 mb-2">
-              {t('naiHandlers.actionSituationLabel')}
+            <label
+              for="nai-new-item-action"
+              class="block text-sm font-medium text-gray-300 mb-2"
+            >
+              {t("naiHandlers.actionSituationLabel")}
             </label>
             <textarea
               id="nai-new-item-action"
               bind:value={newNaiItem.action}
               rows="3"
-              placeholder={t('naiHandlers.actionSituationPlaceholder')}
+              placeholder={t("naiHandlers.actionSituationPlaceholder")}
               class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm resize-none"
             ></textarea>
             <div class="text-xs text-gray-400 mt-1">
-              {t('naiHandlers.actionSituationHelp')}
+              {t("naiHandlers.actionSituationHelp")}
             </div>
           </div>
 
@@ -691,7 +835,7 @@
             class="w-full px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
           >
             <Plus class="w-4 h-4" />
-            {t('naiHandlers.addNaiGenerationItem')}
+            {t("naiHandlers.addNaiGenerationItem")}
           </button>
         </div>
 
@@ -702,21 +846,21 @@
             class="flex-1 py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
           >
             <Check class="w-4 h-4" />
-            {t('naiHandlers.saveList')}
+            {t("naiHandlers.saveList")}
           </button>
           <button
-            on:click={() => isEditingNaiList = false}
+            on:click={() => (isEditingNaiList = false)}
             class="flex-1 py-2 px-4 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
           >
             <X class="w-4 h-4" />
-            {t('naiHandlers.cancel')}
+            {t("naiHandlers.cancel")}
           </button>
           <button
             on:click={resetNaiList}
             class="py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
           >
             <RefreshCw class="w-4 h-4" />
-            {t('naiHandlers.resetToDefault')}
+            {t("naiHandlers.resetToDefault")}
           </button>
         </div>
       </div>
@@ -733,10 +877,10 @@
       <Download class="w-5 h-5 mr-3 text-green-400" />
       {t("naiSettings.batchGenerationTitle")}
     </h4>
-    
+
     <div class="space-y-4">
       <div>
-        <button 
+        <button
           on:click={generateAllStickers}
           class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={!$settings.naiSettings.apiKey}
@@ -745,7 +889,7 @@
           {t("naiSettings.generateAllCharacters")}
         </button>
       </div>
-      
+
       {#if !$settings.naiSettings.apiKey}
         <div class="text-xs text-yellow-400 text-center">
           {t("naiSettings.batchGenerationDisabled")}
@@ -758,8 +902,6 @@
     </div>
   </div>
 
-
-
   <!-- Generation Statistics -->
   <div class="bg-gray-700/30 rounded-xl p-6">
     <h4 class="text-lg font-semibold text-white mb-4 flex items-center">
@@ -769,30 +911,44 @@
     <div class="grid grid-cols-2 gap-4">
       <div class="bg-gray-600/30 rounded-lg p-4 text-center">
         <div class="text-2xl font-bold text-white">{totalGenerated}</div>
-        <div class="text-xs text-gray-400">{t("naiSettings.generatedStickers")}</div>
+        <div class="text-xs text-gray-400">
+          {t("naiSettings.generatedStickers")}
+        </div>
       </div>
       <div class="bg-gray-600/30 rounded-lg p-4 text-center">
-        <div class="text-2xl font-bold text-white">{charactersWithGenerated}</div>
-        <div class="text-xs text-gray-400">{t("naiSettings.generatedCharacters")}</div>
+        <div class="text-2xl font-bold text-white">
+          {charactersWithGenerated}
+        </div>
+        <div class="text-xs text-gray-400">
+          {t("naiSettings.generatedCharacters")}
+        </div>
       </div>
       <div class="bg-gray-600/30 rounded-lg p-4 text-center">
         <div class="text-2xl font-bold text-white">{totalStickers}</div>
-        <div class="text-xs text-gray-400">{t("naiSettings.totalStickers")}</div>
+        <div class="text-xs text-gray-400">
+          {t("naiSettings.totalStickers")}
+        </div>
       </div>
       <div class="bg-gray-600/30 rounded-lg p-4 text-center">
         <div class="text-2xl font-bold text-white">{generationRate}%</div>
-        <div class="text-xs text-gray-400">{t("naiSettings.generationRate")}</div>
+        <div class="text-xs text-gray-400">
+          {t("naiSettings.generationRate")}
+        </div>
       </div>
     </div>
-    
+
     {#if totalGenerated > 0}
       <div class="mt-4">
-        <h5 class="text-sm font-medium text-gray-300 mb-2">{t("naiSettings.characterStats")}</h5>
+        <h5 class="text-sm font-medium text-gray-300 mb-2">
+          {t("naiSettings.characterStats")}
+        </h5>
         <div class="space-y-1 max-h-32 overflow-y-auto">
           {#each characterStats as stat}
             <div class="flex justify-between text-xs">
               <span class="text-gray-300">{stat.name}</span>
-              <span class="text-gray-400">{t("naiSettings.stickerCount", { count: stat.count })}</span>
+              <span class="text-gray-400"
+                >{t("naiSettings.stickerCount", { count: stat.count })}</span
+              >
             </div>
           {/each}
         </div>

@@ -11,7 +11,7 @@
     "prepreview": "pnpm run build",
     "preview": "pnpm run serve",
     "serve": "pnpx http-server -p 5173 -c-1 dist/",
-    "format": "prettier --write 'src/**/*.{js,ts,svelte,json,md}'"
+    "format": "prettier --write 'src/**/*.{js,ts,svelte,json,md}' --plugin prettier-plugin-svelte"
   },
   "author": "",
   "license": "(Apache-2.0 OR CC-BY-NC-4.0)",
@@ -31,6 +31,7 @@
     "vite-plugin-pwa": "^1.0.3"
   },
   "dependencies": {
+    "@clerk/clerk-js": "^5.99.0",
     "@nyariv/sandboxjs": "^0.8.25",
     "jszip": "^3.10.1",
     "nanoid": "^5.1.6",

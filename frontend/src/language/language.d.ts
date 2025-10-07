@@ -13,6 +13,14 @@ export type LanguageStrings = {
     yes: string;
     no: string;
   };
+  auth: {
+    signIn: string;
+    signOut: string;
+    signedInAs: string;
+    authUnavailable: string;
+    retry: string;
+    loading: string;
+  };
   characterModal: {
     memoryPlaceholder: string;
     noStickers: string;
@@ -23,6 +31,7 @@ export type LanguageStrings = {
     editModeTitle: string;
     profileImage: string;
     importContact: string;
+    browsePhonebook: string;
     shareContact: string;
     nameLabel: string;
     namePlaceholder: string;
@@ -44,6 +53,23 @@ export type LanguageStrings = {
     addMemory: string;
     responseSpeed: string;
     openSNS: string;
+  };
+  phonebook: {
+    title: string;
+    description: string;
+    signInRequired: string;
+    checkFailed: string;
+    fetchFailed: string;
+    loading: string;
+    retry: string;
+    close: string;
+    empty: string;
+    encrypted: string;
+    byAuthor: string;
+    downloads: string;
+    uploaded: string;
+    import: string;
+    importing: string;
   };
   characterModalSlider: {
     responseTime: {

@@ -72,6 +72,21 @@ The production-ready files will be in the `ArisuTalk/frontend/dist` directory.
 pnpm test
 ```
 
+## Authentication Setup
+
+The frontend uses [Clerk](https://clerk.com/) for optional user authentication. Some future screens may require a signed-in session, but the core experience still works without it.
+
+1. Create a Clerk application and locate your **Publishable key** in the Clerk dashboard.
+2. Add the key to your environment configuration:
+
+  ```properties
+  VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
+  ```
+
+3. Restart the development server so the new environment variable is picked up.
+
+When the key is present, users can sign in/out directly from the sidebar header and manage their profiles via Clerk's hosted UI.
+
 
 ## Contributing
 
