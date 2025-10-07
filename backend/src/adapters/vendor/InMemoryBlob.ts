@@ -1,5 +1,5 @@
-import { DBEnv } from "adapters/client";
-import { BaseBlobStorageClient } from "adapters/StorageClientBase";
+import { DBEnv } from "@/adapters/client";
+import { BaseBlobStorageClient } from "@/adapters/StorageClientBase";
 
 /**
  * Simple in-memory blob storage used for tests/dev.

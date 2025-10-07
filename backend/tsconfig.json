@@ -12,6 +12,11 @@
         "types": [
             "vite/client"
         ],
+        "paths": {
+            "@/*": [
+                "./*"
+            ]
+        },
         "baseUrl": "./src",
         "outDir": "dist"
     },

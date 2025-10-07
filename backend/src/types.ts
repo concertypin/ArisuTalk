@@ -5,7 +5,7 @@
  */
 
 import { Context } from "hono";
-import { Bindings } from "platform";
+import { Bindings } from "@/platform";
 import z from "zod";
 
 type AllOrNothing<T> = T | { [K in keyof T]?: never };

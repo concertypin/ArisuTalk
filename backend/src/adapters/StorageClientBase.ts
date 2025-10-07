@@ -1,4 +1,4 @@
-import { DataType } from "schema";
+import { DataType } from "@/schema";
 
 /**
  * Client for performing blob storage operations.

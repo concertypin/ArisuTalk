@@ -1,13 +1,8 @@
 import z from "zod";
-import { DataDBClient, BlobClient } from "adapters/client";
-import {
-    DataType,
-    DataSchema,
-    PartialDataSchema,
-    PartialData,
-} from "../schema";
+import { DataDBClient, BlobClient } from "@/adapters/client";
+import { DataType, DataSchema, PartialDataSchema, PartialData } from "@/schema";
 import { describeRoute, resolver, validator } from "hono-openapi";
-import { createAuthedHonoRouter } from "lib/auth";
+import { createAuthedHonoRouter } from "@/lib/auth";
 
 let router = createAuthedHonoRouter("user");
 // Schemas

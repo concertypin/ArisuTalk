@@ -1,7 +1,7 @@
 import { Container, CosmosClient, Database } from "@azure/cosmos";
-import { DataType } from "schema";
-import { DBEnv } from "adapters/client";
-import { BaseDataDBClient, DataListOrder } from "adapters/StorageClientBase";
+import { DataType } from "@/schema";
+import { DBEnv } from "@/adapters/client";
+import { BaseDataDBClient, DataListOrder } from "@/adapters/StorageClientBase";
 
 /**
  * Lightweight in-memory implementation of BaseDataDBClient.
