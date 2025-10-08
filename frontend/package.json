@@ -20,7 +20,7 @@
     "node": ">20"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^6.2.0",
+    "@sveltejs/vite-plugin-svelte": "^6.2.1",
     "@tailwindcss/postcss": "^4.1.13",
     "lucide-svelte": "^0.544.0",
     "postcss": "^8.5.6",
@@ -33,6 +33,7 @@
   "dependencies": {
     "@clerk/clerk-js": "^5.99.0",
     "@nyariv/sandboxjs": "^0.8.25",
+    "firebase": "^12.3.0",
     "jszip": "^3.10.1",
     "nanoid": "^5.1.6",
     "pako": "^2.1.0"

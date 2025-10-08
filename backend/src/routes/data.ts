@@ -13,6 +13,28 @@ const UpdateDataSchema = PartialDataSchema.partial();
 
 const QueryNameSchema = z.object({ name: z.string().min(1).optional() });
 
+// Check availability of user perm
+router = router.get(
+    "/check",
+    describeRoute({
+        summary: "Check if the user has permission to create Data items",
+        description:
+            "Checks if the authenticated user has permission to read/create Data items.",
+        tags: ["Data"],
+        security: [{ ClerkUser: [] }],
+        responses: {
+            204: {
+                description: "User has permission. No content returned.",
+            },
+            403: { description: "Forbidden" },
+            401: { description: "Unauthorized" },
+        },
+    }),
+    async (c) => {
+        // If we reach here, the user is authenticated
+        return c.status(204); // No Content
+    }
+);
 // Create
 router = router.post(
     "/data",

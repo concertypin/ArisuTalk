@@ -31,7 +31,7 @@ const jwtAuthScheme = Object.entries({
     },
 ]);
 
-app.get(
+app = app.get(
     "/openapi.json",
     openAPIRouteHandler(app, {
         includeEmptyPaths: true,
