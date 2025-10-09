@@ -2,6 +2,8 @@
   "name": "ArisuTalk",
   "version": "1.0.0",
   "description": "",
+  "private": true,
+  "repository": "github:concertypin/ArisuTalk",
   "main": "index.js",
   "scripts": {
     "dev:fe": "pnpm --filter frontend dev",
@@ -9,7 +11,10 @@
     "build:fe": "pnpm --filter frontend build",
     "format:fe": "pnpm --filter frontend format",
     "serve:fe": "pnpm --filter frontend serve",
-    "dev:be": "cd backend && ./gradlew run"
+    "dev:be": "pnpm --filter backend dev",
+    "build:be": "pnpm --filter backend build",
+    "format:be": "pnpm --filter backend format",
+    "postinstall": "pnpm exec simple-git-hooks"
   },
   "keywords": [],
   "author": "",
@@ -17,5 +22,11 @@
   "packageManager": "pnpm@10.17.1",
   "engines": {
     "node": ">20"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "lint-staged": "^16.2.3",
+    "prettier": "^3.6.2",
+    "simple-git-hooks": "^2.13.1"
   }
 }

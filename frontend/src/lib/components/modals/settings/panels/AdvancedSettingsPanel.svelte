@@ -1,21 +1,48 @@
-<script>
-  import { t } from '../../../../../i18n.js';
-  import { settings } from '../../../../stores/settings';
-  import { debugLogs } from '../../../../stores/logs';
-  import { isDebugLogModalVisible, isMasterPasswordModalVisible } from '../../../../stores/ui';
-  import { clearDebugLogs } from '../../../../services/logService';
-  import { Bug, Activity, BarChart3, Trash2, Gauge, Clock, FlaskConical, AlertTriangle, Info, Link } from 'lucide-svelte';
+<script lang="ts">
+    import { t } from "../../../../../i18n.js";
+    import { settings } from "../../../../stores/settings";
+    import { debugLogs } from "../../../../stores/logs";
+    import {
+        isDebugLogModalVisible,
+        isMasterPasswordModalVisible,
+    } from "../../../../stores/ui";
+    import { clearDebugLogs } from "../../../../services/logService";
+    import {
+        Bug,
+        Activity,
+        BarChart3,
+        Trash2,
+        Gauge,
+        Clock,
+        FlaskConical,
+        AlertTriangle,
+        Info,
+        Link,
+    } from "lucide-svelte";
 
-  function handleClearLogs() {
-      if (confirm(t('debugLogs.clearAllConfirm', { defaultValue: 'Are you sure you want to clear all debug logs?' }))) {
-          clearDebugLogs();
-      }
-  }
+    function handleClearLogs() {
+        if (
+            confirm(
+                t("debugLogs.clearAllConfirm", {
+                    defaultValue:
+                        "Are you sure you want to clear all debug logs?",
+                })
+            )
+        ) {
+            clearDebugLogs();
+        }
+    }
 
-  function handleEnableDebugLogs(e) {
-      settings.update(s => ({...s, enableDebugLogs: e.target.checked}));
-  }
+    function handleEnableDebugLogs(e) {
+        settings.update((s) => ({ ...s, enableDebugLogs: e.target.checked }));
+    }
 
+    function handleExperimentalTracingToggle(event) {
+        settings.update((current) => ({
+            ...current,
+            experimentalTracingEnabled: event.target.checked,
+        }));
+    }
 </script>
 
 <div class="space-y-6">
@@ -26,32 +53,57 @@
             {t("settings.debugSettings")}
         </h4>
         <div class="space-y-6">
-            <div class="flex items-center justify-between p-4 bg-gray-600/30 rounded-lg">
+            <div
+                class="flex items-center justify-between p-4 bg-gray-600/30 rounded-lg"
+            >
                 <div class="flex-1">
                     <div class="flex items-center mb-1">
                         <Activity class="w-4 h-4 mr-2 text-blue-400" />
-                        <span class="text-sm font-medium text-white">{t("settings.enableDebugLogs")}</span>
+                        <span class="text-sm font-medium text-white"
+                            >{t("settings.enableDebugLogs")}</span
+                        >
                     </div>
-                    <p class="text-xs text-gray-400">{t("settings.debugLogsInfo")}</p>
+                    <p class="text-xs text-gray-400">
+                        {t("settings.debugLogsInfo")}
+                    </p>
                 </div>
                 <label class="relative inline-block w-12 h-6 cursor-pointer">
-                    <input type="checkbox" on:change={handleEnableDebugLogs} checked={$settings.enableDebugLogs} class="sr-only peer" />
-                    <div class="w-12 h-6 bg-gray-600 rounded-full peer-checked:bg-blue-600 transition-colors"></div>
-                    <div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div>
+                    <input
+                        type="checkbox"
+                        on:change={handleEnableDebugLogs}
+                        checked={$settings.enableDebugLogs}
+                        class="sr-only peer"
+                    />
+                    <div
+                        class="w-12 h-6 bg-gray-600 rounded-full peer-checked:bg-blue-600 transition-colors"
+                    ></div>
+                    <div
+                        class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6"
+                    ></div>
                 </label>
             </div>
 
             <div class="bg-gray-600/20 rounded-lg p-4 space-y-4">
                 <div class="flex items-center justify-between text-sm">
-                    <span class="text-gray-300">{t("settings.currentLogCount")}</span>
-                    <span class="font-mono text-blue-400">{$debugLogs.length}/1000</span>
+                    <span class="text-gray-300"
+                        >{t("settings.currentLogCount")}</span
+                    >
+                    <span class="font-mono text-blue-400"
+                        >{$debugLogs.length}/1000</span
+                    >
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <button on:click={() => isDebugLogModalVisible.set(true)} class="w-full py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
+                    <button
+                        on:click={() => isDebugLogModalVisible.set(true)}
+                        class="w-full py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2"
+                    >
                         <BarChart3 class="w-4 h-4" />
                         {t("settings.viewLogs")}
                     </button>
-                    <button on:click={handleClearLogs} class="w-full py-2 px-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
+                    <button
+                        on:click={handleClearLogs}
+                        class="w-full py-2 px-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2"
+                    >
                         <Trash2 class="w-4 h-4" />
                         {t("settings.clearLogs")}
                     </button>
@@ -80,12 +132,51 @@
             <FlaskConical class="w-5 h-5 mr-3 text-blue-400" />
             {t("settings.experimentalFeatures")}
         </h4>
-        <div class="bg-orange-900/20 border border-orange-500/30 rounded-lg p-4">
+        <div
+            class="flex items-start justify-between p-4 mb-4 bg-gray-600/30 rounded-lg"
+        >
+            <div class="pr-4 space-y-1">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm font-medium text-white">
+                        {t("settings.experimentalTracingToggle")}
+                    </span>
+                </div>
+                <p class="text-xs text-gray-400">
+                    {t("settings.experimentalTracingDescription")}
+                </p>
+            </div>
+            <label class="relative inline-block w-12 h-6 cursor-pointer">
+                <input
+                    type="checkbox"
+                    class="sr-only peer"
+                    checked={$settings.experimentalTracingEnabled}
+                    on:change={handleExperimentalTracingToggle}
+                />
+                <div
+                    class="w-12 h-6 bg-gray-600 rounded-full peer-checked:bg-blue-600 transition-colors"
+                ></div>
+                <div
+                    class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6"
+                ></div>
+            </label>
+        </div>
+        <div
+            class="bg-orange-900/20 border border-orange-500/30 rounded-lg p-4"
+        >
             <div class="flex items-start gap-2">
-                <AlertTriangle class="w-4 h-4 text-orange-400 mt-0.5 shrink-0" />
+                <AlertTriangle
+                    class="w-4 h-4 text-orange-400 mt-0.5 shrink-0"
+                />
                 <div class="text-xs text-gray-300">
-                    <p class="font-medium text-orange-400 mb-1">{t("settings.warningNote")}</p>
-                    <p>{t("settings.experimentalWarning")}</p>
+                    <p class="font-medium text-orange-400 mb-1">
+                        {t("settings.warningNote")}
+                    </p>
+                    <p class="mb-2">{t("settings.experimentalWarning")}</p>
+                    {#if !$settings.experimentalTracingEnabled}
+                        <p class="text-orange-200/80">
+                            {t("settings.experimentalTracingReminder")}
+                        </p>
+                    {/if}
                 </div>
             </div>
         </div>
@@ -99,28 +190,61 @@
         </h4>
         <div class="bg-gray-600/20 rounded-lg p-4 space-y-2">
             <div class="flex justify-between items-center">
-                <span class="text-sm text-gray-300">{t("settings.appName")}</span>
+                <span class="text-sm text-gray-300"
+                    >{t("settings.appName")}</span
+                >
                 <span class="text-sm font-mono text-blue-400">ArisuTalk</span>
             </div>
             <div class="flex justify-between items-center">
-                <span class="text-sm text-gray-300">{t("settings.uiMode")}</span>
+                <span class="text-sm text-gray-300">{t("settings.uiMode")}</span
+                >
                 <span class="text-sm font-mono text-blue-400">Desktop</span>
             </div>
             <div class="flex justify-between items-center">
-                <span class="text-sm text-gray-300">{t("settings.browser")}</span>
-                <span class="text-sm font-mono text-blue-400">{navigator.userAgent.split(' ').pop()}</span>
+                <span class="text-sm text-gray-300"
+                    >{t("settings.browser")}</span
+                >
+                <span class="text-sm font-mono text-blue-400"
+                    >{navigator.userAgent.split(" ").pop()}</span
+                >
             </div>
             <div class="flex justify-between items-center">
-                <span class="text-sm text-gray-300">{t("settings.screenResolution")}</span>
-                <span class="text-sm font-mono text-blue-400">{window.screen.width}×{window.screen.height}</span>
+                <span class="text-sm text-gray-300"
+                    >{t("settings.screenResolution")}</span
+                >
+                <span class="text-sm font-mono text-blue-400"
+                    >{window.screen.width}×{window.screen.height}</span
+                >
             </div>
             <div class="flex justify-between items-center">
-                <span class="text-sm text-gray-300">{t("settings.appVersion")}</span>
-                <a href={import.meta.env.VITE_VERSION_URL} target="_blank" rel="noopener noreferrer" class="text-sm font-mono text-blue-400 hover:underline flex items-center gap-2">
+                <span class="text-sm text-gray-300"
+                    >{t("settings.appVersion")}</span
+                >
+                <a
+                    href={import.meta.env.VITE_VERSION_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-sm font-mono text-blue-400 hover:underline flex items-center gap-2"
+                >
                     <Link class="w-4 h-4 inline-block text-blue-400" />
-                    <span class="inline-block">{import.meta.env.VITE_VERSION_CHANNEL} ({import.meta.env.VITE_VERSION_NAME})</span>
+                    <span class="inline-block"
+                        >{import.meta.env.VITE_VERSION_CHANNEL} ({import.meta
+                            .env.VITE_VERSION_NAME})</span
+                    >
                 </a>
             </div>
+            {#if import.meta.env.VITE_DEV_CONTACT}
+                <div class="pt-4 mt-4 border-t border-white/10 space-y-2">
+                    <span class="text-sm text-gray-300"
+                        >{t("settings.creatorContact")}</span
+                    >
+                    <div class="space-y-1 text-xs text-gray-400">
+                        <span>
+                            {import.meta.env.VITE_DEV_CONTACT}
+                        </span>
+                    </div>
+                </div>
+            {/if}
         </div>
     </div>
 </div>

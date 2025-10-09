@@ -16,16 +16,13 @@ dist/
 build/
 
 # IDE files
-.vscode/
+.vscode/*
 .idea/
 .qoder/*
 
 # Temporary files
 *.tmp
 *.temp
-
-# Linters
-backend/ktlint
 
 # Local files
 TODO.md
@@ -51,7 +48,8 @@ claude.md
 .env
 .env.local
 .env.*.local
-# It is used to store environment variables for frontend development(no sensitive info)
+# It is used to store environment variables for development(no sensitive info)
+!backend/.env
 !frontend/.env
 
 # lockfiles should be ignored except for the root one
