@@ -14,6 +14,16 @@ export default class InMemoryDataDBClient implements BaseDataDBClient {
     private counter = 0;
 
     constructor(env: DBEnv) {}
+    async bumpDownloadCount(id: string): Promise<void> {
+        const item = this.store.get(id);
+        if (!item) return;
+        const current = (item as any).downloadCount ?? 0;
+        const updated = {
+            ...(item as any),
+            downloadCount: current + 1,
+        } as DataType;
+        this.store.set(id, updated);
+    }
 
     private generateId(): string {
         // Simple, collision-resistant-enough id for in-memory usage
@@ -86,5 +96,9 @@ export default class InMemoryDataDBClient implements BaseDataDBClient {
      */
     async delete(id: string): Promise<void> {
         this.store.delete(id);
+    }
+    async getBlobUrl(data: string): Promise<string | null> {
+        const item = await this.get(data);
+        return item?.additionalData ?? null;
     }
 }

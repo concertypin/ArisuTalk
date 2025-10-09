@@ -4,10 +4,18 @@ import dataRoutes from "@/routes/data";
 import { Scalar } from "@scalar/hono-api-reference";
 import { openAPIRouteHandler } from "hono-openapi";
 import { cors } from "@/lib/cors";
+import { logger } from "hono/logger";
+
+await import("consola")
+    .then((i) => {
+        //use consola for logging if available
+        console = { ...i.default, ...console };
+    })
+    .catch(); // Ignore errors (e.g., production build)
 
 let app = new Hono<Bindings>();
 
-app = app.use("*", cors);
+app = app.use(logger(), cors);
 
 app = app.get("/", (c) => c.text("Oh hi"));
 

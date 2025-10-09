@@ -7,7 +7,10 @@
         editingCharacter,
         phonebookImportResult,
     } from "../../../stores/character";
-    import { settings } from "../../../stores/settings";
+    import {
+        settings,
+        experimentalTracingOptIn,
+    } from "../../../stores/settings";
     import {
         isCharacterModalVisible,
         isSNSCharacterListModalVisible,
@@ -328,6 +331,11 @@
 
         // Auto-verify phonebook access when modal mounts so button is only shown when enabled.
         (async () => {
+            if (!$experimentalTracingOptIn) {
+                phonebookAccessState.set("disabled");
+                return;
+            }
+
             if (!$auth.isSignedIn) return;
             const access = get(phonebookAccessState);
             if (access !== "unknown") return;
@@ -360,6 +368,11 @@
      * Ensures the feature flag check passes before revealing the modal.
      */
     async function openPhonebook() {
+        if (!$experimentalTracingOptIn) {
+            alert(t("phonebook.experimentalRequired"));
+            return;
+        }
+
         if (!$auth.isSignedIn) {
             alert(t("phonebook.signInRequired"));
             return;

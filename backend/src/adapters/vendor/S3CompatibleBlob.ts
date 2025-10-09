@@ -1,107 +1,102 @@
 import { DBEnv } from "@/adapters/client";
 import { BaseBlobStorageClient } from "@/adapters/StorageClientBase";
-import {
-    S3Client,
-    PutObjectCommand,
-    GetObjectCommand,
-    DeleteObjectCommand,
-} from "@aws-sdk/client-s3";
+import { AwsClient } from "aws4fetch";
 
 export default class S3BlobStorageClient implements BaseBlobStorageClient {
-    private s3: S3Client;
-    private bucket: string;
+    client: AwsClient;
+    bucket: string;
+    endpoint: string;
 
     constructor(env: DBEnv) {
         if (env.SECRET_S3_ACCESS_KEY === undefined)
             throw new Error("S3 environment variables are not properly set");
-        const bucket = env.SECRET_S3_BUCKET_NAME;
-        this.bucket = bucket;
-
+        this.bucket = env.SECRET_S3_BUCKET_NAME;
         const region = env.SECRET_S3_REGION;
-        const endpoint = env.SECRET_S3_ENDPOINT;
+        this.endpoint = env.SECRET_S3_ENDPOINT;
         const accessKeyId = env.SECRET_S3_ACCESS_KEY;
         const secretAccessKey = env.SECRET_S3_SECRET_KEY;
 
-        this.s3 = new S3Client({
-            region: region,
-            endpoint: endpoint,
-            credentials: {
-                secretAccessKey: secretAccessKey,
-                accessKeyId: accessKeyId,
-            },
+        this.client = new AwsClient({
+            accessKeyId,
+            secretAccessKey,
+            region,
+            service: "s3",
         });
     }
-
     async upload(
         buffer: ArrayBuffer | Uint8Array,
         contentType?: string
     ): Promise<string> {
-        const key = crypto.randomUUID();
-        const command = new PutObjectCommand({
-            Bucket: this.bucket,
-            Key: key,
-            Body: buffer,
-            ContentType: contentType,
+        const key = `${Date.now()}-${crypto.randomUUID()}`;
+        const url = `https://${this.bucket}.${this.endpoint}/${key}`;
+
+        // Normalize the body to a Blob so it's accepted as BodyInit in all environments/type definitions.
+        // Create a copy-backed Uint8Array to ensure the underlying buffer is an ArrayBuffer (not SharedArrayBuffer).
+        const u8 = new Uint8Array(buffer);
+        const body = new Blob([u8]);
+
+        const res = await this.client.fetch(url, {
+            method: "PUT",
+            body,
+            headers: {
+                "Content-Type": contentType || "application/octet-stream",
+            },
         });
-
-        await this.s3.send(command);
-
-        return `s3://${this.bucket}/${key}`;
-    }
-
-    async get(url: string): Promise<ArrayBuffer | null> {
-        const { bucket, key } = this.parseS3Url(url);
-        const command = new GetObjectCommand({
-            Bucket: bucket,
-            Key: key,
-        });
-
-        try {
-            const response = await this.s3.send(command);
-            const stream = response.Body;
-            if (!stream) return null;
-            const chunks: Uint8Array[] = [];
-            for await (const chunk of stream) {
-                chunks.push(chunk);
-            }
-            const totalLength = chunks.reduce((sum, c) => sum + c.length, 0);
-            const merged = new Uint8Array(totalLength);
-            let offset = 0;
-            for (const chunk of chunks) {
-                merged.set(chunk, offset);
-                offset += chunk.length;
-            }
-            return merged.buffer;
-        } catch (error) {
-            if (
-                typeof error === "object" &&
-                error !== null && // This godforsaken language says null is an object
-                "name" in error &&
-                error.name === "NoSuchKey"
-            ) {
-                return null;
-            }
-            throw error;
+        if (!res.ok) {
+            throw new Error(
+                `Failed to upload to S3: ${res.status} ${res.statusText}`
+            );
         }
+        return key; // Return only the key as the storage identifier
     }
-
+    async get(url: string): Promise<string | null> {
+        const objectUrl = `https://${this.bucket}.${this.endpoint}/${url}`;
+        //Check for existence
+        const res = await this.client.fetch(objectUrl, {
+            method: "HEAD",
+        });
+        if (res.status === 404) {
+            return null; // Not found
+        }
+        if (!res.ok) {
+            throw new Error(
+                `Failed to get from S3: ${res.status} ${res.statusText}`
+            );
+        }
+        // Return a presigned URL valid for 6 minutes
+        return this.generatePresignedUrl(
+            `${this.bucket}.${this.endpoint}/${url}`
+        );
+    }
     async delete(url: string): Promise<void> {
-        const { bucket, key } = this.parseS3Url(url);
-        const command = new DeleteObjectCommand({
-            Bucket: bucket,
-            Key: key,
+        const objectUrl = `https://${this.bucket}.${this.endpoint}/${url}`;
+        const res = await this.client.fetch(objectUrl, {
+            method: "DELETE",
         });
-
-        await this.s3.send(command);
+        if (!res.ok) {
+            throw new Error(
+                `Failed to delete from S3: ${res.status} ${res.statusText}`
+            );
+        }
     }
 
-    private parseS3Url(url: string): { bucket: string; key: string } {
-        const urlObject = new URL(url);
-        if (urlObject.protocol !== "s3:") {
-            throw new Error("Invalid S3 URL");
-        }
-        const bucket = urlObject.hostname;
-        const key = urlObject.pathname.substring(1);
-        return { bucket, key };
+    /**
+     * @param url - object URL in the bucket
+     * @param ttl - time to live in seconds, default is 360 seconds (6 minutes)
+     * @return presigned URL valid for `ttl` seconds. Fetch this URL to get the object.
+     */
+    private async generatePresignedUrl(url: string, ttl = 360) {
+        const signed = await this.client.sign(
+            new Request(`https://${url}?X-Amz-Expires=${ttl}`, {
+                method: "GET",
+            }),
+            {
+                aws: { signQuery: true },
+                headers: {
+                    "If-Unmodified-Since": "Tue, 28 Sep 2021 16:00:00 GMT",
+                },
+            }
+        );
+        return signed.url;
     }
 }

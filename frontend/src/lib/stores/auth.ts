@@ -1,6 +1,11 @@
 import { get, writable, type Readable } from "svelte/store";
 import { Clerk } from "@clerk/clerk-js";
-import { phonebookAccessState } from "./ui";
+import {
+    phonebookAccessState,
+    isPhonebookModalVisible,
+    type PhonebookAccessState,
+} from "./ui";
+import { settings } from "./settings";
 
 export type ClerkInstance = InstanceType<typeof Clerk>;
 type ClerkUser = ClerkInstance["user"];
@@ -30,6 +35,83 @@ let lastKnownUserId: string | null = null;
 let initializePromise: Promise<void> | null = null;
 let hasInitialized = false;
 let removeListener: (() => void) | null = null;
+let experimentalOptIn = false;
+let hasOptInInitialized = false;
+
+const computeExperimentalOptIn = (): boolean => {
+    const current = get(settings) as { experimentalTracingEnabled?: boolean };
+    return Boolean(current?.experimentalTracingEnabled);
+};
+
+const teardownClerkListener = (): void => {
+    removeListener?.();
+    removeListener = null;
+};
+
+const markAuthDisabled = (
+    phonebookState: PhonebookAccessState = "unknown"
+): void => {
+    authState.set({
+        status: "disabled",
+        clerk: null,
+        user: null,
+        isSignedIn: false,
+        error: null,
+    });
+    phonebookAccessState.set(phonebookState);
+};
+
+const performSignOutIfNeeded = async (): Promise<void> => {
+    const snapshot = get(authState);
+    if (snapshot.status === "ready" && snapshot.clerk) {
+        try {
+            await snapshot.clerk.signOut();
+        } catch (error) {
+            console.error(
+                "Failed to sign out during experimental opt-out",
+                error
+            );
+        }
+    }
+};
+
+const cleanupAuthForOptOut = async (): Promise<void> => {
+    const pending = initializePromise;
+    if (pending) {
+        try {
+            // Wait for pending initialization, but timeout after 5 seconds
+            await Promise.race([
+                pending,
+                new Promise((_, reject) =>
+                    setTimeout(
+                        () =>
+                            reject(
+                                new Error(
+                                    "Auth initialization timeout during opt-out cleanup"
+                                )
+                            ),
+                        5000
+                    )
+                ),
+            ]);
+        } catch (error) {
+            console.error(
+                "Auth initialization failed before opt-out cleanup",
+                error
+            );
+        }
+    }
+
+    teardownClerkListener();
+    await performSignOutIfNeeded();
+
+    hasInitialized = false;
+    initializePromise = null;
+    lastKnownUserId = null;
+
+    markAuthDisabled("disabled");
+    isPhonebookModalVisible.set(false);
+};
 
 const updatePhonebookAccessState = (userId: string | null): void => {
     if (lastKnownUserId === userId) {
@@ -61,7 +143,12 @@ const syncFromClerk = (clerk: ClerkInstance): void => {
 /**
  * Initialize the Clerk authentication client and keep the Svelte store in sync.
  */
-export const initializeAuth = async (): Promise<void> => {
+export async function initializeAuth(): Promise<void> {
+    if (!experimentalOptIn) {
+        await cleanupAuthForOptOut();
+        return;
+    }
+
     if (hasInitialized) {
         return;
     }
@@ -71,30 +158,16 @@ export const initializeAuth = async (): Promise<void> => {
         return;
     }
 
-    const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-
     if (typeof window === "undefined") {
-        authState.set({
-            status: "disabled",
-            clerk: null,
-            user: null,
-            isSignedIn: false,
-            error: null,
-        });
-        updatePhonebookAccessState(null);
+        markAuthDisabled("disabled");
         hasInitialized = true;
         return;
     }
 
+    const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
     if (!publishableKey) {
-        authState.set({
-            status: "disabled",
-            clerk: null,
-            user: null,
-            isSignedIn: false,
-            error: null,
-        });
-        updatePhonebookAccessState(null);
+        markAuthDisabled("disabled");
         hasInitialized = true;
         return;
     }
@@ -106,14 +179,14 @@ export const initializeAuth = async (): Promise<void> => {
         isSignedIn: false,
         error: null,
     });
-    updatePhonebookAccessState(null);
+    phonebookAccessState.set("unknown");
 
     initializePromise = (async () => {
         const clerkClient = new Clerk(publishableKey);
         await clerkClient.load();
         syncFromClerk(clerkClient);
 
-        removeListener?.();
+        teardownClerkListener();
         removeListener = clerkClient.addListener(({ user }) => {
             authState.update((current) => ({
                 ...current,
@@ -141,7 +214,7 @@ export const initializeAuth = async (): Promise<void> => {
                 isSignedIn: false,
                 error,
             });
-            updatePhonebookAccessState(null);
+            phonebookAccessState.set("disabled");
             hasInitialized = false;
             throw error;
         })
@@ -150,7 +223,38 @@ export const initializeAuth = async (): Promise<void> => {
         });
 
     await initializePromise;
-};
+}
+
+settings.subscribe((value) => {
+    const next = Boolean(value?.experimentalTracingEnabled);
+    const previous = experimentalOptIn;
+
+    if (!hasOptInInitialized) {
+        hasOptInInitialized = true;
+        experimentalOptIn = next;
+
+        if (next) {
+            void initializeAuth();
+        } else {
+            void cleanupAuthForOptOut();
+        }
+        return;
+    }
+
+    if (next === previous) {
+        return;
+    }
+
+    experimentalOptIn = next;
+
+    if (!next) {
+        void cleanupAuthForOptOut();
+        return;
+    }
+
+    hasInitialized = false;
+    void initializeAuth();
+});
 
 /**
  * Return the latest authentication state snapshot.

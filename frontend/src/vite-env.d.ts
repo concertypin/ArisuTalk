@@ -13,6 +13,8 @@ interface ImportMetaEnv {
     readonly VITE_PHONEBOOK_BASE_URL: string;
 
     readonly VITE_FIREBASE_AUTH: string;
+
+    readonly VITE_DEV_CONTACT?: string;
 }
 
 interface ImportMeta {

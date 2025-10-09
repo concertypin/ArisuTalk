@@ -70,7 +70,9 @@ export const PartialDataSchema = z.object({
      */
     additionalData: z
         .url()
-        .describe("URL to the additional data blob. It may be encrypted."),
+        .describe(
+            "URL to the additional data blob. Its content may be encrypted. It might not be publicly accessible, use dedicated endpoint to access it."
+        ),
     /**
      * @property Number of times the content has been downloaded.
      * It is not guaranteed to be accurate, as it is not transactionally updated.

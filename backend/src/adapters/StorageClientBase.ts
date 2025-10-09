@@ -21,9 +21,9 @@ export interface BaseBlobStorageClient {
     /**
      * Retrieve a blob by its storage identifier.
      * @param url - The storage identifier returned by upload.
-     * @returns A promise resolving to the binary data or null if not found.
+     * @returns A promise resolving to the blob data URL or null if not found.
      */
-    get(url: string): Promise<ArrayBuffer | null>;
+    get(url: string): Promise<string | null>;
 
     /**
      * Delete a blob by its storage identifier.
@@ -32,7 +32,6 @@ export interface BaseBlobStorageClient {
      */
     delete(url: string): Promise<void>;
 }
-
 /**
  * Client interface for data (domain objects) database operations.
  *
@@ -72,6 +71,13 @@ export interface BaseDataDBClient {
      * @param id - Data id to delete.
      */
     delete(id: string): Promise<void>;
+
+    /**
+     * Get the blob URL associated with a data item.
+     * @param data - The id of the data item.
+     * @returns The blob URL or null if not found.
+     */
+    bumpDownloadCount(id: string): Promise<void>;
 }
 
 /**

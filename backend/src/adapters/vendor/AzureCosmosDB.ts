@@ -31,6 +31,20 @@ export default class AzureCosmosDB implements BaseDataDBClient {
         this.containerName = env.SECRET_AZURE_COSMOSDB_CONTAINER_NAME;
         this.container = this.database.container(this.containerName);
     }
+
+    async bumpDownloadCount(id: string): Promise<void> {
+        const itemRef = this.container.item(id);
+        const readRes = await itemRef.read<DataType>();
+        const existing = readRes.resource;
+        if (!existing) return;
+
+        const updated: DataType = {
+            ...existing,
+            downloadCount: (existing.downloadCount ?? 0) + 1,
+        };
+        await itemRef.replace<DataType>(updated);
+    }
+
     async get(id: string): Promise<DataType | null> {
         const doc = await this.container.item(id).read<DataType>();
         return doc.resource ?? null;
@@ -83,5 +97,9 @@ export default class AzureCosmosDB implements BaseDataDBClient {
     }
     async delete(id: string): Promise<void> {
         await this.container.item(id).delete();
+    }
+    async getBlobUrl(data: string): Promise<string | null> {
+        const item = await this.get(data);
+        return item?.additionalData ?? null;
     }
 }

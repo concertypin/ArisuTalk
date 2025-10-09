@@ -10,6 +10,7 @@
         phonebookAccessState,
         type PhonebookAccessState,
     } from "../../../stores/ui";
+    import { experimentalTracingOptIn } from "../../../stores/settings";
     import type { PhonebookEntrySummary } from "../../../services/phonebookService";
     import { logUserFlowEvent } from "../../../analytics/userFlow";
     import {
@@ -32,6 +33,15 @@
 
     let authState: AuthState = defaultAuthState;
     let currentPhonebookAccess: PhonebookAccessState = "unknown";
+    let isTracingEnabled = false;
+    let entries: PhonebookEntrySummary[] = [];
+    let errorMessage = "";
+    let isInitializing = false;
+    let hasInitialized = false;
+    let busyEntryId: string | null = null;
+    let serviceModule:
+        | typeof import("../../../services/phonebookService")
+        | null = null;
 
     const unsubscribeAuth = auth.subscribe((value) => {
         authState = value ?? defaultAuthState;
@@ -41,19 +51,22 @@
         currentPhonebookAccess = value;
     });
 
+    const unsubscribeTracing = experimentalTracingOptIn.subscribe((value) => {
+        isTracingEnabled = value;
+        if (!value) {
+            entries = [];
+            errorMessage = t("phonebook.experimentalRequired");
+            hasInitialized = true;
+            isInitializing = false;
+            busyEntryId = null;
+        }
+    });
+
     onDestroy(() => {
         unsubscribeAuth();
         unsubscribePhonebook();
+        unsubscribeTracing();
     });
-
-    let entries: PhonebookEntrySummary[] = [];
-    let errorMessage = "";
-    let isInitializing = false;
-    let hasInitialized = false;
-    let busyEntryId: string | null = null;
-    let serviceModule:
-        | typeof import("../../../services/phonebookService")
-        | null = null;
 
     const resetState = (): void => {
         entries = [];
@@ -83,6 +96,15 @@
         }
         isInitializing = true;
         errorMessage = "";
+        if (!isTracingEnabled) {
+            errorMessage = t("phonebook.experimentalRequired");
+            void logUserFlowEvent("phonebook_access_blocked", {
+                reason: "disabled",
+            });
+            hasInitialized = true;
+            isInitializing = false;
+            return;
+        }
         try {
             const state = authState;
             void logUserFlowEvent("phonebook_opened", {
@@ -253,8 +275,9 @@
                         <ShieldAlert class="w-10 h-10 text-amber-400" />
                         <p class="text-sm text-gray-300">{errorMessage}</p>
                         <button
-                            class="mt-4 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm"
+                            class="mt-4 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm disabled:opacity-60 disabled:cursor-not-allowed"
                             on:click={handleRetry}
+                            disabled={!isTracingEnabled}
                         >
                             {t("phonebook.retry")}
                         </button>

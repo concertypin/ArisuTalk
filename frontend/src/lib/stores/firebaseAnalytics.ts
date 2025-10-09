@@ -10,6 +10,7 @@ import {
     type FirebaseAnalyticsContext,
 } from "../services/firebaseAnalytics";
 import { addLog } from "../services/logService";
+import { settings } from "./settings";
 
 export type FirebaseAnalyticsStatus =
     | "idle"
@@ -32,6 +33,32 @@ const initialState: FirebaseAnalyticsState = {
 };
 
 const state = writable<FirebaseAnalyticsState>(initialState);
+let analyticsOptIn = false;
+
+// Subscribe to settings and initialize analyticsOptIn after the first value is emitted
+settings.subscribe((value) => {
+    const isTracingEnabled = Boolean(value?.experimentalTracingEnabled);
+
+    // Initialize analyticsOptIn on first run
+    if (analyticsOptIn === false && isTracingEnabled === true) {
+        analyticsOptIn = isTracingEnabled;
+        void loadFirebaseAnalytics();
+        return;
+    }
+
+    if (isTracingEnabled === analyticsOptIn) {
+        return;
+    }
+
+    analyticsOptIn = isTracingEnabled;
+
+    if (!isTracingEnabled) {
+        state.set({ ...initialState });
+        return;
+    }
+
+    void loadFirebaseAnalytics();
+});
 
 /**
  * Read-only store exposing the Firebase analytics state for the app.
@@ -62,6 +89,11 @@ export const experimentAssignments = derived(
  * @returns {Promise<void>} Resolves when initialization is completed.
  */
 export async function loadFirebaseAnalytics(): Promise<void> {
+    if (!analyticsOptIn) {
+        state.set({ ...initialState });
+        return;
+    }
+
     state.update((current) => ({
         ...current,
         status: "initializing",
@@ -115,6 +147,11 @@ export async function loadFirebaseAnalytics(): Promise<void> {
  * @returns {Promise<ExperimentAssignments>} Latest assignments map.
  */
 export async function refreshExperimentAssignments(): Promise<ExperimentAssignments> {
+    if (!analyticsOptIn) {
+        state.set({ ...initialState });
+        return {};
+    }
+
     const assignments = await fetchExperimentAssignments();
     state.update((current) => ({ ...current, assignments }));
     return assignments;
@@ -142,6 +179,10 @@ export async function trackEvent(
     eventName: string,
     payload: AnalyticsEventPayload = {}
 ): Promise<void> {
+    if (!analyticsOptIn) {
+        return;
+    }
+
     const assignments = get(state).assignments;
     const experimentPayload: AnalyticsEventPayload = Object.fromEntries(
         Object.entries(assignments).map(([key, value]) => [`exp_${key}`, value])
@@ -157,6 +198,10 @@ export async function trackEvent(
  * @returns {Promise<string | null>} Latest variant value.
  */
 export async function fetchAssignment(key: string): Promise<string | null> {
+    if (!analyticsOptIn) {
+        return null;
+    }
+
     const variant = await getExperimentVariant(key);
 
     if (variant !== null) {

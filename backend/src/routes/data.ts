@@ -5,7 +5,7 @@ import { describeRoute, resolver, validator } from "hono-openapi";
 import { createAuthedHonoRouter } from "@/lib/auth";
 import { DataListOrder } from "@/adapters/StorageClientBase";
 
-let router = createAuthedHonoRouter("user");
+let router = createAuthedHonoRouter("known");
 // Schemas
 const IdParamSchema = z.object({ id: z.string().min(1) });
 
@@ -204,14 +204,23 @@ router.patch(
         const existing = await db.get(id);
         if (!existing) return c.json({ error: "not found" }, 404);
 
+        // Validate stored item before authorization check
+        const stored = DataSchema.parse(existing);
+
+        // Only the author may modify the item
+        const user = c.get("user");
+        if (user.authUid !== stored.author && user.role !== "admin") {
+            return c.text("Forbidden", 403);
+        }
+
         const updated: DataType = {
-            id: existing.id,
-            author: existing.author,
-            name: body.name ?? existing.name,
-            description: body.description ?? existing.description,
-            additionalData: body.additionalData ?? existing.additionalData,
-            encrypted: body.encrypted ?? existing.encrypted,
-            downloadCount: body.downloadCount ?? existing.downloadCount,
+            id: stored.id,
+            author: stored.author,
+            name: body.name ?? stored.name,
+            description: body.description ?? stored.description,
+            additionalData: body.additionalData ?? stored.additionalData,
+            encrypted: body.encrypted ?? stored.encrypted,
+            downloadCount: body.downloadCount ?? stored.downloadCount,
             uploadedAt: Date.now(),
         };
 
@@ -234,10 +243,15 @@ router = router.delete(
             404: { description: "Data item not found" },
             403: { description: "Forbidden" },
         },
-        security: [{ ClerkUser: [] }],
+        security: [{ ClerkAdmin: [] }],
     }),
     validator("param", IdParamSchema),
     async (c) => {
+        // Only admin can delete
+        const user = c.get("user");
+        if (user.role !== "admin") {
+            return c.text("Forbidden", 403);
+        }
         const id = c.req.param("id");
         const idOk = IdParamSchema.safeParse({ id });
         if (!idOk.success) return c.json({ error: "invalid id" }, 400);
@@ -271,7 +285,7 @@ router = router.post(
     describeRoute({
         summary: "Upload a blob for a Data item",
         description:
-            "Uploads a binary blob and associates it with the Data item.",
+            "Uploads a binary blob and associates it with the Data item. It can be used to overwrite existing blobs.",
         tags: ["Blob"],
         responses: {
             200: {
@@ -322,4 +336,56 @@ router = router.post(
     }
 );
 
+router = router.get(
+    "/data/:id/blob",
+    describeRoute({
+        summary: "Get the blob URL for a Data item",
+        description:
+            "Retrieves the blob URL associated with the Data item. Increases download count if applicable.",
+        tags: ["Blob"],
+        responses: {
+            307: {
+                description: "Redirect to the blob URL.",
+            },
+            400: { description: "Invalid ID" },
+            404: { description: "ID found, but Blob not found" },
+        },
+        security: [{ ClerkUser: [] }],
+        parameters: [
+            {
+                name: "id",
+                in: "path",
+                description: "The ID of the Data item",
+                required: true,
+                schema: { type: "string" },
+            },
+        ],
+    }),
+    validator("param", IdParamSchema),
+    async (c) => {
+        const id = c.req.param("id");
+        const idOk = IdParamSchema.safeParse({ id });
+        if (!idOk.success) return c.json({ error: "invalid id" }, 400);
+
+        const db = await DataDBClient(c.env);
+        const storage = await BlobClient(c.env);
+
+        const existing = await db.get(id);
+        if (!existing) return c.json({ error: "not found" }, 404);
+
+        const validated = DataSchema.parse(existing);
+
+        if (!validated.additionalData) {
+            return c.json({ error: "blob not found" }, 404);
+        }
+        const url = await storage.get(validated.additionalData);
+        if (!url) {
+            return c.json({ error: "blob not found" }, 404);
+        }
+
+        await db.bumpDownloadCount(id);
+
+        return c.redirect(url, 307);
+    }
+);
 export default router;

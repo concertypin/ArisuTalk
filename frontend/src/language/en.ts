@@ -17,7 +17,9 @@ export const en = {
         signIn: "Sign in",
         signOut: "Sign out",
         signedInAs: "Signed in as {{name}}",
-        authUnavailable: "Auth disabled",
+        authUnavailable: "Authentication is currently disabled.",
+        experimentalOptInRequired:
+            "Enable Experimental Tracing in Advanced Settings to sign in and use phonebook features.",
         retry: "Retry",
         loading: "Loading...",
         account: "Account",
@@ -63,6 +65,8 @@ export const en = {
         title: "Community Phonebook",
         description: "Browse characters shared by other creators.",
         signInRequired: "Sign in to access the phonebook.",
+        experimentalRequired:
+            "Experimental Tracing must be enabled in settings to open the phonebook.",
         checkFailed: "Unable to verify phonebook access.",
         fetchFailed: "Failed to load phonebook data.",
         loading: "Loading phonebook entries...",
@@ -288,6 +292,11 @@ export const en = {
         experimentalFeatures: "Experimental Features",
         experimentalWarning:
             "Experimental features may be unstable and cause unexpected behavior.",
+        experimentalTracingToggle: "Register as Tester",
+        experimentalTracingDescription:
+            "Register as a tester for ArisuTalk. Experimental features may be prioritized for you.",
+        experimentalTracingReminder:
+            "Anonymous behavior tracking will be enabled when registering as a tester. No content such as prompts and logs will be collected, only the flow of behavior will be collected. If you have any questions regarding personal information, please contact the developer.",
         warningNote: "Warning",
         experimentalComingSoon:
             "Experimental features will be added in future updates.",
@@ -296,6 +305,7 @@ export const en = {
         uiMode: "UI Mode",
         browser: "Browser",
         screenResolution: "Screen Resolution",
+        creatorContact: "Creator Contact",
         providerSettings: "Configuration",
         promptManagement: "Prompt Management",
         promptInfo: "You can configure AI behavior and response style.",

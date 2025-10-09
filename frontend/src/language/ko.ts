@@ -17,7 +17,9 @@ export const ko = {
         signIn: "로그인",
         signOut: "로그아웃",
         signedInAs: "{{name}}님으로 로그인됨",
-        authUnavailable: "인증이 비활성화되었습니다",
+        authUnavailable: "현재 인증 기능이 비활성화되어 있습니다.",
+        experimentalOptInRequired:
+            "고급 설정에서 실험적 추적을 활성화해야 로그인 및 전화번호부 기능을 사용할 수 있습니다.",
         retry: "다시 시도",
         loading: "로딩 중...",
         account: "계정",
@@ -62,6 +64,8 @@ export const ko = {
         title: "커뮤니티 전화번호부",
         description: "다른 제작자가 공유한 캐릭터를 둘러보세요.",
         signInRequired: "전화번호부를 사용하려면 로그인하세요.",
+        experimentalRequired:
+            "설정에서 실험적 추적을 켜야 전화번호부를 사용할 수 있습니다.",
         checkFailed: "전화번호부 접근을 확인하지 못했습니다.",
         fetchFailed: "전화번호부 데이터를 불러오지 못했습니다.",
         loading: "전화번호부 항목을 불러오는 중...",
@@ -284,7 +288,12 @@ export const ko = {
             "성능 최적화 옵션은 향후 업데이트에서 지원될 예정입니다.",
         experimentalFeatures: "실험적 기능",
         experimentalWarning:
-            "실험적 기능은 불안정할 수 있으며, 예상치 못한 동작을 할 수 있습니다.",
+            "실험적 기능은 불안정할 수 있으며 작동에 영향을 줄 수 있습니다.",
+        experimentalTracingToggle: "테스터로 등록",
+        experimentalTracingDescription:
+            "ArisuTalk의 테스터 대기열에 등록합니다. 실험적 기능이 우선적으로 제공될 수 있습니다.",
+        experimentalTracingReminder:
+            "테스터로 등록할 경우 익명화된 행동 추적이 활성화됩니다. 프롬프트와 로그 등의 내용을 수집하지 않으며 행동의 흐름만을 수집합니다. 개인정보 관련 문의가 있다면 개발자에게 연락주세요.",
         warningNote: "주의사항",
         experimentalComingSoon:
             "실험적 기능은 향후 업데이트에서 추가될 예정입니다.",
@@ -293,6 +302,7 @@ export const ko = {
         uiMode: "UI 모드",
         browser: "브라우저",
         screenResolution: "화면 해상도",
+        creatorContact: "제작자 연락처",
         providerSettings: "구성",
         promptManagement: "프롬프트 관리",
         promptInfo: "AI의 행동 방식과 응답 스타일을 설정할 수 있습니다.",

@@ -8,58 +8,57 @@ import { BaseBlobStorageClient } from "@/adapters/StorageClientBase";
 export default class InMemoryBlob implements BaseBlobStorageClient {
     private static store = new Map<
         string,
-        { data: ArrayBuffer; contentType?: string; createdAt: number }
+        { data: Uint8Array; contentType?: string }
     >();
-    private static counter = 0;
 
-    constructor(env: DBEnv) {}
+    constructor(_env?: DBEnv) {
+        // In-memory client doesn't need env, but keep signature compatible.
+    }
 
-    /**
-     * Uploads a buffer and returns a generated in-memory URL.
-     * A copy of the provided data is stored to avoid external mutation.
-     */
+    private static idFromUrl(url: string): string | null {
+        const prefix = "inmemory://";
+        return url.startsWith(prefix) ? url.slice(prefix.length) : null;
+    }
+
+    private static uint8ToBase64(bytes: Uint8Array): string {
+        // Convert in chunks to avoid stack/range issues for large arrays
+        const chunkSize = 0x8000;
+        const chunks: string[] = [];
+        for (let i = 0; i < bytes.length; i += chunkSize) {
+            chunks.push(
+                String.fromCharCode(...bytes.subarray(i, i + chunkSize))
+            );
+        }
+        return btoa(chunks.join(""));
+    }
+
     async upload(
         buffer: ArrayBuffer | Uint8Array,
         contentType?: string
     ): Promise<string> {
-        // Normalize to a Uint8Array view
-        const view =
-            buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
-        // Copy the data to a new ArrayBuffer
-        const copy = new Uint8Array(view.length);
-        copy.set(view);
-        const ab = copy.buffer.slice(0); // ensure independent ArrayBuffer
-
-        const id = `${Date.now().toString(36)}-${(++InMemoryBlob.counter).toString(36)}`;
-        const url = `inmemory://${id}`;
-
-        InMemoryBlob.store.set(url, {
-            data: ab,
+        const bytes =
+            buffer instanceof ArrayBuffer ? new Uint8Array(buffer) : buffer;
+        const id = `${Date.now()}-${crypto.randomUUID()}`;
+        InMemoryBlob.store.set(id, {
+            data: new Uint8Array(bytes),
             contentType,
-            createdAt: Date.now(),
         });
-
-        return url;
+        return `inmemory://${id}`;
     }
 
-    /**
-     * Retrieves the ArrayBuffer for the given in-memory URL, or null if not found.
-     * Returns a copy of the stored buffer.
-     */
-    async get(url: string): Promise<ArrayBuffer | null> {
-        const record = InMemoryBlob.store.get(url);
-        if (!record) return null;
-        // Return a copy to avoid external mutation
-        const view = new Uint8Array(record.data);
-        const copy = new Uint8Array(view.length);
-        copy.set(view);
-        return copy.buffer;
+    async get(url: string): Promise<string | null> {
+        const id = InMemoryBlob.idFromUrl(url);
+        if (!id) return null;
+        const entry = InMemoryBlob.store.get(id);
+        if (!entry) return null;
+        const base64 = InMemoryBlob.uint8ToBase64(entry.data);
+        const ct = entry.contentType ?? "application/octet-stream";
+        return `data:${ct};base64,${base64}`;
     }
 
-    /**
-     * Deletes the stored blob for the given URL. No-op if the URL does not exist.
-     */
     async delete(url: string): Promise<void> {
-        InMemoryBlob.store.delete(url);
+        const id = InMemoryBlob.idFromUrl(url);
+        if (!id) return;
+        InMemoryBlob.store.delete(id);
     }
 }
