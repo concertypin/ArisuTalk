@@ -29,7 +29,7 @@ You can access the tokens with `pnpm run auth`.
 
 ## Environment Variables
 
-Create a `.env.local` file in the root directory and add the following environment variables.
+Create a `.env.local` file in the `backend` directory and add the following environment variables.
 On hosting platforms like Cloudflare Workers, set these variables as environment variables in your deployment settings.
 
 ```sh

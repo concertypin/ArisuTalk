@@ -85,7 +85,7 @@ export interface BaseDataDBClient {
      * @param item - Full DataType item including id to update.
      * @returns The updated data item.
      */
-    update(item: DataType): Promise<DataType>;
+    update(item: Partial<DataType> & { id: DataType["id"] }): Promise<DataType>;
 }
 
 /**

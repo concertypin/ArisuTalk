@@ -97,10 +97,15 @@ export default class InMemoryDataDBClient implements BaseDataDBClient {
     async delete(id: string): Promise<void> {
         this.store.delete(id);
     }
-    async update(item: DataType): Promise<DataType> {
+    async update(
+        item: Partial<DataType> & { id: DataType["id"] }
+    ): Promise<DataType> {
         if (!item?.id) throw new Error("Missing id for update");
         if (!this.store.has(item.id)) throw new Error("Item not found");
-        this.store.set(item.id, item);
-        return item;
+        this.store.set(item.id, {
+            ...(this.store.get(item.id) as any),
+            ...item,
+        });
+        return item as DataType;
     }
 }

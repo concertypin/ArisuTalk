@@ -336,7 +336,10 @@ router = router.post(
 
         existing.additionalData = url;
         const validated = DataSchema.parse(existing);
-        await db.put(validated);
+        await db.update({
+            id: validated.id,
+            additionalData: validated.additionalData,
+        });
 
         return c.json({ url });
     }

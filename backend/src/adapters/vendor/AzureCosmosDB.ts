@@ -100,11 +100,19 @@ export default class AzureCosmosDB implements BaseDataDBClient {
         if (req.resource) return req.resource;
         throw new Error("Failed to create item in Cosmos DB");
     }
-    async update(item: DataType): Promise<DataType> {
+    async update(
+        item: Partial<DataType> & { id: DataType["id"] }
+    ): Promise<DataType> {
         // Replace the existing item with the provided one
         const id = item.id;
         const itemRef = this.container.item(id);
-        const resp = await itemRef.replace<DataType>(item);
+        const resp = await itemRef.patch<DataType>({
+            operations: Object.entries(item).map(([key, value]) => ({
+                op: "set",
+                path: `/${key}`,
+                value,
+            })),
+        });
         if (resp.resource) return resp.resource;
         throw new Error("Failed to update item in Cosmos DB");
     }
