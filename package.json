@@ -11,7 +11,7 @@
     "build:fe": "pnpm --filter frontend run build",
     "format:fe": "pnpm --filter frontend run format",
     "serve:fe": "pnpm --filter frontend run serve",
-    "dev:be": "pnpm --filter backend run run dev",
+    "dev:be": "pnpm --filter backend run dev",
     "build:be": "pnpm --filter backend run build",
     "format:be": "pnpm --filter backend run format",
     "deploy:be": "pnpm --filter backend run deploy",
