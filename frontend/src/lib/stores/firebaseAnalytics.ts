@@ -34,21 +34,24 @@ const initialState: FirebaseAnalyticsState = {
 
 const state = writable<FirebaseAnalyticsState>(initialState);
 let analyticsOptIn = false;
+let isAnalyticsOptInInitialized = false;
 
 // Subscribe to settings and initialize analyticsOptIn after the first value is emitted
 settings.subscribe((value) => {
     const isTracingEnabled = Boolean(value?.experimentalTracingEnabled);
 
-    // Initialize analyticsOptIn on first run
-    if (analyticsOptIn === false && isTracingEnabled === true) {
+    // Initialize analyticsOptIn on first run with an explicit flag so the
+    // initial `false` value is not ambiguous.
+    if (!isAnalyticsOptInInitialized) {
+        isAnalyticsOptInInitialized = true;
         analyticsOptIn = isTracingEnabled;
-        void loadFirebaseAnalytics();
+        if (isTracingEnabled) {
+            void loadFirebaseAnalytics();
+        }
         return;
     }
 
-    if (isTracingEnabled === analyticsOptIn) {
-        return;
-    }
+    if (isTracingEnabled === analyticsOptIn) return;
 
     analyticsOptIn = isTracingEnabled;
 

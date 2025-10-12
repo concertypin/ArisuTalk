@@ -225,7 +225,13 @@ router.patch(
         };
 
         const validated = DataSchema.parse(updated);
-        await db.put(validated);
+        // Use update() for existing records to avoid creating duplicates
+        if (typeof (db as any).update === "function") {
+            await (db as any).update(validated);
+        } else {
+            // Fallback: if implementation lacks update(), use put()
+            await db.put(validated as any);
+        }
         return c.json(validated);
     }
 );
@@ -269,7 +275,11 @@ router = router.delete(
             try {
                 await storage.delete(validated.additionalData);
             } catch (e) {
-                // ignore storage delete errors for now
+                // Log deletion failure to help troubleshoot orphaned blobs
+                console.error(
+                    `Failed to delete blob ${validated.additionalData} for data item ${id}:`,
+                    e
+                );
             }
         }
 

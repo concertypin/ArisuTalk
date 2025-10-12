@@ -37,6 +37,7 @@ let hasInitialized = false;
 let removeListener: (() => void) | null = null;
 let experimentalOptIn = false;
 let hasOptInInitialized = false;
+const AUTH_INIT_TIMEOUT_MS = 5000;
 
 const computeExperimentalOptIn = (): boolean => {
     const current = get(settings) as { experimentalTracingEnabled?: boolean };
@@ -90,7 +91,7 @@ const cleanupAuthForOptOut = async (): Promise<void> => {
                                     "Auth initialization timeout during opt-out cleanup"
                                 )
                             ),
-                        5000
+                        AUTH_INIT_TIMEOUT_MS
                     )
                 ),
             ]);

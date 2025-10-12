@@ -36,7 +36,9 @@ export default class AzureCosmosDB implements BaseDataDBClient {
         // Use Cosmos DB patch operation to increment atomically when available
         try {
             // Partial patch: increment downloadCount by 1
-            await this.container.item(id).patch([{ op: "incr", path: "/downloadCount", value: 1 }]);
+            await this.container
+                .item(id)
+                .patch([{ op: "incr", path: "/downloadCount", value: 1 }]);
             return;
         } catch (e) {
             // Fallback to read/replace if patch is not supported in the environment
@@ -62,8 +64,7 @@ export default class AzureCosmosDB implements BaseDataDBClient {
         //It is fuzzy search.
         const { resources } = await this.container.items
             .query<DataType>({
-                query:
-                    `SELECT * FROM c WHERE CONTAINS(LOWER(c.name), LOWER(@name))`,
+                query: `SELECT * FROM c WHERE CONTAINS(LOWER(c.name), LOWER(@name))`,
                 parameters: [
                     {
                         name: "@name",

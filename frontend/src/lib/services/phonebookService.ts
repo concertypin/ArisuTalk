@@ -271,7 +271,9 @@ async function downloadCharacterData(
     entry: PhonebookEntryDetail
 ): Promise<ImportedCharacterData> {
     if (entry.encrypted) {
-        throw new Error("Encrypted phonebook entries cannot be imported");
+        throw new Error(
+            "This character is encrypted and cannot be imported. Please contact the character creator for an unencrypted version."
+        );
     }
 
     const downloadUrl = new URL(
