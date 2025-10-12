@@ -31,7 +31,7 @@
                 t("debugLogs.clearAllConfirm", {
                     defaultValue:
                         "Are you sure you want to clear all debug logs?",
-                }),
+                })
             )
         ) {
             clearDebugLogs();
@@ -40,6 +40,13 @@
 
     function handleEnableDebugLogs(e) {
         settings.update((s) => ({ ...s, enableDebugLogs: e.target.checked }));
+    }
+
+    function handleExperimentalTracingToggle(event) {
+        settings.update((current) => ({
+            ...current,
+            experimentalTracingEnabled: event.target.checked,
+        }));
     }
 </script>
 
@@ -147,6 +154,32 @@
                 {t("settings.experimentalFeatures")}
             </h4>
             <div
+                class="flex items-start justify-between p-3 mb-3 bg-gray-700/40 rounded-lg"
+            >
+                <div class="pr-4 space-y-1">
+                    <span class="text-sm font-medium text-white block">
+                        {t("settings.experimentalTracingToggle")}
+                    </span>
+                    <p class="text-xs text-gray-400">
+                        {t("settings.experimentalTracingDescription")}
+                    </p>
+                </div>
+                <label class="relative inline-block w-10 h-5 cursor-pointer">
+                    <input
+                        type="checkbox"
+                        class="sr-only peer"
+                        checked={$settings.experimentalTracingEnabled}
+                        on:change={handleExperimentalTracingToggle}
+                    />
+                    <div
+                        class="w-10 h-5 bg-gray-600 rounded-full peer-checked:bg-blue-600"
+                    ></div>
+                    <div
+                        class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-5"
+                    ></div>
+                </label>
+            </div>
+            <div
                 class="bg-orange-900/20 border border-orange-500/30 rounded-lg p-3"
             >
                 <div class="flex items-start gap-2">
@@ -157,9 +190,14 @@
                         <p class="font-medium text-orange-300 mb-1">
                             {t("settings.warningNote")}
                         </p>
-                        <p class="text-gray-400">
+                        <p class="text-gray-400 mb-2">
                             {t("settings.experimentalWarning")}
                         </p>
+                        {#if !$settings.experimentalTracingEnabled}
+                            <p class="text-orange-200/80">
+                                {t("settings.experimentalTracingReminder")}
+                            </p>
+                        {/if}
                     </div>
                 </div>
             </div>

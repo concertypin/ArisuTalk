@@ -13,9 +13,11 @@ This file provides guidance for AI coding agents working on the frontend of this
 ## Frontend Development Guidelines
 
 ### Code Style
+
 - Follow the style of the existing codebase.
 - Maintain consistency in indentation, variable names, and function names.
 - Use the linter or formatter configured in the project to prettify your code.
+- Use Svelte 5, not Svelte 4 or 3.
 - **TypeScript Types**: Leverage TypeScript for type safety in all Svelte components (`<script lang="ts">`) and utility files (`.ts`). Use JSDoc for additional documentation where complex logic or API contracts require it.
 - Do not use the `Object` type as it does not provide enough type information.
 - Create `id` attributes for elements.
@@ -25,12 +27,14 @@ This file provides guidance for AI coding agents working on the frontend of this
 - Do not disable Git hooks unless there's a special reason.
 
 ### Internationalization
+
 - Use the `t()` function for all user-facing text.
 - Add new translation keys to both `ko.ts` and `en.ts`.
 - Use descriptive keys that indicate context.
 - Maintain consistent terminology across translations.
 
 ### Event Handling
+
 - Use Svelte's event handling mechanisms (`on:click`, custom events) for component interactions.
 - For global event listeners, ensure they are properly cleaned up in the `onDestroy` lifecycle hook to prevent memory leaks.
 

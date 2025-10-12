@@ -1,22 +1,25 @@
 <script>
-  import { ShieldAlert, Database } from 'lucide-svelte';
-  import { chatRooms, groupChats, openChats } from '../../../../stores/chat';
-  import { characters } from '../../../../stores/character';
-  import { isDataBrowserModalVisible } from '../../../../stores/ui';
+  import { ShieldAlert, Database } from "lucide-svelte";
+  import { chatRooms, groupChats, openChats } from "../../../../stores/chat";
+  import { characters } from "../../../../stores/character";
+  import { isDataBrowserModalVisible } from "../../../../stores/ui";
 
-  let localStorageStatus = 'Checking...';
-  let indexedDBStatus = 'Checking...';
+  let localStorageStatus = "Checking...";
+  let indexedDBStatus = "Checking...";
 
-  if (typeof window !== 'undefined') {
-    localStorageStatus = window.localStorage ? 'OK' : 'Unavailable';
-    indexedDBStatus = window.indexedDB ? 'OK' : 'Unavailable';
+  if (typeof window !== "undefined") {
+    localStorageStatus = window.localStorage ? "OK" : "Unavailable";
+    indexedDBStatus = window.indexedDB ? "OK" : "Unavailable";
   }
 
   $: status = {
     localStorage: localStorageStatus,
     indexedDB: indexedDBStatus,
     characterCount: $characters.length,
-    chatCount: Object.values($chatRooms).flat().length + Object.keys($groupChats).length + Object.keys($openChats).length
+    chatCount:
+      Object.values($chatRooms).flat().length +
+      Object.keys($groupChats).length +
+      Object.keys($openChats).length,
   };
 
   function openDataBrowser() {
@@ -31,11 +34,16 @@
       Debug Status
     </h4>
     <div class="space-y-4">
-      <p class="text-sm text-gray-400">This section shows the current status of application data for debugging purposes.</p>
+      <p class="text-sm text-gray-400">
+        This section shows the current status of application data for debugging
+        purposes.
+      </p>
       <div class="p-4 bg-gray-800/50 rounded-lg">
-        <pre class="text-xs text-gray-300"><code>{JSON.stringify(status, null, 2)}</code></pre>
+        <pre class="text-xs text-gray-300"><code
+            >{JSON.stringify(status, null, 2)}</code
+          ></pre>
       </div>
-      
+
       <!-- Data Browser Button -->
       <div class="pt-4 border-t border-gray-600">
         <button
