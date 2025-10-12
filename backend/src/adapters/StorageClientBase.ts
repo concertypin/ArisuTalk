@@ -73,11 +73,19 @@ export interface BaseDataDBClient {
     delete(id: string): Promise<void>;
 
     /**
-     * Get the blob URL associated with a data item.
-     * @param data - The id of the data item.
-     * @returns The blob URL or null if not found.
+     * Atomically increments the download count for a data item.
+     * @param id - The id of the data item.
      */
     bumpDownloadCount(id: string): Promise<void>;
+
+    /**
+     * Update an existing data item. Implementations should perform an update
+     * (not create) and return the updated item. This allows callers to modify
+     * only existing records without generating duplicates.
+     * @param item - Full DataType item including id to update.
+     * @returns The updated data item.
+     */
+    update(item: DataType): Promise<DataType>;
 }
 
 /**

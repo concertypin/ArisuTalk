@@ -26,7 +26,7 @@ const allowedOrigins = [
  */
 export async function cors<Ctx extends Context>(c: Ctx, next: Next) {
     return corsHono({
-        origin: allowedOrigins.map((i) => "http://" + i),
+        origin: allowedOrigins.flatMap((i) => ["http://" + i, "https://" + i]),
         credentials: true,
         allowMethods: "GET,HEAD,PUT,POST,DELETE,PATCH,OPTIONS".split(","),
     })(c, next);

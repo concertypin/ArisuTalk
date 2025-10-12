@@ -13,8 +13,8 @@ import {
 
 /**
  * Environment variables required by the database and blob storage clients.
- * It will be passed to the client constructors.
- * Sorry for confusing naming, idk how to name it better.
+ * This type is passed to vendor client constructors and contains runtime
+ * secrets/variables required to initialize the database and blob clients.
  */
 export type DBEnv = RuntimeSecret & RuntimeVariable;
 

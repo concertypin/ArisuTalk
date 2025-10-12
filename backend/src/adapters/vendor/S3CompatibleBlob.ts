@@ -92,9 +92,9 @@ export default class S3BlobStorageClient implements BaseBlobStorageClient {
             }),
             {
                 aws: { signQuery: true },
-                headers: {
-                    "If-Unmodified-Since": "Tue, 28 Sep 2021 16:00:00 GMT",
-                },
+                // Do not include conditional headers; they can cause presigned URLs
+                // to fail with 412 Precondition Failed if object was modified.
+                headers: {},
             }
         );
         return signed.url;

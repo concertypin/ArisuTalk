@@ -38,11 +38,13 @@ backup/
 backups/
 .backup/
 .backups/
-# Claude development files
+
+# AI Agent development files(except AGENTS.md)
 .claude/
 CLAUDE.MD
 CLAUDE.md
 claude.md
+.github/chatmodels
 
 # Environment variables
 .env

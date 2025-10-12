@@ -33,16 +33,24 @@ export default class AzureCosmosDB implements BaseDataDBClient {
     }
 
     async bumpDownloadCount(id: string): Promise<void> {
-        const itemRef = this.container.item(id);
-        const readRes = await itemRef.read<DataType>();
-        const existing = readRes.resource;
-        if (!existing) return;
+        // Use Cosmos DB patch operation to increment atomically when available
+        try {
+            // Partial patch: increment downloadCount by 1
+            await this.container.item(id).patch([{ op: "incr", path: "/downloadCount", value: 1 }]);
+            return;
+        } catch (e) {
+            // Fallback to read/replace if patch is not supported in the environment
+            const itemRef = this.container.item(id);
+            const readRes = await itemRef.read<DataType>();
+            const existing = readRes.resource;
+            if (!existing) return;
 
-        const updated: DataType = {
-            ...existing,
-            downloadCount: (existing.downloadCount ?? 0) + 1,
-        };
-        await itemRef.replace<DataType>(updated);
+            const updated: DataType = {
+                ...existing,
+                downloadCount: (existing.downloadCount ?? 0) + 1,
+            };
+            await itemRef.replace<DataType>(updated);
+        }
     }
 
     async get(id: string): Promise<DataType | null> {
@@ -55,8 +63,7 @@ export default class AzureCosmosDB implements BaseDataDBClient {
         const { resources } = await this.container.items
             .query<DataType>({
                 query:
-                    `SELECT * FROM ${this.containerName} ` +
-                    `WHERE CONTAINS(LOWER(c.name), LOWER(@name))`,
+                    `SELECT * FROM c WHERE CONTAINS(LOWER(c.name), LOWER(@name))`,
                 parameters: [
                     {
                         name: "@name",
@@ -69,14 +76,13 @@ export default class AzureCosmosDB implements BaseDataDBClient {
     }
 
     async list(order?: DataListOrder): Promise<DataType[]> {
-        let orderBy = `ORDER BY ${this.containerName}.`;
+        let orderBy = `ORDER BY c.`;
         if (order === DataListOrder.NewestFirst) {
             orderBy += "uploadedAt DESC";
         } else if (order === DataListOrder.DownloadsFirst) {
             orderBy = "downloadCount DESC";
         } else orderBy = "";
-
-        const query = `SELECT * FROM ${this.containerName} ${orderBy}`;
+        const query = `SELECT * FROM c ${orderBy}`;
         console.log("CosmosDB list query:", query);
 
         //(await this.client.databases.query<DataType>("").fetchAll()).resources
@@ -95,11 +101,16 @@ export default class AzureCosmosDB implements BaseDataDBClient {
         if (req.resource) return req.resource;
         throw new Error("Failed to create item in Cosmos DB");
     }
+    async update(item: DataType): Promise<DataType> {
+        // Replace the existing item with the provided one
+        const id = item.id;
+        const itemRef = this.container.item(id);
+        const resp = await itemRef.replace<DataType>(item);
+        if (resp.resource) return resp.resource;
+        throw new Error("Failed to update item in Cosmos DB");
+    }
     async delete(id: string): Promise<void> {
         await this.container.item(id).delete();
     }
-    async getBlobUrl(data: string): Promise<string | null> {
-        const item = await this.get(data);
-        return item?.additionalData ?? null;
-    }
+    // getBlobUrl removed — blob URL handling is the responsibility of the blob storage client
 }

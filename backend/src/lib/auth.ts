@@ -30,7 +30,6 @@ export function createAuthedHonoRouter(authLevel: AuthLevel = "known") {
             })(c, next);
         })
         .use("*", async (c, next) => {
-            console.log(`Auth level required: ${authLevel}`);
             const auth = getAuth(c);
             if (!auth?.userId) {
                 if (authLevel === "optional") {
@@ -57,7 +56,7 @@ export function createAuthedHonoRouter(authLevel: AuthLevel = "known") {
                 name: user.fullName || "User",
                 role: normalizedRole,
             };
-            console.log(`User role: ${userObj.role}, id: ${userObj.authUid}`);
+            // do not log user identifiers in production
             c.set("user", userObj);
 
             // Check if the user's role meets the required auth level

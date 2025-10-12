@@ -97,8 +97,10 @@ export default class InMemoryDataDBClient implements BaseDataDBClient {
     async delete(id: string): Promise<void> {
         this.store.delete(id);
     }
-    async getBlobUrl(data: string): Promise<string | null> {
-        const item = await this.get(data);
-        return item?.additionalData ?? null;
+    async update(item: DataType): Promise<DataType> {
+        if (!item?.id) throw new Error("Missing id for update");
+        if (!this.store.has(item.id)) throw new Error("Item not found");
+        this.store.set(item.id, item);
+        return item;
     }
 }
