@@ -90,12 +90,7 @@
 </script>
 
 {#if isDisabled}
-    <div class="auth-widget__disabled" aria-live="polite">
-        <span>{t("auth.authUnavailable")}</span>
-        <span class="auth-widget__hint"
-            >{t("auth.experimentalOptInRequired")}</span
-        >
-    </div>
+<!-- Invisible -->
 {:else if isReady && isSignedIn}
     <div class="auth-widget__signed-in" aria-live="polite">
         {#if displayName}
@@ -117,9 +112,7 @@
         >
             {t("auth.signIn")}
         </button>
-        {#if isLoading}
-            <span class="auth-widget__status">{t("auth.loading")}</span>
-        {:else if isError}
+        {#if isError}
             <button class="auth-widget__retry" on:click={handleRetry}
                 >{t("auth.retry")}</button
             >
