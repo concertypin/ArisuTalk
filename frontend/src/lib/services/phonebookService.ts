@@ -10,7 +10,7 @@ import {
 } from "../utils/png-utils.js";
 
 const PHONEBOOK_BASE_URL = import.meta.env.VITE_PHONEBOOK_BASE_URL;
-const PHONEBOOK_CHECK_URL = `${PHONEBOOK_BASE_URL}/`;
+const PHONEBOOK_CHECK_URL = `${PHONEBOOK_BASE_URL}/api/check`;
 export interface PhonebookEntrySummary {
     id: string;
     name: string;
