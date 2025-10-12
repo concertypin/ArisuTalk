@@ -329,11 +329,6 @@ router = router.post(
             c.req.header("content-type") ?? "application/octet-stream";
         const url = await storage.upload(ab, contentType);
 
-        // ensure url is valid
-        const urlOk = z.url().safeParse(url);
-        if (!urlOk.success)
-            return c.json({ error: "invalid blob url returned" }, 500);
-
         existing.additionalData = url;
         const validated = DataSchema.parse(existing);
         await db.update({
