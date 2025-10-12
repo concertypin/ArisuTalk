@@ -226,12 +226,8 @@ router.patch(
 
         const validated = DataSchema.parse(updated);
         // Use update() for existing records to avoid creating duplicates
-        if (typeof (db as any).update === "function") {
-            await (db as any).update(validated);
-        } else {
-            // Fallback: if implementation lacks update(), use put()
-            await db.put(validated as any);
-        }
+
+        await db.update(validated);
         return c.json(validated);
     }
 );

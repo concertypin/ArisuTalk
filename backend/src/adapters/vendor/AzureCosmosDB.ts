@@ -4,12 +4,10 @@ import { DBEnv } from "@/adapters/client";
 import { BaseDataDBClient, DataListOrder } from "@/adapters/StorageClientBase";
 
 /**
- * Lightweight in-memory implementation of BaseDataDBClient.
+ * An adapter for Azure Cosmos DB that implements the BaseDataDBClient interface.
  *
- * This adapter is intentionally simple: it stores DataType items in a Map,
- * generates ids with crypto.randomUUID (falls back to a small UUID helper),
- * and provides basic query/list semantics. Useful for local development
- * or unit tests when a real Azure Cosmos DB connection is not available.
+ * This client connects to an Azure Cosmos DB instance and provides methods
+ * for CRUD operations on data items, leveraging the Cosmos DB SQL API.
  */
 export default class AzureCosmosDB implements BaseDataDBClient {
     private client: CosmosClient;
@@ -113,5 +111,4 @@ export default class AzureCosmosDB implements BaseDataDBClient {
     async delete(id: string): Promise<void> {
         await this.container.item(id).delete();
     }
-    // getBlobUrl removed — blob URL handling is the responsibility of the blob storage client
 }

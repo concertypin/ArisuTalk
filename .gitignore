@@ -44,7 +44,7 @@ backups/
 CLAUDE.MD
 CLAUDE.md
 claude.md
-.github/chatmodels
+.github/chatmodes/
 
 # Environment variables
 .env
@@ -56,3 +56,4 @@ claude.md
 
 # lockfiles should be ignored except for the root one
 frontend/pnpm-lock.yaml
+backend/pnpm-lock.yaml
