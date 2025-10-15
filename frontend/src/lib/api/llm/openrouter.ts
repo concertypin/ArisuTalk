@@ -27,7 +27,7 @@ export class OpenRouterClient implements LLMApi {
     constructor(
         apiKey: string,
         model: string,
-        baseUrl: string | undefined = API_BASE_URL,
+        baseUrl: string | null = API_BASE_URL,
         options: LLMApiConstructorOptions = {}
     ) {
         this.apiKey = apiKey;

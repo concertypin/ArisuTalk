@@ -46,6 +46,7 @@ export class GeminiClient implements LLMApi {
         this.client = new ChatGoogleGenerativeAI({
             apiKey: apiKey,
             model: model,
+            baseUrl: baseUrl || undefined, //undefined handled by LangChain
             maxOutputTokens: options.maxTokens || 4096,
             temperature: options.temperature || 1.25,
             ...options,
@@ -55,14 +56,6 @@ export class GeminiClient implements LLMApi {
     /**
      * Generates conversation content with an AI character.
      * Creates character responses to user input and returns structured JSON response.
-     * @param {Object} params - Content generation parameters
-     * @param {string} params.userName - User name
-     * @param {string} params.userDescription - User description/persona
-     * @param {Object} params.character - Character information
-     * @param {Array} params.history - Conversation history
-     * @param {Object} params.prompts - Prompt settings
-     * @param {boolean} [params.isProactive=false] - Whether this is a proactive message
-     * @param {boolean} [params.forceSummary=false] - Whether to force summary
      * @returns {Promise<Object>} Generated response object
      * @returns {number} returns.reactionDelay - Reaction delay time (milliseconds)
      * @returns {Array<Object>} returns.messages - Generated message array
