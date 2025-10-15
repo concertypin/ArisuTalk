@@ -37,6 +37,10 @@ export class OpenRouterClient implements LLMApi {
             temperature: options?.temperature ?? 0.8,
             configuration: {
                 baseURL: baseUrl || API_BASE_URL,
+                defaultHeaders: {
+                    "HTTP-Referer": "https://arisutalk.moe/",
+                    "X-Title": "ArisuTalk",
+                },
             },
             ...options,
         });
