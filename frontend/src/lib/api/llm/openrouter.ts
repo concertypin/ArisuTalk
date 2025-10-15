@@ -2,16 +2,37 @@ import {
     buildContentPrompt,
     buildProfilePrompt,
     buildCharacterSheetPrompt,
-} from "../../prompts/builder/promptBuilder.js";
-import { t } from "../../i18n.js";
+} from "$/prompts/builder/promptBuilder.js";
+import { t } from "$/i18n.js";
+import type {
+    LLMApi,
+    LLMApiConstructorOptions,
+    LLMApiGenerateCharacterSheetParams,
+    LLMApiGenerateContentParams,
+    LLMApiGenerateProfileParams,
+} from "$/lib/api/llm/llmApiProto";
 
 const API_BASE_URL = "https://openrouter.ai/api/v1";
 
-export class OpenRouterClient {
-    constructor(apiKey, model, baseUrl = API_BASE_URL, options = {}) {
+export class OpenRouterClient implements LLMApi {
+    apiKey: string;
+    model: string;
+    baseUrl: string;
+    maxTokens: number;
+    temperature: number;
+    profileMaxTokens: number;
+    profileTemperature: number;
+    profileMaxOutputTokens?: number;
+
+    constructor(
+        apiKey: string,
+        model: string,
+        baseUrl: string | undefined = API_BASE_URL,
+        options: LLMApiConstructorOptions = {}
+    ) {
         this.apiKey = apiKey;
         this.model = model;
-        this.baseUrl = baseUrl;
+        this.baseUrl = baseUrl || API_BASE_URL;
         this.maxTokens = options.maxTokens || 4096;
         this.temperature = options.temperature || 0.8;
         this.profileMaxTokens = options.profileMaxTokens || 1024;
@@ -27,26 +48,30 @@ export class OpenRouterClient {
         isProactive = false,
         forceSummary = false,
         chatId = null,
-    }) {
+    }: LLMApiGenerateContentParams) {
         // Determine chat type from chatId
         const isGroupChat =
-            chatId && typeof chatId === "string" && chatId.startsWith("group_");
+            typeof chatId === "string" ? chatId.startsWith("group_") : false;
         const isOpenChat =
-            chatId && typeof chatId === "string" && chatId.startsWith("open_");
+            typeof chatId === "string" ? chatId.startsWith("open_") : false;
 
         const { systemPrompt, contents } = await buildContentPrompt({
             userName,
             userDescription,
             character,
             history,
-            prompts,
             isProactive,
             forceSummary,
             isGroupChat,
             isOpenChat,
         });
 
-        const messages = [];
+        type Messages = {
+            role: string;
+            content: string;
+        }[];
+
+        const messages: Messages = [];
         if (systemPrompt) {
             messages.push({ role: "system", content: systemPrompt });
         }
@@ -110,7 +135,7 @@ export class OpenRouterClient {
             );
         } catch (error) {
             console.error("OpenRouter API Error:", error);
-            return { error: error.message };
+            return { error: String(error) };
         }
     }
 
@@ -118,14 +143,16 @@ export class OpenRouterClient {
         userName,
         userDescription,
         profileCreationPrompt,
-    }) {
+    }: LLMApiGenerateProfileParams) {
         const { systemPrompt, contents } = await buildProfilePrompt({
             userName,
             userDescription,
-            profileCreationPrompt,
         });
-
-        const messages = [];
+        type Messages = {
+            role: string;
+            content: string;
+        }[];
+        const messages: Messages = [];
         if (systemPrompt) {
             messages.push({ role: "system", content: systemPrompt });
         }
@@ -187,7 +214,7 @@ export class OpenRouterClient {
                 t("api.profileGenerationError", { provider: "OpenRouter" }),
                 error
             );
-            return { error: error.message };
+            return { error: String(error) };
         }
     }
 
@@ -195,19 +222,24 @@ export class OpenRouterClient {
         characterName,
         characterDescription,
         characterSheetPrompt,
-    }) {
+    }: LLMApiGenerateCharacterSheetParams) {
         const { systemPrompt, contents } = await buildCharacterSheetPrompt({
             characterName,
             characterDescription,
-            characterSheetPrompt,
         });
-
-        const messages = [];
+        type Messages = {
+            role: string;
+            content: string;
+        }[];
+        const messages: Messages = [];
         if (systemPrompt) {
             messages.push({ role: "system", content: systemPrompt });
         }
         for (const msg of contents) {
-            messages.push({ role: msg.role, content: msg.parts[0].text });
+            messages.push({
+                role: msg.role,
+                content: msg.parts[0].text,
+            });
         }
 
         const payload = {
@@ -260,7 +292,7 @@ export class OpenRouterClient {
                     " (Character Sheet)",
                 error
             );
-            return { error: error.message };
+            return { error: String(error) };
         }
     }
 }

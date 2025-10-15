@@ -1,4 +1,4 @@
-import { t } from "i18n.js";
+import { t } from "$/i18n.js";
 import {
     PROVIDERS,
     SUPPORTED_PROVIDERS,
@@ -39,7 +39,7 @@ export class APIManager {
      * @param {string} model - The model to use
      * @param {string} [baseUrl] - Custom base URL (for custom_openai only)
      * @param {Object} [options] - Additional options for the client (for custom_openai only)
-     * @returns {Object} The API client instance
+     * @returns {import("$/lib/api/llm/llmApiProto").LLMApi} The API client instance
      */
     async getClient(provider, apiKey, model, baseUrl = null, options = {}) {
         const clientKey = `${provider}_${model}`;
@@ -55,22 +55,22 @@ export class APIManager {
         let client = null;
         switch (provider) {
             case PROVIDERS.GEMINI:
-                client = import("$/lib/api/llm/gemini.js");
+                client = import("$/lib/api/llm/gemini");
                 break;
             case PROVIDERS.CLAUDE:
-                client = import("$/lib/api/llm/claude.js");
+                client = import("$/lib/api/llm/claude");
                 break;
             case PROVIDERS.OPENAI:
-                client = import("$/lib/api/llm/openai.js");
+                client = import("$/lib/api/llm/openai");
                 break;
             case PROVIDERS.GROK:
-                client = import("$/lib/api/llm/grok.js");
+                client = import("$/lib/api/llm/grok");
                 break;
             case PROVIDERS.OPENROUTER:
-                client = import("$/lib/api/llm/openrouter.js");
+                client = import("$/lib/api/llm/openrouter");
                 break;
             case PROVIDERS.CUSTOM_OPENAI:
-                client = import("$/lib/api/llm/customopenai.js");
+                client = import("$/lib/api/llm/customopenai");
                 break;
             default:
                 throw new Error(`Unsupported API provider: ${provider}`);

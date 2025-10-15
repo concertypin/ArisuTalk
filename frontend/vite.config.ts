@@ -3,6 +3,7 @@ import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { VitePWA } from "vite-plugin-pwa";
 import getEnvVar from "./script/envbuild";
 import tsconfigPath from "vite-tsconfig-paths";
+import path from "path";
 // Since it distracts debugging via service worker, enable it only on production build
 const prodOnlyPlugin = [
     VitePWA({
@@ -30,6 +31,7 @@ const prodOnlyPlugin = [
         },
     }),
 ];
+
 declare const process: {
     cwd: () => string;
 };
