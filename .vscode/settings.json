@@ -1,0 +1,15 @@
+{
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.tabSize": 4
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.tabSize": 4
+    },
+    "typescript.preferences.preferTypeOnlyAutoImports": true,
+    "js/ts.implicitProjectConfig.target": "ESNext",
+    "typescript.preferences.importModuleSpecifier": "non-relative",
+    "javascript.preferences.importModuleSpecifier": "non-relative",
+    "editor.tabSize": 4
+}
