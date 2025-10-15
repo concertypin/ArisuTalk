@@ -32,8 +32,8 @@ export class ClaudeClient implements LLMApi {
         this.client = new ChatAnthropic({
             apiKey: apiKey,
             model: model,
-            maxTokens: options.maxTokens || 4096,
-            temperature: options.temperature || 0.8,
+            maxTokens: options?.maxTokens ?? 4096,
+            temperature: options?.temperature ?? 0.8,
             anthropicApiUrl: baseUrl || undefined,
             ...options,
         });

@@ -37,8 +37,8 @@ export class CustomOpenAIClient implements LLMApi {
         this.client = new ChatOpenAI({
             apiKey: apiKey,
             model: model,
-            maxTokens: options.maxTokens || 4096,
-            temperature: options.temperature || 0.8,
+            maxTokens: options?.maxTokens ?? 4096,
+            temperature: options?.temperature ?? 0.8,
             configuration: {
                 baseURL: baseUrl,
             },

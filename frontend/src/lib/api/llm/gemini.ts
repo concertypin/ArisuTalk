@@ -47,8 +47,8 @@ export class GeminiClient implements LLMApi {
             apiKey: apiKey,
             model: model,
             baseUrl: baseUrl || undefined, //undefined handled by LangChain
-            maxOutputTokens: options.maxTokens || 4096,
-            temperature: options.temperature || 1.25,
+            maxOutputTokens: options?.maxTokens ?? 4096,
+            temperature: options?.temperature ?? 1.25,
             ...options,
         });
     }
