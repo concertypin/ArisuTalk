@@ -1,4 +1,3 @@
-import { t } from "$/i18n";
 import {
     PROVIDERS,
     SUPPORTED_PROVIDERS,
@@ -11,10 +10,11 @@ import type {
     LLMApiGenerateCharacterSheetParams,
     LLMApiGenerateCharacterSheetResponse,
     LLMApiGenerateContentParams,
+    LLMApiGenerateContentResponse,
     LLMApiGenerateProfileParams,
     LLMApiGenerateProfileResponse,
 } from "$/lib/api/llm/llmApiProto";
-// Prompt builder
+import { t } from "i18n";
 
 /**
  * API Manager that handles multiple AI providers
@@ -59,36 +59,30 @@ export class APIManager {
         baseUrl: string | null = null,
         options: LLMApiConstructorOptions = {}
     ): Promise<LLMApi> {
+        // Map provider to client import
+        // Used "as" syntax, because when writing type directly, it is ugly due to auto-formatting
+        const providerMap = {
+            [PROVIDERS.GEMINI]: () => import("$/lib/api/llm/gemini"),
+            [PROVIDERS.CLAUDE]: () => import("$/lib/api/llm/claude"),
+            [PROVIDERS.OPENAI]: () => import("$/lib/api/llm/openai"),
+            [PROVIDERS.GROK]: () => import("$/lib/api/llm/grok"),
+            [PROVIDERS.OPENROUTER]: () => import("$/lib/api/llm/openrouter"),
+            [PROVIDERS.CUSTOM_OPENAI]: () =>
+                import("$/lib/api/llm/customopenai"),
+        } as Record<
+            (typeof PROVIDERS)[keyof typeof PROVIDERS],
+            () => Promise<{ default: LLMApiConstructor }>
+        >;
         const clientKey = `${provider}_${model}`;
 
         // Return existing client if available
         if (this.clients[clientKey]) {
             return this.clients[clientKey];
         }
-        let client: LLMApiConstructor | null = null;
-        switch (provider) {
-            case PROVIDERS.GEMINI:
-                client = (await import("$/lib/api/llm/gemini")).default;
-                break;
-            case PROVIDERS.CLAUDE:
-                client = (await import("$/lib/api/llm/claude")).default;
-                break;
-            case PROVIDERS.OPENAI:
-                client = (await import("$/lib/api/llm/openai")).default;
-                break;
-            case PROVIDERS.GROK:
-                client = (await import("$/lib/api/llm/grok")).default;
-                break;
-            case PROVIDERS.OPENROUTER:
-                client = (await import("$/lib/api/llm/openrouter")).default;
-                break;
-            case PROVIDERS.CUSTOM_OPENAI:
-                client = (await import("$/lib/api/llm/customopenai")).default;
+        if (!(provider in providerMap))
+            throw new Error(t("api.providerNotSupported", { provider }));
 
-                break;
-            default:
-                throw new Error(`Unsupported API provider: ${provider}`);
-        }
+        const client = (await providerMap[provider]()).default;
 
         this.clients[clientKey] = new client(
             apiKey,
@@ -116,11 +110,7 @@ export class APIManager {
         params: LLMApiGenerateContentParams,
         baseUrl: string | null = null,
         options: object = {}
-    ): Promise<{
-        reactionDelay: number;
-        messages: Array<Object>;
-        characterState: Object;
-    }> {
+    ): LLMApiGenerateContentResponse {
         try {
             // Resolve actual API key if encrypted
             const actualApiKey = await this.resolveApiKey(provider, apiKey);

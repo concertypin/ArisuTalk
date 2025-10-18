@@ -43,7 +43,11 @@ export type LLMApiGenerateContentParams = {
      */
     chatId: string | null;
 };
-
+export type LLMApiGenerateContentResponse = Promise<{
+    reactionDelay: number;
+    messages: Array<Object>;
+    characterState: Object;
+}>;
 export type LLMApiGenerateProfileParams = {
     /**
      * User name
@@ -169,11 +173,9 @@ export interface LLMApi {
      * @returns {Object} [returns.characterState] - Character state
      * @throws {Error} When API call fails or JSON parsing error occurs
      */
-    generateContent(params: LLMApiGenerateContentParams): Promise<{
-        reactionDelay: number;
-        messages: Array<Object>;
-        characterState: Object;
-    }>;
+    generateContent(
+        params: LLMApiGenerateContentParams
+    ): LLMApiGenerateContentResponse;
 
     /**
      * Generates an AI character profile based on user information.
