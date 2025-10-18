@@ -2,8 +2,8 @@ import {
     buildContentPrompt,
     buildProfilePrompt,
     buildCharacterSheetPrompt,
-} from "$/prompts/builder/promptBuilder.js";
-import { t } from "$/i18n.js";
+} from "$/prompts/builder/promptBuilder";
+import { t } from "$/i18n";
 import { ChatAnthropic } from "@langchain/anthropic";
 import {
     HumanMessage,
@@ -19,7 +19,7 @@ import type {
     LLMApiGenerateContentParams,
     LLMApiGenerateProfileParams,
     LLMApiGenerateProfileResponse,
-} from "$/lib/api/llm/llmApiProto.js";
+} from "$/lib/api/llm/llmApiProto";
 
 export class ClaudeClient implements LLMApi {
     client: ChatAnthropic;

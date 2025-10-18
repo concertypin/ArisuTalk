@@ -3,7 +3,7 @@ import {
     buildProfilePrompt,
     buildCharacterSheetPrompt,
 } from "$/prompts/builder/promptBuilder";
-import { t } from "$/i18n.js";
+import { t } from "$/i18n";
 import { ChatOpenAI } from "@langchain/openai";
 import {
     HumanMessage,

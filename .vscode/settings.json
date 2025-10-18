@@ -11,5 +11,7 @@
     "js/ts.implicitProjectConfig.target": "ESNext",
     "typescript.preferences.importModuleSpecifier": "non-relative",
     "javascript.preferences.importModuleSpecifier": "non-relative",
+    "javascript.preferences.importModuleSpecifierEnding": "minimal",
+    "typescript.preferences.importModuleSpecifierEnding": "minimal",
     "editor.tabSize": 4
 }

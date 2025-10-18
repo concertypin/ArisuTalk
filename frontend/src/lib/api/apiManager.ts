@@ -1,4 +1,4 @@
-import { t } from "$/i18n.js";
+import { t } from "$/i18n";
 import {
     PROVIDERS,
     SUPPORTED_PROVIDERS,
@@ -13,7 +13,7 @@ import type {
     LLMApiGenerateContentParams,
     LLMApiGenerateProfileParams,
     LLMApiGenerateProfileResponse,
-} from "$/lib/api/llm/llmApiProto.js";
+} from "$/lib/api/llm/llmApiProto";
 // Prompt builder
 
 /**

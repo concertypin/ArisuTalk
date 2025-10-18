@@ -2,8 +2,8 @@ import {
     buildContentPrompt,
     buildProfilePrompt,
     buildCharacterSheetPrompt,
-} from "$/prompts/builder/promptBuilder.js";
-import { t } from "i18n.js";
+} from "$/prompts/builder/promptBuilder";
+import { t } from "$/i18n";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import {
     HumanMessage,
@@ -18,7 +18,7 @@ import type {
     LLMApiGenerateCharacterSheetResponse,
     LLMApiGenerateContentParams,
     LLMApiGenerateProfileParams,
-} from "$/lib/api/llm/llmApiProto.js";
+} from "$/lib/api/llm/llmApiProto";
 
 /**
  * Google Gemini API client class
