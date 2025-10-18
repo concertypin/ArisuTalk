@@ -7,6 +7,7 @@ import {
 import type {
     LLMApi,
     LLMApiConstructor,
+    LLMApiConstructorOptions,
     LLMApiGenerateCharacterSheetParams,
     LLMApiGenerateCharacterSheetResponse,
     LLMApiGenerateContentParams,
@@ -56,7 +57,7 @@ export class APIManager {
         apiKey: string,
         model: string,
         baseUrl: string | null = null,
-        options: object = {}
+        options: LLMApiConstructorOptions = {}
     ): Promise<LLMApi> {
         const clientKey = `${provider}_${model}`;
 

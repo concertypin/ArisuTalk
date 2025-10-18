@@ -130,12 +130,19 @@ export interface LLMApiConstructorOptions {
      */
     profileTemperature?: number;
 }
+/**
+ * LLM API Client Interface
+ * This interface defines the constructor for LLM API clients.
+ * It provides only the constructor signature, not actual implementation.
+ * Do not implement methods here. Instead, implement {@link LLMApi} in the implementing class.
+ * @see LLMApi
+ */
 export interface LLMApiConstructor {
     /**
-     * Creates a GeminiClient instance.
-     * @param apiKey - Google Gemini API key
-     * @param model - Gemini model to use (e.g., 'gemini-2.5-flash')
-     * @param baseUrl - API base URL (not used with LangChain)
+     * Creates an LLMApi instance.
+     * @param apiKey - LLM API key
+     * @param model - model to use (e.g., 'gemini-2.5-flash')
+     * @param baseUrl - API base URL
      * @param options - Client options
      */
     new (
@@ -145,6 +152,12 @@ export interface LLMApiConstructor {
         options?: LLMApiConstructorOptions
     ): LLMApi;
 }
+/**
+ * LLM API Interface
+ * This interface defines methods for generating content and profiles using LLM APIs.
+ * Implementing classes must provide these methods.
+ * Instances are created by {@link LLMApiConstructor}.
+ */
 export interface LLMApi {
     /**
      * Generates conversation content with an AI character.
@@ -176,7 +189,7 @@ export interface LLMApi {
         params: LLMApiGenerateProfileParams
     ): LLMApiGenerateProfileResponse;
     /**
-     * Generates a character sheet using Gemini API.
+     * Generates a character sheet using a generic LLM API.
      * @param  params - Generation parameters
      * @returns {Promise<Object>} Promise resolving to character sheet text response
      * @returns {Array} [returns.messages] - Array of response messages
