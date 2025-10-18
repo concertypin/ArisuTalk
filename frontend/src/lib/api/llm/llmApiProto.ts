@@ -43,7 +43,11 @@ export type LLMApiGenerateContentParams = {
      */
     chatId: string | null;
 };
-
+export type LLMApiGenerateContentResponse = Promise<{
+    reactionDelay: number;
+    messages: Array<Object>;
+    characterState: Object;
+}>;
 export type LLMApiGenerateProfileParams = {
     /**
      * User name

@@ -41,7 +41,6 @@ const predefinedChunks: Record<string, string[]> = {
     "vendor-core": ["svelte", "svelte/internal"],
     "vendor-ui": ["lucide-svelte"],
     "vendor-utils": ["jszip"],
-    "langchain-core": ["@langchain/core"],
 };
 
 export default defineConfig(async (ctx) => {
