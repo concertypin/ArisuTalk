@@ -3,6 +3,7 @@ import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { VitePWA } from "vite-plugin-pwa";
 import getEnvVar from "./script/envbuild";
 import checker from "vite-plugin-checker";
+import { comlink } from "vite-plugin-comlink";
 
 // Since it distracts debugging via service worker, enable it only on production build
 const prodOnlyPlugin = [
@@ -51,6 +52,9 @@ export default defineConfig(async (ctx) => {
         server: {
             open: "index.html",
         },
+        worker: {
+            plugins: () => [comlink()],
+        },
         build: {
             outDir: "dist",
             sourcemap: "inline",
@@ -78,7 +82,7 @@ export default defineConfig(async (ctx) => {
             checker({
                 typescript: { tsconfigPath: "./tsconfig.worker.json" },
             }),
-
+            comlink(),
             svelte({
                 compilerOptions: {
                     dev: mode !== "production",

@@ -32,8 +32,8 @@
       "$constants/*": [
         "./constants/*"
       ],
-      "$shared/*": [
-        "../shared/*"
+      "$worker/*": [
+        "../worker/*"
       ]
     },
     "types": [
