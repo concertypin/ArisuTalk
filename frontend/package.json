@@ -27,6 +27,7 @@
     "prettier-plugin-svelte": "^3.4.0",
     "svelte": "^5.39.3",
     "tailwindcss": "^4.1.13",
+    "typescript": "^5.9.3",
     "vite": "^7.1.2",
     "vite-plugin-checker": "^0.11.0",
     "vite-plugin-comlink": "^5.3.0",

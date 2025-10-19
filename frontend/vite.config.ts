@@ -76,8 +76,9 @@ export default defineConfig(async (ctx) => {
                 /**
                  * @todo The error should be fixed, since there's so many errors now. Disabled for now since it works anyway.
                  */
-                //typescript: { tsconfigPath: "./tsconfig.json" },
-                typescript: false,
+                typescript: env.STRICT
+                    ? { tsconfigPath: "./tsconfig.json" }
+                    : false,
             }),
             checker({
                 typescript: { tsconfigPath: "./tsconfig.worker.json" },

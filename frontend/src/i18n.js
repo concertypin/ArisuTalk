@@ -27,6 +27,7 @@ export function t(key, params = {}) {
     if (lang && typeof lang === "object" && k in lang) {
       lang = lang[k];
     } else {
+      console.error(`Missing translation for key: ${key}`);
       return key;
     }
   }
