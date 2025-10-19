@@ -57,3 +57,4 @@ claude.md
 # lockfiles should be ignored except for the root one
 frontend/pnpm-lock.yaml
 backend/pnpm-lock.yaml
+frontend/.vscode/mcp.json

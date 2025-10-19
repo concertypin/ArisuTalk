@@ -28,11 +28,13 @@
     "svelte": "^5.39.3",
     "tailwindcss": "^4.1.13",
     "vite": "^7.1.2",
+    "vite-plugin-checker": "^0.11.0",
     "vite-plugin-pwa": "^1.0.3"
   },
   "dependencies": {
     "@clerk/clerk-js": "^5.99.0",
     "@nyariv/sandboxjs": "^0.8.25",
+    "comlink": "^4.4.2",
     "firebase": "^12.3.0",
     "jszip": "^3.10.1",
     "nanoid": "^5.1.6",

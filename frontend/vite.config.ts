@@ -2,6 +2,7 @@ import { defineConfig, loadEnv, UserConfig } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { VitePWA } from "vite-plugin-pwa";
 import getEnvVar from "./script/envbuild";
+import checker from "vite-plugin-checker";
 
 // Since it distracts debugging via service worker, enable it only on production build
 const prodOnlyPlugin = [
@@ -67,6 +68,17 @@ export default defineConfig(async (ctx) => {
         clearScreen: false,
         publicDir: "static",
         plugins: [
+            checker({
+                /**
+                 * @todo The error should be fixed, since there's so many errors now. Disabled for now since it works anyway.
+                 */
+                //typescript: { tsconfigPath: "./tsconfig.json" },
+                typescript: false,
+            }),
+            checker({
+                typescript: { tsconfigPath: "./tsconfig.worker.json" },
+            }),
+
             svelte({
                 compilerOptions: {
                     dev: mode !== "production",
