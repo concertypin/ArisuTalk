@@ -16,5 +16,8 @@
   "extends": "./tsconfig.base.json",
   "include": [
     "worker"
+  ],
+  "exclude": [
+    "src"
   ]
 }

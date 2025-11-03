@@ -1,36 +1,13 @@
 import { defineConfig, loadEnv, UserConfig } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
-import { VitePWA } from "vite-plugin-pwa";
+import tsconfigPaths from "vite-tsconfig-paths";
 import getEnvVar from "./script/envbuild";
 import checker from "vite-plugin-checker";
 import { comlink } from "vite-plugin-comlink";
+import vitePWA from "./script/pwa";
 
 // Since it distracts debugging via service worker, enable it only on production build
-const prodOnlyPlugin = [
-    VitePWA({
-        registerType: "autoUpdate",
-        workbox: {
-            maximumFileSizeToCacheInBytes: 12 * 1024 * 1024, // Allow precaching bundles up to 12MB
-        },
-        manifest: {
-            name: "ArisuTalk",
-            short_name: "ArisuTalk",
-            description: "ArisuTalk, chat with your waifu.",
-            icons: [
-                {
-                    src: "icon_192.png",
-                    sizes: "192x192",
-                    type: "image/png",
-                },
-                {
-                    src: "icon_512.png",
-                    sizes: "512x512",
-                    type: "image/png",
-                },
-            ],
-        },
-    }),
-];
+const prodOnlyPlugin = [vitePWA];
 declare const process: {
     cwd: () => string;
 };
@@ -72,6 +49,8 @@ export default defineConfig(async (ctx) => {
         clearScreen: false,
         publicDir: "static",
         plugins: [
+            tsconfigPaths(),
+
             checker({
                 /**
                  * @todo The error should be fixed, since there's so many errors now. Disabled for now since it works anyway.

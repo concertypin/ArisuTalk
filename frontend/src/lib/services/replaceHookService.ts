@@ -1,10 +1,11 @@
 import { get } from "svelte/store";
-import { replaceHooks } from "../stores/replaceHooks";
+import { replaceHooks } from "$stores/replaceHooks";
 import type {
     ReplaceHook,
     HookResult,
     ApplyHookOptions,
-} from "../../types/replaceHook";
+} from "$types/replaceHook";
+import { replace } from "$lib/utils/worker/replace";
 
 /**
  * Service for executing replace hooks on text
@@ -15,21 +16,22 @@ import type {
  * Apply a single rule to text
  * Handles both literal string replacement and regex replacement
  */
-function applyRule(
+async function applyRule(
     text: string,
     from: string,
     to: string,
     useRegex: boolean,
     caseSensitive: boolean
-): { result: string; matchCount: number } {
+): Promise<{ result: string; matchCount: number }> {
     try {
         if (useRegex) {
             const flags = caseSensitive ? "g" : "gi";
             const regex = new RegExp(from, flags);
             const matches = text.match(regex);
             const matchCount = matches ? matches.length : 0;
+
             return {
-                result: text.replace(regex, to),
+                result: await replace(text, { pattern: regex, replace: to }),
                 matchCount,
             };
         } else {
@@ -74,11 +76,11 @@ function applyRule(
  * Apply a single hook's rules to text
  * Rules are executed in order
  */
-function applyHook(
+async function applyHook(
     text: string,
     hook: ReplaceHook,
     maxIterations: number = 10
-): {
+): Promise<{
     result: string;
     appliedRules: Array<{
         ruleId: string;
@@ -87,7 +89,7 @@ function applyHook(
         to: string;
         matchCount: number;
     }>;
-} {
+}> {
     if (!hook.enabled) {
         return { result: text, appliedRules: [] };
     }
@@ -109,7 +111,7 @@ function applyHook(
         let previousResult = result;
 
         while (iterationCount < maxIterations) {
-            const { result: newResult, matchCount } = applyRule(
+            const { result: newResult, matchCount } = await applyRule(
                 result,
                 rule.from,
                 rule.to,
@@ -166,7 +168,7 @@ export async function applyHooksByType(
         // Skip if in exclusion list
         if (options.excludeHookIds?.includes(hook.id)) continue;
 
-        const { result: newResult, appliedRules } = applyHook(
+        const { result: newResult, appliedRules } = await applyHook(
             result,
             hook,
             options.maxIterations || 10

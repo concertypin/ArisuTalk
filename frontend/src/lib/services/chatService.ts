@@ -25,13 +25,14 @@ import {
     isConfirmationModalVisible,
     confirmationModalData,
 } from "../stores/ui";
-import { t } from "../../i18n.js";
+import { t } from "i18n.js";
 import { findMessageGroup } from "../../utils";
 import {
     applyInputHooks,
     applyOutputHooks,
     applyRequestHooks,
 } from "./replaceHookService";
+import { replace } from "$lib/utils/worker/replace.js";
 
 const apiManager = new APIManager();
 
@@ -751,15 +752,29 @@ export async function generateSnsPost(messageId) {
             .join("\n");
         const snsPromptTemplate = await getPrompt("snsForce");
 
-        const snsPrompt = snsPromptTemplate
-            .replace(/\{character\.name\}/g, character.name)
-            .replace(/\{persona\.name\}/g, currentSettings.userName || "User")
-            .replace(
-                /\{persona\.description\}/g,
-                currentSettings.userDescription || ""
-            )
-            .replace(/\{character\.prompt\}/g, character.prompt || "")
-            .replace(/\{recentContext\}/g, recentConversation);
+        const snsPrompt = await replace(
+            snsPromptTemplate,
+            {
+                pattern: "{character.name}",
+                replace: character.name,
+            },
+            {
+                pattern: "{persona.name}",
+                replace: currentSettings.userName || "User",
+            },
+            {
+                pattern: "{persona.description}",
+                replace: currentSettings.userDescription || "",
+            },
+            {
+                pattern: "{character.prompt}",
+                replace: character.prompt || "",
+            },
+            {
+                pattern: "{recentContext}",
+                replace: recentConversation,
+            }
+        );
 
         const apiProvider = currentSettings.apiProvider || "gemini";
         const apiConfigs = currentSettings.apiConfigs || {};
@@ -791,7 +806,8 @@ export async function generateSnsPost(messageId) {
             throw new Error(`Gemini API call failed: ${apiResponse.status}`);
 
         const apiData = await apiResponse.json();
-        const responseText = apiData.candidates?.[0]?.content?.parts?.[0]?.text;
+        const responseText: string | null =
+            apiData.candidates?.[0]?.content?.parts?.[0]?.text;
         if (!responseText) throw new Error("No text response from Gemini API");
 
         let parsedResponse = JSON.parse(

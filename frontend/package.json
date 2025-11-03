@@ -31,7 +31,9 @@
     "vite": "^7.1.2",
     "vite-plugin-checker": "^0.11.0",
     "vite-plugin-comlink": "^5.3.0",
-    "vite-plugin-pwa": "^1.0.3"
+    "vite-plugin-pwa": "^1.0.3",
+    "vite-tsconfig-paths": "^5.1.4",
+    "workbox-precaching": "^7.3.0"
   },
   "dependencies": {
     "@clerk/clerk-js": "^5.99.0",
