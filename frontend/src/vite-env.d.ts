@@ -22,6 +22,11 @@ interface ImportMeta {
 }
 
 interface Window {
+    /**
+     * After initialization, the main application instance is assigned here.
+     * @todo Remove any type. I can't find personaApp class after migration.
+     */
+    personaApp: any | undefined;
     __dev__?: {
         dumpLocalStorage: () => string;
         dumpIndexedDB: () => Promise<string | null>;
