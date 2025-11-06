@@ -1,16 +1,16 @@
 import { en } from "$root/language/en";
 import { ko } from "$root/language/ko";
+import type { LanguageStrings } from "$root/language/language";
 
-export const languages = {
+type LanguageCode = "en" | "ko";
+export const languages: Record<LanguageCode, LanguageStrings> = {
     en,
     ko,
-};
-type LanguageCode = keyof typeof languages;
+} as const;
 
+const storedLanguage = localStorage.getItem("language") ?? "ko";
 let currentLanguage: LanguageCode =
-    (localStorage.getItem("language") ?? "ko") in languages
-        ? (localStorage.getItem("language") as LanguageCode)
-        : "ko";
+    storedLanguage in languages ? (storedLanguage as LanguageCode) : "ko";
 
 /**
  * @fires languageChanged

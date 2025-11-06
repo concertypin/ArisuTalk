@@ -1,6 +1,7 @@
 <script lang="ts">
     import { t } from "$root/i18n";
     import { HelpCircle } from "lucide-svelte";
+
     //    import { $effect } from "svelte";
 
     let { title, description, value }: Record<string, string> = $props();

@@ -1,17 +1,18 @@
-import { persistentStore } from "./persistentStore";
+import { get } from "svelte/store";
+
 import type {
     ReplaceHook,
-    ReplaceHooksConfig,
     ReplaceHookType,
+    ReplaceHooksConfig,
     ReplaceRule,
 } from "../../types/replaceHook";
-import { get } from "svelte/store";
+import { persistentStore } from "./persistentStore";
 
 /**
  * Generate a unique ID
  */
 export function generateId(): string {
-    return `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 }
 
 /**
