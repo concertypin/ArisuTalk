@@ -5,6 +5,7 @@ import type {
     ReplaceHookType,
     ReplaceRule,
 } from "../../types/replaceHook";
+import { get } from "svelte/store";
 
 /**
  * Generate a unique ID
@@ -212,9 +213,12 @@ export function resetAllHooks(): void {
 
 /**
  * Export hooks configuration (for backup)
+ * @param config Optional configuration to export; if not provided, exports current store value.
+ * @returns JSON string of the hooks configuration
  */
-export function exportHooksConfig(config: ReplaceHooksConfig): string {
-    return JSON.stringify(config, null, 2);
+export function exportHooksConfig(config?: ReplaceHooksConfig): string {
+    if (config) return JSON.stringify(config, null, 2);
+    else return JSON.stringify(get(replaceHooks), null, 2);
 }
 
 /**
