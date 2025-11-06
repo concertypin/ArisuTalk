@@ -1,6 +1,6 @@
 import { t } from "$root/i18n";
 import pako from "pako";
-import { addLog } from "../services/logService.js";
+import { addLog } from "../services/logService";
 
 /**
  * NovelAI Image Generation Client
@@ -839,8 +839,8 @@ export class NovelAIClient {
             const mimeType = isPNG
                 ? "image/png"
                 : isJPEG
-                  ? "image/jpeg"
-                  : "image/png"; // 기본값 PNG
+                    ? "image/jpeg"
+                    : "image/png"; // 기본값 PNG
             const blob = new Blob([imageData], { type: mimeType });
             const dataUrl = await new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -1003,12 +1003,12 @@ export class NovelAIClient {
             // Vibe Transfer 설정
             ...(naiSettings.vibeTransferEnabled && naiSettings.vibeTransferImage
                 ? {
-                      vibeTransferImage: naiSettings.vibeTransferImage,
-                      reference_strength:
-                          naiSettings.vibeTransferStrength || 0.6,
-                      reference_information_extracted:
-                          naiSettings.vibeTransferInformationExtracted || 1.0,
-                  }
+                    vibeTransferImage: naiSettings.vibeTransferImage,
+                    reference_strength:
+                        naiSettings.vibeTransferStrength || 0.6,
+                    reference_information_extracted:
+                        naiSettings.vibeTransferInformationExtracted || 1.0,
+                }
                 : {}),
 
             // 고급 설정
@@ -1238,3 +1238,5 @@ export const DEFAULT_EMOTIONS = [
 export function validateNAIApiKey(apiKey) {
     return typeof apiKey === "string" && apiKey.trim().length > 0;
 }
+
+export default NovelAIClient;

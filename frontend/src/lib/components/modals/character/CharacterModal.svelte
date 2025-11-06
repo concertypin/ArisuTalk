@@ -33,7 +33,7 @@
     import CharacterStickers from "./CharacterStickers.svelte";
     import CharacterAISettings from "./CharacterAISettings.svelte";
     import CharacterHypnosis from "./CharacterHypnosis.svelte";
-    import { APIManager } from "../../../api/apiManager.js";
+    import { APIManager } from "../../../api/apiManager";
     import { auth } from "../../../stores/auth";
     import {
         dataUrlToUint8Array,
@@ -42,7 +42,7 @@
         extractPngChunk,
         compressData,
         decompressData,
-    } from "../../../utils/png-utils.js";
+    } from "../../../utils/png-utils";
 
     const dispatch = createEventDispatcher();
 

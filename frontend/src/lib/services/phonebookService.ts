@@ -7,7 +7,7 @@ import {
     extractPngChunk,
     decompressData,
     uint8ArrayToDataUrl,
-} from "../utils/png-utils.js";
+} from "../utils/png-utils";
 
 const PHONEBOOK_BASE_URL = import.meta.env.VITE_PHONEBOOK_BASE_URL;
 const PHONEBOOK_CHECK_URL = `${PHONEBOOK_BASE_URL}/api/check`;

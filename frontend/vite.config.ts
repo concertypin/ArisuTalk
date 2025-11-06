@@ -14,6 +14,13 @@ declare const process: {
     cwd: () => string;
 };
 
+const predefinedChunks: Record<string, string[]> = {
+    // 벤더 라이브러리들을 별도 청크로 분리
+    "vendor-core": ["svelte", "svelte/internal"],
+    "vendor-ui": ["lucide-svelte"],
+    "vendor-utils": ["jszip"],
+};
+
 export default defineConfig(async (ctx) => {
     const mode = ctx.mode;
     const env = loadEnv(mode, process.cwd(), "");
@@ -61,12 +68,7 @@ export default defineConfig(async (ctx) => {
             sourcemap: "inline",
             rollupOptions: {
                 output: {
-                    manualChunks: {
-                        // 벤더 라이브러리들을 별도 청크로 분리
-                        "vendor-core": ["svelte", "svelte/internal"],
-                        "vendor-ui": ["lucide-svelte"],
-                        "vendor-utils": ["jszip"],
-                    },
+                    manualChunks: predefinedChunks,
                 },
             },
         },

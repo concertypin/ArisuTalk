@@ -14,7 +14,7 @@
     } from "lucide-svelte";
     import { characters, characterStateStore } from "../../../stores/character";
     import { isSNSPostModalVisible, editingSNSPost } from "../../../stores/ui";
-    import { checkSNSAccess, requirements } from "../../../utils/sns.js";
+    import { checkSNSAccess, requirements } from "../../../utils/sns";
     import PostsTab from "./tabs/PostsTab.svelte";
     import SecretsTab from "./tabs/SecretsTab.svelte";
     import TagsTab from "./tabs/TagsTab.svelte";

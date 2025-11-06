@@ -5,8 +5,8 @@
     import {
         validatePassword,
         generateMasterPassword,
-    } from "../../../utils/crypto.js";
-    import { secureStorage } from "../../../utils/secureStorage.js";
+    } from "../../../utils/crypto";
+    import { secureStorage } from "../../../utils/secureStorage";
     import {
         ShieldCheck,
         Info,

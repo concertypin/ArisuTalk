@@ -6,7 +6,7 @@ import { getPrompt } from "../promptManager";
 import {
     parseChatML,
     chatMLToPromptStructure,
-} from "../../lib/api/chatMLParser.js";
+} from "../../lib/api/chatMLParser";
 import { parseMagicPatterns } from "./magicPatternParser";
 
 /**

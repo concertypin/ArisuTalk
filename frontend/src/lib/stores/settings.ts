@@ -1,6 +1,6 @@
 import { derived } from "svelte/store";
 import { persistentStore } from "./persistentStore";
-import { defaultAPISettings } from "../../defaults.js";
+import { defaultAPISettings } from "../../defaults";
 
 const initialSettings = {
     apiKey: "", // Legacy

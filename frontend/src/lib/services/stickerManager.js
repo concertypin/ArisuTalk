@@ -1,6 +1,6 @@
 import { get } from "svelte/store";
-import { NovelAIClient, validateNAIApiKey } from "../api/novelai.js";
-import { DEFAULT_EMOTIONS } from "../../defaults.js";
+import { NovelAIClient, validateNAIApiKey } from "../api/novelai";
+import { DEFAULT_EMOTIONS } from "../../defaults";
 import { saveToBrowserStorage } from "../../storage";
 import { t } from "$root/i18n";
 import { settings } from "../stores/settings";

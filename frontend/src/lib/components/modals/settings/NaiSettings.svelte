@@ -22,7 +22,7 @@
         Trash2,
     } from "lucide-svelte";
     import { settings } from "../../../stores/settings";
-    import { NovelAIClient, DEFAULT_EMOTIONS } from "../../../api/novelai.js";
+    import { NovelAIClient, DEFAULT_EMOTIONS } from "../../../api/novelai";
 
     const dispatch = createEventDispatcher();
 

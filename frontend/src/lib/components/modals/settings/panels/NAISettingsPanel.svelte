@@ -22,8 +22,8 @@
         Trash2,
         Loader2,
     } from "lucide-svelte";
-    import { NovelAIClient } from "../../../../api/novelai.js";
-    import { DEFAULT_EMOTIONS } from "../../../../../defaults.js";
+    import { NovelAIClient } from "../../../../api/novelai";
+    import { DEFAULT_EMOTIONS } from "../../../../../defaults";
 
     import { characters } from "../../../../stores/character";
 

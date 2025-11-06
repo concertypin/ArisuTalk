@@ -2,7 +2,7 @@
     import { t } from "$root/i18n";
     import { get } from "svelte/store";
     import { characterStateStore } from "../../../../stores/character";
-    import { checkSNSAccess } from "../../../../utils/sns.js";
+    import { checkSNSAccess } from "../../../../utils/sns";
     import { Lock, AlertTriangle } from "lucide-svelte";
     import SNSPost from "./SNSPost.svelte";
 

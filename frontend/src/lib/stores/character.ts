@@ -1,6 +1,6 @@
 import { writable } from "svelte/store";
 import { persistentStore } from "./persistentStore";
-import { defaultCharacters } from "../../defaults.js";
+import { defaultCharacters } from "../../defaults";
 
 export const characters = persistentStore(
     "personaChat_characters_v16",

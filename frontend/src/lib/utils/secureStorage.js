@@ -3,7 +3,7 @@
  * Handles encryption, storage, and retrieval of sensitive data
  */
 
-import { encryptText, decryptText, generateMasterPassword } from "./crypto.js";
+import { encryptText, decryptText, generateMasterPassword } from "./crypto";
 import { loadFromBrowserStorage, saveToBrowserStorage } from "../../storage";
 import { t } from "$root/i18n";
 import { getStorageKey } from "./storageKey";

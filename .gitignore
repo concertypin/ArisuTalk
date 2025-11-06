@@ -15,9 +15,8 @@ yarn-error.log*
 dist/
 build/
 
-# IDE files
-.vscode/*
-.idea/
+# IDE files which might contain secret
+.vscode/mcp.json
 .qoder/*
 
 # Temporary files
