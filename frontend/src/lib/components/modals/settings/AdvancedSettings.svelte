@@ -1,5 +1,5 @@
 <script>
-    import { t } from "../../../../i18n.js";
+    import { t } from "$root/i18n";
     import { createEventDispatcher } from "svelte";
     import {
         ArrowLeft,
