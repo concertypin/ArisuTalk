@@ -1,3 +1,5 @@
+/// <reference types="vitest/config" />
+
 import { defineConfig, loadEnv, UserConfig } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import tsconfigPaths from "vite-tsconfig-paths";
@@ -71,6 +73,26 @@ export default defineConfig(async (ctx) => {
             ...(mode === "production" ? prodOnlyPlugin : []),
         ],
         define: defineConfigReady,
+        test: {
+            globals: true,
+            environment: "happy-dom",
+            setupFiles: ["./tests/setup.ts"],
+            include: ["tests/**/*.{test,spec}.{js,ts}"],
+            exclude: ["node_modules", "dist"],
+            coverage: {
+                reporter: ["text", "json", "html"],
+                exclude: [
+                    "node_modules/",
+                    "dist/",
+                    "tests/",
+                    "**/*.d.ts",
+                    "**/*.config.*",
+                    "script/",
+                    "static/",
+                    "worker/",
+                ],
+            },
+        },
     };
     return baseConfig;
 });

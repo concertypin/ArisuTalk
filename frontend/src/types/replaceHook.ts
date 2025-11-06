@@ -22,7 +22,7 @@ export interface ReplaceRule {
 export interface ReplaceHook {
     id: string; // Unique identifier
     name: string; // Display name
-    type: "input" | "output" | "request" | "display"; // When this hook applies
+    type: ReplaceHookType; // When this hook applies
     description?: string; // Optional description
     enabled: boolean; // Whether this hook is active
     rules: ReplaceRule[]; // Array of replacement rules
@@ -34,12 +34,17 @@ export interface ReplaceHook {
 /**
  * Configuration for all replace hooks
  */
-export interface ReplaceHooksConfig {
+export type ReplaceHooksConfig = {
     inputHooks: ReplaceHook[]; // Applied to user input before storage
     outputHooks: ReplaceHook[]; // Applied to AI response before storage
     requestHooks: ReplaceHook[]; // Applied to data sent to API (not displayed)
     displayHooks: ReplaceHook[]; // Applied only for display (every update)
-}
+};
+/**
+ * Types of replace hooks
+ * It all satisfies `${ReplaceHookType}Hook` satisfies keyof {@link ReplaceHooksConfig}
+ */
+export type ReplaceHookType = "input" | "output" | "request" | "display";
 
 /**
  * Options for applying hooks

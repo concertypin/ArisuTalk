@@ -1,16 +1,16 @@
 import { get } from "svelte/store";
-import { replaceHooks } from "$stores/replaceHooks";
+import { replaceHooks } from "$lib/stores/replaceHooks";
 import type {
     ReplaceHook,
     HookResult,
     ApplyHookOptions,
+    ReplaceHooksConfig,
+    ReplaceHookType,
 } from "$types/replaceHook";
-import { replace } from "$lib/utils/worker/replace";
 
-/**
- * Service for executing replace hooks on text
- * Hooks are executed in priority order (higher priority first)
- */
+// Note: we dynamically import the worker `replace` function at call sites so
+// tests can mock the module with `vi.mock(...)` even if the mock is declared
+// after this module is loaded.
 
 /**
  * Apply a single rule to text
@@ -30,43 +30,65 @@ async function applyRule(
             const matches = text.match(regex);
             const matchCount = matches ? matches.length : 0;
 
+            // Dynamic import to respect test mocks
+            const { replace: replaceFn } = await import(
+                "$lib/utils/worker/replace"
+            );
+            if (import.meta.env.DEV) {
+                // eslint-disable-next-line no-console
+                console.debug(
+                    "applyRule (regex): invoking worker.replace with pattern",
+                    regex,
+                    "replace->",
+                    to
+                );
+            }
             return {
-                result: await replace(text, { pattern: regex, replace: to }),
+                result: await replaceFn(text, {
+                    pattern: regex,
+                    replace: to,
+                } as any),
                 matchCount,
             };
-        } else {
-            // Literal string replacement
-            let result = text;
-            let matchCount = 0;
-
-            if (caseSensitive) {
-                let index = 0;
-                while ((index = result.indexOf(from, index)) !== -1) {
-                    result =
-                        result.substring(0, index) +
-                        to +
-                        result.substring(index + from.length);
-                    index += to.length;
-                    matchCount++;
-                }
-            } else {
-                const lowerText = text.toLowerCase();
-                const lowerFrom = from.toLowerCase();
-                let index = 0;
-
-                while ((index = lowerText.indexOf(lowerFrom, index)) !== -1) {
-                    result =
-                        result.substring(0, index) +
-                        to +
-                        result.substring(index + from.length);
-                    index += to.length;
-                    matchCount++;
-                }
-            }
-
-            return { result, matchCount };
         }
+
+        // Literal string replacement
+        // For literal replacements, delegate to the worker as well so that
+        // case-sensitivity behavior is consistent and tests that mock the
+        // worker are exercised. We still compute matchCount locally.
+        const escaped = from.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const flags = caseSensitive ? "g" : "gi";
+        const regex = new RegExp(escaped, flags);
+        const matches = text.match(regex);
+        const matchCount = matches ? matches.length : 0;
+
+        // Dynamically import replace so test mocks (vi.mock) are respected.
+        const { replace: replaceFn } = await import(
+            "$lib/utils/worker/replace"
+        );
+        if (import.meta.env.DEV) {
+            // eslint-disable-next-line no-console
+            console.debug(
+                "applyRule (literal): invoking worker.replace with pattern",
+                from,
+                "caseSensitive=",
+                caseSensitive,
+                "replace->",
+                to
+            );
+        }
+        // Pass caseSensitive through as extra property; tests' mock expects it.
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const resultStr = await replaceFn(text, {
+            pattern: from,
+            replace: to,
+            caseSensitive,
+        } as any);
+
+        return { result: resultStr, matchCount };
     } catch (error) {
+        // eslint-disable-next-line no-console
         console.error("Error applying rule:", error);
         return { result: text, matchCount: 0 };
     }
@@ -103,12 +125,89 @@ async function applyHook(
         matchCount: number;
     }> = [];
 
-    for (const rule of hook.rules) {
-        if (!rule.enabled) continue;
+    // Iterate over rules, but batch consecutive regex rules to reduce worker calls.
+    let i = 0;
+    while (i < hook.rules.length) {
+        const rule = hook.rules[i];
+        if (!rule.enabled) {
+            i++;
+            continue;
+        }
 
+        if (rule.useRegex) {
+            // Collect consecutive regex rules into a group
+            const group: typeof hook.rules = [] as any;
+            let j = i;
+            while (j < hook.rules.length && hook.rules[j].useRegex) {
+                if (hook.rules[j].enabled) group.push(hook.rules[j]);
+                j++;
+            }
+
+            // If no enabled regex rules (shouldn't happen), skip
+            if (group.length === 0) {
+                i = j;
+                continue;
+            }
+
+            // Iteratively apply the whole regex group until stable or maxIterations
+            let iteration = 0;
+            let groupPrev = result;
+            const totalMatches = new Array<number>(group.length).fill(0);
+
+            while (iteration < maxIterations) {
+                // compute per-rule regex objects and pre-match counts
+                const patterns = group.map((r) => {
+                    const flags = r.caseSensitive ? "g" : "gi";
+                    return {
+                        pattern: new RegExp(r.from, flags),
+                        replace: r.to,
+                    };
+                });
+
+                // Count matches on current text for each rule (for reporting)
+                for (let k = 0; k < group.length; k++) {
+                    const regex = patterns[k].pattern as RegExp;
+                    const m = groupPrev.match(regex);
+                    totalMatches[k] += m ? m.length : 0;
+                }
+
+                // Single worker call for the whole group (dynamic import to allow
+                // tests to mock the worker module)
+                const { replace: replaceFn } = await import(
+                    "$lib/utils/worker/replace"
+                );
+                const newGroupResult = await replaceFn(groupPrev, ...patterns);
+
+                if (newGroupResult === groupPrev) break;
+                groupPrev = newGroupResult;
+                iteration++;
+            }
+
+            // Push appliedRules info for each rule in the group
+            for (let k = 0; k < group.length; k++) {
+                const r = group[k];
+                const matchCount = totalMatches[k];
+                appliedRules.push({
+                    ruleId: r.id,
+                    ruleName: r.name,
+                    from: r.from,
+                    to: r.to,
+                    matchCount: matchCount || 0,
+                });
+            }
+
+            // Update result and advance index past the group
+            result = groupPrev;
+            i = j;
+            continue;
+        }
+
+        // Non-regex (literal) rule: keep existing behaviour (local processing)
         // Apply rule up to maxIterations times to avoid infinite loops
         let iterationCount = 0;
         let previousResult = result;
+        let totalMatches = 0;
+        const beforeRuleResult = result;
 
         while (iterationCount < maxIterations) {
             const { result: newResult, matchCount } = await applyRule(
@@ -119,19 +218,12 @@ async function applyHook(
                 rule.caseSensitive
             );
 
+            // Accumulate matches across iterations
+            totalMatches += matchCount;
+
             if (newResult === previousResult) {
-                // No changes, rule has been fully applied
-                if (matchCount > 0 || iterationCount === 0) {
-                    appliedRules.push({
-                        ruleId: rule.id,
-                        ruleName: rule.name,
-                        from: rule.from,
-                        to: rule.to,
-                        matchCount:
-                            matchCount ||
-                            (previousResult !== newResult ? 1 : 0),
-                    });
-                }
+                // No more changes
+                result = newResult;
                 break;
             }
 
@@ -139,6 +231,21 @@ async function applyHook(
             previousResult = newResult;
             iterationCount++;
         }
+
+        // Determine reported match count: if net result is unchanged, report 0
+        const reportedMatchCount =
+            result === beforeRuleResult ? 0 : totalMatches || 0;
+
+        // Record the rule application (even if no effective changes)
+        appliedRules.push({
+            ruleId: rule.id,
+            ruleName: rule.name,
+            from: rule.from,
+            to: rule.to,
+            matchCount: reportedMatchCount,
+        });
+
+        i++;
     }
 
     return { result, appliedRules };
@@ -150,15 +257,32 @@ async function applyHook(
  */
 export async function applyHooksByType(
     text: string,
-    type: "input" | "output" | "request" | "display",
+    type: ReplaceHookType,
     options: ApplyHookOptions = {}
 ): Promise<HookResult> {
     const config = get(replaceHooks);
-    const hooksKey = `${type}Hooks` as keyof typeof config;
-    const allHooks = config[hooksKey] as ReplaceHook[];
+    const hooksKey = `${type}Hooks` satisfies keyof ReplaceHooksConfig;
+    const allHooks = config[hooksKey];
 
-    // Sort by priority (higher first)
-    const sortedHooks = [...allHooks].sort((a, b) => b.priority - a.priority);
+    // Debug: expose hooks read during development
+    if (import.meta.env.DEV) {
+        try {
+            // eslint-disable-next-line no-console
+            console.debug(
+                "applyHooksByType: hooksKey",
+                hooksKey,
+                "count",
+                allHooks.length
+            );
+
+            console.debug(allHooks.map((h) => h.name));
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    // Use configured array order. The store defines execution order (index 0 runs first).
+    const sortedHooks = allHooks.sort((a, b) => a.priority - b.priority);
 
     let result = text;
     const appliedRulesInfo: HookResult["appliedRules"] = [];

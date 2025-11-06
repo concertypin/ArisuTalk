@@ -11,21 +11,18 @@ import {
     currentMessage,
     editingMessageId,
     virtualStream,
-} from "../stores/chat";
+} from "$stores/chat";
 import {
     characters,
     characterStateStore,
     type CharacterState,
-} from "../stores/character";
-import { settings } from "../stores/settings";
-import { APIManager } from "../api/apiManager";
-import { getPrompt, getAllPrompts } from "../../prompts/promptManager";
-import { addLog } from "./logService";
-import {
-    isConfirmationModalVisible,
-    confirmationModalData,
-} from "../stores/ui";
-import { t } from "i18n.js";
+} from "$stores/character";
+import { settings } from "$stores/settings";
+import { APIManager } from "$lib/api/apiManager";
+import { getPrompt, getAllPrompts } from "$root/prompts/promptManager";
+import { addLog } from "$services/logService";
+import { isConfirmationModalVisible, confirmationModalData } from "$stores/ui";
+import { t } from "$root/i18n";
 import { findMessageGroup } from "../../utils";
 import {
     applyInputHooks,

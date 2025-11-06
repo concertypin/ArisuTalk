@@ -11,16 +11,15 @@
     import type {
         ReplaceHook,
         ReplaceHooksConfig,
-    } from "../../../types/replaceHook";
+        ReplaceHookType,
+    } from "$types/replaceHook";
     import HookEditor from "./HookEditor.svelte";
 
-    type HookType = "input" | "output" | "request" | "display";
-
-    let selectedType: HookType = "input";
+    let selectedType: ReplaceHookType = "input";
     let editingHook: ReplaceHook | null = null;
     let isAddingNew = false;
 
-    $: hooks = $replaceHooks[`${selectedType}Hooks`] as ReplaceHook[];
+    $: hooks = $replaceHooks[`${selectedType}Hooks`] satisfies ReplaceHook[];
 
     function handleAddHook() {
         isAddingNew = true;
@@ -105,11 +104,7 @@
                         >{getHookTypeLabel(type as HookType)}</span
                     >
                     <span class="count"
-                        >{(
-                            $replaceHooks[
-                                `${type}Hooks` as keyof ReplaceHooksConfig
-                            ] as ReplaceHook[]
-                        ).length}</span
+                        >{$replaceHooks[`${type}Hooks`].length}</span
                     >
                 </button>
             {/each}

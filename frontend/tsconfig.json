@@ -7,6 +7,9 @@
     "src/*.ts",
     "src/*.svelte"
   ],
+  "exclude": [
+    "tests/"
+  ],
   "compilerOptions": {
     "lib": [
       "ESNext",
@@ -52,6 +55,9 @@
   "references": [
     {
       "path": "./tsconfig.worker.json"
+    },
+    {
+      "path": "./tsconfig.test.json"
     }
   ]
 }

@@ -11,7 +11,10 @@
     "prepreview": "pnpm run build",
     "preview": "pnpm run serve",
     "serve": "pnpx http-server -p 5173 -c-1 dist/",
-    "format": "prettier --write 'src/**/*.{js,ts,svelte,json,md}' --plugin prettier-plugin-svelte"
+    "format": "prettier --write 'src/**/*.{js,ts,svelte,json,md}' --plugin prettier-plugin-svelte",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:ui": "vitest --ui"
   },
   "author": "",
   "license": "(Apache-2.0 OR CC-BY-NC-4.0)",
@@ -22,6 +25,10 @@
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^6.2.1",
     "@tailwindcss/postcss": "^4.1.13",
+    "@vitest/coverage-v8": "^4.0.6",
+    "@vitest/ui": "^4.0.6",
+    "happy-dom": "^20.0.10",
+    "jsdom": "^27.1.0",
     "lucide-svelte": "^0.544.0",
     "postcss": "^8.5.6",
     "prettier-plugin-svelte": "^3.4.0",
@@ -33,6 +40,8 @@
     "vite-plugin-comlink": "^5.3.0",
     "vite-plugin-pwa": "^1.0.3",
     "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^4.0.6",
+    "vitest-indexeddb": "^0.0.0",
     "workbox-precaching": "^7.3.0"
   },
   "dependencies": {
