@@ -29,7 +29,7 @@ import {
     applyOutputHooks,
     applyRequestHooks,
 } from "./replaceHookService";
-import { replace } from "$lib/utils/worker/replace.js";
+const { replace } = await import("$lib/utils/worker/replace.js");
 
 const apiManager = new APIManager();
 

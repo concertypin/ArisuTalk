@@ -17,7 +17,7 @@ import {
     unreadCounts,
 } from "../stores/chat";
 import { replaceHooks } from "../stores/replaceHooks";
-import { t } from "../../i18n";
+import { t } from "$root/i18n";
 import { saveToBrowserStorage } from "../../storage";
 import { secureStorage } from "../utils/secureStorage";
 import { getStorageKey } from "../utils/storageKey";

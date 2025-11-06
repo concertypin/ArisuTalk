@@ -7,14 +7,14 @@
  * These are newer OpenAI models that use the updated API parameter format
  */
 const MODELS_USING_MAX_COMPLETION_TOKENS = [
-  // GPT-5 series
-  "gpt-5",
-  "gpt-5-mini",
-  "gpt-5-nano",
-  // o3 series
-  "o3",
-  "o4-mini",
-  "o3-pro",
+    // GPT-5 series
+    "gpt-5",
+    "gpt-5-mini",
+    "gpt-5-nano",
+    // o3 series
+    "o3",
+    "o4-mini",
+    "o3-pro",
 ];
 
 /**
@@ -23,7 +23,7 @@ const MODELS_USING_MAX_COMPLETION_TOKENS = [
  * @returns {boolean} True if the model requires max_completion_tokens
  */
 export function shouldUseMaxCompletionTokens(model) {
-  return MODELS_USING_MAX_COMPLETION_TOKENS.includes(model);
+    return MODELS_USING_MAX_COMPLETION_TOKENS.includes(model);
 }
 
 /**
@@ -33,9 +33,9 @@ export function shouldUseMaxCompletionTokens(model) {
  * @returns {({max_tokens: number} | {max_completion_tokens: number})} An object with a single key, which is either `max_tokens` or `max_completion_tokens`.
  */
 export function getTokenLimitParameter(model, tokenLimit) {
-  const paramName = shouldUseMaxCompletionTokens(model)
-    ? "max_completion_tokens"
-    : "max_tokens";
+    const paramName = shouldUseMaxCompletionTokens(model)
+        ? "max_completion_tokens"
+        : "max_tokens";
 
-  return { [paramName]: tokenLimit };
+    return { [paramName]: tokenLimit };
 }

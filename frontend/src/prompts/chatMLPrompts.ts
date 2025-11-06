@@ -12,11 +12,11 @@ import groupChatPrompt from "../texts/groupChatMLPrompt.txt?raw";
 import openChatPrompt from "../texts/openChatMLPrompt.txt?raw";
 
 export const defaultChatMLPrompts = {
-  mainChat: mainPrompt,
-  characterSheet: characterSheetPrompt,
-  profileCreation: profilePrompt,
-  snsForce: snsForcePrompt,
-  naiSticker: naiStickerPrompt,
-  groupChat: groupChatPrompt,
-  openChat: openChatPrompt,
+    mainChat: mainPrompt,
+    characterSheet: characterSheetPrompt,
+    profileCreation: profilePrompt,
+    snsForce: snsForcePrompt,
+    naiSticker: naiStickerPrompt,
+    groupChat: groupChatPrompt,
+    openChat: openChatPrompt,
 };
