@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { t } from "../../../i18n";
-    import type { ReplaceRule } from "../../../types/replaceHook";
+    import { t } from "$root/i18n";
+    import type { ReplaceRule } from "$types/replaceHook";
 
     export let rule: ReplaceRule;
     export let isEditing = false;
@@ -180,7 +180,7 @@
         padding: 0.8rem;
         border: 1px solid var(--color-border, #374151);
         border-radius: 0.3rem;
-        background: white;
+        background: var(--color-bg-primary, #111827);
         transition: all 0.2s ease;
     }
 

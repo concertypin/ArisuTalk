@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { t } from "../../i18n";
+    import { t } from "$root/i18n";
     import { applyHooksByType } from "../services/replaceHookService";
 
     export let hookType: "input" | "output" | "request" | "display" = "input";

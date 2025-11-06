@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { t } from "../../../i18n";
+    import { t } from "$root/i18n";
     import type { ReplaceHook, ReplaceRule } from "../../../types/replaceHook";
     import { generateId } from "../../stores/replaceHooks";
     import RuleItem from "./RuleItem.svelte";
