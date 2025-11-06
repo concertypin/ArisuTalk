@@ -1,16 +1,17 @@
 <script lang="ts">
     import { onMount, onDestroy } from "svelte";
-    import { t } from "../../../../i18n.js";
+    import { t } from "$root/i18n";
     import { isPromptModalVisible } from "../../../stores/ui";
     import { prompts } from "../../../stores/prompts";
     import PromptSection from "./PromptSection.svelte";
     import HookManager from "../HookManager.svelte";
     import { X, Download, Upload, RefreshCw } from "lucide-svelte";
     import { fade } from "svelte/transition";
+    import type { PromptStorageType } from "$types/Prompt";
 
     type TabType = "prompts" | "hooks";
 
-    let promptData = {};
+    let promptData: PromptStorageType = {};
     let activeTab: TabType = "prompts";
 
     const promptSections = [
@@ -51,7 +52,11 @@
             title: t("promptModal.openChatPrompt"),
             description: t("promptModal.openChatPromptDescription"),
         },
-    ];
+    ] satisfies {
+        key: keyof PromptStorageType;
+        title: string;
+        description: string;
+    }[];
 
     async function handleSave() {
         await prompts.save(promptData);

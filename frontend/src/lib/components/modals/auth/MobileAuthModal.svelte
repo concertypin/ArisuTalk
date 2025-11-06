@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { fade } from "svelte/transition";
-    import { t } from "../../../../i18n.js";
+    import { t } from "$root/i18n";
     import {
         auth,
         initializeAuth,

@@ -1,7 +1,7 @@
 <script>
     import { onMount, onDestroy } from "svelte";
     import { get } from "svelte/store";
-    import { t } from "../../../../i18n.js";
+    import { t } from "$root/i18n";
     import {
         characters,
         editingCharacter,
