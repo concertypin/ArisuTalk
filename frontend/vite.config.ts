@@ -1,6 +1,6 @@
 /// <reference types="vitest/config" />
 
-import { defineConfig, loadEnv, UserConfig } from "vite";
+import { defineConfig, loadEnv, UserConfig, type PluginOption } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import tsconfigPaths from "vite-tsconfig-paths";
 import getEnvVar from "./script/envbuild";
@@ -27,6 +27,28 @@ export default defineConfig(async (ctx) => {
             JSON.stringify(v),
         ])
     );
+    const plugin: PluginOption[] = [
+        tsconfigPaths(),
+
+        checker({
+            /**
+             * @todo The error should be fixed, since there's so many errors now. Disabled for now since it works anyway.
+             */
+            typescript: env.STRICT
+                ? { tsconfigPath: "./tsconfig.json" }
+                : false,
+        }),
+        checker({
+            typescript: { tsconfigPath: "./tsconfig.worker.json" },
+        }),
+        comlink(),
+        svelte({
+            compilerOptions: {
+                dev: mode !== "production",
+            },
+        }),
+        ...(mode === "production" ? prodOnlyPlugin : []),
+    ];
     let baseConfig: UserConfig = {
         server: {
             open: "index.html",
@@ -50,28 +72,7 @@ export default defineConfig(async (ctx) => {
         },
         clearScreen: false,
         publicDir: "static",
-        plugins: [
-            tsconfigPaths(),
-
-            checker({
-                /**
-                 * @todo The error should be fixed, since there's so many errors now. Disabled for now since it works anyway.
-                 */
-                typescript: env.STRICT
-                    ? { tsconfigPath: "./tsconfig.json" }
-                    : false,
-            }),
-            checker({
-                typescript: { tsconfigPath: "./tsconfig.worker.json" },
-            }),
-            comlink(),
-            svelte({
-                compilerOptions: {
-                    dev: mode !== "production",
-                },
-            }),
-            ...(mode === "production" ? prodOnlyPlugin : []),
-        ],
+        plugins: plugin,
         define: defineConfigReady,
         test: {
             globals: true,

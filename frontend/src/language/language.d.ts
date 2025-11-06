@@ -534,6 +534,26 @@ type LanguageModalReplaceHooks = {
     addRule: string;
     title: string;
     subtitle: string;
+    noRules: string;
+    newHook: string;
+    hookName: string;
+    hookNamePlaceholder: string;
+    hookDescription: string;
+    hookDescriptionPlaceholder: string;
+    enableHook: string;
+    rules: string;
+    addRule: string;
+    unnamedRule: string;
+    ruleName: string;
+    ruleNamePlaceholder: string;
+    from: string;
+    fromPlaceholder: string;
+    to: string;
+    toPlaceholder: string;
+    useRegex: string;
+    caseSensitive: string;
+    editHook: string;
+    deleteConfirm: string;
 };
 type LanguageGroupChat = {
     groupChat: string;

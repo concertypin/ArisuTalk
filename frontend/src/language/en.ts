@@ -1,4 +1,4 @@
-import type { LanguageStrings } from "language/language";
+import type { LanguageStrings } from "$root/language/language";
 
 const enCommon: LanguageStrings["common"] = {
     cancel: "Cancel",
@@ -788,6 +788,7 @@ const enUI: LanguageStrings["ui"] = {
     generate: "Generate",
 };
 const enReplaceHooks: LanguageStrings["modal"]["replaceHooks"] = {
+    unnamedRule: "Unnamed Rule",
     inputType: "Input",
     outputType: "Output",
     requestType: "Request",
@@ -812,6 +813,16 @@ const enReplaceHooks: LanguageStrings["modal"]["replaceHooks"] = {
     title: "Text Replace Hooks",
     subtitle:
         "Apply text transformations at user input, AI response, API request, or display stages.",
+    ruleName: "Rule Name",
+    ruleNamePlaceholder: "Enter a name for this rule",
+    from: "From",
+    fromPlaceholder: "Text to replace",
+    to: "To",
+    toPlaceholder: "Replacement text",
+    useRegex: "Use Regex",
+    caseSensitive: "Case Sensitive",
+    editHook: "Edit Hook",
+    deleteConfirm: "Are you sure you want to delete this hook?",
 };
 const enModal: LanguageStrings["modal"] = {
     noSpaceError: {

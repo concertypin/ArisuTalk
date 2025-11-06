@@ -1,4 +1,4 @@
-import type { LanguageStrings } from "language/language";
+import type { LanguageStrings } from "$root/language/language";
 
 const koCommon: LanguageStrings["common"] = {
     cancel: "취소",
@@ -108,6 +108,7 @@ const koCharacterModalSlider: LanguageStrings["characterModalSlider"] = {
 };
 
 const koReplaceHooks: LanguageStrings["modal"]["replaceHooks"] = {
+    unnamedRule: "이름 없는 규칙",
     title: "텍스트 치환 훅",
     subtitle:
         "사용자 입력, AI 응답, API 요청, 화면 표시 시점에 텍스트 변환을 적용하세요.",
@@ -128,8 +129,29 @@ const koReplaceHooks: LanguageStrings["modal"]["replaceHooks"] = {
     addHook: "훅 추가",
 
     noHooks: "설정된 훅이 없습니다. 새 훅을 추가해보세요.",
+    noRules:
+        "규칙이 없습니다. 텍스트 변환 동작을 정의하려면 규칙을 추가하세요.",
+    newHook: "새 훅",
+    hookName: "훅 이름",
+    hookNamePlaceholder: "이 훅의 설명적인 이름을 입력하세요",
+    hookDescription: "설명",
+    hookDescriptionPlaceholder: "선택사항: 이 훅이 하는 일을 설명하세요",
+    enableHook: "훅 활성화",
+    rules: "규칙",
+    addRule: "규칙 추가",
+    ruleName: "규칙 이름",
+    ruleNamePlaceholder: "규칙 이름을 입력하세요",
+    from: "찾을 텍스트",
+    fromPlaceholder: "변환할 텍스트를 입력하세요",
+    to: "바꿀 텍스트",
+    toPlaceholder: "어떻게 바꿀지 입력하세요",
+    useRegex: "정규식 사용",
+    caseSensitive: "대소문자 구분",
+    editHook: "훅 수정",
+    deleteConfirm: "이 훅과 모든 규칙을 정말로 삭제하시겠습니까?",
 };
 const koStickerPreview: LanguageStrings["stickerPreview"] = {
+    rerollSticker: "스티커 리롤",
     title: "스티커 프리뷰",
     generatedStickers: "생성된 스티커",
     noStickers: "생성된 스티커가 없습니다.",
@@ -147,17 +169,6 @@ const koStickerPreview: LanguageStrings["stickerPreview"] = {
     generatedAt: "생성 시간",
     fileSize: "파일 크기",
     dimensions: "크기",
-    addHook: "훅 추가",
-    noRules:
-        "규칙이 없습니다. 텍스트 변환 동작을 정의하려면 규칙을 추가하세요.",
-    newHook: "새 훅",
-    hookName: "훅 이름",
-    hookNamePlaceholder: "이 훅의 설명적인 이름을 입력하세요",
-    hookDescription: "설명",
-    hookDescriptionPlaceholder: "선택사항: 이 훅이 하는 일을 설명하세요",
-    enableHook: "훅 활성화",
-    rules: "규칙",
-    addRule: "규칙 추가",
     rerolling: "리롤 중...",
     rerollComplete: "리롤 완료",
     rerollFailed: "리롤 실패",
