@@ -1,12 +1,12 @@
-import { get } from "svelte/store";
 import { replaceHooks } from "$lib/stores/replaceHooks";
 import type {
-    ReplaceHook,
-    HookResult,
     ApplyHookOptions,
-    ReplaceHooksConfig,
+    HookResult,
+    ReplaceHook,
     ReplaceHookType,
+    ReplaceHooksConfig,
 } from "$types/replaceHook";
+import { get } from "svelte/store";
 
 // Note: we dynamically import the worker `replace` function at call sites so
 // tests can mock the module with `vi.mock(...)` even if the mock is declared
@@ -282,13 +282,12 @@ export async function applyHooksByType(
     }
 
     // Use configured array order. The store defines execution order (index 0 runs first).
-    const sortedHooks = allHooks.sort((a, b) => a.priority - b.priority);
 
     let result = text;
     const appliedRulesInfo: HookResult["appliedRules"] = [];
     let appliedHookCount = 0;
 
-    for (const hook of sortedHooks) {
+    for (const hook of allHooks) {
         // Skip if in exclusion list
         if (options.excludeHookIds?.includes(hook.id)) continue;
 

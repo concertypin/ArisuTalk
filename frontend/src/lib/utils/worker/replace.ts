@@ -21,10 +21,15 @@ export async function replace(
         replace: string;
     }[]
 ): Promise<string> {
-    if (!replaceWorker) {
-        replaceWorker = new ComlinkWorker(new URL(RegexWorkerURL), {
-            name: "ReplaceWorker",
-        });
+    try {
+        if (!replaceWorker) {
+            replaceWorker = new ComlinkWorker(new URL(RegexWorkerURL), {
+                name: "ReplaceWorker",
+            });
+        }
+        return replaceWorker.replace(input, ...pattern);
+    } catch (e) {
+        console.error("Error in replace worker:", e);
+        return input;
     }
-    return replaceWorker.replace(input, ...pattern);
 }
