@@ -1,7 +1,7 @@
 <script>
     import { onMount } from "svelte";
     import { t } from "$root/i18n";
-    import { settings } from "../../../../stores/settings";
+    import { settings } from "$stores/settings";
     import {
         Image,
         Cpu,
@@ -22,10 +22,10 @@
         Trash2,
         Loader2,
     } from "lucide-svelte";
-    import { NovelAIClient } from "../../../../api/novelai";
-    import { DEFAULT_EMOTIONS } from "../../../../../defaults";
+        import { NovelAIClient } from "$root/lib/api/novelai";
+    import { DEFAULT_EMOTIONS } from "$root/defaults";
 
-    import { characters } from "../../../../stores/character";
+    import { characters } from "$stores/character";
 
     if (!$settings.naiSettings) {
         $settings.naiSettings = {};

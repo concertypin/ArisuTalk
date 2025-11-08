@@ -1,93 +1,71 @@
-import { t } from "$root/i18n";
+import type NaiSettings from "$components/modals/settings/NaiSettings.svelte";
+import {
+    NOVELAI_MODELS,
+    NOVELAI_UNLIMITED_SIZES,
+    type NovelAIModel,
+} from "$constants/novelaiConfig";
+import type { Character } from "$types/character";
+import type { NaiRawRequest } from "$types/novelai";
+import { fallbackChainAsync } from "$utils/fallbachChain";
 import pako from "pako";
+
 import { addLog } from "../services/logService";
 
+type NAIEmotion = {
+    //todo
+};
+type BinaryData = Uint8Array<ArrayBufferLike>;
+const JSZip = await import("jszip");
 /**
  * NovelAI Image Generation Client
  * 호감도 기반 캐릭터 스티커 자동 생성을 위한 NAI API 클라이언트
  */
 export class NovelAIClient {
-    constructor(apiKey, options = {}) {
+    apiKey: string;
+    /**
+     * Client options
+     */
+    options: {
+        /**
+         * Rate limiting options in milliseconds.
+         * @default 10000 (10 seconds minimum delay)
+         */
+        minDelay: number;
+        /**
+         * Maximum additional random delay in milliseconds.
+         * @default 5000 (0-5 seconds)
+         */
+        maxAdditionalDelay: number;
+    };
+    /**
+     * API Base URL.
+     * @default "https://image.novelai.net"
+     */
+    baseUrl: string;
+    /**
+     * AbortController for current request.
+     * If not null, there is an ongoing request.
+     */
+    currentRequest: null | AbortController;
+    lastGenerationTime: number;
+
+    constructor(apiKey: string, options: any = {}) {
         this.apiKey = apiKey;
         this.baseUrl = "https://image.novelai.net";
         this.options = {
-            minDelay: 10000, // 최소 10초 대기
-            maxAdditionalDelay: 5000, // 추가 0~5초 랜덤 (총 10~15초)
+            minDelay: 10000,
+            maxAdditionalDelay: 5000,
             ...options,
         };
-        this.currentRequest = null; // 현재 진행 중인 요청 추적
+        this.currentRequest = null;
         this.lastGenerationTime = 0;
     }
 
     /**
-     * 사용 가능한 NAI 모델 목록 (실제 API 모델명 사용)
+     * Calculate delay time for rate limiting.
+     * @returns {number} Delay time in milliseconds.
      */
-    static MODELS = {
-        "nai-diffusion-4-5-full": {
-            name: "NAI Diffusion 4.5 Full",
-            version: "v4.5",
-            supportsCharacterPrompts: true,
-            supportsVibeTransfer: true,
-        },
-        "nai-diffusion-4-full": {
-            name: "NAI Diffusion 4 Full",
-            version: "v4",
-            supportsCharacterPrompts: true,
-            supportsVibeTransfer: true,
-        },
-        "nai-diffusion-3": {
-            name: "NAI Diffusion 3",
-            version: "v3",
-            supportsCharacterPrompts: false,
-            supportsVibeTransfer: true,
-        },
-        "nai-diffusion-furry-3": {
-            name: "NAI Diffusion Furry 3",
-            version: "v3-furry",
-            supportsCharacterPrompts: false,
-            supportsVibeTransfer: true,
-        },
-    };
-
-    /**
-     * 사용 가능한 샘플러 목록
-     */
-    static SAMPLERS = [
-        "k_euler_ancestral",
-        "k_euler",
-        "k_lms",
-        "k_heun",
-        "k_dpm_2",
-        "k_dpm_2_ancestral",
-        "k_dpmpp_2s_ancestral",
-        "k_dpmpp_2m",
-        "ddim_v3",
-    ];
-
-    /**
-     * 노이즈 스케줄 목록
-     */
-    static NOISE_SCHEDULES = [
-        "native",
-        "karras",
-        "exponential",
-        "polyexponential",
-    ];
-
-    /**
-     * 무제한 사용 가능한 기본 사이즈 목록
-     */
-    static UNLIMITED_SIZES = [
-        { width: 832, height: 1216, name: "portrait" }, // Normal Portrait
-        { width: 1216, height: 832, name: "landscape" }, // Normal Landscape
-        { width: 1024, height: 1024, name: "square" }, // Normal Square
-    ];
-
-    /**
-     * 안전한 생성을 위한 대기 시간 계산
-     * @returns {number} 대기 시간 (밀리초)
-     */
-    calculateDelay() {
+    calculateDelay(): number {
         const randomDelay = Math.floor(
             Math.random() * this.options.maxAdditionalDelay
         );
@@ -95,66 +73,48 @@ export class NovelAIClient {
     }
 
     /**
-     * ZIP 파일에서 이미지 추출 (JSZip 사용 + fallback 시스템)
-     * @param {Uint8Array} zipData - ZIP 파일 데이터
-     * @returns {Promise<Uint8Array>} 추출된 이미지 데이터
+     * Extract image from ZIP data using multiple strategies.
+     * @todo This is CPU intensive and should be done in a Web Worker if possible.
+     * @param {Uint8Array} zipData - ZIP data containing the image.
+     * @returns {Promise<Uint8Array>} Extracted image data.
      */
-    async extractImageFromZip(zipData) {
-        // console.log('[NAI] ZIP 파일 처리 시작, 크기:', zipData.length);
+    async extractImageFromZip(zipData: Uint8Array): Promise<BinaryData> {
+        return await fallbackChainAsync(
+            async () => {
+                // Method 1: JSZip
+                const zip = await JSZip.loadAsync(zipData);
+                const zipEntries = Object.keys(zip.files);
 
-        // 방법 1: JSZip 사용 (가장 표준적인 방법)
-        try {
-            const JSZip = (await import("jszip")).default;
-            const zip = await JSZip.loadAsync(zipData.buffer);
-            const zipEntries = Object.keys(zip.files);
-
-            if (zipEntries.length > 0) {
-                const imageEntry = zip.file(zipEntries[0]);
-                if (imageEntry) {
-                    // console.log('[NAI] JSZip으로 이미지 엔트리 추출:', zipEntries[0]);
-                    const imageBytes = await imageEntry.async("uint8array");
-                    // console.log('[NAI] JSZip 추출 성공:', imageBytes.length, '바이트');
-                    return imageBytes;
+                if (zipEntries.length > 0) {
+                    const imageEntry = zip.file(zipEntries[0]);
+                    if (imageEntry) {
+                        const imageBytes = await imageEntry.async("uint8array");
+                        return imageBytes;
+                    }
                 }
-            }
-        } catch (jsZipError) {
-            // console.warn('[NAI] JSZip 실패:', jsZipError.message);
-        }
-
-        // 방법 2: PNG/JPEG 시그니처를 직접 찾기
-        try {
-            const imageData = await this.extractImageBySignature(zipData);
-            // console.log('[NAI] 시그니처 검색으로 이미지 추출 성공:', imageData.length, '바이트');
-            return imageData;
-        } catch (signatureError) {
-            // console.warn('[NAI] 시그니처 검색 실패:', signatureError.message);
-        }
-
-        // 방법 3: 표준 ZIP 파싱 시도
-        try {
-            const imageData = await this.parseStandardZip(zipData);
-            // console.log('[NAI] 표준 ZIP 파싱으로 이미지 추출 성공:', imageData.length, '바이트');
-            return imageData;
-        } catch (zipError) {
-            // console.warn('[NAI] 표준 ZIP 파싱 실패:', zipError.message);
-        }
-
-        // 방법 4: 원본 데이터가 이미 이미지인지 확인
-        if (this.isValidImageData(zipData)) {
-            // console.log('[NAI] 원본 데이터가 이미지임을 확인');
-            return zipData;
-        }
-
-        // 최후 수단: 원본 데이터 반환
-        // console.warn('[NAI] 모든 방법 실패, 원본 데이터 그대로 사용');
-        return zipData;
+                throw new Error("JSZip으로 이미지 추출 실패");
+            },
+            async () => await this.extractImageBySignature(zipData),
+            async () => await this.parseStandardZip(zipData),
+            async () => {
+                if (this.isValidImageData(zipData)) {
+                    return zipData;
+                }
+                throw new Error("unable to find valid image data in raw data");
+            },
+            // Method 4: Is it already image data?
+            async () => zipData
+        )
+            .fallback(zipData) // last resort
+            .run(true);
     }
 
     /**
-     * 표준 ZIP 파싱
+     * Parse standard ZIP structure to extract first file.
+     * @todo This is CPU intensive and should be done in a Web Worker if possible.
      */
-    async parseStandardZip(zipData) {
-        // ZIP 파일 끝에서 Central Directory End Record 찾기
+    async parseStandardZip(zipData: BinaryData): Promise<BinaryData> {
+        // Find Central Directory End Record from the end of the file
         let eocdOffset = -1;
         for (
             let i = zipData.length - 22;
@@ -174,30 +134,30 @@ export class NovelAIClient {
 
         if (eocdOffset === -1) {
             throw new Error(
-                "ZIP End of Central Directory 레코드를 찾을 수 없습니다"
+                "Cannot find End of Central Directory record in ZIP file"
             );
         }
 
-        // Central Directory 정보 읽기
+        // Read Central Directory information
         const dataView = new DataView(zipData.buffer, zipData.byteOffset);
         const centralDirOffset = dataView.getUint32(eocdOffset + 16, true);
         const totalEntries = dataView.getUint16(eocdOffset + 8, true);
 
         if (totalEntries === 0) {
-            throw new Error("ZIP 파일에 파일이 없습니다");
+            throw new Error("No entries found in ZIP file");
         }
 
-        // 첫 번째 파일의 Local Header 찾기
+        // Read first file header in Central Directory
         const localHeaderOffset = dataView.getUint32(
             centralDirOffset + 42,
             true
         );
 
         if (localHeaderOffset + 30 > zipData.length) {
-            throw new Error("Local Header가 파일 범위를 벗어났습니다");
+            throw new Error("Local Header offset is out of bounds");
         }
 
-        // Local Header 정보 읽기
+        // Local Header information reading
         const localFileNameLength = dataView.getUint16(
             localHeaderOffset + 26,
             true
@@ -212,7 +172,7 @@ export class NovelAIClient {
             true
         );
 
-        // 파일 데이터 시작 위치
+        // File data starting offset calculation
         const fileDataOffset =
             localHeaderOffset +
             30 +
@@ -220,7 +180,7 @@ export class NovelAIClient {
             localExtraFieldLength;
 
         if (fileDataOffset + compressedSize > zipData.length) {
-            throw new Error("파일 데이터가 ZIP 파일 범위를 벗어났습니다");
+            throw new Error("File data offset is out of bounds");
         }
 
         const fileData = zipData.slice(
@@ -229,26 +189,28 @@ export class NovelAIClient {
         );
 
         if (fileData.length === 0) {
-            throw new Error("추출된 파일 데이터가 비어있습니다");
+            throw new Error("Extracted file data is empty");
         }
 
-        // 압축 방법에 따른 처리
+        // Decompression based on method
         if (compressionMethod === 0) {
-            // 저장된 형태 (압축 없음)
+            // No compression
             return fileData;
         } else if (compressionMethod === 8) {
-            // Deflate 압축
+            // Deflate compression
             return await this.decompressDeflate(fileData);
         } else {
-            throw new Error(`지원하지 않는 압축 방법: ${compressionMethod}`);
+            throw new Error(
+                `Unsupported compression method: ${compressionMethod}`
+            );
         }
     }
 
     /**
-     * 이미지 시그니처로 직접 추출
+     * Extract image by searching for PNG/JPEG signatures.
      */
-    async extractImageBySignature(zipData) {
-        // PNG 시그니처 찾기 (0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A)
+    async extractImageBySignature(zipData: BinaryData): Promise<BinaryData> {
+        // finding PNG signature (0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A)
         for (let i = 0; i < zipData.length - 8; i++) {
             if (
                 zipData[i] === 0x89 &&
@@ -256,10 +218,10 @@ export class NovelAIClient {
                 zipData[i + 2] === 0x4e &&
                 zipData[i + 3] === 0x47
             ) {
-                // PNG 시그니처 발견 - PNG 파일 끝까지 찾기
+                // PNG signature found - find the end of PNG file
                 const pngStart = i;
 
-                // PNG는 IEND 청크로 끝남 (0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82)
+                // PNG ends with IEND chunk (0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82)
                 for (let j = pngStart + 8; j < zipData.length - 8; j++) {
                     if (
                         zipData[j] === 0x49 &&
@@ -276,15 +238,15 @@ export class NovelAIClient {
                     }
                 }
 
-                // IEND를 찾지 못했으면 파일 끝까지 반환
+                // Return rest of data if IEND not found
                 return zipData.slice(pngStart);
             }
         }
 
-        // JPEG 시그니처 찾기 (0xFF, 0xD8)
+        // finding JPEG signature (0xFF, 0xD8)
         for (let i = 0; i < zipData.length - 2; i++) {
             if (zipData[i] === 0xff && zipData[i + 1] === 0xd8) {
-                // JPEG 시그니처 발견 - JPEG 파일 끝까지 찾기 (0xFF, 0xD9)
+                // JPEG signature found - find the end of JPEG file (0xFF, 0xD9)
                 const jpegStart = i;
 
                 for (let j = jpegStart + 2; j < zipData.length - 2; j++) {
@@ -294,7 +256,7 @@ export class NovelAIClient {
                     }
                 }
 
-                // EOI를 찾지 못했으면 파일 끝까지 반환
+                // Return rest of data if EOI not found
                 return zipData.slice(jpegStart);
             }
         }
@@ -379,12 +341,12 @@ export class NovelAIClient {
     }
 
     /**
-     * 유효한 이미지 데이터인지 확인
+     * Check if data is valid image data (PNG or JPEG).
      */
-    isValidImageData(data) {
+    isValidImageData(data: BinaryData) {
         if (!data || data.length < 8) return false;
 
-        // PNG 시그니처 (전체 8바이트)
+        // PNG Signature(8 bytes)
         if (
             data[0] === 0x89 &&
             data[1] === 0x50 &&
@@ -398,7 +360,7 @@ export class NovelAIClient {
             return true;
         }
 
-        // JPEG 시그니처 (SOI)
+        // JPEG Signature (SOI)
         if (data[0] === 0xff && data[1] === 0xd8) {
             return true;
         }
@@ -408,10 +370,11 @@ export class NovelAIClient {
 
     /**
      * Deflate 압축된 데이터를 해제 (pako 라이브러리 사용)
+     * @todo This is CPU intensive and should be done in a Web Worker if possible.
      * @param {Uint8Array} compressedData - 압축된 데이터
      * @returns {Promise<Uint8Array>} 압축 해제된 데이터
      */
-    async decompressDeflate(compressedData) {
+    async decompressDeflate(compressedData: Uint8Array): Promise<Uint8Array> {
         try {
             // pako 라이브러리를 사용하여 안정적으로 deflate 압축 해제
             const decompressed = pako.inflateRaw(compressedData);
@@ -424,7 +387,7 @@ export class NovelAIClient {
                 // 모든 방법 실패 시 원본 데이터 반환
                 console.warn(
                     "[NAI] Deflate 압축 해제 실패, 원본 데이터 사용:",
-                    fallbackError.message
+                    String(fallbackError)
                 );
                 return compressedData;
             }
@@ -433,10 +396,11 @@ export class NovelAIClient {
 
     /**
      * 대체 deflate 압축 해제 (개선된 구현)
+     * @todo This is CPU intensive and should be done in a Web Worker if possible.
      * @param {Uint8Array} data - 압축된 데이터
      * @returns {Promise<Uint8Array>} 압축 해제된 데이터
      */
-    async fallbackDeflateDecompress(data) {
+    async fallbackDeflateDecompress(data: Uint8Array): Promise<Uint8Array> {
         try {
             // 먼저 압축되지 않은 블록으로 deflate 파싱 시도
             const result = [];
@@ -500,69 +464,83 @@ export class NovelAIClient {
     }
 
     /**
-     * 마지막 생성으로부터 충분한 시간이 지났는지 확인
-     * @returns {boolean} 생성 가능 여부
+     * Check if generation is allowed based on rate limiting.
+     * @returns {boolean} True if generation is allowed, false otherwise.
      */
-    canGenerate() {
+    canGenerate(): boolean {
         const now = Date.now();
         const timeSinceLastGeneration = now - this.lastGenerationTime;
         const requiredDelay =
-            this.options.minDelay + this.options.maxAdditionalDelay; // 최대 대기시간 사용
+            this.options.minDelay + this.options.maxAdditionalDelay; // Maximum possible delay
         return timeSinceLastGeneration >= requiredDelay;
     }
 
     /**
-     * 모델명 유효성 검증
-     * @param {string} modelName - 검증할 모델명
-     * @returns {string|null} 유효한 모델명 또는 null
+     * Validate and correct model name.
+     * @param modelName - Model name to validate.
+     * @returns Model name if valid, null otherwise.
      */
-    validateModel(modelName) {
+    validateModel(modelName: string): keyof typeof NOVELAI_MODELS | null {
+        type ModelKey = keyof typeof NOVELAI_MODELS;
+
+        function isExactModelKey(key: string): key is ModelKey {
+            // Helper function to check exact match
+            // Idk why TS is not recognizing type without this
+            return key in NOVELAI_MODELS;
+        }
+
         if (!modelName || typeof modelName !== "string") {
             return null;
         }
 
-        // 정확한 모델명 체크
-        if (NovelAIClient.MODELS[modelName]) {
+        // Exact match first
+        if (isExactModelKey(modelName)) {
             return modelName;
         }
 
-        // 부분 매칭으로 올바른 모델명 찾기
-        const modelKey = Object.keys(NovelAIClient.MODELS).find((key) => {
-            const model = NovelAIClient.MODELS[key];
-            return (
-                key.includes(modelName.toLowerCase()) ||
-                model.name.toLowerCase().includes(modelName.toLowerCase()) ||
-                model.version === modelName
-            );
-        });
+        // Partial match search
+        const modelKey = (Object.keys(NOVELAI_MODELS) as ModelKey[]).find(
+            (key) => {
+                const model: NovelAIModel | undefined = NOVELAI_MODELS[key];
+                return (
+                    key.toLowerCase().includes(modelName.toLowerCase()) || // Ignore case partial match
+                    model?.name
+                        .toLowerCase()
+                        .includes(modelName.toLowerCase()) || // Name partial match
+                    model?.version === modelName // Version exact match
+                );
+            }
+        );
 
         if (modelKey) {
-            // console.warn(`[NAI] 모델명 자동 수정: "${modelName}" → "${modelKey}"`);
+            console.warn(
+                `[NAI] Model name autofix: "${modelName}" → "${modelKey}"`
+            );
             return modelKey;
         }
 
         console.error(
-            `[NAI] 지원하지 않는 모델명: "${modelName}". 기본 모델 사용.`
+            `[NAI] unrecognized model name: "${modelName}", fallback to default`
         );
         return null;
     }
 
     /**
-     * 다음 생성 가능 시간까지 대기
+     * Wait for the next generation slot based on rate limiting.
+     * Resolves when it's safe to generate the next image.
      * @returns {Promise<void>}
      */
-    async waitForNextGeneration() {
+    async waitForNextGeneration(): Promise<void> {
         const now = Date.now();
         const timeSinceLastGeneration = now - this.lastGenerationTime;
-        // 더 안전한 대기 시간 계산 (최소 대기시간 + 약간의 여유)
+        // Safe margin: half of min + max delay
         const requiredDelay =
             this.options.minDelay +
             Math.floor(this.options.maxAdditionalDelay / 2);
 
         if (timeSinceLastGeneration < requiredDelay) {
             const waitTime = requiredDelay - timeSinceLastGeneration;
-            // console.log(`[NAI] API 제한 방지를 위해 ${Math.ceil(waitTime / 1000)}초 대기 중...`);
-            await new Promise((resolve) => setTimeout(resolve, waitTime));
+            return new Promise((resolve) => setTimeout(resolve, waitTime));
         }
     }
 
@@ -573,7 +551,18 @@ export class NovelAIClient {
      * @param {Object} options - 생성 옵션
      * @returns {Object} 프롬프트 정보
      */
-    buildPrompt(character, emotionData, options = {}) {
+    buildPrompt(
+        character: Character,
+        emotionData: string | NAIEmotion,
+        options: object = {}
+    ): {
+        prompt: string;
+        negative_prompt: string;
+        emotion: string | NAIEmotion;
+        character_name: any;
+        characterPrompts: { prompt: string; weight: number }[];
+        naiSettings: any;
+    } {
         console.log("[NAI buildPrompt] emotionData:", emotionData);
         const { naiSettings = {} } = options;
 
@@ -616,7 +605,7 @@ export class NovelAIClient {
         }
 
         // 캐릭터 프롬프트 배열 구성 (v4/v4.5 전용)
-        let characterPrompts = [];
+        let characterPrompts: { prompt: string; weight: number }[] = [];
         if (naiSettings.useCharacterPrompts && characterPrompt.trim()) {
             characterPrompts = [
                 {
@@ -641,7 +630,7 @@ export class NovelAIClient {
      * @param {Object} params - 생성 파라미터
      * @returns {Promise<Object>} 생성 결과
      */
-    async generateImage(params) {
+    async generateImage(params: NaiSettings): Promise<object> {
         const {
             // 기본 프롬프트
             prompt,
@@ -688,7 +677,7 @@ export class NovelAIClient {
         await this.waitForNextGeneration();
 
         // 모델 버전에 따른 올바른 JSON 구조 사용
-        let requestBody;
+        let requestBody: NaiRawRequest;
 
         if (model === "nai-diffusion-3" || model === "nai-diffusion-furry-3") {
             // v3 모델용 구조 - parameters 객체 사용
@@ -705,6 +694,10 @@ export class NovelAIClient {
                     n_samples: 1,
                     ucPreset: 0,
                     qualityToggle: true,
+                    /**
+                     * @todo Needs verify that `uc` is existing field for API
+                     */
+                    //@ts-ignore
                     uc: negative_prompt,
                     seed: seed || Math.floor(Math.random() * 9999999999),
                     // SMEA 및 고급 설정 (v3 전용)
@@ -714,7 +707,7 @@ export class NovelAIClient {
                     cfg_rescale, // CFG Rescale
                     noise_schedule, // 노이즈 스케줄
                 },
-            };
+            } satisfies NaiRawRequest;
         } else {
             // v4/v4.5 모델용 구조
             requestBody = {
@@ -733,7 +726,7 @@ export class NovelAIClient {
                     ucPreset: 0,
                     qualityToggle: true,
                     negative_prompt: negative_prompt,
-                    // v4 전용 프롬프트 구조
+                    // v4-specific settings
                     v4_prompt: {
                         use_coords: false,
                         use_order: false,
@@ -751,7 +744,7 @@ export class NovelAIClient {
                         },
                     },
                 },
-            };
+            } satisfies NaiRawRequest;
         }
 
         // 고급 기능들은 기본 구현에서 제외 (필요시 나중에 추가)
@@ -810,7 +803,7 @@ export class NovelAIClient {
                         imageData = bytes;
                     }
                 } catch (zipError) {
-                    // console.warn('[NAI] ZIP 파일 처리 실패, 원본 데이터 사용:', zipError.message);
+                    // console.warn('[NAI] ZIP 파일 처리 실패, 원본 데이터 사용:', zipString(error));
                     imageData = bytes;
                 }
             } else {
@@ -839,15 +832,22 @@ export class NovelAIClient {
             const mimeType = isPNG
                 ? "image/png"
                 : isJPEG
-                    ? "image/jpeg"
-                    : "image/png"; // 기본값 PNG
+                  ? "image/jpeg"
+                  : "image/png"; // 기본값 PNG
             const blob = new Blob([imageData], { type: mimeType });
-            const dataUrl = await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result);
-                reader.onerror = () => reject(new Error("FileReader 오류"));
-                reader.readAsDataURL(blob);
-            });
+            const dataUrl = await new Promise<string | null>(
+                (resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () =>
+                        resolve(
+                            typeof reader.result === "string"
+                                ? reader.result
+                                : null
+                        );
+                    reader.onerror = () => reject(new Error("FileReader 오류"));
+                    reader.readAsDataURL(blob);
+                }
+            );
 
             // DataURL 검증 (더 관대하게)
             if (!dataUrl || !dataUrl.startsWith("data:")) {
@@ -869,12 +869,13 @@ export class NovelAIClient {
                 },
             };
         } catch (error) {
-            if (error.name === "AbortError") {
+            if (error instanceof DOMException && error.name === "AbortError") {
+                // https://developer.mozilla.org/en-US/docs/Web/API/AbortController/abort
                 // console.log("[NAI] 이미지 생성이 취소되었습니다");
                 throw new Error("이미지 생성이 사용자에 의해 취소되었습니다");
             }
             console.error("[NAI] 이미지 생성 실패:", error);
-            throw new Error(`이미지 생성에 실패했습니다: ${error.message}`);
+            throw new Error(`이미지 생성에 실패했습니다: ${String(error)}`);
         } finally {
             // 요청 완료 후 정리
             this.currentRequest = null;
@@ -905,7 +906,7 @@ export class NovelAIClient {
      * NAI 사용자 구독 정보 조회
      * @returns {Promise<Object>} 구독 정보
      */
-    async getUserSubscription() {
+    async getUserSubscription(): Promise<object> {
         if (!this.apiKey) {
             throw new Error("API key is not set.");
         }
@@ -938,7 +939,11 @@ export class NovelAIClient {
      * @param {Object} options - 생성 옵션
      * @returns {Promise<Object>} 스티커 데이터
      */
-    async generateSticker(character, emotion, options = {}) {
+    async generateSticker(
+        character: Character,
+        emotion: string | NAIEmotion,
+        options: object = {}
+    ): Promise<object> {
         const { naiSettings = {}, ...generateOptions } = options;
 
         // 캐릭터별 설정을 우선 사용, 없으면 전역 설정 사용
@@ -951,8 +956,8 @@ export class NovelAIClient {
             mergedSettings.preferredSize ||
             "square";
         const sizeConfig =
-            NovelAIClient.UNLIMITED_SIZES.find((s) => s.name === imageSize) ||
-            NovelAIClient.UNLIMITED_SIZES[2]; // 기본값: square
+            NOVELAI_UNLIMITED_SIZES.find((s) => s.name === imageSize) ||
+            NOVELAI_UNLIMITED_SIZES[2]; // 기본값: square
 
         // console.log('[NAI generateSticker] 이미지 크기 설정:', {
         //   preferredSize: mergedSettings.preferredSize,
@@ -975,7 +980,7 @@ export class NovelAIClient {
         });
 
         // 완전한 생성 파라미터 구성
-        const generationParams = {
+        const generationParams: NaiSettings = {
             // 기본 프롬프트
             prompt: promptData.prompt,
             negative_prompt: promptData.negative_prompt,
@@ -1003,12 +1008,12 @@ export class NovelAIClient {
             // Vibe Transfer 설정
             ...(naiSettings.vibeTransferEnabled && naiSettings.vibeTransferImage
                 ? {
-                    vibeTransferImage: naiSettings.vibeTransferImage,
-                    reference_strength:
-                        naiSettings.vibeTransferStrength || 0.6,
-                    reference_information_extracted:
-                        naiSettings.vibeTransferInformationExtracted || 1.0,
-                }
+                      vibeTransferImage: naiSettings.vibeTransferImage,
+                      reference_strength:
+                          naiSettings.vibeTransferStrength || 0.6,
+                      reference_information_extracted:
+                          naiSettings.vibeTransferInformationExtracted || 1.0,
+                  }
                 : {}),
 
             // 고급 설정
@@ -1101,7 +1106,7 @@ export class NovelAIClient {
         } catch (error) {
             logData.data.outputResponse = {
                 success: false,
-                error: error.message,
+                error: String(error),
             };
             addLog(logData);
             throw error;
@@ -1117,8 +1122,17 @@ export class NovelAIClient {
      * @param {Object} options - 생성 옵션
      * @returns {Promise<Object[]>} 생성된 스티커 목록
      */
-    async generateStickerBatch(character, emotions, options = {}) {
-        const results = [];
+    async generateStickerBatch(
+        character: object,
+        emotions: string[],
+        options: object = {}
+    ): Promise<object[]> {
+        const results: {
+            success: boolean;
+            sticker?: object;
+            error?: string;
+            emotion: string;
+        }[] = [];
         const { onProgress } = options;
 
         for (let i = 0; i < emotions.length; i++) {
@@ -1154,7 +1168,7 @@ export class NovelAIClient {
                 console.error(`[NAI] ${emotion} 스티커 생성 실패:`, error);
                 results.push({
                     success: false,
-                    error: error.message,
+                    error: String(error),
                     emotion,
                 });
 
@@ -1164,7 +1178,7 @@ export class NovelAIClient {
                         total: emotions.length,
                         emotion,
                         status: "error",
-                        error: error.message,
+                        error: String(error),
                     });
                 }
             }
@@ -1175,67 +1189,11 @@ export class NovelAIClient {
 }
 
 /**
- * NAI 일괄 생성 목록 (새로운 3필드 구조)
+ * Validate NovelAI API key format. This is a basic check, not a full verification.
+ * @param {string} apiKey - API key to validate
+ * @returns {boolean} Whether the API key is valid
  */
-export const DEFAULT_EMOTIONS = [
-    {
-        title: "기쁨",
-        emotion: "smiling, cheerful, bright eyes, joyful expression",
-        action: "",
-    },
-    {
-        title: "슬픔",
-        emotion: "sad expression, downcast eyes, melancholic, tears",
-        action: "",
-    },
-    {
-        title: "놀람",
-        emotion: "wide eyes, surprised, shocked expression, open mouth",
-        action: "",
-    },
-    {
-        title: "분노",
-        emotion: "angry, frowning, intense gaze, fierce expression",
-        action: "",
-    },
-    {
-        title: "사랑",
-        emotion: "loving gaze, romantic, heart eyes, affectionate",
-        action: "",
-    },
-    {
-        title: "부끄러움",
-        emotion: "blushing, shy, embarrassed, covering face",
-        action: "",
-    },
-    {
-        title: "혼란",
-        emotion: "confused, tilted head, questioning look",
-        action: "",
-    },
-    {
-        title: "졸림",
-        emotion: "sleepy, drowsy, tired, yawning",
-        action: "",
-    },
-    {
-        title: "흥분",
-        emotion: "excited, energetic, sparkling eyes",
-        action: "",
-    },
-    {
-        title: "무표정",
-        emotion: "neutral expression, calm, serene",
-        action: "",
-    },
-];
-
-/**
- * NAI API 키 검증
- * @param {string} apiKey - API 키
- * @returns {boolean} 유효성 여부
- */
-export function validateNAIApiKey(apiKey) {
+export function validateNAIApiKey(apiKey: string): boolean {
     return typeof apiKey === "string" && apiKey.trim().length > 0;
 }
 

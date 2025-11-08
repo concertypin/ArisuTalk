@@ -21,8 +21,9 @@
         Users,
         Trash2,
     } from "lucide-svelte";
-    import { settings } from "../../../stores/settings";
-    import { NovelAIClient, DEFAULT_EMOTIONS } from "../../../api/novelai";
+    import { settings } from "$stores/settings";
+        import { DEFAULT_EMOTIONS } from "$constants/novelaiConfig";
+    import { NovelAIClient } from "$root/lib/api/novelai";
 
     const dispatch = createEventDispatcher();
 

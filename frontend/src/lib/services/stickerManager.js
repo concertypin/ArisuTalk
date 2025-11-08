@@ -1,10 +1,9 @@
+import { NovelAIClient } from "$lib/api/novelai";
+import { validateNAIApiKey } from "$lib/api/novelai";
+import { DEFAULT_EMOTIONS } from "$root/defaults";
+import { characters } from "$stores/character";
+import { settings } from "$stores/settings";
 import { get } from "svelte/store";
-import { NovelAIClient, validateNAIApiKey } from "../api/novelai";
-import { DEFAULT_EMOTIONS } from "../../defaults";
-import { saveToBrowserStorage } from "../../storage";
-import { t } from "$root/i18n";
-import { settings } from "../stores/settings";
-import { characters } from "../stores/character";
 
 /**
  * @typedef {Object} EmotionObject
