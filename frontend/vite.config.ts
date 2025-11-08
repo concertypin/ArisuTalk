@@ -1,11 +1,11 @@
 /// <reference types="vitest/config" />
-
-import { defineConfig, loadEnv, UserConfig, type PluginOption } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
-import tsconfigPaths from "vite-tsconfig-paths";
-import getEnvVar from "./script/envbuild";
+import { type PluginOption, UserConfig, defineConfig, loadEnv } from "vite";
 import checker from "vite-plugin-checker";
 import { comlink } from "vite-plugin-comlink";
+import tsconfigPaths from "vite-tsconfig-paths";
+
+import getEnvVar from "./script/envbuild";
 import vitePWA from "./script/pwa";
 
 // Since it distracts debugging via service worker, enable it only on production build
@@ -15,7 +15,6 @@ declare const process: {
 };
 
 const predefinedChunks: Record<string, string[]> = {
-    // 벤더 라이브러리들을 별도 청크로 분리
     "vendor-core": ["svelte", "svelte/internal"],
     "vendor-ui": ["lucide-svelte"],
     "vendor-utils": ["jszip"],
@@ -44,9 +43,6 @@ export default defineConfig(async (ctx) => {
             typescript: env.STRICT
                 ? { tsconfigPath: "./tsconfig.json" }
                 : false,
-        }),
-        checker({
-            typescript: { tsconfigPath: "./tsconfig.worker.json" },
         }),
         comlink(),
         svelte({

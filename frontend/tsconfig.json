@@ -7,9 +7,6 @@
     "src/*.ts",
     "src/*.svelte"
   ],
-  "exclude": [
-    "tests/"
-  ],
   "compilerOptions": {
     "lib": [
       "ESNext",
@@ -37,14 +34,15 @@
       ],
       "$root/*": [
         "./*"
+      ],
+      "$lib/*": [
+        "./lib/*"
       ]
     },
     "types": [
       "vite/client",
       "svelte/compiler"
-    ], /* Specify type package names to be included without being referenced in a source file. */
-    "noEmit": true, /* Disable emitting files from a compilation. */
-    "outDir": "./dist", /* Specify an output folder for all emitted files. */
+    ],
     /* Type Checking */
     "noImplicitAny": false, /* Enable error reporting for expressions and declarations with an implied 'any' type. */
   },
@@ -52,9 +50,6 @@
   "references": [
     {
       "path": "./tsconfig.worker.json"
-    },
-    {
-      "path": "./tsconfig.test.json"
     }
   ]
 }

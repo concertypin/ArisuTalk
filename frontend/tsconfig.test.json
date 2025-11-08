@@ -1,9 +1,7 @@
 {
   "include": [
     "tests/**/*.ts",
-    "tests/*.ts",
-    "src/**/*",
-    "src/*"
+    "tests/*.ts"
   ],
   "compilerOptions": {
     "lib": [
@@ -46,5 +44,13 @@
     /* Type Checking */
     "noImplicitAny": true
   },
-  "extends": "./tsconfig.base.json"
+  "extends": "./tsconfig.base.json",
+  "references": [
+    {
+      "path": "./tsconfig.worker.json"
+    },
+    {
+      "path": "./tsconfig.json"
+    }
+  ]
 }

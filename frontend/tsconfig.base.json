@@ -37,7 +37,7 @@
         ], /* Specify type package names to be included without being referenced in a source file. */
         // "allowUmdGlobalAccess": true,                     /* Allow accessing UMD globals from modules. */
         // "moduleSuffixes": [],                             /* List of file name suffixes to search when resolving a module. */
-        "allowImportingTsExtensions": true, /* Allow imports to include TypeScript file extensions. Requires '--moduleResolution bundler' and either '--noEmit' or '--emitDeclarationOnly' to be set. */
+        "allowImportingTsExtensions": false, /* Allow imports to include TypeScript file extensions. Requires '--moduleResolution bundler' and either '--noEmit' or '--emitDeclarationOnly' to be set. */
         // "rewriteRelativeImportExtensions": true,          /* Rewrite '.ts', '.tsx', '.mts', and '.cts' file extensions in relative import paths to their JavaScript equivalent in output files. */
         // "resolvePackageJsonExports": true,                /* Use the package.json 'exports' field when resolving package imports. */
         // "resolvePackageJsonImports": true,                /* Use the package.json 'imports' field when resolving imports. */
@@ -56,7 +56,7 @@
         // "emitDeclarationOnly": true,                      /* Only output d.ts files and not JavaScript files. */
         "sourceMap": true, /* Create source map files for emitted JavaScript files. */
         // "inlineSourceMap": true,                          /* Include sourcemap files inside the emitted JavaScript. */
-        "noEmit": true, /* Disable emitting files from a compilation. */
+        "noEmit": false, /* Disable emitting files from a compilation. */
         // "outFile": "./",                                  /* Specify a file that bundles all outputs into one JavaScript file. If 'declaration' is true, also designates a file that bundles all .d.ts output. */
         "outDir": "./dist", /* Specify an output folder for all emitted files. */
         // "removeComments": true,                           /* Disable emitting comments. */
@@ -83,7 +83,7 @@
         "forceConsistentCasingInFileNames": true, /* Ensure that casing is correct in imports. */
         /* Type Checking */
         "strict": true, /* Enable all strict type-checking options. */
-        // "noImplicitAny": true, /* Enable error reporting for expressions and declarations with an implied 'any' type. */
+        "noImplicitAny": true, /* Enable error reporting for expressions and declarations with an implied 'any' type. */
         // "strictNullChecks": true,                         /* When type checking, take into account 'null' and 'undefined'. */
         // "strictFunctionTypes": true,                      /* When assigning functions, check to ensure parameters and the return values are subtype-compatible. */
         // "strictBindCallApply": true,                      /* Check that the arguments for 'bind', 'call', and 'apply' methods match the original function. */
@@ -106,12 +106,5 @@
         // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
         "skipLibCheck": true /* Skip type checking all .d.ts files. */
     },
-    "references": [
-        {
-            "path": "./tsconfig.json"
-        },
-        {
-            "path": "./tsconfig.worker.json"
-        }
-    ]
+    "references": []
 }
