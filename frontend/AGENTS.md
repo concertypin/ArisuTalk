@@ -50,3 +50,8 @@ This file provides guidance for AI coding agents working on the frontend of this
 - Execution order: hooks run in the configured array order (store index order). This replaces the previous numeric-priority sort; move hooks in the store to change execution order.
 
 When adding or modifying hooks, please consider these behaviors and add tests for new cases.
+
+## Svelte-Specific Guidelines
+
+- Use Svelte 5's rune-based syntax and features. For more details, refer to the [Svelte 5 documentation](https://svelte.dev/docs/svelte/v5-migration-guide).
+- Use `<script lang="ts">` for TypeScript support in Svelte components.
