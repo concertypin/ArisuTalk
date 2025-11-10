@@ -25,7 +25,7 @@
     } from "./stores/ui";
     import { fade } from "svelte/transition";
     import { stickerManager } from "./stores/services";
-    import { StickerManager } from "./services/stickerManager.js";
+    import { StickerManager } from "./services/stickerManager";
     import { loadFirebaseAnalytics } from "./stores/firebaseAnalytics";
     import { logUserFlowEvent } from "./analytics/userFlow";
 

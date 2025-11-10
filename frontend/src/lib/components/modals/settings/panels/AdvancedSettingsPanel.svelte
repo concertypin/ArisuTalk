@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { t } from "../../../../../i18n.js";
+    import { t } from "$root/i18n";
     import { settings } from "../../../../stores/settings";
     import { debugLogs } from "../../../../stores/logs";
     import {

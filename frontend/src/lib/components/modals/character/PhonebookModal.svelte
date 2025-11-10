@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { t } from "../../../../i18n.js";
+    import { t } from "$root/i18n";
     import { onDestroy } from "svelte";
     import { fade } from "svelte/transition";
     import { auth } from "../../../stores/auth";

@@ -1,11 +1,12 @@
-import { derived, writable, get } from "svelte/store";
-import { addLog } from "../services/logService";
-import { settings } from "./settings";
 import {
     type AnalyticsEventPayload,
     type ExperimentAssignments,
     type FirebaseAnalyticsContext,
-} from "$/lib/services/firebaseAnalytics";
+} from "$root/lib/services/firebaseAnalytics";
+import { derived, get, writable } from "svelte/store";
+
+import { addLog } from "../services/logService";
+import { settings } from "./settings";
 
 export type FirebaseAnalyticsStatus =
     | "idle"
@@ -103,7 +104,7 @@ export async function loadFirebaseAnalytics(): Promise<void> {
             initFirebaseAnalytics,
             fetchExperimentAssignments,
             setFirebaseUserProperties,
-        } = await import("$/lib/services/firebaseAnalytics");
+        } = await import("$root/lib/services/firebaseAnalytics");
         const context = await initFirebaseAnalytics();
         const assignments = await fetchExperimentAssignments();
 
@@ -155,7 +156,7 @@ export async function refreshExperimentAssignments(): Promise<ExperimentAssignme
         return {};
     }
     const { fetchExperimentAssignments } = await import(
-        "$/lib/services/firebaseAnalytics"
+        "$root/lib/services/firebaseAnalytics"
     );
     const assignments = await fetchExperimentAssignments();
     state.update((current) => ({ ...current, assignments }));
@@ -193,7 +194,7 @@ export async function trackEvent(
         Object.entries(assignments).map(([key, value]) => [`exp_${key}`, value])
     );
     const { logFirebaseEvent } = await import(
-        "$/lib/services/firebaseAnalytics"
+        "$root/lib/services/firebaseAnalytics"
     );
     await logFirebaseEvent(eventName, { ...experimentPayload, ...payload });
 }
@@ -209,7 +210,7 @@ export async function fetchAssignment(key: string): Promise<string | null> {
         return null;
     }
     const { getExperimentVariant } = await import(
-        "$/lib/services/firebaseAnalytics"
+        "$root/lib/services/firebaseAnalytics"
     );
     const variant = await getExperimentVariant(key);
 

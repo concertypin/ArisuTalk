@@ -2,8 +2,8 @@ import {
     buildContentPrompt,
     buildProfilePrompt,
     buildCharacterSheetPrompt,
-} from "$/prompts/builder/promptBuilder";
-import { t } from "$/i18n";
+} from "$root/prompts/builder/promptBuilder";
+import { t } from "$root/i18n";
 import { ChatOpenAI } from "@langchain/openai";
 import {
     HumanMessage,
@@ -19,7 +19,7 @@ import type {
     LLMApiGenerateContentParams,
     LLMApiGenerateProfileParams,
     LLMApiGenerateProfileResponse,
-} from "$/lib/api/llm/llmApiProto";
+} from "$root/lib/api/llm/llmApiProto";
 
 export class OpenAIClient implements LLMApi {
     client: ChatOpenAI;

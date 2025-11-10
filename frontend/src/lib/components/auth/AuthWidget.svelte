@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { t } from "../../../i18n.js";
+    import { t } from "$root/i18n";
     import ClerkUserButton from "./ClerkUserButton.svelte";
     import {
         auth,
@@ -90,7 +90,7 @@
 </script>
 
 {#if isDisabled}
-<!-- Invisible -->
+    <!-- Invisible -->
 {:else if isReady && isSignedIn}
     <div class="auth-widget__signed-in" aria-live="polite">
         {#if displayName}

@@ -1,43 +1,20 @@
-import { defineConfig, loadEnv, UserConfig } from "vite";
+/// <reference types="vitest/config" />
 import { svelte } from "@sveltejs/vite-plugin-svelte";
-import { VitePWA } from "vite-plugin-pwa";
-import getEnvVar from "./script/envbuild";
-import tsconfigPath from "vite-tsconfig-paths";
-import path from "path";
-// Since it distracts debugging via service worker, enable it only on production build
-const prodOnlyPlugin = [
-    VitePWA({
-        registerType: "autoUpdate",
-        workbox: {
-            maximumFileSizeToCacheInBytes: 12 * 1024 * 1024, // Allow precaching bundles up to 12MB
-            sourcemap: false,
-        },
-        manifest: {
-            name: "ArisuTalk",
-            short_name: "ArisuTalk",
-            description: "ArisuTalk, chat with your waifu.",
-            icons: [
-                {
-                    src: "icon_192.png",
-                    sizes: "192x192",
-                    type: "image/png",
-                },
-                {
-                    src: "icon_512.png",
-                    sizes: "512x512",
-                    type: "image/png",
-                },
-            ],
-        },
-    }),
-];
+import { type PluginOption, UserConfig, defineConfig, loadEnv } from "vite";
+import checker from "vite-plugin-checker";
+import { comlink } from "vite-plugin-comlink";
+import tsconfigPaths from "vite-tsconfig-paths";
 
+import getEnvVar from "./script/envbuild";
+import vitePWA from "./script/pwa";
+
+// Since it distracts debugging via service worker, enable it only on production build
+const prodOnlyPlugin = [vitePWA];
 declare const process: {
     cwd: () => string;
 };
 
 const predefinedChunks: Record<string, string[]> = {
-    // 벤더 라이브러리들을 별도 청크로 분리
     "vendor-core": ["svelte", "svelte/internal"],
     "vendor-ui": ["lucide-svelte"],
     "vendor-utils": ["jszip"],
@@ -56,10 +33,31 @@ export default defineConfig(async (ctx) => {
             JSON.stringify(v),
         ])
     );
+    const plugin: PluginOption[] = [
+        tsconfigPaths(),
 
+        checker({
+            /**
+             * @todo The error should be fixed, since there's so many errors now. Disabled for now since it works anyway.
+             */
+            typescript: env.STRICT
+                ? { tsconfigPath: "./tsconfig.json" }
+                : false,
+        }),
+        comlink(),
+        svelte({
+            compilerOptions: {
+                dev: mode !== "production",
+            },
+        }),
+        ...(mode === "production" ? prodOnlyPlugin : []),
+    ];
     let baseConfig: UserConfig = {
         server: {
             open: "index.html",
+        },
+        worker: {
+            plugins: () => [comlink()],
         },
         build: {
             outDir: "dist",
@@ -72,16 +70,28 @@ export default defineConfig(async (ctx) => {
         },
         clearScreen: false,
         publicDir: "static",
-        plugins: [
-            tsconfigPath(),
-            svelte({
-                compilerOptions: {
-                    dev: mode !== "production",
-                },
-            }),
-            ...(mode === "production" ? prodOnlyPlugin : []),
-        ],
+        plugins: plugin,
         define: defineConfigReady,
+        test: {
+            globals: true,
+            environment: "happy-dom",
+            setupFiles: ["./tests/setup.ts"],
+            include: ["tests/**/*.{test,spec}.{js,ts}"],
+            exclude: ["node_modules", "dist"],
+            coverage: {
+                reporter: ["text", "json", "html"],
+                exclude: [
+                    "node_modules/",
+                    "dist/",
+                    "tests/",
+                    "**/*.d.ts",
+                    "**/*.config.*",
+                    "script/",
+                    "static/",
+                    "worker/",
+                ],
+            },
+        },
     };
     return baseConfig;
 });

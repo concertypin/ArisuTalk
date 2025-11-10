@@ -1,7 +1,7 @@
 <script>
     import { onMount, onDestroy } from "svelte";
     import { get } from "svelte/store";
-    import { t } from "../../../../i18n.js";
+    import { t } from "$root/i18n";
     import {
         characters,
         editingCharacter,
@@ -33,7 +33,7 @@
     import CharacterStickers from "./CharacterStickers.svelte";
     import CharacterAISettings from "./CharacterAISettings.svelte";
     import CharacterHypnosis from "./CharacterHypnosis.svelte";
-    import { APIManager } from "../../../api/apiManager.js";
+    import { APIManager } from "../../../api/apiManager";
     import { auth } from "../../../stores/auth";
     import {
         dataUrlToUint8Array,
@@ -42,7 +42,7 @@
         extractPngChunk,
         compressData,
         decompressData,
-    } from "../../../utils/png-utils.js";
+    } from "../../../utils/png-utils";
 
     const dispatch = createEventDispatcher();
 

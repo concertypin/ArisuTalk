@@ -42,3 +42,16 @@ This file provides guidance for AI coding agents working on the frontend of this
 
 - Write or run tests to ensure your changes work well without breaking existing functionality.
 - For the frontend, run tests using `pnpm test`.
+
+## Replace Hook Service Notes
+
+- Regex rule batching: consecutive rules with `useRegex: true` are now executed as a single batch via the replace worker to reduce main-thread <-> worker round-trips.
+- Literal replacements are delegated to the replace worker too (via dynamic import) so unit tests that mock the worker are respected and behavior is consistent.
+- Execution order: hooks run in the configured array order (store index order). This replaces the previous numeric-priority sort; move hooks in the store to change execution order.
+
+When adding or modifying hooks, please consider these behaviors and add tests for new cases.
+
+## Svelte-Specific Guidelines
+
+- Use Svelte 5's rune-based syntax and features. For more details, refer to the [Svelte 5 documentation](https://svelte.dev/docs/svelte/v5-migration-guide).
+- Use `<script lang="ts">` for TypeScript support in Svelte components.

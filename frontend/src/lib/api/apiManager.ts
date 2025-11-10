@@ -2,7 +2,7 @@ import {
     PROVIDERS,
     SUPPORTED_PROVIDERS,
     isProviderSupported,
-} from "$/constants/providers.ts";
+} from "$root/constants/providers";
 import type {
     LLMApi,
     LLMApiConstructor,
@@ -13,8 +13,8 @@ import type {
     LLMApiGenerateContentResponse,
     LLMApiGenerateProfileParams,
     LLMApiGenerateProfileResponse,
-} from "$/lib/api/llm/llmApiProto";
-import { t } from "i18n";
+} from "$root/lib/api/llm/llmApiProto";
+import { t } from "$root/i18n";
 
 /**
  * API Manager that handles multiple AI providers
@@ -62,13 +62,13 @@ export class APIManager {
         // Map provider to client import
         // Used "as" syntax, because when writing type directly, it is ugly due to auto-formatting
         const providerMap = {
-            [PROVIDERS.GEMINI]: () => import("$/lib/api/llm/gemini"),
-            [PROVIDERS.CLAUDE]: () => import("$/lib/api/llm/claude"),
-            [PROVIDERS.OPENAI]: () => import("$/lib/api/llm/openai"),
-            [PROVIDERS.GROK]: () => import("$/lib/api/llm/grok"),
-            [PROVIDERS.OPENROUTER]: () => import("$/lib/api/llm/openrouter"),
+            [PROVIDERS.GEMINI]: () => import("$root/lib/api/llm/gemini"),
+            [PROVIDERS.CLAUDE]: () => import("$root/lib/api/llm/claude"),
+            [PROVIDERS.OPENAI]: () => import("$root/lib/api/llm/openai"),
+            [PROVIDERS.GROK]: () => import("$root/lib/api/llm/grok"),
+            [PROVIDERS.OPENROUTER]: () => import("$root/lib/api/llm/openrouter"),
             [PROVIDERS.CUSTOM_OPENAI]: () =>
-                import("$/lib/api/llm/customopenai"),
+                import("$root/lib/api/llm/customopenai"),
         } as Record<
             (typeof PROVIDERS)[keyof typeof PROVIDERS],
             () => Promise<{ default: LLMApiConstructor }>

@@ -12,7 +12,11 @@ export const isDebugLogModalVisible = writable(false);
 export const isDataBrowserModalVisible = writable(false);
 export const isConfirmationModalVisible = writable(false);
 export const isMasterPasswordModalVisible = writable(false);
-export const confirmationModalData = writable({
+export const confirmationModalData = writable<{
+    title: string;
+    message: string;
+    onConfirm: (() => void) | null;
+}>({
     title: "",
     message: "",
     onConfirm: null,
