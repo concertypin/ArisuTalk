@@ -5,6 +5,9 @@ import type {
 } from "$constants/novelaiConfig";
 import type { NaiAPIParamRequest } from "$types/novelaiRaw";
 
+/**
+ *
+ */
 export type NaiSettings = {
     prompt: string;
     negative_prompt: string;
@@ -43,6 +46,8 @@ export type NaiSettings = {
     uncond_scale: number;
 };
 /**
+ * Used to send requests to NovelAI API
+ * This is a low-level type that maps directly to the API specification.
  * @copyright {@link https://api.novelai.net/docs/}
  */
 export type NaiRawRequest = {
@@ -69,6 +74,8 @@ export type NaiRawRequest = {
 };
 
 /**
+ * Response from NovelAI API
+ * This is a low-level type that maps directly to the API specification.
  * @copyright {@link https://api.novelai.net/docs/}
  */
 type NaiRawResponse = {

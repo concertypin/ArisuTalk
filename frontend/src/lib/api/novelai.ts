@@ -1,11 +1,10 @@
-import type NaiSettings from "$components/modals/settings/NaiSettings.svelte";
 import {
     NOVELAI_MODELS,
     NOVELAI_UNLIMITED_SIZES,
     type NovelAIModel,
 } from "$constants/novelaiConfig";
 import type { Character } from "$types/character";
-import type { NaiRawRequest } from "$types/novelai";
+import type { NaiRawRequest, NaiSettings } from "$types/novelai";
 import { fallbackChainAsync } from "$utils/fallbachChain";
 import pako from "pako";
 
