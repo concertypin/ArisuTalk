@@ -1,9 +1,14 @@
-import z from "zod";
-import { DataDBClient, BlobClient } from "@/adapters/client";
-import { DataType, DataSchema, PartialDataSchema, PartialData } from "@/schema";
 import { describeRoute, resolver, validator } from "hono-openapi";
-import { createAuthedHonoRouter } from "@/lib/auth";
+import z from "zod";
+import { BlobClient, DataDBClient } from "@/adapters/client";
 import { DataListOrder } from "@/adapters/StorageClientBase";
+import { createAuthedHonoRouter } from "@/lib/auth";
+import {
+    DataSchema,
+    type DataType,
+    type PartialData,
+    PartialDataSchema,
+} from "@/schema";
 
 let router = createAuthedHonoRouter("known");
 // Schemas
@@ -33,7 +38,7 @@ router = router.get(
     async (c) => {
         // If we reach here, the user is authenticated
         return c.status(204); // No Content
-    }
+    },
 );
 // Create
 router = router.post(
@@ -63,10 +68,8 @@ router = router.post(
     validator("json", PartialDataSchema),
 
     //Authorization
-    async (c, next) => {
-        if (c.get("user").role !== "admin") {
-            return c.text("Forbidden!", 403);
-        }
+    async (_c, next) => {
+        // Allow any authenticated user to create
         return next();
     },
     async (c) => {
@@ -88,7 +91,7 @@ router = router.post(
 
         const db = await DataDBClient(c.env);
         return c.json(await db.put(validated), 201);
-    }
+    },
 );
 
 // Read list / query
@@ -98,6 +101,7 @@ router = router.get(
         summary: "List or query Data items",
         description: "Lists all Data items or queries by name.",
         tags: ["Data"],
+        security: [{ ClerkUser: [] }],
         parameters: [
             {
                 name: "name",
@@ -121,14 +125,14 @@ router = router.get(
         if (q) {
             const results = await db.queryByName(q);
             // validate each result
-            const validated = results.map((r: any) => DataSchema.parse(r));
+            const validated = results.map((r) => DataSchema.parse(r));
             return c.json(validated);
         } else {
             const all = await db.list(DataListOrder.Undefined);
-            const validatedAll = all.map((r: any) => DataSchema.parse(r));
+            const validatedAll = all.map((r) => DataSchema.parse(r));
             return c.json(validatedAll);
         }
-    }
+    },
 );
 
 // Read single
@@ -138,6 +142,7 @@ router = router.get(
         summary: "Get a single Data item by ID",
         description: "Retrieves a single Data item by its ID.",
         tags: ["Data"],
+        security: [{ ClerkUser: [] }],
         parameters: [
             {
                 name: "id",
@@ -169,7 +174,7 @@ router = router.get(
 
         const validated = DataSchema.parse(item);
         return c.json(validated);
-    }
+    },
 );
 
 // Update
@@ -229,7 +234,7 @@ router.patch(
 
         await db.update(validated);
         return c.json(validated);
-    }
+    },
 );
 
 // Delete
@@ -249,11 +254,7 @@ router = router.delete(
     }),
     validator("param", IdParamSchema),
     async (c) => {
-        // Only admin can delete
         const user = c.get("user");
-        if (user.role !== "admin") {
-            return c.text("Forbidden", 403);
-        }
         const id = c.req.param("id");
         const idOk = IdParamSchema.safeParse({ id });
         if (!idOk.success) return c.json({ error: "invalid id" }, 400);
@@ -265,6 +266,11 @@ router = router.delete(
         // validate stored item before acting
         const validated = DataSchema.parse(existing);
 
+        // Only admin or author can delete
+        if (user.role !== "admin" && user.authUid !== validated.author) {
+            return c.text("Forbidden", 403);
+        }
+
         // If additionalData points to a blob URL stored in storage, attempt delete
         const storage = await BlobClient(c.env);
         if (validated.additionalData) {
@@ -274,14 +280,14 @@ router = router.delete(
                 // Log deletion failure to help troubleshoot orphaned blobs
                 console.error(
                     `Failed to delete blob ${validated.additionalData} for data item ${id}:`,
-                    e
+                    e,
                 );
             }
         }
 
         await db.delete(id);
         return c.json({ ok: true });
-    }
+    },
 );
 
 // Upload blob
@@ -323,6 +329,13 @@ router = router.post(
         const existing = await db.get(id);
         if (!existing) return c.json({ error: "not found" }, 404);
 
+        const validatedItem = DataSchema.parse(existing);
+        const user = c.get("user");
+        // Only admin or author can upload blob
+        if (user.role !== "admin" && user.authUid !== validatedItem.author) {
+            return c.text("Forbidden", 403);
+        }
+
         const storage = await BlobClient(c.env);
         const ab = await c.req.arrayBuffer();
         const contentType =
@@ -337,7 +350,7 @@ router = router.post(
         });
 
         return c.json({ url });
-    }
+    },
 );
 
 router = router.get(
@@ -390,6 +403,6 @@ router = router.get(
         await db.bumpDownloadCount(id);
 
         return c.redirect(url, 307);
-    }
+    },
 );
 export default router;
