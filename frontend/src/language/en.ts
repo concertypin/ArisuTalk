@@ -1288,6 +1288,23 @@ const enPhonebook: LanguageStrings["phonebook"] = {
     uploaded: "Uploaded: {{date}}",
     import: "Import",
     importing: "Importing...",
+    create: "Create New Entry",
+    upload: "Upload",
+    edit: "Edit",
+    delete: "Delete",
+    confirmDelete: "Are you sure you want to delete this entry?",
+    name: "Name",
+    entryDescription: "Description",
+    file: "Character Card File",
+    save: "Save",
+    cancel: "Cancel",
+    fileRequired: "File is required",
+    unsupportedFile: "Only JSON or PNG files are allowed.",
+    uploading: "Uploading...",
+    deleting: "Deleting...",
+    updateSuccess: "Entry updated successfully.",
+    createSuccess: "Entry created successfully.",
+    deleteSuccess: "Entry deleted successfully.",
 };
 
 export const en: LanguageStrings = {

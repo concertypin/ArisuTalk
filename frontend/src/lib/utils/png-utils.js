@@ -164,7 +164,7 @@ export async function compressData(data) {
 
         const totalLength = chunks.reduce(
             (sum, chunk) => sum + chunk.length,
-            0
+            0,
         );
         const result = new Uint8Array(totalLength);
         let offset = 0;
@@ -204,7 +204,7 @@ export async function decompressData(compressedData) {
 
         const totalLength = chunks.reduce(
             (sum, chunk) => sum + chunk.length,
-            0
+            0,
         );
         const result = new Uint8Array(totalLength);
         let offset = 0;

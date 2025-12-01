@@ -5,11 +5,11 @@
  * loading unnecessary code in environments that don't need it.
  */
 
-import { RuntimeSecret, RuntimeVariable } from "@/types";
-import {
+import type {
     BaseBlobStorageClient,
     BaseDataDBClient,
 } from "@/adapters/StorageClientBase";
+import type { RuntimeSecret, RuntimeVariable } from "@/types";
 
 /**
  * Environment variables required by the database and blob storage clients.
@@ -30,7 +30,7 @@ export async function DataDBClient(env: DBEnv): Promise<BaseDataDBClient> {
     if (cachedDBClient) return cachedDBClient;
     if (env.SECRET_AZURE_COSMOSDB_CONNECTION_STRING) {
         cachedDBClient = new (await import("./vendor/AzureCosmosDB")).default(
-            env
+            env,
         );
     } else {
         cachedDBClient = new (await import("./vendor/InMemoryDB")).default(env);
@@ -45,11 +45,11 @@ export async function DataDBClient(env: DBEnv): Promise<BaseDataDBClient> {
 export async function BlobClient(env: DBEnv): Promise<BaseBlobStorageClient> {
     if (cachedBlobClient) return cachedBlobClient;
     if (env.SECRET_S3_BUCKET_NAME) {
-        return (cachedBlobClient = new (
+        cachedBlobClient = new (
             await import("./vendor/S3CompatibleBlob")
-        ).default(env));
+        ).default(env);
+        return cachedBlobClient;
     }
-    return (cachedBlobClient = new (
-        await import("./vendor/InMemoryBlob")
-    ).default(env));
+    cachedBlobClient = new (await import("./vendor/InMemoryBlob")).default(env);
+    return cachedBlobClient;
 }

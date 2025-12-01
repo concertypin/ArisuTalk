@@ -1,79 +1,79 @@
 <script lang="ts">
-    import { t } from "$root/i18n";
-    import {
-        replaceHooks,
-        addHook,
-        deleteHook,
-        updateHook,
-        moveHookUp,
-        moveHookDown,
-    } from "../../stores/replaceHooks";
-    import type {
-        ReplaceHook,
-        ReplaceHooksConfig,
-        ReplaceHookType,
-    } from "$types/replaceHook";
-    import HookEditor from "./HookEditor.svelte";
+import { t } from "$root/i18n";
+import {
+    replaceHooks,
+    addHook,
+    deleteHook,
+    updateHook,
+    moveHookUp,
+    moveHookDown,
+} from "../../stores/replaceHooks";
+import type {
+    ReplaceHook,
+    ReplaceHooksConfig,
+    ReplaceHookType,
+} from "$types/replaceHook";
+import HookEditor from "./HookEditor.svelte";
 
-    let selectedType: ReplaceHookType = "input";
-    let editingHook: ReplaceHook | null = null;
-    let isAddingNew = false;
+let selectedType: ReplaceHookType = "input";
+let editingHook: ReplaceHook | null = null;
+let isAddingNew = false;
 
-    $: hooks = $replaceHooks[`${selectedType}Hooks`] satisfies ReplaceHook[];
+$: hooks = $replaceHooks[`${selectedType}Hooks`] satisfies ReplaceHook[];
 
-    function handleAddHook() {
-        isAddingNew = true;
-        editingHook = null;
+function handleAddHook() {
+    isAddingNew = true;
+    editingHook = null;
+}
+
+function handleEditHook(hook: ReplaceHook) {
+    editingHook = hook;
+    isAddingNew = false;
+}
+
+function handleSaveHook(hook: ReplaceHook) {
+    if (isAddingNew) {
+        addHook(hook);
+    } else if (editingHook) {
+        updateHook(selectedType, hook.id, hook);
     }
+    editingHook = null;
+    isAddingNew = false;
+}
 
-    function handleEditHook(hook: ReplaceHook) {
-        editingHook = hook;
-        isAddingNew = false;
+function handleDeleteHook(hookId: string) {
+    if (confirm(t("modal.replaceHooks.deleteConfirm"))) {
+        deleteHook(selectedType, hookId);
     }
+}
 
-    function handleSaveHook(hook: ReplaceHook) {
-        if (isAddingNew) {
-            addHook(hook);
-        } else if (editingHook) {
-            updateHook(selectedType, hook.id, hook);
-        }
-        editingHook = null;
-        isAddingNew = false;
-    }
+function handleMoveUp(hookId: string) {
+    moveHookUp(selectedType, hookId);
+}
 
-    function handleDeleteHook(hookId: string) {
-        if (confirm(t("modal.replaceHooks.deleteConfirm"))) {
-            deleteHook(selectedType, hookId);
-        }
-    }
+function handleMoveDown(hookId: string) {
+    moveHookDown(selectedType, hookId);
+}
 
-    function handleMoveUp(hookId: string) {
-        moveHookUp(selectedType, hookId);
-    }
+function getHookTypeLabel(type: HookType): string {
+    const labels: Record<HookType, string> = {
+        input: t("modal.replaceHooks.inputType"),
+        output: t("modal.replaceHooks.outputType"),
+        request: t("modal.replaceHooks.requestType"),
+        display: t("modal.replaceHooks.displayType"),
+    };
+    return labels[type];
+}
 
-    function handleMoveDown(hookId: string) {
-        moveHookDown(selectedType, hookId);
-    }
-
-    function getHookTypeLabel(type: HookType): string {
-        const labels: Record<HookType, string> = {
-            input: t("modal.replaceHooks.inputType"),
-            output: t("modal.replaceHooks.outputType"),
-            request: t("modal.replaceHooks.requestType"),
-            display: t("modal.replaceHooks.displayType"),
-        };
-        return labels[type];
-    }
-
-    function getHookTypeDescription(type: HookType): string {
-        const descriptions: Record<HookType, string> = {
-            input: t("modal.replaceHooks.inputDesc"),
-            output: t("modal.replaceHooks.outputDesc"),
-            request: t("modal.replaceHooks.requestDesc"),
-            display: t("modal.replaceHooks.displayDesc"),
-        };
-        return descriptions[type];
-    }
+function getHookTypeDescription(type: HookType): string {
+    const descriptions: Record<HookType, string> = {
+        input: t("modal.replaceHooks.inputDesc"),
+        output: t("modal.replaceHooks.outputDesc"),
+        request: t("modal.replaceHooks.requestDesc"),
+        display: t("modal.replaceHooks.displayDesc"),
+    };
+    return descriptions[type];
+}
 </script>
 
 <div class="hook-manager">

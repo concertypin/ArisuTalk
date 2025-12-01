@@ -1,24 +1,24 @@
 <script>
-    import { createEventDispatcher } from "svelte";
-    import { t } from "$root/i18n";
+import { createEventDispatcher } from "svelte";
+import { t } from "$root/i18n";
 
-    export let sticker = null;
+export let sticker = null;
 
-    let stickerName = sticker?.name || "";
+let stickerName = sticker?.name || "";
 
-    const dispatch = createEventDispatcher();
+const dispatch = createEventDispatcher();
 
-    function save() {
-        dispatch("save", { name: stickerName });
-    }
+function save() {
+    dispatch("save", { name: stickerName });
+}
 
-    function formatStickerSize(bytes) {
-        if (bytes === 0) return "0 Bytes";
-        const k = 1024;
-        const sizes = ["Bytes", "KB", "MB", "GB"];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-    }
+function formatStickerSize(bytes) {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+}
 </script>
 
 {#if sticker}

@@ -1,46 +1,42 @@
 <script>
-    import { onMount, onDestroy } from "svelte";
-    import { t } from "$root/i18n";
-    import { isDebugLogModalVisible } from "../../../stores/ui";
-    import { debugLogs } from "../../../stores/logs";
-    import { settings } from "../../../stores/settings";
-    import {
-        exportDebugLogs,
-        clearDebugLogs,
-    } from "../../../services/logService";
-    import { BarChart3, Download, Trash2, X, FileX } from "lucide-svelte";
-    import SimpleLog from "./SimpleLog.svelte";
-    import StructuredLog from "./StructuredLog.svelte";
-    import { fade } from "svelte/transition";
+import { onMount, onDestroy } from "svelte";
+import { t } from "$root/i18n";
+import { isDebugLogModalVisible } from "../../../stores/ui";
+import { debugLogs } from "../../../stores/logs";
+import { settings } from "../../../stores/settings";
+import { exportDebugLogs, clearDebugLogs } from "../../../services/logService";
+import { BarChart3, Download, Trash2, X, FileX } from "lucide-svelte";
+import SimpleLog from "./SimpleLog.svelte";
+import StructuredLog from "./StructuredLog.svelte";
+import { fade } from "svelte/transition";
 
-    const maxLogs = 1000;
+const maxLogs = 1000;
 
-    function handleClearLogs() {
-        if (
-            confirm(
-                t("debugLogs.clearAllConfirm", {
-                    defaultValue:
-                        "Are you sure you want to clear all debug logs?",
-                })
-            )
-        ) {
-            clearDebugLogs();
-        }
+function handleClearLogs() {
+    if (
+        confirm(
+            t("debugLogs.clearAllConfirm", {
+                defaultValue: "Are you sure you want to clear all debug logs?",
+            }),
+        )
+    ) {
+        clearDebugLogs();
     }
+}
 
-    function handleKeydown(event) {
-        if (event.key === "Escape") {
-            isDebugLogModalVisible.set(false);
-        }
+function handleKeydown(event) {
+    if (event.key === "Escape") {
+        isDebugLogModalVisible.set(false);
     }
+}
 
-    onMount(() => {
-        window.addEventListener("keydown", handleKeydown);
-    });
+onMount(() => {
+    window.addEventListener("keydown", handleKeydown);
+});
 
-    onDestroy(() => {
-        window.removeEventListener("keydown", handleKeydown);
-    });
+onDestroy(() => {
+    window.removeEventListener("keydown", handleKeydown);
+});
 </script>
 
 {#if $isDebugLogModalVisible}

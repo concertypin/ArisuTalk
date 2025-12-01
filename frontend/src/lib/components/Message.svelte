@@ -1,25 +1,25 @@
 <script>
-    import { t } from "$root/i18n";
-    import Avatar from "./Avatar.svelte";
-    import { isImageZoomModalVisible, imageZoomModalData } from "../stores/ui";
+import { t } from "$root/i18n";
+import Avatar from "./Avatar.svelte";
+import { isImageZoomModalVisible, imageZoomModalData } from "../stores/ui";
 
-    export let message;
-    export let showSenderInfo = false;
+export let message;
+export let showSenderInfo = false;
 
-    function openImageZoom() {
-        if (message.type === "image" || message.type === "sticker") {
-            const imageUrl =
-                message.type === "sticker"
-                    ? message.sticker.data
-                    : message.imageUrl;
-            const title =
-                message.type === "sticker"
-                    ? message.sticker.stickerName
-                    : t("mainChat.uploadPhoto");
-            imageZoomModalData.set({ imageUrl, title });
-            isImageZoomModalVisible.set(true);
-        }
+function openImageZoom() {
+    if (message.type === "image" || message.type === "sticker") {
+        const imageUrl =
+            message.type === "sticker"
+                ? message.sticker.data
+                : message.imageUrl;
+        const title =
+            message.type === "sticker"
+                ? message.sticker.stickerName
+                : t("mainChat.uploadPhoto");
+        imageZoomModalData.set({ imageUrl, title });
+        isImageZoomModalVisible.set(true);
     }
+}
 </script>
 
 <div class="flex items-start gap-3" class:justify-end={message.isMe}>

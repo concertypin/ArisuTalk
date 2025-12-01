@@ -84,7 +84,7 @@ function formatGroupChatMessages(messages) {
                 {
                     hour: "2-digit",
                     minute: "2-digit",
-                }
+                },
             );
             const sender = msg.isMe ? "User" : msg.sender;
             return `[${timestamp}] ${sender}: ${msg.content || "(No content)"}`;
@@ -167,7 +167,7 @@ export async function buildContentPrompt({
                             ? ` [${post.tags.join(", ")}]`
                             : "";
                     const date = new Date(post.timestamp).toLocaleDateString(
-                        "ko-KR"
+                        "ko-KR",
                     );
                     return `- ${post.content}${tags} (${date})`;
                 })
@@ -242,7 +242,7 @@ export async function buildContentPrompt({
         character,
         userName,
         userDescription,
-        false // Don't include user/assistant messages from ChatML prompts
+        false, // Don't include user/assistant messages from ChatML prompts
     );
 
     let conversationContents = [];
@@ -252,7 +252,7 @@ export async function buildContentPrompt({
 
         if (msg.isMe && msg.type === "image" && msg.imageId) {
             const imageData = character?.media?.find(
-                (m) => m.id === msg.imageId
+                (m) => m.id === msg.imageId,
             );
             if (imageData) {
                 let textContent =
@@ -343,7 +343,7 @@ export async function buildCharacterSheetPrompt({
         null,
         "",
         "",
-        true // Allow conversation messages for character sheet generation
+        true, // Allow conversation messages for character sheet generation
     );
 
     return { systemPrompt, contents };
@@ -376,7 +376,7 @@ export async function buildProfilePrompt({ userName, userDescription }) {
         null,
         "",
         "",
-        true // Allow conversation messages for profile generation
+        true, // Allow conversation messages for profile generation
     );
 
     return { systemPrompt, contents };

@@ -1,99 +1,97 @@
 <script lang="ts">
-    import { onMount, onDestroy } from "svelte";
-    import { t } from "$root/i18n";
-    import { isPromptModalVisible } from "../../../stores/ui";
-    import { prompts } from "../../../stores/prompts";
-    import PromptSection from "./PromptSection.svelte";
-    import HookManager from "../HookManager.svelte";
-    import { X, Download, Upload, RefreshCw } from "lucide-svelte";
-    import { fade } from "svelte/transition";
-    import type { PromptStorageType } from "$types/Prompt";
+import { onMount, onDestroy } from "svelte";
+import { t } from "$root/i18n";
+import { isPromptModalVisible } from "../../../stores/ui";
+import { prompts } from "../../../stores/prompts";
+import PromptSection from "./PromptSection.svelte";
+import HookManager from "../HookManager.svelte";
+import { X, Download, Upload, RefreshCw } from "lucide-svelte";
+import { fade } from "svelte/transition";
+import type { PromptStorageType } from "$types/Prompt";
 
-    type TabType = "prompts" | "hooks";
+type TabType = "prompts" | "hooks";
 
-    let promptData: PromptStorageType = {};
-    let activeTab: TabType = "prompts";
+let promptData: PromptStorageType = {};
+let activeTab: TabType = "prompts";
 
-    const promptSections = [
-        {
-            key: "mainChat",
-            title: t("promptModal.mainChatPrompt"),
-            description: t("promptModal.mainChatPromptDescription"),
-        },
-        {
-            key: "characterSheet",
-            title: t("promptModal.characterSheetGenerationPrompt"),
-            description: t(
-                "promptModal.characterSheetGenerationPromptDescription"
-            ),
-        },
-        {
-            key: "profileCreation",
-            title: t("promptModal.randomFirstMessagePrompt"),
-            description: t("promptModal.randomFirstMessagePromptDescription"),
-        },
-        {
-            key: "snsForce",
-            title: t("promptModal.snsForcePrompt"),
-            description: t("promptModal.snsForcePromptDescription"),
-        },
-        {
-            key: "naiSticker",
-            title: t("promptModal.naiStickerPrompt"),
-            description: t("promptModal.naiStickerPromptDescription"),
-        },
-        {
-            key: "groupChat",
-            title: t("promptModal.groupChatPrompt"),
-            description: t("promptModal.groupChatPromptDescription"),
-        },
-        {
-            key: "openChat",
-            title: t("promptModal.openChatPrompt"),
-            description: t("promptModal.openChatPromptDescription"),
-        },
-    ] satisfies {
-        key: keyof PromptStorageType;
-        title: string;
-        description: string;
-    }[];
+const promptSections = [
+    {
+        key: "mainChat",
+        title: t("promptModal.mainChatPrompt"),
+        description: t("promptModal.mainChatPromptDescription"),
+    },
+    {
+        key: "characterSheet",
+        title: t("promptModal.characterSheetGenerationPrompt"),
+        description: t("promptModal.characterSheetGenerationPromptDescription"),
+    },
+    {
+        key: "profileCreation",
+        title: t("promptModal.randomFirstMessagePrompt"),
+        description: t("promptModal.randomFirstMessagePromptDescription"),
+    },
+    {
+        key: "snsForce",
+        title: t("promptModal.snsForcePrompt"),
+        description: t("promptModal.snsForcePromptDescription"),
+    },
+    {
+        key: "naiSticker",
+        title: t("promptModal.naiStickerPrompt"),
+        description: t("promptModal.naiStickerPromptDescription"),
+    },
+    {
+        key: "groupChat",
+        title: t("promptModal.groupChatPrompt"),
+        description: t("promptModal.groupChatPromptDescription"),
+    },
+    {
+        key: "openChat",
+        title: t("promptModal.openChatPrompt"),
+        description: t("promptModal.openChatPromptDescription"),
+    },
+] satisfies {
+    key: keyof PromptStorageType;
+    title: string;
+    description: string;
+}[];
 
-    async function handleSave() {
-        await prompts.save(promptData);
+async function handleSave() {
+    await prompts.save(promptData);
+    isPromptModalVisible.set(false);
+}
+
+async function handleReset() {
+    if (confirm(t("promptModal.resetAllPromptsConfirmation"))) {
+        await prompts.reset();
+    }
+}
+
+async function handleBackup() {
+    await prompts.backup();
+}
+
+async function handleRestore() {
+    try {
+        await prompts.restore();
+    } catch (e) {
+        alert(t("promptModal.restoreFailed"));
+    }
+}
+
+function handleKeydown(event) {
+    if (event.key === "Escape") {
         isPromptModalVisible.set(false);
     }
+}
 
-    async function handleReset() {
-        if (confirm(t("promptModal.resetAllPromptsConfirmation"))) {
-            await prompts.reset();
-        }
-    }
+onMount(() => {
+    window.addEventListener("keydown", handleKeydown);
+});
 
-    async function handleBackup() {
-        await prompts.backup();
-    }
-
-    async function handleRestore() {
-        try {
-            await prompts.restore();
-        } catch (e) {
-            alert(t("promptModal.restoreFailed"));
-        }
-    }
-
-    function handleKeydown(event) {
-        if (event.key === "Escape") {
-            isPromptModalVisible.set(false);
-        }
-    }
-
-    onMount(() => {
-        window.addEventListener("keydown", handleKeydown);
-    });
-
-    onDestroy(() => {
-        window.removeEventListener("keydown", handleKeydown);
-    });
+onDestroy(() => {
+    window.removeEventListener("keydown", handleKeydown);
+});
 </script>
 
 {#if $isPromptModalVisible}

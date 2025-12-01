@@ -1,80 +1,80 @@
 <script>
-    import { t } from "$root/i18n";
-    import { createEventDispatcher, beforeUpdate, afterUpdate } from "svelte";
-    import { fade } from "svelte/transition";
-    import { Search, X, SearchX } from "lucide-svelte";
-    import { searchQuery } from "../../../stores/chat";
-    import { characters } from "../../../stores/character";
-    import CharacterItem from "../../CharacterItem.svelte";
+import { t } from "$root/i18n";
+import { createEventDispatcher, beforeUpdate, afterUpdate } from "svelte";
+import { fade } from "svelte/transition";
+import { Search, X, SearchX } from "lucide-svelte";
+import { searchQuery } from "../../../stores/chat";
+import { characters } from "../../../stores/character";
+import CharacterItem from "../../CharacterItem.svelte";
 
-    export let isOpen = false;
+export let isOpen = false;
 
-    const dispatch = createEventDispatcher();
+const dispatch = createEventDispatcher();
 
-    let filteredCharacters = [];
-    let modalContentEl;
-    let oldHeight;
-    let inputEl;
+let filteredCharacters = [];
+let modalContentEl;
+let oldHeight;
+let inputEl;
 
-    beforeUpdate(() => {
-        if (!modalContentEl) return;
-        oldHeight = modalContentEl.offsetHeight;
-    });
+beforeUpdate(() => {
+    if (!modalContentEl) return;
+    oldHeight = modalContentEl.offsetHeight;
+});
 
-    afterUpdate(() => {
-        if (!modalContentEl || oldHeight === undefined) return;
+afterUpdate(() => {
+    if (!modalContentEl || oldHeight === undefined) return;
 
-        const scrollHeight = modalContentEl.scrollHeight;
-        const vh85 = window.innerHeight * 0.85;
-        const newHeight = Math.min(scrollHeight, vh85);
+    const scrollHeight = modalContentEl.scrollHeight;
+    const vh85 = window.innerHeight * 0.85;
+    const newHeight = Math.min(scrollHeight, vh85);
 
-        if (Math.abs(oldHeight - newHeight) < 5) {
-            return;
-        }
-
-        modalContentEl.style.height = `${oldHeight}px`;
-        modalContentEl.style.overflow = "hidden"; // Prevent scrollbar flicker during animation
-
-        requestAnimationFrame(() => {
-            modalContentEl.style.transition = `height 0.4s cubic-bezier(0.4, 0, 0.2, 1)`;
-            modalContentEl.style.height = `${newHeight}px`;
-
-            const onTransitionEnd = () => {
-                modalContentEl.removeEventListener(
-                    "transitionend",
-                    onTransitionEnd
-                );
-                modalContentEl.style.transition = "";
-                modalContentEl.style.height = "";
-                modalContentEl.style.overflow = "";
-            };
-            modalContentEl.addEventListener("transitionend", onTransitionEnd);
-        });
-    });
-
-    $: if (isOpen && inputEl) {
-        setTimeout(() => inputEl.focus(), 100);
+    if (Math.abs(oldHeight - newHeight) < 5) {
+        return;
     }
 
-    $: {
-        const query = $searchQuery.toLowerCase().trim();
-        if (query) {
-            filteredCharacters = $characters.filter((char) =>
-                char.name.toLowerCase().includes(query)
+    modalContentEl.style.height = `${oldHeight}px`;
+    modalContentEl.style.overflow = "hidden"; // Prevent scrollbar flicker during animation
+
+    requestAnimationFrame(() => {
+        modalContentEl.style.transition = `height 0.4s cubic-bezier(0.4, 0, 0.2, 1)`;
+        modalContentEl.style.height = `${newHeight}px`;
+
+        const onTransitionEnd = () => {
+            modalContentEl.removeEventListener(
+                "transitionend",
+                onTransitionEnd,
             );
-        } else {
-            filteredCharacters = [];
-        }
-    }
+            modalContentEl.style.transition = "";
+            modalContentEl.style.height = "";
+            modalContentEl.style.overflow = "";
+        };
+        modalContentEl.addEventListener("transitionend", onTransitionEnd);
+    });
+});
 
-    function closeModal() {
-        dispatch("close");
-    }
+$: if (isOpen && inputEl) {
+    setTimeout(() => inputEl.focus(), 100);
+}
 
-    function handleSelect(event) {
-        dispatch("select", event.detail);
-        closeModal();
+$: {
+    const query = $searchQuery.toLowerCase().trim();
+    if (query) {
+        filteredCharacters = $characters.filter((char) =>
+            char.name.toLowerCase().includes(query),
+        );
+    } else {
+        filteredCharacters = [];
     }
+}
+
+function closeModal() {
+    dispatch("close");
+}
+
+function handleSelect(event) {
+    dispatch("select", event.detail);
+    closeModal();
+}
 </script>
 
 {#if isOpen}

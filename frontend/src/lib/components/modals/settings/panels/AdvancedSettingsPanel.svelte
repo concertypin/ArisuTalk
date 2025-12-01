@@ -1,48 +1,47 @@
 <script lang="ts">
-    import { t } from "$root/i18n";
-    import { settings } from "../../../../stores/settings";
-    import { debugLogs } from "../../../../stores/logs";
-    import {
-        isDebugLogModalVisible,
-        isMasterPasswordModalVisible,
-    } from "../../../../stores/ui";
-    import { clearDebugLogs } from "../../../../services/logService";
-    import {
-        Bug,
-        Activity,
-        BarChart3,
-        Trash2,
-        Gauge,
-        Clock,
-        FlaskConical,
-        AlertTriangle,
-        Info,
-        Link,
-    } from "lucide-svelte";
+import { t } from "$root/i18n";
+import { settings } from "../../../../stores/settings";
+import { debugLogs } from "../../../../stores/logs";
+import {
+    isDebugLogModalVisible,
+    isMasterPasswordModalVisible,
+} from "../../../../stores/ui";
+import { clearDebugLogs } from "../../../../services/logService";
+import {
+    Bug,
+    Activity,
+    BarChart3,
+    Trash2,
+    Gauge,
+    Clock,
+    FlaskConical,
+    AlertTriangle,
+    Info,
+    Link,
+} from "lucide-svelte";
 
-    function handleClearLogs() {
-        if (
-            confirm(
-                t("debugLogs.clearAllConfirm", {
-                    defaultValue:
-                        "Are you sure you want to clear all debug logs?",
-                })
-            )
-        ) {
-            clearDebugLogs();
-        }
+function handleClearLogs() {
+    if (
+        confirm(
+            t("debugLogs.clearAllConfirm", {
+                defaultValue: "Are you sure you want to clear all debug logs?",
+            }),
+        )
+    ) {
+        clearDebugLogs();
     }
+}
 
-    function handleEnableDebugLogs(e) {
-        settings.update((s) => ({ ...s, enableDebugLogs: e.target.checked }));
-    }
+function handleEnableDebugLogs(e) {
+    settings.update((s) => ({ ...s, enableDebugLogs: e.target.checked }));
+}
 
-    function handleExperimentalTracingToggle(event) {
-        settings.update((current) => ({
-            ...current,
-            experimentalTracingEnabled: event.target.checked,
-        }));
-    }
+function handleExperimentalTracingToggle(event) {
+    settings.update((current) => ({
+        ...current,
+        experimentalTracingEnabled: event.target.checked,
+    }));
+}
 </script>
 
 <div class="space-y-6">

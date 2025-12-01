@@ -41,7 +41,7 @@ export class GeminiClient implements LLMApi {
         apiKey: string,
         model: string,
         baseUrl: string | null,
-        options: LLMApiConstructorOptions | undefined = {}
+        options: LLMApiConstructorOptions | undefined = {},
     ) {
         this.client = new ChatGoogleGenerativeAI({
             apiKey: apiKey,
@@ -132,7 +132,7 @@ export class GeminiClient implements LLMApi {
                             parseError instanceof Error
                                 ? parseError.message
                                 : String(parseError),
-                    })
+                    }),
                 );
             }
 
@@ -219,11 +219,11 @@ export class GeminiClient implements LLMApi {
                 console.error("Text length:", String(response.content).length);
                 console.error(
                     "Character at position 321:",
-                    String(response.content).charAt(320)
+                    String(response.content).charAt(320),
                 );
                 console.error(
                     "Surrounding text:",
-                    String(response.content).substring(310, 330)
+                    String(response.content).substring(310, 330),
                 );
 
                 throw new Error(
@@ -232,7 +232,7 @@ export class GeminiClient implements LLMApi {
                             parseError instanceof Error
                                 ? parseError.message
                                 : String(parseError),
-                    })
+                    }),
                 );
             }
 
@@ -240,7 +240,7 @@ export class GeminiClient implements LLMApi {
         } catch (error) {
             console.error(
                 t("api.profileGenerationError", { provider: "Gemini" }),
-                error
+                error,
             );
             return { error: String(error) };
         }
@@ -290,7 +290,7 @@ export class GeminiClient implements LLMApi {
             console.error(
                 t("api.profileGenerationError", { provider: "Gemini" }) +
                     " (Character Sheet)",
-                error
+                error,
             );
             return { error: String(error) };
         }

@@ -11,7 +11,9 @@
     "prepreview": "pnpm run build",
     "preview": "pnpm run serve",
     "serve": "pnpx http-server -p 5173 -c-1 dist/",
-    "format": "prettier --write 'src/**/*.{js,ts,svelte,json,md}' --plugin prettier-plugin-svelte",
+    "format": "biome format --write .",
+    "lint": "biome lint .",
+    "check": "biome check .",
     "test": "vitest",
     "test:run": "vitest run",
     "test:ui": "vitest --ui"
@@ -23,16 +25,15 @@
     "node": ">20"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.3.8",
     "@sveltejs/vite-plugin-svelte": "^6.2.1",
     "@tailwindcss/postcss": "^4.1.13",
     "@vitest/coverage-v8": "^4.0.6",
     "@vitest/ui": "^4.0.6",
     "happy-dom": "^20.0.10",
     "jsdom": "^27.1.0",
-    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "lucide-svelte": "^0.544.0",
     "postcss": "^8.5.6",
-    "prettier-plugin-svelte": "^3.4.0",
     "svelte": "^5.39.3",
     "tailwindcss": "^4.1.13",
     "typescript": "^5.9.3",

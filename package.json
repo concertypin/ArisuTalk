@@ -11,10 +11,14 @@
     "build:fe": "pnpm --filter frontend run build",
     "format:fe": "pnpm --filter frontend run format",
     "serve:fe": "pnpm --filter frontend run serve",
+
     "dev:be": "pnpm --filter backend run dev",
     "build:be": "pnpm --filter backend run build",
     "format:be": "pnpm --filter backend run format",
+    "lint:be": "pnpm --filter backend run lint",
+    "check:be": "pnpm --filter backend run check",
     "deploy:be": "pnpm --filter backend run deploy",
+    
     "postinstall": "pnpm exec simple-git-hooks"
   },
   "keywords": [],
@@ -28,7 +32,6 @@
     "cross-env": "^10.1.0",
     "frontend": "2.0.0-alpha.4",
     "lint-staged": "^16.2.3",
-    "prettier": "^3.6.2",
     "simple-git-hooks": "^2.13.1",
     "vite-tsconfig-paths": "^5.1.4"
   }

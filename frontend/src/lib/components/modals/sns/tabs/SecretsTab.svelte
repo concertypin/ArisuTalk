@@ -1,46 +1,44 @@
 <script>
-    import { t } from "$root/i18n";
-    import { get } from "svelte/store";
-    import { characterStateStore } from "../../../../stores/character";
-    import { checkSNSAccess } from "../../../../utils/sns";
-    import { Lock, AlertTriangle } from "lucide-svelte";
-    import SNSPost from "./SNSPost.svelte";
+import { t } from "$root/i18n";
+import { get } from "svelte/store";
+import { characterStateStore } from "../../../../stores/character";
+import { checkSNSAccess } from "../../../../utils/sns";
+import { Lock, AlertTriangle } from "lucide-svelte";
+import SNSPost from "./SNSPost.svelte";
 
-    export let character = null;
-    export let isSecretMode = false;
+export let character = null;
+export let isSecretMode = false;
 
-    let secretPosts = [];
+let secretPosts = [];
 
-    $: {
-        if (character && character.snsPosts) {
-            secretPosts = character.snsPosts
-                .filter(
-                    (post) =>
-                        post.access_level &&
-                        (post.access_level.includes("private") ||
-                            post.access_level.includes("secret"))
-                )
-                .map((post) => {
-                    const hasAccess = checkSNSAccess(
-                        character,
-                        post.access_level || "public",
-                        get(characterStateStore)[character.id]
-                    );
-                    return {
-                        ...post,
-                        content: hasAccess
-                            ? post.content
-                            : t("sns.lockedContent"),
-                        isBlocked: !hasAccess,
-                    };
-                })
-                .sort(
-                    (a, b) =>
-                        new Date(b.timestamp).getTime() -
-                        new Date(a.timestamp).getTime()
+$: {
+    if (character && character.snsPosts) {
+        secretPosts = character.snsPosts
+            .filter(
+                (post) =>
+                    post.access_level &&
+                    (post.access_level.includes("private") ||
+                        post.access_level.includes("secret")),
+            )
+            .map((post) => {
+                const hasAccess = checkSNSAccess(
+                    character,
+                    post.access_level || "public",
+                    get(characterStateStore)[character.id],
                 );
-        }
+                return {
+                    ...post,
+                    content: hasAccess ? post.content : t("sns.lockedContent"),
+                    isBlocked: !hasAccess,
+                };
+            })
+            .sort(
+                (a, b) =>
+                    new Date(b.timestamp).getTime() -
+                    new Date(a.timestamp).getTime(),
+            );
     }
+}
 </script>
 
 {#if secretPosts.length === 0}

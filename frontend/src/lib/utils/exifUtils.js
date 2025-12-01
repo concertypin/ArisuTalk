@@ -85,7 +85,7 @@ function parsePngMetadata(uint8Array) {
             uint8Array[offset],
             uint8Array[offset + 1],
             uint8Array[offset + 2],
-            uint8Array[offset + 3]
+            uint8Array[offset + 3],
         );
         offset += 4;
 
@@ -187,7 +187,7 @@ function parseJpegExif(uint8Array) {
                 (uint8Array[offset + 2] << 8) | uint8Array[offset + 3];
             const segmentData = uint8Array.slice(
                 offset + 4,
-                offset + 4 + segmentLength - 2
+                offset + 4 + segmentLength - 2,
             );
 
             // "Exif\0\0" 헤더 확인
@@ -229,7 +229,7 @@ function parseTiffData(data, offset) {
         const numEntries = readUint16(
             data,
             offset + ifd0Offset,
-            isLittleEndian
+            isLittleEndian,
         );
 
         // 각 엔트리 파싱
@@ -241,7 +241,7 @@ function parseTiffData(data, offset) {
             const valueOffset = readUint32(
                 data,
                 entryOffset + 8,
-                isLittleEndian
+                isLittleEndian,
             );
 
             // 특정 태그들만 처리
@@ -256,14 +256,14 @@ function parseTiffData(data, offset) {
                     tags.software = readString(
                         data,
                         offset + valueOffset,
-                        count
+                        count,
                     );
                     break;
                 case 0x9286: // UserComment
                     tags.userComment = readUserComment(
                         data,
                         offset + valueOffset,
-                        count
+                        count,
                     );
                     break;
             }

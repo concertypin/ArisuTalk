@@ -1,149 +1,148 @@
 <script>
-    import { t } from "$root/i18n";
-    import { userStickers } from "../stores/character";
-    import { stickerToSend } from "../stores/chat";
-    import { isUserStickerPanelVisible } from "../stores/ui";
-    import { Plus, X, Smile, Music, Edit3, Trash2 } from "lucide-svelte";
+import { t } from "$root/i18n";
+import { userStickers } from "../stores/character";
+import { stickerToSend } from "../stores/chat";
+import { isUserStickerPanelVisible } from "../stores/ui";
+import { Plus, X, Smile, Music, Edit3, Trash2 } from "lucide-svelte";
 
-    let stickerInput;
+let stickerInput;
 
-    function selectSticker(sticker) {
-        stickerToSend.set(sticker);
-        isUserStickerPanelVisible.set(false);
-    }
+function selectSticker(sticker) {
+    stickerToSend.set(sticker);
+    isUserStickerPanelVisible.set(false);
+}
 
-    function addStickers() {
-        stickerInput.click();
-    }
+function addStickers() {
+    stickerInput.click();
+}
 
-    async function handleFileChange(event) {
-        const files = Array.from(event.target.files);
-        if (!files.length) return;
+async function handleFileChange(event) {
+    const files = Array.from(event.target.files);
+    if (!files.length) return;
 
-        for (const file of files) {
-            const allowedTypes = [
-                "image/jpeg",
-                "image/jpg",
-                "image/gif",
-                "image/png",
-                "image/bmp",
-                "image/webp",
-                "video/webm",
-                "video/mp4",
-                "audio/mpeg",
-                "audio/mp3",
-            ];
-            if (!allowedTypes.includes(file.type)) {
-                alert(`${file.name}${t("modal.unsupportedFileType.message")}`);
-                continue;
-            }
-
-            if (file.size > 30 * 1024 * 1024) {
-                alert(`${file.name}${t("modal.fileTooLarge.message")}`);
-                continue;
-            }
-
-            try {
-                let dataUrl;
-                if (file.type.startsWith("image/")) {
-                    dataUrl = await compressImage(file, 1024, 1024, 0.85);
-                } else {
-                    dataUrl = await toBase64(file);
-                }
-                const stickerName = file.name.split(".")[0];
-                const newSticker = {
-                    id: Date.now() + Math.random(),
-                    name: stickerName,
-                    data: dataUrl,
-                    type: file.type,
-                    createdAt: Date.now(),
-                };
-                userStickers.update((stickers) => [...stickers, newSticker]);
-            } catch (error) {
-                console.error(t("ui.fileProcessingError"), error);
-                alert(t("ui.fileProcessingAlert"));
-            }
+    for (const file of files) {
+        const allowedTypes = [
+            "image/jpeg",
+            "image/jpg",
+            "image/gif",
+            "image/png",
+            "image/bmp",
+            "image/webp",
+            "video/webm",
+            "video/mp4",
+            "audio/mpeg",
+            "audio/mp3",
+        ];
+        if (!allowedTypes.includes(file.type)) {
+            alert(`${file.name}${t("modal.unsupportedFileType.message")}`);
+            continue;
         }
-        event.target.value = "";
-    }
 
-    function toBase64(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = (error) => reject(error);
-        });
-    }
+        if (file.size > 30 * 1024 * 1024) {
+            alert(`${file.name}${t("modal.fileTooLarge.message")}`);
+            continue;
+        }
 
-    function compressImage(file, maxWidth, maxHeight, quality) {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            img.src = URL.createObjectURL(file);
-            img.onload = () => {
-                const canvas = document.createElement("canvas");
-                let width = img.width;
-                let height = img.height;
-
-                if (width > height) {
-                    if (width > maxWidth) {
-                        height = Math.round((height * maxWidth) / width);
-                        width = maxWidth;
-                    }
-                } else {
-                    if (height > maxHeight) {
-                        width = Math.round((width * maxHeight) / height);
-                        height = maxHeight;
-                    }
-                }
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext("2d");
-                ctx.drawImage(img, 0, 0, width, height);
-                resolve(canvas.toDataURL(file.type, quality));
+        try {
+            let dataUrl;
+            if (file.type.startsWith("image/")) {
+                dataUrl = await compressImage(file, 1024, 1024, 0.85);
+            } else {
+                dataUrl = await toBase64(file);
+            }
+            const stickerName = file.name.split(".")[0];
+            const newSticker = {
+                id: Date.now() + Math.random(),
+                name: stickerName,
+                data: dataUrl,
+                type: file.type,
+                createdAt: Date.now(),
             };
-            img.onerror = (error) => reject(error);
+            userStickers.update((stickers) => [...stickers, newSticker]);
+        } catch (error) {
+            console.error(t("ui.fileProcessingError"), error);
+            alert(t("ui.fileProcessingAlert"));
+        }
+    }
+    event.target.value = "";
+}
+
+function toBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (error) => reject(error);
+    });
+}
+
+function compressImage(file, maxWidth, maxHeight, quality) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.src = URL.createObjectURL(file);
+        img.onload = () => {
+            const canvas = document.createElement("canvas");
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+                if (width > maxWidth) {
+                    height = Math.round((height * maxWidth) / width);
+                    width = maxWidth;
+                }
+            } else {
+                if (height > maxHeight) {
+                    width = Math.round((width * maxHeight) / height);
+                    height = maxHeight;
+                }
+            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL(file.type, quality));
+        };
+        img.onerror = (error) => reject(error);
+    });
+}
+
+function editName(sticker, event) {
+    event.stopPropagation();
+    const newName = prompt(t("modal.editStickerName.title"), sticker.name);
+    if (newName && newName.trim() !== "") {
+        userStickers.update((stickers) => {
+            const index = stickers.findIndex((s) => s.id === sticker.id);
+            if (index !== -1) {
+                stickers[index].name = newName.trim();
+            }
+            return stickers;
         });
     }
+}
 
-    function editName(sticker, event) {
-        event.stopPropagation();
-        const newName = prompt(t("modal.editStickerName.title"), sticker.name);
-        if (newName && newName.trim() !== "") {
-            userStickers.update((stickers) => {
-                const index = stickers.findIndex((s) => s.id === sticker.id);
-                if (index !== -1) {
-                    stickers[index].name = newName.trim();
-                }
-                return stickers;
-            });
+function deleteSticker(sticker, event) {
+    event.stopPropagation();
+    if (confirm(t("stickerPreview.confirmRemove"))) {
+        userStickers.update((stickers) =>
+            stickers.filter((s) => s.id !== sticker.id),
+        );
+    }
+}
+
+function calculateSize() {
+    if (!$userStickers || $userStickers.length === 0) return "0 Bytes";
+    const totalBytes = $userStickers.reduce((acc, sticker) => {
+        if (sticker.data) {
+            const base64Length = sticker.data.split(",")[1]?.length || 0;
+            return acc + base64Length * 0.75;
         }
-    }
+        return acc;
+    }, 0);
 
-    function deleteSticker(sticker, event) {
-        event.stopPropagation();
-        if (confirm(t("stickerPreview.confirmRemove"))) {
-            userStickers.update((stickers) =>
-                stickers.filter((s) => s.id !== sticker.id)
-            );
-        }
-    }
-
-    function calculateSize() {
-        if (!$userStickers || $userStickers.length === 0) return "0 Bytes";
-        const totalBytes = $userStickers.reduce((acc, sticker) => {
-            if (sticker.data) {
-                const base64Length = sticker.data.split(",")[1]?.length || 0;
-                return acc + base64Length * 0.75;
-            }
-            return acc;
-        }, 0);
-
-        if (totalBytes < 1024) return `${totalBytes.toFixed(0)} Bytes`;
-        if (totalBytes < 1024 * 1024)
-            return `${(totalBytes / 1024).toFixed(2)} KB`;
-        return `${(totalBytes / (1024 * 1024)).toFixed(2)} MB`;
-    }
+    if (totalBytes < 1024) return `${totalBytes.toFixed(0)} Bytes`;
+    if (totalBytes < 1024 * 1024) return `${(totalBytes / 1024).toFixed(2)} KB`;
+    return `${(totalBytes / (1024 * 1024)).toFixed(2)} MB`;
+}
 </script>
 
 <div

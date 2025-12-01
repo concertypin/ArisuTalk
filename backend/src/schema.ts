@@ -15,7 +15,7 @@ export const Queryable = z.object({
     id: z
         .string()
         .describe(
-            "Unique identifier for the data entry. It is used as internal reference."
+            "Unique identifier for the data entry. It is used as internal reference.",
         ),
 });
 /**
@@ -60,7 +60,7 @@ export const PartialDataSchema = z.object({
         .default(false)
         .describe(
             "Whether the data is encrypted. If true, the additionalData(not link, but content) is encrypted. " +
-                "Encryption implies that it is private data."
+                "Encryption implies that it is private data.",
         ),
     /**
      * URL to the additional data blob stored in the storage client.
@@ -71,7 +71,7 @@ export const PartialDataSchema = z.object({
     additionalData: z
         .url()
         .describe(
-            "URL to the additional data blob. Its content may be encrypted. It might not be publicly accessible, use dedicated endpoint to access it."
+            "URL to the additional data blob. Its content may be encrypted. It might not be publicly accessible, use dedicated endpoint to access it.",
         ),
     /**
      * @property Number of times the content has been downloaded.
@@ -83,7 +83,7 @@ export const PartialDataSchema = z.object({
         .min(0)
         .default(0)
         .describe(
-            "Number of times the data has been downloaded. It is not guaranteed to be accurate."
+            "Number of times the data has been downloaded. It is not guaranteed to be accurate.",
         ),
     uploadedAt: z
         .number()

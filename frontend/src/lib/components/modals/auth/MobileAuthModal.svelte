@@ -1,114 +1,114 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import { fade } from "svelte/transition";
-    import { t } from "$root/i18n";
-    import {
-        auth,
-        initializeAuth,
-        openSignIn,
-        openUserProfile,
-        signOut,
-        type AuthState,
-    } from "../../../stores/auth";
-    import { isMobileAuthModalVisible } from "../../../stores/ui";
-    import {
-        X,
-        LogIn,
-        LogOut,
-        UserCircle2,
-        Loader2,
-        AlertCircle,
-    } from "lucide-svelte";
+import { onMount } from "svelte";
+import { fade } from "svelte/transition";
+import { t } from "$root/i18n";
+import {
+    auth,
+    initializeAuth,
+    openSignIn,
+    openUserProfile,
+    signOut,
+    type AuthState,
+} from "../../../stores/auth";
+import { isMobileAuthModalVisible } from "../../../stores/ui";
+import {
+    X,
+    LogIn,
+    LogOut,
+    UserCircle2,
+    Loader2,
+    AlertCircle,
+} from "lucide-svelte";
 
-    export let isOpen = false;
+export let isOpen = false;
 
-    const defaultState: AuthState = {
-        status: "idle",
-        clerk: null,
-        user: null,
-        isSignedIn: false,
-        error: null,
-    };
+const defaultState: AuthState = {
+    status: "idle",
+    clerk: null,
+    user: null,
+    isSignedIn: false,
+    error: null,
+};
 
-    let state: AuthState = defaultState;
+let state: AuthState = defaultState;
 
-    const closeModal = (): void => {
-        isMobileAuthModalVisible.set(false);
-    };
+const closeModal = (): void => {
+    isMobileAuthModalVisible.set(false);
+};
 
-    const getUserDisplayName = (): string => {
-        const user = state.user;
-        if (!user || typeof user !== "object") {
-            return "";
-        }
+const getUserDisplayName = (): string => {
+    const user = state.user;
+    if (!user || typeof user !== "object") {
+        return "";
+    }
 
-        const withFallback = [
-            (user as { fullName?: string }).fullName,
-            (user as { firstName?: string }).firstName,
-            (user as { username?: string }).username,
-            (user as { primaryEmailAddress?: { emailAddress?: string } })
-                .primaryEmailAddress?.emailAddress,
-        ].find((value) => Boolean(value));
+    const withFallback = [
+        (user as { fullName?: string }).fullName,
+        (user as { firstName?: string }).firstName,
+        (user as { username?: string }).username,
+        (user as { primaryEmailAddress?: { emailAddress?: string } })
+            .primaryEmailAddress?.emailAddress,
+    ].find((value) => Boolean(value));
 
-        return withFallback ?? "";
-    };
+    return withFallback ?? "";
+};
 
-    const handleSignIn = async (): Promise<void> => {
-        await openSignIn();
-    };
+const handleSignIn = async (): Promise<void> => {
+    await openSignIn();
+};
 
-    const handleOpenProfile = async (): Promise<void> => {
-        await openUserProfile();
-    };
+const handleOpenProfile = async (): Promise<void> => {
+    await openUserProfile();
+};
 
-    const handleSignOut = async (): Promise<void> => {
-        await signOut();
-    };
+const handleSignOut = async (): Promise<void> => {
+    await signOut();
+};
 
-    const handleRetry = async (): Promise<void> => {
-        await initializeAuth();
-    };
+const handleRetry = async (): Promise<void> => {
+    await initializeAuth();
+};
 
-    const handleKeydown = (event: KeyboardEvent): void => {
-        if (!isOpen) {
-            return;
-        }
-        if (event.key === "Escape") {
-            closeModal();
-        }
-    };
+const handleKeydown = (event: KeyboardEvent): void => {
+    if (!isOpen) {
+        return;
+    }
+    if (event.key === "Escape") {
+        closeModal();
+    }
+};
 
-    onMount(() => {
-        const unsubscribe = auth.subscribe((value) => {
-            state = value ?? defaultState;
-        });
-
-        window.addEventListener("keydown", handleKeydown);
-
-        (async () => {
-            try {
-                await initializeAuth();
-            } catch (error) {
-                console.error(
-                    "Failed to initialize Clerk for mobile auth modal",
-                    error
-                );
-            }
-        })();
-
-        return () => {
-            unsubscribe();
-            window.removeEventListener("keydown", handleKeydown);
-        };
+onMount(() => {
+    const unsubscribe = auth.subscribe((value) => {
+        state = value ?? defaultState;
     });
 
-    $: status = state.status;
-    $: isDisabled = status === "disabled";
-    $: isReady = status === "ready";
-    $: isLoading = status === "loading";
-    $: isError = status === "error";
-    $: isSignedIn = state.isSignedIn;
-    $: displayName = getUserDisplayName();
+    window.addEventListener("keydown", handleKeydown);
+
+    (async () => {
+        try {
+            await initializeAuth();
+        } catch (error) {
+            console.error(
+                "Failed to initialize Clerk for mobile auth modal",
+                error,
+            );
+        }
+    })();
+
+    return () => {
+        unsubscribe();
+        window.removeEventListener("keydown", handleKeydown);
+    };
+});
+
+$: status = state.status;
+$: isDisabled = status === "disabled";
+$: isReady = status === "ready";
+$: isLoading = status === "loading";
+$: isError = status === "error";
+$: isSignedIn = state.isSignedIn;
+$: displayName = getUserDisplayName();
 </script>
 
 {#if isOpen}

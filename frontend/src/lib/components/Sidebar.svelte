@@ -1,274 +1,269 @@
 <script>
-    import { onMount, afterUpdate } from "svelte";
-    import { t } from "$root/i18n";
-    import {
-        characters,
-        expandedCharacterIds,
-        editingCharacter,
-    } from "../stores/character";
-    import {
-        chatRooms,
-        selectedChatId,
-        searchQuery,
-        messages,
-        groupChats,
-        openChats,
-        unreadCounts,
-        editingGroupChat,
-        editingChatRoomId,
-    } from "../stores/chat";
-    import {
-        isSidebarCollapsed,
-        isCharacterModalVisible,
-        isConfirmationModalVisible,
-        confirmationModalData,
-        isCreateGroupChatModalVisible,
-        isCreateOpenChatModalVisible,
-        isEditGroupChatModalVisible,
-        isDesktopSettingsModalVisible,
-        isChatSelectionModalVisible,
-        chatSelectionModalData,
-        isSearchModalVisible,
-    } from "../stores/ui";
-    import { formatTimestamp } from "../../utils";
-    import Avatar from "./Avatar.svelte";
-    import {
-        Bot,
-        Settings,
-        Plus,
-        ChevronRight,
-        ChevronLeft,
-        ChevronDown,
-        Edit3,
-        Trash2,
-        Check,
-        Users,
-        Globe,
-        X,
-    } from "lucide-svelte";
-    import GroupChatList from "./sidebar/GroupChatList.svelte";
-    import OpenChatList from "./sidebar/OpenChatList.svelte";
-    import AuthWidget from "./auth/AuthWidget.svelte";
+import { onMount, afterUpdate } from "svelte";
+import { t } from "$root/i18n";
+import {
+    characters,
+    expandedCharacterIds,
+    editingCharacter,
+} from "../stores/character";
+import {
+    chatRooms,
+    selectedChatId,
+    searchQuery,
+    messages,
+    groupChats,
+    openChats,
+    unreadCounts,
+    editingGroupChat,
+    editingChatRoomId,
+} from "../stores/chat";
+import {
+    isSidebarCollapsed,
+    isCharacterModalVisible,
+    isConfirmationModalVisible,
+    confirmationModalData,
+    isCreateGroupChatModalVisible,
+    isCreateOpenChatModalVisible,
+    isEditGroupChatModalVisible,
+    isDesktopSettingsModalVisible,
+    isChatSelectionModalVisible,
+    chatSelectionModalData,
+    isSearchModalVisible,
+} from "../stores/ui";
+import { formatTimestamp } from "../../utils";
+import Avatar from "./Avatar.svelte";
+import {
+    Bot,
+    Settings,
+    Plus,
+    ChevronRight,
+    ChevronLeft,
+    ChevronDown,
+    Edit3,
+    Trash2,
+    Check,
+    Users,
+    Globe,
+    X,
+} from "lucide-svelte";
+import GroupChatList from "./sidebar/GroupChatList.svelte";
+import OpenChatList from "./sidebar/OpenChatList.svelte";
+import AuthWidget from "./auth/AuthWidget.svelte";
 
-    let characterGroupEls = {};
-    let avatarEls = {};
-    let headerEls = {};
-    let roomListEls = {};
-    let editingName = "";
+let characterGroupEls = {};
+let avatarEls = {};
+let headerEls = {};
+let roomListEls = {};
+let editingName = "";
 
-    $: filteredCharacters = $characters.filter((char) =>
-        char.name.toLowerCase().includes($searchQuery.toLowerCase())
+$: filteredCharacters = $characters.filter((char) =>
+    char.name.toLowerCase().includes($searchQuery.toLowerCase()),
+);
+
+$: characterLastAiMessages = Object.fromEntries(
+    $characters.map((char) => {
+        const rooms = $chatRooms[char.id] || [];
+        if (!rooms.length) return [char.id, null];
+
+        const lastAiMessage = rooms
+            .flatMap((room) => $messages[room.id] || [])
+            .filter((msg) => msg && typeof msg.timestamp === "number")
+            .sort((a, b) => b.timestamp - a.timestamp)[0];
+
+        return [char.id, lastAiMessage];
+    }),
+);
+
+afterUpdate(() => {
+    $expandedCharacterIds.forEach((id) => {
+        updateTreeLine(id);
+    });
+});
+
+function updateTreeLine(characterId) {
+    const characterGroup = characterGroupEls[characterId];
+    const avatar = avatarEls[characterId];
+    const header = headerEls[characterId];
+    const roomList = roomListEls[characterId];
+
+    if (!characterGroup || !avatar || !header) return;
+
+    const groupRect = characterGroup.getBoundingClientRect();
+    const avatarRect = avatar.getBoundingClientRect();
+    const headerRect = header.getBoundingClientRect();
+
+    const alignmentCorrection = -2;
+    const trunkLeft =
+        avatarRect.left -
+        groupRect.left +
+        avatarRect.width / 2 +
+        alignmentCorrection;
+
+    const connectorTop = headerRect.bottom - groupRect.top;
+    let connectorHeight = 0;
+    if (roomList && roomList.lastElementChild) {
+        const lastRoomItemRect =
+            roomList.lastElementChild.getBoundingClientRect();
+        connectorHeight =
+            lastRoomItemRect.top -
+            headerRect.bottom +
+            lastRoomItemRect.height / 2 -
+            6;
+    }
+
+    characterGroup.style.setProperty("--tree-trunk-left", `${trunkLeft}px`);
+    characterGroup.style.setProperty(
+        "--tree-connector-top",
+        `${connectorTop}px`,
     );
-
-    $: characterLastAiMessages = Object.fromEntries(
-        $characters.map((char) => {
-            const rooms = $chatRooms[char.id] || [];
-            if (!rooms.length) return [char.id, null];
-
-            const lastAiMessage = rooms
-                .flatMap((room) => $messages[room.id] || [])
-                .filter((msg) => msg && typeof msg.timestamp === "number")
-                .sort((a, b) => b.timestamp - a.timestamp)[0];
-
-            return [char.id, lastAiMessage];
-        })
+    characterGroup.style.setProperty(
+        "--tree-connector-height",
+        `${connectorHeight}px`,
     );
+}
 
-    afterUpdate(() => {
-        $expandedCharacterIds.forEach((id) => {
-            updateTreeLine(id);
-        });
+function toggleSidebar() {
+    isSidebarCollapsed.update((v) => !v);
+}
+
+function openSettings() {
+    isDesktopSettingsModalVisible.set(true);
+}
+
+function openNewCharacterModal() {
+    isCharacterModalVisible.set(true);
+}
+
+function handleCharacterSelect(character) {
+    const rooms = $chatRooms[character.id] || [];
+    if (rooms.length === 1) {
+        selectChat(rooms[0].id);
+    } else if (rooms.length > 1) {
+        chatSelectionModalData.set({ character });
+        isChatSelectionModalVisible.set(true);
+    }
+}
+
+function toggleCharacterExpansion(characterId) {
+    expandedCharacterIds.update((ids) => {
+        const newIds = new Set(ids);
+        if (newIds.has(characterId)) {
+            newIds.delete(characterId);
+        } else {
+            newIds.add(characterId);
+        }
+        return newIds;
+    });
+}
+
+function selectChat(chatId) {
+    if ($editingChatRoomId) return;
+    selectedChatId.set(chatId);
+}
+
+function createNewChatRoomForCharacter(characterId) {
+    const newChatRoomId = `${characterId}_${Date.now()}`;
+    const newChatRoom = {
+        id: newChatRoomId,
+        characterId: characterId,
+        name: t("ui.newChatName"),
+        createdAt: Date.now(),
+        lastActivity: Date.now(),
+    };
+
+    chatRooms.update((rooms) => {
+        const characterChatRooms = [...(rooms[characterId] || []), newChatRoom];
+        return { ...rooms, [characterId]: characterChatRooms };
     });
 
-    function updateTreeLine(characterId) {
-        const characterGroup = characterGroupEls[characterId];
-        const avatar = avatarEls[characterId];
-        const header = headerEls[characterId];
-        const roomList = roomListEls[characterId];
+    messages.update((msgs) => ({ ...msgs, [newChatRoomId]: [] }));
 
-        if (!characterGroup || !avatar || !header) return;
+    selectChat(newChatRoomId);
+}
 
-        const groupRect = characterGroup.getBoundingClientRect();
-        const avatarRect = avatar.getBoundingClientRect();
-        const headerRect = header.getBoundingClientRect();
+function editCharacter(character) {
+    editingCharacter.set(character);
+    isCharacterModalVisible.set(true);
+}
 
-        const alignmentCorrection = -2;
-        const trunkLeft =
-            avatarRect.left -
-            groupRect.left +
-            avatarRect.width / 2 +
-            alignmentCorrection;
-
-        const connectorTop = headerRect.bottom - groupRect.top;
-        let connectorHeight = 0;
-        if (roomList && roomList.lastElementChild) {
-            const lastRoomItemRect =
-                roomList.lastElementChild.getBoundingClientRect();
-            connectorHeight =
-                lastRoomItemRect.top -
-                headerRect.bottom +
-                lastRoomItemRect.height / 2 -
-                6;
-        }
-
-        characterGroup.style.setProperty("--tree-trunk-left", `${trunkLeft}px`);
-        characterGroup.style.setProperty(
-            "--tree-connector-top",
-            `${connectorTop}px`
-        );
-        characterGroup.style.setProperty(
-            "--tree-connector-height",
-            `${connectorHeight}px`
-        );
-    }
-
-    function toggleSidebar() {
-        isSidebarCollapsed.update((v) => !v);
-    }
-
-    function openSettings() {
-        isDesktopSettingsModalVisible.set(true);
-    }
-
-    function openNewCharacterModal() {
-        isCharacterModalVisible.set(true);
-    }
-
-    function handleCharacterSelect(character) {
-        const rooms = $chatRooms[character.id] || [];
-        if (rooms.length === 1) {
-            selectChat(rooms[0].id);
-        } else if (rooms.length > 1) {
-            chatSelectionModalData.set({ character });
-            isChatSelectionModalVisible.set(true);
-        }
-    }
-
-    function toggleCharacterExpansion(characterId) {
-        expandedCharacterIds.update((ids) => {
-            const newIds = new Set(ids);
-            if (newIds.has(characterId)) {
-                newIds.delete(characterId);
-            } else {
-                newIds.add(characterId);
-            }
-            return newIds;
-        });
-    }
-
-    function selectChat(chatId) {
-        if ($editingChatRoomId) return;
-        selectedChatId.set(chatId);
-    }
-
-    function createNewChatRoomForCharacter(characterId) {
-        const newChatRoomId = `${characterId}_${Date.now()}`;
-        const newChatRoom = {
-            id: newChatRoomId,
-            characterId: characterId,
-            name: t("ui.newChatName"),
-            createdAt: Date.now(),
-            lastActivity: Date.now(),
-        };
-
-        chatRooms.update((rooms) => {
-            const characterChatRooms = [
-                ...(rooms[characterId] || []),
-                newChatRoom,
-            ];
-            return { ...rooms, [characterId]: characterChatRooms };
-        });
-
-        messages.update((msgs) => ({ ...msgs, [newChatRoomId]: [] }));
-
-        selectChat(newChatRoomId);
-    }
-
-    function editCharacter(character) {
-        editingCharacter.set(character);
-        isCharacterModalVisible.set(true);
-    }
-
-    function deleteCharacter(charToDelete) {
-        confirmationModalData.set({
-            title: t("sidebar.deleteCharacterTitle"),
-            message: t("sidebar.deleteCharacterConfirm", {
-                name: charToDelete.name,
-            }),
-            onConfirm: () => {
-                characters.update((chars) =>
-                    chars.filter((c) => c.id !== charToDelete.id)
-                );
-                chatRooms.update((rooms) => {
-                    delete rooms[charToDelete.id];
-                    return rooms;
-                });
-                // TODO: Also delete messages for all rooms of this character
-            },
-        });
-        isConfirmationModalVisible.set(true);
-    }
-
-    function editChatRoom(room) {
-        editingChatRoomId.set(room.id);
-        editingName = room.name;
-    }
-
-    function deleteChatRoom(room, characterId) {
-        confirmationModalData.set({
-            title: t("sidebar.deleteChatRoom"),
-            message: t("modal.deleteChatRoom.message"),
-            onConfirm: () => {
-                chatRooms.update((rooms) => {
-                    const characterRooms = rooms[characterId] || [];
-                    rooms[characterId] = characterRooms.filter(
-                        (r) => r.id !== room.id
-                    );
-                    return rooms;
-                });
-                messages.update((msgs) => {
-                    delete msgs[room.id];
-                    return msgs;
-                });
-            },
-        });
-        isConfirmationModalVisible.set(true);
-    }
-
-    function saveName(room, characterId) {
-        if (!editingName.trim()) return;
-
-        if (characterId) {
-            // It's a character room
+function deleteCharacter(charToDelete) {
+    confirmationModalData.set({
+        title: t("sidebar.deleteCharacterTitle"),
+        message: t("sidebar.deleteCharacterConfirm", {
+            name: charToDelete.name,
+        }),
+        onConfirm: () => {
+            characters.update((chars) =>
+                chars.filter((c) => c.id !== charToDelete.id),
+            );
             chatRooms.update((rooms) => {
-                const characterRooms = rooms[characterId] || [];
-                const roomToUpdate = characterRooms.find(
-                    (r) => r.id === room.id
-                );
-                if (roomToUpdate) {
-                    roomToUpdate.name = editingName;
-                }
+                delete rooms[charToDelete.id];
                 return rooms;
             });
-        } else {
-            // It's a group chat
-            groupChats.update((chats) => {
-                const chatToUpdate = chats[room.id];
-                if (chatToUpdate) {
-                    chatToUpdate.name = editingName;
-                }
-                return chats;
+            // TODO: Also delete messages for all rooms of this character
+        },
+    });
+    isConfirmationModalVisible.set(true);
+}
+
+function editChatRoom(room) {
+    editingChatRoomId.set(room.id);
+    editingName = room.name;
+}
+
+function deleteChatRoom(room, characterId) {
+    confirmationModalData.set({
+        title: t("sidebar.deleteChatRoom"),
+        message: t("modal.deleteChatRoom.message"),
+        onConfirm: () => {
+            chatRooms.update((rooms) => {
+                const characterRooms = rooms[characterId] || [];
+                rooms[characterId] = characterRooms.filter(
+                    (r) => r.id !== room.id,
+                );
+                return rooms;
             });
-        }
+            messages.update((msgs) => {
+                delete msgs[room.id];
+                return msgs;
+            });
+        },
+    });
+    isConfirmationModalVisible.set(true);
+}
 
-        editingChatRoomId.set(null);
-        editingName = "";
+function saveName(room, characterId) {
+    if (!editingName.trim()) return;
+
+    if (characterId) {
+        // It's a character room
+        chatRooms.update((rooms) => {
+            const characterRooms = rooms[characterId] || [];
+            const roomToUpdate = characterRooms.find((r) => r.id === room.id);
+            if (roomToUpdate) {
+                roomToUpdate.name = editingName;
+            }
+            return rooms;
+        });
+    } else {
+        // It's a group chat
+        groupChats.update((chats) => {
+            const chatToUpdate = chats[room.id];
+            if (chatToUpdate) {
+                chatToUpdate.name = editingName;
+            }
+            return chats;
+        });
     }
 
-    function cancelEdit() {
-        editingChatRoomId.set(null);
-        editingName = "";
-    }
+    editingChatRoomId.set(null);
+    editingName = "";
+}
+
+function cancelEdit() {
+    editingChatRoomId.set(null);
+    editingName = "";
+}
 </script>
 
 <aside

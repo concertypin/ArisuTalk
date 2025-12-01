@@ -1,127 +1,126 @@
 <script>
-    import { onMount } from "svelte";
-    import { t } from "$root/i18n";
-    import { settings } from "$stores/settings";
-    import {
-        Image,
-        Cpu,
-        UserPlus,
-        Settings,
-        Edit,
-        Smile,
-        Download,
-        BarChart3,
-        HelpCircle,
-        Eye,
-        EyeOff,
-        Plus,
-        Check,
-        X,
-        RefreshCw,
-        Users,
-        Trash2,
-        Loader2,
-    } from "lucide-svelte";
-        import { NovelAIClient } from "$root/lib/api/novelai";
-    import { DEFAULT_EMOTIONS } from "$root/defaults";
+import { onMount } from "svelte";
+import { t } from "$root/i18n";
+import { settings } from "$stores/settings";
+import {
+    Image,
+    Cpu,
+    UserPlus,
+    Settings,
+    Edit,
+    Smile,
+    Download,
+    BarChart3,
+    HelpCircle,
+    Eye,
+    EyeOff,
+    Plus,
+    Check,
+    X,
+    RefreshCw,
+    Users,
+    Trash2,
+    Loader2,
+} from "lucide-svelte";
+import { NovelAIClient } from "$root/lib/api/novelai";
+import { DEFAULT_EMOTIONS } from "$root/defaults";
 
-    import { characters } from "$stores/character";
+import { characters } from "$stores/character";
 
-    if (!$settings.naiSettings) {
-        $settings.naiSettings = {};
-    }
+if (!$settings.naiSettings) {
+    $settings.naiSettings = {};
+}
 
-    let apiKeyVisible = false;
-    let maskedApiKey =
-        "●".repeat(8) + ($settings.naiSettings?.apiKey?.slice(-4) || "");
+let apiKeyVisible = false;
+let maskedApiKey =
+    "●".repeat(8) + ($settings.naiSettings?.apiKey?.slice(-4) || "");
 
-    let minDelaySeconds = $settings.naiSettings?.minDelay / 1000;
-    let maxAdditionalDelaySeconds =
-        $settings.naiSettings?.maxAdditionalDelay / 1000;
+let minDelaySeconds = $settings.naiSettings?.minDelay / 1000;
+let maxAdditionalDelaySeconds =
+    $settings.naiSettings?.maxAdditionalDelay / 1000;
 
-    $: $settings.naiSettings.minDelay = minDelaySeconds * 1000;
-    $: $settings.naiSettings.maxAdditionalDelay =
-        maxAdditionalDelaySeconds * 1000;
+$: $settings.naiSettings.minDelay = minDelaySeconds * 1000;
+$: $settings.naiSettings.maxAdditionalDelay = maxAdditionalDelaySeconds * 1000;
 
-    let isEditingNaiList = false;
-    const emotionLabels = {
-        happy: "😊 기쁨",
-        sad: "😢 슬픔",
-        surprised: "😮 놀람",
-        angry: "😠 분노",
-        love: "💕 사랑",
-        embarrassed: "😳 부끄러움",
-        confused: "😕 혼란",
-        sleepy: "😴 졸림",
-        excited: "🤩 흥분",
-        neutral: "😐 무표정",
-    };
+let isEditingNaiList = false;
+const emotionLabels = {
+    happy: "😊 기쁨",
+    sad: "😢 슬픔",
+    surprised: "😮 놀람",
+    angry: "😠 분노",
+    love: "💕 사랑",
+    embarrassed: "😳 부끄러움",
+    confused: "😕 혼란",
+    sleepy: "😴 졸림",
+    excited: "🤩 흥분",
+    neutral: "😐 무표정",
+};
 
-    let newNaiItem = { title: "", emotion: "", action: "" };
+let newNaiItem = { title: "", emotion: "", action: "" };
 
-    let totalGenerated = 0;
-    let charactersWithGenerated = 0;
-    let totalStickers = 0;
-    let generationRate = 0;
-    let characterStats = [];
+let totalGenerated = 0;
+let charactersWithGenerated = 0;
+let totalStickers = 0;
+let generationRate = 0;
+let characterStats = [];
 
-    $: {
-        let generated = 0;
-        let withGenerated = 0;
-        let total = 0;
-        let stats = [];
+$: {
+    let generated = 0;
+    let withGenerated = 0;
+    let total = 0;
+    let stats = [];
 
-        $characters.forEach((character) => {
-            if (character.stickers && character.stickers.length > 0) {
-                total += character.stickers.length;
-                const generatedStickers = character.stickers.filter(
-                    (s) => s.generated
-                );
-                const generatedCount = generatedStickers.length;
-                generated += generatedCount;
-                if (generatedCount > 0) {
-                    withGenerated++;
-                    stats.push({ name: character.name, count: generatedCount });
-                }
+    $characters.forEach((character) => {
+        if (character.stickers && character.stickers.length > 0) {
+            total += character.stickers.length;
+            const generatedStickers = character.stickers.filter(
+                (s) => s.generated,
+            );
+            const generatedCount = generatedStickers.length;
+            generated += generatedCount;
+            if (generatedCount > 0) {
+                withGenerated++;
+                stats.push({ name: character.name, count: generatedCount });
             }
-        });
-
-        totalGenerated = generated;
-        charactersWithGenerated = withGenerated;
-        totalStickers = total;
-        generationRate = total > 0 ? ((generated / total) * 100).toFixed(1) : 0;
-        characterStats = stats.sort((a, b) => b.count - a.count);
-    }
-
-    function addNaiItem() {
-        if (!newNaiItem.title.trim()) return;
-        if (!$settings.naiSettings.naiGenerationList) {
-            $settings.naiSettings.naiGenerationList = [];
         }
-        $settings.naiSettings.naiGenerationList = [
-            ...$settings.naiSettings.naiGenerationList,
-            { ...newNaiItem },
-        ];
-        newNaiItem = { title: "", emotion: "", action: "" };
-    }
+    });
 
-    function deleteNaiItem(index) {
-        $settings.naiSettings.naiGenerationList.splice(index, 1);
-        $settings.naiSettings.naiGenerationList =
-            $settings.naiSettings.naiGenerationList;
-    }
+    totalGenerated = generated;
+    charactersWithGenerated = withGenerated;
+    totalStickers = total;
+    generationRate = total > 0 ? ((generated / total) * 100).toFixed(1) : 0;
+    characterStats = stats.sort((a, b) => b.count - a.count);
+}
 
-    function saveNaiList() {
-        isEditingNaiList = false;
+function addNaiItem() {
+    if (!newNaiItem.title.trim()) return;
+    if (!$settings.naiSettings.naiGenerationList) {
+        $settings.naiSettings.naiGenerationList = [];
     }
+    $settings.naiSettings.naiGenerationList = [
+        ...$settings.naiSettings.naiGenerationList,
+        { ...newNaiItem },
+    ];
+    newNaiItem = { title: "", emotion: "", action: "" };
+}
 
-    function resetNaiList() {
-        $settings.naiSettings.naiGenerationList = DEFAULT_EMOTIONS;
-    }
+function deleteNaiItem(index) {
+    $settings.naiSettings.naiGenerationList.splice(index, 1);
+    $settings.naiSettings.naiGenerationList =
+        $settings.naiSettings.naiGenerationList;
+}
 
-    function generateAllStickers() {
-        console.log("generateAllStickers");
-    }
+function saveNaiList() {
+    isEditingNaiList = false;
+}
+
+function resetNaiList() {
+    $settings.naiSettings.naiGenerationList = DEFAULT_EMOTIONS;
+}
+
+function generateAllStickers() {
+    console.log("generateAllStickers");
+}
 </script>
 
 <div class="space-y-6">

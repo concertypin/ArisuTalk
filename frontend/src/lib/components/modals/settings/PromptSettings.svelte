@@ -1,77 +1,69 @@
 <script>
-    import { t } from "$root/i18n";
-    import { createEventDispatcher } from "svelte";
-    import {
-        ArrowLeft,
-        Save,
-        RefreshCw,
-        Download,
-        Upload,
-    } from "lucide-svelte";
-    import { prompts } from "$stores/prompts";
-    import PromptSection from "$components/modals/prompt/PromptSection.svelte";
+import { t } from "$root/i18n";
+import { createEventDispatcher } from "svelte";
+import { ArrowLeft, Save, RefreshCw, Download, Upload } from "lucide-svelte";
+import { prompts } from "$stores/prompts";
+import PromptSection from "$components/modals/prompt/PromptSection.svelte";
 
-    const dispatch = createEventDispatcher();
+const dispatch = createEventDispatcher();
 
-    let promptData = {};
-    prompts.subscribe((value) => {
-        promptData = JSON.parse(JSON.stringify(value)); // Deep copy
-    });
+let promptData = {};
+prompts.subscribe((value) => {
+    promptData = JSON.parse(JSON.stringify(value)); // Deep copy
+});
 
-    const promptSections = [
-        {
-            key: "mainChat",
-            title: t("promptModal.mainChatPrompt"),
-            description: t("promptModal.mainChatPromptDescription"),
-        },
-        {
-            key: "characterSheet",
-            title: t("promptModal.characterSheetGenerationPrompt"),
-            description: t(
-                "promptModal.characterSheetGenerationPromptDescription"
-            ),
-        },
-        {
-            key: "profileCreation",
-            title: t("promptModal.randomFirstMessagePrompt"),
-            description: t("promptModal.randomFirstMessagePromptDescription"),
-        },
-        {
-            key: "snsForce",
-            title: t("promptModal.snsForcePrompt"),
-            description: t("promptModal.snsForcePromptDescription"),
-        },
-        {
-            key: "naiSticker",
-            title: t("promptModal.naiStickerPrompt"),
-            description: t("promptModal.naiStickerPromptDescription"),
-        },
-        {
-            key: "groupChat",
-            title: t("promptModal.groupChatPrompt"),
-            description: t("promptModal.groupChatPromptDescription"),
-        },
-        {
-            key: "openChat",
-            title: t("promptModal.openChatPrompt"),
-            description: t("promptModal.openChatPromptDescription"),
-        },
-    ];
+const promptSections = [
+    {
+        key: "mainChat",
+        title: t("promptModal.mainChatPrompt"),
+        description: t("promptModal.mainChatPromptDescription"),
+    },
+    {
+        key: "characterSheet",
+        title: t("promptModal.characterSheetGenerationPrompt"),
+        description: t("promptModal.characterSheetGenerationPromptDescription"),
+    },
+    {
+        key: "profileCreation",
+        title: t("promptModal.randomFirstMessagePrompt"),
+        description: t("promptModal.randomFirstMessagePromptDescription"),
+    },
+    {
+        key: "snsForce",
+        title: t("promptModal.snsForcePrompt"),
+        description: t("promptModal.snsForcePromptDescription"),
+    },
+    {
+        key: "naiSticker",
+        title: t("promptModal.naiStickerPrompt"),
+        description: t("promptModal.naiStickerPromptDescription"),
+    },
+    {
+        key: "groupChat",
+        title: t("promptModal.groupChatPrompt"),
+        description: t("promptModal.groupChatPromptDescription"),
+    },
+    {
+        key: "openChat",
+        title: t("promptModal.openChatPrompt"),
+        description: t("promptModal.openChatPromptDescription"),
+    },
+];
 
-    async function handleSave() {
-        await prompts.save(promptData);
-        dispatch("back");
+async function handleSave() {
+    await prompts.save(promptData);
+    dispatch("back");
+}
+
+async function handleReset() {
+    if (confirm(t("promptModal.resetAllPromptsConfirmation"))) {
+        await prompts.reset();
+        // Re-initialize promptData after reset
+        prompts.subscribe((value) => {
+            promptData = JSON.parse(JSON.stringify(value));
+        });
     }
-
-    async function handleReset() {
-        if (confirm(t("promptModal.resetAllPromptsConfirmation"))) {
-            await prompts.reset();
-            // Re-initialize promptData after reset
-            prompts.subscribe((value) => {
-                promptData = JSON.parse(JSON.stringify(value));
-            });
-        }
-    }
+}
 </script>
 
 <div class="flex flex-col h-full relative">

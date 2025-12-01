@@ -1,8 +1,8 @@
 <script>
-    import { t } from "$root/i18n";
-    import { AlertTriangle } from "lucide-svelte";
+import { t } from "$root/i18n";
+import { AlertTriangle } from "lucide-svelte";
 
-    export let hypnosis = {};
+export let hypnosis = {};
 </script>
 
 <details class="group border-t border-gray-700/50 pt-4">

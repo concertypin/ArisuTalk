@@ -13,6 +13,12 @@ export default defineConfig({
             entry: "src/main.ts",
             formats: ["es"],
         },
+        rollupOptions: {
+            output: {
+                //Everything in a single file for Cloudflare Workers
+                manualChunks: () => "bundle",
+            },
+        },
         outDir: "dist",
     },
     preview: { port: 5179 },

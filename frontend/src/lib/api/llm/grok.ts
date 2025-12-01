@@ -26,7 +26,7 @@ export class GrokClient implements LLMApi {
         apiKey: string,
         model: string,
         baseUrl: string | null,
-        options: LLMApiConstructorOptions | undefined = {}
+        options: LLMApiConstructorOptions | undefined = {},
     ) {
         this.client = new ChatGroq({
             apiKey: apiKey,
@@ -135,7 +135,7 @@ export class GrokClient implements LLMApi {
         } catch (error) {
             console.error(
                 t("api.profileGenerationError", { provider: "Grok" }),
-                error
+                error,
             );
             return { error: String(error) };
         }
@@ -174,7 +174,7 @@ export class GrokClient implements LLMApi {
             console.error(
                 t("api.profileGenerationError", { provider: "Grok" }) +
                     " (Character Sheet)",
-                error
+                error,
             );
             return { error: String(error) };
         }

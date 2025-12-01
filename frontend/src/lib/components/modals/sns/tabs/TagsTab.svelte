@@ -1,71 +1,66 @@
 <script>
-    import { t } from "$root/i18n";
-    import { Hash, Lock, EyeOff } from "lucide-svelte";
+import { t } from "$root/i18n";
+import { Hash, Lock, EyeOff } from "lucide-svelte";
 
-    export let character = null;
+export let character = null;
 
-    let allTags = [];
+let allTags = [];
 
-    $: {
-        if (character && character.snsPosts) {
-            const tagCounts = {};
-            const tagLastUsed = {};
-            const tagSecretStatus = {};
+$: {
+    if (character && character.snsPosts) {
+        const tagCounts = {};
+        const tagLastUsed = {};
+        const tagSecretStatus = {};
 
-            character.snsPosts.forEach((post) => {
-                if (post.tags && Array.isArray(post.tags)) {
-                    post.tags.forEach((tag) => {
-                        tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-                        const postTimestamp = new Date(
-                            post.timestamp
-                        ).getTime();
-                        if (
-                            !tagLastUsed[tag] ||
-                            postTimestamp > tagLastUsed[tag]
-                        ) {
-                            tagLastUsed[tag] = postTimestamp;
-                        }
-                        if (
-                            post.access_level &&
-                            post.access_level.includes("secret")
-                        ) {
-                            tagSecretStatus[tag] = true;
-                        }
-                    });
-                }
-            });
+        character.snsPosts.forEach((post) => {
+            if (post.tags && Array.isArray(post.tags)) {
+                post.tags.forEach((tag) => {
+                    tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+                    const postTimestamp = new Date(post.timestamp).getTime();
+                    if (!tagLastUsed[tag] || postTimestamp > tagLastUsed[tag]) {
+                        tagLastUsed[tag] = postTimestamp;
+                    }
+                    if (
+                        post.access_level &&
+                        post.access_level.includes("secret")
+                    ) {
+                        tagSecretStatus[tag] = true;
+                    }
+                });
+            }
+        });
 
-            allTags = Object.keys(tagCounts)
-                .map((tagName) => ({
-                    name: tagName,
-                    count: tagCounts[tagName],
-                    lastUsed: tagLastUsed[tagName] || Date.now(),
-                    isSecret: tagSecretStatus[tagName] || false,
-                }))
-                .sort((a, b) => b.count - a.count);
-        }
+        allTags = Object.keys(tagCounts)
+            .map((tagName) => ({
+                name: tagName,
+                count: tagCounts[tagName],
+                lastUsed: tagLastUsed[tagName] || Date.now(),
+                isSecret: tagSecretStatus[tagName] || false,
+            }))
+            .sort((a, b) => b.count - a.count);
     }
+}
 
-    function formatTimeAgo(timestamp) {
-        const now = Date.now();
-        const diff = now - timestamp;
+function formatTimeAgo(timestamp) {
+    const now = Date.now();
+    const diff = now - timestamp;
 
-        if (diff < 60000) return t("sns.justNow");
-        if (diff < 3600000)
-            return t("sns.minutesAgo", { minutes: Math.floor(diff / 60000) });
-        if (diff < 86400000)
-            return t("sns.hoursAgo", { hours: Math.floor(diff / 3600000) });
-        if (diff < 604800000)
-            return t("sns.daysAgo", { days: Math.floor(diff / 86400000) });
-        if (diff < 2592000000)
-            return t("sns.weeksAgo", { weeks: Math.floor(diff / 604800000) });
-        if (diff < 31536000000)
-            return t("sns.monthsAgo", {
-                months: Math.floor(diff / 2592000000),
-            });
+    if (diff < 60000) return t("sns.justNow");
+    if (diff < 3600000)
+        return t("sns.minutesAgo", { minutes: Math.floor(diff / 60000) });
+    if (diff < 86400000)
+        return t("sns.hoursAgo", { hours: Math.floor(diff / 3600000) });
+    if (diff < 604800000)
+        return t("sns.daysAgo", { days: Math.floor(diff / 86400000) });
+    if (diff < 2592000000)
+        return t("sns.weeksAgo", { weeks: Math.floor(diff / 604800000) });
+    if (diff < 31536000000)
+        return t("sns.monthsAgo", {
+            months: Math.floor(diff / 2592000000),
+        });
 
-        return t("sns.yearsAgo", { years: Math.floor(diff / 31536000000) });
-    }
+    return t("sns.yearsAgo", { years: Math.floor(diff / 31536000000) });
+}
 </script>
 
 {#if allTags.length === 0}

@@ -1,6 +1,9 @@
-import { DataType } from "@/schema";
-import { DBEnv } from "@/adapters/client";
-import { BaseDataDBClient, DataListOrder } from "@/adapters/StorageClientBase";
+import type { DBEnv } from "@/adapters/client";
+import type {
+    BaseDataDBClient,
+    DataListOrder,
+} from "@/adapters/StorageClientBase";
+import type { DataType } from "@/schema";
 
 /**{
  * Simple in-memory implementation of BaseDataDBClient for tests and local usage.
@@ -13,13 +16,14 @@ export default class InMemoryDataDBClient implements BaseDataDBClient {
     private store: Map<string, DataType> = new Map();
     private counter = 0;
 
-    constructor(env: DBEnv) {}
+    // biome-ignore lint/complexity/noUselessConstructor: Keep compatible signature
+    constructor(_env: DBEnv) {}
     async bumpDownloadCount(id: string): Promise<void> {
         const item = this.store.get(id);
         if (!item) return;
-        const current = (item as any).downloadCount ?? 0;
+        const current = item.downloadCount ?? 0;
         const updated = {
-            ...(item as any),
+            ...item,
             downloadCount: current + 1,
         } as DataType;
         this.store.set(id, updated);
@@ -49,7 +53,7 @@ export default class InMemoryDataDBClient implements BaseDataDBClient {
         const q = name.toString().toLowerCase();
         const results: DataType[] = [];
         for (const item of this.store.values()) {
-            const maybeName = (item as any)?.name;
+            const maybeName = item.name;
             if (
                 typeof maybeName === "string" &&
                 maybeName.toLowerCase().includes(q)
@@ -67,6 +71,7 @@ export default class InMemoryDataDBClient implements BaseDataDBClient {
     async list(order?: DataListOrder): Promise<DataType[]> {
         const items = Array.from(this.store.values());
         try {
+            // biome-ignore lint/suspicious/noExplicitAny: Handle potential string input
             const ord = order as any;
             if (typeof ord === "string") {
                 if (ord.toLowerCase() === "desc") return items.reverse();
@@ -85,6 +90,7 @@ export default class InMemoryDataDBClient implements BaseDataDBClient {
      */
     async put(item: Omit<DataType, "id">): Promise<DataType> {
         const id = this.generateId();
+        // biome-ignore lint/suspicious/noExplicitAny: casting to DataType
         const newItem = { ...(item as any), id } as DataType;
         this.store.set(id, newItem);
         return newItem;
@@ -98,11 +104,12 @@ export default class InMemoryDataDBClient implements BaseDataDBClient {
         this.store.delete(id);
     }
     async update(
-        item: Partial<DataType> & { id: DataType["id"] }
+        item: Partial<DataType> & { id: DataType["id"] },
     ): Promise<DataType> {
         if (!item?.id) throw new Error("Missing id for update");
         if (!this.store.has(item.id)) throw new Error("Item not found");
         this.store.set(item.id, {
+            // biome-ignore lint/suspicious/noExplicitAny: merging
             ...(this.store.get(item.id) as any),
             ...item,
         });

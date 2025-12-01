@@ -4,9 +4,9 @@
  * @see {@link src/schema.ts}
  */
 
-import { Context } from "hono";
-import { Bindings } from "@/platform";
+import type { Context } from "hono";
 import z from "zod";
+import type { Bindings } from "@/platform";
 
 type AllOrNothing<T> = T | { [K in keyof T]?: never };
 type AzureCosmosDBSecretEnv = AllOrNothing<{

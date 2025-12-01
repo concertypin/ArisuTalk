@@ -27,7 +27,7 @@ export class OpenAIClient implements LLMApi {
         apiKey: string,
         model: string,
         baseUrl: string | null,
-        options: LLMApiConstructorOptions | undefined = {}
+        options: LLMApiConstructorOptions | undefined = {},
     ) {
         this.client = new ChatOpenAI({
             apiKey: apiKey,
@@ -137,7 +137,7 @@ export class OpenAIClient implements LLMApi {
         } catch (error) {
             console.error(
                 t("api.profileGenerationError", { provider: "OpenAI" }),
-                error
+                error,
             );
             return { error: String(error) };
         }
@@ -175,7 +175,7 @@ export class OpenAIClient implements LLMApi {
             console.error(
                 t("api.profileGenerationError", { provider: "OpenAI" }) +
                     " (Character Sheet)",
-                error
+                error,
             );
             return { error: String(error) };
         }

@@ -13,7 +13,7 @@ import { getStorageKey } from "../utils/storageKey";
 export function persistentStore<T>(
     key: string,
     initialValue: T,
-    debounceMs = 500
+    debounceMs = 500,
 ): Writable<T> {
     const prefixedKey = getStorageKey(key);
     const store = writable(initialValue);

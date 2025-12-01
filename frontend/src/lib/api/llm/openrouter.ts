@@ -28,7 +28,7 @@ export class OpenRouterClient implements LLMApi {
         apiKey: string,
         model: string,
         baseUrl: string | null = API_BASE_URL,
-        options: LLMApiConstructorOptions | undefined = {}
+        options: LLMApiConstructorOptions | undefined = {},
     ) {
         this.client = new ChatOpenAI({
             apiKey: apiKey,
@@ -105,7 +105,7 @@ export class OpenRouterClient implements LLMApi {
             }
 
             throw new Error(
-                t("api.invalidResponse", { provider: "OpenRouter" })
+                t("api.invalidResponse", { provider: "OpenRouter" }),
             );
         } catch (error) {
             console.error("OpenRouter API Error:", error);
@@ -148,7 +148,7 @@ export class OpenRouterClient implements LLMApi {
         } catch (error) {
             console.error(
                 t("api.profileGenerationError", { provider: "OpenRouter" }),
-                error
+                error,
             );
             return { error: String(error) };
         }
@@ -189,7 +189,7 @@ export class OpenRouterClient implements LLMApi {
             console.error(
                 t("api.profileGenerationError", { provider: "OpenRouter" }) +
                     " (Character Sheet)",
-                error
+                error,
             );
             return { error: String(error) };
         }

@@ -1,4 +1,4 @@
-import { type Context, Hono, type Next } from "hono";
+import type { Context, Next } from "hono";
 import { cors as corsHono } from "hono/cors";
 
 /**
@@ -26,7 +26,7 @@ const allowedOrigins = [
  */
 export async function cors<Ctx extends Context>(c: Ctx, next: Next) {
     return corsHono({
-        origin: allowedOrigins.flatMap((i) => ["http://" + i, "https://" + i]),
+        origin: allowedOrigins.flatMap((i) => [`http://${i}`, `https://${i}`]),
         credentials: true,
         allowMethods: "GET,HEAD,PUT,POST,DELETE,PATCH,OPTIONS".split(","),
     })(c, next);

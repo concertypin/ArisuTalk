@@ -83,6 +83,23 @@ const koPhonebook: LanguageStrings["phonebook"] = {
     uploaded: "업로드: {{date}}",
     import: "가져오기",
     importing: "가져오는 중...",
+    create: "새 항목 만들기",
+    upload: "업로드",
+    edit: "수정",
+    delete: "삭제",
+    confirmDelete: "정말로 이 항목을 삭제하시겠습니까?",
+    name: "이름",
+    entryDescription: "설명",
+    file: "캐릭터 카드 파일",
+    save: "저장",
+    cancel: "취소",
+    fileRequired: "파일이 필요합니다.",
+    unsupportedFile: "JSON 또는 PNG 파일만 허용됩니다.",
+    uploading: "업로드 중...",
+    deleting: "삭제 중...",
+    updateSuccess: "항목이 수정되었습니다.",
+    createSuccess: "항목이 생성되었습니다.",
+    deleteSuccess: "항목이 삭제되었습니다.",
 };
 const koCharacterModalSlider: LanguageStrings["characterModalSlider"] = {
     responseTime: {

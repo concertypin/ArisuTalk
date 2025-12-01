@@ -1,92 +1,92 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import { t } from "$root/i18n";
-    import ClerkUserButton from "./ClerkUserButton.svelte";
-    import {
-        auth,
-        initializeAuth,
-        openSignIn,
-        openUserProfile,
-        signOut,
-        type AuthState,
-    } from "../../stores/auth";
+import { onMount } from "svelte";
+import { t } from "$root/i18n";
+import ClerkUserButton from "./ClerkUserButton.svelte";
+import {
+    auth,
+    initializeAuth,
+    openSignIn,
+    openUserProfile,
+    signOut,
+    type AuthState,
+} from "../../stores/auth";
 
-    const defaultState: AuthState = {
-        status: "idle",
-        clerk: null,
-        user: null,
-        isSignedIn: false,
-        error: null,
-    };
+const defaultState: AuthState = {
+    status: "idle",
+    clerk: null,
+    user: null,
+    isSignedIn: false,
+    error: null,
+};
 
-    let state: AuthState = defaultState;
+let state: AuthState = defaultState;
 
-    /**
-     * Resolve a user-friendly display name from the Clerk user resource.
-     * @returns Preferred display name or an empty string when unavailable.
-     */
-    const getUserDisplayName = (): string => {
-        const user = state.user;
-        if (!user || typeof user !== "object") {
-            return "";
-        }
+/**
+ * Resolve a user-friendly display name from the Clerk user resource.
+ * @returns Preferred display name or an empty string when unavailable.
+ */
+const getUserDisplayName = (): string => {
+    const user = state.user;
+    if (!user || typeof user !== "object") {
+        return "";
+    }
 
-        const withFallback = [
-            (user as { fullName?: string }).fullName,
-            (user as { firstName?: string }).firstName,
-            (user as { username?: string }).username,
-            (user as { primaryEmailAddress?: { emailAddress?: string } })
-                .primaryEmailAddress?.emailAddress,
-        ].find((value) => Boolean(value));
+    const withFallback = [
+        (user as { fullName?: string }).fullName,
+        (user as { firstName?: string }).firstName,
+        (user as { username?: string }).username,
+        (user as { primaryEmailAddress?: { emailAddress?: string } })
+            .primaryEmailAddress?.emailAddress,
+    ].find((value) => Boolean(value));
 
-        return withFallback ?? "";
-    };
+    return withFallback ?? "";
+};
 
-    /**
-     * Trigger the Clerk sign-in flow.
-     */
-    const handleSignInClick = async (): Promise<void> => {
-        await openSignIn();
-    };
+/**
+ * Trigger the Clerk sign-in flow.
+ */
+const handleSignInClick = async (): Promise<void> => {
+    await openSignIn();
+};
 
-    /**
-     * Attempt to re-initialize Clerk after a failure.
-     */
-    const handleRetry = async (): Promise<void> => {
+/**
+ * Attempt to re-initialize Clerk after a failure.
+ */
+const handleRetry = async (): Promise<void> => {
+    await initializeAuth();
+};
+
+/**
+ * Open the Clerk-hosted user profile dialog when available.
+ */
+const handleProfileOpen = async (): Promise<void> => {
+    await openUserProfile();
+};
+
+/**
+ * Sign the active user out of Clerk.
+ */
+const handleSignOut = async (): Promise<void> => {
+    await signOut();
+};
+
+$: state = $auth ?? defaultState;
+
+onMount(async () => {
+    try {
         await initializeAuth();
-    };
+    } catch (error) {
+        console.error("Clerk initialization failed", error);
+    }
+});
 
-    /**
-     * Open the Clerk-hosted user profile dialog when available.
-     */
-    const handleProfileOpen = async (): Promise<void> => {
-        await openUserProfile();
-    };
-
-    /**
-     * Sign the active user out of Clerk.
-     */
-    const handleSignOut = async (): Promise<void> => {
-        await signOut();
-    };
-
-    $: state = $auth ?? defaultState;
-
-    onMount(async () => {
-        try {
-            await initializeAuth();
-        } catch (error) {
-            console.error("Clerk initialization failed", error);
-        }
-    });
-
-    $: status = state.status;
-    $: isDisabled = status === "disabled";
-    $: isReady = status === "ready";
-    $: isLoading = status === "loading";
-    $: isError = status === "error";
-    $: isSignedIn = state.isSignedIn;
-    $: displayName = getUserDisplayName();
+$: status = state.status;
+$: isDisabled = status === "disabled";
+$: isReady = status === "ready";
+$: isLoading = status === "loading";
+$: isError = status === "error";
+$: isSignedIn = state.isSignedIn;
+$: displayName = getUserDisplayName();
 </script>
 
 {#if isDisabled}

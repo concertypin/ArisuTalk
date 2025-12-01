@@ -1,52 +1,50 @@
 <script>
-    import { t } from "$root/i18n";
-    import { settings } from "../../stores/settings";
-    import { PROVIDERS, PROVIDER_MODELS } from "../../../constants/providers";
-    import {
-        Key,
-        Link,
-        Cpu,
-        Settings as SettingsIcon,
-        Plus,
-        Trash2,
-        ChevronDown,
-    } from "lucide-svelte";
+import { t } from "$root/i18n";
+import { settings } from "../../stores/settings";
+import { PROVIDERS, PROVIDER_MODELS } from "../../../constants/providers";
+import {
+    Key,
+    Link,
+    Cpu,
+    Settings as SettingsIcon,
+    Plus,
+    Trash2,
+    ChevronDown,
+} from "lucide-svelte";
 
-    export let provider;
+export let provider;
 
-    let config = $settings.apiConfigs[provider] || {};
-    let customModelInput = "";
+let config = $settings.apiConfigs[provider] || {};
+let customModelInput = "";
 
-    $: (provider, (config = $settings.apiConfigs[provider] || {}));
+$: provider, (config = $settings.apiConfigs[provider] || {});
 
-    const models = PROVIDER_MODELS[provider] || [];
-    const customModels = config.customModels || [];
+const models = PROVIDER_MODELS[provider] || [];
+const customModels = config.customModels || [];
 
-    function handleConfigChange(key, value) {
-        const newConfig = { ...$settings.apiConfigs[provider], [key]: value };
-        const newApiConfigs = {
-            ...$settings.apiConfigs,
-            [provider]: newConfig,
-        };
-        settings.update((s) => ({ ...s, apiConfigs: newApiConfigs }));
-    }
+function handleConfigChange(key, value) {
+    const newConfig = { ...$settings.apiConfigs[provider], [key]: value };
+    const newApiConfigs = {
+        ...$settings.apiConfigs,
+        [provider]: newConfig,
+    };
+    settings.update((s) => ({ ...s, apiConfigs: newApiConfigs }));
+}
 
-    function addCustomModel() {
-        if (!customModelInput.trim()) return;
-        const newCustomModels = [
-            ...(config.customModels || []),
-            customModelInput.trim(),
-        ];
-        handleConfigChange("customModels", newCustomModels);
-        customModelInput = "";
-    }
+function addCustomModel() {
+    if (!customModelInput.trim()) return;
+    const newCustomModels = [
+        ...(config.customModels || []),
+        customModelInput.trim(),
+    ];
+    handleConfigChange("customModels", newCustomModels);
+    customModelInput = "";
+}
 
-    function removeCustomModel(index) {
-        const newCustomModels = config.customModels.filter(
-            (_, i) => i !== index
-        );
-        handleConfigChange("customModels", newCustomModels);
-    }
+function removeCustomModel(index) {
+    const newCustomModels = config.customModels.filter((_, i) => i !== index);
+    handleConfigChange("customModels", newCustomModels);
+}
 </script>
 
 <div class="space-y-4">

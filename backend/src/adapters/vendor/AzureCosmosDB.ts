@@ -1,7 +1,10 @@
-import { Container, CosmosClient, Database } from "@azure/cosmos";
-import { DataType } from "@/schema";
-import { DBEnv } from "@/adapters/client";
-import { BaseDataDBClient, DataListOrder } from "@/adapters/StorageClientBase";
+import { type Container, CosmosClient, type Database } from "@azure/cosmos";
+import type { DBEnv } from "@/adapters/client";
+import {
+    type BaseDataDBClient,
+    DataListOrder,
+} from "@/adapters/StorageClientBase";
+import type { DataType } from "@/schema";
 
 /**
  * An adapter for Azure Cosmos DB that implements the BaseDataDBClient interface.
@@ -17,14 +20,14 @@ export default class AzureCosmosDB implements BaseDataDBClient {
     constructor(env: DBEnv) {
         if (!env.SECRET_AZURE_COSMOSDB_CONNECTION_STRING) {
             throw new Error(
-                "Azure Cosmos DB environment variables are not properly set"
+                "Azure Cosmos DB environment variables are not properly set",
             );
         }
         this.client = new CosmosClient(
-            env.SECRET_AZURE_COSMOSDB_CONNECTION_STRING
+            env.SECRET_AZURE_COSMOSDB_CONNECTION_STRING,
         );
         this.database = this.client.database(
-            env.SECRET_AZURE_COSMOSDB_DATABASE_NAME
+            env.SECRET_AZURE_COSMOSDB_DATABASE_NAME,
         );
         this.containerName = env.SECRET_AZURE_COSMOSDB_CONTAINER_NAME;
         this.container = this.database.container(this.containerName);
@@ -34,13 +37,14 @@ export default class AzureCosmosDB implements BaseDataDBClient {
         // Use Cosmos DB patch operation to increment atomically when available
         try {
             // Partial patch: increment downloadCount by 1
-            await this.container
-                .item(id)
-                .patch([{ op: "incr", path: "/downloadCount", value: 1 }]);
+            await itemRef.patch([
+                { op: "incr", path: "/downloadCount", value: 1 },
+            ]);
             return;
-        } catch (e) {
+        } catch (_e) {
             // Fallback to read/replace if patch is not supported in the environment
             const itemRef = this.container.item(id);
+
             const readRes = await itemRef.read<DataType>();
             const existing = readRes.resource;
             if (!existing) return;
@@ -101,7 +105,7 @@ export default class AzureCosmosDB implements BaseDataDBClient {
         throw new Error("Failed to create item in Cosmos DB");
     }
     async update(
-        item: Partial<DataType> & { id: DataType["id"] }
+        item: Partial<DataType> & { id: DataType["id"] },
     ): Promise<DataType> {
         // Replace the existing item with the provided one
         const id = item.id;

@@ -6,7 +6,7 @@
  */
 export async function parseMagicPatterns(
     template: string,
-    context: object
+    context: object,
 ): Promise<string> {
     if (!template) return "";
     const pattern = /{\|([\s\S]*?)\|}/g;

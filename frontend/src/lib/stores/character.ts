@@ -4,7 +4,7 @@ import { defaultCharacters } from "../../defaults";
 
 export const characters = persistentStore(
     "personaChat_characters_v16",
-    defaultCharacters
+    defaultCharacters,
 );
 export const userStickers = persistentStore("personaChat_userStickers_v16", []);
 
@@ -32,7 +32,7 @@ export interface PhonebookImportResult {
 }
 
 export const phonebookImportResult = writable<PhonebookImportResult | null>(
-    null
+    null,
 );
 
 // Character State Management
@@ -58,7 +58,7 @@ export const characterStateStore = persistentStore<
 
 export function initializeCharacterState(
     characterId: string,
-    personality: { extroversion: number } = { extroversion: 0.5 }
+    personality: { extroversion: number } = { extroversion: 0.5 },
 ) {
     characterStateStore.update((states) => {
         if (!states[characterId]) {
@@ -77,7 +77,7 @@ export function initializeCharacterState(
 
 export function updateCharacterState(
     characterId: string,
-    newState: Partial<CharacterState>
+    newState: Partial<CharacterState>,
 ) {
     characterStateStore.update((states) => {
         if (states[characterId]) {

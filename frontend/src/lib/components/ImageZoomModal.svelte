@@ -1,26 +1,26 @@
 <script>
-    import { onMount, onDestroy } from "svelte";
-    import { X } from "lucide-svelte";
-    import { isImageZoomModalVisible, imageZoomModalData } from "../stores/ui";
-    import { t } from "$root/i18n";
+import { onMount, onDestroy } from "svelte";
+import { X } from "lucide-svelte";
+import { isImageZoomModalVisible, imageZoomModalData } from "../stores/ui";
+import { t } from "$root/i18n";
 
-    onMount(() => {
-        window.addEventListener("keydown", handleKeydown);
-    });
+onMount(() => {
+    window.addEventListener("keydown", handleKeydown);
+});
 
-    onDestroy(() => {
-        window.removeEventListener("keydown", handleKeydown);
-    });
+onDestroy(() => {
+    window.removeEventListener("keydown", handleKeydown);
+});
 
-    function handleClose() {
-        isImageZoomModalVisible.set(false);
+function handleClose() {
+    isImageZoomModalVisible.set(false);
+}
+
+function handleKeydown(event) {
+    if (event.key === "Escape") {
+        handleClose();
     }
-
-    function handleKeydown(event) {
-        if (event.key === "Escape") {
-            handleClose();
-        }
-    }
+}
 </script>
 
 {#if $isImageZoomModalVisible}

@@ -1,4 +1,4 @@
-import { DataType } from "@/schema";
+import type { DataType } from "@/schema";
 
 /**
  * Client for performing blob storage operations.
@@ -15,7 +15,7 @@ export interface BaseBlobStorageClient {
      */
     upload(
         buffer: ArrayBuffer | Uint8Array,
-        contentType?: string
+        contentType?: string,
     ): Promise<string>;
 
     /**

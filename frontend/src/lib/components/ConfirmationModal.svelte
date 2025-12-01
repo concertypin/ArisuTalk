@@ -1,37 +1,37 @@
 <script>
-    import { onMount, onDestroy } from "svelte";
-    import { AlertTriangle } from "lucide-svelte";
-    import {
-        isConfirmationModalVisible,
-        confirmationModalData,
-    } from "../stores/ui";
-    import { t } from "$root/i18n";
+import { onMount, onDestroy } from "svelte";
+import { AlertTriangle } from "lucide-svelte";
+import {
+    isConfirmationModalVisible,
+    confirmationModalData,
+} from "../stores/ui";
+import { t } from "$root/i18n";
 
-    function handleCancel() {
-        isConfirmationModalVisible.set(false);
-        confirmationModalData.set({ title: "", message: "", onConfirm: null });
+function handleCancel() {
+    isConfirmationModalVisible.set(false);
+    confirmationModalData.set({ title: "", message: "", onConfirm: null });
+}
+
+function handleConfirm() {
+    if ($confirmationModalData.onConfirm) {
+        $confirmationModalData.onConfirm();
     }
+    handleCancel(); // Close modal after confirm
+}
 
-    function handleConfirm() {
-        if ($confirmationModalData.onConfirm) {
-            $confirmationModalData.onConfirm();
-        }
-        handleCancel(); // Close modal after confirm
+function handleKeydown(event) {
+    if (event.key === "Escape") {
+        handleCancel();
     }
+}
 
-    function handleKeydown(event) {
-        if (event.key === "Escape") {
-            handleCancel();
-        }
-    }
+onMount(() => {
+    window.addEventListener("keydown", handleKeydown);
+});
 
-    onMount(() => {
-        window.addEventListener("keydown", handleKeydown);
-    });
-
-    onDestroy(() => {
-        window.removeEventListener("keydown", handleKeydown);
-    });
+onDestroy(() => {
+    window.removeEventListener("keydown", handleKeydown);
+});
 </script>
 
 {#if $isConfirmationModalVisible}

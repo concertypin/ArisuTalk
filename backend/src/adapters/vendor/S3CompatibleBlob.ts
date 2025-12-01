@@ -1,6 +1,6 @@
-import { DBEnv } from "@/adapters/client";
-import { BaseBlobStorageClient } from "@/adapters/StorageClientBase";
 import { AwsClient } from "aws4fetch";
+import type { DBEnv } from "@/adapters/client";
+import type { BaseBlobStorageClient } from "@/adapters/StorageClientBase";
 
 export default class S3BlobStorageClient implements BaseBlobStorageClient {
     client: AwsClient;
@@ -25,7 +25,7 @@ export default class S3BlobStorageClient implements BaseBlobStorageClient {
     }
     async upload(
         buffer: ArrayBuffer | Uint8Array,
-        contentType?: string
+        contentType?: string,
     ): Promise<string> {
         const key = `${Date.now()}-${crypto.randomUUID()}`;
         const url = `https://${this.bucket}.${this.endpoint}/${key}`;
@@ -44,7 +44,7 @@ export default class S3BlobStorageClient implements BaseBlobStorageClient {
         });
         if (!res.ok) {
             throw new Error(
-                `Failed to upload to S3: ${res.status} ${res.statusText}`
+                `Failed to upload to S3: ${res.status} ${res.statusText}`,
             );
         }
         return key; // Return only the key as the storage identifier
@@ -60,12 +60,12 @@ export default class S3BlobStorageClient implements BaseBlobStorageClient {
         }
         if (!res.ok) {
             throw new Error(
-                `Failed to get from S3: ${res.status} ${res.statusText}`
+                `Failed to get from S3: ${res.status} ${res.statusText}`,
             );
         }
         // Return a presigned URL valid for 6 minutes
         return this.generatePresignedUrl(
-            `${this.bucket}.${this.endpoint}/${url}`
+            `${this.bucket}.${this.endpoint}/${url}`,
         );
     }
     async delete(url: string): Promise<void> {
@@ -75,7 +75,7 @@ export default class S3BlobStorageClient implements BaseBlobStorageClient {
         });
         if (!res.ok) {
             throw new Error(
-                `Failed to delete from S3: ${res.status} ${res.statusText}`
+                `Failed to delete from S3: ${res.status} ${res.statusText}`,
             );
         }
     }
@@ -95,7 +95,7 @@ export default class S3BlobStorageClient implements BaseBlobStorageClient {
                 // Do not include conditional headers; they can cause presigned URLs
                 // to fail with 412 Precondition Failed if object was modified.
                 headers: {},
-            }
+            },
         );
         return signed.url;
     }

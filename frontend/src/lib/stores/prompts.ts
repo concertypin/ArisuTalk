@@ -50,7 +50,7 @@ function createPromptsStore() {
             download({ prompts: prompts, hook: hook });
             showNotification(
                 t("modal.promptBackupComplete.title"),
-                t("modal.promptBackupComplete.message")
+                t("modal.promptBackupComplete.message"),
             );
         },
         restore: async () => {
@@ -72,15 +72,15 @@ function createPromptsStore() {
 
                         showNotification(
                             t("modal.promptRestoreComplete.title"),
-                            t("modal.promptRestoreComplete.message")
+                            t("modal.promptRestoreComplete.message"),
                         );
                     } catch (error) {
                         showNotification(
                             t("modal.promptRestoreFailed.title"),
-                            t("modal.promptRestoreFailed.message")
+                            t("modal.promptRestoreFailed.message"),
                         );
                     }
-                }
+                },
             );
         },
     };

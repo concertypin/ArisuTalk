@@ -22,7 +22,7 @@ async function deriveKey(password, salt) {
         encoder.encode(password),
         { name: "PBKDF2" },
         false,
-        ["deriveKey"]
+        ["deriveKey"],
     );
 
     return await crypto.subtle.deriveKey(
@@ -35,7 +35,7 @@ async function deriveKey(password, salt) {
         keyMaterial,
         { name: ALGORITHM, length: KEY_LENGTH },
         false,
-        ["encrypt", "decrypt"]
+        ["encrypt", "decrypt"],
     );
 }
 
@@ -77,12 +77,12 @@ export async function encryptText(text, password) {
         const encryptedData = await crypto.subtle.encrypt(
             { name: ALGORITHM, iv: iv },
             key,
-            data
+            data,
         );
 
         // Combine salt + iv + encrypted data
         const combined = new Uint8Array(
-            salt.length + iv.length + encryptedData.byteLength
+            salt.length + iv.length + encryptedData.byteLength,
         );
         combined.set(salt);
         combined.set(iv, salt.length);
@@ -110,7 +110,7 @@ export async function decryptText(encryptedText, password) {
         const combined = new Uint8Array(
             atob(encryptedText)
                 .split("")
-                .map((c) => c.charCodeAt(0))
+                .map((c) => c.charCodeAt(0)),
         );
 
         // Extract salt, iv, and encrypted data
@@ -123,7 +123,7 @@ export async function decryptText(encryptedText, password) {
         const decryptedData = await crypto.subtle.decrypt(
             { name: ALGORITHM, iv: iv },
             key,
-            encryptedData
+            encryptedData,
         );
 
         const decoder = new TextDecoder();
@@ -168,7 +168,7 @@ export function validatePassword(password) {
     const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
     const strength = [hasUpper, hasLower, hasNumber, hasSpecial].filter(
-        Boolean
+        Boolean,
     ).length;
 
     return {

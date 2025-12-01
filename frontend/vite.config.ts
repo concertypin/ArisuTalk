@@ -31,7 +31,7 @@ export default defineConfig(async (ctx) => {
         Object.entries(defines).map(([k, v]) => [
             `import.meta.env.${k}`,
             JSON.stringify(v),
-        ])
+        ]),
     );
     const plugin: PluginOption[] = [
         tsconfigPaths(),
