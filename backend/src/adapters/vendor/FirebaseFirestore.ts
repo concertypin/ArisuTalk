@@ -1,6 +1,6 @@
 import {
-    createFirestoreClient,
     type CollectionReference,
+    createFirestoreClient,
     type Query,
 } from "firebase-rest-firestore";
 import type { DBEnv } from "@/adapters/client";
@@ -46,6 +46,8 @@ export default class FirebaseFirestoreClient implements BaseDataDBClient {
      * @param data - The raw data object from Firestore.
      * @returns The normalized DataType object.
      */
+
+    // biome-ignore lint/suspicious/noExplicitAny: Firestore data can be any
     private normalizeData(id: string, data: any): DataType {
         return {
             ...data,

@@ -1,15 +1,15 @@
-import {
-    describe,
-    it,
-    expect,
-    vi,
-    beforeEach,
-    type MockedFunction,
-} from "vitest";
-import FirebaseFirestoreClient from "./FirebaseFirestore";
 import { createFirestoreClient } from "firebase-rest-firestore";
-import { DataListOrder } from "@/adapters/StorageClientBase";
+import {
+    beforeEach,
+    describe,
+    expect,
+    it,
+    type MockedFunction,
+    vi,
+} from "vitest";
 import type { DBEnv } from "@/adapters/client";
+import { DataListOrder } from "@/adapters/StorageClientBase";
+import FirebaseFirestoreClient from "@/adapters/vendor/FirebaseFirestore";
 import type { DataType } from "@/schema";
 
 // Mock the library

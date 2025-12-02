@@ -21,7 +21,7 @@
         "lint": "biome lint .",
         "check": "biome check --write .",
         "auth": "pnpx http-server -p 5000 -c-1 tools/",
-        "test": "vitest run"
+        "test": "vitest"
     },
     "engines": {
         "node": ">=20"
@@ -44,7 +44,7 @@
         "@cloudflare/vite-plugin": "^1.2.3",
         "@cloudflare/vitest-pool-workers": "^0.10.11",
         "consola": "^3.4.2",
-        "vite": "^6.3.5",
+        "vite": "^7.2.1",
         "vite-tsconfig-paths": "^5.1.4",
         "vitest": "^3.2.4",
         "wrangler": "^4.17.0"
