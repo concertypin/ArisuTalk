@@ -1,7 +1,7 @@
 import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
-import { openAPIRouteHandler, describeRoute } from "hono-openapi";
+import { describeRoute, openAPIRouteHandler } from "hono-openapi";
 import { cors } from "@/lib/cors";
 import type { Bindings } from "@/platform";
 import dataRoutes from "@/routes/data";

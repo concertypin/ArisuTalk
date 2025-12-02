@@ -33,7 +33,17 @@ export default class AzureCosmosDB implements BaseDataDBClient {
         this.container = this.database.container(this.containerName);
     }
 
+    private validateId(id: string): void {
+        if (!id) throw new Error("Item ID cannot be empty");
+        // Cosmos DB illegal chars: /, \, ?, #
+        if (/[/\\?#]/.test(id)) {
+            throw new Error("Item ID contains invalid characters");
+        }
+    }
+
     async bumpDownloadCount(id: string): Promise<void> {
+        this.validateId(id);
+        const itemRef = this.container.item(id);
         // Use Cosmos DB patch operation to increment atomically when available
         try {
             // Partial patch: increment downloadCount by 1
@@ -43,8 +53,6 @@ export default class AzureCosmosDB implements BaseDataDBClient {
             return;
         } catch (_e) {
             // Fallback to read/replace if patch is not supported in the environment
-            const itemRef = this.container.item(id);
-
             const readRes = await itemRef.read<DataType>();
             const existing = readRes.resource;
             if (!existing) return;
@@ -58,11 +66,13 @@ export default class AzureCosmosDB implements BaseDataDBClient {
     }
 
     async get(id: string): Promise<DataType | null> {
+        this.validateId(id);
         const doc = await this.container.item(id).read<DataType>();
         return doc.resource ?? null;
     }
 
     async queryByName(name: string): Promise<DataType[]> {
+        if (!name) return [];
         //It is fuzzy search.
         const { resources } = await this.container.items
             .query<DataType>({
@@ -107,6 +117,7 @@ export default class AzureCosmosDB implements BaseDataDBClient {
     async update(
         item: Partial<DataType> & { id: DataType["id"] },
     ): Promise<DataType> {
+        this.validateId(item.id);
         // Replace the existing item with the provided one
         const id = item.id;
         const itemRef = this.container.item(id);
@@ -121,6 +132,7 @@ export default class AzureCosmosDB implements BaseDataDBClient {
         throw new Error("Failed to update item in Cosmos DB");
     }
     async delete(id: string): Promise<void> {
+        this.validateId(id);
         await this.container.item(id).delete();
     }
 }

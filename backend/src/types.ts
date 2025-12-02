@@ -8,7 +8,12 @@ import type { Context } from "hono";
 import z from "zod";
 import type { Bindings } from "@/platform";
 
+/**
+ * Utility type that allows either all properties of T or none of them.
+ * This is useful for defining optional groups of related properties.
+ */
 type AllOrNothing<T> = T | { [K in keyof T]?: never };
+
 type AzureCosmosDBSecretEnv = AllOrNothing<{
     readonly SECRET_AZURE_COSMOSDB_CONNECTION_STRING: string;
     readonly SECRET_AZURE_COSMOSDB_DATABASE_NAME: string;
@@ -22,6 +27,12 @@ type S3SecretEnv = AllOrNothing<{
     readonly SECRET_S3_REGION: string;
     readonly SECRET_S3_ENDPOINT: string;
 }>;
+
+type FirebaseFirestoreSecretEnv = AllOrNothing<{
+    readonly SECRET_FIREBASE_PROJECT_ID: string;
+    readonly SECRET_FIREBASE_CLIENT_EMAIL: string;
+    readonly SECRET_FIREBASE_PRIVATE_KEY: string;
+}>;
 /**
  * Environment secrets required for the application.
  * These should be provided via platform-specific secret management, not environment variables.
@@ -29,7 +40,8 @@ type S3SecretEnv = AllOrNothing<{
 export type RuntimeSecret = {
     readonly SECRET_CLERK_SECRET_KEY: string;
 } & S3SecretEnv &
-    AzureCosmosDBSecretEnv;
+    AzureCosmosDBSecretEnv &
+    FirebaseFirestoreSecretEnv;
 /**
  * Environment variables required for the application.
  * These can be provided via environment variables or platform-specific configuration.

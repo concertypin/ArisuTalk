@@ -8,6 +8,7 @@ This file provides guidance for AI coding agents working on the backend of this 
 - **Run tests**: Currently no tests.
 - **Build the application**: `pnpm run -w build:be`
 - **Format code**: `pnpm run -w format:be`
+- **Lint code**: `pnpm run -w lint:be`
 
 ## Backend Development Guidelines
 

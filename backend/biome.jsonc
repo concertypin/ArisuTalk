@@ -16,8 +16,7 @@
         "enabled": true,
         "rules": {
             "recommended": true
-        },
-        "includes": ["src"]
+        }
     },
     "formatter": {
         "enabled": true,
@@ -33,16 +32,5 @@
             "trailingCommas": "all",
             "arrowParentheses": "always"
         }
-    },
-    "overrides": [
-        {
-            "includes": ["tools/**"],
-            "linter": {
-                "enabled": false
-            },
-            "formatter": {
-                "enabled": false
-            }
-        }
-    ]
+    }
 }

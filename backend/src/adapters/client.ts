@@ -32,6 +32,10 @@ export async function DataDBClient(env: DBEnv): Promise<BaseDataDBClient> {
         cachedDBClient = new (await import("./vendor/AzureCosmosDB")).default(
             env,
         );
+    } else if (env.SECRET_FIREBASE_PROJECT_ID) {
+        cachedDBClient = new (
+            await import("./vendor/FirebaseFirestore")
+        ).default(env);
     } else {
         cachedDBClient = new (await import("./vendor/InMemoryDB")).default(env);
     }

@@ -6,6 +6,7 @@ export default defineConfig({
     plugins: [cloudflare(), tsconfigPaths()],
     server: {
         cors: false, // https://hono.dev/docs/middleware/builtin/cors#using-with-vite
+        allowedHosts: true,
     },
     build: {
         sourcemap: true,

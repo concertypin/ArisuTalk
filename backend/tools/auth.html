@@ -1,488 +1,178 @@
-<!--
-// biome-ignore-all lint: Somewhat doesn't work
--->
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <title>Clerk Dev Auth Playground</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Auth (simple)</title>
     <style>
-        :root {
-            --font-family:
-                system-ui, -apple-system, "Segoe UI", Roboto,
-                "Helvetica Neue", Arial, sans-serif;
-            --text-color: #0f172a;
-            --muted-color: #475569;
-            --card-bg: rgba(255, 255, 255, 0.95);
-            --accent-1: #6366f1;
-            --accent-2: #8b5cf6;
-            --success-bg: rgba(236, 253, 245, 0.95);
-            --success-color: #166534;
-            --error-bg: rgba(254, 226, 226, 0.95);
-            --error-color: #b91c1c;
-            --pre-bg: rgba(2, 6, 23, 0.95);
-            color-scheme: light dark;
-            font-family: var(--font-family);
-            font-size: 16px;
-            line-height: 1.5;
-        }
-
         body {
-            margin: 0;
-            padding: 2rem;
-            background: radial-gradient(circle at top,
-                    #e8f0ff 0%,
-                    #f5f7fb 45%,
-                    #ffffff 100%);
-            min-height: 100vh;
-            box-sizing: border-box;
-            color: var(--text-color);
-        }
-
-        main {
-            max-width: 960px;
-            margin: 0 auto;
-            display: grid;
-            gap: 1.5rem;
-        }
-
-        h1 {
-            margin: 0;
-            font-size: 1.875rem;
-            color: var(--text-color);
-            text-align: center;
-        }
-
-        .card {
-            background: var(--card-bg);
-            border-radius: 1rem;
-            padding: 1.5rem;
-            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(148, 163, 184, 0.2);
-            display: grid;
-            gap: 1rem;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+            padding: 20px;
         }
 
         label {
-            display: grid;
-            gap: 0.35rem;
-            font-weight: 600;
-            color: var(--text-color);
-            font-size: 0.95rem;
+            display: block;
+            margin: 8px 0;
         }
 
-        input,
-        button,
-        textarea {
-            font: inherit;
-        }
-
-        input,
-        textarea {
-            padding: 0.65rem 0.75rem;
-            border-radius: 0.65rem;
-            border: 1px solid rgba(148, 163, 184, 0.7);
-            background: rgba(255, 255, 255, 0.98);
-            transition:
-                border-color 0.2s ease,
-                box-shadow 0.2s ease;
-            font-size: 0.95rem;
-            line-height: 1.4;
-            color: var(--text-color);
-        }
-
-        input::placeholder {
-            color: #94a3b8;
-        }
-
-        input:focus,
-        textarea:focus {
-            border-color: var(--accent-1);
-            outline: none;
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.18);
+        input {
+            padding: 6px 8px;
+            width: 100%;
+            max-width: 420px;
         }
 
         button {
-            border: none;
-            border-radius: 0.65rem;
-            padding: 0.65rem 1rem;
-            cursor: pointer;
-            background: linear-gradient(135deg,
-                    var(--accent-1),
-                    var(--accent-2));
-            color: white;
-            font-weight: 600;
-            transition:
-                transform 0.15s ease,
-                box-shadow 0.15s ease,
-                filter 0.15s ease;
-            font-size: 0.95rem;
-        }
-
-        button.secondary {
-            background: rgba(99, 102, 241, 0.12);
-            color: #312e81;
-        }
-
-        button:disabled {
-            cursor: not-allowed;
-            filter: grayscale(0.6);
-            opacity: 0.7;
-        }
-
-        button:not(:disabled):hover {
-            transform: translateY(-1px);
-            box-shadow: 0 10px 18px rgba(99, 102, 241, 0.25);
-        }
-
-        #status {
-            padding: 0.75rem 1rem;
-            border-radius: 0.75rem;
-            background: var(--success-bg);
-            color: var(--success-color);
-            border: 1px solid rgba(34, 197, 94, 0.35);
-            font-weight: 500;
-            font-size: 0.95rem;
-        }
-
-        #status[data-variant="error"] {
-            background: var(--error-bg);
-            color: var(--error-color);
-            border-color: rgba(248, 113, 113, 0.45);
-        }
-
-        #status[data-variant="info"] {
-            background: rgba(219, 234, 254, 0.95);
-            color: #1d4ed8;
-            border-color: rgba(96, 165, 250, 0.45);
-        }
-
-        .grid-2 {
-            display: grid;
-            gap: 1rem;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            margin-top: 8px;
+            padding: 8px 12px;
         }
 
         pre {
-            margin: 0;
-            padding: 1rem;
-            min-height: 180px;
-            border-radius: 0.75rem;
-            background: var(--pre-bg);
-            color: #f8fafc;
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 6px;
+            max-width: 720px;
             overflow: auto;
-            font-size: 0.95rem;
-            line-height: 1.6;
-            font-family:
-                ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono",
-                "Courier New", monospace;
         }
 
-        #sign-in-root {
-            min-height: 320px;
-        }
-
-        .footer-note {
-            font-size: 0.9rem;
-            color: var(--muted-color);
-            text-align: center;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-
-            *,
-            *::before,
-            *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-                scroll-behavior: auto !important;
-            }
+        .row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 8px;
         }
     </style>
 </head>
 
 <body>
-    <main>
-        <h1>Clerk Dev Auth Playground</h1>
+    <h1>Clerk Auth — Simple</h1>
 
-        <section class="card">
-            <label for="publishable-key">
-                Clerk publishable key
-                <input id="publishable-key" type="text" placeholder="pk_test_..." autocomplete="off"
-                    spellcheck="false" />
-            </label>
+    <label>
+        Publishable key
+        <input id="publishable-key" placeholder="pk_test_..." autocomplete="off" />
+    </label>
 
-            <div class="grid-2">
-                <label for="token-template">
-                    Token template (optional)
-                    <input id="token-template" type="text" placeholder="e.g. integration_fallback" autocomplete="off"
-                        spellcheck="false" />
-                </label>
+    <div class="row">
+        <button id="init-clerk">Load Clerk</button>
+        <button id="fetch-token" disabled>Fetch token</button>
+        <button id="sign-out" disabled>Sign out</button>
+        <button id="clear-output">Clear</button>
+    </div>
 
-                <label for="audience">
-                    Audience (optional)
-                    <input id="audience" type="text" placeholder="comma,separated,audiences" autocomplete="off"
-                        spellcheck="false" />
-                </label>
-            </div>
+    <p id="status">Provide a publishable key and load Clerk.</p>
 
-            <div class="grid-2">
-                <button id="init-clerk" type="button">
-                    Initialize Clerk
-                </button>
-                <button id="fetch-token" type="button" disabled>
-                    Fetch fresh token
-                </button>
-            </div>
+    <h2>Session</h2>
+    <pre id="session-output">null</pre>
 
-            <div class="grid-2">
-                <button id="sign-out" class="secondary" type="button" disabled>
-                    Sign out current session
-                </button>
-                <button id="clear-output" class="secondary" type="button">
-                    Clear output
-                </button>
-            </div>
-
-            <p id="status" data-variant="info">
-                Provide a publishable key to get started.
-            </p>
-        </section>
-
-        <section class="card" id="auth-section" hidden>
-            <div id="sign-in-root"></div>
-            <div id="user-button-root"></div>
-        </section>
-
-        <section class="card">
-            <h2 style="margin: 0">Session snapshot</h2>
-            <pre id="session-output">null</pre>
-        </section>
-
-        <section class="card">
-            <h2 style="margin: 0">Tokens</h2>
-            <pre id="token-output">
-// Fetch a token to display it here.</pre>
-        </section>
-
-        <p class="footer-note">
-            Tokens are fetched via <code>Clerk.session.getToken()</code>.
-            Never ship this page to production.
-        </p>
-    </main>
+    <h2>Token</h2>
+    <pre id="token-output">// no token</pre>
 
     <script type="module">
         const keyInput = document.getElementById("publishable-key");
-        const templateInput = document.getElementById("token-template");
-        const audienceInput = document.getElementById("audience");
         const initButton = document.getElementById("init-clerk");
-        const fetchTokenButton = document.getElementById("fetch-token");
+        const fetchButton = document.getElementById("fetch-token");
         const signOutButton = document.getElementById("sign-out");
-        const clearOutputButton = document.getElementById("clear-output");
-        const statusElement = document.getElementById("status");
-        const signInContainer = document.getElementById("sign-in-root");
-        const userButtonContainer =
-            document.getElementById("user-button-root");
-        const authSection = document.getElementById("auth-section");
+        const clearButton = document.getElementById("clear-output");
+        const statusEl = document.getElementById("status");
         const sessionOutput = document.getElementById("session-output");
         const tokenOutput = document.getElementById("token-output");
 
         let isClerkReady = false;
-        let removeListener = null;
 
-        window.addEventListener("load", () => {
-            keyInput.focus();
-        });
+        function setStatus(msg) {
+            statusEl.textContent = msg;
+        }
 
         initButton.addEventListener("click", () => {
-            const publishableKey = keyInput.value.trim();
-            if (!publishableKey) {
-                setStatus("Enter a publishable key.", true);
+            const key = keyInput.value.trim();
+            if (!key) {
+                setStatus("Enter publishable key.");
                 return;
             }
-            loadClerkClient(publishableKey);
+            loadClerk(key);
         });
 
-        fetchTokenButton.addEventListener("click", async () => {
-            if (!isClerkReady) {
-                setStatus("Initialize Clerk first.", true);
-                return;
-            }
-            const { Clerk } = window;
-            const session = Clerk.session;
-            if (!session) {
-                setStatus("No active session. Sign in to proceed.", true);
-                tokenOutput.textContent = "// No session available.";
+        fetchButton.addEventListener("click", async () => {
+            if (!isClerkReady || !window.Clerk || !window.Clerk.session) {
+                setStatus("No active session.");
                 return;
             }
             try {
-                setStatus("Requesting token...");
-                const template = templateInput.value.trim();
-                const audience = audienceInput.value
-                    .split(",")
-                    .map((value) => value.trim())
-                    .filter(Boolean);
-                const token = template
-                    ? await session.getToken({
-                        template,
-                        audience:
-                            audience.length > 0 ? audience : undefined,
-                    })
-                    : await session.getToken({
-                        audience:
-                            audience.length > 0 ? audience : undefined,
-                    });
-                tokenOutput.textContent = JSON.stringify(
-                    {
-                        template: template || "default",
-                        audience:
-                            audience.length > 0 ? audience : undefined,
-                        token,
-                    },
-                    null,
-                    2
-                );
+                setStatus("Fetching token...");
+                const token = await window.Clerk.session.getToken();
+                tokenOutput.textContent = token || "// empty token";
                 setStatus("Token fetched.");
-            } catch (error) {
-                setStatus(`Token fetch failed: ${error.message}`, true);
+            } catch (e) {
+                console.error(e);
+                setStatus(`Token error: ${e?.message}`);
             }
         });
 
         signOutButton.addEventListener("click", async () => {
-            if (!isClerkReady) {
-                return;
-            }
+            if (!isClerkReady || !window.Clerk) return;
             try {
-                setStatus("Signing out...");
                 await window.Clerk.signOut();
                 setStatus("Signed out.");
-            } catch (error) {
-                setStatus(`Sign-out failed: ${error.message}`, true);
+                updateSession(null);
+            } catch (e) {
+                console.error(e);
+                setStatus("Sign out failed");
             }
         });
 
-        clearOutputButton.addEventListener("click", () => {
+        clearButton.addEventListener("click", () => {
             sessionOutput.textContent = "null";
-            tokenOutput.textContent = "// Cleared.";
-            setStatus("Output cleared.");
+            tokenOutput.textContent = "// no token";
+            setStatus("Cleared.");
         });
 
-        function loadClerkClient(publishableKey) {
+        function loadClerk(key) {
             if (isClerkReady) {
-                setStatus("Clerk is already initialized.");
+                setStatus("Clerk already loaded");
                 return;
             }
-            initButton.disabled = true;
-            setStatus("Loading Clerk browser bundle...");
-            const existingScript = document.getElementById("clerk-browser");
-            if (existingScript) {
-                existingScript.remove();
-            }
-            const script = document.createElement("script");
-            script.id = "clerk-browser";
-            script.async = true;
-            script.crossOrigin = "anonymous";
-            script.setAttribute(
-                "data-clerk-publishable-key",
-                publishableKey
-            );
-            script.src =
+            setStatus("Loading Clerk...");
+            const s = document.createElement("script");
+            s.src =
                 "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js";
-            script.addEventListener("load", handleClerkReady);
-            script.addEventListener("error", () => {
-                setStatus(
-                    "Failed to load Clerk bundle. Verify the publishable key.",
-                    true
-                );
-                initButton.disabled = false;
-            });
-            document.body.appendChild(script);
+            s.async = true;
+            s.setAttribute("data-clerk-publishable-key", key);
+            s.onload = async () => {
+                try {
+                    await window.Clerk.load();
+                    isClerkReady = true;
+                    setStatus("Clerk ready.");
+                    fetchButton.disabled = false;
+                    signOutButton.disabled = false;
+                    updateSession(window.Clerk.session);
+                    if (window.Clerk.addListener) {
+                        window.Clerk.addListener(({ session }) => updateSession(session));
+                    }
+                } catch (e) {
+                    console.error(e);
+                    setStatus("Clerk init error");
+                }
+            };
+            s.onerror = () => setStatus("Failed to load Clerk bundle");
+            document.head.appendChild(s);
         }
 
-        async function handleClerkReady() {
-            try {
-                await window.Clerk.load();
-                isClerkReady = true;
-                authSection.hidden = false;
-                window.Clerk.mountSignIn(signInContainer, {
-                    appearance: {
-                        layout: {
-                            shimmer: true,
-                            socialButtonsVariant: "iconButton",
-                        },
-                    },
-                    afterSignInUrl: window.location.href,
-                    afterSignUpUrl: window.location.href,
-                });
-                window.Clerk.mountUserButton(userButtonContainer, {
-                    appearance: {
-                        elements: {
-                            userButtonAvatarBox: {
-                                border: "2px solid rgba(99, 102, 241, 0.5)",
-                            },
-                        },
-                    },
-                });
-                attachSessionListener();
-                fetchTokenButton.disabled = false;
-                setStatus("Clerk initialized. Sign in to obtain tokens.");
-            } catch (error) {
-                setStatus(
-                    `Clerk initialization failed: ${error.message}`,
-                    true
-                );
-                initButton.disabled = false;
-            }
-        }
-
-        function attachSessionListener() {
-            if (removeListener) {
-                removeListener();
-            }
-            removeListener = window.Clerk.addListener(({ session }) => {
-                renderSession(session);
-            });
-            renderSession(window.Clerk.session);
-        }
-
-        function renderSession(session) {
+        function updateSession(session) {
             if (!session) {
                 sessionOutput.textContent = "null";
-                tokenOutput.textContent = "// Sign in to retrieve tokens.";
-                fetchTokenButton.disabled = true;
-                signOutButton.disabled = true;
                 return;
             }
-            const snapshot =
-                typeof session.toJSON === "function"
-                    ? session.toJSON()
-                    : {
-                        id: session.id,
-                        status: session.status,
-                        userId: session.userId,
-                        lastActiveToken: session.lastActiveToken,
-                        expireAt: session.expireAt,
-                    };
-            sessionOutput.textContent = JSON.stringify(snapshot, null, 2);
-            fetchTokenButton.disabled = false;
-            signOutButton.disabled = false;
-        }
-
-        function setStatus(message, isError = false) {
-            statusElement.textContent = message;
-            statusElement.dataset.variant = isError ? "error" : "info";
-        }
-
-        window.addEventListener("beforeunload", (e) => {
-            e.preventDefault();
-            if (removeListener) {
-                removeListener();
+            try {
+                sessionOutput.textContent = JSON.stringify(
+                    typeof session.toJSON === "function" ? session.toJSON() : session,
+                    null,
+                    2
+                );
+            } catch (e) {
+                console.error(e);
+                sessionOutput.textContent = String(session);
             }
-        });
+        }
     </script>
 </body>
 
