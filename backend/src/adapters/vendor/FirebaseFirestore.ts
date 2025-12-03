@@ -7,12 +7,23 @@ import type { DBEnv } from "@/adapters/client";
 import {
     type BaseDataDBClient,
     DataListOrder,
+    type PaginationOptions,
+    type PaginationResult,
 } from "@/adapters/StorageClientBase";
 import type { DataType } from "@/schema";
 
+/**
+ * FirebaseFirestoreClient is an implementation of BaseDataDBClient
+ * that interacts with Google Firebase Firestore to perform CRUD operations
+ * on DataType objects.
+ *
+ * Hierarchy:
+ * - Collection: defaults to "data", can be customized via SECRET_FIRESTORE_COLLECTION_NAME
+ *   - Documents: Each document represents a DataType object.-
+ */
 export default class FirebaseFirestoreClient implements BaseDataDBClient {
     private readonly db: ReturnType<typeof createFirestoreClient>;
-    private readonly collectionName = "data";
+    private readonly collectionName: string;
 
     /**
      * Initializes the FirebaseFirestoreClient.
@@ -36,6 +47,7 @@ export default class FirebaseFirestoreClient implements BaseDataDBClient {
             clientEmail: env.SECRET_FIREBASE_CLIENT_EMAIL,
             privateKey: env.SECRET_FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
         });
+        this.collectionName = env.SECRET_FIRESTORE_COLLECTION_NAME ?? "data";
     }
 
     /**
@@ -83,31 +95,65 @@ export default class FirebaseFirestoreClient implements BaseDataDBClient {
     }
 
     /**
-     * Queries documents by name.
+     * Queries documents by name with pagination support.
      *
      * @param name - The name to search for.
-     * @returns A promise that resolves to an array of matching documents.
+     * @param options - Pagination options including limit and pageToken.
+     * @returns A promise that resolves to a paginated result of matching documents.
      */
-    async queryByName(name: string): Promise<DataType[]> {
-        const querySnapshot = await this.db
+    async queryByName(
+        name: string,
+        options?: PaginationOptions,
+    ): Promise<PaginationResult<DataType>> {
+        // For now, we'll implement a simple offset-based pagination
+        // In a real implementation, you might want to use cursor-based pagination
+        const limit = options?.limit || 10; // Default limit of 10
+        const offset = options?.pageToken ? parseInt(options.pageToken, 10) : 0;
+
+        // Get all documents (not ideal for large datasets)
+        const allQuerySnapshot = await this.db
             .collection(this.collectionName)
             .where("name", "==", name)
             .get();
 
-        const results: DataType[] = [];
-        querySnapshot.forEach((doc) => {
-            results.push(this.normalizeData(doc.id, doc.data()));
+        // Convert to array and apply pagination
+        const allResults: DataType[] = [];
+        allQuerySnapshot.forEach((doc) => {
+            allResults.push(this.normalizeData(doc.id, doc.data()));
         });
-        return results;
+
+        // Apply pagination
+        const paginatedResults = allResults.slice(offset, offset + limit);
+
+        // Determine if there's a next page
+        let nextPageToken: string | undefined;
+        if (offset + limit < allResults.length) {
+            nextPageToken = String(offset + limit);
+        }
+
+        return {
+            items: paginatedResults,
+            nextPageToken,
+            totalCount: allResults.length,
+        };
     }
 
     /**
-     * Lists all documents, optionally sorted.
+     * Lists all documents with pagination support, optionally sorted.
      *
      * @param order - The order in which to list the documents.
-     * @returns A promise that resolves to an array of documents.
+     * @param options - Pagination options including limit and pageToken.
+     * @returns A promise that resolves to a paginated result of documents.
      */
-    async list(order?: DataListOrder): Promise<DataType[]> {
+    async list(
+        order?: DataListOrder,
+        options?: PaginationOptions,
+    ): Promise<PaginationResult<DataType>> {
+        // For now, we'll implement a simple offset-based pagination
+        // In a real implementation, you might want to use cursor-based pagination
+        const limit = options?.limit || 10; // Default limit of 10
+        const offset = options?.pageToken ? parseInt(options.pageToken, 10) : 0;
+
         let query: Query | CollectionReference = this.db.collection(
             this.collectionName,
         );
@@ -127,12 +173,29 @@ export default class FirebaseFirestoreClient implements BaseDataDBClient {
             query = query.orderBy(orderByField, orderByDirection);
         }
 
+        // Get all documents (not ideal for large datasets)
         const querySnapshot = await query.get();
-        const results: DataType[] = [];
+
+        // Convert to array and apply pagination
+        const allResults: DataType[] = [];
         querySnapshot.forEach((doc) => {
-            results.push(this.normalizeData(doc.id, doc.data()));
+            allResults.push(this.normalizeData(doc.id, doc.data()));
         });
-        return results;
+
+        // Apply pagination
+        const paginatedResults = allResults.slice(offset, offset + limit);
+
+        // Determine if there's a next page
+        let nextPageToken: string | undefined;
+        if (offset + limit < allResults.length) {
+            nextPageToken = String(offset + limit);
+        }
+
+        return {
+            items: paginatedResults,
+            nextPageToken,
+            totalCount: allResults.length,
+        };
     }
 
     /**

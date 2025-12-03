@@ -3,6 +3,8 @@ import type { DBEnv } from "@/adapters/client";
 import {
     type BaseDataDBClient,
     DataListOrder,
+    type PaginationOptions,
+    type PaginationResult,
 } from "@/adapters/StorageClientBase";
 import type { DataType } from "@/schema";
 
@@ -71,12 +73,41 @@ export default class AzureCosmosDB implements BaseDataDBClient {
         return doc.resource ?? null;
     }
 
-    async queryByName(name: string): Promise<DataType[]> {
-        if (!name) return [];
+    async queryByName(
+        name: string,
+        options?: PaginationOptions,
+    ): Promise<PaginationResult<DataType>> {
+        if (!name) return { items: [] };
+
+        // Set default limit
+        const limit = options?.limit || 10;
+        const offset = options?.pageToken ? parseInt(options.pageToken, 10) : 0;
+
         //It is fuzzy search.
         const { resources } = await this.container.items
             .query<DataType>({
-                query: `SELECT * FROM c WHERE CONTAINS(LOWER(c.name), LOWER(@name))`,
+                query: `SELECT * FROM c WHERE CONTAINS(LOWER(c.name), LOWER(@name)) ORDER BY c.id OFFSET @offset LIMIT @limit`,
+                parameters: [
+                    {
+                        name: "@name",
+                        value: name,
+                    },
+                    {
+                        name: "@offset",
+                        value: offset,
+                    },
+                    {
+                        name: "@limit",
+                        value: limit,
+                    },
+                ],
+            })
+            .fetchAll();
+
+        // Get total count for pagination metadata
+        const { resources: countResources } = await this.container.items
+            .query<{ count: number }>({
+                query: `SELECT VALUE COUNT(1) FROM c WHERE CONTAINS(LOWER(c.name), LOWER(@name))`,
                 parameters: [
                     {
                         name: "@name",
@@ -85,27 +116,79 @@ export default class AzureCosmosDB implements BaseDataDBClient {
                 ],
             })
             .fetchAll();
-        return resources;
+
+        const totalCount = countResources[0]?.count || 0;
+
+        // Determine if there's a next page
+        let nextPageToken: string | undefined;
+        if (offset + limit < totalCount) {
+            nextPageToken = String(offset + limit);
+        }
+
+        return {
+            items: resources,
+            nextPageToken,
+            totalCount,
+        };
     }
 
-    async list(order?: DataListOrder): Promise<DataType[]> {
+    async list(
+        order?: DataListOrder,
+        options?: PaginationOptions,
+    ): Promise<PaginationResult<DataType>> {
+        // Set default limit
+        const limit = options?.limit || 10;
+        const offset = options?.pageToken ? parseInt(options.pageToken, 10) : 0;
+
         let orderBy = `ORDER BY c.`;
         if (order === DataListOrder.NewestFirst) {
             orderBy += "uploadedAt DESC";
         } else if (order === DataListOrder.DownloadsFirst) {
             orderBy = "downloadCount DESC";
-        } else orderBy = "";
-        const query = `SELECT * FROM c ${orderBy}`;
+        } else {
+            // Default order by id to ensure consistent pagination
+            orderBy = "c.id";
+        }
+
+        const query = `SELECT * FROM c ${orderBy} OFFSET @offset LIMIT @limit`;
         console.log("CosmosDB list query:", query);
 
-        //(await this.client.databases.query<DataType>("").fetchAll()).resources
-        return (
-            await this.container.items
-                .query<DataType>({
-                    query: query,
-                })
-                .fetchAll()
-        ).resources;
+        const { resources } = await this.container.items
+            .query<DataType>({
+                query: query,
+                parameters: [
+                    {
+                        name: "@offset",
+                        value: offset,
+                    },
+                    {
+                        name: "@limit",
+                        value: limit,
+                    },
+                ],
+            })
+            .fetchAll();
+
+        // Get total count for pagination metadata
+        const { resources: countResources } = await this.container.items
+            .query<{ count: number }>({
+                query: "SELECT VALUE COUNT(1) FROM c",
+            })
+            .fetchAll();
+
+        const totalCount = countResources[0]?.count || 0;
+
+        // Determine if there's a next page
+        let nextPageToken: string | undefined;
+        if (offset + limit < totalCount) {
+            nextPageToken = String(offset + limit);
+        }
+
+        return {
+            items: resources,
+            nextPageToken,
+            totalCount,
+        };
     }
     async put(item: Omit<DataType, "id">): Promise<DataType> {
         const id = crypto.randomUUID();

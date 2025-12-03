@@ -1,7 +1,10 @@
 import { describeRoute, resolver, validator } from "hono-openapi";
 import z from "zod";
 import { BlobClient, DataDBClient } from "@/adapters/client";
-import { DataListOrder } from "@/adapters/StorageClientBase";
+import {
+    DataListOrder,
+    type PaginationOptions,
+} from "@/adapters/StorageClientBase";
 import { createAuthedHonoRouter } from "@/lib/auth";
 import {
     DataSchema,
@@ -16,7 +19,11 @@ const IdParamSchema = z.object({ id: z.string().min(1) });
 
 const UpdateDataSchema = PartialDataSchema.partial();
 
-const QueryNameSchema = z.object({ name: z.string().min(1).optional() });
+const QueryNameSchema = z.object({
+    name: z.string().min(1).optional(),
+    limit: z.coerce.number().int().positive().max(100).optional().default(10),
+    pageToken: z.string().optional(),
+});
 
 // Check availability of user perm
 router = router.get(
@@ -98,8 +105,9 @@ router = router.post(
 router = router.get(
     "/data",
     describeRoute({
-        summary: "List or query Data items",
-        description: "Lists all Data items or queries by name.",
+        summary: "List or query Data items with pagination",
+        description:
+            "Lists all Data items or queries by name with pagination support.",
         tags: ["Data"],
         security: [{ ClerkUser: [] }],
         parameters: [
@@ -110,27 +118,68 @@ router = router.get(
                 required: false,
                 schema: { type: "string" },
             },
+            {
+                name: "limit",
+                in: "query",
+                description:
+                    "Maximum number of items to return (max 100, default 10)",
+                required: false,
+                schema: {
+                    type: "integer",
+                    minimum: 1,
+                    maximum: 100,
+                    default: 10,
+                },
+            },
+            {
+                name: "pageToken",
+                in: "query",
+                description: "Token for retrieving the next page of results",
+                required: false,
+                schema: { type: "string" },
+            },
         ],
     }),
     validator("query", QueryNameSchema),
     async (c) => {
-        // validate optional query param 'name'
+        // validate optional query params
         const q = c.req.query("name")?.trim();
-        const maybe = QueryNameSchema.safeParse({ name: q });
+        const limit = parseInt(c.req.query("limit") || "10", 10);
+        const pageToken = c.req.query("pageToken");
+
+        const maybe = QueryNameSchema.safeParse({ name: q, limit, pageToken });
         if (!maybe.success) {
             return c.json({ error: maybe.error.message }, 400);
         }
 
+        const paginationOptions: PaginationOptions = {
+            limit: maybe.data.limit,
+            pageToken: maybe.data.pageToken,
+        };
+
         const db = await DataDBClient(c.env);
         if (q) {
-            const results = await db.queryByName(q);
+            const results = await db.queryByName(q, paginationOptions);
             // validate each result
-            const validated = results.map((r) => DataSchema.parse(r));
-            return c.json(validated);
+            const validatedItems = results.items.map((r) =>
+                DataSchema.parse(r),
+            );
+            return c.json({
+                items: validatedItems,
+                nextPageToken: results.nextPageToken,
+                totalCount: results.totalCount,
+            });
         } else {
-            const all = await db.list(DataListOrder.Undefined);
-            const validatedAll = all.map((r) => DataSchema.parse(r));
-            return c.json(validatedAll);
+            const all = await db.list(
+                DataListOrder.Undefined,
+                paginationOptions,
+            );
+            const validatedItems = all.items.map((r) => DataSchema.parse(r));
+            return c.json({
+                items: validatedItems,
+                nextPageToken: all.nextPageToken,
+                totalCount: all.totalCount,
+            });
         }
     },
 );

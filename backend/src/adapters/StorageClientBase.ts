@@ -1,12 +1,53 @@
 import type { DataType } from "@/schema";
 
 /**
+ * Pagination options for querying data items.
+ */
+export type PaginationOptions = {
+    /**
+     * Number of items to return per page.
+     */
+    limit: number;
+
+    /**
+     * Token for retrieving the next page of results.
+     * This is typically returned from a previous query.
+     */
+    pageToken?: string;
+};
+export const paginationOptionsDefault: PaginationOptions = {
+    limit: 10,
+};
+/**
+ * Result of a paginated query.
+ */
+export type PaginationResult<T> = {
+    /**
+     * Array of items for the current page.
+     */
+    items: T[];
+
+    /**
+     * Token for retrieving the next page of results.
+     * If null or undefined, there are no more pages.
+     * It is typically(not nececcary) alphanumeric value.
+     */
+    nextPageToken?: string;
+
+    /**
+     * Total number of items (if available).
+     * This might not be supported by all implementations.
+     */
+    totalCount?: number;
+};
+
+/**
  * Client for performing blob storage operations.
  *
  * Implementations should return a publicly accessible string (e.g. URL or key)
  * from upload, and must support reading and deletion of blobs by that string.
  */
-export interface BaseBlobStorageClient {
+export type BaseBlobStorageClient = {
     /**
      * Upload a binary buffer to storage.
      * @param buffer - The data to upload.
@@ -31,13 +72,13 @@ export interface BaseBlobStorageClient {
      * @returns A promise that resolves when deletion completes.
      */
     delete(url: string): Promise<void>;
-}
+};
 /**
  * Client interface for data (domain objects) database operations.
  *
  * Provides methods to get, query, list, create (put), and delete data items.
  */
-export interface BaseDataDBClient {
+export type BaseDataDBClient = {
     /**
      * Get a data item by id.
      * @param id - Data id.
@@ -48,16 +89,24 @@ export interface BaseDataDBClient {
     /**
      * Query data items by name.
      * @param name - Name to query by.
-     * @returns Array of matching data items.
+     * @param options [options=options] - Pagination options.
+     * @returns Paginated result of matching data items.
      */
-    queryByName(name: string): Promise<DataType[]>;
+    queryByName(
+        name: string,
+        options: PaginationOptions,
+    ): Promise<PaginationResult<DataType>>;
 
     /**
      * List data items with optional ordering.
      * @param order - Optional ordering hint.
-     * @returns Array of data items.
+     * @param options - Pagination options.
+     * @returns Paginated result of data items.
      */
-    list(order?: DataListOrder): Promise<DataType[]>;
+    list(
+        order?: DataListOrder,
+        options?: PaginationOptions,
+    ): Promise<PaginationResult<DataType>>;
 
     /**
      * Create a new data item.
@@ -86,14 +135,14 @@ export interface BaseDataDBClient {
      * @returns The updated data item.
      */
     update(item: Partial<DataType> & { id: DataType["id"] }): Promise<DataType>;
-}
+};
 
 /**
  * Ordering options for listing data items.
  *
  * @enum {string}
  */
-export enum DataListOrder {
+export const enum DataListOrder {
     /**
      * Newest first
      */

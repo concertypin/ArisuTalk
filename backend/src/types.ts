@@ -32,6 +32,8 @@ type FirebaseFirestoreSecretEnv = AllOrNothing<{
     readonly SECRET_FIREBASE_PROJECT_ID: string;
     readonly SECRET_FIREBASE_CLIENT_EMAIL: string;
     readonly SECRET_FIREBASE_PRIVATE_KEY: string;
+
+    readonly SECRET_FIRESTORE_COLLECTION_NAME?: string;
 }>;
 /**
  * Environment secrets required for the application.
