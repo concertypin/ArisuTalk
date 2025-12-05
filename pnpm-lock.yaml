@@ -68,7 +68,10 @@ importers:
         version: 1.14.0(vite@7.2.1(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(yaml@2.8.1))(workerd@1.20251105.0)(wrangler@4.46.0)
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.10.11
-        version: 0.10.11(@vitest/runner@4.0.7)(@vitest/snapshot@4.0.7)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@24.10.0)(happy-dom@20.0.10)(jiti@2.6.1)(jsdom@27.1.0)(lightningcss@1.30.2)(terser@5.44.1)(yaml@2.8.1))
+        version: 0.10.11(@vitest/runner@4.0.7)(@vitest/snapshot@4.0.7)(vitest@3.2.4)
+      '@vitest/ui':
+        specifier: ^4.0.7
+        version: 4.0.7(vitest@3.2.4)
       consola:
         specifier: ^3.4.2
         version: 3.4.2
@@ -80,7 +83,7 @@ importers:
         version: 5.1.4(typescript@5.9.3)(vite@7.2.1(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(yaml@2.8.1))
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@24.10.0)(happy-dom@20.0.10)(jiti@2.6.1)(jsdom@27.1.0)(lightningcss@1.30.2)(terser@5.44.1)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@24.10.0)(@vitest/ui@4.0.7)(happy-dom@20.0.10)(jiti@2.6.1)(jsdom@27.1.0)(lightningcss@1.30.2)(terser@5.44.1)(yaml@2.8.1)
       wrangler:
         specifier: ^4.17.0
         version: 4.46.0
@@ -9069,7 +9072,7 @@ snapshots:
       - utf-8-validate
       - workerd
 
-  '@cloudflare/vitest-pool-workers@0.10.11(@vitest/runner@4.0.7)(@vitest/snapshot@4.0.7)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@24.10.0)(happy-dom@20.0.10)(jiti@2.6.1)(jsdom@27.1.0)(lightningcss@1.30.2)(terser@5.44.1)(yaml@2.8.1))':
+  '@cloudflare/vitest-pool-workers@0.10.11(@vitest/runner@4.0.7)(@vitest/snapshot@4.0.7)(vitest@3.2.4)':
     dependencies:
       '@vitest/runner': 4.0.7
       '@vitest/snapshot': 4.0.7
@@ -9078,7 +9081,7 @@ snapshots:
       devalue: 5.5.0
       miniflare: 4.20251125.0
       semver: 7.7.3
-      vitest: 3.2.4(@types/debug@4.1.12)(@types/node@24.10.0)(happy-dom@20.0.10)(jiti@2.6.1)(jsdom@27.1.0)(lightningcss@1.30.2)(terser@5.44.1)(yaml@2.8.1)
+      vitest: 3.2.4(@types/debug@4.1.12)(@types/node@24.10.0)(@vitest/ui@4.0.7)(happy-dom@20.0.10)(jiti@2.6.1)(jsdom@27.1.0)(lightningcss@1.30.2)(terser@5.44.1)(yaml@2.8.1)
       wrangler: 4.51.0
       zod: 3.25.76
     transitivePeerDependencies:
@@ -10830,6 +10833,17 @@ snapshots:
       tinyspy: 4.0.4
 
   '@vitest/spy@4.0.7': {}
+
+  '@vitest/ui@4.0.7(vitest@3.2.4)':
+    dependencies:
+      '@vitest/utils': 4.0.7
+      fflate: 0.8.2
+      flatted: 3.3.3
+      pathe: 2.0.3
+      sirv: 3.0.2
+      tinyglobby: 0.2.15
+      tinyrainbow: 3.0.3
+      vitest: 3.2.4(@types/debug@4.1.12)(@types/node@24.10.0)(@vitest/ui@4.0.7)(happy-dom@20.0.10)(jiti@2.6.1)(jsdom@27.1.0)(lightningcss@1.30.2)(terser@5.44.1)(yaml@2.8.1)
 
   '@vitest/ui@4.0.7(vitest@4.0.7)':
     dependencies:
@@ -15210,7 +15224,7 @@ snapshots:
     dependencies:
       fake-indexeddb: 4.0.2
 
-  vitest@3.2.4(@types/debug@4.1.12)(@types/node@24.10.0)(happy-dom@20.0.10)(jiti@2.6.1)(jsdom@27.1.0)(lightningcss@1.30.2)(terser@5.44.1)(yaml@2.8.1):
+  vitest@3.2.4(@types/debug@4.1.12)(@types/node@24.10.0)(@vitest/ui@4.0.7)(happy-dom@20.0.10)(jiti@2.6.1)(jsdom@27.1.0)(lightningcss@1.30.2)(terser@5.44.1)(yaml@2.8.1):
     dependencies:
       '@types/chai': 5.2.3
       '@vitest/expect': 3.2.4
@@ -15238,6 +15252,7 @@ snapshots:
     optionalDependencies:
       '@types/debug': 4.1.12
       '@types/node': 24.10.0
+      '@vitest/ui': 4.0.7(vitest@3.2.4)
       happy-dom: 20.0.10
       jsdom: 27.1.0
     transitivePeerDependencies:

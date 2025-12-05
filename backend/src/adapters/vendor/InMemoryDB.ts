@@ -1,4 +1,3 @@
-import type { DBEnv } from "@/adapters/client";
 import type {
     BaseDataDBClient,
     PaginationOptions,
@@ -19,7 +18,7 @@ export default class InMemoryDataDBClient implements BaseDataDBClient {
     private counter = 0;
 
     // biome-ignore lint/complexity/noUselessConstructor: Keep compatible signature
-    constructor(_env: DBEnv) {}
+    constructor(_env?: Record<never, never>) {}
     async bumpDownloadCount(id: string): Promise<void> {
         const item = this.store.get(id);
         if (!item) return;
@@ -27,7 +26,7 @@ export default class InMemoryDataDBClient implements BaseDataDBClient {
         const updated = {
             ...item,
             downloadCount: current + 1,
-        } as DataType;
+        } satisfies DataType;
         this.store.set(id, updated);
     }
 

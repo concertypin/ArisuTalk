@@ -290,8 +290,8 @@ describe("FirebaseFirestoreClient", () => {
             const result = await client.list();
 
             expect(mockCollection.get).toHaveBeenCalled();
-            expect(result).toHaveLength(2);
-            expect(result[0].id).toBe("1");
+            expect(result.items).toHaveLength(2);
+            expect(result.items[0].id).toBe("1");
         });
 
         it("should list documents with order NewestFirst", async () => {
@@ -331,9 +331,9 @@ describe("FirebaseFirestoreClient", () => {
                 "==",
                 "Target",
             );
-            expect(result).toHaveLength(1);
+            expect(result.items).toHaveLength(1);
 
-            expect(result[0].name).toBe("Target");
+            expect(result.items[0].name).toBe("Target");
         });
     });
 

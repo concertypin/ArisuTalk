@@ -24,9 +24,13 @@ This file provides guidance for AI coding agents working on the backend of this 
 - Use libraries instead of reinventing the wheel.
   - One exception: If Web APIs are available with the same functionality, prefer them over libraries.
     (example: `fetch` instead of `axios` library, `crypto.randomUUID` instead of `uuid` library).
+- Use `satisfies` operator to ensure object types instead of type assertions (`as Type`) if possible.
 
 ### Developer's Guide
 
 - Make code stateless to reduce trouble with containers, auto-scaling, etc.
 - Use `pnpm add` instead of editing `package.json` directly.
 - Use `import.meta.env`(injected at build time) or `c.env`(injected at runtime, per HTTP call) for environment variables.
+
+### Documents
+- Hono: https://hono.dev/llms.txt

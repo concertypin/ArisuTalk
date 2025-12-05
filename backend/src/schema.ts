@@ -93,4 +93,44 @@ export const PartialDataSchema = z.object({
 
 export const DataSchema = PartialDataSchema.and(Queryable);
 
+export const PaginationOptionschema = z.object({
+    limit: z.coerce
+        .number()
+        .int()
+        .positive()
+        .max(100)
+        .optional()
+        .default(10)
+        .describe("Number of items to return per page."),
+    pageToken: z
+        .string()
+        .optional()
+        .describe(
+            "Token for retrieving the next page of results. Is typically returned from a previous query.",
+        ),
+});
+export const PaginatedResultSchema = z.object({
+    items: z.array(DataSchema).describe("Array of items for the current page."),
+    nextPageToken: z
+        .string()
+        .optional()
+        .describe(
+            "Token for retrieving the next page of results. If null or undefined, there are no more pages. It is typically(not nececcary) alphanumeric value.",
+        ),
+    totalCount: z
+        .number()
+        .int()
+        .min(-1)
+        .default(-1)
+        .describe(
+            "Total number of items (if available). This might not be supported by all implementations. If not supported, it will be -1.",
+        ),
+});
+
+export type paginatedResultType<T> = {
+    items: T[];
+    nextPageToken?: string;
+    totalCount: number;
+};
+
 export type PartialData = Partial<Omit<DataType, "id">> & { id?: string };

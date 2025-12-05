@@ -4,6 +4,7 @@ import { logger } from "hono/logger";
 import { describeRoute, openAPIRouteHandler } from "hono-openapi";
 import { cors } from "@/lib/cors";
 import type { Bindings } from "@/platform";
+import blobRoutes from "@/routes/blob";
 import dataRoutes from "@/routes/data";
 
 await import("consola")
@@ -15,7 +16,6 @@ await import("consola")
     .catch(); // Ignore errors (e.g., production build)
 
 let app = new Hono<Bindings>();
-
 app = app.use(logger(), cors);
 
 app = app.get(
@@ -39,6 +39,7 @@ app = app.get(
 
 // Mount API routes under /api
 app = app.route("/api", dataRoutes);
+app = app.route("/api", blobRoutes);
 
 const jwtAuthScheme = Object.entries({
     ClerkUser:

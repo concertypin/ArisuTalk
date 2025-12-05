@@ -3,13 +3,13 @@ import {
     createFirestoreClient,
     type Query,
 } from "firebase-rest-firestore";
-import type { DBEnv } from "@/adapters/client";
 import {
     type BaseDataDBClient,
     DataListOrder,
     type PaginationOptions,
     type PaginationResult,
 } from "@/adapters/StorageClientBase";
+import type { VendorSecretEnv } from "@/environmentTypes";
 import type { DataType } from "@/schema";
 
 /**
@@ -31,7 +31,7 @@ export default class FirebaseFirestoreClient implements BaseDataDBClient {
      * @param env - The environment variables containing Firebase credentials.
      * @throws {Error} If required Firebase credentials are missing.
      */
-    constructor(env: DBEnv) {
+    constructor(env: VendorSecretEnv["firebase"]) {
         if (
             !env.SECRET_FIREBASE_PROJECT_ID ||
             !env.SECRET_FIREBASE_CLIENT_EMAIL ||

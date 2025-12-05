@@ -84,3 +84,15 @@ type AuthenticatedContext = {
 export type AuthenticatedBindings = Bindings & {
     Variables: AuthenticatedContext["Variables"];
 };
+/**
+ * Vendor-specific secret environment variables.
+ * @example
+ * function something(env: VendorSecretEnv['azure']) { ... }
+ */
+export type VendorSecretEnv = {
+    azure: AzureCosmosDBSecretEnv;
+    s3: S3SecretEnv;
+    firebase: FirebaseFirestoreSecretEnv;
+    // Something exists, but not typed. So we use an empty object type.
+    [Key: string]: Record<never, never>;
+};

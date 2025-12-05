@@ -1,5 +1,5 @@
-import type { DBEnv } from "@/adapters/client";
 import type { BaseBlobStorageClient } from "@/adapters/StorageClientBase";
+import type { VendorSecretEnv } from "@/environmentTypes";
 
 /**
  * Simple in-memory blob storage used for tests/dev.
@@ -12,7 +12,7 @@ export default class InMemoryBlob implements BaseBlobStorageClient {
     >();
 
     // biome-ignore lint/complexity/noUselessConstructor: Keep compatible signature
-    constructor(_env?: DBEnv) {
+    constructor(_env?: VendorSecretEnv["inmemory"]) {
         // In-memory client doesn't need env, but keep signature compatible.
     }
 

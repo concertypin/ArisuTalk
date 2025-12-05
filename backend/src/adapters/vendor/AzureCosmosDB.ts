@@ -1,11 +1,11 @@
 import { type Container, CosmosClient, type Database } from "@azure/cosmos";
-import type { DBEnv } from "@/adapters/client";
 import {
     type BaseDataDBClient,
     DataListOrder,
     type PaginationOptions,
     type PaginationResult,
 } from "@/adapters/StorageClientBase";
+import type { VendorSecretEnv } from "@/environmentTypes";
 import type { DataType } from "@/schema";
 
 /**
@@ -19,7 +19,7 @@ export default class AzureCosmosDB implements BaseDataDBClient {
     private database: Database;
     private container: Container;
     private containerName: string;
-    constructor(env: DBEnv) {
+    constructor(env: VendorSecretEnv["azure"]) {
         if (!env.SECRET_AZURE_COSMOSDB_CONNECTION_STRING) {
             throw new Error(
                 "Azure Cosmos DB environment variables are not properly set",

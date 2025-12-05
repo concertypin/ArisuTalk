@@ -9,7 +9,7 @@ import type {
     BaseBlobStorageClient,
     BaseDataDBClient,
 } from "@/adapters/StorageClientBase";
-import type { RuntimeSecret, RuntimeVariable } from "@/types";
+import type { RuntimeSecret, RuntimeVariable } from "@/environmentTypes";
 
 /**
  * Environment variables required by the database and blob storage clients.
@@ -23,22 +23,23 @@ let cachedBlobClient: BaseBlobStorageClient | null = null;
 
 /**
  * Dynamically imports and returns the DatabaseClient.
- * Temporarily using InMemoryBlob as a placeholder.
+ * Try AzureCosmosDB, then FirebaseFirestore.
+ * Temporarily using InMemoryBlob as fallback.
  * It is created once and cached for subsequent calls.
  */
 export async function DataDBClient(env: DBEnv): Promise<BaseDataDBClient> {
     if (cachedDBClient) return cachedDBClient;
+    let module: Promise<{
+        default: new (env: DBEnv) => BaseDataDBClient;
+    }>;
     if (env.SECRET_AZURE_COSMOSDB_CONNECTION_STRING) {
-        cachedDBClient = new (await import("./vendor/AzureCosmosDB")).default(
-            env,
-        );
+        module = import("./vendor/AzureCosmosDB");
     } else if (env.SECRET_FIREBASE_PROJECT_ID) {
-        cachedDBClient = new (
-            await import("./vendor/FirebaseFirestore")
-        ).default(env);
+        module = import("./vendor/FirebaseFirestore");
     } else {
-        cachedDBClient = new (await import("./vendor/InMemoryDB")).default(env);
+        module = import("./vendor/InMemoryDB");
     }
+    cachedDBClient = new (await module).default(env);
     return cachedDBClient;
 }
 

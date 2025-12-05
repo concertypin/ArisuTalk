@@ -10,7 +10,7 @@ interface FirebaseServiceAccount {
 }
 
 describe.runIf(async () => {
-    const secretModule = await import("../secret.json", {
+    const secretModule = await import("../../../secret.json", {
         with: { type: "json" },
     });
 
@@ -28,7 +28,7 @@ describe.runIf(async () => {
         try {
             // Already validated in describe.runIf
             const secret: FirebaseServiceAccount = await import(
-                "../secret.json",
+                "../../../secret.json",
                 {
                     with: { type: "json" },
                 }
@@ -53,8 +53,8 @@ describe.runIf(async () => {
 
     it("should list documents (real connection)", async () => {
         const docs = await client.list(); // Use non-null assertion as we've skipped if client is null
-        console.log(`Found ${docs.length} documents.`);
-        expect(Array.isArray(docs)).toBe(true);
+        console.log(`Found ${docs.items.length} documents.`);
+        expect(Array.isArray(docs.items)).toBe(true);
     });
 
     it("should write, update, read, and delete a document (real connection)", async () => {
