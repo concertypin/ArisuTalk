@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { onMount, onDestroy } from "svelte";
     import { get } from "svelte/store";
     import { t } from "$root/i18n";

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { onMount } from "svelte";
     import { get } from "svelte/store";
     import {
@@ -36,26 +36,26 @@
     import DevModeIndicator from "./components/DevModeIndicator.svelte";
 
     // Lazy load heavy components
-    let ConfirmationModal,
-        ImageZoomModal,
-        CreateGroupChatModal,
-        CreateOpenChatModal,
-        EditGroupChatModal,
-        CharacterModal,
-        DesktopSettingsUI,
-        MasterPasswordModal,
-        ChatSelectionModal,
-        SearchModal,
-        CharacterListPage,
-        MobileSettings,
-        SNSCharacterListModal,
-        SNSFeedModal,
-        SNSPostModal,
-        PromptModal,
-        DebugLogsModal,
-        DataBrowserModal,
-        PhonebookModal,
-        MobileAuthModal;
+    let ConfirmationModal: any,
+        ImageZoomModal: any,
+        CreateGroupChatModal: any,
+        CreateOpenChatModal: any,
+        EditGroupChatModal: any,
+        CharacterModal: any,
+        DesktopSettingsUI: any,
+        MasterPasswordModal: any,
+        ChatSelectionModal: any,
+        SearchModal: any,
+        CharacterListPage: any,
+        MobileSettings: any,
+        SNSCharacterListModal: any,
+        SNSFeedModal: any,
+        SNSPostModal: any,
+        PromptModal: any,
+        DebugLogsModal: any,
+        DataBrowserModal: any,
+        PhonebookModal: any,
+        MobileAuthModal: any;
     let deviceType = "desktop";
     import { settings } from "./stores/settings";
     import {
@@ -121,7 +121,7 @@
 
     function totalChatRoomCount() {
         const roomsMap = get(chatRooms);
-        return Object.values(roomsMap).reduce((total, rooms) => {
+        return Object.values(roomsMap).reduce((total: number, rooms: any) => {
             if (Array.isArray(rooms)) {
                 return total + rooms.length;
             }
@@ -196,7 +196,7 @@
     }
 
     // Lazy load components when needed
-    async function lazyLoadComponent(loadFunction, componentVar) {
+    async function lazyLoadComponent(loadFunction: any, componentVar: any) {
         if (!componentVar) {
             const module = await loadFunction();
             componentVar = module.default;
@@ -280,7 +280,7 @@
         }
     }
 
-    async function handleCharacterSelect(event) {
+    async function handleCharacterSelect(event: CustomEvent<any>) {
         // Lazy load SearchModal if needed
         SearchModal = await lazyLoadComponent(loadSearchModal, SearchModal);
         const character = event.detail;
@@ -317,7 +317,7 @@
         }
     }
 
-    async function handleMobileCharacterSelect(event) {
+    async function handleMobileCharacterSelect(event: CustomEvent<any>) {
         // Lazy load ChatSelectionModal if needed
         ChatSelectionModal = await lazyLoadComponent(
             loadChatSelectionModal,
@@ -334,7 +334,7 @@
         isChatSelectionModalVisible.set(true);
     }
 
-    async function handleOpenSns(event) {
+    async function handleOpenSns(event: CustomEvent<any>) {
         // Lazy load SNS components if needed
         SNSCharacterListModal = await lazyLoadComponent(
             loadSNSCharacterListModal,
@@ -346,7 +346,7 @@
         void logUserFlowEvent("sns_feed_opened", { device_type: deviceType });
     }
 
-    async function handleCharacterSettings(event) {
+    async function handleCharacterSettings(event: CustomEvent<any>) {
         // Lazy load CharacterModal if needed
         CharacterModal = await lazyLoadComponent(
             loadCharacterModal,
@@ -374,7 +374,7 @@
         });
     }
 
-    async function handleSaveSNSPost(event) {
+    async function handleSaveSNSPost(event: CustomEvent<any>) {
         // Lazy load SNSPostModal if needed
         SNSPostModal = await lazyLoadComponent(loadSNSPostModal, SNSPostModal);
         const post = event.detail;
@@ -389,7 +389,7 @@
                     });
                 } else {
                     const postIndex = chars[charIndex].snsPosts.findIndex(
-                        (p) => p.id === post.id
+                        (p: any) => p.id === post.id
                     );
                     if (postIndex !== -1) {
                         chars[charIndex].snsPosts[postIndex] = post;

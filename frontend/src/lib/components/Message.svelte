@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
     import Avatar from "./Avatar.svelte";
     import { isImageZoomModalVisible, imageZoomModalData } from "../stores/ui";

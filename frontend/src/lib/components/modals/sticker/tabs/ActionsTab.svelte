@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { createEventDispatcher } from "svelte";
     import { t } from "$root/i18n";
     import { Trash2, Copy, Download } from "lucide-svelte";

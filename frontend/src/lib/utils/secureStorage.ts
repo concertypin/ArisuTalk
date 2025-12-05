@@ -7,6 +7,7 @@ import { encryptText, decryptText, generateMasterPassword } from "./crypto";
 import { loadFromBrowserStorage, saveToBrowserStorage } from "../../storage";
 import { t } from "$root/i18n";
 import { getStorageKey } from "./storageKey";
+import type { APISettings } from "../../defaults";
 
 const STORAGE_KEYS = {
     ENCRYPTED_API_CONFIGS: getStorageKey("personaChat_encryptedApiConfigs_v1"),
@@ -19,6 +20,9 @@ const STORAGE_KEYS = {
  * Secure Storage Manager class
  */
 export class SecureStorageManager {
+    private masterPassword: string | null;
+    public encryptionEnabled: boolean;
+
     constructor() {
         this.masterPassword = null;
         this.encryptionEnabled = false;
@@ -26,12 +30,11 @@ export class SecureStorageManager {
 
     /**
      * Initialize secure storage - always enabled
-     * @returns {Promise<boolean>} - Whether encryption is enabled
      */
-    async initialize() {
+    async initialize(): Promise<boolean> {
         try {
             // Check if this is first time setup
-            const hasExistingEncryption = await loadFromBrowserStorage(
+            const hasExistingEncryption = await loadFromBrowserStorage<boolean>(
                 STORAGE_KEYS.ENCRYPTION_ENABLED,
                 false
             );
@@ -70,11 +73,8 @@ export class SecureStorageManager {
 
     /**
      * Setup encryption with master password
-     * @param {string} masterPassword - Master password for encryption
-     * @param {string} [hint] - Optional hint for the password
-     * @returns {Promise<boolean>} - Success status
      */
-    async setupEncryption(masterPassword, hint = "") {
+    async setupEncryption(masterPassword: string, hint: string = ""): Promise<boolean> {
         try {
             // Test encryption with a dummy value
             await encryptText("test", masterPassword);
@@ -101,10 +101,8 @@ export class SecureStorageManager {
 
     /**
      * Save encrypted API configurations
-     * @param {Object} apiConfigs - API configurations object
-     * @returns {Promise<void>}
      */
-    async saveApiConfigs(apiConfigs) {
+    async saveApiConfigs(apiConfigs: APISettings['apiConfigs']): Promise<void> {
         if (!this.masterPassword) {
             console.warn(t("secureStorage.noMasterPasswordForEncryption"));
             return;
@@ -125,16 +123,15 @@ export class SecureStorageManager {
 
     /**
      * Load and decrypt API configurations
-     * @returns {Promise<Object|null>} - Decrypted API configurations
      */
-    async loadApiConfigs() {
+    async loadApiConfigs(): Promise<Partial<APISettings['apiConfigs']>> {
         if (!this.masterPassword) {
             console.warn(t("secureStorage.noMasterPasswordForDecryption"));
             return {};
         }
 
         try {
-            const encrypted = await loadFromBrowserStorage(
+            const encrypted = await loadFromBrowserStorage<string | null>(
                 STORAGE_KEYS.ENCRYPTED_API_CONFIGS,
                 null
             );
@@ -147,7 +144,7 @@ export class SecureStorageManager {
                 encrypted,
                 this.masterPassword
             );
-            return JSON.parse(jsonString);
+            return JSON.parse(jsonString) as Partial<APISettings['apiConfigs']>;
         } catch (error) {
             console.error(t("secureStorage.loadApiConfigsFailed"), error);
             return {};
@@ -156,10 +153,9 @@ export class SecureStorageManager {
 
     /**
      * Get password hint
-     * @returns {Promise<string>} - Password hint
      */
-    async getPasswordHint() {
-        return await loadFromBrowserStorage(
+    async getPasswordHint(): Promise<string> {
+        return await loadFromBrowserStorage<string>(
             STORAGE_KEYS.MASTER_PASSWORD_HINT,
             ""
         );
@@ -167,9 +163,8 @@ export class SecureStorageManager {
 
     /**
      * Generate a secure master password
-     * @returns {string} - Generated master password
      */
-    generateMasterPassword() {
+    generateMasterPassword(): string {
         return generateMasterPassword();
     }
 }

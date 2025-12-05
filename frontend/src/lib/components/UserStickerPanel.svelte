@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
     import { userStickers } from "../stores/character";
     import { stickerToSend } from "../stores/chat";

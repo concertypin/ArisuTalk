@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
     import { PlusCircle, Trash2 } from "lucide-svelte";
 

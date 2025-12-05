@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { createEventDispatcher, onMount, onDestroy } from "svelte";
     import { fade } from "svelte/transition";
     import { X, Info } from "lucide-svelte";

@@ -1,6 +1,6 @@
 // --- PNG Chunk Utilities ---
 
-export function dataUrlToUint8Array(dataUrl) {
+export function dataUrlToUint8Array(dataUrl: string): Uint8Array {
     const base64 = dataUrl.split(",")[1];
     const binaryString = atob(base64);
     const bytes = new Uint8Array(binaryString.length);
@@ -10,7 +10,7 @@ export function dataUrlToUint8Array(dataUrl) {
     return bytes;
 }
 
-export function uint8ArrayToDataUrl(uint8Array, mimeType = "image/png") {
+export function uint8ArrayToDataUrl(uint8Array: Uint8Array, mimeType: string = "image/png"): string {
     const binaryString = Array.from(uint8Array)
         .map((byte) => String.fromCharCode(byte))
         .join("");
@@ -18,7 +18,7 @@ export function uint8ArrayToDataUrl(uint8Array, mimeType = "image/png") {
     return `data:${mimeType};base64,${base64}`;
 }
 
-export function addPngChunk(pngData, chunkType, data) {
+export function addPngChunk(pngData: Uint8Array, chunkType: string, data: Uint8Array): Uint8Array {
     // Find IEND chunk
     let iendIndex = -1;
     for (let i = 0; i < pngData.length - 7; i++) {
@@ -96,8 +96,8 @@ export function addPngChunk(pngData, chunkType, data) {
     return newPngData;
 }
 
-export function calculateCRC32(data) {
-    const crcTable = [];
+export function calculateCRC32(data: Uint8Array): number {
+    const crcTable: number[] = [];
     for (let i = 0; i < 256; i++) {
         let c = i;
         for (let j = 0; j < 8; j++) {
@@ -113,7 +113,7 @@ export function calculateCRC32(data) {
     return (crc ^ 0xffffffff) >>> 0;
 }
 
-export function extractPngChunk(pngData, chunkType) {
+export function extractPngChunk(pngData: Uint8Array, chunkType: string): Uint8Array | null {
     const chunkTypeBytes = new TextEncoder().encode(chunkType);
 
     let index = 8; // Skip PNG header
@@ -139,7 +139,7 @@ export function extractPngChunk(pngData, chunkType) {
     return null;
 }
 
-export async function compressData(data) {
+export async function compressData(data: Uint8Array): Promise<Uint8Array> {
     if (!window.CompressionStream) {
         return data;
     }
@@ -149,10 +149,10 @@ export async function compressData(data) {
         const writer = stream.writable.getWriter();
         const reader = stream.readable.getReader();
 
-        writer.write(data);
-        writer.close();
+        await writer.write(data as unknown as BufferSource);
+        await writer.close();
 
-        const chunks = [];
+        const chunks: Uint8Array[] = [];
         let done = false;
         while (!done) {
             const { value, done: readerDone } = await reader.read();
@@ -179,7 +179,7 @@ export async function compressData(data) {
     }
 }
 
-export async function decompressData(compressedData) {
+export async function decompressData(compressedData: Uint8Array): Promise<Uint8Array> {
     if (!window.DecompressionStream) {
         return compressedData;
     }
@@ -189,10 +189,10 @@ export async function decompressData(compressedData) {
         const writer = stream.writable.getWriter();
         const reader = stream.readable.getReader();
 
-        writer.write(compressedData);
-        writer.close();
+        await writer.write(compressedData as unknown as BufferSource);
+        await writer.close();
 
-        const chunks = [];
+        const chunks: Uint8Array[] = [];
         let done = false;
         while (!done) {
             const { value, done: readerDone } = await reader.read();

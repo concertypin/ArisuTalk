@@ -30,14 +30,16 @@ import {
     applyRequestHooks,
 } from "./replaceHookService";
 const { replace } = await import("$lib/utils/worker/replace.js");
+import type { Character } from "$types/character";
+import type { APIConfig } from "$root/defaults";
 
 const apiManager = new APIManager();
 
-async function handleVirtualStream(chatId, character, messageParts) {
+async function handleVirtualStream(chatId: string, character: Character, messageParts: any[]) {
     virtualStream.set({
         isStreaming: true,
         chatId: chatId,
-        characterId: character.id,
+        characterId: character.id as string, // Cast to string if needed
         messages: [],
         isTyping: false,
     });
@@ -58,10 +60,10 @@ async function handleVirtualStream(chatId, character, messageParts) {
         const outputHookResult = await applyOutputHooks(messagePart.content);
         const processedContent = outputHookResult.modified;
 
-        const botMessage = {
+        const botMessage: Message = {
             id: Date.now() + Math.random(),
             sender: character.name,
-            characterId: character.id,
+            characterId: String(character.id),
             content: processedContent,
             time: new Date().toLocaleTimeString([], {
                 hour: "2-digit",
@@ -78,7 +80,7 @@ async function handleVirtualStream(chatId, character, messageParts) {
         virtualStream.set({
             isStreaming: true,
             chatId: chatId,
-            characterId: character.id,
+            characterId: String(character.id),
             messages: [...streamedMessages] as any,
             isTyping: false,
         });
@@ -103,15 +105,15 @@ async function handleVirtualStream(chatId, character, messageParts) {
     });
 }
 
-function isGroupChat(chatId) {
+function isGroupChat(chatId: string | null) {
     return chatId && typeof chatId === "string" && chatId.startsWith("group_");
 }
 
-function isOpenChat(chatId) {
+function isOpenChat(chatId: string | null) {
     return chatId && typeof chatId === "string" && chatId.startsWith("open_");
 }
 
-function getCurrentChatRoom(chatId) {
+function getCurrentChatRoom(chatId: string | null) {
     if (!chatId) return null;
 
     if (isGroupChat(chatId)) {
@@ -124,13 +126,13 @@ function getCurrentChatRoom(chatId) {
 
     for (const characterId in get(chatRooms)) {
         const rooms = get(chatRooms)[characterId];
-        const chatRoom = rooms.find((room) => room.id === chatId);
+        const chatRoom = rooms.find((room: any) => room.id === chatId);
         if (chatRoom) return chatRoom;
     }
     return null;
 }
 
-function processAutoPost(character, autoPost) {
+function processAutoPost(character: Character, autoPost: any) {
     if (!autoPost || !autoPost.content?.trim()) return character;
 
     const allCharacterStates = get(characterStateStore);
@@ -150,7 +152,7 @@ function processAutoPost(character, autoPost) {
     const timestamp = new Date().toISOString();
 
     const formattedTags = Array.isArray(autoPost.tags)
-        ? autoPost.tags.map((tag) => (tag.startsWith("#") ? tag : `#${tag}`))
+        ? autoPost.tags.map((tag: string) => (tag.startsWith("#") ? tag : `#${tag}`))
         : [];
 
     const newPost = {
@@ -179,20 +181,21 @@ function processAutoPost(character, autoPost) {
 }
 
 async function callApiAndHandleResponse(
-    chatId,
-    character,
-    history,
+    chatId: string,
+    character: Character,
+    history: Message[],
     isProactive = false,
     forceSummary = false
 ) {
     const currentSettings = get(settings);
     const apiProvider = currentSettings.apiProvider || "gemini";
     const apiConfigs = currentSettings.apiConfigs || {};
-    let currentConfig = apiConfigs[apiProvider];
+    let currentConfig: APIConfig = apiConfigs[apiProvider];
     if (!currentConfig && apiProvider === "gemini") {
         currentConfig = {
             apiKey: currentSettings.apiKey,
             model: currentSettings.model,
+            customModels: [],
         };
     }
 
@@ -222,7 +225,7 @@ async function callApiAndHandleResponse(
         const response = await apiManager.generateContent(
             apiProvider,
             currentConfig.apiKey,
-            currentConfig.model,
+            currentConfig.model || "",
             {
                 userName: currentSettings.userName,
                 userDescription: currentSettings.userDescription,
@@ -300,7 +303,7 @@ async function callApiAndHandleResponse(
                 if (charIndex !== -1) {
                     const newChars = [...chars];
                     newChars[charIndex] = processAutoPost(
-                        newChars[charIndex],
+                        newChars[charIndex] as Character,
                         legacyMemoryPost
                     );
                     return newChars;
@@ -315,7 +318,7 @@ async function callApiAndHandleResponse(
                 if (charIndex !== -1) {
                     const newChars = [...chars];
                     newChars[charIndex] = processAutoPost(
-                        newChars[charIndex],
+                        newChars[charIndex] as Character,
                         response.autoPost
                     );
                     return newChars;
@@ -335,7 +338,7 @@ async function callApiAndHandleResponse(
         }
     } catch (error) {
         console.error("Error sending message:", error);
-        const errorMessage = {
+        const errorMessage: Message = {
             id: Date.now() + 1,
             sender: "System",
             content: (error as Error).message || "Error sending message",
@@ -358,7 +361,7 @@ async function callApiAndHandleResponse(
     }
 }
 
-export async function sendMessage(content, type = "text", payload = {}) {
+export async function sendMessage(content: string, type: string = "text", payload: object = {}) {
     console.log(
         `sendMessage called with chatId: ${get(selectedChatId)}, isGroupChat: ${isGroupChat(get(selectedChatId))}`
     );
@@ -371,7 +374,7 @@ export async function sendMessage(content, type = "text", payload = {}) {
     const inputHookResult = await applyInputHooks(content);
     const processedContent = inputHookResult.modified;
 
-    const userMessage = {
+    const userMessage: Message = {
         id: Date.now(),
         sender: "user",
         isMe: true,
@@ -417,7 +420,7 @@ export async function sendMessage(content, type = "text", payload = {}) {
         }
 
         // Filter active participants based on individual settings
-        const activeParticipants = participants.filter((participantId) => {
+        const activeParticipants = participants.filter((participantId: string) => {
             const settings = groupSettings.participantSettings[
                 participantId
             ] || {
@@ -463,7 +466,7 @@ export async function sendMessage(content, type = "text", payload = {}) {
             }
 
             try {
-                await callApiAndHandleResponse(chatId, character, history);
+                await callApiAndHandleResponse(chatId, character as Character, history);
             } catch (error) {
                 console.error(
                     `Error in group chat response for ${character.name}:`,
@@ -499,7 +502,7 @@ export async function sendMessage(content, type = "text", payload = {}) {
         }
 
         try {
-            await callApiAndHandleResponse(chatId, character, history);
+            await callApiAndHandleResponse(chatId, character as Character, history);
         } finally {
             isWaitingForResponse.set(false);
             typingCharacterId.set(null);
@@ -515,7 +518,7 @@ export async function sendMessage(content, type = "text", payload = {}) {
         }
 
         try {
-            await callApiAndHandleResponse(chatId, character, history);
+            await callApiAndHandleResponse(chatId, character as Character, history);
         } finally {
             isWaitingForResponse.set(false);
             typingCharacterId.set(null);
@@ -523,7 +526,7 @@ export async function sendMessage(content, type = "text", payload = {}) {
     }
 }
 
-export function deleteMessageGroup(messageId) {
+export function deleteMessageGroup(messageId: number | string) {
     confirmationModalData.set({
         title: t("modal.messageGroupDeleteConfirm.title"),
         message: t("modal.messageGroupDeleteConfirm.message"),
@@ -562,11 +565,11 @@ export function deleteMessageGroup(messageId) {
     isConfirmationModalVisible.set(true);
 }
 
-export function editMessage(messageId) {
+export function editMessage(messageId: number | string) {
     editingMessageId.set(messageId);
 }
 
-export async function saveEditedMessage(messageId, newContent) {
+export async function saveEditedMessage(messageId: number | string, newContent: string) {
     const chatId = get(selectedChatId);
     if (!chatId) return;
 
@@ -589,7 +592,7 @@ export async function saveEditedMessage(messageId, newContent) {
 
     const originalMessage = currentMessages[groupInfo.startIndex];
 
-    const editedMessage = {
+    const editedMessage: Message = {
         ...originalMessage,
         id: Date.now(),
         content: newContent,
@@ -622,7 +625,7 @@ export async function saveEditedMessage(messageId, newContent) {
     try {
         await callApiAndHandleResponse(
             chatId,
-            character,
+            character as Character,
             updatedMessages,
             false,
             true
@@ -633,7 +636,7 @@ export async function saveEditedMessage(messageId, newContent) {
     }
 }
 
-export async function rerollMessage(messageId) {
+export async function rerollMessage(messageId: number | string) {
     const chatId = get(selectedChatId);
     if (!chatId) return;
 
@@ -711,7 +714,7 @@ export async function rerollMessage(messageId) {
     try {
         await callApiAndHandleResponse(
             chatId,
-            character,
+            character as Character,
             truncatedMessages,
             false,
             true
@@ -722,8 +725,10 @@ export async function rerollMessage(messageId) {
     }
 }
 
-export async function generateSnsPost(messageId) {
+export async function generateSnsPost(messageId: number | string) {
     const chatId = get(selectedChatId);
+    if (!chatId) return;
+
     const allMessages = get(messages);
     const currentMessages = allMessages[chatId] || [];
     const targetMessage = currentMessages.find((msg) => msg.id === messageId);
@@ -775,11 +780,12 @@ export async function generateSnsPost(messageId) {
 
         const apiProvider = currentSettings.apiProvider || "gemini";
         const apiConfigs = currentSettings.apiConfigs || {};
-        let currentConfig = apiConfigs[apiProvider];
+        let currentConfig: APIConfig = apiConfigs[apiProvider];
         if (!currentConfig && apiProvider === "gemini") {
             currentConfig = {
                 apiKey: currentSettings.apiKey,
                 model: currentSettings.model,
+                customModels: [],
             };
         }
 
@@ -820,7 +826,7 @@ export async function generateSnsPost(messageId) {
                 if (charIndex !== -1) {
                     const newChars = [...chars];
                     newChars[charIndex] = processAutoPost(
-                        newChars[charIndex],
+                        newChars[charIndex] as Character,
                         parsedResponse.autoPost
                     );
                     return newChars;
@@ -849,7 +855,7 @@ export async function generateSnsPost(messageId) {
                         chatId,
                         chatType: "sns_generation",
                         timestamp: new Date().toISOString(),
-                        apiProvider,
+                        apiProvider: "novelai",
                         model: currentConfig.model,
                     },
                 },
@@ -864,11 +870,11 @@ export async function generateSnsPost(messageId) {
         } else {
             throw new Error("Failed to generate SNS post from response.");
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error generating SNS post:", error);
         addLog({
             type: "structured",
-            characterName: character.name,
+            characterName: character?.name || "Unknown",
             chatId: chatId,
             chatType: "sns_generation",
             data: { error: { message: error.message, stack: error.stack } },
@@ -883,7 +889,7 @@ export async function generateSnsPost(messageId) {
 }
 
 export function addSystemMessage(chatId: string, content: string) {
-    const systemMessage = {
+    const systemMessage: Message = {
         id: Date.now() + Math.random(),
         sender: "System",
         content: content,

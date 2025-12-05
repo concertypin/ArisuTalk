@@ -4,7 +4,7 @@ import { debugLogs } from "../stores/logs";
 
 const MAX_LOGS = 1000;
 
-export function addLog(logData) {
+export function addLog(logData: any) {
     const currentSettings = get(settings);
     if (!currentSettings.enableDebugLogs) {
         return;

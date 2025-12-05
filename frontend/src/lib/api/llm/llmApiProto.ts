@@ -1,4 +1,5 @@
 import type { Character } from "$root/types/character";
+import type { Message } from "$root/types/chat";
 
 export type LLMApiGenerateContentParams = {
     /**
@@ -15,10 +16,8 @@ export type LLMApiGenerateContentParams = {
     character: Character;
     /**
      * Conversation history
-     * It has not been typed strictly.
-     * @todo Define the type properly.
      */
-    history: Array<object>;
+    history: Message[];
     /**
      * Prompt settings
      * It has not been typed strictly.
@@ -44,9 +43,13 @@ export type LLMApiGenerateContentParams = {
     chatId: string | null;
 };
 export type LLMApiGenerateContentResponse = Promise<{
-    reactionDelay: number;
-    messages: Array<Object>;
-    characterState: Object;
+    reactionDelay?: number;
+    messages?: any[];
+    characterState?: any;
+    newMemory?: string;
+    autoPost?: any;
+    error?: string;
+    [key: string]: any;
 }>;
 export type LLMApiGenerateProfileParams = {
     /**

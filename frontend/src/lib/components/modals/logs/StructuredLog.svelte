@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
     import { onMount } from "svelte";
     import { ChevronRight } from "lucide-svelte";

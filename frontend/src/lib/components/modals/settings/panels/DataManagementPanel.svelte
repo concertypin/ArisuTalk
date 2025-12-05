@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
     import { settings, settingsSnapshots } from "../../../../stores/settings";
     import {

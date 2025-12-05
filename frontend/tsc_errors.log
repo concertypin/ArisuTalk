@@ -1,0 +1,455 @@
+! Corepack is about to download https://registry.npmjs.org/pnpm/-/pnpm-10.14.0.tgz
+src/handlers/groupChatHandlers.js(6,38): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/handlers/groupChatHandlers.js(6,41): error TS7006: Parameter 'app' implicitly has an 'any' type.
+src/lib/api/apiManager.ts(85,31): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'Record<"gemini" | "claude" | "openai" | "grok" | "openrouter" | "custom_openai", () => Promise<{ default: LLMApiConstructor; }>>'.
+  No index signature with a parameter of type 'string' was found on type 'Record<"gemini" | "claude" | "openai" | "grok" | "openrouter" | "custom_openai", () => Promise<{ default: LLMApiConstructor; }>>'.
+src/lib/api/chatMLParser.js(108,49): error TS2339: Property 'name' does not exist on type 'Object'.
+src/lib/api/chatMLParser.js(115,34): error TS7006: Parameter 'text' implicitly has an 'any' type.
+src/lib/api/chatMLParser.js(121,17): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ "character.name": any; "user.name": string; "persona.name": string; "user.description": string; "persona.description": string; }'.
+  No index signature with a parameter of type 'string' was found on type '{ "character.name": any; "user.name": string; "persona.name": string; "user.description": string; "persona.description": string; }'.
+src/lib/api/chatMLParser.js(150,45): error TS2339: Property 'name' does not exist on type 'Object'.
+src/lib/api/chatMLParser.js(150,112): error TS2339: Property 'prompt' does not exist on type 'Object'.
+src/lib/api/chatMLParser.js(174,30): error TS2339: Property 'role' does not exist on type 'Object'.
+src/lib/api/chatMLParser.js(174,71): error TS2339: Property 'role' does not exist on type 'Object'.
+src/lib/api/chatMLParser.js(175,30): error TS2339: Property 'parts' does not exist on type 'Object'.
+src/lib/api/chatMLParser.js(175,58): error TS2339: Property 'content' does not exist on type 'Object'.
+src/lib/api/chatMLParser.js(215,42): error TS2322: Type 'null' is not assignable to type 'Object'.
+src/lib/api/chatMLParser.js(216,38): error TS2339: Property 'name' does not exist on type 'Object'.
+src/lib/api/chatMLParser.js(218,20): error TS2339: Property 'prompt' does not exist on type 'Object'.
+src/lib/api/chatMLParser.js(250,33): error TS2339: Property 'main' does not exist on type 'Object'.
+src/lib/api/chatMLParser.js(267,25): error TS2339: Property 'availableStickers' does not exist on type 'Object'.
+src/lib/api/chatMLParser.js(280,54): error TS2339: Property 'name' does not exist on type 'Object'.
+src/lib/api/chatMLParser.js(286,17): error TS2339: Property 'timeContext' does not exist on type 'Object'.
+src/lib/api/chatMLParser.js(287,43): error TS2339: Property 'timeContext' does not exist on type 'Object'.
+src/lib/api/llm/claude.ts(74,21): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/claude.ts(75,52): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/claude.ts(76,28): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/claude.ts(77,49): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/claude.ts(119,21): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/claude.ts(120,52): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/claude.ts(121,28): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/claude.ts(122,49): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/claude.ts(158,21): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/claude.ts(159,52): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/claude.ts(160,28): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/claude.ts(161,49): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/customopenai.ts(81,21): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/customopenai.ts(82,52): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/customopenai.ts(83,28): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/customopenai.ts(84,49): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/customopenai.ts(133,21): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/customopenai.ts(134,52): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/customopenai.ts(135,28): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/customopenai.ts(136,49): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/customopenai.ts(176,21): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/customopenai.ts(177,52): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/customopenai.ts(178,28): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/customopenai.ts(179,49): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/gemini.ts(96,21): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/gemini.ts(97,52): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/gemini.ts(98,28): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/gemini.ts(99,49): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/gemini.ts(188,21): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/gemini.ts(189,52): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/gemini.ts(190,28): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/gemini.ts(191,49): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/gemini.ts(275,21): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/gemini.ts(276,52): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/gemini.ts(277,28): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/gemini.ts(278,49): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/grok.ts(72,21): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/grok.ts(73,52): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/grok.ts(74,28): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/grok.ts(75,49): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/grok.ts(120,21): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/grok.ts(121,52): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/grok.ts(122,28): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/grok.ts(123,49): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/grok.ts(159,21): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/grok.ts(160,52): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/grok.ts(161,28): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/grok.ts(162,49): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/openai.ts(75,21): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/openai.ts(76,52): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/openai.ts(77,28): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/openai.ts(78,49): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/openai.ts(122,21): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/openai.ts(123,52): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/openai.ts(124,28): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/openai.ts(125,49): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/openai.ts(160,21): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/openai.ts(161,52): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/openai.ts(162,28): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/openai.ts(163,49): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/openrouter.ts(80,21): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/openrouter.ts(81,52): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/openrouter.ts(82,28): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/openrouter.ts(83,49): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/openrouter.ts(131,21): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/openrouter.ts(132,52): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/openrouter.ts(133,28): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/openrouter.ts(134,49): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/openrouter.ts(172,21): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/openrouter.ts(173,52): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/llm/openrouter.ts(174,28): error TS2339: Property 'role' does not exist on type 'object'.
+src/lib/api/llm/openrouter.ts(175,49): error TS2339: Property 'parts' does not exist on type 'object'.
+src/lib/api/novelai.ts(9,18): error TS7016: Could not find a declaration file for module 'pako'. '/app/node_modules/.pnpm/pako@2.1.0/node_modules/pako/dist/pako.esm.mjs' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/pako` if it exists or add a new declaration (.d.ts) file containing `declare module 'pako';`
+src/lib/api/novelai.ts(269,35): error TS7006: Parameter 'data' implicitly has an 'any' type.
+src/lib/api/novelai.ts(566,17): error TS2339: Property 'naiSettings' does not exist on type '{}'.
+src/lib/api/novelai.ts(569,43): error TS2339: Property 'appearance' does not exist on type 'Character'.
+src/lib/api/novelai.ts(580,41): error TS2339: Property 'emotion' does not exist on type 'string | NAIEmotion'.
+  Property 'emotion' does not exist on type 'string'.
+src/lib/api/novelai.ts(581,40): error TS2339: Property 'action' does not exist on type 'string | NAIEmotion'.
+  Property 'action' does not exist on type 'string'.
+src/lib/api/novelai.ts(691,21): error TS2322: Type 'string | number | symbol' is not assignable to type 'string | undefined'.
+  Type 'number' is not assignable to type 'string'.
+src/lib/api/novelai.ts(704,21): error TS2322: Type 'number | false' is not assignable to type 'boolean | undefined'.
+  Type 'number' is not assignable to type 'boolean | undefined'.
+src/lib/api/novelai.ts(707,21): error TS2322: Type 'string | number | symbol' is not assignable to type 'string | undefined'.
+  Type 'number' is not assignable to type 'string'.
+src/lib/api/novelai.ts(712,13): error TS2322: Type '{ input: string; model: "nai-diffusion-4-5-full" | "nai-diffusion-4-full"; action: "generate"; parameters: { params_version: number; width: number; height: number; scale: number; sampler: string | ... 1 more ... | symbol; ... 7 more ...; v4_negative_prompt: { ...; }; }; }' is not assignable to type 'NaiRawRequest'.
+  The types of 'parameters.sampler' are incompatible between these types.
+    Type 'string | number | symbol' is not assignable to type 'string | undefined'.
+      Type 'number' is not assignable to type 'string'.
+src/lib/api/novelai.ts(721,21): error TS2322: Type 'string | number | symbol' is not assignable to type 'string | undefined'.
+  Type 'number' is not assignable to type 'string'.
+src/lib/api/novelai.ts(734,29): error TS2322: Type 'unknown[]' is not assignable to type 'ImageV4ExternalCharacterCaption[]'.
+  Type 'unknown' is not assignable to type 'ImageV4ExternalCharacterCaption'.
+src/lib/api/novelai.ts(836,36): error TS2322: Type 'BinaryData' is not assignable to type 'BlobPart'.
+  Type 'Uint8Array<ArrayBufferLike>' is not assignable to type 'ArrayBufferView<ArrayBuffer>'.
+    Types of property 'buffer' are incompatible.
+      Type 'ArrayBufferLike' is not assignable to type 'ArrayBuffer'.
+        Type 'SharedArrayBuffer' is missing the following properties from type 'ArrayBuffer': resizable, resize, detached, transfer, transferToFixedLength
+src/lib/api/novelai.ts(946,17): error TS2339: Property 'naiSettings' does not exist on type '{}'.
+src/lib/api/novelai.ts(949,48): error TS2339: Property 'naiSettings' does not exist on type 'Character'.
+src/lib/api/novelai.ts(982,15): error TS2739: Type '{ cfg_rescale: any; uncond_scale: any; dynamic_thresholding: any; dynamic_thresholding_percentile: any; dynamic_thresholding_mimic_scale: any; legacy: any; add_original_image: any; vibeTransferImage?: any; ... 13 more ...; characterPrompts: { ...; }[]; }' is missing the following properties from type 'NaiSettings': noise, strength, seed, controlnet_strength
+src/lib/api/novelai.ts(1041,48): error TS2339: Property 'prompt' does not exist on type 'Character'.
+src/lib/api/novelai.ts(1042,44): error TS2339: Property 'id' does not exist on type 'Character'.
+src/lib/api/novelai.ts(1056,26): error TS2339: Property 'outputResponse' does not exist on type '{ personaInput: { characterName: string; characterPrompt: any; characterId: any; }; systemPrompt: string; parameters: NaiSettings; metadata: { timestamp: string; apiProvider: string; model: NaiModelName; }; }'.
+src/lib/api/novelai.ts(1059,24): error TS2339: Property 'success' does not exist on type 'object'.
+src/lib/api/novelai.ts(1063,60): error TS2339: Property 'emotion' does not exist on type 'object'.
+src/lib/api/novelai.ts(1065,42): error TS2339: Property 'emotion' does not exist on type 'object'.
+src/lib/api/novelai.ts(1066,50): error TS2339: Property 'title' does not exist on type 'object'.
+src/lib/api/novelai.ts(1066,67): error TS2339: Property 'emotion' does not exist on type 'object'.
+src/lib/api/novelai.ts(1083,37): error TS2339: Property 'dataUrl' does not exist on type 'object'.
+src/lib/api/novelai.ts(1101,60): error TS2339: Property 'id' does not exist on type 'Character'.
+src/lib/api/novelai.ts(1102,38): error TS2339: Property 'metadata' does not exist on type 'object'.
+src/lib/api/novelai.ts(1106,26): error TS2339: Property 'outputResponse' does not exist on type '{ personaInput: { characterName: string; characterPrompt: any; characterId: any; }; systemPrompt: string; parameters: NaiSettings; metadata: { timestamp: string; apiProvider: string; model: NaiModelName; }; }'.
+src/lib/api/novelai.ts(1135,17): error TS2339: Property 'onProgress' does not exist on type '{}'.
+src/lib/api/novelai.ts(1151,21): error TS2345: Argument of type 'object' is not assignable to parameter of type 'Character'.
+  Type '{}' is missing the following properties from type 'Character': name, description
+src/lib/services/chatService.ts(36,36): error TS7006: Parameter 'chatId' implicitly has an 'any' type.
+src/lib/services/chatService.ts(36,44): error TS7006: Parameter 'character' implicitly has an 'any' type.
+src/lib/services/chatService.ts(36,55): error TS7006: Parameter 'messageParts' implicitly has an 'any' type.
+src/lib/services/chatService.ts(45,29): error TS2304: Cannot find name 'Message'.
+src/lib/services/chatService.ts(106,22): error TS7006: Parameter 'chatId' implicitly has an 'any' type.
+src/lib/services/chatService.ts(110,21): error TS7006: Parameter 'chatId' implicitly has an 'any' type.
+src/lib/services/chatService.ts(114,29): error TS7006: Parameter 'chatId' implicitly has an 'any' type.
+src/lib/services/chatService.ts(133,26): error TS7006: Parameter 'character' implicitly has an 'any' type.
+src/lib/services/chatService.ts(133,37): error TS7006: Parameter 'autoPost' implicitly has an 'any' type.
+src/lib/services/chatService.ts(153,30): error TS7006: Parameter 'tag' implicitly has an 'any' type.
+src/lib/services/chatService.ts(182,5): error TS7006: Parameter 'chatId' implicitly has an 'any' type.
+src/lib/services/chatService.ts(183,5): error TS7006: Parameter 'character' implicitly has an 'any' type.
+src/lib/services/chatService.ts(184,5): error TS7006: Parameter 'history' implicitly has an 'any' type.
+src/lib/services/chatService.ts(191,25): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ gemini: { apiKey: string; model: string; customModels: never[]; }; claude: { apiKey: string; model: string; customModels: never[]; }; openai: { apiKey: string; model: string; customModels: never[]; }; grok: { ...; }; openrouter: { ...; }; custom_openai: { ...; }; novelai: { ...; }; }'.
+  No index signature with a parameter of type 'string' was found on type '{ gemini: { apiKey: string; model: string; customModels: never[]; }; claude: { apiKey: string; model: string; customModels: never[]; }; openai: { apiKey: string; model: string; customModels: never[]; }; grok: { ...; }; openrouter: { ...; }; custom_openai: { ...; }; novelai: { ...; }; }'.
+src/lib/services/chatService.ts(213,32): error TS7006: Parameter 'msg' implicitly has an 'any' type.
+src/lib/services/chatService.ts(259,41): error TS2339: Property 'newMemory' does not exist on type '{ reactionDelay: number; messages: Object[]; characterState: Object; }'.
+src/lib/services/chatService.ts(289,22): error TS2339: Property 'newMemory' does not exist on type '{ reactionDelay: number; messages: Object[]; characterState: Object; }'.
+src/lib/services/chatService.ts(289,44): error TS2339: Property 'newMemory' does not exist on type '{ reactionDelay: number; messages: Object[]; characterState: Object; }'.
+src/lib/services/chatService.ts(292,35): error TS2339: Property 'newMemory' does not exist on type '{ reactionDelay: number; messages: Object[]; characterState: Object; }'.
+src/lib/services/chatService.ts(312,22): error TS2339: Property 'autoPost' does not exist on type '{ reactionDelay: number; messages: Object[]; characterState: Object; }'.
+src/lib/services/chatService.ts(319,34): error TS2339: Property 'autoPost' does not exist on type '{ reactionDelay: number; messages: Object[]; characterState: Object; }'.
+src/lib/services/chatService.ts(333,29): error TS2339: Property 'error' does not exist on type '{ reactionDelay: number; messages: Object[]; characterState: Object; }'.
+src/lib/services/chatService.ts(334,38): error TS2339: Property 'error' does not exist on type '{ reactionDelay: number; messages: Object[]; characterState: Object; }'.
+src/lib/services/chatService.ts(361,35): error TS7006: Parameter 'content' implicitly has an 'any' type.
+src/lib/services/chatService.ts(420,57): error TS7006: Parameter 'participantId' implicitly has an 'any' type.
+src/lib/services/chatService.ts(526,36): error TS7006: Parameter 'messageId' implicitly has an 'any' type.
+src/lib/services/chatService.ts(565,29): error TS7006: Parameter 'messageId' implicitly has an 'any' type.
+src/lib/services/chatService.ts(569,41): error TS7006: Parameter 'messageId' implicitly has an 'any' type.
+src/lib/services/chatService.ts(569,52): error TS7006: Parameter 'newContent' implicitly has an 'any' type.
+src/lib/services/chatService.ts(636,37): error TS7006: Parameter 'messageId' implicitly has an 'any' type.
+src/lib/services/chatService.ts(678,20): error TS2367: This comparison appears to be unintentional because the types 'number' and 'string | undefined' have no overlap.
+src/lib/services/chatService.ts(684,20): error TS2367: This comparison appears to be unintentional because the types 'number' and 'string | undefined' have no overlap.
+src/lib/services/chatService.ts(725,39): error TS7006: Parameter 'messageId' implicitly has an 'any' type.
+src/lib/services/chatService.ts(728,41): error TS2538: Type 'null' cannot be used as an index type.
+src/lib/services/chatService.ts(729,49): error TS7006: Parameter 'msg' implicitly has an 'any' type.
+src/lib/services/chatService.ts(748,19): error TS7006: Parameter 'msg' implicitly has an 'any' type.
+src/lib/services/chatService.ts(778,29): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ gemini: { apiKey: string; model: string; customModels: never[]; }; claude: { apiKey: string; model: string; customModels: never[]; }; openai: { apiKey: string; model: string; customModels: never[]; }; grok: { ...; }; openrouter: { ...; }; custom_openai: { ...; }; novelai: { ...; }; }'.
+  No index signature with a parameter of type 'string' was found on type '{ gemini: { apiKey: string; model: string; customModels: never[]; }; claude: { apiKey: string; model: string; customModels: never[]; }; openai: { apiKey: string; model: string; customModels: never[]; }; grok: { ...; }; openrouter: { ...; }; custom_openai: { ...; }; novelai: { ...; }; }'.
+src/lib/services/chatService.ts(874,39): error TS18046: 'error' is of type 'unknown'.
+src/lib/services/chatService.ts(874,61): error TS18046: 'error' is of type 'unknown'.
+src/lib/services/chatService.ts(878,54): error TS18046: 'error' is of type 'unknown'.
+src/lib/services/dataService.ts(37,9): error TS2322: Type 'Timeout' is not assignable to type 'number'.
+src/lib/services/logService.ts(7,24): error TS7006: Parameter 'logData' implicitly has an 'any' type.
+src/lib/services/logService.ts(19,22): error TS2345: Argument of type '(logs: never[]) => any[]' is not assignable to parameter of type 'Updater<never[]>'.
+  Type 'any[]' is not assignable to type 'never[]'.
+    Type 'any' is not assignable to type 'never'.
+src/lib/services/openChatService.ts(19,51): error TS2367: This comparison appears to be unintentional because the types 'number' and 'string' have no overlap.
+src/lib/services/openChatService.ts(31,53): error TS2339: Property 'personality' does not exist on type '{ id: number; name: string; prompt: string; avatar: null; responseTime: string; thinkingTime: string; reactivity: string; tone: string; memories: never[]; proactiveEnabled: boolean; messageCountSinceLastSummary: number; media: never[]; stickers: never[]; }'.
+src/lib/services/openChatService.ts(41,9): error TS2571: Object is of type 'unknown'.
+src/lib/services/openChatService.ts(41,13): error TS2345: Argument of type '(key: string, params?: Record<string, string>) => string' is not assignable to parameter of type 'Readable<unknown>'.
+src/lib/services/openChatService.ts(53,51): error TS2367: This comparison appears to be unintentional because the types 'number' and 'string' have no overlap.
+src/lib/services/openChatService.ts(60,18): error TS7006: Parameter 'id' implicitly has an 'any' type.
+src/lib/services/openChatService.ts(75,30): error TS2571: Object is of type 'unknown'.
+src/lib/services/openChatService.ts(75,34): error TS2345: Argument of type '(key: string, params?: Record<string, string>) => string' is not assignable to parameter of type 'Readable<unknown>'.
+src/lib/services/openChatService.ts(92,43): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+src/lib/services/openChatService.ts(112,63): error TS2339: Property 'personality' does not exist on type '{ id: number; name: string; prompt: string; avatar: null; responseTime: string; thinkingTime: string; reactivity: string; tone: string; memories: never[]; proactiveEnabled: boolean; messageCountSinceLastSummary: number; media: never[]; stickers: never[]; }'.
+src/lib/services/openChatService.ts(143,43): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+src/lib/services/stickerManager.js(71,24): error TS2339: Property 'stickers' does not exist on type 'Object'.
+src/lib/services/stickerManager.js(71,61): error TS2339: Property 'stickers' does not exist on type 'Object'.
+src/lib/services/stickerManager.js(77,52): error TS2339: Property 'emotion' does not exist on type 'Object'.
+src/lib/services/stickerManager.js(78,34): error TS2339: Property 'emotion' does not exist on type 'Object'.
+src/lib/services/stickerManager.js(85,26): error TS2339: Property 'stickers' does not exist on type 'Object'.
+src/lib/services/stickerManager.js(86,14): error TS7006: Parameter 'sticker' implicitly has an 'any' type.
+src/lib/services/stickerManager.js(209,48): error TS2339: Property 'naiSettings' does not exist on type 'Object'.
+src/lib/services/stickerManager.js(223,32): error TS2339: Property 'autoGenerate' does not exist on type '{ apiKey: string; model: string; preferredSize: string; steps: number; scale: number; sampler: string; minDelay: number; maxAdditionalDelay: number; }'.
+src/lib/services/stickerManager.js(257,35): error TS2531: Object is possibly 'null'.
+src/lib/services/stickerManager.js(258,17): error TS2345: Argument of type 'Object' is not assignable to parameter of type 'Character'.
+  The 'Object' type is assignable to very few other types. Did you mean to use the 'any' type instead?
+    Type 'Object' is missing the following properties from type 'Character': name, description
+src/lib/services/stickerManager.js(266,28): error TS2339: Property 'stickers' does not exist on type 'Object'.
+src/lib/services/stickerManager.js(267,27): error TS2339: Property 'stickers' does not exist on type 'Object'.
+src/lib/services/stickerManager.js(281,23): error TS2339: Property 'stickers' does not exist on type 'Object'.
+src/lib/services/stickerManager.js(285,17): error TS2322: Type 'Object[]' is not assignable to type '{ id: number; name: string; prompt: string; avatar: null; responseTime: string; thinkingTime: string; reactivity: string; tone: string; memories: never[]; proactiveEnabled: boolean; messageCountSinceLastSummary: number; media: never[]; stickers: never[]; }[]'.
+  The 'Object' type is assignable to very few other types. Did you mean to use the 'any' type instead?
+    Type 'Object' is missing the following properties from type '{ id: number; name: string; prompt: string; avatar: null; responseTime: string; thinkingTime: string; reactivity: string; tone: string; memories: never[]; proactiveEnabled: boolean; messageCountSinceLastSummary: number; media: never[]; stickers: never[]; }': id, name, prompt, avatar, and 9 more.
+src/lib/services/stickerManager.js(285,54): error TS2339: Property 'id' does not exist on type 'Object'.
+src/lib/services/stickerManager.js(307,17): error TS2339: Property 'emotions' does not exist on type 'Object'.
+src/lib/services/stickerManager.js(307,46): error TS2339: Property 'onProgress' does not exist on type 'Object'.
+src/lib/services/stickerManager.js(336,43): error TS2531: Object is possibly 'null'.
+src/lib/services/stickerManager.js(337,25): error TS2345: Argument of type 'Object' is not assignable to parameter of type 'Character'.
+  The 'Object' type is assignable to very few other types. Did you mean to use the 'any' type instead?
+    Type 'Object' is missing the following properties from type 'Character': name, description
+src/lib/services/stickerManager.js(348,36): error TS2339: Property 'stickers' does not exist on type 'Object'.
+src/lib/services/stickerManager.js(349,35): error TS2339: Property 'stickers' does not exist on type 'Object'.
+src/lib/services/stickerManager.js(351,31): error TS2339: Property 'stickers' does not exist on type 'Object'.
+src/lib/services/stickerManager.js(355,25): error TS2322: Type 'Object[]' is not assignable to type '{ id: number; name: string; prompt: string; avatar: null; responseTime: string; thinkingTime: string; reactivity: string; tone: string; memories: never[]; proactiveEnabled: boolean; messageCountSinceLastSummary: number; media: never[]; stickers: never[]; }[]'.
+  The 'Object' type is assignable to very few other types. Did you mean to use the 'any' type instead?
+    Type 'Object' is missing the following properties from type '{ id: number; name: string; prompt: string; avatar: null; responseTime: string; thinkingTime: string; reactivity: string; tone: string; memories: never[]; proactiveEnabled: boolean; messageCountSinceLastSummary: number; media: never[]; stickers: never[]; }': id, name, prompt, avatar, and 9 more.
+src/lib/services/stickerManager.js(356,48): error TS2339: Property 'id' does not exist on type 'Object'.
+src/lib/services/stickerManager.js(380,25): error TS18046: 'error' is of type 'unknown'.
+src/lib/services/stickerManager.js(381,25): error TS18046: 'error' is of type 'unknown'.
+src/lib/services/stickerManager.js(385,49): error TS2532: Object is possibly 'undefined'.
+src/lib/services/stickerManager.js(388,25): error TS18046: 'error' is of type 'unknown'.
+src/lib/services/stickerManager.js(389,25): error TS18046: 'error' is of type 'unknown'.
+src/lib/services/stickerManager.js(395,33): error TS2532: Object is possibly 'undefined'.
+src/lib/services/stickerManager.js(402,32): error TS18046: 'error' is of type 'unknown'.
+src/lib/services/stickerManager.js(413,36): error TS18046: 'error' is of type 'unknown'.
+src/lib/services/stickerManager.js(450,17): error TS2339: Property 'onProgress' does not exist on type 'Object'.
+src/lib/services/stickerManager.js(450,29): error TS2339: Property 'emotions' does not exist on type 'Object'.
+src/lib/services/stickerManager.js(469,34): error TS7006: Parameter 'stickerProgress' implicitly has an 'any' type.
+src/lib/services/stickerManager.js(489,28): error TS18046: 'error' is of type 'unknown'.
+src/lib/services/stickerManager.js(513,24): error TS2339: Property 'naiSettings' does not exist on type 'Object'.
+src/lib/services/stickerManager.js(514,23): error TS2339: Property 'naiSettings' does not exist on type 'Object'.
+src/lib/services/stickerManager.js(517,33): error TS2339: Property 'naiSettings' does not exist on type 'Object'.
+src/lib/services/stickerManager.js(518,39): error TS2339: Property 'autoGenerate' does not exist on type 'Object'.
+src/lib/services/stickerManager.js(519,40): error TS2339: Property 'preferredSize' does not exist on type 'Object'.
+src/lib/services/stickerManager.js(520,40): error TS2339: Property 'lastGenerated' does not exist on type 'Object'.
+src/lib/services/stickerManager.js(521,44): error TS2339: Property 'generatedEmotions' does not exist on type 'Object'.
+src/lib/services/stickerManager.js(522,36): error TS2339: Property 'vibeImage' does not exist on type 'Object'.
+src/lib/services/stickerManager.js(538,23): error TS7005: Variable 'generatedStickers' implicitly has an 'any[]' type.
+src/lib/services/stickerManager.js(539,30): error TS2339: Property 'generated' does not exist on type 'never'.
+src/lib/services/stickerManager.js(621,21): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ happy: number; sad: number; angry: number; surprised: number; love: number; embarrassed: number; confused: number; sleepy: number; excited: number; }'.
+  No index signature with a parameter of type 'string' was found on type '{ happy: number; sad: number; angry: number; surprised: number; love: number; embarrassed: number; confused: number; sleepy: number; excited: number; }'.
+src/lib/services/stickerManager.js(627,21): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ happy: number; sad: number; angry: number; surprised: number; love: number; embarrassed: number; confused: number; sleepy: number; excited: number; }'.
+  No index signature with a parameter of type 'string' was found on type '{ happy: number; sad: number; angry: number; surprised: number; love: number; embarrassed: number; confused: number; sleepy: number; excited: number; }'.
+src/lib/stores/chat.ts(69,35): error TS7006: Parameter 'characterId' implicitly has an 'any' type.
+src/lib/stores/derived.ts(7,25): error TS2339: Property 'startsWith' does not exist on type 'never'.
+src/lib/stores/derived.ts(8,25): error TS2339: Property 'startsWith' does not exist on type 'never'.
+src/lib/stores/derived.ts(17,29): error TS2339: Property 'startsWith' does not exist on type 'never'.
+src/lib/stores/derived.ts(21,29): error TS2339: Property 'startsWith' does not exist on type 'never'.
+src/lib/utils/crypto.js(31,13): error TS2322: Type 'Uint8Array<ArrayBufferLike>' is not assignable to type 'BufferSource'.
+  Type 'Uint8Array<ArrayBufferLike>' is not assignable to type 'ArrayBufferView<ArrayBuffer>'.
+    Types of property 'buffer' are incompatible.
+      Type 'ArrayBufferLike' is not assignable to type 'ArrayBuffer'.
+        Type 'SharedArrayBuffer' is missing the following properties from type 'ArrayBuffer': resizable, resize, detached, transfer, transferToFixedLength
+src/lib/utils/crypto.js(78,32): error TS2322: Type 'Uint8Array<ArrayBufferLike>' is not assignable to type 'BufferSource'.
+  Type 'Uint8Array<ArrayBufferLike>' is not assignable to type 'ArrayBufferView<ArrayBuffer>'.
+    Types of property 'buffer' are incompatible.
+      Type 'ArrayBufferLike' is not assignable to type 'ArrayBuffer'.
+        Type 'SharedArrayBuffer' is missing the following properties from type 'ArrayBuffer': resizable, resize, detached, transfer, transferToFixedLength
+src/lib/utils/crypto.js(180,52): error TS2322: Type 'number' is not assignable to type 'string'.
+src/lib/utils/dev-tools.ts(43,21): error TS2345: Argument of type 'DOMStringList' is not assignable to parameter of type 'string | string[]'.
+  Type 'DOMStringList' is missing the following properties from type 'string[]': pop, push, concat, join, and 34 more.
+src/lib/utils/dev-tools.ts(59,41): error TS2488: Type 'DOMStringList' must have a '[Symbol.iterator]()' method that returns an iterator.
+src/lib/utils/exifUtils.js(163,17): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ naiPrompt: any; naiNegativePrompt: any; naiSteps: any; naiCfgScale: any; naiSeed: any; }'.
+  No index signature with a parameter of type 'string' was found on type '{ naiPrompt: any; naiNegativePrompt: any; naiSteps: any; naiCfgScale: any; naiSeed: any; }'.
+src/lib/utils/exifUtils.js(166,13): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ naiPrompt: any; naiNegativePrompt: any; naiSteps: any; naiCfgScale: any; naiSeed: any; }'.
+  No index signature with a parameter of type 'string' was found on type '{ naiPrompt: any; naiNegativePrompt: any; naiSteps: any; naiCfgScale: any; naiSeed: any; }'.
+src/lib/utils/exifUtils.js(286,14): error TS2339: Property 'userComment' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(289,36): error TS2339: Property 'userComment' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(295,26): error TS2339: Property 'naiPrompt' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(298,26): error TS2339: Property 'naiNegativePrompt' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(301,26): error TS2339: Property 'naiSteps' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(304,26): error TS2339: Property 'naiScale' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(307,26): error TS2339: Property 'naiSeed' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(310,26): error TS2339: Property 'naiSampler' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(313,26): error TS2339: Property 'naiModel' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(419,18): error TS2339: Property 'make' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(419,40): error TS2339: Property 'make' does not exist on type '{}'.
+src/lib/utils/exifUtils.js(419,56): error TS2339: Property 'make' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(420,18): error TS2339: Property 'model' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(420,41): error TS2339: Property 'model' does not exist on type '{}'.
+src/lib/utils/exifUtils.js(420,58): error TS2339: Property 'model' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(421,18): error TS2339: Property 'software' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(421,44): error TS2339: Property 'software' does not exist on type '{}'.
+src/lib/utils/exifUtils.js(421,64): error TS2339: Property 'software' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(424,18): error TS2339: Property 'naiPrompt' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(424,43): error TS2339: Property 'prompt' does not exist on type '{}'.
+src/lib/utils/exifUtils.js(424,61): error TS2339: Property 'naiPrompt' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(425,18): error TS2339: Property 'naiNegativePrompt' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(426,23): error TS2339: Property 'negativePrompt' does not exist on type '{}'.
+src/lib/utils/exifUtils.js(426,49): error TS2339: Property 'naiNegativePrompt' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(427,18): error TS2339: Property 'naiSteps' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(427,42): error TS2339: Property 'steps' does not exist on type '{}'.
+src/lib/utils/exifUtils.js(427,59): error TS2339: Property 'naiSteps' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(428,18): error TS2339: Property 'naiScale' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(428,42): error TS2339: Property 'scale' does not exist on type '{}'.
+src/lib/utils/exifUtils.js(428,59): error TS2339: Property 'naiScale' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(429,18): error TS2339: Property 'naiCfgScale' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(429,45): error TS2339: Property 'cfgScale' does not exist on type '{}'.
+src/lib/utils/exifUtils.js(429,65): error TS2339: Property 'naiCfgScale' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(430,18): error TS2339: Property 'naiSeed' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(430,41): error TS2339: Property 'seed' does not exist on type '{}'.
+src/lib/utils/exifUtils.js(430,57): error TS2339: Property 'naiSeed' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(431,18): error TS2339: Property 'naiSampler' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(431,44): error TS2339: Property 'sampler' does not exist on type '{}'.
+src/lib/utils/exifUtils.js(431,63): error TS2339: Property 'naiSampler' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(432,18): error TS2339: Property 'naiModel' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(432,42): error TS2339: Property 'model' does not exist on type '{}'.
+src/lib/utils/exifUtils.js(432,59): error TS2339: Property 'naiModel' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(435,18): error TS2339: Property 'comment' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(435,43): error TS2339: Property 'comment' does not exist on type '{}'.
+src/lib/utils/exifUtils.js(435,62): error TS2339: Property 'comment' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(436,18): error TS2339: Property 'description' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(437,25): error TS2339: Property 'description' does not exist on type '{}'.
+src/lib/utils/exifUtils.js(437,48): error TS2339: Property 'description' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(448,19): error TS2339: Property 'naiPrompt' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(453,26): error TS2339: Property 'naiPrompt' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(454,34): error TS2339: Property 'naiNegativePrompt' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(455,25): error TS2339: Property 'naiSteps' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(455,46): error TS2339: Property 'steps' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(457,22): error TS2339: Property 'naiScale' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(458,22): error TS2339: Property 'naiCfgScale' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(459,22): error TS2339: Property 'cfg_scale' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(461,27): error TS2339: Property 'naiSampler' does not exist on type 'Object'.
+src/lib/utils/exifUtils.js(462,25): error TS2339: Property 'naiModel' does not exist on type 'Object'.
+src/lib/utils/modelUtils.js(40,5): error TS2322: Type '{ [x: string]: number; }' is not assignable to type '{ max_tokens: number; } | { max_completion_tokens: number; }'.
+  Property 'max_completion_tokens' is missing in type '{ [x: string]: number; }' but required in type '{ max_completion_tokens: number; }'.
+src/lib/utils/png-utils.js(3,37): error TS7006: Parameter 'dataUrl' implicitly has an 'any' type.
+src/lib/utils/png-utils.js(13,37): error TS7006: Parameter 'uint8Array' implicitly has an 'any' type.
+src/lib/utils/png-utils.js(21,29): error TS7006: Parameter 'pngData' implicitly has an 'any' type.
+src/lib/utils/png-utils.js(21,38): error TS7006: Parameter 'chunkType' implicitly has an 'any' type.
+src/lib/utils/png-utils.js(21,49): error TS7006: Parameter 'data' implicitly has an 'any' type.
+src/lib/utils/png-utils.js(99,32): error TS7006: Parameter 'data' implicitly has an 'any' type.
+src/lib/utils/png-utils.js(116,33): error TS7006: Parameter 'pngData' implicitly has an 'any' type.
+src/lib/utils/png-utils.js(116,42): error TS7006: Parameter 'chunkType' implicitly has an 'any' type.
+src/lib/utils/png-utils.js(131,25): error TS7006: Parameter 'byte' implicitly has an 'any' type.
+src/lib/utils/png-utils.js(131,31): error TS7006: Parameter 'i' implicitly has an 'any' type.
+src/lib/utils/png-utils.js(142,36): error TS7006: Parameter 'data' implicitly has an 'any' type.
+src/lib/utils/png-utils.js(182,38): error TS7006: Parameter 'compressedData' implicitly has an 'any' type.
+src/lib/utils/sns.js(47,32): error TS7006: Parameter 'character' implicitly has an 'any' type.
+src/lib/utils/sns.js(47,43): error TS7006: Parameter 'accessLevel' implicitly has an 'any' type.
+src/lib/utils/sns.js(47,56): error TS7006: Parameter 'characterState' implicitly has an 'any' type.
+src/lib/utils/sns.js(69,22): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ "main-public": { affection: number; intimacy: number; trust: number; romantic_interest: number; }; "main-private": { affection: number; intimacy: number; trust: number; romantic_interest: number; }; ... 5 more ...; secretPrivate: { ...; }; }'.
+src/lib/utils/worker/replace.ts(4,40): error TS6305: Output file '/app/frontend/dist/worker/regex/main.d.ts' has not been built from source file '/app/frontend/worker/regex/main.ts'.
+src/prompts/builder/promptBuilder.js(30,17): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/prompts/builder/promptBuilder.js(31,25): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/prompts/builder/promptBuilder.js(32,28): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/prompts/builder/promptBuilder.js(34,17): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ sessionStorage: Storage; console: { log: { (...data: any[]): void; (message?: any, ...optionalParams: any[]): void; }; }; }'.
+  No index signature with a parameter of type 'string' was found on type '{ sessionStorage: Storage; console: { log: { (...data: any[]): void; (message?: any, ...optionalParams: any[]): void; }; }; }'.
+src/prompts/builder/promptBuilder.js(34,32): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/prompts/builder/promptBuilder.js(37,24): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/prompts/builder/promptBuilder.js(38,17): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ sessionStorage: Storage; console: { log: { (...data: any[]): void; (message?: any, ...optionalParams: any[]): void; }; }; }'.
+  No index signature with a parameter of type 'string' was found on type '{ sessionStorage: Storage; console: { log: { (...data: any[]): void; (message?: any, ...optionalParams: any[]): void; }; }; }'.
+src/prompts/builder/promptBuilder.js(38,32): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/prompts/builder/promptBuilder.js(41,24): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/prompts/builder/promptBuilder.js(41,53): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/prompts/builder/promptBuilder.js(42,17): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ sessionStorage: Storage; console: { log: { (...data: any[]): void; (message?: any, ...optionalParams: any[]): void; }; }; }'.
+  No index signature with a parameter of type 'string' was found on type '{ sessionStorage: Storage; console: { log: { (...data: any[]): void; (message?: any, ...optionalParams: any[]): void; }; }; }'.
+src/prompts/builder/promptBuilder.js(42,48): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/prompts/builder/promptBuilder.js(46,13): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ sessionStorage: Storage; console: { log: { (...data: any[]): void; (message?: any, ...optionalParams: any[]): void; }; }; }'.
+  No index signature with a parameter of type 'string' was found on type '{ sessionStorage: Storage; console: { log: { (...data: any[]): void; (message?: any, ...optionalParams: any[]): void; }; }; }'.
+src/prompts/builder/promptBuilder.js(46,54): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/prompts/builder/promptBuilder.js(58,26): error TS7006: Parameter 'obj' implicitly has an 'any' type.
+src/prompts/builder/promptBuilder.js(58,31): error TS7006: Parameter 'key' implicitly has an 'any' type.
+src/prompts/builder/promptBuilder.js(82,44): error TS2339: Property 'timestamp' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(89,32): error TS2339: Property 'isMe' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(89,52): error TS2339: Property 'sender' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(90,53): error TS2339: Property 'content' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(122,52): error TS2339: Property 'id' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(125,34): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/prompts/builder/promptBuilder.js(125,48): error TS2363: The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/prompts/builder/promptBuilder.js(130,23): error TS2339: Property 'isRandom' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(149,19): error TS2339: Property 'stickers' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(150,20): error TS7006: Parameter 'sticker' implicitly has an 'any' type.
+src/prompts/builder/promptBuilder.js(153,19): error TS2339: Property 'stickers' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(153,41): error TS2339: Property 'stickers' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(160,23): error TS2339: Property 'snsPosts' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(160,45): error TS2339: Property 'snsPosts' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(161,30): error TS2339: Property 'snsPosts' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(162,24): error TS7006: Parameter 'a' implicitly has an 'any' type.
+src/prompts/builder/promptBuilder.js(162,27): error TS7006: Parameter 'b' implicitly has an 'any' type.
+src/prompts/builder/promptBuilder.js(162,33): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/prompts/builder/promptBuilder.js(162,57): error TS2363: The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/prompts/builder/promptBuilder.js(164,23): error TS7006: Parameter 'post' implicitly has an 'any' type.
+src/prompts/builder/promptBuilder.js(178,23): error TS2339: Property 'memories' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(178,45): error TS2339: Property 'memories' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(179,30): error TS2339: Property 'memories' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(179,44): error TS7006: Parameter 'mem' implicitly has an 'any' type.
+src/prompts/builder/promptBuilder.js(186,19): error TS7006: Parameter 'a' implicitly has an 'any' type.
+src/prompts/builder/promptBuilder.js(186,22): error TS7006: Parameter 'b' implicitly has an 'any' type.
+src/prompts/builder/promptBuilder.js(192,24): error TS7006: Parameter 'index' implicitly has an 'any' type.
+src/prompts/builder/promptBuilder.js(192,31): error TS7006: Parameter 'length' implicitly has an 'any' type.
+src/prompts/builder/promptBuilder.js(196,31): error TS7006: Parameter 'index' implicitly has an 'any' type.
+src/prompts/builder/promptBuilder.js(196,38): error TS7006: Parameter 'length' implicitly has an 'any' type.
+src/prompts/builder/promptBuilder.js(230,10): error TS2339: Property 'char' does not exist on type '{ character: { memories: any; }; persona: { name: string; description: string; }; time: { context: string; diff: number; }; chat: (a: any, b: any) => object[]; }'.
+src/prompts/builder/promptBuilder.js(230,32): error TS2339: Property 'name' does not exist on type '{ memories: any; }'.
+src/prompts/builder/promptBuilder.js(231,10): error TS2339: Property 'user' does not exist on type '{ character: { memories: any; }; persona: { name: string; description: string; }; time: { context: string; diff: number; }; chat: (a: any, b: any) => object[]; }'.
+src/prompts/builder/promptBuilder.js(235,14): error TS2339: Property 'formatted_recent_messages' does not exist on type '{ character: { memories: any; }; persona: { name: string; description: string; }; time: { context: string; diff: number; }; chat: (a: any, b: any) => object[]; }'.
+src/prompts/builder/promptBuilder.js(250,26): error TS2339: Property 'isMe' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(253,17): error TS2339: Property 'isMe' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(253,29): error TS2339: Property 'type' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(253,53): error TS2339: Property 'imageId' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(254,42): error TS2339: Property 'media' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(255,18): error TS7006: Parameter 'm' implicitly has an 'any' type.
+src/prompts/builder/promptBuilder.js(255,37): error TS2339: Property 'imageId' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(259,25): error TS2339: Property 'content' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(270,29): error TS2339: Property 'content' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(274,24): error TS2339: Property 'isMe' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(274,36): error TS2339: Property 'type' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(274,62): error TS2339: Property 'stickerData' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(276,21): error TS2339: Property 'stickerData' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(278,21): error TS2339: Property 'content' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(278,36): error TS2339: Property 'content' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(279,54): error TS2339: Property 'content' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(282,24): error TS2339: Property 'content' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(283,36): error TS2339: Property 'content' does not exist on type 'object'.
+src/prompts/builder/promptBuilder.js(336,10): error TS2339: Property 'char' does not exist on type '{ character: { name: string; description: string | undefined; }; persona: {}; }'.
+src/prompts/builder/promptBuilder.js(337,10): error TS2339: Property 'user' does not exist on type '{ character: { name: string; description: string | undefined; }; persona: {}; }'.
+src/prompts/builder/promptBuilder.js(337,30): error TS2339: Property 'name' does not exist on type '{}'.
+src/prompts/builder/promptBuilder.js(343,9): error TS2345: Argument of type 'null' is not assignable to parameter of type 'Object'.
+src/prompts/builder/promptBuilder.js(369,10): error TS2339: Property 'char' does not exist on type '{ character: {}; persona: { name: string; description: string; }; }'.
+src/prompts/builder/promptBuilder.js(369,32): error TS2339: Property 'name' does not exist on type '{}'.
+src/prompts/builder/promptBuilder.js(370,10): error TS2339: Property 'user' does not exist on type '{ character: {}; persona: { name: string; description: string; }; }'.
+src/prompts/builder/promptBuilder.js(376,9): error TS2345: Argument of type 'null' is not assignable to parameter of type 'Object'.
+src/prompts/promptManager.ts(29,16): error TS2554: Expected 2 arguments, but got 1.
+src/prompts/promptManager.ts(55,16): error TS2554: Expected 2 arguments, but got 1.
+src/prompts/promptManager.ts(56,5): error TS7053: Element implicitly has an 'any' type because expression of type 'PromptType' can't be used to index type '{}'.
+  Property 'mainChat' does not exist on type '{}'.
+src/prompts/promptManager.ts(68,16): error TS2554: Expected 2 arguments, but got 1.
+src/prompts/promptManager.ts(79,16): error TS2554: Expected 2 arguments, but got 1.
+src/prompts/promptManager.ts(80,12): error TS7053: Element implicitly has an 'any' type because expression of type 'PromptType' can't be used to index type '{}'.
+  Property 'mainChat' does not exist on type '{}'.

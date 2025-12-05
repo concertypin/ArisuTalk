@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { MessageCircle, Wrench, RefreshCw } from "lucide-svelte";
     import { t } from "$root/i18n";
     import {

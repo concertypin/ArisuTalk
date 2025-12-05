@@ -1,0 +1,88 @@
+src/lib/api/novelai.ts(843,36): error TS2322: Type 'BinaryData' is not assignable to type 'BlobPart'.
+  Type 'Uint8Array<ArrayBufferLike>' is not assignable to type 'ArrayBufferView<ArrayBuffer>'.
+    Types of property 'buffer' are incompatible.
+      Type 'ArrayBufferLike' is not assignable to type 'ArrayBuffer'.
+        Type 'SharedArrayBuffer' is missing the following properties from type 'ArrayBuffer': resizable, resize, detached, transfer, transferToFixedLength
+src/lib/api/novelai.ts(989,15): error TS2739: Type '{ cfg_rescale: number; uncond_scale: number; dynamic_thresholding: boolean; dynamic_thresholding_percentile: number; dynamic_thresholding_mimic_scale: number; legacy: boolean; add_original_image: boolean; ... 14 more ...; characterPrompts: { ...; }[]; }' is missing the following properties from type 'NaiSettings': noise, strength, seed, controlnet_strength
+src/lib/api/novelai.ts(996,36): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/lib/api/novelai.ts(1063,26): error TS2339: Property 'outputResponse' does not exist on type '{ personaInput: { characterName: string; characterPrompt: string; characterId: string | number; }; systemPrompt: string; parameters: NaiSettings; metadata: { timestamp: string; apiProvider: string; model: NaiModelName; }; }'.
+src/lib/api/novelai.ts(1113,26): error TS2339: Property 'outputResponse' does not exist on type '{ personaInput: { characterName: string; characterPrompt: string; characterId: string | number; }; systemPrompt: string; parameters: NaiSettings; metadata: { timestamp: string; apiProvider: string; model: NaiModelName; }; }'.
+src/lib/services/chatService.ts(42,9): error TS2322: Type 'string' is not assignable to type 'null'.
+src/lib/services/chatService.ts(43,9): error TS2322: Type 'string' is not assignable to type 'null'.
+src/lib/services/chatService.ts(83,13): error TS2322: Type 'string' is not assignable to type 'null'.
+src/lib/services/chatService.ts(84,13): error TS2322: Type 'string' is not assignable to type 'null'.
+src/lib/services/chatService.ts(548,17): error TS2345: Argument of type 'import("/app/frontend/src/types/chat").Message[]' is not assignable to parameter of type 'Message[]'.
+  Type 'import("/app/frontend/src/types/chat").Message' is not assignable to type 'Message'.
+    Types of property 'id' are incompatible.
+      Type 'string | number' is not assignable to type 'number'.
+        Type 'string' is not assignable to type 'number'.
+src/lib/services/chatService.ts(570,26): error TS2345: Argument of type 'string | number' is not assignable to parameter of type 'null'.
+  Type 'string' is not assignable to type 'null'.
+src/lib/services/chatService.ts(587,9): error TS2345: Argument of type 'import("/app/frontend/src/types/chat").Message[]' is not assignable to parameter of type 'Message[]'.
+  Type 'import("/app/frontend/src/types/chat").Message' is not assignable to type 'Message'.
+    Types of property 'id' are incompatible.
+      Type 'string | number' is not assignable to type 'number'.
+        Type 'string' is not assignable to type 'number'.
+src/lib/services/chatService.ts(654,9): error TS2345: Argument of type 'import("/app/frontend/src/types/chat").Message[]' is not assignable to parameter of type 'Message[]'.
+  Type 'import("/app/frontend/src/types/chat").Message' is not assignable to type 'Message'.
+    Types of property 'id' are incompatible.
+      Type 'string | number' is not assignable to type 'number'.
+        Type 'string' is not assignable to type 'number'.
+src/lib/services/chatService.ts(732,41): error TS2538: Type 'null' cannot be used as an index type.
+src/lib/services/chatService.ts(733,49): error TS7006: Parameter 'msg' implicitly has an 'any' type.
+src/lib/services/chatService.ts(752,19): error TS7006: Parameter 'msg' implicitly has an 'any' type.
+src/lib/services/dataService.ts(37,9): error TS2322: Type 'Timeout' is not assignable to type 'number'.
+src/lib/services/dataService.ts(168,23): error TS2341: Property 'masterPassword' is private and only accessible within class 'SecureStorageManager'.
+src/lib/services/displayHookHelper.ts(29,24): error TS2345: Argument of type 'string | number' is not assignable to parameter of type 'number'.
+  Type 'string' is not assignable to type 'number'.
+src/lib/services/openChatService.ts(41,9): error TS2571: Object is of type 'unknown'.
+src/lib/services/openChatService.ts(41,13): error TS2345: Argument of type '(key: string, params?: Record<string, string>) => string' is not assignable to parameter of type 'Readable<unknown>'.
+src/lib/services/openChatService.ts(60,18): error TS7006: Parameter 'id' implicitly has an 'any' type.
+src/lib/services/openChatService.ts(75,30): error TS2571: Object is of type 'unknown'.
+src/lib/services/openChatService.ts(75,34): error TS2345: Argument of type '(key: string, params?: Record<string, string>) => string' is not assignable to parameter of type 'Readable<unknown>'.
+src/lib/services/openChatService.ts(92,43): error TS2345: Argument of type 'string | number' is not assignable to parameter of type 'string'.
+  Type 'number' is not assignable to type 'string'.
+src/lib/services/openChatService.ts(143,43): error TS2345: Argument of type 'string | number' is not assignable to parameter of type 'string'.
+  Type 'number' is not assignable to type 'string'.
+src/lib/services/stickerManager.ts(212,32): error TS2339: Property 'autoGenerate' does not exist on type '{ apiKey: string; model: string; preferredSize: string; steps: number; scale: number; sampler: string; minDelay: number; maxAdditionalDelay: number; }'.
+src/lib/services/stickerManager.ts(252,37): error TS2345: Argument of type 'object' is not assignable to parameter of type '{ [key: string]: any; id: string; name: string; emotion?: string | undefined; }'.
+  Type '{}' is missing the following properties from type '{ [key: string]: any; id: string; name: string; emotion?: string | undefined; }': id, name
+src/lib/services/stickerManager.ts(318,45): error TS2345: Argument of type 'object' is not assignable to parameter of type '{ [key: string]: any; id: string; name: string; emotion?: string | undefined; }'.
+  Type '{}' is missing the following properties from type '{ [key: string]: any; id: string; name: string; emotion?: string | undefined; }': id, name
+src/lib/stores/derived.ts(7,25): error TS2339: Property 'startsWith' does not exist on type 'never'.
+src/lib/stores/derived.ts(8,25): error TS2339: Property 'startsWith' does not exist on type 'never'.
+src/lib/stores/derived.ts(17,29): error TS2339: Property 'startsWith' does not exist on type 'never'.
+src/lib/stores/derived.ts(21,29): error TS2339: Property 'startsWith' does not exist on type 'never'.
+src/lib/utils/crypto.ts(28,13): error TS2322: Type 'Uint8Array<ArrayBufferLike>' is not assignable to type 'BufferSource'.
+  Type 'Uint8Array<ArrayBufferLike>' is not assignable to type 'ArrayBufferView<ArrayBuffer>'.
+    Types of property 'buffer' are incompatible.
+      Type 'ArrayBufferLike' is not assignable to type 'ArrayBuffer'.
+        Type 'SharedArrayBuffer' is missing the following properties from type 'ArrayBuffer': resizable, resize, detached, transfer, transferToFixedLength
+src/lib/utils/crypto.ts(70,32): error TS2322: Type 'Uint8Array<ArrayBufferLike>' is not assignable to type 'BufferSource'.
+  Type 'Uint8Array<ArrayBufferLike>' is not assignable to type 'ArrayBufferView<ArrayBuffer>'.
+    Types of property 'buffer' are incompatible.
+      Type 'ArrayBufferLike' is not assignable to type 'ArrayBuffer'.
+        Type 'SharedArrayBuffer' is missing the following properties from type 'ArrayBuffer': resizable, resize, detached, transfer, transferToFixedLength
+src/lib/utils/png-utils.ts(152,28): error TS2345: Argument of type 'Uint8Array<ArrayBufferLike>' is not assignable to parameter of type 'BufferSource | undefined'.
+  Type 'Uint8Array<ArrayBufferLike>' is not assignable to type 'ArrayBufferView<ArrayBuffer>'.
+    Types of property 'buffer' are incompatible.
+      Type 'ArrayBufferLike' is not assignable to type 'ArrayBuffer'.
+        Type 'SharedArrayBuffer' is missing the following properties from type 'ArrayBuffer': resizable, resize, detached, transfer, transferToFixedLength
+src/lib/utils/png-utils.ts(192,28): error TS2345: Argument of type 'Uint8Array<ArrayBufferLike>' is not assignable to parameter of type 'BufferSource | undefined'.
+  Type 'Uint8Array<ArrayBufferLike>' is not assignable to type 'ArrayBufferView<ArrayBuffer>'.
+    Types of property 'buffer' are incompatible.
+      Type 'ArrayBufferLike' is not assignable to type 'ArrayBuffer'.
+        Type 'SharedArrayBuffer' is missing the following properties from type 'ArrayBuffer': resizable, resize, detached, transfer, transferToFixedLength
+src/lib/utils/worker/replace.ts(4,40): error TS6305: Output file '/app/frontend/dist/worker/regex/main.d.ts' has not been built from source file '/app/frontend/worker/regex/main.ts'.
+src/prompts/builder/promptBuilder.ts(283,47): error TS2322: Type '({ text: string; } | { inlineData: { mimeType: string; data: string; }; })[]' is not assignable to type '{ text: string; }[]'.
+  Type '{ text: string; } | { inlineData: { mimeType: string; data: string; }; }' is not assignable to type '{ text: string; }'.
+    Property 'text' is missing in type '{ inlineData: { mimeType: string; data: string; }; }' but required in type '{ text: string; }'.
+src/prompts/promptManager.ts(29,16): error TS2554: Expected 2 arguments, but got 1.
+src/prompts/promptManager.ts(55,16): error TS2554: Expected 2 arguments, but got 1.
+src/prompts/promptManager.ts(56,5): error TS7053: Element implicitly has an 'any' type because expression of type 'PromptType' can't be used to index type '{}'.
+  Property 'mainChat' does not exist on type '{}'.
+src/prompts/promptManager.ts(68,16): error TS2554: Expected 2 arguments, but got 1.
+src/prompts/promptManager.ts(79,16): error TS2554: Expected 2 arguments, but got 1.
+src/prompts/promptManager.ts(80,12): error TS7053: Element implicitly has an 'any' type because expression of type 'PromptType' can't be used to index type '{}'.
+  Property 'mainChat' does not exist on type '{}'.

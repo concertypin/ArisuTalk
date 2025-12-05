@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
     import { settingsSnapshots } from "../../../../stores/settings";
     import { History, Trash2 } from "lucide-svelte";

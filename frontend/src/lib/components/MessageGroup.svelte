@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import Avatar from "./Avatar.svelte";
     import MessageBubble from "./MessageBubble.svelte";
     import {

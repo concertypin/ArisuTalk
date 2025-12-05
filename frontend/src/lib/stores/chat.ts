@@ -1,21 +1,9 @@
 import { writable } from "svelte/store";
 import { persistentStore } from "./persistentStore";
 import { t } from "$root/i18n";
+import type { Message } from "../../types/chat";
 
-export interface Message {
-    id: number;
-    sender: string;
-    characterId?: string;
-    content: string;
-    time: string;
-    timestamp: number;
-    isMe: boolean;
-    isError: boolean;
-    type: string;
-    hasText?: boolean;
-    sticker?: any;
-    imageUrl?: string;
-}
+export type { Message };
 
 export interface MessagesStore {
     [chatId: string]: Message[];
@@ -43,22 +31,30 @@ export const unreadCounts = persistentStore<Record<string, number>>(
 );
 
 // Forcing the landing page to be visible on refresh.
-export const selectedChatId = writable(null);
+export const selectedChatId = writable<string | null>(null);
 
 // Non-persistent stores
-export const editingMessageId = writable(null);
-export const editingChatRoomId = writable(null);
+export const editingMessageId = writable<number | string | null>(null);
+export const editingChatRoomId = writable<string | null>(null);
 export const editingGroupChat = writable(null);
 
 export const isWaitingForResponse = writable(false);
 export const typingCharacterId = writable(null);
 
 export const searchQuery = writable("");
-export const imageToSend = writable(null);
+export const imageToSend = writable<string | null>(null);
 export const stickerToSend = writable(null);
 export const currentMessage = writable("");
 
-export const virtualStream = writable({
+export interface VirtualStreamState {
+    isStreaming: boolean;
+    chatId: string | null;
+    characterId: string | null;
+    messages: Message[];
+    isTyping: boolean;
+}
+
+export const virtualStream = writable<VirtualStreamState>({
     isStreaming: false,
     chatId: null,
     characterId: null,
@@ -66,7 +62,7 @@ export const virtualStream = writable({
     isTyping: false,
 });
 
-export function createNewChatRoom(characterId) {
+export function createNewChatRoom(characterId: string) {
     const newChatRoomId = `${characterId}_${Date.now()}`;
     const newChatRoom = {
         id: newChatRoomId,

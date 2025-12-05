@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
     import { settings } from "../../stores/settings";
     import { PROVIDERS, PROVIDER_MODELS } from "../../../constants/providers";

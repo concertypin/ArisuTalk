@@ -44,7 +44,7 @@
       "svelte/compiler"
     ],
     /* Type Checking */
-    "noImplicitAny": false, /* Enable error reporting for expressions and declarations with an implied 'any' type. */
+    "noImplicitAny": true, /* Enable error reporting for expressions and declarations with an implied 'any' type. */
   },
   "extends": "./tsconfig.base.json",
   "references": [

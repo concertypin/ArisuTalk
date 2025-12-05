@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { onMount, onDestroy } from "svelte";
     import { X } from "lucide-svelte";
     import { isImageZoomModalVisible, imageZoomModalData } from "../stores/ui";

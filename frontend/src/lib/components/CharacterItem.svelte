@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
     import { createEventDispatcher } from "svelte";
     import { chatRooms, messages, unreadCounts } from "../stores/chat";
