@@ -18,7 +18,7 @@
         UserCircle2,
         Loader2,
         AlertCircle,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
 
     export let isOpen = false;
 
@@ -91,7 +91,7 @@
             } catch (error) {
                 console.error(
                     "Failed to initialize Clerk for mobile auth modal",
-                    error
+                    error,
                 );
             }
         })();

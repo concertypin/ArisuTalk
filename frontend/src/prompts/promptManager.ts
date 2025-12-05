@@ -49,7 +49,7 @@ export async function getPrompt(type: PromptType): Promise<string> {
  */
 export async function savePrompt(
     type: PromptType,
-    content: string
+    content: string,
 ): Promise<void> {
     const customPrompts =
         (await loadFromBrowserStorage(PROMPT_STORAGE_KEY)) || {};
@@ -62,7 +62,7 @@ export async function savePrompt(
  * @param prompts - An object containing the prompts to save.
  */
 export async function saveAllPrompts(
-    prompts: Record<PromptType, string>
+    prompts: Record<PromptType, string>,
 ): Promise<void> {
     const customPrompts =
         (await loadFromBrowserStorage(PROMPT_STORAGE_KEY)) || {};

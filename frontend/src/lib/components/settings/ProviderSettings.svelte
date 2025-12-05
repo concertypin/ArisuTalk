@@ -10,14 +10,14 @@
         Plus,
         Trash2,
         ChevronDown,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
 
     export let provider;
 
     let config = $settings.apiConfigs[provider] || {};
     let customModelInput = "";
 
-    $: (provider, (config = $settings.apiConfigs[provider] || {}));
+    $: provider, (config = $settings.apiConfigs[provider] || {});
 
     const models = PROVIDER_MODELS[provider] || [];
     const customModels = config.customModels || [];
@@ -43,7 +43,7 @@
 
     function removeCustomModel(index) {
         const newCustomModels = config.customModels.filter(
-            (_, i) => i !== index
+            (_, i) => i !== index,
         );
         handleConfigChange("customModels", newCustomModels);
     }
@@ -167,7 +167,7 @@
         >
             <h4 class="text-sm font-medium text-gray-300 flex items-center">
                 <SettingsIcon class="w-4 h-4 mr-2" />{t(
-                    "settings.advancedSettings"
+                    "settings.advancedSettings",
                 )}
             </h4>
             <ChevronDown
@@ -198,7 +198,7 @@
                     on:input={(e) =>
                         handleConfigChange(
                             "maxTokens",
-                            parseInt(e.target.value)
+                            parseInt(e.target.value),
                         )}
                     class="w-full"
                 />
@@ -233,7 +233,7 @@
                     on:input={(e) =>
                         handleConfigChange(
                             "temperature",
-                            parseFloat(e.target.value)
+                            parseFloat(e.target.value),
                         )}
                     class="w-full"
                 />
@@ -266,7 +266,7 @@
                             on:input={(e) =>
                                 handleConfigChange(
                                     "profileMaxTokens",
-                                    parseInt(e.target.value)
+                                    parseInt(e.target.value),
                                 )}
                             class="w-full"
                         />
@@ -297,7 +297,7 @@
                             on:input={(e) =>
                                 handleConfigChange(
                                     "profileTemperature",
-                                    parseFloat(e.target.value)
+                                    parseFloat(e.target.value),
                                 )}
                             class="w-full"
                         />

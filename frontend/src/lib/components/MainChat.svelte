@@ -20,7 +20,7 @@
         Plus,
         Smile,
         MessageCircle,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
     import { nanoid } from "nanoid";
     import { t } from "$root/i18n";
 
@@ -80,7 +80,7 @@
                     .filter(Boolean);
             }
             return [];
-        }
+        },
     );
     let isAtBottom = true;
     let participantUpdateInterval: number;
@@ -210,7 +210,7 @@
         if ($imageToSend) {
             const imageId = nanoid();
             const match = $imageToSend.match(
-                /^data:(image\/[a-zA-Z]+);base64,(.*)$/
+                /^data:(image\/[a-zA-Z]+);base64,(.*)$/,
             );
             const mimeType = match ? match[1] : "image/png";
 
@@ -223,7 +223,7 @@
             // Update character
             characters.update((allChars) => {
                 const charIndex = allChars.findIndex(
-                    (c) => c.id === character.id
+                    (c) => c.id === character.id,
                 );
                 if (charIndex !== -1) {
                     const updatedChar = { ...allChars[charIndex] };

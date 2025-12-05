@@ -1,7 +1,7 @@
 <script>
     import { createEventDispatcher } from "svelte";
     import { t } from "$root/i18n";
-    import { Trash2, Copy, Download } from "lucide-svelte";
+    import { Trash2, Copy, Download } from "@lucide/svelte";
 
     const dispatch = createEventDispatcher();
 </script>

@@ -10,7 +10,7 @@
         Music,
         X,
         Sparkles,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
     import { stickerManager } from "../../../stores/services";
     import { settings } from "../../../stores/settings";
     import { editingCharacter } from "../../../stores/character";
@@ -185,7 +185,7 @@
             confirm(
                 t("stickerPreview.confirmRemoveMultiple", {
                     count: selectedStickers.length,
-                })
+                }),
             )
         ) {
             stickers = stickers.filter((s) => !selectedStickers.includes(s.id));
@@ -214,7 +214,7 @@
         const naiApiKey = get(settings).apiConfigs.novelai?.apiKey;
         if (!naiApiKey) {
             alert(
-                "NAI API 키가 설정되지 않았습니다. 설정에서 API 키를 입력해주세요."
+                "NAI API 키가 설정되지 않았습니다. 설정에서 API 키를 입력해주세요.",
             );
             return;
         }
@@ -236,7 +236,7 @@
             get(editingCharacter),
             (progress) => {
                 progressData = { ...progressData, ...progress };
-            }
+            },
         );
     }
 </script>
@@ -314,7 +314,7 @@
                             <span class="text-xs"
                                 >{t("characterModal.deleteSelected").replace(
                                     "0",
-                                    selectedStickers.length
+                                    selectedStickers.length,
                                 )}</span
                             >
                         </button>
@@ -354,7 +354,7 @@
                                 class="absolute top-0 left-0 w-full h-full bg-black/30 flex items-center justify-center z-10"
                                 on:click|stopPropagation={() => {
                                     const index = selectedStickers.indexOf(
-                                        sticker.id
+                                        sticker.id,
                                     );
                                     if (index > -1) {
                                         selectedStickers.splice(index, 1);
@@ -370,7 +370,7 @@
                             >
                                 <div
                                     class="w-6 h-6 rounded-full flex items-center justify-center transition-all {selectedStickers.includes(
-                                        sticker.id
+                                        sticker.id,
                                     )
                                         ? 'bg-blue-600'
                                         : 'bg-gray-900/50 border-2 border-white'}"
@@ -424,7 +424,7 @@
                                 <button
                                     on:click|stopPropagation={(e) =>
                                         (stickers = stickers.filter(
-                                            (s) => s.id !== sticker.id
+                                            (s) => s.id !== sticker.id,
                                         ))}
                                     class="p-1 bg-red-600 hover:bg-red-700 rounded-full text-white"
                                     title={t("characterModal.deleteSticker")}

@@ -23,7 +23,7 @@
         FileArchive,
         SlidersHorizontal,
         Bug,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
     import { isMobileSettingsPageVisible } from "../../../stores/ui";
     import AiSettings from "./AiSettings.svelte";
     import NaiSettings from "./NaiSettings.svelte";

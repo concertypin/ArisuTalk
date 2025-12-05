@@ -3,7 +3,7 @@
     import { t } from "$root/i18n";
     import { createEventDispatcher } from "svelte";
     import { fade } from "svelte/transition";
-    import { X, Image, Plus } from "lucide-svelte";
+    import { X, Image, Plus } from "@lucide/svelte";
     import { characters } from "../../../stores/character";
 
     export let isOpen = false;
@@ -22,7 +22,7 @@
     $: {
         if (editingPost) {
             character = $characters.find(
-                (c) => c.id === editingPost.characterId
+                (c) => c.id === editingPost.characterId,
             );
             postContent = editingPost.content || "";
             tags = editingPost.tags || [];
@@ -241,23 +241,23 @@
                         {#if editingPost.isSecret}
                             <option value="secret-public"
                                 >{t("sns.secretPublic")} - {t(
-                                    "sns.secretPublicDesc"
+                                    "sns.secretPublicDesc",
                                 )}</option
                             >
                             <option value="secret-private"
                                 >{t("sns.secretPrivate")} - {t(
-                                    "sns.secretPrivateDesc"
+                                    "sns.secretPrivateDesc",
                                 )}</option
                             >
                         {:else}
                             <option value="main-public"
                                 >{t("sns.mainPublic")} - {t(
-                                    "sns.mainPublicDesc"
+                                    "sns.mainPublicDesc",
                                 )}</option
                             >
                             <option value="main-private"
                                 >{t("sns.mainPrivate")} - {t(
-                                    "sns.mainPrivateDesc"
+                                    "sns.mainPrivateDesc",
                                 )}</option
                             >
                         {/if}

@@ -13,7 +13,7 @@
         Info,
         Image,
         Shield,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
     import { isDevModeActive } from "../../../stores/ui";
     import { fade } from "svelte/transition";
     import APISettingsPanel from "./panels/APISettingsPanel.svelte";

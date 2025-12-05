@@ -80,6 +80,23 @@ type LanguagePhonebook = {
     uploaded: string;
     import: string;
     importing: string;
+    create: string;
+    upload: string;
+    edit: string;
+    delete: string;
+    confirmDelete: string;
+    name: string;
+    entryDescription: string;
+    file: string;
+    save: string;
+    cancel: string;
+    fileRequired: string;
+    unsupportedFile: string;
+    uploading: string;
+    deleting: string;
+    updateSuccess: string;
+    createSuccess: string;
+    deleteSuccess: string;
 };
 type LanguageCharacterModalSlider = {
     responseTime: {

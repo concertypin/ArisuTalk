@@ -5,7 +5,7 @@
     import { prompts } from "../../../stores/prompts";
     import PromptSection from "./PromptSection.svelte";
     import HookManager from "../HookManager.svelte";
-    import { X, Download, Upload, RefreshCw } from "lucide-svelte";
+    import { X, Download, Upload, RefreshCw } from "@lucide/svelte";
     import { fade } from "svelte/transition";
     import type { PromptStorageType } from "$types/Prompt";
 
@@ -24,7 +24,7 @@
             key: "characterSheet",
             title: t("promptModal.characterSheetGenerationPrompt"),
             description: t(
-                "promptModal.characterSheetGenerationPromptDescription"
+                "promptModal.characterSheetGenerationPromptDescription",
             ),
         },
         {

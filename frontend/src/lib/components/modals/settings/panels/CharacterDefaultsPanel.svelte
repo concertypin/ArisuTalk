@@ -8,7 +8,7 @@
         MessageSquarePlus,
         Shuffle,
         Users,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
 
     function handleSettingChange(key, value) {
         settings.update((s) => ({ ...s, [key]: value }));
@@ -146,7 +146,7 @@
                                     <span class="text-blue-400 font-semibold"
                                         >{$settings.randomCharacterCount ||
                                             3}{t(
-                                            "settings.characterCountUnit"
+                                            "settings.characterCountUnit",
                                         )}</span
                                     >
                                 </label>

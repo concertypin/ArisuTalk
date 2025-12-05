@@ -21,8 +21,8 @@
         Users,
         Trash2,
         Loader2,
-    } from "lucide-svelte";
-        import { NovelAIClient } from "$root/lib/api/novelai";
+    } from "@lucide/svelte";
+    import { NovelAIClient } from "$root/lib/api/novelai";
     import { DEFAULT_EMOTIONS } from "$root/defaults";
 
     import { characters } from "$stores/character";
@@ -75,7 +75,7 @@
             if (character.stickers && character.stickers.length > 0) {
                 total += character.stickers.length;
                 const generatedStickers = character.stickers.filter(
-                    (s) => s.generated
+                    (s) => s.generated,
                 );
                 const generatedCount = generatedStickers.length;
                 generated += generatedCount;
@@ -857,7 +857,7 @@
                             bind:value={newNaiItem.action}
                             rows="3"
                             placeholder={t(
-                                "naiHandlers.actionSituationPlaceholder"
+                                "naiHandlers.actionSituationPlaceholder",
                             )}
                             class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm resize-none"
                         ></textarea>

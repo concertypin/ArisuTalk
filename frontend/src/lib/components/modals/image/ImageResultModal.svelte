@@ -1,7 +1,7 @@
 <script>
     import { createEventDispatcher, onMount, onDestroy } from "svelte";
     import { fade } from "svelte/transition";
-    import { X, Info } from "lucide-svelte";
+    import { X, Info } from "@lucide/svelte";
 
     export let isOpen = false;
     export let imageUrl = "";

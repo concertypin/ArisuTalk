@@ -1,26 +1,45 @@
-import { Hono } from "hono";
-import { Bindings } from "@/platform";
-import dataRoutes from "@/routes/data";
 import { Scalar } from "@scalar/hono-api-reference";
-import { openAPIRouteHandler } from "hono-openapi";
-import { cors } from "@/lib/cors";
+import { Hono } from "hono";
 import { logger } from "hono/logger";
+import { describeRoute, openAPIRouteHandler } from "hono-openapi";
+import { cors } from "@/lib/cors";
+import type { Bindings } from "@/platform";
+import blobRoutes from "@/routes/blob";
+import dataRoutes from "@/routes/data";
 
 await import("consola")
     .then((i) => {
         //use consola for logging if available
+        // biome-ignore lint/suspicious/noGlobalAssign: Enhance console with consola
         console = { ...i.default, ...console };
     })
     .catch(); // Ignore errors (e.g., production build)
 
 let app = new Hono<Bindings>();
-
 app = app.use(logger(), cors);
 
-app = app.get("/", (c) => c.text("Oh hi"));
+app = app.get(
+    "/",
+    describeRoute({
+        summary: "Root endpoint",
+        description:
+            "Returns a friendly greeting. Can be used as a health check.",
+        tags: ["General"],
+        responses: {
+            200: {
+                description: "Greeting message",
+                content: {
+                    "text/plain": { schema: { type: "string" } },
+                },
+            },
+        },
+    }),
+    (c) => c.text("Oh hi"),
+);
 
 // Mount API routes under /api
 app = app.route("/api", dataRoutes);
+app = app.route("/api", blobRoutes);
 
 const jwtAuthScheme = Object.entries({
     ClerkUser:
@@ -56,13 +75,13 @@ app = app.get(
                     "API for managing Data items in ArisuTalk Phonebook",
             },
         },
-    })
+    }),
 );
 app = app.get(
     "/docs",
     Scalar({
         title: "ArisuTalk Phonebook API",
         url: "/openapi.json",
-    })
+    }),
 );
 export default app;

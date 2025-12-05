@@ -2,7 +2,7 @@
     import { t } from "$root/i18n";
     import { createEventDispatcher, beforeUpdate, afterUpdate } from "svelte";
     import { fade } from "svelte/transition";
-    import { Search, X, SearchX } from "lucide-svelte";
+    import { Search, X, SearchX } from "@lucide/svelte";
     import { searchQuery } from "../../../stores/chat";
     import { characters } from "../../../stores/character";
     import CharacterItem from "../../CharacterItem.svelte";
@@ -42,7 +42,7 @@
             const onTransitionEnd = () => {
                 modalContentEl.removeEventListener(
                     "transitionend",
-                    onTransitionEnd
+                    onTransitionEnd,
                 );
                 modalContentEl.style.transition = "";
                 modalContentEl.style.height = "";
@@ -60,7 +60,7 @@
         const query = $searchQuery.toLowerCase().trim();
         if (query) {
             filteredCharacters = $characters.filter((char) =>
-                char.name.toLowerCase().includes(query)
+                char.name.toLowerCase().includes(query),
             );
         } else {
             filteredCharacters = [];

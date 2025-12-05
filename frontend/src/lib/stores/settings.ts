@@ -32,15 +32,15 @@ const initialSettings = {
 
 export const settings = persistentStore(
     "personaChat_settings_v16",
-    initialSettings
+    initialSettings,
 );
 
 export const experimentalFeaturesOptIn = derived(settings, ($settings) =>
-    Boolean($settings?.experimentalFeaturesEnabled)
+    Boolean($settings?.experimentalFeaturesEnabled),
 );
 
 export const experimentalTracingOptIn = derived(settings, ($settings) =>
-    Boolean($settings?.experimentalTracingEnabled)
+    Boolean($settings?.experimentalTracingEnabled),
 );
 export interface SettingsSnapshot {
     timestamp: number;
@@ -53,5 +53,5 @@ export interface SettingsSnapshot {
 
 export const settingsSnapshots = persistentStore<SettingsSnapshot[]>(
     "personaChat_settingsSnapshots_v16",
-    []
+    [],
 );

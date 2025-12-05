@@ -9,7 +9,7 @@
     } from "../../stores/ui";
     import { auth } from "../../stores/auth";
     import CharacterItem from "../CharacterItem.svelte";
-    import { Search, Settings, Plus, X, UserCircle2 } from "lucide-svelte";
+    import { Search, Settings, Plus, X, UserCircle2 } from "@lucide/svelte";
     import { createEventDispatcher } from "svelte";
 
     const dispatch = createEventDispatcher();

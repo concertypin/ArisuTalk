@@ -1,5 +1,5 @@
 <script>
-    import { ShieldAlert, Database } from "lucide-svelte";
+    import { ShieldAlert, Database } from "@lucide/svelte";
     import { chatRooms, groupChats, openChats } from "../../../../stores/chat";
     import { characters } from "../../../../stores/character";
     import { isDataBrowserModalVisible } from "../../../../stores/ui";

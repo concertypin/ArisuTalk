@@ -17,7 +17,7 @@ console.log("import.meta.env.DEV:", import.meta.env.DEV);
 console.log("isResetOnRefreshEnabled 값:", get(isResetOnRefreshEnabled));
 console.log(
     "현재 localStorage 'debug-reset-on-refresh':",
-    localStorage.getItem("debug-reset-on-refresh")
+    localStorage.getItem("debug-reset-on-refresh"),
 );
 
 if (import.meta.env.DEV && get(isResetOnRefreshEnabled)) {
@@ -66,7 +66,7 @@ if (isDevelopmentServer()) {
     isDevModeActive.set(true);
     console.log("✅ 개발 서버 감지 - 디버그 모드 강제 활성화");
     console.log(
-        `📍 호스트: ${window.location.hostname}, 포트: ${window.location.port}`
+        `📍 호스트: ${window.location.hostname}, 포트: ${window.location.port}`,
     );
 
     // 디버그 모드 데이터 시스템도 동일한 조건으로 설정
@@ -97,7 +97,7 @@ if (isDevelopmentServer()) {
                 for (let registration of registrations) {
                     console.log(
                         "🗑️ 서비스 워커 unregister:",
-                        registration.scope
+                        registration.scope,
                     );
                     registration.unregister();
                 }
@@ -113,7 +113,7 @@ if (isDevelopmentServer()) {
                 if (registration) {
                     console.log(
                         "🗑️ 활성 서비스 워커 unregister:",
-                        registration.scope
+                        registration.scope,
                     );
                     return registration.unregister();
                 }
@@ -145,7 +145,7 @@ if (import.meta.env.DEV) {
                         for (let registration of registrations) {
                             console.log(
                                 "🗑️ 서비스 워커 unregister:",
-                                registration.scope
+                                registration.scope,
                             );
                             promises.push(registration.unregister());
                         }
@@ -161,7 +161,7 @@ if (import.meta.env.DEV) {
         },
     };
     console.log(
-        "Dev tools (__dev__.dumpLocalStorage(), __dev__.dumpIndexedDB(), __dev__.clearServiceWorker(), __dev__.forceDevMode()) are available in the console."
+        "Dev tools (__dev__.dumpLocalStorage(), __dev__.dumpIndexedDB(), __dev__.clearServiceWorker(), __dev__.forceDevMode()) are available in the console.",
     );
 }
 

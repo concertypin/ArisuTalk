@@ -3,7 +3,7 @@
     import { t } from "$root/i18n";
     import { createEventDispatcher } from "svelte";
     import { fade } from "svelte/transition";
-    import { X, Search, ChevronRight, Lock } from "lucide-svelte";
+    import { X, Search, ChevronRight, Lock } from "@lucide/svelte";
     import { characters, characterStateStore } from "../../../stores/character";
     import { checkSNSAccess } from "../../../utils/sns";
 
@@ -19,14 +19,14 @@
         const filtered = $characters.filter(
             (char) =>
                 char.id !== 0 &&
-                char.name.toLowerCase().includes(searchTerm.toLowerCase())
+                char.name.toLowerCase().includes(searchTerm.toLowerCase()),
         );
         accessibleCharacters = filtered.filter((char) =>
-            checkSNSAccess(char, "public", $characterStateStore[char.id])
+            checkSNSAccess(char, "public", $characterStateStore[char.id]),
         );
         inaccessibleCharacters = filtered.filter(
             (char) =>
-                !checkSNSAccess(char, "public", $characterStateStore[char.id])
+                !checkSNSAccess(char, "public", $characterStateStore[char.id]),
         );
     }
 

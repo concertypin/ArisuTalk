@@ -7,7 +7,7 @@
         Settings,
         FilePenLine,
         Edit,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
     import { settings } from "../../../stores/settings";
     import ProviderSettings from "../../settings/ProviderSettings.svelte";
 

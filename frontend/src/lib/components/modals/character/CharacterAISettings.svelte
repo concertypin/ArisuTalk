@@ -1,6 +1,6 @@
 <script>
     import { t } from "$root/i18n";
-    import { Sparkles, TestTube, Loader } from "lucide-svelte";
+    import { Sparkles, TestTube, Loader } from "@lucide/svelte";
     import { stickerManager } from "../../../stores/services";
     import { settings } from "../../../stores/settings";
     import ImageResultModal from "../image/ImageResultModal.svelte";
@@ -23,7 +23,7 @@
         const naiApiKey = $settings.apiConfigs.novelai?.apiKey;
         if (!naiApiKey) {
             alert(
-                "NAI API 키가 설정되지 않았습니다. 설정에서 API 키를 입력해주세요."
+                "NAI API 키가 설정되지 않았습니다. 설정에서 API 키를 입력해주세요.",
             );
             return;
         }
@@ -45,7 +45,7 @@
                 "happy",
                 {
                     naiSettings: $settings.naiSettings || {},
-                }
+                },
             );
 
             if (result && result.dataUrl) {

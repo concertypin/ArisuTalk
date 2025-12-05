@@ -4,7 +4,7 @@
  * Platform-specific code should only be included here.
  */
 
-import { RuntimeSecret, RuntimeVariable } from "@/types";
+import type { RuntimeSecret, RuntimeVariable } from "@/environmentTypes";
 
 export type Bindings = {
     Bindings: RuntimeSecret & RuntimeVariable;

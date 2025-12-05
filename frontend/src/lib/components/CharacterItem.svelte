@@ -4,7 +4,7 @@
     import { chatRooms, messages, unreadCounts } from "../stores/chat";
     import { formatTimestamp } from "../../utils";
     import Avatar from "./Avatar.svelte";
-    import { Instagram, Settings } from "lucide-svelte";
+    import { Instagram, Settings } from "@lucide/svelte";
 
     export let character = null;
 

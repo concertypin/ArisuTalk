@@ -1,7 +1,7 @@
 <script>
     import { t } from "$root/i18n";
     import { onMount } from "svelte";
-    import { ChevronRight } from "lucide-svelte";
+    import { ChevronRight } from "@lucide/svelte";
 
     export let log;
 
@@ -67,7 +67,7 @@
         } catch (error) {
             console.warn(
                 `Failed to load prompt file for chat type: ${chatType}`,
-                error
+                error,
             );
         }
         return t("debugLogs.promptLoadError", { chatType });
@@ -118,7 +118,7 @@
                     <pre class="text-gray-300 overflow-x-auto">{JSON.stringify(
                             log.data.personaInput,
                             null,
-                            2
+                            2,
                         )}</pre>
                 </div>
             </details>
@@ -154,7 +154,7 @@
                     <pre class="text-gray-300 overflow-x-auto">{JSON.stringify(
                             log.data.outputResponse,
                             null,
-                            2
+                            2,
                         )}</pre>
                 </div>
             </details>
@@ -174,7 +174,7 @@
                     <pre class="text-gray-300 overflow-x-auto">{JSON.stringify(
                             log.data.parameters,
                             null,
-                            2
+                            2,
                         )}</pre>
                 </div>
             </details>
@@ -194,7 +194,7 @@
                     <pre class="text-gray-300 overflow-x-auto">{JSON.stringify(
                             log.data.metadata,
                             null,
-                            2
+                            2,
                         )}</pre>
                 </div>
             </details>

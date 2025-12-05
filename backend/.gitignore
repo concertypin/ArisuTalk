@@ -23,6 +23,7 @@ node_modules/
 # env
 .env.production
 .dev.vars
+secret.*
 
 # logs
 logs/

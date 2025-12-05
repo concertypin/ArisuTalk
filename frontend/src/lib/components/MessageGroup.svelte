@@ -6,7 +6,7 @@
         typingCharacterId,
         editingMessageId,
     } from "../stores/chat";
-    import { Edit3, Trash2, RefreshCw, Newspaper, Image } from "lucide-svelte";
+    import { Edit3, Trash2, RefreshCw, Newspaper, Image } from "@lucide/svelte";
     import { t } from "$root/i18n";
     import {
         deleteMessageGroup,

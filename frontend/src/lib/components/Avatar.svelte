@@ -1,5 +1,5 @@
 <script>
-    import { Bot } from "lucide-svelte";
+    import { Bot } from "@lucide/svelte";
 
     /**
      * @type {object} character - The character object.

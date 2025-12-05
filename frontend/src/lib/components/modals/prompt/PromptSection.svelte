@@ -1,6 +1,6 @@
 <script lang="ts">
     import { t } from "$root/i18n";
-    import { HelpCircle } from "lucide-svelte";
+    import { HelpCircle } from "@lucide/svelte";
 
     //    import { $effect } from "svelte";
 

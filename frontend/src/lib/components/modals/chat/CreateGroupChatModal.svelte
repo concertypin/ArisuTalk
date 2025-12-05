@@ -4,7 +4,7 @@
     import { characters } from "../../../stores/character";
     import { groupChats, selectedChatId } from "../../../stores/chat";
     import { isCreateGroupChatModalVisible } from "../../../stores/ui";
-    import { X, Users } from "lucide-svelte";
+    import { X, Users } from "@lucide/svelte";
     import { fade } from "svelte/transition";
     import Avatar from "../../Avatar.svelte";
 
@@ -49,7 +49,7 @@
                         };
                         return acc;
                     },
-                    {}
+                    {},
                 ),
             },
         };

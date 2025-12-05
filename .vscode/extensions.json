@@ -1,5 +1,7 @@
 {
     "recommendations": [
-        "svelte.svelte-vscode"
+        "svelte.svelte-vscode",
+        "biomejs.biome",
+        "vitest.explorer"
     ]
 }

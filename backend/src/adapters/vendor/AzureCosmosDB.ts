@@ -1,7 +1,12 @@
-import { Container, CosmosClient, Database } from "@azure/cosmos";
-import { DataType } from "@/schema";
-import { DBEnv } from "@/adapters/client";
-import { BaseDataDBClient, DataListOrder } from "@/adapters/StorageClientBase";
+import { type Container, CosmosClient, type Database } from "@azure/cosmos";
+import {
+    type BaseDataDBClient,
+    DataListOrder,
+    type PaginationOptions,
+    type PaginationResult,
+} from "@/adapters/StorageClientBase";
+import type { VendorSecretEnv } from "@/environmentTypes";
+import type { DataType } from "@/schema";
 
 /**
  * An adapter for Azure Cosmos DB that implements the BaseDataDBClient interface.
@@ -14,33 +19,42 @@ export default class AzureCosmosDB implements BaseDataDBClient {
     private database: Database;
     private container: Container;
     private containerName: string;
-    constructor(env: DBEnv) {
+    constructor(env: VendorSecretEnv["azure"]) {
         if (!env.SECRET_AZURE_COSMOSDB_CONNECTION_STRING) {
             throw new Error(
-                "Azure Cosmos DB environment variables are not properly set"
+                "Azure Cosmos DB environment variables are not properly set",
             );
         }
         this.client = new CosmosClient(
-            env.SECRET_AZURE_COSMOSDB_CONNECTION_STRING
+            env.SECRET_AZURE_COSMOSDB_CONNECTION_STRING,
         );
         this.database = this.client.database(
-            env.SECRET_AZURE_COSMOSDB_DATABASE_NAME
+            env.SECRET_AZURE_COSMOSDB_DATABASE_NAME,
         );
         this.containerName = env.SECRET_AZURE_COSMOSDB_CONTAINER_NAME;
         this.container = this.database.container(this.containerName);
     }
 
+    private validateId(id: string): void {
+        if (!id) throw new Error("Item ID cannot be empty");
+        // Cosmos DB illegal chars: /, \, ?, #
+        if (/[/\\?#]/.test(id)) {
+            throw new Error("Item ID contains invalid characters");
+        }
+    }
+
     async bumpDownloadCount(id: string): Promise<void> {
+        this.validateId(id);
+        const itemRef = this.container.item(id);
         // Use Cosmos DB patch operation to increment atomically when available
         try {
             // Partial patch: increment downloadCount by 1
-            await this.container
-                .item(id)
-                .patch([{ op: "incr", path: "/downloadCount", value: 1 }]);
+            await itemRef.patch([
+                { op: "incr", path: "/downloadCount", value: 1 },
+            ]);
             return;
-        } catch (e) {
+        } catch (_e) {
             // Fallback to read/replace if patch is not supported in the environment
-            const itemRef = this.container.item(id);
             const readRes = await itemRef.read<DataType>();
             const existing = readRes.resource;
             if (!existing) return;
@@ -54,15 +68,46 @@ export default class AzureCosmosDB implements BaseDataDBClient {
     }
 
     async get(id: string): Promise<DataType | null> {
+        this.validateId(id);
         const doc = await this.container.item(id).read<DataType>();
         return doc.resource ?? null;
     }
 
-    async queryByName(name: string): Promise<DataType[]> {
+    async queryByName(
+        name: string,
+        options?: PaginationOptions,
+    ): Promise<PaginationResult<DataType>> {
+        if (!name) return { items: [] };
+
+        // Set default limit
+        const limit = options?.limit || 10;
+        const offset = options?.pageToken ? parseInt(options.pageToken, 10) : 0;
+
         //It is fuzzy search.
         const { resources } = await this.container.items
             .query<DataType>({
-                query: `SELECT * FROM c WHERE CONTAINS(LOWER(c.name), LOWER(@name))`,
+                query: `SELECT * FROM c WHERE CONTAINS(LOWER(c.name), LOWER(@name)) ORDER BY c.id OFFSET @offset LIMIT @limit`,
+                parameters: [
+                    {
+                        name: "@name",
+                        value: name,
+                    },
+                    {
+                        name: "@offset",
+                        value: offset,
+                    },
+                    {
+                        name: "@limit",
+                        value: limit,
+                    },
+                ],
+            })
+            .fetchAll();
+
+        // Get total count for pagination metadata
+        const { resources: countResources } = await this.container.items
+            .query<{ count: number }>({
+                query: `SELECT VALUE COUNT(1) FROM c WHERE CONTAINS(LOWER(c.name), LOWER(@name))`,
                 parameters: [
                     {
                         name: "@name",
@@ -71,27 +116,79 @@ export default class AzureCosmosDB implements BaseDataDBClient {
                 ],
             })
             .fetchAll();
-        return resources;
+
+        const totalCount = countResources[0]?.count || 0;
+
+        // Determine if there's a next page
+        let nextPageToken: string | undefined;
+        if (offset + limit < totalCount) {
+            nextPageToken = String(offset + limit);
+        }
+
+        return {
+            items: resources,
+            nextPageToken,
+            totalCount,
+        };
     }
 
-    async list(order?: DataListOrder): Promise<DataType[]> {
+    async list(
+        order?: DataListOrder,
+        options?: PaginationOptions,
+    ): Promise<PaginationResult<DataType>> {
+        // Set default limit
+        const limit = options?.limit || 10;
+        const offset = options?.pageToken ? parseInt(options.pageToken, 10) : 0;
+
         let orderBy = `ORDER BY c.`;
         if (order === DataListOrder.NewestFirst) {
             orderBy += "uploadedAt DESC";
         } else if (order === DataListOrder.DownloadsFirst) {
             orderBy = "downloadCount DESC";
-        } else orderBy = "";
-        const query = `SELECT * FROM c ${orderBy}`;
+        } else {
+            // Default order by id to ensure consistent pagination
+            orderBy = "c.id";
+        }
+
+        const query = `SELECT * FROM c ${orderBy} OFFSET @offset LIMIT @limit`;
         console.log("CosmosDB list query:", query);
 
-        //(await this.client.databases.query<DataType>("").fetchAll()).resources
-        return (
-            await this.container.items
-                .query<DataType>({
-                    query: query,
-                })
-                .fetchAll()
-        ).resources;
+        const { resources } = await this.container.items
+            .query<DataType>({
+                query: query,
+                parameters: [
+                    {
+                        name: "@offset",
+                        value: offset,
+                    },
+                    {
+                        name: "@limit",
+                        value: limit,
+                    },
+                ],
+            })
+            .fetchAll();
+
+        // Get total count for pagination metadata
+        const { resources: countResources } = await this.container.items
+            .query<{ count: number }>({
+                query: "SELECT VALUE COUNT(1) FROM c",
+            })
+            .fetchAll();
+
+        const totalCount = countResources[0]?.count || 0;
+
+        // Determine if there's a next page
+        let nextPageToken: string | undefined;
+        if (offset + limit < totalCount) {
+            nextPageToken = String(offset + limit);
+        }
+
+        return {
+            items: resources,
+            nextPageToken,
+            totalCount,
+        };
     }
     async put(item: Omit<DataType, "id">): Promise<DataType> {
         const id = crypto.randomUUID();
@@ -101,8 +198,9 @@ export default class AzureCosmosDB implements BaseDataDBClient {
         throw new Error("Failed to create item in Cosmos DB");
     }
     async update(
-        item: Partial<DataType> & { id: DataType["id"] }
+        item: Partial<DataType> & { id: DataType["id"] },
     ): Promise<DataType> {
+        this.validateId(item.id);
         // Replace the existing item with the provided one
         const id = item.id;
         const itemRef = this.container.item(id);
@@ -117,6 +215,7 @@ export default class AzureCosmosDB implements BaseDataDBClient {
         throw new Error("Failed to update item in Cosmos DB");
     }
     async delete(id: string): Promise<void> {
+        this.validateId(id);
         await this.container.item(id).delete();
     }
 }

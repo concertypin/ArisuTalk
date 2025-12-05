@@ -1,6 +1,6 @@
 <script>
     import { t } from "$root/i18n";
-    import { AlertTriangle } from "lucide-svelte";
+    import { AlertTriangle } from "@lucide/svelte";
 
     export let hypnosis = {};
 </script>
@@ -111,7 +111,7 @@
                         <span>0%</span>
                         <span
                             >{Math.round(
-                                (hypnosis.affection || 0) * 100
+                                (hypnosis.affection || 0) * 100,
                             )}%</span
                         >
                         <span>100%</span>
@@ -186,7 +186,7 @@
                         <span>0%</span>
                         <span
                             >{Math.round(
-                                (hypnosis.romantic_interest || 0) * 100
+                                (hypnosis.romantic_interest || 0) * 100,
                             )}%</span
                         >
                         <span>100%</span>

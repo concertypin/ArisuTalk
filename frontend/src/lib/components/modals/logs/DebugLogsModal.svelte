@@ -8,7 +8,7 @@
         exportDebugLogs,
         clearDebugLogs,
     } from "../../../services/logService";
-    import { BarChart3, Download, Trash2, X, FileX } from "lucide-svelte";
+    import { BarChart3, Download, Trash2, X, FileX } from "@lucide/svelte";
     import SimpleLog from "./SimpleLog.svelte";
     import StructuredLog from "./StructuredLog.svelte";
     import { fade } from "svelte/transition";
@@ -21,7 +21,7 @@
                 t("debugLogs.clearAllConfirm", {
                     defaultValue:
                         "Are you sure you want to clear all debug logs?",
-                })
+                }),
             )
         ) {
             clearDebugLogs();
@@ -77,7 +77,7 @@
                         <p class="text-gray-400 text-sm mt-1">
                             {t("debugLogs.totalLogItems")}
                             {$debugLogs.length}/{maxLogs}{t(
-                                "debugLogs.maxLogItems"
+                                "debugLogs.maxLogItems",
                             )} |
                             {t("debugLogs.logCollectionStatus")}
                             {$settings.enableDebugLogs

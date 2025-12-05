@@ -8,7 +8,7 @@
         Lock,
         Edit3,
         Trash2,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
 
     export let post = null;
     export let character = null;
@@ -52,7 +52,7 @@
         if (!sticker) {
             // 문자열로 변환해서 재시도
             sticker = character.stickers.find(
-                (s) => String(s.id) === String(stickerId)
+                (s) => String(s.id) === String(stickerId),
             );
         }
 

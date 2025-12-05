@@ -13,7 +13,7 @@
         Filter,
         Download,
         RefreshCw,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
     import { fade } from "svelte/transition";
 
     let selectedStore = "characters";
@@ -239,7 +239,7 @@
                                     "dataBrowser.searchPlaceholder",
                                     {
                                         defaultValue: "Search data...",
-                                    }
+                                    },
                                 )}
                                 class="w-full bg-gray-600 border border-gray-500 text-white rounded-lg pl-10 pr-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
@@ -330,8 +330,8 @@
 
 <style>
     pre {
-        font-family:
-            "Fira Code", "Monaco", "Cascadia Code", "Roboto Mono", monospace;
+        font-family: "Fira Code", "Monaco", "Cascadia Code", "Roboto Mono",
+            monospace;
         font-size: 0.75rem;
         line-height: 1.4;
     }

@@ -14,7 +14,7 @@
         Info,
         Key,
         Link,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
     import { settings } from "../../../stores/settings";
     import { debugLogs } from "../../../stores/logs";
     import {
@@ -31,7 +31,7 @@
                 t("debugLogs.clearAllConfirm", {
                     defaultValue:
                         "Are you sure you want to clear all debug logs?",
-                })
+                }),
             )
         ) {
             clearDebugLogs();

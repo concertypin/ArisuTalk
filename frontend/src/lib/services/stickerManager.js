@@ -85,7 +85,7 @@ export class StickerManager {
         return character.stickers.some(
             (sticker) =>
                 sticker.emotion === emotionKey ||
-                sticker.name.toLowerCase().includes(emotionKey.toLowerCase())
+                sticker.name.toLowerCase().includes(emotionKey.toLowerCase()),
         );
     }
 
@@ -97,7 +97,7 @@ export class StickerManager {
      */
     getMissingEmotions(character, emotionList = DEFAULT_EMOTIONS) {
         return emotionList.filter(
-            (emotion) => !this.hasEmotionSticker(character, emotion)
+            (emotion) => !this.hasEmotionSticker(character, emotion),
         );
     }
 
@@ -259,7 +259,7 @@ export class StickerManager {
                 emotion,
                 {
                     naiSettings: get(settings).naiSettings || {},
-                }
+                },
             );
 
             // 캐릭터에 스티커 추가
@@ -282,7 +282,7 @@ export class StickerManager {
 
             // 캐릭터 정보 즉시 저장
             characters.update((chars) =>
-                chars.map((c) => (c.id === character.id ? character : c))
+                chars.map((c) => (c.id === character.id ? character : c)),
             );
 
             // console.log(`[StickerManager] ${character.name}의 ${emotion} 스티커가 자동 생성되어 저장되었습니다.`);
@@ -341,7 +341,7 @@ export class StickerManager {
                                 get(settings).naiSettings?.preferredSize ||
                                 "square",
                             naiSettings: get(settings).naiSettings || {},
-                        }
+                        },
                     );
 
                     // 스티커를 캐릭터에 추가하고 즉시 저장
@@ -353,8 +353,8 @@ export class StickerManager {
                     // 캐릭터 정보 즉시 저장
                     characters.update((chars) =>
                         chars.map((c) =>
-                            c.id === character.id ? character : c
-                        )
+                            c.id === character.id ? character : c,
+                        ),
                     );
 
                     results.push({ success: true, sticker, emotion });
@@ -372,7 +372,7 @@ export class StickerManager {
                 } catch (error) {
                     console.error(
                         `[StickerManager] ${emotion} 스티커 생성 실패:`,
-                        error
+                        error,
                     );
 
                     // 실패 후에도 대기 시간을 두어 429 오류 방지
@@ -382,7 +382,7 @@ export class StickerManager {
                     ) {
                         // console.log('[StickerManager] 429 오류로 인한 추가 대기...');
                         await new Promise((resolve) =>
-                            setTimeout(resolve, this.NAI_DELAYS.rateLimitDelay)
+                            setTimeout(resolve, this.NAI_DELAYS.rateLimitDelay),
                         );
                     } else if (
                         error.message.includes("500") ||
@@ -392,8 +392,8 @@ export class StickerManager {
                         await new Promise((resolve) =>
                             setTimeout(
                                 resolve,
-                                this.NAI_DELAYS.serverErrorDelay
-                            )
+                                this.NAI_DELAYS.serverErrorDelay,
+                            ),
                         );
                     }
 
@@ -429,7 +429,7 @@ export class StickerManager {
         } catch (error) {
             console.error(
                 `[StickerManager] 기본 스티커 세트 생성 실패:`,
-                error
+                error,
             );
             throw error;
         }
@@ -536,7 +536,7 @@ export class StickerManager {
         allCharacters.forEach((character) => {
             if (character.stickers) {
                 const generatedStickers = character.stickers.filter(
-                    (s) => s.generated
+                    (s) => s.generated,
                 );
                 totalGenerated += generatedStickers.length;
                 if (generatedStickers.length > 0) {

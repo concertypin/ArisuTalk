@@ -5,7 +5,7 @@
     import { openChats, selectedChatId } from "../../../stores/chat";
     import { characters } from "../../../stores/character";
     import { isCreateOpenChatModalVisible } from "../../../stores/ui";
-    import { X, Globe, Info, Users } from "lucide-svelte";
+    import { X, Globe, Info, Users } from "@lucide/svelte";
     import { fade } from "svelte/transition";
 
     let chatName = "";

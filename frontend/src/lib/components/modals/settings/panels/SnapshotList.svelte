@@ -1,7 +1,7 @@
 <script>
     import { t } from "$root/i18n";
     import { settingsSnapshots } from "../../../../stores/settings";
-    import { History, Trash2 } from "lucide-svelte";
+    import { History, Trash2 } from "@lucide/svelte";
     import {
         restoreSnapshot,
         deleteSnapshot,

@@ -99,7 +99,7 @@ export function chatMLToPromptStructure(
     character,
     userName = "",
     userDescription = "",
-    includeConversation = false
+    includeConversation = false,
 ) {
     let systemPrompt = "";
     const contents = [];
@@ -118,7 +118,7 @@ export function chatMLToPromptStructure(
         for (const key in replacements) {
             result = result.replace(
                 new RegExp(`{${key}}`, "g"),
-                replacements[key]
+                replacements[key],
             );
         }
         return result;
@@ -244,7 +244,7 @@ export function buildChatMLFromTraditionalPrompts(
     character,
     userName = "",
     userDescription = "",
-    context = {}
+    context = {},
 ) {
     // Combine all the traditional prompt sections into a comprehensive system message
     const mainPrompts = prompts.main || {};
@@ -264,7 +264,7 @@ export function buildChatMLFromTraditionalPrompts(
         if (key === "sticker_usage") {
             processedValue = value.replace(
                 "{availableStickers}",
-                context.availableStickers || "none"
+                context.availableStickers || "none",
             );
         }
 

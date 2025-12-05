@@ -1,47 +1,47 @@
 <script lang="ts">
-    import { t } from "$root/i18n";
-    import type { ReplaceRule } from "$types/replaceHook";
+import { t } from "$root/i18n";
+import type { ReplaceRule } from "$types/replaceHook";
 
-    export let rule: ReplaceRule;
-    export let isEditing = false;
-    export let onEdit: (() => void) | undefined = undefined;
-    export let onSave: ((rule: ReplaceRule) => void) | undefined = undefined;
-    export let onCancel: (() => void) | undefined = undefined;
-    export let onDelete: (() => void) | undefined = undefined;
+export let rule: ReplaceRule;
+export let isEditing = false;
+export let onEdit: (() => void) | undefined = undefined;
+export let onSave: ((rule: ReplaceRule) => void) | undefined = undefined;
+export let onCancel: (() => void) | undefined = undefined;
+export let onDelete: (() => void) | undefined = undefined;
 
-    let editData = { ...rule };
+let editData = { ...rule };
 
-    function handleSave() {
-        if (!editData.from.trim()) {
-            alert(t("modal.replaceHooks.fromRequired"));
-            return;
-        }
-
-        onSave?.(editData);
+function handleSave() {
+    if (!editData.from.trim()) {
+        alert(t("modal.replaceHooks.fromRequired"));
+        return;
     }
 
-    function handleCancel() {
-        editData = { ...rule };
-        onCancel?.();
-    }
+    onSave?.(editData);
+}
 
-    function toggleEnabled() {
-        if (isEditing) {
-            editData.enabled = !editData.enabled;
-        }
-    }
+function handleCancel() {
+    editData = { ...rule };
+    onCancel?.();
+}
 
-    function toggleRegex() {
-        if (isEditing) {
-            editData.useRegex = !editData.useRegex;
-        }
+function toggleEnabled() {
+    if (isEditing) {
+        editData.enabled = !editData.enabled;
     }
+}
 
-    function toggleCaseSensitive() {
-        if (isEditing) {
-            editData.caseSensitive = !editData.caseSensitive;
-        }
+function toggleRegex() {
+    if (isEditing) {
+        editData.useRegex = !editData.useRegex;
     }
+}
+
+function toggleCaseSensitive() {
+    if (isEditing) {
+        editData.caseSensitive = !editData.caseSensitive;
+    }
+}
 </script>
 
 <div class="rule-item" class:editing={isEditing}>

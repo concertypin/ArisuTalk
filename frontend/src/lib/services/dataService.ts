@@ -74,13 +74,13 @@ export async function backupData() {
 
         showNotification(
             t("modal.backupComplete.title"),
-            t("modal.backupComplete.message")
+            t("modal.backupComplete.message"),
         );
     } catch (error) {
         console.error("Backup failed:", error);
         showNotification(
             t("modal.backupFailed.title"),
-            t("modal.backupFailed.message")
+            t("modal.backupFailed.message"),
         );
     }
 }
@@ -112,21 +112,21 @@ export function restoreData(fileContent: string) {
                 characterStateStore.set(backupData.characterStates || {});
                 settingsSnapshots.set(backupData.settingsSnapshots || []);
                 replaceHooks.set(
-                    backupData.replaceHooks || { hooks: {}, order: [] }
+                    backupData.replaceHooks || { hooks: {}, order: [] },
                 );
 
                 showNotification(
                     t("modal.restoreComplete.title"),
-                    t("modal.restoreComplete.message")
+                    t("modal.restoreComplete.message"),
                 );
                 setTimeout(() => window.location.reload(), 1000);
-            }
+            },
         );
     } catch (error) {
         console.error("Restore failed:", error);
         showNotification(
             t("modal.restoreFailed.title"),
-            t("modal.restoreFailed.message")
+            t("modal.restoreFailed.message"),
         );
     }
 }
@@ -179,13 +179,13 @@ export async function resetAllData() {
 
 export function restoreSnapshot(timestamp: number) {
     const snapshot = get(settingsSnapshots).find(
-        (s: SettingsSnapshot) => s.timestamp === timestamp
+        (s: SettingsSnapshot) => s.timestamp === timestamp,
     );
     if (snapshot) {
         settings.set(snapshot.settings);
         showNotification(
             t("settings.snapshotRestored.title"),
-            t("modal.snapshotRestored.message")
+            t("modal.snapshotRestored.message"),
         );
     }
 }
@@ -214,14 +214,14 @@ export function createSettingsSnapshot() {
 
 export function deleteSnapshot(timestamp: number) {
     settingsSnapshots.update((snapshots: SettingsSnapshot[]) =>
-        snapshots.filter((s) => s.timestamp !== timestamp)
+        snapshots.filter((s) => s.timestamp !== timestamp),
     );
 }
 
 // Debounced version of createSettingsSnapshot for automatic saving
 export const debouncedCreateSettingsSnapshot = debounce(
     createSettingsSnapshot,
-    1000
+    1000,
 );
 
 // Subscribe to settings changes for automatic snapshots

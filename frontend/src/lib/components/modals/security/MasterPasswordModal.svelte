@@ -14,7 +14,7 @@
         Check,
         HelpCircle,
         RefreshCw,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
     import { fade } from "svelte/transition";
 
     let password = "";
@@ -65,7 +65,7 @@
         confirmPassword = newPassword;
         handlePasswordInput();
         alert(
-            t("security.generatedPasswordMessage", { password: newPassword })
+            t("security.generatedPasswordMessage", { password: newPassword }),
         );
     }
 
@@ -162,7 +162,7 @@
                             for="setup-master-password"
                         >
                             <Key class="w-4 h-4 mr-2" />{t(
-                                "security.masterPasswordLabel"
+                                "security.masterPasswordLabel",
                             )}
                         </label>
                         <input
@@ -171,7 +171,7 @@
                             bind:value={password}
                             on:input={handlePasswordInput}
                             placeholder={t(
-                                "security.masterPasswordPlaceholder"
+                                "security.masterPasswordPlaceholder",
                             )}
                             class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm"
                             autocomplete="new-password"
@@ -197,7 +197,7 @@
                             for="setup-master-password-confirm"
                         >
                             <Check class="w-4 h-4 mr-2" />{t(
-                                "security.confirmPasswordLabel"
+                                "security.confirmPasswordLabel",
                             )}
                         </label>
                         <input
@@ -205,7 +205,7 @@
                             id="setup-master-password-confirm"
                             bind:value={confirmPassword}
                             placeholder={t(
-                                "security.confirmPasswordPlaceholder"
+                                "security.confirmPasswordPlaceholder",
                             )}
                             class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm"
                             autocomplete="new-password"
@@ -219,7 +219,7 @@
                             for="setup-password-hint"
                         >
                             <HelpCircle class="w-4 h-4 mr-2" />{t(
-                                "security.passwordHintLabel"
+                                "security.passwordHintLabel",
                             )}
                         </label>
                         <input

@@ -1,6 +1,6 @@
 <script>
     import { t } from "$root/i18n";
-    import { ChevronRight } from "lucide-svelte";
+    import { ChevronRight } from "@lucide/svelte";
 
     export let exifData = null;
 </script>

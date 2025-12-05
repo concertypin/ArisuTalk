@@ -11,7 +11,7 @@
         ShieldAlert,
         Image,
         Hash,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
     import { characters, characterStateStore } from "../../../stores/character";
     import { isSNSPostModalVisible, editingSNSPost } from "../../../stores/ui";
     import { checkSNSAccess, requirements } from "../../../utils/sns";
@@ -62,18 +62,18 @@
             hasAccess = checkSNSAccess(
                 currentCharacter,
                 requiredLevel,
-                get(characterStateStore)[currentCharacter.id]
+                get(characterStateStore)[currentCharacter.id],
             );
 
             if (currentCharacter.snsPosts) {
                 postsCount = currentCharacter.snsPosts.filter(
-                    (p) => !p.access_level || p.access_level === "main-public"
+                    (p) => !p.access_level || p.access_level === "main-public",
                 ).length;
                 secretsCount = currentCharacter.snsPosts.filter(
                     (p) =>
                         p.access_level &&
                         (p.access_level.includes("private") ||
-                            p.access_level.includes("secret"))
+                            p.access_level.includes("secret")),
                 ).length;
 
                 const allTags = new Set();

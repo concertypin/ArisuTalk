@@ -26,7 +26,7 @@ export class CustomOpenAIClient implements LLMApi {
         apiKey: string,
         model: string,
         baseUrl: string | null,
-        options: LLMApiConstructorOptions | undefined = {}
+        options: LLMApiConstructorOptions | undefined = {},
     ) {
         /*
         this.maxTokens = options.maxTokens || 4096;
@@ -107,7 +107,7 @@ export class CustomOpenAIClient implements LLMApi {
             }
 
             throw new Error(
-                t("api.invalidResponse", { provider: "Custom OpenAI" })
+                t("api.invalidResponse", { provider: "Custom OpenAI" }),
             );
         } catch (error) {
             console.error("Custom OpenAI API Error:", error);
@@ -152,7 +152,7 @@ export class CustomOpenAIClient implements LLMApi {
         } catch (error) {
             console.error(
                 t("api.profileGenerationError", { provider: "Custom OpenAI" }),
-                error
+                error,
             );
             return { error: String(error) };
         }
@@ -195,7 +195,7 @@ export class CustomOpenAIClient implements LLMApi {
             console.error(
                 t("api.profileGenerationError", { provider: "Custom OpenAI" }) +
                     " (Character Sheet)",
-                error
+                error,
             );
             return { error: String(error) };
         }

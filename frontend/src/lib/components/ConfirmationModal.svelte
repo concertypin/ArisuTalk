@@ -1,6 +1,6 @@
 <script>
     import { onMount, onDestroy } from "svelte";
-    import { AlertTriangle } from "lucide-svelte";
+    import { AlertTriangle } from "@lucide/svelte";
     import {
         isConfirmationModalVisible,
         confirmationModalData,

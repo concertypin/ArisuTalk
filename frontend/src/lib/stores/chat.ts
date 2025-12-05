@@ -23,23 +23,23 @@ export interface MessagesStore {
 
 export const chatRooms = persistentStore<Record<string, any[]>>(
     "personaChat_chatRooms_v16",
-    {}
+    {},
 );
 export const groupChats = persistentStore<Record<string, any>>(
     "personaChat_groupChats_v16",
-    {}
+    {},
 );
 export const openChats = persistentStore<Record<string, any>>(
     "personaChat_openChats_v16",
-    {}
+    {},
 );
 export const messages = persistentStore<MessagesStore>(
     "personaChat_messages_v16",
-    {}
+    {},
 );
 export const unreadCounts = persistentStore<Record<string, number>>(
     "personaChat_unreadCounts_v16",
-    {}
+    {},
 );
 
 // Forcing the landing page to be visible on refresh.

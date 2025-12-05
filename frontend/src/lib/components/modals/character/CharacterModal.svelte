@@ -1,4 +1,7 @@
-<script>
+<script lang="ts">
+    import { createBubbler, stopPropagation } from "svelte/legacy";
+
+    const bubble = createBubbler();
     import { onMount, onDestroy } from "svelte";
     import { get } from "svelte/store";
     import { t } from "$root/i18n";
@@ -26,7 +29,7 @@
         Sparkles,
         MessageSquarePlus,
         Instagram,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
     import { fade } from "svelte/transition";
     import { createEventDispatcher } from "svelte";
     import CharacterMemory from "./CharacterMemory.svelte";
@@ -43,14 +46,14 @@
         compressData,
         decompressData,
     } from "../../../utils/png-utils";
+    import type { Character } from "$types/character";
+    import { ChangeEventHandler } from "svelte/elements";
 
-    const dispatch = createEventDispatcher();
-
-    let isNew = false;
-    let characterData = {};
-    let avatarInput;
-    let cardInput;
-    let isGeneratingPersona = false;
+    let isNew = $state(false);
+    let characterData = $state<Character>();
+    let avatarInput = $state();
+    let cardInput = $state();
+    let isGeneratingPersona = $state(false);
     const apiManager = new APIManager();
     let phonebookUnsubscribe;
     let isCheckingPhonebook = false;
@@ -71,7 +74,7 @@
     editingCharacter.subscribe((char) => {
         if (char) {
             isNew = false;
-            characterData = JSON.parse(JSON.stringify(char)); // Deep copy
+            characterData = structuredClone(char) satisfies Character;
             if (!characterData.memories) characterData.memories = [];
             if (!characterData.stickers) characterData.stickers = [];
             if (!characterData.naiSettings)
@@ -162,7 +165,7 @@
                     characterName: characterData.name,
                     systemPrompt: $settings.prompts.characterSheet,
                 },
-                config.baseUrl
+                config.baseUrl,
             );
             characterData.prompt = generatedPrompt;
         } catch (error) {
@@ -177,7 +180,13 @@
         cardInput.click();
     }
 
-    async function handleCardChange(event) {
+    type OnChangeEvent = Parameters<
+        NonNullable<HTMLInputElement["onchange"]>
+    >["0"];
+    async function handleCardChange(
+        event: Parameters<ChangeEventHandler<HTMLInputElement>>["0"],
+    ) {
+        if (!event.target) return;
         const file = event.target.files[0];
         if (!file) return;
 
@@ -217,7 +226,7 @@
                 } catch (err) {
                     console.error(
                         "Failed to parse character data from image:",
-                        err
+                        err,
                     );
                 }
 
@@ -346,7 +355,7 @@
                     "../../../services/phonebookService.ts"
                 );
                 const allowed = await service.verifyPhonebookAccess(
-                    $auth.clerk
+                    $auth.clerk,
                 );
                 phonebookAccessState.set(allowed ? "enabled" : "disabled");
             } catch (error) {
@@ -392,7 +401,7 @@
                     "../../../services/phonebookService.ts"
                 );
                 const allowed = await service.verifyPhonebookAccess(
-                    $auth.clerk
+                    $auth.clerk,
                 );
                 phonebookAccessState.set(allowed ? "enabled" : "disabled");
                 verificationFailed = !allowed;
@@ -430,8 +439,8 @@
             tabindex="0"
             aria-labelledby="character-modal-title"
             class="bg-gray-800 rounded-2xl w-full max-w-md mx-auto my-auto flex flex-col max-h-[90vh]"
-            on:click|stopPropagation
-            on:keydown={(e) => {
+            onclick={stopPropagation(bubble("click"))}
+            onkeydown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
                 }
@@ -451,7 +460,7 @@
                 <div class="flex items-center gap-2">
                     {#if !isNew}
                         <button
-                            on:click={() =>
+                            onclick={() =>
                                 isSNSCharacterListModalVisible.set(true)}
                             class="p-2 md:p-2 hover:bg-gray-700 rounded-full transition-colors z-20"
                             title={t("characterModal.openSNS")}
@@ -462,7 +471,7 @@
                         </button>
                     {/if}
                     <button
-                        on:click={closeModal}
+                        onclick={closeModal}
                         class="p-1 hover:bg-gray-700 rounded-full"
                     >
                         <X class="w-5 h-5" />
@@ -487,14 +496,14 @@
                     </div>
                     <div class="flex flex-col gap-2">
                         <button
-                            on:click={selectAvatar}
+                            onclick={selectAvatar}
                             class="py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2"
                         >
                             <Image class="w-4 h-4" />
                             {t("characterModal.profileImage")}
                         </button>
                         <button
-                            on:click={importCard}
+                            onclick={importCard}
                             class="py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2"
                         >
                             <Upload class="w-4 h-4" />
@@ -503,7 +512,7 @@
 
                         {#if $auth.isSignedIn && $phonebookAccessState === "enabled"}
                             <button
-                                on:click={openPhonebook}
+                                onclick={openPhonebook}
                                 class="py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2"
                             >
                                 <MessageSquarePlus class="w-4 h-4" />
@@ -512,7 +521,7 @@
                         {/if}
 
                         <button
-                            on:click={exportCard}
+                            onclick={exportCard}
                             class="py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2"
                         >
                             <Download class="w-4 h-4" />
@@ -523,14 +532,14 @@
                         type="file"
                         accept="image/png,image/jpeg"
                         bind:this={avatarInput}
-                        on:change={handleAvatarChange}
+                        onchange={handleAvatarChange}
                         class="hidden"
                     />
                     <input
                         type="file"
                         accept="image/png"
                         bind:this={cardInput}
-                        on:change={handleCardChange}
+                        onchange={handleCardChange}
                         class="hidden"
                     />
                 </div>
@@ -556,7 +565,7 @@
                             >{t("characterModal.promptLabel")}</label
                         >
                         <button
-                            on:click={generatePersona}
+                            onclick={generatePersona}
                             disabled={isGeneratingPersona}
                             class="py-1 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-xs flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
@@ -566,7 +575,7 @@
                                 ></div>
                             {:else}
                                 <Sparkles class="w-3 h-3" /> AI {t(
-                                    "ui.generate"
+                                    "ui.generate",
                                 )}
                             {/if}
                         </button>
@@ -610,7 +619,7 @@
                                     ><MessageSquarePlus
                                         class="w-4 h-4 mr-2"
                                     />{t(
-                                        "characterModal.proactiveToggle"
+                                        "characterModal.proactiveToggle",
                                     )}</span
                                 >
                                 <div
@@ -652,7 +661,7 @@
                                         class="text-sm font-medium text-gray-300 mb-2"
                                     >
                                         {t(
-                                            "characterModalSlider.responseTime.description"
+                                            "characterModalSlider.responseTime.description",
                                         )}
                                     </p>
                                     <input
@@ -667,12 +676,12 @@
                                     >
                                         <span
                                             >{t(
-                                                "characterModalSlider.responseTime.low"
+                                                "characterModalSlider.responseTime.low",
                                             )}</span
                                         >
                                         <span
                                             >{t(
-                                                "characterModalSlider.responseTime.high"
+                                                "characterModalSlider.responseTime.high",
                                             )}</span
                                         >
                                     </div>
@@ -682,7 +691,7 @@
                                         class="text-sm font-medium text-gray-300 mb-2"
                                     >
                                         {t(
-                                            "characterModalSlider.thinkingTime.description"
+                                            "characterModalSlider.thinkingTime.description",
                                         )}
                                     </p>
                                     <input
@@ -697,12 +706,12 @@
                                     >
                                         <span
                                             >{t(
-                                                "characterModalSlider.thinkingTime.low"
+                                                "characterModalSlider.thinkingTime.low",
                                             )}</span
                                         >
                                         <span
                                             >{t(
-                                                "characterModalSlider.thinkingTime.high"
+                                                "characterModalSlider.thinkingTime.high",
                                             )}</span
                                         >
                                     </div>
@@ -712,7 +721,7 @@
                                         class="text-sm font-medium text-gray-300 mb-2"
                                     >
                                         {t(
-                                            "characterModalSlider.reactivity.description"
+                                            "characterModalSlider.reactivity.description",
                                         )}
                                     </p>
                                     <input
@@ -727,12 +736,12 @@
                                     >
                                         <span
                                             >{t(
-                                                "characterModalSlider.reactivity.low"
+                                                "characterModalSlider.reactivity.low",
                                             )}</span
                                         >
                                         <span
                                             >{t(
-                                                "characterModalSlider.reactivity.high"
+                                                "characterModalSlider.reactivity.high",
                                             )}</span
                                         >
                                     </div>
@@ -742,7 +751,7 @@
                                         class="text-sm font-medium text-gray-300 mb-2"
                                     >
                                         {t(
-                                            "characterModalSlider.tone.description"
+                                            "characterModalSlider.tone.description",
                                         )}
                                     </p>
                                     <input
@@ -757,12 +766,12 @@
                                     >
                                         <span
                                             >{t(
-                                                "characterModalSlider.tone.low"
+                                                "characterModalSlider.tone.low",
                                             )}</span
                                         >
                                         <span
                                             >{t(
-                                                "characterModalSlider.tone.high"
+                                                "characterModalSlider.tone.high",
                                             )}</span
                                         >
                                     </div>
@@ -773,27 +782,30 @@
                         <CharacterStickers
                             bind:stickers={characterData.stickers}
                         >
-                            <ChevronDown
-                                slot="chevron"
-                                class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"
-                            />
+                            {#snippet chevron()}
+                                <ChevronDown
+                                    class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"
+                                />
+                            {/snippet}
                         </CharacterStickers>
 
                         <CharacterMemory bind:memories={characterData.memories}>
-                            <ChevronDown
-                                slot="chevron"
-                                class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"
-                            />
+                            {#snippet chevron()}
+                                <ChevronDown
+                                    class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"
+                                />
+                            {/snippet}
                         </CharacterMemory>
                     </div>
                 </details>
 
                 {#if !isNew}
                     <CharacterHypnosis bind:hypnosis={characterData.hypnosis}>
-                        <ChevronDown
-                            slot="chevron"
-                            class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"
-                        />
+                        {#snippet chevron()}
+                            <ChevronDown
+                                class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"
+                            />
+                        {/snippet}
                     </CharacterHypnosis>
                 {/if}
             </div>
@@ -801,12 +813,12 @@
                 class="p-6 mt-auto border-t border-gray-700 shrink-0 flex justify-end space-x-3"
             >
                 <button
-                    on:click={closeModal}
+                    onclick={closeModal}
                     class="flex-1 md:flex-none py-2.5 px-6 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
                     >{t("common.cancel")}</button
                 >
                 <button
-                    on:click={saveCharacter}
+                    onclick={saveCharacter}
                     class="flex-1 md:flex-none py-2.5 px-6 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                     >{t("common.save")}</button
                 >

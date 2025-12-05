@@ -1,6 +1,6 @@
 <script>
     import { t } from "$root/i18n";
-    import { PlusCircle, Trash2 } from "lucide-svelte";
+    import { PlusCircle, Trash2 } from "@lucide/svelte";
 
     export let memories = [];
 

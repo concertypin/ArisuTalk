@@ -27,7 +27,7 @@ export class ClaudeClient implements LLMApi {
         apiKey: string,
         model: string,
         baseUrl: string | null,
-        options: LLMApiConstructorOptions | undefined = {}
+        options: LLMApiConstructorOptions | undefined = {},
     ) {
         this.client = new ChatAnthropic({
             apiKey: apiKey,
@@ -134,7 +134,7 @@ export class ClaudeClient implements LLMApi {
         } catch (error) {
             console.error(
                 t("api.profileGenerationError", { provider: "Claude" }),
-                error
+                error,
             );
             return { error: String(error) };
         }
@@ -173,7 +173,7 @@ export class ClaudeClient implements LLMApi {
             console.error(
                 t("api.profileGenerationError", { provider: "Claude" }) +
                     " (Character Sheet)",
-                error
+                error,
             );
             return { error: String(error) };
         }

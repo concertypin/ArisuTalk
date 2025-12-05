@@ -12,7 +12,7 @@
         History,
         AlertTriangle,
         Trash2,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
     import { settings, settingsSnapshots } from "../../../stores/settings";
     import {
         backupData,

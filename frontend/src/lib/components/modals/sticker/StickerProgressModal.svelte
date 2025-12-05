@@ -2,7 +2,7 @@
     import { t } from "$root/i18n";
     import { createEventDispatcher } from "svelte";
     import { fade } from "svelte/transition";
-    import { X, Check, RefreshCw, AlertCircle, Clock } from "lucide-svelte";
+    import { X, Check, RefreshCw, AlertCircle, Clock } from "@lucide/svelte";
 
     export let progress = {};
 
@@ -138,7 +138,7 @@
                     <div
                         class="bg-blue-600 h-2 rounded-full transition-all duration-300"
                         style="width: {Math.round(
-                            (progress.currentIndex / progress.totalCount) * 100
+                            (progress.currentIndex / progress.totalCount) * 100,
                         )}%"
                     ></div>
                 </div>
@@ -151,37 +151,37 @@
                     {#if progress.status === "generating"}
                         <RefreshCw
                             class="w-5 h-5 animate-spin {getStatusTextColor(
-                                progress.status
+                                progress.status,
                             )}"
                         />
                     {:else if progress.status === "completed"}
                         <Check
                             class="w-5 h-5 {getStatusTextColor(
-                                progress.status
+                                progress.status,
                             )}"
                         />
                     {:else if progress.status === "error"}
                         <AlertCircle
                             class="w-5 h-5 {getStatusTextColor(
-                                progress.status
+                                progress.status,
                             )}"
                         />
                     {:else if progress.status === "waiting"}
                         <Clock
                             class="w-5 h-5 {getStatusTextColor(
-                                progress.status
+                                progress.status,
                             )}"
                         />
                     {/if}
                     <div class="ml-3">
                         <p
                             class="text-sm font-medium {getStatusTextColor(
-                                progress.status
+                                progress.status,
                             )}"
                         >
                             {getStatusText(
                                 progress.status,
-                                progress.currentEmotion
+                                progress.currentEmotion,
                             )}
                         </p>
                         {#if progress.error}
@@ -204,13 +204,13 @@
                                 s.emotion ===
                                 (typeof emotion === "string"
                                     ? emotion
-                                    : emotion.emotion)
+                                    : emotion.emotion),
                         )}
                         {@const isCurrent = index === progress.currentIndex - 1}
                         {@const isError = progress.failedEmotions?.includes(
                             typeof emotion === "string"
                                 ? emotion
-                                : emotion.emotion
+                                : emotion.emotion,
                         )}
                         <div class="text-center">
                             <div
@@ -235,7 +235,7 @@
                                 >{typeof emotion === "object" && emotion.title
                                     ? emotion.title
                                     : t(
-                                          `stickerProgress.emotions.${typeof emotion === "string" ? emotion : emotion.emotion}`
+                                          `stickerProgress.emotions.${typeof emotion === "string" ? emotion : emotion.emotion}`,
                                       ) ||
                                       (typeof emotion === "string"
                                           ? emotion

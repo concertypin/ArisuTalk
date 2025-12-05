@@ -13,7 +13,7 @@
         Mouse,
         AlertTriangle,
         Trash2,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
     import SnapshotList from "./SnapshotList.svelte";
     import {
         backupData,

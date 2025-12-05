@@ -7,7 +7,7 @@
         RefreshCw,
         Download,
         Upload,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
     import { prompts } from "$stores/prompts";
     import PromptSection from "$components/modals/prompt/PromptSection.svelte";
 
@@ -28,7 +28,7 @@
             key: "characterSheet",
             title: t("promptModal.characterSheetGenerationPrompt"),
             description: t(
-                "promptModal.characterSheetGenerationPromptDescription"
+                "promptModal.characterSheetGenerationPromptDescription",
             ),
         },
         {

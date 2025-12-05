@@ -3,7 +3,7 @@
     import { characters } from "../../../stores/character";
     import { groupChats, editingGroupChat } from "../../../stores/chat";
     import { isEditGroupChatModalVisible } from "../../../stores/ui";
-    import { X, Users } from "lucide-svelte";
+    import { X, Users } from "@lucide/svelte";
     import { fade } from "svelte/transition";
     import { onMount, onDestroy } from "svelte";
     import Avatar from "../../Avatar.svelte";
@@ -23,17 +23,17 @@
                 .filter(Boolean);
             chatName = chat.name;
             responseFrequency = Math.round(
-                (chat.settings.responseFrequency || 0.5) * 100
+                (chat.settings.responseFrequency || 0.5) * 100,
             );
             maxRespondingCharacters =
                 chat.settings.maxRespondingCharacters || 1;
             responseDelay = Math.round(
-                (chat.settings.responseDelay || 3000) / 1000
+                (chat.settings.responseDelay || 3000) / 1000,
             );
 
             // Deep copy participant settings to avoid direct store mutation
             participantSettings = JSON.parse(
-                JSON.stringify(chat.settings.participantSettings || {})
+                JSON.stringify(chat.settings.participantSettings || {}),
             );
 
             // Ensure all participants have a settings object
@@ -238,7 +238,7 @@
                                             for={`active-${participant.id}`}
                                             class="text-sm text-gray-300"
                                             >{t(
-                                                "groupChat.responseEnabled"
+                                                "groupChat.responseEnabled",
                                             )}</label
                                         >
                                     </div>
@@ -248,10 +248,10 @@
                                             class="block text-sm text-gray-300 mb-1"
                                         >
                                             {t(
-                                                "groupChat.individualResponseProbability"
+                                                "groupChat.individualResponseProbability",
                                             )} ({Math.round(
                                                 settings.responseProbability *
-                                                    100
+                                                    100,
                                             )}%)
                                         </label>
                                         <input
@@ -274,7 +274,7 @@
                                             for={`role-${participant.id}`}
                                             class="block text-sm text-gray-300 mb-1"
                                             >{t(
-                                                "groupChat.characterRole"
+                                                "groupChat.characterRole",
                                             )}</label
                                         >
                                         <select
@@ -284,22 +284,22 @@
                                         >
                                             <option value="normal"
                                                 >{t(
-                                                    "groupChat.roleNormal"
+                                                    "groupChat.roleNormal",
                                                 )}</option
                                             >
                                             <option value="leader"
                                                 >{t(
-                                                    "groupChat.roleLeader"
+                                                    "groupChat.roleLeader",
                                                 )}</option
                                             >
                                             <option value="quiet"
                                                 >{t(
-                                                    "groupChat.roleQuiet"
+                                                    "groupChat.roleQuiet",
                                                 )}</option
                                             >
                                             <option value="active"
                                                 >{t(
-                                                    "groupChat.roleActive"
+                                                    "groupChat.roleActive",
                                                 )}</option
                                             >
                                         </select>

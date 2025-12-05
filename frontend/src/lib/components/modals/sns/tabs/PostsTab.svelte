@@ -3,7 +3,7 @@
     import { get } from "svelte/store";
     import { characterStateStore } from "../../../../stores/character";
     import { checkSNSAccess } from "../../../../utils/sns";
-    import { Image } from "lucide-svelte";
+    import { Image } from "@lucide/svelte";
     import SNSPost from "./SNSPost.svelte";
 
     export let character = null;
@@ -32,7 +32,7 @@
                     const hasAccess = checkSNSAccess(
                         character,
                         post.access_level || "public",
-                        get(characterStateStore)[character.id]
+                        get(characterStateStore)[character.id],
                     );
                     return {
                         ...post,
@@ -45,7 +45,7 @@
                 .sort(
                     (a, b) =>
                         new Date(b.timestamp).getTime() -
-                        new Date(a.timestamp).getTime()
+                        new Date(a.timestamp).getTime(),
                 );
         }
     }

@@ -9,7 +9,7 @@
         Moon,
         Clock,
         Zap,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
 
     let currentLanguage = getLanguage();
 

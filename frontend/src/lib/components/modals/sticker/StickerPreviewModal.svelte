@@ -1,7 +1,7 @@
 <script>
     import { createEventDispatcher, onMount, onDestroy } from "svelte";
     import { fade } from "svelte/transition";
-    import { X, Image, Hash, Download, Copy, RefreshCw } from "lucide-svelte";
+    import { X, Image, Hash, Download, Copy, RefreshCw } from "@lucide/svelte";
     import { t } from "$root/i18n";
     import PreviewTab from "./tabs/PreviewTab.svelte";
     import RerollTab from "./tabs/RerollTab.svelte";

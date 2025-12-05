@@ -3,7 +3,7 @@
     import { get } from "svelte/store";
     import { characterStateStore } from "../../../../stores/character";
     import { checkSNSAccess } from "../../../../utils/sns";
-    import { Lock, AlertTriangle } from "lucide-svelte";
+    import { Lock, AlertTriangle } from "@lucide/svelte";
     import SNSPost from "./SNSPost.svelte";
 
     export let character = null;
@@ -18,13 +18,13 @@
                     (post) =>
                         post.access_level &&
                         (post.access_level.includes("private") ||
-                            post.access_level.includes("secret"))
+                            post.access_level.includes("secret")),
                 )
                 .map((post) => {
                     const hasAccess = checkSNSAccess(
                         character,
                         post.access_level || "public",
-                        get(characterStateStore)[character.id]
+                        get(characterStateStore)[character.id],
                     );
                     return {
                         ...post,
@@ -37,7 +37,7 @@
                 .sort(
                     (a, b) =>
                         new Date(b.timestamp).getTime() -
-                        new Date(a.timestamp).getTime()
+                        new Date(a.timestamp).getTime(),
                 );
         }
     }
@@ -64,12 +64,12 @@
                 on:edit={(e) =>
                     window.personaApp.editSNSPost(
                         e.detail.characterId,
-                        e.detail.postId
+                        e.detail.postId,
                     )}
                 on:delete={(e) =>
                     window.personaApp.deleteSNSPost(
                         e.detail.characterId,
-                        e.detail.postId
+                        e.detail.postId,
                     )}
             />
         {/each}

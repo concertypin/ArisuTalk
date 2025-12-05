@@ -1,7 +1,7 @@
 <script>
     import { createEventDispatcher } from "svelte";
     import { t } from "$root/i18n";
-    import { RefreshCw, ArrowLeft, ArrowRight } from "lucide-svelte";
+    import { RefreshCw, ArrowLeft, ArrowRight } from "@lucide/svelte";
 
     export let rerollData = null;
     export let sticker = null;

@@ -9,7 +9,7 @@
         MessageSquarePlus,
         Shuffle,
         Users,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
     import { settings } from "../../../stores/settings";
 
     const dispatch = createEventDispatcher();
@@ -170,7 +170,7 @@
                                     <span class="text-blue-400 font-semibold"
                                         >{$settings.randomCharacterCount ||
                                             3}{t(
-                                            "settings.characterCountUnit"
+                                            "settings.characterCountUnit",
                                         )}</span
                                     >
                                 </label>

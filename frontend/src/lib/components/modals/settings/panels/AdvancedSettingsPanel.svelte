@@ -18,7 +18,7 @@
         AlertTriangle,
         Info,
         Link,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
 
     function handleClearLogs() {
         if (
@@ -26,7 +26,7 @@
                 t("debugLogs.clearAllConfirm", {
                     defaultValue:
                         "Are you sure you want to clear all debug logs?",
-                })
+                }),
             )
         ) {
             clearDebugLogs();

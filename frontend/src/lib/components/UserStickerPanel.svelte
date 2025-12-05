@@ -3,7 +3,7 @@
     import { userStickers } from "../stores/character";
     import { stickerToSend } from "../stores/chat";
     import { isUserStickerPanelVisible } from "../stores/ui";
-    import { Plus, X, Smile, Music, Edit3, Trash2 } from "lucide-svelte";
+    import { Plus, X, Smile, Music, Edit3, Trash2 } from "@lucide/svelte";
 
     let stickerInput;
 
@@ -124,7 +124,7 @@
         event.stopPropagation();
         if (confirm(t("stickerPreview.confirmRemove"))) {
             userStickers.update((stickers) =>
-                stickers.filter((s) => s.id !== sticker.id)
+                stickers.filter((s) => s.id !== sticker.id),
             );
         }
     }

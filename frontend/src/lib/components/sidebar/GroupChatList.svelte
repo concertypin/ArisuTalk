@@ -13,7 +13,7 @@
         isConfirmationModalVisible,
         confirmationModalData,
     } from "../../stores/ui";
-    import { Users, Plus, Edit3, Trash2 } from "lucide-svelte";
+    import { Users, Plus, Edit3, Trash2 } from "@lucide/svelte";
     import { formatTimestamp } from "../../../utils";
 
     function openCreateGroupChatModal() {
@@ -126,7 +126,7 @@
                     </div>
                     <p class="text-sm text-gray-400 truncate">
                         {chat.participantIds.length}{t(
-                            "groupChat.participantsCount"
+                            "groupChat.participantsCount",
                         )}
                     </p>
                     <p class="text-xs text-gray-500 truncate mt-1">

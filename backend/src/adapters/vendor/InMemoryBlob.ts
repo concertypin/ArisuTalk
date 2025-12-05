@@ -1,5 +1,5 @@
-import { DBEnv } from "@/adapters/client";
-import { BaseBlobStorageClient } from "@/adapters/StorageClientBase";
+import type { BaseBlobStorageClient } from "@/adapters/StorageClientBase";
+import type { VendorSecretEnv } from "@/environmentTypes";
 
 /**
  * Simple in-memory blob storage used for tests/dev.
@@ -11,7 +11,8 @@ export default class InMemoryBlob implements BaseBlobStorageClient {
         { data: Uint8Array; contentType?: string }
     >();
 
-    constructor(_env?: DBEnv) {
+    // biome-ignore lint/complexity/noUselessConstructor: Keep compatible signature
+    constructor(_env?: VendorSecretEnv["inmemory"]) {
         // In-memory client doesn't need env, but keep signature compatible.
     }
 
@@ -26,7 +27,7 @@ export default class InMemoryBlob implements BaseBlobStorageClient {
         const chunks: string[] = [];
         for (let i = 0; i < bytes.length; i += chunkSize) {
             chunks.push(
-                String.fromCharCode(...bytes.subarray(i, i + chunkSize))
+                String.fromCharCode(...bytes.subarray(i, i + chunkSize)),
             );
         }
         return btoa(chunks.join(""));
@@ -34,7 +35,7 @@ export default class InMemoryBlob implements BaseBlobStorageClient {
 
     async upload(
         buffer: ArrayBuffer | Uint8Array,
-        contentType?: string
+        contentType?: string,
     ): Promise<string> {
         const bytes =
             buffer instanceof ArrayBuffer ? new Uint8Array(buffer) : buffer;

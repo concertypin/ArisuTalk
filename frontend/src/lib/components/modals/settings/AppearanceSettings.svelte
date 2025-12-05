@@ -11,7 +11,7 @@
         Clock,
         Zap,
         Check,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
     import { settings } from "../../../stores/settings";
 
     const dispatch = createEventDispatcher();

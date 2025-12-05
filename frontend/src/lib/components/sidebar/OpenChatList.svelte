@@ -11,7 +11,7 @@
         isConfirmationModalVisible,
         confirmationModalData,
     } from "../../stores/ui";
-    import { Globe, Plus, Trash2 } from "lucide-svelte";
+    import { Globe, Plus, Trash2 } from "@lucide/svelte";
     import { formatTimestamp } from "../../../utils";
 
     function openCreateOpenChatModal() {

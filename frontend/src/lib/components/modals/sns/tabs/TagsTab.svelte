@@ -1,6 +1,6 @@
 <script>
     import { t } from "$root/i18n";
-    import { Hash, Lock, EyeOff } from "lucide-svelte";
+    import { Hash, Lock, EyeOff } from "@lucide/svelte";
 
     export let character = null;
 
@@ -17,7 +17,7 @@
                     post.tags.forEach((tag) => {
                         tagCounts[tag] = (tagCounts[tag] || 0) + 1;
                         const postTimestamp = new Date(
-                            post.timestamp
+                            post.timestamp,
                         ).getTime();
                         if (
                             !tagLastUsed[tag] ||

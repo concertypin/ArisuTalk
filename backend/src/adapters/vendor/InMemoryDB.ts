@@ -1,6 +1,10 @@
-import { DataType } from "@/schema";
-import { DBEnv } from "@/adapters/client";
-import { BaseDataDBClient, DataListOrder } from "@/adapters/StorageClientBase";
+import type {
+    BaseDataDBClient,
+    PaginationOptions,
+    PaginationResult,
+} from "@/adapters/StorageClientBase";
+import { DataListOrder } from "@/adapters/StorageClientBase";
+import type { DataType } from "@/schema";
 
 /**{
  * Simple in-memory implementation of BaseDataDBClient for tests and local usage.
@@ -13,15 +17,16 @@ export default class InMemoryDataDBClient implements BaseDataDBClient {
     private store: Map<string, DataType> = new Map();
     private counter = 0;
 
-    constructor(env: DBEnv) {}
+    // biome-ignore lint/complexity/noUselessConstructor: Keep compatible signature
+    constructor(_env?: Record<never, never>) {}
     async bumpDownloadCount(id: string): Promise<void> {
         const item = this.store.get(id);
         if (!item) return;
-        const current = (item as any).downloadCount ?? 0;
+        const current = item.downloadCount ?? 0;
         const updated = {
-            ...(item as any),
+            ...item,
             downloadCount: current + 1,
-        } as DataType;
+        } satisfies DataType;
         this.store.set(id, updated);
     }
 
@@ -40,42 +45,96 @@ export default class InMemoryDataDBClient implements BaseDataDBClient {
     }
 
     /**
-     * Query items by name. If DataType doesn't have a `name` property, returns empty array.
+     * Query items by name with pagination support. If DataType doesn't have a `name` property, returns empty array.
      * Performs a case-insensitive substring match.
      * @param name - name to search for
+     * @param options - Pagination options including limit and pageToken.
      */
-    async queryByName(name: string): Promise<DataType[]> {
-        if (!name) return [];
+    async queryByName(
+        name: string,
+        options?: PaginationOptions,
+    ): Promise<PaginationResult<DataType>> {
+        if (!name) return { items: [] };
         const q = name.toString().toLowerCase();
-        const results: DataType[] = [];
+        const allResults: DataType[] = [];
         for (const item of this.store.values()) {
-            const maybeName = (item as any)?.name;
+            const maybeName = item.name;
             if (
                 typeof maybeName === "string" &&
                 maybeName.toLowerCase().includes(q)
             ) {
-                results.push(item);
+                allResults.push(item);
             }
         }
-        return results;
+
+        // Apply pagination
+        const limit = options?.limit || 10; // Default limit of 10
+        const offset = options?.pageToken ? parseInt(options.pageToken, 10) : 0;
+        const paginatedResults = allResults.slice(offset, offset + limit);
+
+        // Determine if there's a next page
+        let nextPageToken: string | undefined;
+        if (offset + limit < allResults.length) {
+            nextPageToken = String(offset + limit);
+        }
+
+        return {
+            items: paginatedResults,
+            nextPageToken,
+            totalCount: allResults.length,
+        };
     }
 
     /**
-     * List all items. If a simple "asc" / "desc" string is provided as order, it will reverse the array for "desc".
+     * List all items with pagination support. If a simple "asc" / "desc" string is provided as order, it will reverse the array for "desc".
      * @param order - optional ordering hint (best-effort)
+     * @param options - Pagination options including limit and pageToken.
      */
-    async list(order?: DataListOrder): Promise<DataType[]> {
-        const items = Array.from(this.store.values());
+    async list(
+        order?: DataListOrder,
+        options?: PaginationOptions,
+    ): Promise<PaginationResult<DataType>> {
+        let items = Array.from(this.store.values());
+
+        // Apply ordering
+        if (order) {
+            if (order === DataListOrder.NewestFirst) {
+                items = items.sort(
+                    (a, b) => (b.uploadedAt || 0) - (a.uploadedAt || 0),
+                );
+            } else if (order === DataListOrder.DownloadsFirst) {
+                items = items.sort(
+                    (a, b) => (b.downloadCount || 0) - (a.downloadCount || 0),
+                );
+            }
+        }
+
         try {
+            // biome-ignore lint/suspicious/noExplicitAny: Handle potential string input
             const ord = order as any;
             if (typeof ord === "string") {
-                if (ord.toLowerCase() === "desc") return items.reverse();
-                return items;
+                if (ord.toLowerCase() === "desc") items = items.reverse();
             }
         } catch {
             // ignore and return as-is
         }
-        return items;
+
+        // Apply pagination
+        const limit = options?.limit || 10; // Default limit of 10
+        const offset = options?.pageToken ? parseInt(options.pageToken, 10) : 0;
+        const paginatedResults = items.slice(offset, offset + limit);
+
+        // Determine if there's a next page
+        let nextPageToken: string | undefined;
+        if (offset + limit < items.length) {
+            nextPageToken = String(offset + limit);
+        }
+
+        return {
+            items: paginatedResults,
+            nextPageToken,
+            totalCount: items.length,
+        };
     }
 
     /**
@@ -85,6 +144,7 @@ export default class InMemoryDataDBClient implements BaseDataDBClient {
      */
     async put(item: Omit<DataType, "id">): Promise<DataType> {
         const id = this.generateId();
+        // biome-ignore lint/suspicious/noExplicitAny: casting to DataType
         const newItem = { ...(item as any), id } as DataType;
         this.store.set(id, newItem);
         return newItem;
@@ -98,11 +158,12 @@ export default class InMemoryDataDBClient implements BaseDataDBClient {
         this.store.delete(id);
     }
     async update(
-        item: Partial<DataType> & { id: DataType["id"] }
+        item: Partial<DataType> & { id: DataType["id"] },
     ): Promise<DataType> {
         if (!item?.id) throw new Error("Missing id for update");
         if (!this.store.has(item.id)) throw new Error("Item not found");
         this.store.set(item.id, {
+            // biome-ignore lint/suspicious/noExplicitAny: merging
             ...(this.store.get(item.id) as any),
             ...item,
         });

@@ -3,7 +3,7 @@
     import { settings } from "../../../../stores/settings";
     import { isPromptModalVisible } from "../../../../stores/ui";
     import ProviderSettings from "../../../settings/ProviderSettings.svelte";
-    import { Globe, Settings, FilePenLine, Edit } from "lucide-svelte";
+    import { Globe, Settings, FilePenLine, Edit } from "@lucide/svelte";
 
     let provider = $settings.apiProvider || "gemini";
 

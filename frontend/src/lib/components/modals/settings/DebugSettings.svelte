@@ -1,7 +1,7 @@
 <script>
     import { t } from "$root/i18n";
     import { createEventDispatcher } from "svelte";
-    import { ArrowLeft, ShieldAlert, Database } from "lucide-svelte";
+    import { ArrowLeft, ShieldAlert, Database } from "@lucide/svelte";
     import { chatRooms, groupChats, openChats } from "../../../stores/chat";
     import { characters } from "../../../stores/character";
     import { isDataBrowserModalVisible } from "../../../stores/ui";
