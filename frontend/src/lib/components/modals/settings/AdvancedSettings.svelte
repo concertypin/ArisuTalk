@@ -1,52 +1,53 @@
 <script>
-import { t } from "$root/i18n";
-import { createEventDispatcher } from "svelte";
-import {
-    ArrowLeft,
-    Bug,
-    Activity,
-    BarChart3,
-    Trash2,
-    Gauge,
-    Clock,
-    FlaskConical,
-    AlertTriangle,
-    Info,
-    Key,
-    Link,
-} from "lucide-svelte";
-import { settings } from "../../../stores/settings";
-import { debugLogs } from "../../../stores/logs";
-import {
-    isDebugLogModalVisible,
-    isMasterPasswordModalVisible,
-} from "../../../stores/ui";
-import { clearDebugLogs } from "../../../services/logService";
+    import { t } from "$root/i18n";
+    import { createEventDispatcher } from "svelte";
+    import {
+        ArrowLeft,
+        Bug,
+        Activity,
+        BarChart3,
+        Trash2,
+        Gauge,
+        Clock,
+        FlaskConical,
+        AlertTriangle,
+        Info,
+        Key,
+        Link,
+    } from "@lucide/svelte";
+    import { settings } from "../../../stores/settings";
+    import { debugLogs } from "../../../stores/logs";
+    import {
+        isDebugLogModalVisible,
+        isMasterPasswordModalVisible,
+    } from "../../../stores/ui";
+    import { clearDebugLogs } from "../../../services/logService";
 
-const dispatch = createEventDispatcher();
+    const dispatch = createEventDispatcher();
 
-function handleClearLogs() {
-    if (
-        confirm(
-            t("debugLogs.clearAllConfirm", {
-                defaultValue: "Are you sure you want to clear all debug logs?",
-            }),
-        )
-    ) {
-        clearDebugLogs();
+    function handleClearLogs() {
+        if (
+            confirm(
+                t("debugLogs.clearAllConfirm", {
+                    defaultValue:
+                        "Are you sure you want to clear all debug logs?",
+                }),
+            )
+        ) {
+            clearDebugLogs();
+        }
     }
-}
 
-function handleEnableDebugLogs(e) {
-    settings.update((s) => ({ ...s, enableDebugLogs: e.target.checked }));
-}
+    function handleEnableDebugLogs(e) {
+        settings.update((s) => ({ ...s, enableDebugLogs: e.target.checked }));
+    }
 
-function handleExperimentalTracingToggle(event) {
-    settings.update((current) => ({
-        ...current,
-        experimentalTracingEnabled: event.target.checked,
-    }));
-}
+    function handleExperimentalTracingToggle(event) {
+        settings.update((current) => ({
+            ...current,
+            experimentalTracingEnabled: event.target.checked,
+        }));
+    }
 </script>
 
 <div class="flex flex-col h-full">

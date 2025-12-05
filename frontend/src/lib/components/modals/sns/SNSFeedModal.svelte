@@ -1,109 +1,109 @@
 <script>
-import { t } from "$root/i18n";
-import { createEventDispatcher, onMount, onDestroy } from "svelte";
-import { get } from "svelte/store";
-import { fade } from "svelte/transition";
-import {
-    X,
-    Plus,
-    Instagram,
-    Lock,
-    ShieldAlert,
-    Image,
-    Hash,
-} from "lucide-svelte";
-import { characters, characterStateStore } from "../../../stores/character";
-import { isSNSPostModalVisible, editingSNSPost } from "../../../stores/ui";
-import { checkSNSAccess, requirements } from "../../../utils/sns";
-import PostsTab from "./tabs/PostsTab.svelte";
-import SecretsTab from "./tabs/SecretsTab.svelte";
-import TagsTab from "./tabs/TagsTab.svelte";
+    import { t } from "$root/i18n";
+    import { createEventDispatcher, onMount, onDestroy } from "svelte";
+    import { get } from "svelte/store";
+    import { fade } from "svelte/transition";
+    import {
+        X,
+        Plus,
+        Instagram,
+        Lock,
+        ShieldAlert,
+        Image,
+        Hash,
+    } from "@lucide/svelte";
+    import { characters, characterStateStore } from "../../../stores/character";
+    import { isSNSPostModalVisible, editingSNSPost } from "../../../stores/ui";
+    import { checkSNSAccess, requirements } from "../../../utils/sns";
+    import PostsTab from "./tabs/PostsTab.svelte";
+    import SecretsTab from "./tabs/SecretsTab.svelte";
+    import TagsTab from "./tabs/TagsTab.svelte";
 
-export let isOpen = false;
-export let character = null;
+    export let isOpen = false;
+    export let character = null;
 
-let activeTab = "posts";
-let isSecretMode = false;
-let hasAccess = false;
+    let activeTab = "posts";
+    let isSecretMode = false;
+    let hasAccess = false;
 
-let postsCount = 0;
-let secretsCount = 0;
-let tagsCount = 0;
+    let postsCount = 0;
+    let secretsCount = 0;
+    let tagsCount = 0;
 
-let currentCharacter;
+    let currentCharacter;
 
-const dispatch = createEventDispatcher();
+    const dispatch = createEventDispatcher();
 
-function closeModal() {
-    dispatch("close");
-}
-
-function toggleSecretMode() {
-    isSecretMode = !isSecretMode;
-}
-
-function createNewPost() {
-    editingSNSPost.set({
-        characterId: character.id,
-        isNew: true,
-        isSecret: isSecretMode,
-    });
-    isSNSPostModalVisible.set(true);
-}
-
-$: {
-    if (character) {
-        currentCharacter = $characters.find((c) => c.id === character.id);
-    } else {
-        currentCharacter = null;
+    function closeModal() {
+        dispatch("close");
     }
-    if (currentCharacter) {
-        const requiredLevel = isSecretMode ? "private" : "public";
-        hasAccess = checkSNSAccess(
-            currentCharacter,
-            requiredLevel,
-            get(characterStateStore)[currentCharacter.id],
-        );
 
-        if (currentCharacter.snsPosts) {
-            postsCount = currentCharacter.snsPosts.filter(
-                (p) => !p.access_level || p.access_level === "main-public",
-            ).length;
-            secretsCount = currentCharacter.snsPosts.filter(
-                (p) =>
-                    p.access_level &&
-                    (p.access_level.includes("private") ||
-                        p.access_level.includes("secret")),
-            ).length;
+    function toggleSecretMode() {
+        isSecretMode = !isSecretMode;
+    }
 
-            const allTags = new Set();
-            currentCharacter.snsPosts.forEach((post) => {
-                if (post.tags && Array.isArray(post.tags)) {
-                    post.tags.forEach((tag) => allTags.add(tag));
-                }
-            });
-            tagsCount = allTags.size;
+    function createNewPost() {
+        editingSNSPost.set({
+            characterId: character.id,
+            isNew: true,
+            isSecret: isSecretMode,
+        });
+        isSNSPostModalVisible.set(true);
+    }
+
+    $: {
+        if (character) {
+            currentCharacter = $characters.find((c) => c.id === character.id);
         } else {
-            postsCount = 0;
-            secretsCount = 0;
-            tagsCount = 0;
+            currentCharacter = null;
+        }
+        if (currentCharacter) {
+            const requiredLevel = isSecretMode ? "private" : "public";
+            hasAccess = checkSNSAccess(
+                currentCharacter,
+                requiredLevel,
+                get(characterStateStore)[currentCharacter.id],
+            );
+
+            if (currentCharacter.snsPosts) {
+                postsCount = currentCharacter.snsPosts.filter(
+                    (p) => !p.access_level || p.access_level === "main-public",
+                ).length;
+                secretsCount = currentCharacter.snsPosts.filter(
+                    (p) =>
+                        p.access_level &&
+                        (p.access_level.includes("private") ||
+                            p.access_level.includes("secret")),
+                ).length;
+
+                const allTags = new Set();
+                currentCharacter.snsPosts.forEach((post) => {
+                    if (post.tags && Array.isArray(post.tags)) {
+                        post.tags.forEach((tag) => allTags.add(tag));
+                    }
+                });
+                tagsCount = allTags.size;
+            } else {
+                postsCount = 0;
+                secretsCount = 0;
+                tagsCount = 0;
+            }
         }
     }
-}
 
-function handleKeydown(event) {
-    if (event.key === "Escape") {
-        closeModal();
+    function handleKeydown(event) {
+        if (event.key === "Escape") {
+            closeModal();
+        }
     }
-}
 
-onMount(() => {
-    window.addEventListener("keydown", handleKeydown);
-});
+    onMount(() => {
+        window.addEventListener("keydown", handleKeydown);
+    });
 
-onDestroy(() => {
-    window.removeEventListener("keydown", handleKeydown);
-});
+    onDestroy(() => {
+        window.removeEventListener("keydown", handleKeydown);
+    });
 </script>
 
 {#if isOpen && currentCharacter}

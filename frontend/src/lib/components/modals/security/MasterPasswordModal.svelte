@@ -1,102 +1,104 @@
 <script>
-import { onMount, onDestroy } from "svelte";
-import { t } from "$root/i18n";
-import { isMasterPasswordModalVisible } from "../../../stores/ui";
-import {
-    validatePassword,
-    generateMasterPassword,
-} from "../../../utils/crypto";
-import { secureStorage } from "../../../utils/secureStorage";
-import {
-    ShieldCheck,
-    Info,
-    Key,
-    Check,
-    HelpCircle,
-    RefreshCw,
-} from "lucide-svelte";
-import { fade } from "svelte/transition";
+    import { onMount, onDestroy } from "svelte";
+    import { t } from "$root/i18n";
+    import { isMasterPasswordModalVisible } from "../../../stores/ui";
+    import {
+        validatePassword,
+        generateMasterPassword,
+    } from "../../../utils/crypto";
+    import { secureStorage } from "../../../utils/secureStorage";
+    import {
+        ShieldCheck,
+        Info,
+        Key,
+        Check,
+        HelpCircle,
+        RefreshCw,
+    } from "@lucide/svelte";
+    import { fade } from "svelte/transition";
 
-let password = "";
-let confirmPassword = "";
-let hint = "";
-let errorMessage = "";
-let passwordStrength = { message: "", strength: 0 };
+    let password = "";
+    let confirmPassword = "";
+    let hint = "";
+    let errorMessage = "";
+    let passwordStrength = { message: "", strength: 0 };
 
-function handlePasswordInput() {
-    if (password) {
-        passwordStrength = validatePassword(password);
-    } else {
-        passwordStrength = { message: "", strength: 0 };
-    }
-}
-
-async function handleSetupEncryption() {
-    errorMessage = "";
-
-    if (!password) {
-        errorMessage = t("security.enterMasterPassword");
-        return;
+    function handlePasswordInput() {
+        if (password) {
+            passwordStrength = validatePassword(password);
+        } else {
+            passwordStrength = { message: "", strength: 0 };
+        }
     }
 
-    const validation = validatePassword(password);
-    if (!validation.isValid) {
-        errorMessage = validation.message;
-        return;
+    async function handleSetupEncryption() {
+        errorMessage = "";
+
+        if (!password) {
+            errorMessage = t("security.enterMasterPassword");
+            return;
+        }
+
+        const validation = validatePassword(password);
+        if (!validation.isValid) {
+            errorMessage = validation.message;
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            errorMessage = t("security.passwordsDoNotMatch");
+            return;
+        }
+
+        try {
+            await secureStorage.setupEncryption(password, hint);
+            isMasterPasswordModalVisible.set(false);
+            alert(t("security.encryptionEnabledSuccess"));
+        } catch (error) {
+            errorMessage = error.message;
+        }
     }
 
-    if (password !== confirmPassword) {
-        errorMessage = t("security.passwordsDoNotMatch");
-        return;
+    function handleGeneratePassword() {
+        const newPassword = generateMasterPassword();
+        password = newPassword;
+        confirmPassword = newPassword;
+        handlePasswordInput();
+        alert(
+            t("security.generatedPasswordMessage", { password: newPassword }),
+        );
     }
 
-    try {
-        await secureStorage.setupEncryption(password, hint);
+    function handleSkip() {
         isMasterPasswordModalVisible.set(false);
-        alert(t("security.encryptionEnabledSuccess"));
-    } catch (error) {
-        errorMessage = error.message;
     }
-}
 
-function handleGeneratePassword() {
-    const newPassword = generateMasterPassword();
-    password = newPassword;
-    confirmPassword = newPassword;
-    handlePasswordInput();
-    alert(t("security.generatedPasswordMessage", { password: newPassword }));
-}
-
-function handleSkip() {
-    isMasterPasswordModalVisible.set(false);
-}
-
-function handleKeydown(event) {
-    if (event.key === "Escape") {
-        handleSkip();
+    function handleKeydown(event) {
+        if (event.key === "Escape") {
+            handleSkip();
+        }
     }
-}
 
-onMount(() => {
-    window.addEventListener("keydown", handleKeydown);
-});
+    onMount(() => {
+        window.addEventListener("keydown", handleKeydown);
+    });
 
-onDestroy(() => {
-    window.removeEventListener("keydown", handleKeydown);
-});
+    onDestroy(() => {
+        window.removeEventListener("keydown", handleKeydown);
+    });
 
-const strengthColors = [
-    "text-red-400",
-    "text-yellow-400",
-    "text-blue-400",
-    "text-green-400",
-];
-const strengthText = [
-    t("security.passwordStrength.veryWeak"),
-    t("security.passwordStrength.weak"),
-    t("security.passwordStrength.medium"),
-    t("security.passwordStrength.strong"),
-];
+    const strengthColors = [
+        "text-red-400",
+        "text-yellow-400",
+        "text-blue-400",
+        "text-green-400",
+    ];
+    const strengthText = [
+        t("security.passwordStrength.veryWeak"),
+        t("security.passwordStrength.weak"),
+        t("security.passwordStrength.medium"),
+        t("security.passwordStrength.strong"),
+    ];
 </script>
 
 {#if $isMasterPasswordModalVisible}
@@ -160,7 +162,7 @@ const strengthText = [
                             for="setup-master-password"
                         >
                             <Key class="w-4 h-4 mr-2" />{t(
-                                "security.masterPasswordLabel"
+                                "security.masterPasswordLabel",
                             )}
                         </label>
                         <input
@@ -169,7 +171,7 @@ const strengthText = [
                             bind:value={password}
                             on:input={handlePasswordInput}
                             placeholder={t(
-                                "security.masterPasswordPlaceholder"
+                                "security.masterPasswordPlaceholder",
                             )}
                             class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm"
                             autocomplete="new-password"
@@ -195,7 +197,7 @@ const strengthText = [
                             for="setup-master-password-confirm"
                         >
                             <Check class="w-4 h-4 mr-2" />{t(
-                                "security.confirmPasswordLabel"
+                                "security.confirmPasswordLabel",
                             )}
                         </label>
                         <input
@@ -203,7 +205,7 @@ const strengthText = [
                             id="setup-master-password-confirm"
                             bind:value={confirmPassword}
                             placeholder={t(
-                                "security.confirmPasswordPlaceholder"
+                                "security.confirmPasswordPlaceholder",
                             )}
                             class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm"
                             autocomplete="new-password"
@@ -217,7 +219,7 @@ const strengthText = [
                             for="setup-password-hint"
                         >
                             <HelpCircle class="w-4 h-4 mr-2" />{t(
-                                "security.passwordHintLabel"
+                                "security.passwordHintLabel",
                             )}
                         </label>
                         <input

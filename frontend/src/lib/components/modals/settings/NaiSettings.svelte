@@ -1,80 +1,81 @@
 <script>
-import { t } from "$root/i18n";
-import { createEventDispatcher } from "svelte";
-import {
-    ArrowLeft,
-    Image,
-    Cpu,
-    UserPlus,
-    Settings,
-    Edit,
-    Smile,
-    Download,
-    BarChart3,
-    HelpCircle,
-    Eye,
-    EyeOff,
-    Plus,
-    Check,
-    X,
-    RefreshCw,
-    Users,
-    Trash2,
-} from "lucide-svelte";
-import { settings } from "$stores/settings";
-import { DEFAULT_EMOTIONS } from "$constants/novelaiConfig";
-import { NovelAIClient } from "$root/lib/api/novelai";
+    import { t } from "$root/i18n";
+    import { createEventDispatcher } from "svelte";
+    import {
+        ArrowLeft,
+        Image,
+        Cpu,
+        UserPlus,
+        Settings,
+        Edit,
+        Smile,
+        Download,
+        BarChart3,
+        HelpCircle,
+        Eye,
+        EyeOff,
+        Plus,
+        Check,
+        X,
+        RefreshCw,
+        Users,
+        Trash2,
+    } from "@lucide/svelte";
+    import { settings } from "$stores/settings";
+    import { DEFAULT_EMOTIONS } from "$constants/novelaiConfig";
+    import { NovelAIClient } from "$root/lib/api/novelai";
 
-const dispatch = createEventDispatcher();
+    const dispatch = createEventDispatcher();
 
-if (!$settings.naiSettings) {
-    $settings.naiSettings = {};
-}
-
-let apiKeyVisible = false;
-let maskedApiKey =
-    "●".repeat(8) + ($settings.naiSettings?.apiKey?.slice(-4) || "");
-
-let minDelaySeconds = ($settings.naiSettings?.minDelay ?? 20000) / 1000;
-let maxAdditionalDelaySeconds =
-    ($settings.naiSettings?.maxAdditionalDelay ?? 10000) / 1000;
-
-$: $settings.naiSettings.minDelay = minDelaySeconds * 1000;
-$: $settings.naiSettings.maxAdditionalDelay = maxAdditionalDelaySeconds * 1000;
-
-let isEditingNaiList = false;
-
-let newNaiItem = { title: "", emotion: "", action: "" };
-
-function addNaiItem() {
-    if (!newNaiItem.title.trim()) return;
-    if (!$settings.naiSettings.naiGenerationList) {
-        $settings.naiSettings.naiGenerationList = [];
+    if (!$settings.naiSettings) {
+        $settings.naiSettings = {};
     }
-    $settings.naiSettings.naiGenerationList = [
-        ...$settings.naiSettings.naiGenerationList,
-        { ...newNaiItem },
-    ];
-    newNaiItem = { title: "", emotion: "", action: "" };
-}
 
-function deleteNaiItem(index) {
-    $settings.naiSettings.naiGenerationList.splice(index, 1);
-    $settings.naiSettings.naiGenerationList =
-        $settings.naiSettings.naiGenerationList;
-}
+    let apiKeyVisible = false;
+    let maskedApiKey =
+        "●".repeat(8) + ($settings.naiSettings?.apiKey?.slice(-4) || "");
 
-function saveNaiList() {
-    isEditingNaiList = false;
-}
+    let minDelaySeconds = ($settings.naiSettings?.minDelay ?? 20000) / 1000;
+    let maxAdditionalDelaySeconds =
+        ($settings.naiSettings?.maxAdditionalDelay ?? 10000) / 1000;
 
-function resetNaiList() {
-    $settings.naiSettings.naiGenerationList = DEFAULT_EMOTIONS;
-}
+    $: $settings.naiSettings.minDelay = minDelaySeconds * 1000;
+    $: $settings.naiSettings.maxAdditionalDelay =
+        maxAdditionalDelaySeconds * 1000;
 
-function generateAllStickers() {
-    console.log("generateAllStickers");
-}
+    let isEditingNaiList = false;
+
+    let newNaiItem = { title: "", emotion: "", action: "" };
+
+    function addNaiItem() {
+        if (!newNaiItem.title.trim()) return;
+        if (!$settings.naiSettings.naiGenerationList) {
+            $settings.naiSettings.naiGenerationList = [];
+        }
+        $settings.naiSettings.naiGenerationList = [
+            ...$settings.naiSettings.naiGenerationList,
+            { ...newNaiItem },
+        ];
+        newNaiItem = { title: "", emotion: "", action: "" };
+    }
+
+    function deleteNaiItem(index) {
+        $settings.naiSettings.naiGenerationList.splice(index, 1);
+        $settings.naiSettings.naiGenerationList =
+            $settings.naiSettings.naiGenerationList;
+    }
+
+    function saveNaiList() {
+        isEditingNaiList = false;
+    }
+
+    function resetNaiList() {
+        $settings.naiSettings.naiGenerationList = DEFAULT_EMOTIONS;
+    }
+
+    function generateAllStickers() {
+        console.log("generateAllStickers");
+    }
 </script>
 
 <div class="flex flex-col h-full">

@@ -1,5 +1,5 @@
-<script>
-import { onMount, afterUpdate } from "svelte";
+<script lang="ts">
+import { afterUpdate } from "svelte";
 import { t } from "$root/i18n";
 import {
     characters,
@@ -12,9 +12,7 @@ import {
     searchQuery,
     messages,
     groupChats,
-    openChats,
     unreadCounts,
-    editingGroupChat,
     editingChatRoomId,
 } from "../stores/chat";
 import {
@@ -45,12 +43,14 @@ import {
     Users,
     Globe,
     X,
-} from "lucide-svelte";
+} from "@lucide/svelte";
 import GroupChatList from "./sidebar/GroupChatList.svelte";
 import OpenChatList from "./sidebar/OpenChatList.svelte";
 import AuthWidget from "./auth/AuthWidget.svelte";
 
-let characterGroupEls = {};
+let characterGroupEls: {
+    [key: number]: HTMLElement;
+} = {};
 let avatarEls = {};
 let headerEls = {};
 let roomListEls = {};
@@ -80,7 +80,7 @@ afterUpdate(() => {
     });
 });
 
-function updateTreeLine(characterId) {
+function updateTreeLine(characterId: number) {
     const characterGroup = characterGroupEls[characterId];
     const avatar = avatarEls[characterId];
     const header = headerEls[characterId];
@@ -383,7 +383,7 @@ function cancelEdit() {
                                             >
                                                 {char.name ||
                                                     t(
-                                                        "sidebar.unknownCharacter"
+                                                        "sidebar.unknownCharacter",
                                                     )}
                                             </h3>
                                             <div
@@ -406,12 +406,12 @@ function cancelEdit() {
                                         >
                                             {lastAiMessage?.content?.substring(
                                                 0,
-                                                35
+                                                35,
                                             ) || t("sidebar.startNewChat")}
                                         </p>
                                         <p class="text-xs text-gray-500 mt-1">
                                             {rooms.length}{t(
-                                                "sidebar.chatRoomCount"
+                                                "sidebar.chatRoomCount",
                                             )}
                                         </p>
                                     </div>
@@ -422,7 +422,7 @@ function cancelEdit() {
                                     <button
                                         on:click|stopPropagation={() =>
                                             createNewChatRoomForCharacter(
-                                                char.id
+                                                char.id,
                                             )}
                                         class="p-1.5 bg-gray-700/50 hover:bg-green-600 rounded-lg text-gray-300 hover:text-white transition-colors"
                                         title={t("sidebar.newChatRoom")}
@@ -477,11 +477,11 @@ function cancelEdit() {
                                                     on:click|stopPropagation={() =>
                                                         deleteChatRoom(
                                                             room,
-                                                            char.id
+                                                            char.id,
                                                         )}
                                                     class="p-1 bg-gray-700 hover:bg-red-600 rounded text-gray-300 hover:text-white transition-colors"
                                                     title={t(
-                                                        "sidebar.deleteChatRoom"
+                                                        "sidebar.deleteChatRoom",
                                                     )}
                                                 >
                                                     <Trash2 class="w-3 h-3" />
@@ -491,7 +491,7 @@ function cancelEdit() {
                                                 on:click|stopPropagation={() =>
                                                     selectChat(room.id)}
                                                 on:keydown|stopPropagation={(
-                                                    e
+                                                    e,
                                                 ) => {
                                                     if (
                                                         e.key === "Enter" ||
@@ -519,7 +519,7 @@ function cancelEdit() {
                                                                     "Enter" &&
                                                                 saveName(
                                                                     room,
-                                                                    char.id
+                                                                    char.id,
                                                                 )}
                                                             type="text"
                                                             class="w-full px-2 py-1 bg-gray-600 text-white rounded border-gray-500 focus:ring-1 focus:ring-blue-500 text-sm"
@@ -528,7 +528,7 @@ function cancelEdit() {
                                                             on:click|stopPropagation={() =>
                                                                 saveName(
                                                                     room,
-                                                                    char.id
+                                                                    char.id,
                                                                 )}
                                                             class="p-1 bg-blue-600 hover:bg-blue-700 rounded"
                                                             ><Check
@@ -570,14 +570,14 @@ function cancelEdit() {
                                                         >
                                                             {lastMessage?.content ||
                                                                 t(
-                                                                    "sidebar.startChatting"
+                                                                    "sidebar.startChatting",
                                                                 )}
                                                         </p>
                                                         {#if lastMessage}
                                                             <span
                                                                 class="shrink-0"
                                                                 >{formatTimestamp(
-                                                                    lastMessage.timestamp
+                                                                    lastMessage.timestamp,
                                                                 )}</span
                                                             >
                                                         {/if}

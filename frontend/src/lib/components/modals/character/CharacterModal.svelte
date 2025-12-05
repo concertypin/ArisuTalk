@@ -1,413 +1,429 @@
-<script>
-import { onMount, onDestroy } from "svelte";
-import { get } from "svelte/store";
-import { t } from "$root/i18n";
-import {
-    characters,
-    editingCharacter,
-    phonebookImportResult,
-} from "../../../stores/character";
-import { settings, experimentalTracingOptIn } from "../../../stores/settings";
-import {
-    isCharacterModalVisible,
-    isSNSCharacterListModalVisible,
-    isPhonebookModalVisible,
-    phonebookAccessState,
-} from "../../../stores/ui";
-import {
-    X,
-    Image,
-    Upload,
-    Download,
-    ChevronDown,
-    Sparkles,
-    MessageSquarePlus,
-    Instagram,
-} from "lucide-svelte";
-import { fade } from "svelte/transition";
-import { createEventDispatcher } from "svelte";
-import CharacterMemory from "./CharacterMemory.svelte";
-import CharacterStickers from "./CharacterStickers.svelte";
-import CharacterAISettings from "./CharacterAISettings.svelte";
-import CharacterHypnosis from "./CharacterHypnosis.svelte";
-import { APIManager } from "../../../api/apiManager";
-import { auth } from "../../../stores/auth";
-import {
-    dataUrlToUint8Array,
-    uint8ArrayToDataUrl,
-    addPngChunk,
-    extractPngChunk,
-    compressData,
-    decompressData,
-} from "../../../utils/png-utils";
+<script lang="ts">
+    import { createBubbler, stopPropagation } from "svelte/legacy";
 
-const dispatch = createEventDispatcher();
+    const bubble = createBubbler();
+    import { onMount, onDestroy } from "svelte";
+    import { get } from "svelte/store";
+    import { t } from "$root/i18n";
+    import {
+        characters,
+        editingCharacter,
+        phonebookImportResult,
+    } from "../../../stores/character";
+    import {
+        settings,
+        experimentalTracingOptIn,
+    } from "../../../stores/settings";
+    import {
+        isCharacterModalVisible,
+        isSNSCharacterListModalVisible,
+        isPhonebookModalVisible,
+        phonebookAccessState,
+    } from "../../../stores/ui";
+    import {
+        X,
+        Image,
+        Upload,
+        Download,
+        ChevronDown,
+        Sparkles,
+        MessageSquarePlus,
+        Instagram,
+    } from "@lucide/svelte";
+    import { fade } from "svelte/transition";
+    import { createEventDispatcher } from "svelte";
+    import CharacterMemory from "./CharacterMemory.svelte";
+    import CharacterStickers from "./CharacterStickers.svelte";
+    import CharacterAISettings from "./CharacterAISettings.svelte";
+    import CharacterHypnosis from "./CharacterHypnosis.svelte";
+    import { APIManager } from "../../../api/apiManager";
+    import { auth } from "../../../stores/auth";
+    import {
+        dataUrlToUint8Array,
+        uint8ArrayToDataUrl,
+        addPngChunk,
+        extractPngChunk,
+        compressData,
+        decompressData,
+    } from "../../../utils/png-utils";
+    import type { Character } from "$types/character";
+    import { ChangeEventHandler } from "svelte/elements";
 
-let isNew = false;
-let characterData = {};
-let avatarInput;
-let cardInput;
-let isGeneratingPersona = false;
-const apiManager = new APIManager();
-let phonebookUnsubscribe;
-let isCheckingPhonebook = false;
+    let isNew = $state(false);
+    let characterData = $state<Character>();
+    let avatarInput = $state();
+    let cardInput = $state();
+    let isGeneratingPersona = $state(false);
+    const apiManager = new APIManager();
+    let phonebookUnsubscribe;
+    let isCheckingPhonebook = false;
 
-const defaultHypnosis = {
-    enabled: false,
-    affection: 0.5,
-    intimacy: 0.5,
-    trust: 0.5,
-    romantic_interest: 0,
-    force_love_unlock: false,
-    sns_full_access: false,
-    secret_account_access: false,
-    sns_edit_access: false,
-    affection_override: false,
-};
-
-editingCharacter.subscribe((char) => {
-    if (char) {
-        isNew = false;
-        characterData = JSON.parse(JSON.stringify(char)); // Deep copy
-        if (!characterData.memories) characterData.memories = [];
-        if (!characterData.stickers) characterData.stickers = [];
-        if (!characterData.naiSettings)
-            characterData.naiSettings = {
-                qualityPrompt: "masterpiece, best quality",
-                autoGenerate: false,
-            };
-        if (!characterData.hypnosis)
-            characterData.hypnosis = { ...defaultHypnosis };
-    } else {
-        isNew = true;
-        characterData = {
-            name: "",
-            prompt: "",
-            avatar: null,
-            appearance: "",
-            proactiveEnabled: true,
-            responseTime: 5,
-            thinkingTime: 5,
-            reactivity: 5,
-            tone: 5,
-            memories: [],
-            stickers: [],
-            naiSettings: {
-                qualityPrompt: "masterpiece, best quality",
-                autoGenerate: false,
-            },
-            hypnosis: { ...defaultHypnosis },
-        }; // Default new character
-    }
-});
-
-function closeModal() {
-    isCharacterModalVisible.set(false);
-    editingCharacter.set(null);
-}
-
-function saveCharacter() {
-    if (isNew) {
-        characters.update((chars) => {
-            const newChar = { ...characterData, id: `char_${Date.now()}` };
-            return [...chars, newChar];
-        });
-    } else {
-        characters.update((chars) => {
-            const index = chars.findIndex((c) => c.id === characterData.id);
-            if (index !== -1) {
-                chars[index] = characterData;
-            }
-            return chars;
-        });
-    }
-    closeModal();
-}
-
-function selectAvatar() {
-    avatarInput.click();
-}
-
-function handleAvatarChange(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        characterData.avatar = e.target.result;
-        // Force reactivity
-        characterData = characterData;
-    };
-    reader.readAsDataURL(file);
-}
-
-async function generatePersona() {
-    if (!characterData.name.trim()) {
-        alert(t("modal.characterNameRequiredMessage"));
-        return;
-    }
-
-    isGeneratingPersona = true;
-    try {
-        const provider = $settings.apiProvider;
-        const config = $settings.apiConfigs[provider] || {};
-        const generatedPrompt = await apiManager.generateCharacterSheet(
-            provider,
-            config.apiKey,
-            config.model,
-            {
-                characterName: characterData.name,
-                systemPrompt: $settings.prompts.characterSheet,
-            },
-            config.baseUrl,
-        );
-        characterData.prompt = generatedPrompt;
-    } catch (error) {
-        console.error("Error generating character prompt:", error);
-        alert(`${t("modal.generationFailed.title")}: ${error.message}`);
-    } finally {
-        isGeneratingPersona = false;
-    }
-}
-
-function importCard() {
-    cardInput.click();
-}
-
-async function handleCardChange(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const imageSrc = e.target.result;
-        const image = new Image();
-        image.onload = async () => {
-            try {
-                const pngData = dataUrlToUint8Array(imageSrc);
-
-                let chunkData = extractPngChunk(pngData, "cChr");
-                let jsonString;
-
-                if (chunkData) {
-                    const decompressedData = await compressData(chunkData);
-                    jsonString = new TextDecoder().decode(decompressedData);
-                } else {
-                    chunkData = extractPngChunk(pngData, "chAr");
-                    if (chunkData) {
-                        jsonString = new TextDecoder().decode(chunkData);
-                    }
-                }
-
-                if (jsonString) {
-                    const data = JSON.parse(jsonString);
-                    if (data.source === "PersonaChatAppCharacterCard") {
-                        characterData = {
-                            ...characterData,
-                            ...data,
-                            avatar: imageSrc,
-                        };
-                        alert(t("modal.avatarLoadSuccess.message"));
-                        return;
-                    }
-                }
-            } catch (err) {
-                console.error(
-                    "Failed to parse character data from image:",
-                    err,
-                );
-            }
-
-            alert(t("modal.characterCardNoAvatarImageInfo.message"));
-            characterData.avatar = imageSrc;
-            characterData = characterData;
-        };
-        image.src = imageSrc;
-    };
-    reader.readAsDataURL(file);
-}
-
-async function exportCard() {
-    if (!characterData.name) {
-        alert(t("modal.characterCardNoNameError.message"));
-        return;
-    }
-    if (!characterData.avatar) {
-        alert(t("modal.characterCardNoAvatarImageError.message"));
-        return;
-    }
-
-    const dataToSave = {
-        name: characterData.name,
-        prompt: characterData.prompt,
-        responseTime: characterData.responseTime,
-        thinkingTime: characterData.thinkingTime,
-        reactivity: characterData.reactivity,
-        tone: characterData.tone,
-        source: "PersonaChatAppCharacterCard",
-        memories: characterData.memories,
-        proactiveEnabled: characterData.proactiveEnabled,
-        stickers: characterData.stickers,
+    const defaultHypnosis = {
+        enabled: false,
+        affection: 0.5,
+        intimacy: 0.5,
+        trust: 0.5,
+        romantic_interest: 0,
+        force_love_unlock: false,
+        sns_full_access: false,
+        secret_account_access: false,
+        sns_edit_access: false,
+        affection_override: false,
     };
 
-    const image = new Image();
-    image.crossOrigin = "Anonymous";
-    image.onload = async () => {
-        try {
-            const canvas = document.createElement("canvas");
-            canvas.width = 1024;
-            canvas.height = 1024;
-            const ctx = canvas.getContext("2d");
-            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-
-            const jsonString = JSON.stringify(dataToSave);
-            const dataUrl = canvas.toDataURL("image/png");
-            const pngData = dataUrlToUint8Array(dataUrl);
-            const characterDataBytes = new TextEncoder().encode(jsonString);
-            const compressedData = await compressData(characterDataBytes);
-            const newPngData = addPngChunk(pngData, "cChr", compressedData);
-            const newDataUrl = uint8ArrayToDataUrl(newPngData);
-
-            const link = document.createElement("a");
-            link.href = newDataUrl;
-            link.download = `${characterData.name}_card.png`;
-            link.click();
-        } catch (error) {
-            console.error("Character card save failed:", error);
-            alert(t("modal.characterCardSaveError.message"));
+    editingCharacter.subscribe((char) => {
+        if (char) {
+            isNew = false;
+            characterData = structuredClone(char) satisfies Character;
+            if (!characterData.memories) characterData.memories = [];
+            if (!characterData.stickers) characterData.stickers = [];
+            if (!characterData.naiSettings)
+                characterData.naiSettings = {
+                    qualityPrompt: "masterpiece, best quality",
+                    autoGenerate: false,
+                };
+            if (!characterData.hypnosis)
+                characterData.hypnosis = { ...defaultHypnosis };
+        } else {
+            isNew = true;
+            characterData = {
+                name: "",
+                prompt: "",
+                avatar: null,
+                appearance: "",
+                proactiveEnabled: true,
+                responseTime: 5,
+                thinkingTime: 5,
+                reactivity: 5,
+                tone: 5,
+                memories: [],
+                stickers: [],
+                naiSettings: {
+                    qualityPrompt: "masterpiece, best quality",
+                    autoGenerate: false,
+                },
+                hypnosis: { ...defaultHypnosis },
+            }; // Default new character
         }
-    };
-    image.onerror = () => alert(t("modal.avatarImageLoadError.message"));
-    image.src = characterData.avatar;
-}
-
-function handleKeydown(event) {
-    if (event.key === "Escape") {
-        closeModal();
-    }
-}
-
-onMount(() => {
-    window.addEventListener("keydown", handleKeydown);
-
-    phonebookUnsubscribe = phonebookImportResult.subscribe((result) => {
-        if (!result) {
-            return;
-        }
-
-        const imported = result.character;
-        const mergedData = {
-            ...characterData,
-            ...imported,
-        };
-
-        if (imported.avatar !== undefined) {
-            mergedData.avatar = imported.avatar;
-        }
-
-        if (!mergedData.memories) {
-            mergedData.memories = [];
-        }
-        if (!mergedData.stickers) {
-            mergedData.stickers = [];
-        }
-        if (!mergedData.naiSettings) {
-            mergedData.naiSettings = {
-                qualityPrompt: "masterpiece, best quality",
-                autoGenerate: false,
-            };
-        }
-        if (!mergedData.hypnosis) {
-            mergedData.hypnosis = { ...defaultHypnosis };
-        }
-
-        characterData = mergedData;
-        isNew = true;
-        phonebookImportResult.set(null);
     });
 
-    // Auto-verify phonebook access when modal mounts so button is only shown when enabled.
-    (async () => {
-        if (!$experimentalTracingOptIn) {
-            phonebookAccessState.set("disabled");
+    function closeModal() {
+        isCharacterModalVisible.set(false);
+        editingCharacter.set(null);
+    }
+
+    function saveCharacter() {
+        if (isNew) {
+            characters.update((chars) => {
+                const newChar = { ...characterData, id: `char_${Date.now()}` };
+                return [...chars, newChar];
+            });
+        } else {
+            characters.update((chars) => {
+                const index = chars.findIndex((c) => c.id === characterData.id);
+                if (index !== -1) {
+                    chars[index] = characterData;
+                }
+                return chars;
+            });
+        }
+        closeModal();
+    }
+
+    function selectAvatar() {
+        avatarInput.click();
+    }
+
+    function handleAvatarChange(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            characterData.avatar = e.target.result;
+            // Force reactivity
+            characterData = characterData;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async function generatePersona() {
+        if (!characterData.name.trim()) {
+            alert(t("modal.characterNameRequiredMessage"));
             return;
         }
 
-        if (!$auth.isSignedIn) return;
-        const access = get(phonebookAccessState);
-        if (access !== "unknown") return;
-
-        isCheckingPhonebook = true;
+        isGeneratingPersona = true;
         try {
-            const service = await import(
-                "../../../services/phonebookService.ts"
+            const provider = $settings.apiProvider;
+            const config = $settings.apiConfigs[provider] || {};
+            const generatedPrompt = await apiManager.generateCharacterSheet(
+                provider,
+                config.apiKey,
+                config.model,
+                {
+                    characterName: characterData.name,
+                    systemPrompt: $settings.prompts.characterSheet,
+                },
+                config.baseUrl,
             );
-            const allowed = await service.verifyPhonebookAccess($auth.clerk);
-            phonebookAccessState.set(allowed ? "enabled" : "disabled");
+            characterData.prompt = generatedPrompt;
         } catch (error) {
-            console.error("Phonebook auto verification failed", error);
-            phonebookAccessState.set("disabled");
+            console.error("Error generating character prompt:", error);
+            alert(`${t("modal.generationFailed.title")}: ${error.message}`);
         } finally {
-            isCheckingPhonebook = false;
+            isGeneratingPersona = false;
         }
-    })();
-});
-
-onDestroy(() => {
-    window.removeEventListener("keydown", handleKeydown);
-    phonebookUnsubscribe?.();
-});
-
-/**
- * Attempt to open the shared phonebook modal for importing characters.
- * Ensures the feature flag check passes before revealing the modal.
- */
-async function openPhonebook() {
-    if (!$experimentalTracingOptIn) {
-        alert(t("phonebook.experimentalRequired"));
-        return;
     }
 
-    if (!$auth.isSignedIn) {
-        alert(t("phonebook.signInRequired"));
-        return;
+    function importCard() {
+        cardInput.click();
     }
 
-    let access = get(phonebookAccessState);
-    if (access === "disabled") {
-        return;
+    type OnChangeEvent = Parameters<
+        NonNullable<HTMLInputElement["onchange"]>
+    >["0"];
+    async function handleCardChange(
+        event: Parameters<ChangeEventHandler<HTMLInputElement>>["0"],
+    ) {
+        if (!event.target) return;
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const imageSrc = e.target.result;
+            const image = new Image();
+            image.onload = async () => {
+                try {
+                    const pngData = dataUrlToUint8Array(imageSrc);
+
+                    let chunkData = extractPngChunk(pngData, "cChr");
+                    let jsonString;
+
+                    if (chunkData) {
+                        const decompressedData = await compressData(chunkData);
+                        jsonString = new TextDecoder().decode(decompressedData);
+                    } else {
+                        chunkData = extractPngChunk(pngData, "chAr");
+                        if (chunkData) {
+                            jsonString = new TextDecoder().decode(chunkData);
+                        }
+                    }
+
+                    if (jsonString) {
+                        const data = JSON.parse(jsonString);
+                        if (data.source === "PersonaChatAppCharacterCard") {
+                            characterData = {
+                                ...characterData,
+                                ...data,
+                                avatar: imageSrc,
+                            };
+                            alert(t("modal.avatarLoadSuccess.message"));
+                            return;
+                        }
+                    }
+                } catch (err) {
+                    console.error(
+                        "Failed to parse character data from image:",
+                        err,
+                    );
+                }
+
+                alert(t("modal.characterCardNoAvatarImageInfo.message"));
+                characterData.avatar = imageSrc;
+                characterData = characterData;
+            };
+            image.src = imageSrc;
+        };
+        reader.readAsDataURL(file);
     }
 
-    let verificationFailed = false;
-
-    if (access === "unknown") {
-        isCheckingPhonebook = true;
-        try {
-            const service = await import(
-                "../../../services/phonebookService.ts"
-            );
-            const allowed = await service.verifyPhonebookAccess($auth.clerk);
-            phonebookAccessState.set(allowed ? "enabled" : "disabled");
-            verificationFailed = !allowed;
-        } catch (error) {
-            console.error("Phonebook availability check failed", error);
-            phonebookAccessState.set("disabled");
-            verificationFailed = true;
-        } finally {
-            isCheckingPhonebook = false;
+    async function exportCard() {
+        if (!characterData.name) {
+            alert(t("modal.characterCardNoNameError.message"));
+            return;
         }
-        access = get(phonebookAccessState);
-    }
-
-    if (access !== "enabled") {
-        if (verificationFailed) {
-            alert(t("phonebook.checkFailed"));
+        if (!characterData.avatar) {
+            alert(t("modal.characterCardNoAvatarImageError.message"));
+            return;
         }
-        return;
+
+        const dataToSave = {
+            name: characterData.name,
+            prompt: characterData.prompt,
+            responseTime: characterData.responseTime,
+            thinkingTime: characterData.thinkingTime,
+            reactivity: characterData.reactivity,
+            tone: characterData.tone,
+            source: "PersonaChatAppCharacterCard",
+            memories: characterData.memories,
+            proactiveEnabled: characterData.proactiveEnabled,
+            stickers: characterData.stickers,
+        };
+
+        const image = new Image();
+        image.crossOrigin = "Anonymous";
+        image.onload = async () => {
+            try {
+                const canvas = document.createElement("canvas");
+                canvas.width = 1024;
+                canvas.height = 1024;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+                const jsonString = JSON.stringify(dataToSave);
+                const dataUrl = canvas.toDataURL("image/png");
+                const pngData = dataUrlToUint8Array(dataUrl);
+                const characterDataBytes = new TextEncoder().encode(jsonString);
+                const compressedData = await compressData(characterDataBytes);
+                const newPngData = addPngChunk(pngData, "cChr", compressedData);
+                const newDataUrl = uint8ArrayToDataUrl(newPngData);
+
+                const link = document.createElement("a");
+                link.href = newDataUrl;
+                link.download = `${characterData.name}_card.png`;
+                link.click();
+            } catch (error) {
+                console.error("Character card save failed:", error);
+                alert(t("modal.characterCardSaveError.message"));
+            }
+        };
+        image.onerror = () => alert(t("modal.avatarImageLoadError.message"));
+        image.src = characterData.avatar;
     }
 
-    isPhonebookModalVisible.set(true);
-}
+    function handleKeydown(event) {
+        if (event.key === "Escape") {
+            closeModal();
+        }
+    }
+
+    onMount(() => {
+        window.addEventListener("keydown", handleKeydown);
+
+        phonebookUnsubscribe = phonebookImportResult.subscribe((result) => {
+            if (!result) {
+                return;
+            }
+
+            const imported = result.character;
+            const mergedData = {
+                ...characterData,
+                ...imported,
+            };
+
+            if (imported.avatar !== undefined) {
+                mergedData.avatar = imported.avatar;
+            }
+
+            if (!mergedData.memories) {
+                mergedData.memories = [];
+            }
+            if (!mergedData.stickers) {
+                mergedData.stickers = [];
+            }
+            if (!mergedData.naiSettings) {
+                mergedData.naiSettings = {
+                    qualityPrompt: "masterpiece, best quality",
+                    autoGenerate: false,
+                };
+            }
+            if (!mergedData.hypnosis) {
+                mergedData.hypnosis = { ...defaultHypnosis };
+            }
+
+            characterData = mergedData;
+            isNew = true;
+            phonebookImportResult.set(null);
+        });
+
+        // Auto-verify phonebook access when modal mounts so button is only shown when enabled.
+        (async () => {
+            if (!$experimentalTracingOptIn) {
+                phonebookAccessState.set("disabled");
+                return;
+            }
+
+            if (!$auth.isSignedIn) return;
+            const access = get(phonebookAccessState);
+            if (access !== "unknown") return;
+
+            isCheckingPhonebook = true;
+            try {
+                const service = await import(
+                    "../../../services/phonebookService.ts"
+                );
+                const allowed = await service.verifyPhonebookAccess(
+                    $auth.clerk,
+                );
+                phonebookAccessState.set(allowed ? "enabled" : "disabled");
+            } catch (error) {
+                console.error("Phonebook auto verification failed", error);
+                phonebookAccessState.set("disabled");
+            } finally {
+                isCheckingPhonebook = false;
+            }
+        })();
+    });
+
+    onDestroy(() => {
+        window.removeEventListener("keydown", handleKeydown);
+        phonebookUnsubscribe?.();
+    });
+
+    /**
+     * Attempt to open the shared phonebook modal for importing characters.
+     * Ensures the feature flag check passes before revealing the modal.
+     */
+    async function openPhonebook() {
+        if (!$experimentalTracingOptIn) {
+            alert(t("phonebook.experimentalRequired"));
+            return;
+        }
+
+        if (!$auth.isSignedIn) {
+            alert(t("phonebook.signInRequired"));
+            return;
+        }
+
+        let access = get(phonebookAccessState);
+        if (access === "disabled") {
+            return;
+        }
+
+        let verificationFailed = false;
+
+        if (access === "unknown") {
+            isCheckingPhonebook = true;
+            try {
+                const service = await import(
+                    "../../../services/phonebookService.ts"
+                );
+                const allowed = await service.verifyPhonebookAccess(
+                    $auth.clerk,
+                );
+                phonebookAccessState.set(allowed ? "enabled" : "disabled");
+                verificationFailed = !allowed;
+            } catch (error) {
+                console.error("Phonebook availability check failed", error);
+                phonebookAccessState.set("disabled");
+                verificationFailed = true;
+            } finally {
+                isCheckingPhonebook = false;
+            }
+            access = get(phonebookAccessState);
+        }
+
+        if (access !== "enabled") {
+            if (verificationFailed) {
+                alert(t("phonebook.checkFailed"));
+            }
+            return;
+        }
+
+        isPhonebookModalVisible.set(true);
+    }
 </script>
 
 {#if $isCharacterModalVisible}
@@ -423,8 +439,8 @@ async function openPhonebook() {
             tabindex="0"
             aria-labelledby="character-modal-title"
             class="bg-gray-800 rounded-2xl w-full max-w-md mx-auto my-auto flex flex-col max-h-[90vh]"
-            on:click|stopPropagation
-            on:keydown={(e) => {
+            onclick={stopPropagation(bubble("click"))}
+            onkeydown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
                 }
@@ -444,7 +460,7 @@ async function openPhonebook() {
                 <div class="flex items-center gap-2">
                     {#if !isNew}
                         <button
-                            on:click={() =>
+                            onclick={() =>
                                 isSNSCharacterListModalVisible.set(true)}
                             class="p-2 md:p-2 hover:bg-gray-700 rounded-full transition-colors z-20"
                             title={t("characterModal.openSNS")}
@@ -455,7 +471,7 @@ async function openPhonebook() {
                         </button>
                     {/if}
                     <button
-                        on:click={closeModal}
+                        onclick={closeModal}
                         class="p-1 hover:bg-gray-700 rounded-full"
                     >
                         <X class="w-5 h-5" />
@@ -480,14 +496,14 @@ async function openPhonebook() {
                     </div>
                     <div class="flex flex-col gap-2">
                         <button
-                            on:click={selectAvatar}
+                            onclick={selectAvatar}
                             class="py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2"
                         >
                             <Image class="w-4 h-4" />
                             {t("characterModal.profileImage")}
                         </button>
                         <button
-                            on:click={importCard}
+                            onclick={importCard}
                             class="py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2"
                         >
                             <Upload class="w-4 h-4" />
@@ -496,7 +512,7 @@ async function openPhonebook() {
 
                         {#if $auth.isSignedIn && $phonebookAccessState === "enabled"}
                             <button
-                                on:click={openPhonebook}
+                                onclick={openPhonebook}
                                 class="py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2"
                             >
                                 <MessageSquarePlus class="w-4 h-4" />
@@ -505,7 +521,7 @@ async function openPhonebook() {
                         {/if}
 
                         <button
-                            on:click={exportCard}
+                            onclick={exportCard}
                             class="py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm flex items-center justify-center gap-2"
                         >
                             <Download class="w-4 h-4" />
@@ -516,14 +532,14 @@ async function openPhonebook() {
                         type="file"
                         accept="image/png,image/jpeg"
                         bind:this={avatarInput}
-                        on:change={handleAvatarChange}
+                        onchange={handleAvatarChange}
                         class="hidden"
                     />
                     <input
                         type="file"
                         accept="image/png"
                         bind:this={cardInput}
-                        on:change={handleCardChange}
+                        onchange={handleCardChange}
                         class="hidden"
                     />
                 </div>
@@ -549,7 +565,7 @@ async function openPhonebook() {
                             >{t("characterModal.promptLabel")}</label
                         >
                         <button
-                            on:click={generatePersona}
+                            onclick={generatePersona}
                             disabled={isGeneratingPersona}
                             class="py-1 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-xs flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
@@ -559,7 +575,7 @@ async function openPhonebook() {
                                 ></div>
                             {:else}
                                 <Sparkles class="w-3 h-3" /> AI {t(
-                                    "ui.generate"
+                                    "ui.generate",
                                 )}
                             {/if}
                         </button>
@@ -603,7 +619,7 @@ async function openPhonebook() {
                                     ><MessageSquarePlus
                                         class="w-4 h-4 mr-2"
                                     />{t(
-                                        "characterModal.proactiveToggle"
+                                        "characterModal.proactiveToggle",
                                     )}</span
                                 >
                                 <div
@@ -645,7 +661,7 @@ async function openPhonebook() {
                                         class="text-sm font-medium text-gray-300 mb-2"
                                     >
                                         {t(
-                                            "characterModalSlider.responseTime.description"
+                                            "characterModalSlider.responseTime.description",
                                         )}
                                     </p>
                                     <input
@@ -660,12 +676,12 @@ async function openPhonebook() {
                                     >
                                         <span
                                             >{t(
-                                                "characterModalSlider.responseTime.low"
+                                                "characterModalSlider.responseTime.low",
                                             )}</span
                                         >
                                         <span
                                             >{t(
-                                                "characterModalSlider.responseTime.high"
+                                                "characterModalSlider.responseTime.high",
                                             )}</span
                                         >
                                     </div>
@@ -675,7 +691,7 @@ async function openPhonebook() {
                                         class="text-sm font-medium text-gray-300 mb-2"
                                     >
                                         {t(
-                                            "characterModalSlider.thinkingTime.description"
+                                            "characterModalSlider.thinkingTime.description",
                                         )}
                                     </p>
                                     <input
@@ -690,12 +706,12 @@ async function openPhonebook() {
                                     >
                                         <span
                                             >{t(
-                                                "characterModalSlider.thinkingTime.low"
+                                                "characterModalSlider.thinkingTime.low",
                                             )}</span
                                         >
                                         <span
                                             >{t(
-                                                "characterModalSlider.thinkingTime.high"
+                                                "characterModalSlider.thinkingTime.high",
                                             )}</span
                                         >
                                     </div>
@@ -705,7 +721,7 @@ async function openPhonebook() {
                                         class="text-sm font-medium text-gray-300 mb-2"
                                     >
                                         {t(
-                                            "characterModalSlider.reactivity.description"
+                                            "characterModalSlider.reactivity.description",
                                         )}
                                     </p>
                                     <input
@@ -720,12 +736,12 @@ async function openPhonebook() {
                                     >
                                         <span
                                             >{t(
-                                                "characterModalSlider.reactivity.low"
+                                                "characterModalSlider.reactivity.low",
                                             )}</span
                                         >
                                         <span
                                             >{t(
-                                                "characterModalSlider.reactivity.high"
+                                                "characterModalSlider.reactivity.high",
                                             )}</span
                                         >
                                     </div>
@@ -735,7 +751,7 @@ async function openPhonebook() {
                                         class="text-sm font-medium text-gray-300 mb-2"
                                     >
                                         {t(
-                                            "characterModalSlider.tone.description"
+                                            "characterModalSlider.tone.description",
                                         )}
                                     </p>
                                     <input
@@ -750,12 +766,12 @@ async function openPhonebook() {
                                     >
                                         <span
                                             >{t(
-                                                "characterModalSlider.tone.low"
+                                                "characterModalSlider.tone.low",
                                             )}</span
                                         >
                                         <span
                                             >{t(
-                                                "characterModalSlider.tone.high"
+                                                "characterModalSlider.tone.high",
                                             )}</span
                                         >
                                     </div>
@@ -766,27 +782,30 @@ async function openPhonebook() {
                         <CharacterStickers
                             bind:stickers={characterData.stickers}
                         >
-                            <ChevronDown
-                                slot="chevron"
-                                class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"
-                            />
+                            {#snippet chevron()}
+                                <ChevronDown
+                                    class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"
+                                />
+                            {/snippet}
                         </CharacterStickers>
 
                         <CharacterMemory bind:memories={characterData.memories}>
-                            <ChevronDown
-                                slot="chevron"
-                                class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"
-                            />
+                            {#snippet chevron()}
+                                <ChevronDown
+                                    class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"
+                                />
+                            {/snippet}
                         </CharacterMemory>
                     </div>
                 </details>
 
                 {#if !isNew}
                     <CharacterHypnosis bind:hypnosis={characterData.hypnosis}>
-                        <ChevronDown
-                            slot="chevron"
-                            class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"
-                        />
+                        {#snippet chevron()}
+                            <ChevronDown
+                                class="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180"
+                            />
+                        {/snippet}
                     </CharacterHypnosis>
                 {/if}
             </div>
@@ -794,12 +813,12 @@ async function openPhonebook() {
                 class="p-6 mt-auto border-t border-gray-700 shrink-0 flex justify-end space-x-3"
             >
                 <button
-                    on:click={closeModal}
+                    onclick={closeModal}
                     class="flex-1 md:flex-none py-2.5 px-6 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
                     >{t("common.cancel")}</button
                 >
                 <button
-                    on:click={saveCharacter}
+                    onclick={saveCharacter}
                     class="flex-1 md:flex-none py-2.5 px-6 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                     >{t("common.save")}</button
                 >

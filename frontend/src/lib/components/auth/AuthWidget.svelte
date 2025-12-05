@@ -156,24 +156,4 @@ $: displayName = getUserDisplayName();
         background-color: rgba(59, 130, 246, 0.35);
         color: white;
     }
-
-    .auth-widget__status {
-        font-size: 0.75rem;
-        color: rgb(148, 163, 184);
-    }
-
-    .auth-widget__disabled {
-        display: inline-flex;
-        flex-direction: column;
-        gap: 0.25rem;
-        font-size: 0.75rem;
-        color: rgb(148, 163, 184);
-    }
-
-    .auth-widget__hint {
-        font-size: 0.7rem;
-        max-width: 16rem;
-        line-height: 1.2;
-        color: rgb(191, 219, 254);
-    }
 </style>

@@ -1,22 +1,22 @@
 <script>
-import { t } from "$root/i18n";
-import { PlusCircle, Trash2 } from "lucide-svelte";
+    import { t } from "$root/i18n";
+    import { PlusCircle, Trash2 } from "@lucide/svelte";
 
-export let memories = [];
+    export let memories = [];
 
-function addMemory() {
-    memories = [...memories, ""];
-}
+    function addMemory() {
+        memories = [...memories, ""];
+    }
 
-function deleteMemory(index) {
-    memories = memories.filter((_, i) => i !== index);
-}
+    function deleteMemory(index) {
+        memories = memories.filter((_, i) => i !== index);
+    }
 
-function updateMemory(index, value) {
-    memories[index] = value;
-    // Svelte needs a reassignment to trigger reactivity for arrays
-    memories = memories;
-}
+    function updateMemory(index, value) {
+        memories[index] = value;
+        // Svelte needs a reassignment to trigger reactivity for arrays
+        memories = memories;
+    }
 </script>
 
 <details class="group border-t border-gray-700/50 pt-4">

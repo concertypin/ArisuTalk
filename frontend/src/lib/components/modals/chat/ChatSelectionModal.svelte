@@ -1,63 +1,63 @@
 <script>
-import { onMount, onDestroy } from "svelte";
-import { t } from "$root/i18n";
-import { createEventDispatcher } from "svelte";
-import { fade } from "svelte/transition";
-import { X, PlusCircle } from "lucide-svelte";
-import {
-    chatRooms,
-    messages,
-    unreadCounts,
-    selectedChatId,
-} from "../../../stores/chat";
-import { characters } from "../../../stores/character";
-import Avatar from "../../Avatar.svelte";
+    import { onMount, onDestroy } from "svelte";
+    import { t } from "$root/i18n";
+    import { createEventDispatcher } from "svelte";
+    import { fade } from "svelte/transition";
+    import { X, PlusCircle } from "@lucide/svelte";
+    import {
+        chatRooms,
+        messages,
+        unreadCounts,
+        selectedChatId,
+    } from "../../../stores/chat";
+    import { characters } from "../../../stores/character";
+    import Avatar from "../../Avatar.svelte";
 
-export let isOpen = false;
-export let character = null;
+    export let isOpen = false;
+    export let character = null;
 
-const dispatch = createEventDispatcher();
+    const dispatch = createEventDispatcher();
 
-let characterChatRooms = [];
+    let characterChatRooms = [];
 
-$: {
-    if (character && $chatRooms[character.id]) {
-        characterChatRooms = [...$chatRooms[character.id]].sort((a, b) => {
-            const lastMessageA = $messages[a.id]?.slice(-1)[0];
-            const lastMessageB = $messages[b.id]?.slice(-1)[0];
-            const timeA = lastMessageA ? lastMessageA.id : a.createdAt || 0;
-            const timeB = lastMessageB ? lastMessageB.id : b.createdAt || 0;
-            return timeB - timeA; // Newest first
-        });
+    $: {
+        if (character && $chatRooms[character.id]) {
+            characterChatRooms = [...$chatRooms[character.id]].sort((a, b) => {
+                const lastMessageA = $messages[a.id]?.slice(-1)[0];
+                const lastMessageB = $messages[b.id]?.slice(-1)[0];
+                const timeA = lastMessageA ? lastMessageA.id : a.createdAt || 0;
+                const timeB = lastMessageB ? lastMessageB.id : b.createdAt || 0;
+                return timeB - timeA; // Newest first
+            });
+        }
     }
-}
 
-function selectChat(chatRoomId) {
-    selectedChatId.set(chatRoomId);
-    dispatch("close");
-}
-
-function createNewChat() {
-    dispatch("createNewChat");
-}
-
-function closeModal() {
-    dispatch("close");
-}
-
-function handleKeydown(event) {
-    if (event.key === "Escape") {
-        closeModal();
+    function selectChat(chatRoomId) {
+        selectedChatId.set(chatRoomId);
+        dispatch("close");
     }
-}
 
-onMount(() => {
-    window.addEventListener("keydown", handleKeydown);
-});
+    function createNewChat() {
+        dispatch("createNewChat");
+    }
 
-onDestroy(() => {
-    window.removeEventListener("keydown", handleKeydown);
-});
+    function closeModal() {
+        dispatch("close");
+    }
+
+    function handleKeydown(event) {
+        if (event.key === "Escape") {
+            closeModal();
+        }
+    }
+
+    onMount(() => {
+        window.addEventListener("keydown", handleKeydown);
+    });
+
+    onDestroy(() => {
+        window.removeEventListener("keydown", handleKeydown);
+    });
 </script>
 
 {#if isOpen && character}

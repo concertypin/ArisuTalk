@@ -1,30 +1,36 @@
 <script>
-import { t } from "$root/i18n";
-import { createEventDispatcher } from "svelte";
-import { ArrowLeft, Globe, Settings, FilePenLine, Edit } from "lucide-svelte";
-import { settings } from "../../../stores/settings";
-import ProviderSettings from "../../settings/ProviderSettings.svelte";
+    import { t } from "$root/i18n";
+    import { createEventDispatcher } from "svelte";
+    import {
+        ArrowLeft,
+        Globe,
+        Settings,
+        FilePenLine,
+        Edit,
+    } from "@lucide/svelte";
+    import { settings } from "../../../stores/settings";
+    import ProviderSettings from "../../settings/ProviderSettings.svelte";
 
-const dispatch = createEventDispatcher();
+    const dispatch = createEventDispatcher();
 
-let provider = $settings.apiProvider || "gemini";
+    let provider = $settings.apiProvider || "gemini";
 
-function handleProviderChange(e) {
-    provider = e.target.value;
-    settings.update((s) => ({ ...s, apiProvider: provider }));
-}
+    function handleProviderChange(e) {
+        provider = e.target.value;
+        settings.update((s) => ({ ...s, apiProvider: provider }));
+    }
 
-function getProviderDisplayName(p) {
-    const displayNames = {
-        gemini: "Google Gemini",
-        claude: "Anthropic Claude",
-        openai: "OpenAI ChatGPT",
-        grok: "xAI Grok",
-        openrouter: "OpenRouter",
-        custom_openai: "Custom OpenAI",
-    };
-    return displayNames[p] || p;
-}
+    function getProviderDisplayName(p) {
+        const displayNames = {
+            gemini: "Google Gemini",
+            claude: "Anthropic Claude",
+            openai: "OpenAI ChatGPT",
+            grok: "xAI Grok",
+            openrouter: "OpenRouter",
+            custom_openai: "Custom OpenAI",
+        };
+        return displayNames[p] || p;
+    }
 </script>
 
 <div class="flex flex-col h-full">

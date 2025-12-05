@@ -1,18 +1,18 @@
 <script>
-import { MessageCircle, Wrench, RefreshCw } from "lucide-svelte";
-import { t } from "$root/i18n";
-import {
-    isResetOnRefreshEnabled,
-    toggleResetOnRefresh,
-} from "../stores/debugSettings";
-import { get } from "svelte/store";
+    import { MessageCircle, Wrench, RefreshCw } from "@lucide/svelte";
+    import { t } from "$root/i18n";
+    import {
+        isResetOnRefreshEnabled,
+        toggleResetOnRefresh,
+    } from "../stores/debugSettings";
+    import { get } from "svelte/store";
 
-let isEnabled = get(isResetOnRefreshEnabled);
+    let isEnabled = get(isResetOnRefreshEnabled);
 
-function handleToggle() {
-    toggleResetOnRefresh();
-    isEnabled = get(isResetOnRefreshEnabled);
-}
+    function handleToggle() {
+        toggleResetOnRefresh();
+        isEnabled = get(isResetOnRefreshEnabled);
+    }
 </script>
 
 <div
@@ -38,7 +38,7 @@ function handleToggle() {
                 <span class="mr-3 text-white"
                     >{t(
                         "debug.quickPanel.resetOnRefresh.title",
-                        "Reset on refresh"
+                        "Reset on refresh",
                     )}</span
                 >
                 <label class="switch">

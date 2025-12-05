@@ -12,11 +12,8 @@ import {
     editingMessageId,
     virtualStream,
 } from "$stores/chat";
-import {
-    characters,
-    characterStateStore,
-    type CharacterState,
-} from "$stores/character";
+import { characters, characterStateStore } from "$stores/character";
+import { type CharacterState } from "$types/character";
 import { settings } from "$stores/settings";
 import { APIManager } from "$lib/api/apiManager";
 import { getPrompt, getAllPrompts } from "$root/prompts/promptManager";

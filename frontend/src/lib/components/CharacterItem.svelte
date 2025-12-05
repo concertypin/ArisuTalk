@@ -1,46 +1,46 @@
 <script>
-import { t } from "$root/i18n";
-import { createEventDispatcher } from "svelte";
-import { chatRooms, messages, unreadCounts } from "../stores/chat";
-import { formatTimestamp } from "../../utils";
-import Avatar from "./Avatar.svelte";
-import { Instagram, Settings } from "lucide-svelte";
+    import { t } from "$root/i18n";
+    import { createEventDispatcher } from "svelte";
+    import { chatRooms, messages, unreadCounts } from "../stores/chat";
+    import { formatTimestamp } from "../../utils";
+    import Avatar from "./Avatar.svelte";
+    import { Instagram, Settings } from "@lucide/svelte";
 
-export let character = null;
+    export let character = null;
 
-const dispatch = createEventDispatcher();
+    const dispatch = createEventDispatcher();
 
-let lastMessage = null;
-let totalUnreadCount = 0;
+    let lastMessage = null;
+    let totalUnreadCount = 0;
 
-$: {
-    const rooms = $chatRooms[character.id] || [];
-    lastMessage = null;
-    totalUnreadCount = 0;
-    rooms.forEach((room) => {
-        const roomMessages = $messages[room.id] || [];
-        const roomLastMessage = roomMessages.slice(-1)[0];
-        if (
-            roomLastMessage &&
-            (!lastMessage || roomLastMessage.id > lastMessage.id)
-        ) {
-            lastMessage = roomLastMessage;
-        }
-        totalUnreadCount += $unreadCounts[room.id] || 0;
-    });
-}
+    $: {
+        const rooms = $chatRooms[character.id] || [];
+        lastMessage = null;
+        totalUnreadCount = 0;
+        rooms.forEach((room) => {
+            const roomMessages = $messages[room.id] || [];
+            const roomLastMessage = roomMessages.slice(-1)[0];
+            if (
+                roomLastMessage &&
+                (!lastMessage || roomLastMessage.id > lastMessage.id)
+            ) {
+                lastMessage = roomLastMessage;
+            }
+            totalUnreadCount += $unreadCounts[room.id] || 0;
+        });
+    }
 
-function handleSelect() {
-    dispatch("select", character);
-}
+    function handleSelect() {
+        dispatch("select", character);
+    }
 
-function openSns() {
-    dispatch("sns", character);
-}
+    function openSns() {
+        dispatch("sns", character);
+    }
 
-function openSettings() {
-    dispatch("settings", character);
-}
+    function openSettings() {
+        dispatch("settings", character);
+    }
 </script>
 
 <div

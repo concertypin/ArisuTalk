@@ -1,18 +1,18 @@
 <script>
-import { t } from "$root/i18n";
-import { createEventDispatcher } from "svelte";
-import {
-    ArrowLeft,
-    User,
-    Badge,
-    BrainCircuit,
-    MessageSquarePlus,
-    Shuffle,
-    Users,
-} from "lucide-svelte";
-import { settings } from "../../../stores/settings";
+    import { t } from "$root/i18n";
+    import { createEventDispatcher } from "svelte";
+    import {
+        ArrowLeft,
+        User,
+        Badge,
+        BrainCircuit,
+        MessageSquarePlus,
+        Shuffle,
+        Users,
+    } from "@lucide/svelte";
+    import { settings } from "../../../stores/settings";
 
-const dispatch = createEventDispatcher();
+    const dispatch = createEventDispatcher();
 </script>
 
 <div class="flex flex-col h-full">
@@ -170,7 +170,7 @@ const dispatch = createEventDispatcher();
                                     <span class="text-blue-400 font-semibold"
                                         >{$settings.randomCharacterCount ||
                                             3}{t(
-                                            "settings.characterCountUnit"
+                                            "settings.characterCountUnit",
                                         )}</span
                                     >
                                 </label>

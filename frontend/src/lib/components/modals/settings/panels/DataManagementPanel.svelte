@@ -1,37 +1,37 @@
 <script>
-import { t } from "$root/i18n";
-import { settings, settingsSnapshots } from "../../../../stores/settings";
-import {
-    HardDrive,
-    Download,
-    Upload,
-    Info,
-    FileText,
-    FilePenLine,
-    Camera,
-    History,
-    Mouse,
-    AlertTriangle,
-    Trash2,
-} from "lucide-svelte";
-import SnapshotList from "./SnapshotList.svelte";
-import {
-    backupData,
-    restoreData,
-    resetAllData,
-} from "../../../../services/dataService";
-import { prompts } from "../../../../stores/prompts";
+    import { t } from "$root/i18n";
+    import { settings, settingsSnapshots } from "../../../../stores/settings";
+    import {
+        HardDrive,
+        Download,
+        Upload,
+        Info,
+        FileText,
+        FilePenLine,
+        Camera,
+        History,
+        Mouse,
+        AlertTriangle,
+        Trash2,
+    } from "@lucide/svelte";
+    import SnapshotList from "./SnapshotList.svelte";
+    import {
+        backupData,
+        restoreData,
+        resetAllData,
+    } from "../../../../services/dataService";
+    import { prompts } from "../../../../stores/prompts";
 
-let restoreFileInput;
+    let restoreFileInput;
 
-async function handleRestoreFile(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+    async function handleRestoreFile(event) {
+        const file = event.target.files[0];
+        if (!file) return;
 
-    const fileContent = await file.text();
-    restoreData(fileContent);
-    event.target.value = ""; // Reset file input
-}
+        const fileContent = await file.text();
+        restoreData(fileContent);
+        event.target.value = ""; // Reset file input
+    }
 </script>
 
 <div class="space-y-6">

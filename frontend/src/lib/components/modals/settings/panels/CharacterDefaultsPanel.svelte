@@ -1,18 +1,18 @@
 <script>
-import { t } from "$root/i18n";
-import { settings } from "../../../../stores/settings";
-import {
-    User,
-    Badge,
-    BrainCircuit,
-    MessageSquarePlus,
-    Shuffle,
-    Users,
-} from "lucide-svelte";
+    import { t } from "$root/i18n";
+    import { settings } from "../../../../stores/settings";
+    import {
+        User,
+        Badge,
+        BrainCircuit,
+        MessageSquarePlus,
+        Shuffle,
+        Users,
+    } from "@lucide/svelte";
 
-function handleSettingChange(key, value) {
-    settings.update((s) => ({ ...s, [key]: value }));
-}
+    function handleSettingChange(key, value) {
+        settings.update((s) => ({ ...s, [key]: value }));
+    }
 </script>
 
 <div class="space-y-6">
@@ -146,7 +146,7 @@ function handleSettingChange(key, value) {
                                     <span class="text-blue-400 font-semibold"
                                         >{$settings.randomCharacterCount ||
                                             3}{t(
-                                            "settings.characterCountUnit"
+                                            "settings.characterCountUnit",
                                         )}</span
                                     >
                                 </label>

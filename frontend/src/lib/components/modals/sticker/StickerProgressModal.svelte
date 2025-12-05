@@ -1,90 +1,93 @@
 <script>
-import { t } from "$root/i18n";
-import { createEventDispatcher } from "svelte";
-import { fade } from "svelte/transition";
-import { X, Check, RefreshCw, AlertCircle, Clock } from "lucide-svelte";
+    import { t } from "$root/i18n";
+    import { createEventDispatcher } from "svelte";
+    import { fade } from "svelte/transition";
+    import { X, Check, RefreshCw, AlertCircle, Clock } from "@lucide/svelte";
 
-export let progress = {};
+    export let progress = {};
 
-const dispatch = createEventDispatcher();
+    const dispatch = createEventDispatcher();
 
-function cancel() {
-    dispatch("cancel");
-}
-
-function close() {
-    dispatch("close");
-}
-
-function retry() {
-    dispatch("retry");
-}
-
-function getStatusBgColor(status) {
-    switch (status) {
-        case "generating":
-            return "bg-blue-50";
-        case "completed":
-            return "bg-green-50";
-        case "error":
-            return "bg-red-50";
-        case "waiting":
-            return "bg-yellow-50";
-        default:
-            return "bg-gray-50";
+    function cancel() {
+        dispatch("cancel");
     }
-}
 
-function getStatusTextColor(status) {
-    switch (status) {
-        case "generating":
-            return "text-blue-800";
-        case "completed":
-            return "text-green-800";
-        case "error":
-            return "text-red-800";
-        case "waiting":
-            return "text-yellow-800";
-        default:
-            return "text-gray-800";
+    function close() {
+        dispatch("close");
     }
-}
 
-function getStatusText(status, currentEmotion) {
-    switch (status) {
-        case "generating": {
-            let emotionKey, emotionDisplayName;
-            if (typeof currentEmotion === "object" && currentEmotion.emotion) {
-                emotionKey = currentEmotion.emotion;
-                emotionDisplayName =
-                    currentEmotion.title || currentEmotion.emotion;
-            } else if (typeof currentEmotion === "string") {
-                emotionKey = currentEmotion;
-                emotionDisplayName = currentEmotion;
-            } else {
-                emotionKey = "unknown";
-                emotionDisplayName = "Unknown";
-            }
+    function retry() {
+        dispatch("retry");
+    }
 
-            const emotionTranslation =
-                typeof currentEmotion === "object" && currentEmotion.title
-                    ? emotionDisplayName
-                    : t(`stickerProgress.emotions.${emotionKey}`) ||
-                      emotionDisplayName;
-            return t("stickerProgress.statuses.generating", {
-                emotion: emotionTranslation,
-            });
+    function getStatusBgColor(status) {
+        switch (status) {
+            case "generating":
+                return "bg-blue-50";
+            case "completed":
+                return "bg-green-50";
+            case "error":
+                return "bg-red-50";
+            case "waiting":
+                return "bg-yellow-50";
+            default:
+                return "bg-gray-50";
         }
-        case "completed":
-            return t("stickerProgress.statuses.completed");
-        case "error":
-            return t("stickerProgress.statuses.error");
-        case "waiting":
-            return t("stickerProgress.statuses.waiting");
-        default:
-            return t("stickerProgress.statuses.preparing");
     }
-}
+
+    function getStatusTextColor(status) {
+        switch (status) {
+            case "generating":
+                return "text-blue-800";
+            case "completed":
+                return "text-green-800";
+            case "error":
+                return "text-red-800";
+            case "waiting":
+                return "text-yellow-800";
+            default:
+                return "text-gray-800";
+        }
+    }
+
+    function getStatusText(status, currentEmotion) {
+        switch (status) {
+            case "generating": {
+                let emotionKey, emotionDisplayName;
+                if (
+                    typeof currentEmotion === "object" &&
+                    currentEmotion.emotion
+                ) {
+                    emotionKey = currentEmotion.emotion;
+                    emotionDisplayName =
+                        currentEmotion.title || currentEmotion.emotion;
+                } else if (typeof currentEmotion === "string") {
+                    emotionKey = currentEmotion;
+                    emotionDisplayName = currentEmotion;
+                } else {
+                    emotionKey = "unknown";
+                    emotionDisplayName = "Unknown";
+                }
+
+                const emotionTranslation =
+                    typeof currentEmotion === "object" && currentEmotion.title
+                        ? emotionDisplayName
+                        : t(`stickerProgress.emotions.${emotionKey}`) ||
+                          emotionDisplayName;
+                return t("stickerProgress.statuses.generating", {
+                    emotion: emotionTranslation,
+                });
+            }
+            case "completed":
+                return t("stickerProgress.statuses.completed");
+            case "error":
+                return t("stickerProgress.statuses.error");
+            case "waiting":
+                return t("stickerProgress.statuses.waiting");
+            default:
+                return t("stickerProgress.statuses.preparing");
+        }
+    }
 </script>
 
 {#if progress && progress.isVisible}
@@ -135,7 +138,7 @@ function getStatusText(status, currentEmotion) {
                     <div
                         class="bg-blue-600 h-2 rounded-full transition-all duration-300"
                         style="width: {Math.round(
-                            (progress.currentIndex / progress.totalCount) * 100
+                            (progress.currentIndex / progress.totalCount) * 100,
                         )}%"
                     ></div>
                 </div>
@@ -148,37 +151,37 @@ function getStatusText(status, currentEmotion) {
                     {#if progress.status === "generating"}
                         <RefreshCw
                             class="w-5 h-5 animate-spin {getStatusTextColor(
-                                progress.status
+                                progress.status,
                             )}"
                         />
                     {:else if progress.status === "completed"}
                         <Check
                             class="w-5 h-5 {getStatusTextColor(
-                                progress.status
+                                progress.status,
                             )}"
                         />
                     {:else if progress.status === "error"}
                         <AlertCircle
                             class="w-5 h-5 {getStatusTextColor(
-                                progress.status
+                                progress.status,
                             )}"
                         />
                     {:else if progress.status === "waiting"}
                         <Clock
                             class="w-5 h-5 {getStatusTextColor(
-                                progress.status
+                                progress.status,
                             )}"
                         />
                     {/if}
                     <div class="ml-3">
                         <p
                             class="text-sm font-medium {getStatusTextColor(
-                                progress.status
+                                progress.status,
                             )}"
                         >
                             {getStatusText(
                                 progress.status,
-                                progress.currentEmotion
+                                progress.currentEmotion,
                             )}
                         </p>
                         {#if progress.error}
@@ -201,13 +204,13 @@ function getStatusText(status, currentEmotion) {
                                 s.emotion ===
                                 (typeof emotion === "string"
                                     ? emotion
-                                    : emotion.emotion)
+                                    : emotion.emotion),
                         )}
                         {@const isCurrent = index === progress.currentIndex - 1}
                         {@const isError = progress.failedEmotions?.includes(
                             typeof emotion === "string"
                                 ? emotion
-                                : emotion.emotion
+                                : emotion.emotion,
                         )}
                         <div class="text-center">
                             <div
@@ -232,7 +235,7 @@ function getStatusText(status, currentEmotion) {
                                 >{typeof emotion === "object" && emotion.title
                                     ? emotion.title
                                     : t(
-                                          `stickerProgress.emotions.${typeof emotion === "string" ? emotion : emotion.emotion}`
+                                          `stickerProgress.emotions.${typeof emotion === "string" ? emotion : emotion.emotion}`,
                                       ) ||
                                       (typeof emotion === "string"
                                           ? emotion

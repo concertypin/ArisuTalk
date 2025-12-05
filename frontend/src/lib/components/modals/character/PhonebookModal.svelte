@@ -1,318 +1,333 @@
 <script lang="ts">
-import { t } from "$root/i18n";
-import { onDestroy } from "svelte";
-import { fade } from "svelte/transition";
-import { auth } from "../../../stores/auth";
-import type { AuthState } from "../../../stores/auth";
-import { phonebookImportResult } from "../../../stores/character";
-import {
-    isPhonebookModalVisible,
-    phonebookAccessState,
-    type PhonebookAccessState,
-} from "../../../stores/ui";
-import { experimentalTracingOptIn } from "../../../stores/settings";
-import {
-    createPhonebookEntry,
-    updatePhonebookEntry,
-    deletePhonebookEntry,
-    verifyPhonebookAccess,
-    listPhonebookEntries,
-    importPhonebookCharacter,
-    type PhonebookEntrySummary,
-    type PhonebookEntryInput,
-    type PhonebookEntryUpdateInput,
-} from "../../../services/phonebookService";
-import { logUserFlowEvent } from "../../../analytics/userFlow";
-import {
-    X,
-    Download,
-    RefreshCcw,
-    ShieldAlert,
-    Loader2,
-    Plus,
-    Pencil,
-    Trash2,
-    Save,
-    Upload,
-} from "lucide-svelte";
+    import { t } from "$root/i18n";
+    import { onDestroy } from "svelte";
+    import { fade } from "svelte/transition";
+    import { auth } from "../../../stores/auth";
+    import type { AuthState } from "../../../stores/auth";
+    import { phonebookImportResult } from "../../../stores/character";
+    import {
+        isPhonebookModalVisible,
+        phonebookAccessState,
+        type PhonebookAccessState,
+    } from "../../../stores/ui";
+    import { experimentalTracingOptIn } from "../../../stores/settings";
+    import {
+        createPhonebookEntry,
+        updatePhonebookEntry,
+        deletePhonebookEntry,
+        verifyPhonebookAccess,
+        listPhonebookEntries,
+        importPhonebookCharacter,
+        type PhonebookEntrySummary,
+        type PhonebookEntryInput,
+        type PhonebookEntryUpdateInput,
+    } from "../../../services/phonebookService";
+    import { logUserFlowEvent } from "../../../analytics/userFlow";
+    import {
+        X,
+        Download,
+        RefreshCcw,
+        ShieldAlert,
+        Loader2,
+        Plus,
+        Pencil,
+        Trash2,
+        Save,
+        Upload,
+    } from "@lucide/svelte";
 
-export let isOpen = false;
+    export let isOpen = false;
 
-const defaultAuthState: AuthState = {
-    status: "idle",
-    clerk: null,
-    user: null,
-    isSignedIn: false,
-    error: null,
-};
+    const defaultAuthState: AuthState = {
+        status: "idle",
+        clerk: null,
+        user: null,
+        isSignedIn: false,
+        error: null,
+    };
 
-let authState: AuthState = defaultAuthState;
-let currentPhonebookAccess: PhonebookAccessState = "unknown";
-let isTracingEnabled = false;
-let entries: PhonebookEntrySummary[] = [];
-let errorMessage = "";
-let isInitializing = false;
-let hasInitialized = false;
-let busyEntryId: string | null = null;
+    let authState: AuthState = defaultAuthState;
+    let currentPhonebookAccess: PhonebookAccessState = "unknown";
+    let isTracingEnabled = false;
+    let entries: PhonebookEntrySummary[] = [];
+    let errorMessage = "";
+    let isInitializing = false;
+    let hasInitialized = false;
+    let busyEntryId: string | null = null;
 
-// Form State
-let isEditing = false;
-let isCreating = false;
-let isSubmitting = false;
-let editTargetId: string | null = null;
-let formName = "";
-let formDescription = "";
-let formEncrypted = false;
-let formFile: File | null = null;
-let formError = "";
+    // Form State
+    let isEditing = false;
+    let isCreating = false;
+    let isSubmitting = false;
+    let editTargetId: string | null = null;
+    let formName = "";
+    let formDescription = "";
+    let formEncrypted = false;
+    let formFile: File | null = null;
+    let formError = "";
 
-const unsubscribeAuth = auth.subscribe((value) => {
-    authState = value ?? defaultAuthState;
-});
+    const unsubscribeAuth = auth.subscribe((value) => {
+        authState = value ?? defaultAuthState;
+    });
 
-const unsubscribePhonebook = phonebookAccessState.subscribe((value) => {
-    currentPhonebookAccess = value;
-});
+    const unsubscribePhonebook = phonebookAccessState.subscribe((value) => {
+        currentPhonebookAccess = value;
+    });
 
-const unsubscribeTracing = experimentalTracingOptIn.subscribe((value) => {
-    isTracingEnabled = value;
-    if (!value) {
+    const unsubscribeTracing = experimentalTracingOptIn.subscribe((value) => {
+        isTracingEnabled = value;
+        if (!value) {
+            entries = [];
+            errorMessage = t("phonebook.experimentalRequired");
+            hasInitialized = true;
+            isInitializing = false;
+            busyEntryId = null;
+        }
+    });
+
+    onDestroy(() => {
+        unsubscribeAuth();
+        unsubscribePhonebook();
+        unsubscribeTracing();
+    });
+
+    const resetState = (): void => {
         entries = [];
-        errorMessage = t("phonebook.experimentalRequired");
-        hasInitialized = true;
+        errorMessage = "";
+        hasInitialized = false;
         isInitializing = false;
         busyEntryId = null;
-    }
-});
+        resetForm();
+    };
 
-onDestroy(() => {
-    unsubscribeAuth();
-    unsubscribePhonebook();
-    unsubscribeTracing();
-});
+    const resetForm = (): void => {
+        isEditing = false;
+        isCreating = false;
+        isSubmitting = false;
+        editTargetId = null;
+        formName = "";
+        formDescription = "";
+        formEncrypted = false;
+        formFile = null;
+        formError = "";
+    };
 
-const resetState = (): void => {
-    entries = [];
-    errorMessage = "";
-    hasInitialized = false;
-    isInitializing = false;
-    busyEntryId = null;
-    resetForm();
-};
+    const closeModal = (): void => {
+        isPhonebookModalVisible.set(false);
+        resetState();
+    };
 
-const resetForm = (): void => {
-    isEditing = false;
-    isCreating = false;
-    isSubmitting = false;
-    editTargetId = null;
-    formName = "";
-    formDescription = "";
-    formEncrypted = false;
-    formFile = null;
-    formError = "";
-};
-
-const closeModal = (): void => {
-    isPhonebookModalVisible.set(false);
-    resetState();
-};
-
-const initialize = async (): Promise<void> => {
-    if (isInitializing || hasInitialized) {
-        return;
-    }
-    isInitializing = true;
-    errorMessage = "";
-    if (!isTracingEnabled) {
-        errorMessage = t("phonebook.experimentalRequired");
-        void logUserFlowEvent("phonebook_access_blocked", {
-            reason: "disabled",
-        });
-        hasInitialized = true;
-        isInitializing = false;
-        return;
-    }
-    try {
-        const state = authState;
-        void logUserFlowEvent("phonebook_opened", {
-            auth_status: state.isSignedIn ? "signed_in" : "guest",
-            access_state: currentPhonebookAccess,
-        });
-        if (!state.isSignedIn || !state.clerk) {
-            errorMessage = t("phonebook.signInRequired");
+    const initialize = async (): Promise<void> => {
+        if (isInitializing || hasInitialized) {
+            return;
+        }
+        isInitializing = true;
+        errorMessage = "";
+        if (!isTracingEnabled) {
+            errorMessage = t("phonebook.experimentalRequired");
             void logUserFlowEvent("phonebook_access_blocked", {
-                reason: "auth_required",
+                reason: "disabled",
             });
+            hasInitialized = true;
+            isInitializing = false;
             return;
         }
-
-        let accessState = currentPhonebookAccess;
-        if (accessState === "unknown") {
-            const canAccess = await verifyPhonebookAccess(state.clerk);
-            phonebookAccessState.set(canAccess ? "enabled" : "disabled");
-            accessState = canAccess ? "enabled" : "disabled";
-        }
-
-        if (accessState !== "enabled") {
-            void logUserFlowEvent("phonebook_access_blocked", {
-                reason: accessState === "disabled" ? "disabled" : "unknown",
+        try {
+            const state = authState;
+            void logUserFlowEvent("phonebook_opened", {
+                auth_status: state.isSignedIn ? "signed_in" : "guest",
+                access_state: currentPhonebookAccess,
             });
-            closeModal();
-            return;
-        }
-
-        const result = await listPhonebookEntries(state.clerk);
-        entries = result;
-    } catch (error) {
-        console.error("Failed to load phonebook entries", error);
-        errorMessage =
-            error instanceof Error ? error.message : t("phonebook.fetchFailed");
-    } finally {
-        hasInitialized = true;
-        isInitializing = false;
-    }
-};
-
-const handleRetry = async (): Promise<void> => {
-    const hadError = errorMessage.length > 0;
-    const wasEmpty = !hadError && hasInitialized && entries.length === 0;
-    const reason: "error" | "empty" | "manual" = hadError
-        ? "error"
-        : wasEmpty
-          ? "empty"
-          : "manual";
-    resetState();
-    void logUserFlowEvent("phonebook_retry", { reason });
-    await initialize();
-};
-
-const handleImport = async (entry: PhonebookEntrySummary): Promise<void> => {
-    if (busyEntryId || entry.encrypted) {
-        return;
-    }
-
-    try {
-        const state = authState;
-        if (!state.isSignedIn || !state.clerk) {
-            errorMessage = t("phonebook.signInRequired");
-            return;
-        }
-
-        busyEntryId = entry.id;
-        void logUserFlowEvent("phonebook_import_attempt", {
-            encrypted: Boolean(entry.encrypted),
-        });
-        const result = await importPhonebookCharacter(state.clerk, entry.id);
-        phonebookImportResult.set(result);
-        closeModal();
-        void logUserFlowEvent("phonebook_import_result", {
-            outcome: "success",
-            encrypted: Boolean(entry.encrypted),
-        });
-    } catch (error) {
-        console.error("Failed to import phonebook entry", error);
-        errorMessage =
-            error instanceof Error ? error.message : t("phonebook.fetchFailed");
-        void logUserFlowEvent("phonebook_import_result", {
-            outcome: "failure",
-            encrypted: Boolean(entry.encrypted),
-            error_type: "unknown",
-        });
-    } finally {
-        busyEntryId = null;
-    }
-};
-
-// CRUD Operations
-const startCreate = () => {
-    resetForm();
-    isCreating = true;
-};
-
-const startEdit = (entry: PhonebookEntrySummary) => {
-    resetForm();
-    isEditing = true;
-    editTargetId = entry.id;
-    formName = entry.name;
-    formDescription = entry.description || "";
-    formEncrypted = entry.encrypted || false;
-};
-
-const handleFileSelect = (e: Event) => {
-    const input = e.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-        formFile = input.files[0];
-    }
-};
-
-const handleSave = async () => {
-    if (!authState.clerk) return;
-    if (isSubmitting) return;
-
-    formError = "";
-    isSubmitting = true;
-
-    try {
-        if (isCreating) {
-            if (!formFile) {
-                formError = t("phonebook.fileRequired");
-                isSubmitting = false;
+            if (!state.isSignedIn || !state.clerk) {
+                errorMessage = t("phonebook.signInRequired");
+                void logUserFlowEvent("phonebook_access_blocked", {
+                    reason: "auth_required",
+                });
                 return;
             }
-            const input: PhonebookEntryInput = {
-                name: formName,
-                description: formDescription,
-                file: formFile,
-                encrypted: formEncrypted,
-            };
-            await createPhonebookEntry(authState.clerk, input);
-        } else if (isEditing && editTargetId) {
-            const input: PhonebookEntryUpdateInput = {
-                name: formName,
-                description: formDescription,
-                encrypted: formEncrypted,
-            };
-            if (formFile) {
-                input.file = formFile;
+
+            let accessState = currentPhonebookAccess;
+            if (accessState === "unknown") {
+                const canAccess = await verifyPhonebookAccess(state.clerk);
+                phonebookAccessState.set(canAccess ? "enabled" : "disabled");
+                accessState = canAccess ? "enabled" : "disabled";
             }
-            await updatePhonebookEntry(authState.clerk, editTargetId, input);
+
+            if (accessState !== "enabled") {
+                void logUserFlowEvent("phonebook_access_blocked", {
+                    reason: accessState === "disabled" ? "disabled" : "unknown",
+                });
+                closeModal();
+                return;
+            }
+
+            const result = await listPhonebookEntries(state.clerk);
+            entries = result;
+        } catch (error) {
+            console.error("Failed to load phonebook entries", error);
+            errorMessage =
+                error instanceof Error
+                    ? error.message
+                    : t("phonebook.fetchFailed");
+        } finally {
+            hasInitialized = true;
+            isInitializing = false;
+        }
+    };
+
+    const handleRetry = async (): Promise<void> => {
+        const hadError = errorMessage.length > 0;
+        const wasEmpty = !hadError && hasInitialized && entries.length === 0;
+        const reason: "error" | "empty" | "manual" = hadError
+            ? "error"
+            : wasEmpty
+              ? "empty"
+              : "manual";
+        resetState();
+        void logUserFlowEvent("phonebook_retry", { reason });
+        await initialize();
+    };
+
+    const handleImport = async (
+        entry: PhonebookEntrySummary,
+    ): Promise<void> => {
+        if (busyEntryId || entry.encrypted) {
+            return;
         }
 
-        // Refresh list
-        const result = await listPhonebookEntries(authState.clerk);
-        entries = result;
+        try {
+            const state = authState;
+            if (!state.isSignedIn || !state.clerk) {
+                errorMessage = t("phonebook.signInRequired");
+                return;
+            }
+
+            busyEntryId = entry.id;
+            void logUserFlowEvent("phonebook_import_attempt", {
+                encrypted: Boolean(entry.encrypted),
+            });
+            const result = await importPhonebookCharacter(
+                state.clerk,
+                entry.id,
+            );
+            phonebookImportResult.set(result);
+            closeModal();
+            void logUserFlowEvent("phonebook_import_result", {
+                outcome: "success",
+                encrypted: Boolean(entry.encrypted),
+            });
+        } catch (error) {
+            console.error("Failed to import phonebook entry", error);
+            errorMessage =
+                error instanceof Error
+                    ? error.message
+                    : t("phonebook.fetchFailed");
+            void logUserFlowEvent("phonebook_import_result", {
+                outcome: "failure",
+                encrypted: Boolean(entry.encrypted),
+                error_type: "unknown",
+            });
+        } finally {
+            busyEntryId = null;
+        }
+    };
+
+    // CRUD Operations
+    const startCreate = () => {
         resetForm();
-    } catch (error) {
-        console.error("Save failed", error);
-        formError = error instanceof Error ? error.message : "Operation failed";
-    } finally {
-        isSubmitting = false;
+        isCreating = true;
+    };
+
+    const startEdit = (entry: PhonebookEntrySummary) => {
+        resetForm();
+        isEditing = true;
+        editTargetId = entry.id;
+        formName = entry.name;
+        formDescription = entry.description || "";
+        formEncrypted = entry.encrypted || false;
+    };
+
+    const handleFileSelect = (e: Event) => {
+        const input = e.target as HTMLInputElement;
+        if (input.files && input.files.length > 0) {
+            formFile = input.files[0];
+        }
+    };
+
+    const handleSave = async () => {
+        if (!authState.clerk) return;
+        if (isSubmitting) return;
+
+        formError = "";
+        isSubmitting = true;
+
+        try {
+            if (isCreating) {
+                if (!formFile) {
+                    formError = t("phonebook.fileRequired");
+                    isSubmitting = false;
+                    return;
+                }
+                const input: PhonebookEntryInput = {
+                    name: formName,
+                    description: formDescription,
+                    file: formFile,
+                    encrypted: formEncrypted,
+                };
+                await createPhonebookEntry(authState.clerk, input);
+            } else if (isEditing && editTargetId) {
+                const input: PhonebookEntryUpdateInput = {
+                    name: formName,
+                    description: formDescription,
+                    encrypted: formEncrypted,
+                };
+                if (formFile) {
+                    input.file = formFile;
+                }
+                await updatePhonebookEntry(
+                    authState.clerk,
+                    editTargetId,
+                    input,
+                );
+            }
+
+            // Refresh list
+            const result = await listPhonebookEntries(authState.clerk);
+            entries = result;
+            resetForm();
+        } catch (error) {
+            console.error("Save failed", error);
+            formError =
+                error instanceof Error ? error.message : "Operation failed";
+        } finally {
+            isSubmitting = false;
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!authState.clerk) return;
+        if (!confirm(t("phonebook.confirmDelete"))) return;
+
+        busyEntryId = id;
+        try {
+            await deletePhonebookEntry(authState.clerk, id);
+            // Refresh list
+            const result = await listPhonebookEntries(authState.clerk);
+            entries = result;
+        } catch (error) {
+            console.error("Delete failed", error);
+            errorMessage =
+                error instanceof Error ? error.message : "Delete failed";
+        } finally {
+            busyEntryId = null;
+        }
+    };
+
+    $: if (isOpen) {
+        void initialize();
+    } else {
+        resetState();
     }
-};
-
-const handleDelete = async (id: string) => {
-    if (!authState.clerk) return;
-    if (!confirm(t("phonebook.confirmDelete"))) return;
-
-    busyEntryId = id;
-    try {
-        await deletePhonebookEntry(authState.clerk, id);
-        // Refresh list
-        const result = await listPhonebookEntries(authState.clerk);
-        entries = result;
-    } catch (error) {
-        console.error("Delete failed", error);
-        errorMessage = error instanceof Error ? error.message : "Delete failed";
-    } finally {
-        busyEntryId = null;
-    }
-};
-
-$: if (isOpen) {
-    void initialize();
-} else {
-    resetState();
-}
 </script>
 
 {#if isOpen}
@@ -474,7 +489,9 @@ $: if (isOpen) {
                         </div>
 
                         {#if formError}
-                            <div class="p-3 rounded-lg bg-red-500/10 text-red-400 text-sm">
+                            <div
+                                class="p-3 rounded-lg bg-red-500/10 text-red-400 text-sm"
+                            >
                                 {formError}
                             </div>
                         {/if}
@@ -557,7 +574,7 @@ $: if (isOpen) {
                                             <span
                                                 >{t("phonebook.uploaded", {
                                                     date: new Date(
-                                                        entry.uploadedAt
+                                                        entry.uploadedAt,
                                                     ).toLocaleString(),
                                                 })}</span
                                             >
@@ -568,7 +585,7 @@ $: if (isOpen) {
                                     class="flex items-center gap-2 self-stretch md:self-center flex-shrink-0"
                                 >
                                     <!-- Edit/Delete for Author or Admin -->
-                                    {#if authState.user && (authState.user.id === entry.author || (authState.user.publicMetadata?.role === "admin"))}
+                                    {#if authState.user && (authState.user.id === entry.author || authState.user.publicMetadata?.role === "admin")}
                                         <button
                                             class="p-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm transition-colors"
                                             on:click={() => startEdit(entry)}
@@ -605,7 +622,7 @@ $: if (isOpen) {
                                             />
                                             <span
                                                 >{t(
-                                                    "phonebook.importing"
+                                                    "phonebook.importing",
                                                 )}</span
                                             >
                                         {:else}

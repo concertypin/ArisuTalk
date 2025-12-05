@@ -1,41 +1,41 @@
 <script>
-import { t } from "$root/i18n";
-import {
-    openChats,
-    selectedChatId,
-    messages,
-    unreadCounts,
-} from "../../stores/chat";
-import {
-    isCreateOpenChatModalVisible,
-    isConfirmationModalVisible,
-    confirmationModalData,
-} from "../../stores/ui";
-import { Globe, Plus, Trash2 } from "lucide-svelte";
-import { formatTimestamp } from "../../../utils";
+    import { t } from "$root/i18n";
+    import {
+        openChats,
+        selectedChatId,
+        messages,
+        unreadCounts,
+    } from "../../stores/chat";
+    import {
+        isCreateOpenChatModalVisible,
+        isConfirmationModalVisible,
+        confirmationModalData,
+    } from "../../stores/ui";
+    import { Globe, Plus, Trash2 } from "@lucide/svelte";
+    import { formatTimestamp } from "../../../utils";
 
-function openCreateOpenChatModal() {
-    isCreateOpenChatModalVisible.set(true);
-}
+    function openCreateOpenChatModal() {
+        isCreateOpenChatModalVisible.set(true);
+    }
 
-function selectChat(chatId) {
-    selectedChatId.set(chatId);
-}
+    function selectChat(chatId) {
+        selectedChatId.set(chatId);
+    }
 
-function deleteOpenChat(chat) {
-    confirmationModalData.set({
-        title: t("openChat.deleteOpenChatTitle"),
-        message: t("openChat.deleteOpenChatConfirm", { name: chat.name }),
-        onConfirm: () => {
-            openChats.update((chats) => {
-                delete chats[chat.id];
-                return chats;
-            });
-            // TODO: also delete messages
-        },
-    });
-    isConfirmationModalVisible.set(true);
-}
+    function deleteOpenChat(chat) {
+        confirmationModalData.set({
+            title: t("openChat.deleteOpenChatTitle"),
+            message: t("openChat.deleteOpenChatConfirm", { name: chat.name }),
+            onConfirm: () => {
+                openChats.update((chats) => {
+                    delete chats[chat.id];
+                    return chats;
+                });
+                // TODO: also delete messages
+            },
+        });
+        isConfirmationModalVisible.set(true);
+    }
 </script>
 
 <div class="border-t border-gray-800 pt-6">

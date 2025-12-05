@@ -1,16 +1,24 @@
 <script>
-import { t, getLanguage, setLanguage } from "$root/i18n";
-import { settings } from "../../../../stores/settings";
-import { Type, Info, Globe, Palette, Moon, Clock, Zap } from "lucide-svelte";
+    import { t, getLanguage, setLanguage } from "$root/i18n";
+    import { settings } from "../../../../stores/settings";
+    import {
+        Type,
+        Info,
+        Globe,
+        Palette,
+        Moon,
+        Clock,
+        Zap,
+    } from "@lucide/svelte";
 
-let currentLanguage = getLanguage();
+    let currentLanguage = getLanguage();
 
-function handleLanguageChange(lang) {
-    if (currentLanguage === lang) return;
-    setLanguage(lang);
-    alert(t("system.languageChangeMessage"));
-    setTimeout(() => window.location.reload(), 300);
-}
+    function handleLanguageChange(lang) {
+        if (currentLanguage === lang) return;
+        setLanguage(lang);
+        alert(t("system.languageChangeMessage"));
+        setTimeout(() => window.location.reload(), 300);
+    }
 </script>
 
 <div class="space-y-6">

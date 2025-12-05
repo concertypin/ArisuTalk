@@ -1,48 +1,48 @@
 <script>
-import { t } from "$root/i18n";
-import {
-    groupChats,
-    selectedChatId,
-    messages,
-    unreadCounts,
-    editingGroupChat,
-} from "../../stores/chat";
-import {
-    isCreateGroupChatModalVisible,
-    isEditGroupChatModalVisible,
-    isConfirmationModalVisible,
-    confirmationModalData,
-} from "../../stores/ui";
-import { Users, Plus, Edit3, Trash2 } from "lucide-svelte";
-import { formatTimestamp } from "../../../utils";
+    import { t } from "$root/i18n";
+    import {
+        groupChats,
+        selectedChatId,
+        messages,
+        unreadCounts,
+        editingGroupChat,
+    } from "../../stores/chat";
+    import {
+        isCreateGroupChatModalVisible,
+        isEditGroupChatModalVisible,
+        isConfirmationModalVisible,
+        confirmationModalData,
+    } from "../../stores/ui";
+    import { Users, Plus, Edit3, Trash2 } from "@lucide/svelte";
+    import { formatTimestamp } from "../../../utils";
 
-function openCreateGroupChatModal() {
-    isCreateGroupChatModalVisible.set(true);
-}
+    function openCreateGroupChatModal() {
+        isCreateGroupChatModalVisible.set(true);
+    }
 
-function selectChat(chatId) {
-    selectedChatId.set(chatId);
-}
+    function selectChat(chatId) {
+        selectedChatId.set(chatId);
+    }
 
-function editGroupChat(chat) {
-    editingGroupChat.set(chat);
-    isEditGroupChatModalVisible.set(true);
-}
+    function editGroupChat(chat) {
+        editingGroupChat.set(chat);
+        isEditGroupChatModalVisible.set(true);
+    }
 
-function deleteGroupChat(chat) {
-    confirmationModalData.set({
-        title: t("groupChat.deleteGroupChat"),
-        message: t("groupChat.deleteGroupChatConfirm", { name: chat.name }),
-        onConfirm: () => {
-            groupChats.update((chats) => {
-                delete chats[chat.id];
-                return chats;
-            });
-            // TODO: also delete messages
-        },
-    });
-    isConfirmationModalVisible.set(true);
-}
+    function deleteGroupChat(chat) {
+        confirmationModalData.set({
+            title: t("groupChat.deleteGroupChat"),
+            message: t("groupChat.deleteGroupChatConfirm", { name: chat.name }),
+            onConfirm: () => {
+                groupChats.update((chats) => {
+                    delete chats[chat.id];
+                    return chats;
+                });
+                // TODO: also delete messages
+            },
+        });
+        isConfirmationModalVisible.set(true);
+    }
 </script>
 
 <div class="border-t border-gray-800 pt-6">
@@ -126,7 +126,7 @@ function deleteGroupChat(chat) {
                     </div>
                     <p class="text-sm text-gray-400 truncate">
                         {chat.participantIds.length}{t(
-                            "groupChat.participantsCount"
+                            "groupChat.participantsCount",
                         )}
                     </p>
                     <p class="text-xs text-gray-500 truncate mt-1">

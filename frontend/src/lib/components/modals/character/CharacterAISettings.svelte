@@ -1,67 +1,67 @@
 <script>
-import { t } from "$root/i18n";
-import { Sparkles, TestTube, Loader } from "lucide-svelte";
-import { stickerManager } from "../../../stores/services";
-import { settings } from "../../../stores/settings";
-import ImageResultModal from "../image/ImageResultModal.svelte";
+    import { t } from "$root/i18n";
+    import { Sparkles, TestTube, Loader } from "@lucide/svelte";
+    import { stickerManager } from "../../../stores/services";
+    import { settings } from "../../../stores/settings";
+    import ImageResultModal from "../image/ImageResultModal.svelte";
 
-export let appearance = "";
-export let naiQualityPrompt = "";
-export let naiAutoGenerate = false;
+    export let appearance = "";
+    export let naiQualityPrompt = "";
+    export let naiAutoGenerate = false;
 
-let isTesting = false;
-let showImageResultModal = false;
-let resultImageUrl = "";
-let resultPromptText = "";
+    let isTesting = false;
+    let showImageResultModal = false;
+    let resultImageUrl = "";
+    let resultPromptText = "";
 
-async function testAppearancePrompt() {
-    if (!appearance.trim()) {
-        alert("외모 설명을 입력해주세요.");
-        return;
-    }
-
-    const naiApiKey = $settings.apiConfigs.novelai?.apiKey;
-    if (!naiApiKey) {
-        alert(
-            "NAI API 키가 설정되지 않았습니다. 설정에서 API 키를 입력해주세요.",
-        );
-        return;
-    }
-
-    isTesting = true;
-
-    try {
-        const testCharacter = {
-            id: "test",
-            name: "테스트",
-            appearance: appearance,
-            naiSettings: {
-                qualityPrompt: naiQualityPrompt,
-            },
-        };
-
-        const result = await $stickerManager.naiClient.generateSticker(
-            testCharacter,
-            "happy",
-            {
-                naiSettings: $settings.naiSettings || {},
-            },
-        );
-
-        if (result && result.dataUrl) {
-            resultImageUrl = result.dataUrl;
-            resultPromptText = appearance;
-            showImageResultModal = true;
-        } else {
-            throw new Error(result?.error || "이미지 생성 실패");
+    async function testAppearancePrompt() {
+        if (!appearance.trim()) {
+            alert("외모 설명을 입력해주세요.");
+            return;
         }
-    } catch (error) {
-        console.error("[Test] 외모 프롬프트 테스트 실패:", error);
-        alert(`외모 프롬프트 테스트 실패: ${error.message}`);
-    } finally {
-        isTesting = false;
+
+        const naiApiKey = $settings.apiConfigs.novelai?.apiKey;
+        if (!naiApiKey) {
+            alert(
+                "NAI API 키가 설정되지 않았습니다. 설정에서 API 키를 입력해주세요.",
+            );
+            return;
+        }
+
+        isTesting = true;
+
+        try {
+            const testCharacter = {
+                id: "test",
+                name: "테스트",
+                appearance: appearance,
+                naiSettings: {
+                    qualityPrompt: naiQualityPrompt,
+                },
+            };
+
+            const result = await $stickerManager.naiClient.generateSticker(
+                testCharacter,
+                "happy",
+                {
+                    naiSettings: $settings.naiSettings || {},
+                },
+            );
+
+            if (result && result.dataUrl) {
+                resultImageUrl = result.dataUrl;
+                resultPromptText = appearance;
+                showImageResultModal = true;
+            } else {
+                throw new Error(result?.error || "이미지 생성 실패");
+            }
+        } catch (error) {
+            console.error("[Test] 외모 프롬프트 테스트 실패:", error);
+            alert(`외모 프롬프트 테스트 실패: ${error.message}`);
+        } finally {
+            isTesting = false;
+        }
     }
-}
 </script>
 
 <div class="space-y-6">

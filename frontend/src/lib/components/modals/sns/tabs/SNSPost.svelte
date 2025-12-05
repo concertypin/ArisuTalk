@@ -1,69 +1,76 @@
 <script>
-import { t } from "$root/i18n";
-import { createEventDispatcher } from "svelte";
-import { Heart, MessageCircle, Star, Lock, Edit3, Trash2 } from "lucide-svelte";
+    import { t } from "$root/i18n";
+    import { createEventDispatcher } from "svelte";
+    import {
+        Heart,
+        MessageCircle,
+        Star,
+        Lock,
+        Edit3,
+        Trash2,
+    } from "@lucide/svelte";
 
-export let post = null;
-export let character = null;
-export let isSecretMode = false;
+    export let post = null;
+    export let character = null;
+    export let isSecretMode = false;
 
-const dispatch = createEventDispatcher();
+    const dispatch = createEventDispatcher();
 
-function formatTimeAgo(timestamp) {
-    const now = new Date();
-    const past = new Date(timestamp);
-    const diff = now.getTime() - past.getTime();
+    function formatTimeAgo(timestamp) {
+        const now = new Date();
+        const past = new Date(timestamp);
+        const diff = now.getTime() - past.getTime();
 
-    if (diff < 60000) return t("sns.justNow");
-    if (diff < 3600000)
-        return t("sns.minutesAgo", { minutes: Math.floor(diff / 60000) });
-    if (diff < 86400000)
-        return t("sns.hoursAgo", { hours: Math.floor(diff / 3600000) });
-    if (diff < 604800000)
-        return t("sns.daysAgo", { days: Math.floor(diff / 86400000) });
-    if (diff < 2592000000)
-        return t("sns.weeksAgo", { weeks: Math.floor(diff / 604800000) });
-    if (diff < 31536000000)
-        return t("sns.monthsAgo", {
-            months: Math.floor(diff / 2592000000),
-        });
+        if (diff < 60000) return t("sns.justNow");
+        if (diff < 3600000)
+            return t("sns.minutesAgo", { minutes: Math.floor(diff / 60000) });
+        if (diff < 86400000)
+            return t("sns.hoursAgo", { hours: Math.floor(diff / 3600000) });
+        if (diff < 604800000)
+            return t("sns.daysAgo", { days: Math.floor(diff / 86400000) });
+        if (diff < 2592000000)
+            return t("sns.weeksAgo", { weeks: Math.floor(diff / 604800000) });
+        if (diff < 31536000000)
+            return t("sns.monthsAgo", {
+                months: Math.floor(diff / 2592000000),
+            });
 
-    return t("sns.yearsAgo", { years: Math.floor(diff / 31536000000) });
-}
-
-function getStickerUrl(character, stickerId) {
-    if (!character.stickers) {
-        return "";
+        return t("sns.yearsAgo", { years: Math.floor(diff / 31536000000) });
     }
 
-    // 문자열과 숫자 비교 모두 시도하여 스티커 찾기
-    let sticker = character.stickers.find((s) => s.id === stickerId);
-    if (!sticker) {
-        // 타입 변환해서 재시도
-        sticker = character.stickers.find((s) => s.id == stickerId); // == 사용 (타입 무시)
+    function getStickerUrl(character, stickerId) {
+        if (!character.stickers) {
+            return "";
+        }
+
+        // 문자열과 숫자 비교 모두 시도하여 스티커 찾기
+        let sticker = character.stickers.find((s) => s.id === stickerId);
+        if (!sticker) {
+            // 타입 변환해서 재시도
+            sticker = character.stickers.find((s) => s.id == stickerId); // == 사용 (타입 무시)
+        }
+        if (!sticker) {
+            // 문자열로 변환해서 재시도
+            sticker = character.stickers.find(
+                (s) => String(s.id) === String(stickerId),
+            );
+        }
+
+        if (!sticker) {
+            return "";
+        }
+
+        // 메인 채팅과 동일한 방식으로 data 또는 dataUrl 사용
+        return sticker.data || sticker.dataUrl || "";
     }
-    if (!sticker) {
-        // 문자열로 변환해서 재시도
-        sticker = character.stickers.find(
-            (s) => String(s.id) === String(stickerId),
-        );
+
+    function handleEdit() {
+        dispatch("edit", { characterId: character.id, postId: post.id });
     }
 
-    if (!sticker) {
-        return "";
+    function handleDelete() {
+        dispatch("delete", { characterId: character.id, postId: post.id });
     }
-
-    // 메인 채팅과 동일한 방식으로 data 또는 dataUrl 사용
-    return sticker.data || sticker.dataUrl || "";
-}
-
-function handleEdit() {
-    dispatch("edit", { characterId: character.id, postId: post.id });
-}
-
-function handleDelete() {
-    dispatch("delete", { characterId: character.id, postId: post.id });
-}
 </script>
 
 <div

@@ -1,38 +1,38 @@
 <script>
-import { t } from "$root/i18n";
-import { createEventDispatcher } from "svelte";
-import {
-    ArrowLeft,
-    HardDrive,
-    Download,
-    Upload,
-    Info,
-    FileText,
-    Camera,
-    History,
-    AlertTriangle,
-    Trash2,
-} from "lucide-svelte";
-import { settings, settingsSnapshots } from "../../../stores/settings";
-import {
-    backupData,
-    restoreData,
-    resetAllData,
-} from "../../../services/dataService";
-import { prompts } from "../../../stores/prompts";
-import SnapshotList from "./panels/SnapshotList.svelte";
+    import { t } from "$root/i18n";
+    import { createEventDispatcher } from "svelte";
+    import {
+        ArrowLeft,
+        HardDrive,
+        Download,
+        Upload,
+        Info,
+        FileText,
+        Camera,
+        History,
+        AlertTriangle,
+        Trash2,
+    } from "@lucide/svelte";
+    import { settings, settingsSnapshots } from "../../../stores/settings";
+    import {
+        backupData,
+        restoreData,
+        resetAllData,
+    } from "../../../services/dataService";
+    import { prompts } from "../../../stores/prompts";
+    import SnapshotList from "./panels/SnapshotList.svelte";
 
-const dispatch = createEventDispatcher();
-let restoreFileInput;
+    const dispatch = createEventDispatcher();
+    let restoreFileInput;
 
-async function handleRestoreFile(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+    async function handleRestoreFile(event) {
+        const file = event.target.files[0];
+        if (!file) return;
 
-    const fileContent = await file.text();
-    restoreData(fileContent);
-    event.target.value = "";
-}
+        const fileContent = await file.text();
+        restoreData(fileContent);
+        event.target.value = "";
+    }
 </script>
 
 <div class="flex flex-col h-full">

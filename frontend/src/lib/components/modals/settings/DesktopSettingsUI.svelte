@@ -1,131 +1,131 @@
 <script>
-import { onMount, onDestroy } from "svelte";
-import { t } from "$root/i18n";
-import { isDesktopSettingsModalVisible } from "../../../stores/ui";
-import {
-    Settings,
-    X,
-    Globe,
-    Palette,
-    User,
-    HardDrive,
-    Cog,
-    Info,
-    Image,
-    Shield,
-} from "lucide-svelte";
-import { isDevModeActive } from "../../../stores/ui";
-import { fade } from "svelte/transition";
-import APISettingsPanel from "./panels/APISettingsPanel.svelte";
-import AdvancedSettingsPanel from "./panels/AdvancedSettingsPanel.svelte";
-import AppearanceSettingsPanel from "./panels/AppearanceSettingsPanel.svelte";
-import CharacterDefaultsPanel from "./panels/CharacterDefaultsPanel.svelte";
-import DataManagementPanel from "./panels/DataManagementPanel.svelte";
-import NAISettingsPanel from "./panels/NAISettingsPanel.svelte";
-import DebugSettingsPanel from "./panels/DebugSettingsPanel.svelte";
+    import { onMount, onDestroy } from "svelte";
+    import { t } from "$root/i18n";
+    import { isDesktopSettingsModalVisible } from "../../../stores/ui";
+    import {
+        Settings,
+        X,
+        Globe,
+        Palette,
+        User,
+        HardDrive,
+        Cog,
+        Info,
+        Image,
+        Shield,
+    } from "@lucide/svelte";
+    import { isDevModeActive } from "../../../stores/ui";
+    import { fade } from "svelte/transition";
+    import APISettingsPanel from "./panels/APISettingsPanel.svelte";
+    import AdvancedSettingsPanel from "./panels/AdvancedSettingsPanel.svelte";
+    import AppearanceSettingsPanel from "./panels/AppearanceSettingsPanel.svelte";
+    import CharacterDefaultsPanel from "./panels/CharacterDefaultsPanel.svelte";
+    import DataManagementPanel from "./panels/DataManagementPanel.svelte";
+    import NAISettingsPanel from "./panels/NAISettingsPanel.svelte";
+    import DebugSettingsPanel from "./panels/DebugSettingsPanel.svelte";
 
-let activePanel = "api"; // Default panel
+    let activePanel = "api"; // Default panel
 
-const navItems = [
-    {
-        id: "api",
-        icon: Globe,
-        label: t("settings.aiSettings"),
-        description: t("settings.apiDescription"),
-    },
-    {
-        id: "nai",
-        icon: Image,
-        label: "🧪 NAI 스티커 생성",
-        description: "NovelAI 기반 스티커 자동 생성 설정",
-    },
-    {
-        id: "appearance",
-        icon: Palette,
-        label: t("settings.appearanceSettings"),
-        description: t("settings.appearanceDescription"),
-    },
-    {
-        id: "character",
-        icon: User,
-        label: t("settings.characterDefaults"),
-        description: t("settings.characterDescription"),
-    },
-    {
-        id: "data",
-        icon: HardDrive,
-        label: t("settings.dataManagement"),
-        description: t("settings.dataDescription"),
-    },
-    {
-        id: "advanced",
-        icon: Cog,
-        label: t("settings.advancedSettings"),
-        description: t("settings.advancedDescription"),
-    },
-];
+    const navItems = [
+        {
+            id: "api",
+            icon: Globe,
+            label: t("settings.aiSettings"),
+            description: t("settings.apiDescription"),
+        },
+        {
+            id: "nai",
+            icon: Image,
+            label: "🧪 NAI 스티커 생성",
+            description: "NovelAI 기반 스티커 자동 생성 설정",
+        },
+        {
+            id: "appearance",
+            icon: Palette,
+            label: t("settings.appearanceSettings"),
+            description: t("settings.appearanceDescription"),
+        },
+        {
+            id: "character",
+            icon: User,
+            label: t("settings.characterDefaults"),
+            description: t("settings.characterDescription"),
+        },
+        {
+            id: "data",
+            icon: HardDrive,
+            label: t("settings.dataManagement"),
+            description: t("settings.dataDescription"),
+        },
+        {
+            id: "advanced",
+            icon: Cog,
+            label: t("settings.advancedSettings"),
+            description: t("settings.advancedDescription"),
+        },
+    ];
 
-const debugNavItem = {
-    id: "debug",
-    icon: Shield,
-    label: "Debug",
-    description: "Data status and developer tools",
-};
+    const debugNavItem = {
+        id: "debug",
+        icon: Shield,
+        label: "Debug",
+        description: "Data status and developer tools",
+    };
 
-const panelTitles = {
-    api: {
-        title: t("settings.aiSettings"),
-        subtitle: t("settings.apiSubtitle"),
-    },
-    nai: {
-        title: t("settings.naiSettings"),
-        subtitle: "NovelAI 기반 스티커 자동 생성 설정",
-    },
-    appearance: {
-        title: t("settings.appearanceSettings"),
-        subtitle: t("settings.appearanceSubtitle"),
-    },
-    character: {
-        title: t("settings.characterDefaults"),
-        subtitle: t("settings.characterSubtitle"),
-    },
-    data: {
-        title: t("settings.dataManagement"),
-        subtitle: t("settings.dataSubtitle"),
-    },
-    advanced: {
-        title: t("settings.advancedSettings"),
-        subtitle: t("settings.advancedSubtitle"),
-    },
-    debug: {
-        title: "Debug Settings",
-        subtitle: "Tools for development and testing",
-    },
-};
+    const panelTitles = {
+        api: {
+            title: t("settings.aiSettings"),
+            subtitle: t("settings.apiSubtitle"),
+        },
+        nai: {
+            title: t("settings.naiSettings"),
+            subtitle: "NovelAI 기반 스티커 자동 생성 설정",
+        },
+        appearance: {
+            title: t("settings.appearanceSettings"),
+            subtitle: t("settings.appearanceSubtitle"),
+        },
+        character: {
+            title: t("settings.characterDefaults"),
+            subtitle: t("settings.characterSubtitle"),
+        },
+        data: {
+            title: t("settings.dataManagement"),
+            subtitle: t("settings.dataSubtitle"),
+        },
+        advanced: {
+            title: t("settings.advancedSettings"),
+            subtitle: t("settings.advancedSubtitle"),
+        },
+        debug: {
+            title: "Debug Settings",
+            subtitle: "Tools for development and testing",
+        },
+    };
 
-function handleClose() {
-    isDesktopSettingsModalVisible.set(false);
-}
+    function handleClose() {
+        isDesktopSettingsModalVisible.set(false);
+    }
 
-function handleSave() {
-    // TODO: Implement save logic
-    console.log("Saving settings...");
-    handleClose();
-}
-
-function handleKeydown(event) {
-    if (event.key === "Escape") {
+    function handleSave() {
+        // TODO: Implement save logic
+        console.log("Saving settings...");
         handleClose();
     }
-}
 
-onMount(() => {
-    window.addEventListener("keydown", handleKeydown);
-});
+    function handleKeydown(event) {
+        if (event.key === "Escape") {
+            handleClose();
+        }
+    }
 
-onDestroy(() => {
-    window.removeEventListener("keydown", handleKeydown);
-});
+    onMount(() => {
+        window.addEventListener("keydown", handleKeydown);
+    });
+
+    onDestroy(() => {
+        window.removeEventListener("keydown", handleKeydown);
+    });
 </script>
 
 {#if $isDesktopSettingsModalVisible}

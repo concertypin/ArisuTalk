@@ -16,7 +16,7 @@ declare const process: {
 
 const predefinedChunks: Record<string, string[]> = {
     "vendor-core": ["svelte", "svelte/internal"],
-    "vendor-ui": ["lucide-svelte"],
+    "vendor-ui": ["@lucide/svelte"],
     "vendor-utils": ["jszip"],
 };
 
@@ -48,12 +48,42 @@ export default defineConfig(async (ctx) => {
         svelte({
             compilerOptions: {
                 dev: mode !== "production",
+                compatibility: {
+                    componentApi: 4,
+                },
             },
         }),
         ...(mode === "production" ? prodOnlyPlugin : []),
     ];
+    const testConfig: UserConfig["test"] = {
+        globals: true,
+        environment: "happy-dom",
+        setupFiles: ["./tests/setup.ts"],
+        include: ["tests/**/*.{test,spec}.{js,ts}"],
+        exclude: ["node_modules", "dist"],
+        coverage: {
+            reporter: ["text", "json", "html"],
+            exclude: [
+                "node_modules/",
+                "dist/",
+                "tests/",
+                "**/*.d.ts",
+                "**/*.config.*",
+                "script/",
+                "static/",
+                "worker/",
+            ],
+        },
+    };
     let baseConfig: UserConfig = {
         server: {
+            proxy: {
+                "/phonebook": {
+                    target: "http://localhost:5174",
+                    changeOrigin: true,
+                    ignorePath: true,
+                },
+            },
             open: "index.html",
         },
         worker: {
@@ -64,6 +94,9 @@ export default defineConfig(async (ctx) => {
             sourcemap: "inline",
             rollupOptions: {
                 output: {
+                    sourcemapIgnoreList: (relativeSourcePath) => {
+                        return relativeSourcePath.includes("node_modules");
+                    },
                     manualChunks: predefinedChunks,
                 },
             },
@@ -72,26 +105,7 @@ export default defineConfig(async (ctx) => {
         publicDir: "static",
         plugins: plugin,
         define: defineConfigReady,
-        test: {
-            globals: true,
-            environment: "happy-dom",
-            setupFiles: ["./tests/setup.ts"],
-            include: ["tests/**/*.{test,spec}.{js,ts}"],
-            exclude: ["node_modules", "dist"],
-            coverage: {
-                reporter: ["text", "json", "html"],
-                exclude: [
-                    "node_modules/",
-                    "dist/",
-                    "tests/",
-                    "**/*.d.ts",
-                    "**/*.config.*",
-                    "script/",
-                    "static/",
-                    "worker/",
-                ],
-            },
-        },
+        test: testConfig,
     };
     return baseConfig;
 });

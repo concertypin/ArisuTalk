@@ -8,21 +8,43 @@
         "src/*.svelte"
     ],
     "compilerOptions": {
-        "lib": ["ESNext", "DOM"],
+        "lib": [
+            "ESNext",
+            "DOM"
+        ],
         "baseUrl": "./src" /* Specify the base directory to resolve non-relative module names. */,
         "paths": {
-            "$components/*": ["./lib/components/*"],
-            "$stores/*": ["./lib/stores/*"],
-            "$services/*": ["./lib/services/*"],
-            "$utils/*": ["./lib/utils/*"],
-            "$types/*": ["./types/*"],
-            "$constants/*": ["./constants/*"],
-            "$root/*": ["./*"],
-            "$lib/*": ["./lib/*"]
+            "$components/*": [
+                "./lib/components/*"
+            ],
+            "$stores/*": [
+                "./lib/stores/*"
+            ],
+            "$services/*": [
+                "./lib/services/*"
+            ],
+            "$utils/*": [
+                "./lib/utils/*"
+            ],
+            "$types/*": [
+                "./types/*"
+            ],
+            "$constants/*": [
+                "./constants/*"
+            ],
+            "$root/*": [
+                "./*"
+            ],
+            "$lib/*": [
+                "./lib/*"
+            ]
         },
-        "types": ["vite/client", "svelte/compiler"],
+        "types": [
+            "vite/client",
+            "svelte/compiler"
+        ],
         /* Type Checking */
-        "noImplicitAny": false /* Enable error reporting for expressions and declarations with an implied 'any' type. */
+        "noImplicitAny": false, /* Enable error reporting for expressions and declarations with an implied 'any' type. */
     },
     "extends": "./tsconfig.base.json",
     "references": [

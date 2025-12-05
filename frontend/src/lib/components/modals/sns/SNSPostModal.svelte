@@ -1,73 +1,75 @@
 <script>
-import { onMount, onDestroy } from "svelte";
-import { t } from "$root/i18n";
-import { createEventDispatcher } from "svelte";
-import { fade } from "svelte/transition";
-import { X, Image, Plus } from "lucide-svelte";
-import { characters } from "../../../stores/character";
+    import { onMount, onDestroy } from "svelte";
+    import { t } from "$root/i18n";
+    import { createEventDispatcher } from "svelte";
+    import { fade } from "svelte/transition";
+    import { X, Image, Plus } from "@lucide/svelte";
+    import { characters } from "../../../stores/character";
 
-export let isOpen = false;
-export let editingPost = null;
+    export let isOpen = false;
+    export let editingPost = null;
 
-const dispatch = createEventDispatcher();
+    const dispatch = createEventDispatcher();
 
-let character = null;
-let postContent = "";
-let tags = [];
-let accessLevel = "main-public";
-let importance = 5;
-let stickerId = null;
-let showStickerPanel = false;
+    let character = null;
+    let postContent = "";
+    let tags = [];
+    let accessLevel = "main-public";
+    let importance = 5;
+    let stickerId = null;
+    let showStickerPanel = false;
 
-$: {
-    if (editingPost) {
-        character = $characters.find((c) => c.id === editingPost.characterId);
-        postContent = editingPost.content || "";
-        tags = editingPost.tags || [];
-        accessLevel =
-            editingPost.accessLevel ||
-            (editingPost.isSecret ? "secret-public" : "main-public");
-        importance = editingPost.importance || 5;
-        stickerId = editingPost.stickerId || null;
+    $: {
+        if (editingPost) {
+            character = $characters.find(
+                (c) => c.id === editingPost.characterId,
+            );
+            postContent = editingPost.content || "";
+            tags = editingPost.tags || [];
+            accessLevel =
+                editingPost.accessLevel ||
+                (editingPost.isSecret ? "secret-public" : "main-public");
+            importance = editingPost.importance || 5;
+            stickerId = editingPost.stickerId || null;
+        }
     }
-}
 
-function closeModal() {
-    dispatch("close");
-}
+    function closeModal() {
+        dispatch("close");
+    }
 
-function savePost() {
-    const post = {
-        ...editingPost,
-        content: postContent,
-        tags,
-        accessLevel,
-        importance,
-        stickerId,
-    };
-    dispatch("save", post);
-    closeModal();
-}
-
-function getStickerUrl(id) {
-    if (!character || !character.stickers) return "";
-    const sticker = character.stickers.find((s) => s.id == id);
-    return sticker ? sticker.data || sticker.dataUrl : "";
-}
-
-function handleKeydown(event) {
-    if (event.key === "Escape") {
+    function savePost() {
+        const post = {
+            ...editingPost,
+            content: postContent,
+            tags,
+            accessLevel,
+            importance,
+            stickerId,
+        };
+        dispatch("save", post);
         closeModal();
     }
-}
 
-onMount(() => {
-    window.addEventListener("keydown", handleKeydown);
-});
+    function getStickerUrl(id) {
+        if (!character || !character.stickers) return "";
+        const sticker = character.stickers.find((s) => s.id == id);
+        return sticker ? sticker.data || sticker.dataUrl : "";
+    }
 
-onDestroy(() => {
-    window.removeEventListener("keydown", handleKeydown);
-});
+    function handleKeydown(event) {
+        if (event.key === "Escape") {
+            closeModal();
+        }
+    }
+
+    onMount(() => {
+        window.addEventListener("keydown", handleKeydown);
+    });
+
+    onDestroy(() => {
+        window.removeEventListener("keydown", handleKeydown);
+    });
 </script>
 
 {#if isOpen && editingPost && character}
@@ -239,23 +241,23 @@ onDestroy(() => {
                         {#if editingPost.isSecret}
                             <option value="secret-public"
                                 >{t("sns.secretPublic")} - {t(
-                                    "sns.secretPublicDesc"
+                                    "sns.secretPublicDesc",
                                 )}</option
                             >
                             <option value="secret-private"
                                 >{t("sns.secretPrivate")} - {t(
-                                    "sns.secretPrivateDesc"
+                                    "sns.secretPrivateDesc",
                                 )}</option
                             >
                         {:else}
                             <option value="main-public"
                                 >{t("sns.mainPublic")} - {t(
-                                    "sns.mainPublicDesc"
+                                    "sns.mainPublicDesc",
                                 )}</option
                             >
                             <option value="main-private"
                                 >{t("sns.mainPrivate")} - {t(
-                                    "sns.mainPrivateDesc"
+                                    "sns.mainPrivateDesc",
                                 )}</option
                             >
                         {/if}

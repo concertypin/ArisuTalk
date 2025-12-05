@@ -1,7 +1,5 @@
-import type {
-    PhonebookImportResult,
-    ImportedCharacterData,
-} from "../stores/character";
+import type { PhonebookImportResult } from "../stores/character";
+import type { ImportedCharacterData } from "$types/character";
 import type { ClerkInstance } from "../stores/auth";
 import {
     extractPngChunk,

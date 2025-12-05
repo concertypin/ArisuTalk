@@ -1,57 +1,57 @@
 <script>
-import { createEventDispatcher, onMount, onDestroy } from "svelte";
-import { fade } from "svelte/transition";
-import { X, Image, Hash, Download, Copy, RefreshCw } from "lucide-svelte";
-import { t } from "$root/i18n";
-import PreviewTab from "./tabs/PreviewTab.svelte";
-import RerollTab from "./tabs/RerollTab.svelte";
-import ActionsTab from "./tabs/ActionsTab.svelte";
+    import { createEventDispatcher, onMount, onDestroy } from "svelte";
+    import { fade } from "svelte/transition";
+    import { X, Image, Hash, Download, Copy, RefreshCw } from "@lucide/svelte";
+    import { t } from "$root/i18n";
+    import PreviewTab from "./tabs/PreviewTab.svelte";
+    import RerollTab from "./tabs/RerollTab.svelte";
+    import ActionsTab from "./tabs/ActionsTab.svelte";
 
-export let isOpen = false;
-export let sticker = null;
-export let index = null;
+    export let isOpen = false;
+    export let sticker = null;
+    export let index = null;
 
-let activeTab = "preview";
+    let activeTab = "preview";
 
-const dispatch = createEventDispatcher();
+    const dispatch = createEventDispatcher();
 
-function closeModal() {
-    dispatch("close");
-}
-
-function handleSave(event) {
-    dispatch("save", event.detail);
-}
-
-function handleDelete() {
-    dispatch("delete");
-}
-
-function handleCopy() {
-    dispatch("copy");
-}
-
-function handleDownload() {
-    dispatch("download");
-}
-
-function handleReroll(event) {
-    dispatch("reroll", event.detail);
-}
-
-function handleKeydown(event) {
-    if (event.key === "Escape") {
-        closeModal();
+    function closeModal() {
+        dispatch("close");
     }
-}
 
-onMount(() => {
-    window.addEventListener("keydown", handleKeydown);
-});
+    function handleSave(event) {
+        dispatch("save", event.detail);
+    }
 
-onDestroy(() => {
-    window.removeEventListener("keydown", handleKeydown);
-});
+    function handleDelete() {
+        dispatch("delete");
+    }
+
+    function handleCopy() {
+        dispatch("copy");
+    }
+
+    function handleDownload() {
+        dispatch("download");
+    }
+
+    function handleReroll(event) {
+        dispatch("reroll", event.detail);
+    }
+
+    function handleKeydown(event) {
+        if (event.key === "Escape") {
+            closeModal();
+        }
+    }
+
+    onMount(() => {
+        window.addEventListener("keydown", handleKeydown);
+    });
+
+    onDestroy(() => {
+        window.removeEventListener("keydown", handleKeydown);
+    });
 </script>
 
 {#if isOpen && sticker}
