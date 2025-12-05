@@ -2,8 +2,7 @@
     import { t } from "$root/i18n";
     import { onMount } from "svelte";
     import { ChevronRight } from "lucide-svelte";
-
-    export let log;
+export let log: any;
 
     let promptContent = "";
 

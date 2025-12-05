@@ -48,11 +48,11 @@
 
     let isNew = false;
     let characterData = {};
-    let avatarInput;
-    let cardInput;
+let avatarInput: any;
+let cardInput: any;
     let isGeneratingPersona = false;
     const apiManager = new APIManager();
-    let phonebookUnsubscribe;
+let phonebookUnsubscribe: any;
     let isCheckingPhonebook = false;
 
     const defaultHypnosis = {
@@ -190,7 +190,7 @@
                     const pngData = dataUrlToUint8Array(imageSrc);
 
                     let chunkData = extractPngChunk(pngData, "cChr");
-                    let jsonString;
+let jsonString: any;
 
                     if (chunkData) {
                         const decompressedData = await compressData(chunkData);

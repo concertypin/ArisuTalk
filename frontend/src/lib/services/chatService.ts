@@ -30,6 +30,7 @@ import {
     applyRequestHooks,
 } from "./replaceHookService";
 const { replace } = await import("$lib/utils/worker/replace.js");
+import type { Message } from "$types/chat";
 import type { Character } from "$types/character";
 import type { APIConfig } from "$root/defaults";
 
@@ -466,7 +467,7 @@ export async function sendMessage(content: string, type: string = "text", payloa
             }
 
             try {
-                await callApiAndHandleResponse(chatId, character as Character, history);
+                await callApiAndHandleResponse(chatId, character as Character, history as any);
             } catch (error) {
                 console.error(
                     `Error in group chat response for ${character.name}:`,
@@ -502,7 +503,8 @@ export async function sendMessage(content: string, type: string = "text", payloa
         }
 
         try {
-            await callApiAndHandleResponse(chatId, character as Character, history);
+            await callApiAndHandleResponse(chatId, character as Character, history as any);
+            await callApiAndHandleResponse(chatId, character as Character, history as any);
         } finally {
             isWaitingForResponse.set(false);
             typingCharacterId.set(null);

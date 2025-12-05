@@ -167,6 +167,14 @@ export class SecureStorageManager {
     generateMasterPassword(): string {
         return generateMasterPassword();
     }
+
+    /**
+     * Clear master password (reset)
+     */
+    clearMasterPassword() {
+        this.masterPassword = null;
+        this.encryptionEnabled = false;
+    }
 }
 
 // Export singleton instance

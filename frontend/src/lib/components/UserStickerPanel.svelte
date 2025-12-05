@@ -4,8 +4,7 @@
     import { stickerToSend } from "../stores/chat";
     import { isUserStickerPanelVisible } from "../stores/ui";
     import { Plus, X, Smile, Music, Edit3, Trash2 } from "lucide-svelte";
-
-    let stickerInput;
+let stickerInput: any;
 
     function selectSticker(sticker) {
         stickerToSend.set(sticker);
@@ -44,7 +43,7 @@
             }
 
             try {
-                let dataUrl;
+let dataUrl: any;
                 if (file.type.startsWith("image/")) {
                     dataUrl = await compressImage(file, 1024, 1024, 0.85);
                 } else {

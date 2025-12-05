@@ -12,9 +12,9 @@
     const dispatch = createEventDispatcher();
 
     let filteredCharacters = [];
-    let modalContentEl;
-    let oldHeight;
-    let inputEl;
+let modalContentEl: any;
+let oldHeight: any;
+let inputEl: any;
 
     beforeUpdate(() => {
         if (!modalContentEl) return;

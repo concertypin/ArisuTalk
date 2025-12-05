@@ -2,8 +2,7 @@
     import { t } from "$root/i18n";
     import Avatar from "./Avatar.svelte";
     import { isImageZoomModalVisible, imageZoomModalData } from "../stores/ui";
-
-    export let message;
+export let message: any;
     export let showSenderInfo = false;
 
     function openImageZoom() {

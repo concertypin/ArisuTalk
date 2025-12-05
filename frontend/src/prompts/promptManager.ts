@@ -26,7 +26,7 @@ type PromptType =
  */
 export async function getAllPrompts(): Promise<Record<PromptType, string>> {
     const customPrompts =
-        (await loadFromBrowserStorage(PROMPT_STORAGE_KEY)) || {};
+        (await loadFromBrowserStorage<Record<string, string>>(PROMPT_STORAGE_KEY, {})) || {};
     return {
         ...defaultChatMLPrompts,
         ...customPrompts,
@@ -52,7 +52,7 @@ export async function savePrompt(
     content: string
 ): Promise<void> {
     const customPrompts =
-        (await loadFromBrowserStorage(PROMPT_STORAGE_KEY)) || {};
+        (await loadFromBrowserStorage<Record<string, string>>(PROMPT_STORAGE_KEY, {})) || {};
     customPrompts[type] = content;
     await saveToBrowserStorage(PROMPT_STORAGE_KEY, customPrompts);
 }
@@ -65,7 +65,7 @@ export async function saveAllPrompts(
     prompts: Record<PromptType, string>
 ): Promise<void> {
     const customPrompts =
-        (await loadFromBrowserStorage(PROMPT_STORAGE_KEY)) || {};
+        (await loadFromBrowserStorage<Record<string, string>>(PROMPT_STORAGE_KEY, {})) || {};
     Object.assign(customPrompts, prompts);
     saveToBrowserStorage(PROMPT_STORAGE_KEY, customPrompts);
 }
@@ -76,7 +76,7 @@ export async function saveAllPrompts(
  */
 export async function resetPrompt(type: PromptType): Promise<void> {
     const customPrompts =
-        (await loadFromBrowserStorage(PROMPT_STORAGE_KEY)) || {};
+        (await loadFromBrowserStorage<Record<string, string>>(PROMPT_STORAGE_KEY, {})) || {};
     delete customPrompts[type];
     await saveToBrowserStorage(PROMPT_STORAGE_KEY, customPrompts);
 }

@@ -8,6 +8,7 @@ import {
 } from "../stores/character";
 import { addSystemMessage } from "./chatService";
 import { t } from "$root/i18n";
+import type { ChatRoom } from "$types/chat";
 
 /**
  * 캐릭터를 OpenChat에 참여시킵니다.
@@ -21,9 +22,14 @@ export function characterJoinOpenChat(
 
     openChats.update((chats) => {
         const chat = chats[chatId];
-        if (chat && !chat.currentParticipants.includes(characterId)) {
-            chat.currentParticipants.push(characterId);
-            chat.participantHistory.push({ characterId, joinedAt: Date.now() });
+        if (chat) {
+            if (!chat.currentParticipants) chat.currentParticipants = [];
+            if (!chat.participantHistory) chat.participantHistory = [];
+
+            if (!chat.currentParticipants.includes(characterId)) {
+                chat.currentParticipants.push(characterId);
+                chat.participantHistory.push({ characterId, joinedAt: Date.now() });
+            }
         }
         return chats;
     });
@@ -38,7 +44,7 @@ export function characterJoinOpenChat(
 
     addSystemMessage(
         chatId,
-        get(t)("openChat.joined", { name: character.name })
+        t("openChat.joined", { name: character.name })
     );
 }
 
@@ -55,9 +61,9 @@ export function characterLeaveOpenChat(
 
     openChats.update((chats) => {
         const chat = chats[chatId];
-        if (chat) {
+        if (chat && chat.currentParticipants) {
             chat.currentParticipants = chat.currentParticipants.filter(
-                (id) => id !== characterId
+                (id: string) => id !== characterId
             );
         }
         return chats;
@@ -72,7 +78,7 @@ export function characterLeaveOpenChat(
         });
     }
 
-    addSystemMessage(chatId, get(t)("openChat.left", { name: character.name }));
+    addSystemMessage(chatId, t("openChat.left", { name: character.name }));
 }
 
 /**
@@ -89,7 +95,7 @@ export function initializeOpenChat(chatId: string): void {
 
     for (const character of initialJoiners) {
         setTimeout(() => {
-            characterJoinOpenChat(chatId, character.id);
+            characterJoinOpenChat(chatId, String(character.id));
         }, Math.random() * 5000); // Join after 0-5 seconds
     }
 }
@@ -98,10 +104,10 @@ export function initializeOpenChat(chatId: string): void {
  * OpenChat 참여자 상태를 주기적으로 업데이트합니다. (레거시 updateParticipantStates 대체)
  */
 export function updateParticipantStates(chatId: string): void {
-    const chat = get(openChats)[chatId];
+    const chat = get(openChats)[chatId] as ChatRoom;
     if (!chat) return;
 
-    const currentParticipants = chat.currentParticipants;
+    const currentParticipants = chat.currentParticipants || [];
 
     for (const participantId of currentParticipants) {
         const character = get(characters).find((c) => c.id === participantId);
@@ -127,20 +133,20 @@ export function updateParticipantStates(chatId: string): void {
     }
 
     // Possibility of a new participant joining
-    const updatedChat = get(openChats)[chatId];
+    const updatedChat = get(openChats)[chatId] as ChatRoom;
     const shouldAddNewParticipant =
-        Math.random() < 0.3 && updatedChat.currentParticipants.length < 6;
+        Math.random() < 0.3 && (updatedChat.currentParticipants?.length || 0) < 6;
 
     if (shouldAddNewParticipant) {
         const availableCharacters = get(characters).filter(
-            (c) => !updatedChat.currentParticipants.includes(c.id) && c.id
+            (c) => !(updatedChat.currentParticipants || []).includes(String(c.id)) && c.id
         );
         if (availableCharacters.length > 0) {
             const newParticipant =
                 availableCharacters[
                     Math.floor(Math.random() * availableCharacters.length)
                 ];
-            characterJoinOpenChat(chatId, newParticipant.id);
+            characterJoinOpenChat(chatId, String(newParticipant.id));
         }
     }
 }

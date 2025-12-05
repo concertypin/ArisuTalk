@@ -1,0 +1,49 @@
+src/lib/api/novelai.ts(9,18): error TS7016: Could not find a declaration file for module 'pako'. '/app/node_modules/.pnpm/pako@2.1.0/node_modules/pako/dist/pako.esm.mjs' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/pako` if it exists or add a new declaration (.d.ts) file containing `declare module 'pako';`
+src/lib/services/chatService.ts(47,29): error TS2304: Cannot find name 'Message'.
+src/lib/services/chatService.ts(63,27): error TS2304: Cannot find name 'Message'.
+src/lib/services/chatService.ts(186,14): error TS2304: Cannot find name 'Message'.
+src/lib/services/chatService.ts(341,29): error TS2304: Cannot find name 'Message'.
+src/lib/services/chatService.ts(377,24): error TS2304: Cannot find name 'Message'.
+src/lib/services/chatService.ts(547,17): error TS2345: Argument of type 'import("/app/frontend/src/types/chat").Message[]' is not assignable to parameter of type 'Message[]'.
+  Type 'import("/app/frontend/src/types/chat").Message' is not assignable to type 'Message'.
+    Types of property 'id' are incompatible.
+      Type 'string | number' is not assignable to type 'number'.
+        Type 'string' is not assignable to type 'number'.
+src/lib/services/chatService.ts(586,9): error TS2345: Argument of type 'import("/app/frontend/src/types/chat").Message[]' is not assignable to parameter of type 'Message[]'.
+  Type 'import("/app/frontend/src/types/chat").Message' is not assignable to type 'Message'.
+    Types of property 'id' are incompatible.
+      Type 'string | number' is not assignable to type 'number'.
+        Type 'string' is not assignable to type 'number'.
+src/lib/services/chatService.ts(595,26): error TS2304: Cannot find name 'Message'.
+src/lib/services/chatService.ts(653,9): error TS2345: Argument of type 'import("/app/frontend/src/types/chat").Message[]' is not assignable to parameter of type 'Message[]'.
+  Type 'import("/app/frontend/src/types/chat").Message' is not assignable to type 'Message'.
+    Types of property 'id' are incompatible.
+      Type 'string | number' is not assignable to type 'number'.
+        Type 'string' is not assignable to type 'number'.
+src/lib/services/chatService.ts(892,26): error TS2304: Cannot find name 'Message'.
+src/lib/services/openChatService.ts(60,18): error TS7006: Parameter 'id' implicitly has an 'any' type.
+src/lib/services/openChatService.ts(92,43): error TS2345: Argument of type 'string | number' is not assignable to parameter of type 'string'.
+  Type 'number' is not assignable to type 'string'.
+src/lib/utils/crypto.ts(28,13): error TS2322: Type 'Uint8Array<ArrayBufferLike>' is not assignable to type 'BufferSource'.
+  Type 'Uint8Array<ArrayBufferLike>' is not assignable to type 'ArrayBufferView<ArrayBuffer>'.
+    Types of property 'buffer' are incompatible.
+      Type 'ArrayBufferLike' is not assignable to type 'ArrayBuffer'.
+        Type 'SharedArrayBuffer' is missing the following properties from type 'ArrayBuffer': resizable, resize, detached, transfer, transferToFixedLength
+src/lib/utils/crypto.ts(70,32): error TS2322: Type 'Uint8Array<ArrayBufferLike>' is not assignable to type 'BufferSource'.
+  Type 'Uint8Array<ArrayBufferLike>' is not assignable to type 'ArrayBufferView<ArrayBuffer>'.
+    Types of property 'buffer' are incompatible.
+      Type 'ArrayBufferLike' is not assignable to type 'ArrayBuffer'.
+        Type 'SharedArrayBuffer' is missing the following properties from type 'ArrayBuffer': resizable, resize, detached, transfer, transferToFixedLength
+src/lib/utils/worker/replace.ts(4,40): error TS6305: Output file '/app/frontend/dist/worker/regex/main.d.ts' has not been built from source file '/app/frontend/worker/regex/main.ts'.
+src/prompts/builder/promptBuilder.ts(283,47): error TS2322: Type '({ text: string; } | { inlineData: { mimeType: string; data: string; }; })[]' is not assignable to type '{ text: string; }[]'.
+  Type '{ text: string; } | { inlineData: { mimeType: string; data: string; }; }' is not assignable to type '{ text: string; }'.
+    Property 'text' is missing in type '{ inlineData: { mimeType: string; data: string; }; }' but required in type '{ text: string; }'.
+src/prompts/promptManager.ts(29,16): error TS2554: Expected 2 arguments, but got 1.
+src/prompts/promptManager.ts(55,16): error TS2554: Expected 2 arguments, but got 1.
+src/prompts/promptManager.ts(56,5): error TS7053: Element implicitly has an 'any' type because expression of type 'PromptType' can't be used to index type '{}'.
+  Property 'mainChat' does not exist on type '{}'.
+src/prompts/promptManager.ts(68,16): error TS2554: Expected 2 arguments, but got 1.
+src/prompts/promptManager.ts(79,16): error TS2554: Expected 2 arguments, but got 1.
+src/prompts/promptManager.ts(80,12): error TS7053: Element implicitly has an 'any' type because expression of type 'PromptType' can't be used to index type '{}'.
+  Property 'mainChat' does not exist on type '{}'.

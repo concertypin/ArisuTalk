@@ -21,8 +21,7 @@
         resetAllData,
     } from "../../../../services/dataService";
     import { prompts } from "../../../../stores/prompts";
-
-    let restoreFileInput;
+let restoreFileInput: any;
 
     async function handleRestoreFile(event) {
         const file = event.target.files[0];

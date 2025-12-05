@@ -1,8 +1,7 @@
 <script lang="ts">
     import { t } from "$root/i18n";
     import { expandedImages } from "../stores/ui";
-
-    export let message;
+export let message: any;
 
     function toggleImageSize() {
         expandedImages.update((set) => {

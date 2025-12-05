@@ -11,8 +11,7 @@
         Trash2,
         ChevronDown,
     } from "lucide-svelte";
-
-    export let provider;
+export let provider: any;
 
     let config = $settings.apiConfigs[provider] || {};
     let customModelInput = "";

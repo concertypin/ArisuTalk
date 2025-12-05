@@ -11,7 +11,7 @@ export interface ChatMLMessage {
 
 export interface InternalContent {
     role: string;
-    parts: { text: string }[];
+    parts: ({ text: string } | { inlineData: { mimeType: string; data: string } })[];
     content?: string;
 }
 
@@ -165,7 +165,8 @@ export function promptStructureToChatML(systemPrompt: string, contents: Internal
     // Add conversation contents
     for (const content of contents) {
         const role = content.role === "model" ? "assistant" : content.role;
-        const text = content.parts?.[0]?.text || content.content || "";
+        const part = content.parts?.[0];
+        const text = (part && 'text' in part) ? (part as { text: string }).text : (content.content || "");
 
         if (text) {
             chatML += "<|im_start|>" + role + "\n" + text + "\n<|im_end|>\n";

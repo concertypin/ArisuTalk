@@ -21,7 +21,7 @@
 
     let selectionMode = false;
     let selectedStickers = [];
-    let stickerInput;
+let stickerInput: any;
     let showProgressModal = false;
     let progressData = {};
     let showPreviewModal = false;
@@ -63,7 +63,7 @@
             }
 
             try {
-                let dataUrl;
+let dataUrl: any;
                 if (file.type.startsWith("image/")) {
                     dataUrl = await compressImage(file, 1024, 1024, 0.85);
                 } else {

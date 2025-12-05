@@ -949,7 +949,7 @@ export class NovelAIClient {
         character: Character,
         emotion: string | NAIEmotion,
         options: object = {}
-    ): Promise<object> {
+    ): Promise<any> {
         const { naiSettings = {}, ...generateOptions } = options as { naiSettings?: Partial<NaiSettings> & { imageSize?: string; preferredSize?: string; minDelay?: number; maxAdditionalDelay?: number; vibeTransferEnabled?: boolean; vibeTransferStrength?: number; vibeTransferInformationExtracted?: number; }; [key: string]: any; };
 
         // 캐릭터별 설정을 우선 사용, 없으면 전역 설정 사용
@@ -993,7 +993,7 @@ export class NovelAIClient {
 
             // 모델 및 이미지 설정 (캐릭터별 설정 우선)
             model:
-                this.validateModel(mergedSettings.model) ||
+                this.validateModel(mergedSettings.model || "") ||
                 "nai-diffusion-4-5-full", // 기본값을 최신 권장 모델로 변경
             width: sizeConfig.width,
             height: sizeConfig.height,

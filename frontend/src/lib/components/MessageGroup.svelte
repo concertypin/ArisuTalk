@@ -15,9 +15,8 @@
         rerollMessage,
         generateSnsPost,
     } from "../services/chatService";
-
-    export let group;
-    export let isLastGroup;
+export let group: any;
+export let isLastGroup: any;
 
     const { messages, isMe, showSenderInfo, character } = group;
     const lastMessage = messages[messages.length - 1];

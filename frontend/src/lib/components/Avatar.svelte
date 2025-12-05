@@ -4,7 +4,7 @@
     /**
      * @type {object} character - The character object.
      */
-    export let character;
+export let character: any;
 
     /**
      * @type {"sm" | "md" | "lg"} size - The size of the avatar.

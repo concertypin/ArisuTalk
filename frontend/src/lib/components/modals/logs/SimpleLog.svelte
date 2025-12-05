@@ -1,6 +1,6 @@
 <script lang="ts">
     import { t } from "$root/i18n";
-    export let log;
+export let log: any;
 
     const levelColor =
         {

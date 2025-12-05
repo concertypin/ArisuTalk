@@ -25,7 +25,7 @@ import { showNotification, showConfirmation } from "./notificationService";
 
 // Debounce utility function
 function debounce(func: Function, wait: number) {
-    let timeout: number | null = null;
+    let timeout: any = null;
     return function executedFunction(...args: any[]) {
         const later = () => {
             timeout = null;
@@ -164,8 +164,7 @@ export async function resetAllData() {
             saveToBrowserStorage(key, null);
         }
 
-        secureStorage.encryptionEnabled = false;
-        secureStorage.masterPassword = null;
+        secureStorage.clearMasterPassword();
 
         sessionStorage.clear();
 

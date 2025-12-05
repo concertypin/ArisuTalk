@@ -27,6 +27,7 @@ const initialSettings = {
         sampler: "k_euler_ancestral",
         minDelay: 20000,
         maxAdditionalDelay: 10000,
+        autoGenerate: true,
     },
 };
 

@@ -29,8 +29,7 @@
     let postsCount = 0;
     let secretsCount = 0;
     let tagsCount = 0;
-
-    let currentCharacter;
+let currentCharacter: any;
 
     const dispatch = createEventDispatcher();
 
