@@ -1,23 +1,24 @@
 <script lang="ts">
     import { t } from "$root/i18n";
-    import { get } from "svelte/store";
+    import type { Character, Sticker } from "$types/character";
     import {
-        Plus,
-        CheckSquare,
+        Check,
         CheckCircle,
-        Trash2,
+        CheckSquare,
         Edit3,
         Music,
-        X,
+        Plus,
         Sparkles,
-        Check
+        Trash2,
+        X,
     } from "lucide-svelte";
+    import { get } from "svelte/store";
+
+    import { editingCharacter } from "../../../stores/character";
     import { stickerManager } from "../../../stores/services";
     import { settings } from "../../../stores/settings";
-    import { editingCharacter } from "../../../stores/character";
-    import StickerProgressModal from "../sticker/StickerProgressModal.svelte";
     import StickerPreviewModal from "../sticker/StickerPreviewModal.svelte";
-    import type { Sticker, Character } from "$types/character";
+    import StickerProgressModal from "../sticker/StickerProgressModal.svelte";
 
     export let stickers: Sticker[] = [];
 
@@ -99,7 +100,12 @@
         });
     }
 
-    function compressImage(file: File, maxWidth: number, maxHeight: number, quality: number): Promise<string> {
+    function compressImage(
+        file: File,
+        maxWidth: number,
+        maxHeight: number,
+        quality: number
+    ): Promise<string> {
         return new Promise((resolve, reject) => {
             const img = new Image();
             img.src = URL.createObjectURL(file);
@@ -141,7 +147,7 @@
         showPreviewModal = true;
     }
 
-    function handleSaveSticker(event) {
+    function handleSaveSticker(event: Event) {
         const { name } = event.detail;
         if (previewIndex !== null) {
             stickers[previewIndex].name = name;

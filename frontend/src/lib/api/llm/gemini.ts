@@ -248,10 +248,6 @@ export class GeminiClient implements LLMApi {
 
     /**
      * Generates a character sheet using Gemini API.
-     * @param {object} params - Generation parameters
-     * @param {string} params.characterName - Character name
-     * @param {string} params.characterDescription - Character description
-     * @param {string} params.characterSheetPrompt - Template for character sheet generation
      * @returns {Promise<Object>} Promise resolving to character sheet text response
      * @returns {Array} [returns.messages] - Array of response messages
      * @returns {string} [returns.error] - Error message if error occurs

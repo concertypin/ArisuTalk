@@ -53,14 +53,14 @@ export function handleGroupChatClick(e: MouseEvent, app: Application): void {
     }
 
     // 단톡방 편집/삭제 버튼
-    const editGroupChatBtn = e.target.closest(".edit-group-chat-btn") as HTMLElement;
+    const editGroupChatBtn = e.target.closest<HTMLElement>(".edit-group-chat-btn") ;
     if (editGroupChatBtn) {
         const groupId = editGroupChatBtn.dataset.groupId;
         if (groupId) app.openEditGroupChatModal(groupId);
         return;
     }
 
-    const deleteGroupChatBtn = e.target.closest(".delete-group-chat-btn") as HTMLElement;
+    const deleteGroupChatBtn = e.target.closest<HTMLElement>(".delete-group-chat-btn");
     if (deleteGroupChatBtn) {
         const groupId = deleteGroupChatBtn.dataset.groupId;
         if (groupId) app.handleDeleteGroupChat(groupId);
@@ -68,7 +68,7 @@ export function handleGroupChatClick(e: MouseEvent, app: Application): void {
     }
 
     // 오픈톡방 삭제 버튼
-    const deleteOpenChatBtn = e.target.closest(".delete-open-chat-btn") as HTMLElement;
+    const deleteOpenChatBtn = e.target.closest<HTMLElement>(".delete-open-chat-btn");
     if (deleteOpenChatBtn) {
         const openId = deleteOpenChatBtn.dataset.openId;
         if (openId) app.handleDeleteOpenChat(openId);
@@ -76,14 +76,14 @@ export function handleGroupChatClick(e: MouseEvent, app: Application): void {
     }
 
     // 단톡방/오픈톡방 선택
-    const groupChatItem = e.target.closest(".group-chat-item") as HTMLElement;
+    const groupChatItem = e.target.closest<HTMLElement>(".group-chat-item");
     if (groupChatItem) {
         const chatId = groupChatItem.dataset.chatId;
         if (chatId) app.selectChatRoom(chatId);
         return;
     }
 
-    const openChatItem = e.target.closest(".open-chat-item") as HTMLElement;
+    const openChatItem = e.target.closest<HTMLElement>(".open-chat-item");
     if (openChatItem) {
         const chatId = openChatItem.dataset.chatId;
         if (chatId) app.selectChatRoom(chatId);

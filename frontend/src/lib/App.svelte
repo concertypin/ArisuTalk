@@ -1,39 +1,56 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { get } from "svelte/store";
-    import {
-        selectedChatId,
-        createNewChatRoom,
-        chatRooms,
-    } from "./stores/chat";
-    import { characters, editingCharacter } from "./stores/character";
-    import {
-        isSidebarCollapsed,
-        isChatSelectionModalVisible,
-        chatSelectionModalData,
-        isSearchModalVisible,
-        isMobile,
-        isSNSCharacterListModalVisible,
-        isSNSFeedModalVisible,
-        snsFeedCharacter,
-        isSNSPostModalVisible,
-        editingSNSPost,
-        isMobileSettingsPageVisible,
-        isCharacterModalVisible,
-        isPhonebookModalVisible,
-        isMobileAuthModalVisible,
-    } from "./stores/ui";
     import { fade } from "svelte/transition";
-    import { stickerManager } from "./stores/services";
-    import { StickerManager } from "./services/stickerManager";
-    import { loadFirebaseAnalytics } from "./stores/firebaseAnalytics";
-    import { logUserFlowEvent } from "./analytics/userFlow";
 
-    // Core components - always loaded
-    import Sidebar from "./components/Sidebar.svelte";
+    import { logUserFlowEvent } from "./analytics/userFlow";
+    import DevModeIndicator from "./components/DevModeIndicator.svelte";
     import LandingPage from "./components/LandingPage.svelte";
     import MainChat from "./components/MainChat.svelte";
-    import DevModeIndicator from "./components/DevModeIndicator.svelte";
+    // Core components - always loaded
+    import Sidebar from "./components/Sidebar.svelte";
+    import { enableAutoSnapshots } from "./services/dataService";
+    import { addLog } from "./services/logService";
+    import { StickerManager } from "./services/stickerManager";
+    import { initializeAuth } from "./stores/auth";
+    import { characters, editingCharacter } from "./stores/character";
+    import {
+        chatRooms,
+        createNewChatRoom,
+        selectedChatId,
+    } from "./stores/chat";
+    import { loadFirebaseAnalytics } from "./stores/firebaseAnalytics";
+    import { stickerManager } from "./stores/services";
+    import { settings } from "./stores/settings";
+    import {
+        chatSelectionModalData,
+        editingSNSPost,
+        isCharacterModalVisible,
+        isChatSelectionModalVisible,
+        isMobile,
+        isMobileAuthModalVisible,
+        isMobileSettingsPageVisible,
+        isPhonebookModalVisible,
+        isSNSCharacterListModalVisible,
+        isSNSFeedModalVisible,
+        isSNSPostModalVisible,
+        isSearchModalVisible,
+        isSidebarCollapsed,
+        snsFeedCharacter,
+    } from "./stores/ui";
+    import {
+        desktopSettings,
+        isConfirmationModalVisible,
+        isCreateGroupChatModalVisible,
+        isCreateOpenChatModalVisible,
+        isDataBrowserModalVisible,
+        isDebugLogModalVisible,
+        isDesktopSettingsModalVisible,
+        isEditGroupChatModalVisible,
+        isImageZoomModalVisible,
+        isMasterPasswordModalVisible,
+        isPromptModalVisible,
+    } from "./stores/ui";
 
     // Lazy load heavy components
     let ConfirmationModal: any,
@@ -56,24 +73,7 @@
         DataBrowserModal: any,
         PhonebookModal: any,
         MobileAuthModal: any;
-    let deviceType = "desktop";
-    import { settings } from "./stores/settings";
-    import {
-        isConfirmationModalVisible,
-        isImageZoomModalVisible,
-        isCreateGroupChatModalVisible,
-        isCreateOpenChatModalVisible,
-        isEditGroupChatModalVisible,
-        isPromptModalVisible,
-        isDebugLogModalVisible,
-        isDataBrowserModalVisible,
-        isMasterPasswordModalVisible,
-        desktopSettings,
-        isDesktopSettingsModalVisible,
-    } from "./stores/ui";
-    import { enableAutoSnapshots } from "./services/dataService";
-    import { addLog } from "./services/logService";
-    import { initializeAuth } from "./stores/auth";
+    let deviceType: "mobile" | "desktop" = "desktop";
 
     $: deviceType = $isMobile ? "mobile" : "desktop";
 
@@ -389,7 +389,7 @@
                     });
                 } else {
                     const postIndex = chars[charIndex].snsPosts.findIndex(
-                        (p: any) => p.id === post.id
+                        (p) => p.id === post.id
                     );
                     if (postIndex !== -1) {
                         chars[charIndex].snsPosts[postIndex] = post;

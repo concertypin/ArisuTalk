@@ -14,7 +14,8 @@
     "format": "prettier --write 'src/**/*.{js,ts,svelte,json,md}' --plugin prettier-plugin-svelte",
     "test": "vitest",
     "test:run": "vitest run",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "check:types": "svelte-check --tsconfig tsconfig.app.json --fail-on-warnings"
   },
   "author": "",
   "license": "(Apache-2.0 OR CC-BY-NC-4.0)",

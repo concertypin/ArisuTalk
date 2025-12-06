@@ -153,9 +153,9 @@ export async function buildContentPrompt({
         // 1. SNS 포스트가 있으면 SNS 포스트를 메모리로 사용
         if (character.snsPosts && character.snsPosts.length > 0) {
             return character.snsPosts
-                .sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()) // 최신순 정렬
+                .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()) // 최신순 정렬
                 .slice(0, 15) // 최근 15개만 사용 (컨텍스트 제한)
-                .map((post: any) => {
+                .map((post) => {
                     const tags =
                         post.tags && post.tags.length > 0
                             ? ` [${post.tags.join(", ")}]`
@@ -323,14 +323,15 @@ export async function buildCharacterSheetPrompt({
 }: BuildCharacterSheetPromptParams): Promise<{ systemPrompt: string; contents: InternalContent[] }> {
     const chatMLTemplate = await getPrompt("characterSheet");
 
-    const data: any = {
+    const data = {
         character: {
             name: characterName,
             description: characterDescription || undefined,
         },
+        char: characterName,
         persona: {},
     };
-    data.char = data.character.name;
+    //@ts-ignore
     data.user = data.persona.name;
 
     const populatedPrompt = await populateTemplate(chatMLTemplate, data);

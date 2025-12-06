@@ -82,7 +82,7 @@ function sanitizePayload(
         Object.entries(payload).filter(
             ([, value]) => value !== undefined && value !== null
         )
-    ) as AnalyticsEventPayload;
+    ) 
 }
 
 /**
@@ -96,6 +96,6 @@ export async function logUserFlowEvent<Name extends UserFlowEventName>(
     name: Name,
     payload: UserFlowEventPayload<Name>
 ): Promise<void> {
-    const sanitized = sanitizePayload(payload as AnalyticsEventPayload);
+    const sanitized = sanitizePayload(payload );
     await trackEvent(`flow_${name}`, sanitized);
 }

@@ -3,7 +3,10 @@ import { persistentStore } from "./persistentStore";
 import { defaultAPISettings } from "../../defaults";
 
 export interface Settings {
-    apiKey: string; // Legacy
+    /**
+     * @deprecated Use apiConfigs with apiProvider instead.
+     */
+    apiKey: string;
     model: string;
     apiProvider: string;
     apiConfigs: Record<string, any>;

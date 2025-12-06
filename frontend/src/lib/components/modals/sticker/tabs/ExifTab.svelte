@@ -1,8 +1,13 @@
 <script lang="ts">
     import { t } from "$root/i18n";
+    import type { ExifData } from "$utils/exifUtils";
     import { ChevronRight } from "lucide-svelte";
 
-    export let exifData = null;
+    interface Props {
+        exifData: ExifData | null;
+    }
+
+    let { exifData = null }: Props = $props();
 </script>
 
 {#if !exifData}

@@ -548,9 +548,9 @@ export class NovelAIClient {
 
     /**
      * 캐릭터와 감정에 맞는 프롬프트 생성 (전체 설정 지원)
-     * @param {Object} character - 캐릭터 정보
-     * @param {string} emotion - 감정 키워드
-     * @param {Object} options - 생성 옵션
+     * @param character - 캐릭터 정보
+     * @param emotion - 감정 키워드
+     * @param options - 생성 옵션
      * @returns {Object} 프롬프트 정보
      */
     buildPrompt(
@@ -561,7 +561,7 @@ export class NovelAIClient {
         prompt: string;
         negative_prompt: string;
         emotion: string | NAIEmotion;
-        character_name: any;
+        character_name: string;
         characterPrompts: { prompt: string; weight: number }[];
         naiSettings: any;
     } {
@@ -840,7 +840,8 @@ export class NovelAIClient {
                 : isJPEG
                   ? "image/jpeg"
                   : "image/png"; // 기본값 PNG
-            const blob = new Blob([imageData as unknown as BlobPart], { type: mimeType });
+            const imageDataBuffer = new Uint8Array(imageData);
+            const blob = new Blob([imageDataBuffer], { type: mimeType });
             const dataUrl = await new Promise<string | null>(
                 (resolve, reject) => {
                     const reader = new FileReader();
