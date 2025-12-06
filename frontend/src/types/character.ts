@@ -1,30 +1,13 @@
-export interface SNSPost {
-    id: string;
-    type: string;
-    content: string;
-    timestamp: string;
-    likes: number;
-    comments: number;
-    affection_state: {
-        affection: number;
-        intimacy: number;
-        trust: number;
-        romantic_interest: number;
-    };
-    access_level: string;
-    importance: number;
-    tags: string[];
-    reason: string;
-}
+import type { SNSPost } from "./sns";
+import type { Sticker } from "./sticker";
 
-export interface Sticker {
+export type Media = {
     id: string;
-    name: string;
-    emotion?: string;
-    [key: string]: any;
-}
+    mimeType: string;
+    dataUrl: string;
+};
 
-export interface Character {
+export type Character = {
     id: number | string;
     name: string;
     description?: string;
@@ -37,11 +20,14 @@ export interface Character {
     memories?: string[];
     proactiveEnabled?: boolean;
     messageCountSinceLastSummary?: number;
-    media?: { id: string; mimeType: string; dataUrl: string }[];
+    media?: Media[];
     stickers?: Sticker[];
     naiSettings?: Record<string, any>;
     isRandom?: boolean;
     snsPosts?: SNSPost[];
     hypnosis?: any;
     [key: string]: any;
-}
+};
+
+export * from "./sticker";
+export * from "./sns";

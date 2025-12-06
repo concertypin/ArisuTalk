@@ -2,6 +2,7 @@ import { writable } from "svelte/store";
 import { persistentStore } from "./persistentStore";
 import { t } from "$root/i18n";
 import type { Message } from "../../types/chat";
+import type { Sticker } from "../../types/character";
 
 export type { Message };
 
@@ -43,7 +44,7 @@ export const typingCharacterId = writable(null);
 
 export const searchQuery = writable("");
 export const imageToSend = writable<string | null>(null);
-export const stickerToSend = writable(null);
+export const stickerToSend = writable<Sticker | null>(null);
 export const currentMessage = writable("");
 
 export interface VirtualStreamState {

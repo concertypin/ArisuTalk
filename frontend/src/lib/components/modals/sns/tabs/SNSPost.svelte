@@ -9,37 +9,48 @@
         Edit3,
         Trash2,
     } from "lucide-svelte";
+    import type { SNSPost, Character, Sticker } from "$types/character";
 
-    export let post = null;
-    export let character = null;
+    export let post: SNSPost | null = null;
+    export let character: Character | null = null;
     export let isSecretMode = false;
 
     const dispatch = createEventDispatcher();
 
-    function formatTimeAgo(timestamp) {
+    function formatTimeAgo(timestamp: string | number) {
         const now = new Date();
         const past = new Date(timestamp);
         const diff = now.getTime() - past.getTime();
 
         if (diff < 60000) return t("sns.justNow");
         if (diff < 3600000)
-            return t("sns.minutesAgo", { minutes: Math.floor(diff / 60000) });
+            return t("sns.minutesAgo", {
+                minutes: String(Math.floor(diff / 60000)),
+            });
         if (diff < 86400000)
-            return t("sns.hoursAgo", { hours: Math.floor(diff / 3600000) });
+            return t("sns.hoursAgo", {
+                hours: String(Math.floor(diff / 3600000)),
+            });
         if (diff < 604800000)
-            return t("sns.daysAgo", { days: Math.floor(diff / 86400000) });
+            return t("sns.daysAgo", {
+                days: String(Math.floor(diff / 86400000)),
+            });
         if (diff < 2592000000)
-            return t("sns.weeksAgo", { weeks: Math.floor(diff / 604800000) });
+            return t("sns.weeksAgo", {
+                weeks: String(Math.floor(diff / 604800000)),
+            });
         if (diff < 31536000000)
             return t("sns.monthsAgo", {
-                months: Math.floor(diff / 2592000000),
+                months: String(Math.floor(diff / 2592000000)),
             });
 
-        return t("sns.yearsAgo", { years: Math.floor(diff / 31536000000) });
+        return t("sns.yearsAgo", {
+            years: String(Math.floor(diff / 31536000000)),
+        });
     }
 
-    function getStickerUrl(character, stickerId) {
-        if (!character.stickers) {
+    function getStickerUrl(character: Character, stickerId: string | undefined): string {
+        if (!character || !character.stickers || !stickerId) {
             return "";
         }
 
@@ -47,6 +58,7 @@
         let sticker = character.stickers.find((s) => s.id === stickerId);
         if (!sticker) {
             // 타입 변환해서 재시도
+            // eslint-disable-next-line eqeqeq
             sticker = character.stickers.find((s) => s.id == stickerId); // == 사용 (타입 무시)
         }
         if (!sticker) {
@@ -65,14 +77,19 @@
     }
 
     function handleEdit() {
-        dispatch("edit", { characterId: character.id, postId: post.id });
+        if (character && post) {
+            dispatch("edit", { characterId: character.id, postId: post.id });
+        }
     }
 
     function handleDelete() {
-        dispatch("delete", { characterId: character.id, postId: post.id });
+        if (character && post) {
+            dispatch("delete", { characterId: character.id, postId: post.id });
+        }
     }
 </script>
 
+{#if post}
 <div
     class="bg-gray-800/90 backdrop-blur-sm rounded-xl overflow-hidden relative group hover:shadow-lg transition-all duration-200 border border-gray-700/50"
     data-post-id={post.id}
@@ -132,7 +149,7 @@
         </div>
 
         <div class="sns-post-content">
-            {#if post.stickerId}
+            {#if post.stickerId && character}
                 <div class="mb-6 flex justify-center">
                     <div class="bg-gray-700 rounded-xl p-6 max-w-sm w-full">
                         <img
@@ -172,3 +189,4 @@
         {/if}
     </div>
 </div>
+{/if}

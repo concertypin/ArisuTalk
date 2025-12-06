@@ -3,8 +3,9 @@
     import { createEventDispatcher } from "svelte";
     import { fade } from "svelte/transition";
     import { X, Check, RefreshCw, AlertCircle, Clock } from "lucide-svelte";
+    import type { StickerGenerationProgress, StickerEmotion } from "$types/character";
 
-    export let progress = {};
+    export let progress: StickerGenerationProgress | null = null;
 
     const dispatch = createEventDispatcher();
 
@@ -20,7 +21,7 @@
         dispatch("retry");
     }
 
-    function getStatusBgColor(status) {
+    function getStatusBgColor(status: StickerGenerationProgress['status']) {
         switch (status) {
             case "generating":
                 return "bg-blue-50";
@@ -35,7 +36,7 @@
         }
     }
 
-    function getStatusTextColor(status) {
+    function getStatusTextColor(status: StickerGenerationProgress['status']) {
         switch (status) {
             case "generating":
                 return "text-blue-800";
@@ -50,13 +51,14 @@
         }
     }
 
-    function getStatusText(status, currentEmotion) {
+    function getStatusText(status: StickerGenerationProgress['status'], currentEmotion?: StickerEmotion) {
         switch (status) {
             case "generating": {
                 let emotionKey, emotionDisplayName;
                 if (
                     typeof currentEmotion === "object" &&
-                    currentEmotion.emotion
+                    currentEmotion !== null &&
+                    'emotion' in currentEmotion
                 ) {
                     emotionKey = currentEmotion.emotion;
                     emotionDisplayName =
@@ -70,7 +72,7 @@
                 }
 
                 const emotionTranslation =
-                    typeof currentEmotion === "object" && currentEmotion.title
+                    typeof currentEmotion === "object" && currentEmotion !== null && currentEmotion.title
                         ? emotionDisplayName
                         : t(`stickerProgress.emotions.${emotionKey}`) ||
                           emotionDisplayName;
@@ -277,11 +279,11 @@
                 </div>
             {/if}
 
-            {#if progress.status === "waiting"}
+            {#if progress.status === "waiting" && progress.waitTime}
                 <div class="bg-yellow-50 p-3 rounded-lg">
                     <p class="text-sm text-yellow-800">
                         {t("stickerProgress.waitingMessage", {
-                            seconds: Math.ceil(progress.waitTime / 1000),
+                            seconds: String(Math.ceil(progress.waitTime / 1000)),
                         })}
                     </p>
                 </div>

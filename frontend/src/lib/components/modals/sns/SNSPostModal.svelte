@@ -5,24 +5,25 @@
     import { fade } from "svelte/transition";
     import { X, Image, Plus } from "lucide-svelte";
     import { characters } from "../../../stores/character";
+    import type { SNSPost, Character, Sticker } from "$types/character";
 
     export let isOpen = false;
-    export let editingPost = null;
+    export let editingPost: (SNSPost & { characterId?: string | number }) | null = null;
 
     const dispatch = createEventDispatcher();
 
-    let character = null;
+    let character: Character | undefined | null = null;
     let postContent = "";
-    let tags = [];
+    let tags: string[] = [];
     let accessLevel = "main-public";
     let importance = 5;
-    let stickerId = null;
+    let stickerId: string | null = null;
     let showStickerPanel = false;
 
     $: {
         if (editingPost) {
             character = $characters.find(
-                (c) => c.id === editingPost.characterId
+                (c) => c.id === editingPost?.characterId
             );
             postContent = editingPost.content || "";
             tags = editingPost.tags || [];
@@ -39,25 +40,27 @@
     }
 
     function savePost() {
+        if (!editingPost) return;
         const post = {
             ...editingPost,
             content: postContent,
             tags,
             accessLevel,
             importance,
-            stickerId,
+            stickerId: stickerId || undefined,
         };
         dispatch("save", post);
         closeModal();
     }
 
-    function getStickerUrl(id) {
+    function getStickerUrl(id: string) {
         if (!character || !character.stickers) return "";
+        // eslint-disable-next-line eqeqeq
         const sticker = character.stickers.find((s) => s.id == id);
-        return sticker ? sticker.data || sticker.dataUrl : "";
+        return sticker ? sticker.data || sticker.dataUrl || "" : "";
     }
 
-    function handleKeydown(event) {
+    function handleKeydown(event: KeyboardEvent) {
         if (event.key === "Escape") {
             closeModal();
         }

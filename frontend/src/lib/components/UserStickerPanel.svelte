@@ -4,10 +4,11 @@
     import { stickerToSend } from "../stores/chat";
     import { isUserStickerPanelVisible } from "../stores/ui";
     import { Plus, X, Smile, Music, Edit3, Trash2 } from "lucide-svelte";
+    import type { Sticker } from "$types/character";
 
     let stickerInput: HTMLInputElement;
 
-    function selectSticker(sticker) {
+    function selectSticker(sticker: Sticker) {
         stickerToSend.set(sticker);
         isUserStickerPanelVisible.set(false);
     }
@@ -16,7 +17,7 @@
         stickerInput.click();
     }
 
-    async function handleFileChange(event) {
+    async function handleFileChange(event: Event) {
         const target = event.target as HTMLInputElement;
         const files = target.files ? Array.from(target.files) : [];
         if (!files.length) return;
@@ -52,7 +53,7 @@
                     dataUrl = await toBase64(file);
                 }
                 const stickerName = file.name.split(".")[0];
-                const newSticker = {
+                const newSticker: Sticker = {
                     id: String(Date.now() + Math.random()),
                     name: stickerName,
                     data: dataUrl,
@@ -111,7 +112,7 @@
         });
     }
 
-    function editName(sticker, event) {
+    function editName(sticker: Sticker, event: Event) {
         event.stopPropagation();
         const newName = prompt(t("modal.editStickerName.title"), sticker.name);
         if (newName && newName.trim() !== "") {
@@ -125,7 +126,7 @@
         }
     }
 
-    function deleteSticker(sticker, event) {
+    function deleteSticker(sticker: Sticker, event: Event) {
         event.stopPropagation();
         if (confirm(t("stickerPreview.confirmRemove"))) {
             userStickers.update((stickers) =>
@@ -184,7 +185,7 @@
             <span>{t("mainChat.stickerSupport")}</span>
             <span
                 >{t("mainChat.stickerCount", {
-                    count: $userStickers.length,
+                    count: String($userStickers.length),
                 })}</span
             >
         </div>
