@@ -7,6 +7,20 @@ export type Media = {
     dataUrl: string;
 };
 
+export type HypnosisSettings = {
+    enabled?: boolean;
+    sns_edit_access?: boolean;
+    affection_override?: boolean;
+    affection?: number;
+    intimacy?: number;
+    trust?: number;
+    romantic_interest?: number;
+    force_love_unlock?: boolean;
+    sns_full_access?: boolean;
+    secret_account_access?: boolean;
+    [key: string]: any;
+};
+
 export type Character = {
     id: number | string;
     name: string;
@@ -25,7 +39,7 @@ export type Character = {
     naiSettings?: Record<string, any>;
     isRandom?: boolean;
     snsPosts?: SNSPost[];
-    hypnosis?: any;
+    hypnosis?: HypnosisSettings;
     [key: string]: any;
 };
 

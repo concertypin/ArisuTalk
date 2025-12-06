@@ -1,20 +1,20 @@
 import { writable } from "svelte/store";
 import { persistentStore } from "./persistentStore";
 import { t } from "$root/i18n";
-import type { Message } from "../../types/chat";
+import type { Message, GroupChat, ChatRoom } from "../../types/chat";
 import type { Sticker } from "../../types/character";
 
-export type { Message };
+export type { Message, GroupChat, ChatRoom };
 
 export interface MessagesStore {
     [chatId: string]: Message[];
 }
 
-export const chatRooms = persistentStore<Record<string, any[]>>(
+export const chatRooms = persistentStore<Record<string, ChatRoom[]>>(
     "personaChat_chatRooms_v16",
     {}
 );
-export const groupChats = persistentStore<Record<string, any>>(
+export const groupChats = persistentStore<Record<string, GroupChat>>(
     "personaChat_groupChats_v16",
     {}
 );
@@ -37,7 +37,7 @@ export const selectedChatId = writable<string | null>(null);
 // Non-persistent stores
 export const editingMessageId = writable<number | string | null>(null);
 export const editingChatRoomId = writable<string | null>(null);
-export const editingGroupChat = writable(null);
+export const editingGroupChat = writable<GroupChat | null>(null);
 
 export const isWaitingForResponse = writable(false);
 export const typingCharacterId = writable(null);

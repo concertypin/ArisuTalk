@@ -1,6 +1,8 @@
+import type { Sticker } from "./sticker";
+
 export interface Message {
     id: number | string;
-    sender: string | any; // Updated to any because it can be an object in runtime (e.g. Character object)
+    sender: string | any;
     characterId?: string;
     content: string;
     time?: string;
@@ -9,7 +11,7 @@ export interface Message {
     isError?: boolean;
     type?: string;
     hasText?: boolean;
-    sticker?: { name: string; data?: string; stickerName?: string; [key: string]: any };
+    sticker?: Sticker;
     stickerData?: { stickerName: string; [key: string]: any };
     imageUrl?: string;
     imageId?: string;
@@ -31,6 +33,29 @@ export interface ChatRoom {
     participantIds?: string[];
     settings?: any;
     currentParticipants?: string[];
+    [key: string]: any;
+}
+
+export interface GroupChatParticipantSettings {
+    isActive: boolean;
+    responseProbability: number;
+    characterRole: "normal" | "leader" | "quiet" | "active";
+}
+
+export interface GroupChatSettings {
+    responseFrequency?: number;
+    maxRespondingCharacters?: number;
+    responseDelay?: number;
+    participantSettings?: Record<string, GroupChatParticipantSettings>;
+}
+
+export interface GroupChat {
+    id: string;
+    name: string;
+    participantIds: string[];
+    settings: GroupChatSettings;
+    createdAt?: number;
+    lastActivity?: number;
     [key: string]: any;
 }
 

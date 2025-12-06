@@ -1,4 +1,5 @@
 import { writable } from "svelte/store";
+import type { Character, SNSPost } from "$types/character";
 
 // Modal states
 export const isDesktopSettingsModalVisible = writable(false);
@@ -24,9 +25,9 @@ export const confirmationModalData = writable<{
 export const isSearchModalVisible = writable(false);
 export const isSNSCharacterListModalVisible = writable(false);
 export const isSNSFeedModalVisible = writable(false);
-export const snsFeedCharacter = writable(null);
+export const snsFeedCharacter = writable<Character | null>(null);
 export const isSNSPostModalVisible = writable(false);
-export const editingSNSPost = writable(null);
+export const editingSNSPost = writable<SNSPost | null>(null);
 export const isPhonebookModalVisible = writable(false);
 export const isMobileAuthModalVisible = writable(false);
 
