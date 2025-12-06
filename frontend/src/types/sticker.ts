@@ -10,6 +10,7 @@ export type Sticker = {
     type?: string;
     createdAt?: number;
     size?: number;
+    generated?: boolean;
 };
 
 export type StickerEmotion = string | { emotion: string; title?: string };

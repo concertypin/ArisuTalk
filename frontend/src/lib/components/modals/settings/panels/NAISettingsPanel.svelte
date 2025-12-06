@@ -22,58 +22,62 @@
         Trash2,
         Loader2,
     } from "lucide-svelte";
-        import { NovelAIClient } from "$root/lib/api/novelai";
+    import {
+        NOVELAI_MODELS,
+        NOVELAI_SAMPLERS,
+        NOVELAI_NOISE_SCHEDULES,
+    } from "$constants/novelaiConfig";
     import { DEFAULT_EMOTIONS } from "$root/defaults";
-
     import { characters } from "$stores/character";
+    import type { NAIGenerationItem } from "$types/nai";
 
+    // Ensure naiSettings exists (runtime check for legacy data)
     if (!$settings.naiSettings) {
-        $settings.naiSettings = {};
+        ($settings as any).naiSettings = {
+            apiKey: "",
+            model: "nai-diffusion-3",
+            preferredSize: "square",
+            steps: 28,
+            scale: 5,
+            sampler: "k_euler",
+            minDelay: 2000,
+            maxAdditionalDelay: 5000,
+            autoGenerate: false,
+        };
     }
 
     let apiKeyVisible = false;
     let maskedApiKey =
         "●".repeat(8) + ($settings.naiSettings?.apiKey?.slice(-4) || "");
 
-    let minDelaySeconds = $settings.naiSettings?.minDelay / 1000;
+    let minDelaySeconds = ($settings.naiSettings?.minDelay || 0) / 1000;
     let maxAdditionalDelaySeconds =
-        $settings.naiSettings?.maxAdditionalDelay / 1000;
+        ($settings.naiSettings?.maxAdditionalDelay || 0) / 1000;
 
     $: $settings.naiSettings.minDelay = minDelaySeconds * 1000;
     $: $settings.naiSettings.maxAdditionalDelay =
         maxAdditionalDelaySeconds * 1000;
 
     let isEditingNaiList = false;
-    const emotionLabels = {
-        happy: "😊 기쁨",
-        sad: "😢 슬픔",
-        surprised: "😮 놀람",
-        angry: "😠 분노",
-        love: "💕 사랑",
-        embarrassed: "😳 부끄러움",
-        confused: "😕 혼란",
-        sleepy: "😴 졸림",
-        excited: "🤩 흥분",
-        neutral: "😐 무표정",
-    };
 
-    let newNaiItem = { title: "", emotion: "", action: "" };
+    let newNaiItem: { title: string; emotion: string; action: string } = { title: "", emotion: "", action: "" };
 
     let totalGenerated = 0;
     let charactersWithGenerated = 0;
     let totalStickers = 0;
-    let generationRate = 0;
-    let characterStats = [];
+    let generationRate = "0";
+    let characterStats: { name: string; count: number }[] = [];
 
     $: {
         let generated = 0;
         let withGenerated = 0;
         let total = 0;
-        let stats = [];
+        let stats: { name: string; count: number }[] = [];
 
         $characters.forEach((character) => {
             if (character.stickers && character.stickers.length > 0) {
                 total += character.stickers.length;
+                // Assuming 'generated' property exists on Sticker, possibly added by generation logic
                 const generatedStickers = character.stickers.filter(
                     (s) => s.generated
                 );
@@ -89,7 +93,7 @@
         totalGenerated = generated;
         charactersWithGenerated = withGenerated;
         totalStickers = total;
-        generationRate = total > 0 ? ((generated / total) * 100).toFixed(1) : 0;
+        generationRate = total > 0 ? ((generated / total) * 100).toFixed(1) : "0";
         characterStats = stats.sort((a, b) => b.count - a.count);
     }
 
@@ -105,10 +109,12 @@
         newNaiItem = { title: "", emotion: "", action: "" };
     }
 
-    function deleteNaiItem(index) {
-        $settings.naiSettings.naiGenerationList.splice(index, 1);
-        $settings.naiSettings.naiGenerationList =
-            $settings.naiSettings.naiGenerationList;
+    function deleteNaiItem(index: number) {
+        if ($settings.naiSettings.naiGenerationList) {
+            $settings.naiSettings.naiGenerationList.splice(index, 1);
+            $settings.naiSettings.naiGenerationList =
+                $settings.naiSettings.naiGenerationList;
+        }
     }
 
     function saveNaiList() {
@@ -116,7 +122,7 @@
     }
 
     function resetNaiList() {
-        $settings.naiSettings.naiGenerationList = DEFAULT_EMOTIONS;
+        $settings.naiSettings.naiGenerationList = [...DEFAULT_EMOTIONS];
     }
 
     function generateAllStickers() {
@@ -205,7 +211,7 @@
                     bind:value={$settings.naiSettings.model}
                     class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-green-500/50"
                 >
-                    {#each Object.entries(NovelAIClient.MODELS) as [modelId, modelInfo]}
+                    {#each Object.entries(NOVELAI_MODELS) as [modelId, modelInfo]}
                         <option value={modelId}>
                             {modelInfo.name} ({modelInfo.version})
                         </option>
@@ -350,7 +356,7 @@
                     bind:value={$settings.naiSettings.sampler}
                     class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-green-500/50"
                 >
-                    {#each NovelAIClient.SAMPLERS as samplerOption}
+                    {#each NOVELAI_SAMPLERS as samplerOption}
                         <option value={samplerOption}>
                             {samplerOption.replace(/_/g, " ").toUpperCase()}
                         </option>
@@ -370,7 +376,7 @@
                     bind:value={$settings.naiSettings.noise_schedule}
                     class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-green-500/50"
                 >
-                    {#each NovelAIClient.NOISE_SCHEDULES as schedule}
+                    {#each NOVELAI_NOISE_SCHEDULES as schedule}
                         <option value={schedule}>
                             {schedule.charAt(0).toUpperCase() +
                                 schedule.slice(1)}
@@ -755,10 +761,12 @@
         {#if !isEditingNaiList}
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
                 {#each $settings.naiSettings.naiGenerationList || DEFAULT_EMOTIONS as item}
-                    {@const fullKey = item.titleKey
-                        ? `naiSettings.emotion.${item.titleKey}`
+                    {@const titleKey = 'titleKey' in item ? item.titleKey : undefined}
+                    {@const fullKey = titleKey
+                        ? `naiSettings.emotion.${titleKey}`
                         : null}
-                    {@const displayText = fullKey ? t(fullKey) : item.title}
+                    {@const title = 'title' in item ? (item.title || '') : ''}
+                    {@const displayText = fullKey ? t(fullKey) : title}
                     <div
                         class="bg-gray-600/50 rounded-lg px-3 py-2 text-center"
                     >
@@ -777,13 +785,15 @@
                         {t("naiHandlers.currentList")}
                     </h5>
                     <div class="space-y-2 max-h-32 overflow-y-auto">
-                        {#each $settings.naiSettings.naiGenerationList as item, index}
-                            {@const fullKey = item.titleKey
-                                ? `naiSettings.emotion.${item.titleKey}`
+                        {#each $settings.naiSettings.naiGenerationList || [] as item, index}
+                            {@const titleKey = 'titleKey' in item ? item.titleKey : undefined}
+                            {@const fullKey = titleKey
+                                ? `naiSettings.emotion.${titleKey}`
                                 : null}
+                            {@const title = 'title' in item ? (item.title || '') : ''}
                             {@const displayText = fullKey
                                 ? t(fullKey)
-                                : item.title}
+                                : title}
                             <div
                                 class="flex items-center gap-2 bg-gray-600/30 p-2 rounded-lg"
                             >
@@ -988,7 +998,7 @@
                             <span class="text-gray-300">{stat.name}</span>
                             <span class="text-gray-400"
                                 >{t("naiSettings.stickerCount", {
-                                    count: stat.count,
+                                    count: String(stat.count),
                                 })}</span
                             >
                         </div>

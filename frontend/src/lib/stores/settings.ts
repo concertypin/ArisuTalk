@@ -1,6 +1,7 @@
 import { derived } from "svelte/store";
 import { persistentStore } from "./persistentStore";
 import { defaultAPISettings } from "../../defaults";
+import type { NAISettings } from "../../types/nai";
 
 export interface Settings {
     /**
@@ -22,18 +23,7 @@ export interface Settings {
     experimentalFeaturesEnabled: boolean;
     experimentalTracingEnabled: boolean;
     fontScale: number;
-    naiSettings: {
-        apiKey: string;
-        model: string;
-        preferredSize: string;
-        steps: number;
-        scale: number;
-        sampler: string;
-        minDelay: number;
-        maxAdditionalDelay: number;
-        autoGenerate: boolean;
-        [key: string]: any;
-    };
+    naiSettings: NAISettings;
     [key: string]: any;
 }
 

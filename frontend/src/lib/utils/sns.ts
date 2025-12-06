@@ -64,10 +64,10 @@ export interface SNSCharacter {
 }
 
 export interface SNSCharacterState {
-    affection: number;
-    intimacy: number;
-    trust: number;
-    romantic_interest: number;
+    affection?: number;
+    intimacy?: number;
+    trust?: number;
+    romantic_interest?: number;
     [key: string]: any;
 }
 

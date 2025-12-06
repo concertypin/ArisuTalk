@@ -5,26 +5,30 @@
     import { checkSNSAccess } from "../../../../utils/sns";
     import { Lock, AlertTriangle } from "lucide-svelte";
     import SNSPost from "./SNSPost.svelte";
+    import type { Character, SNSPost as SNSPostType } from "$types/character";
 
-    export let character = null;
+    export let character: Character | null = null;
     export let isSecretMode = false;
 
-    let secretPosts = [];
+    let secretPosts: (SNSPostType & { isBlocked?: boolean })[] = [];
 
     $: {
         if (character && character.snsPosts) {
             secretPosts = character.snsPosts
                 .filter(
-                    (post) =>
-                        post.access_level &&
-                        (post.access_level.includes("private") ||
-                            post.access_level.includes("secret"))
+                    (post) => {
+                        const accessLevel = post.accessLevel || post.access_level;
+                        return accessLevel &&
+                        (accessLevel.includes("private") ||
+                            accessLevel.includes("secret"));
+                    }
                 )
                 .map((post) => {
+                    const accessLevel = post.accessLevel || post.access_level || "public";
                     const hasAccess = checkSNSAccess(
-                        character,
-                        post.access_level || "public",
-                        get(characterStateStore)[character.id]
+                        character!,
+                        accessLevel,
+                        get(characterStateStore)[String(character!.id)]
                     );
                     return {
                         ...post,
@@ -62,12 +66,12 @@
                 {character}
                 {isSecretMode}
                 on:edit={(e) =>
-                    window.personaApp.editSNSPost(
+                    (window as any).personaApp?.editSNSPost(
                         e.detail.characterId,
                         e.detail.postId
                     )}
                 on:delete={(e) =>
-                    window.personaApp.deleteSNSPost(
+                    (window as any).personaApp?.deleteSNSPost(
                         e.detail.characterId,
                         e.detail.postId
                     )}

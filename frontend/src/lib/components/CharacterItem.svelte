@@ -5,29 +5,33 @@
     import { formatTimestamp } from "../../utils";
     import Avatar from "./Avatar.svelte";
     import { Instagram, Settings } from "lucide-svelte";
+    import type { Character } from "$types/character";
+    import type { Message } from "$types/chat";
 
-    export let character = null;
+    export let character: Character | null = null;
 
     const dispatch = createEventDispatcher();
 
-    let lastMessage = null;
+    let lastMessage: Message | null = null;
     let totalUnreadCount = 0;
 
     $: {
-        const rooms = $chatRooms[character.id] || [];
-        lastMessage = null;
-        totalUnreadCount = 0;
-        rooms.forEach((room) => {
-            const roomMessages = $messages[room.id] || [];
-            const roomLastMessage = roomMessages.slice(-1)[0];
-            if (
-                roomLastMessage &&
-                (!lastMessage || roomLastMessage.id > lastMessage.id)
-            ) {
-                lastMessage = roomLastMessage;
-            }
-            totalUnreadCount += $unreadCounts[room.id] || 0;
-        });
+        if (character) {
+            const rooms = $chatRooms[String(character.id)] || [];
+            lastMessage = null;
+            totalUnreadCount = 0;
+            rooms.forEach((room) => {
+                const roomMessages = $messages[room.id] || [];
+                const roomLastMessage = roomMessages.slice(-1)[0];
+                if (
+                    roomLastMessage &&
+                    (!lastMessage || roomLastMessage.id > lastMessage.id)
+                ) {
+                    lastMessage = roomLastMessage;
+                }
+                totalUnreadCount += $unreadCounts[room.id] || 0;
+            });
+        }
     }
 
     function handleSelect() {
@@ -43,6 +47,7 @@
     }
 </script>
 
+{#if character}
 <div
     class="character-list-item p-3 rounded-full cursor-pointer hover:bg-gray-800/60 transition-colors duration-200"
     on:click={handleSelect}
@@ -102,9 +107,10 @@
                     {/if}
                 </p>
                 <span class="text-sm text-gray-500 shrink-0"
-                    >{formatTimestamp(lastMessage?.id)}</span
+                    >{formatTimestamp(lastMessage?.timestamp)}</span
                 >
             </div>
         </div>
     </div>
 </div>
+{/if}
