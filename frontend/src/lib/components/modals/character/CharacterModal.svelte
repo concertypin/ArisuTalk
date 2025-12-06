@@ -43,16 +43,18 @@
         compressData,
         decompressData,
     } from "../../../utils/png-utils";
+    import type { Unsubscriber } from "svelte/store";
+    import type { Character } from "$types/character";
 
     const dispatch = createEventDispatcher();
 
     let isNew = false;
-    let characterData = {};
-let avatarInput: any;
-let cardInput: any;
+    let characterData: Partial<Character> = {};
+    let avatarInput: HTMLInputElement;
+    let cardInput: HTMLInputElement;
     let isGeneratingPersona = false;
     const apiManager = new APIManager();
-let phonebookUnsubscribe: any;
+    let phonebookUnsubscribe: Unsubscriber;
     let isCheckingPhonebook = false;
 
     const defaultHypnosis = {
@@ -112,14 +114,14 @@ let phonebookUnsubscribe: any;
     function saveCharacter() {
         if (isNew) {
             characters.update((chars) => {
-                const newChar = { ...characterData, id: `char_${Date.now()}` };
+                const newChar = { ...characterData, id: `char_${Date.now()}` } as Character;
                 return [...chars, newChar];
             });
         } else {
             characters.update((chars) => {
                 const index = chars.findIndex((c) => c.id === characterData.id);
                 if (index !== -1) {
-                    chars[index] = characterData;
+                    chars[index] = characterData as Character;
                 }
                 return chars;
             });
@@ -131,13 +133,14 @@ let phonebookUnsubscribe: any;
         avatarInput.click();
     }
 
-    function handleAvatarChange(event) {
-        const file = event.target.files[0];
+    function handleAvatarChange(event: Event) {
+        const target = event.target as HTMLInputElement;
+        const file = target.files?.[0];
         if (!file) return;
 
         const reader = new FileReader();
         reader.onload = (e) => {
-            characterData.avatar = e.target.result;
+            characterData.avatar = e.target?.result as string;
             // Force reactivity
             characterData = characterData;
         };
@@ -145,7 +148,7 @@ let phonebookUnsubscribe: any;
     }
 
     async function generatePersona() {
-        if (!characterData.name.trim()) {
+        if (!characterData.name?.trim()) {
             alert(t("modal.characterNameRequiredMessage"));
             return;
         }
@@ -177,20 +180,21 @@ let phonebookUnsubscribe: any;
         cardInput.click();
     }
 
-    async function handleCardChange(event) {
-        const file = event.target.files[0];
+    async function handleCardChange(event: Event) {
+        const target = event.target as HTMLInputElement;
+        const file = target.files?.[0];
         if (!file) return;
 
         const reader = new FileReader();
         reader.onload = (e) => {
-            const imageSrc = e.target.result;
-            const image = new Image();
+            const imageSrc = e.target?.result as string;
+            const image = new globalThis.Image();
             image.onload = async () => {
                 try {
                     const pngData = dataUrlToUint8Array(imageSrc);
 
                     let chunkData = extractPngChunk(pngData, "cChr");
-let jsonString: any;
+                    let jsonString: string | undefined;
 
                     if (chunkData) {
                         const decompressedData = await compressData(chunkData);
@@ -253,7 +257,7 @@ let jsonString: any;
             stickers: characterData.stickers,
         };
 
-        const image = new Image();
+        const image = new globalThis.Image();
         image.crossOrigin = "Anonymous";
         image.onload = async () => {
             try {
@@ -261,6 +265,7 @@ let jsonString: any;
                 canvas.width = 1024;
                 canvas.height = 1024;
                 const ctx = canvas.getContext("2d");
+                if (!ctx) return;
                 ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
                 const jsonString = JSON.stringify(dataToSave);
@@ -284,7 +289,7 @@ let jsonString: any;
         image.src = characterData.avatar;
     }
 
-    function handleKeydown(event) {
+    function handleKeydown(event: KeyboardEvent) {
         if (event.key === "Escape") {
             closeModal();
         }
@@ -343,7 +348,7 @@ let jsonString: any;
             isCheckingPhonebook = true;
             try {
                 const service = await import(
-                    "../../../services/phonebookService.ts"
+                    "../../../services/phonebookService"
                 );
                 const allowed = await service.verifyPhonebookAccess(
                     $auth.clerk
@@ -389,7 +394,7 @@ let jsonString: any;
             isCheckingPhonebook = true;
             try {
                 const service = await import(
-                    "../../../services/phonebookService.ts"
+                    "../../../services/phonebookService"
                 );
                 const allowed = await service.verifyPhonebookAccess(
                     $auth.clerk
@@ -580,6 +585,7 @@ let jsonString: any;
                     ></textarea>
                 </div>
 
+                {#if characterData.naiSettings}
                 <CharacterAISettings
                     bind:appearance={characterData.appearance}
                     bind:naiQualityPrompt={
@@ -589,6 +595,7 @@ let jsonString: any;
                         characterData.naiSettings.autoGenerate
                     }
                 />
+                {/if}
 
                 <details class="group border-t border-gray-700/50 pt-4">
                     <summary
@@ -788,7 +795,7 @@ let jsonString: any;
                     </div>
                 </details>
 
-                {#if !isNew}
+                {#if !isNew && characterData.hypnosis}
                     <CharacterHypnosis bind:hypnosis={characterData.hypnosis}>
                         <ChevronDown
                             slot="chevron"

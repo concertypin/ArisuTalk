@@ -15,8 +15,10 @@
         rerollMessage,
         generateSnsPost,
     } from "../services/chatService";
-export let group: any;
-export let isLastGroup: any;
+    import type { MessageGroupData } from "$types/chat";
+
+    export let group: MessageGroupData;
+    export let isLastGroup: boolean;
 
     const { messages, isMe, showSenderInfo, character } = group;
     const lastMessage = messages[messages.length - 1];

@@ -18,9 +18,10 @@
     import PostsTab from "./tabs/PostsTab.svelte";
     import SecretsTab from "./tabs/SecretsTab.svelte";
     import TagsTab from "./tabs/TagsTab.svelte";
+    import type { Character } from "$types/character";
 
     export let isOpen = false;
-    export let character = null;
+    export let character: Character | null = null;
 
     let activeTab = "posts";
     let isSecretMode = false;
@@ -29,7 +30,7 @@
     let postsCount = 0;
     let secretsCount = 0;
     let tagsCount = 0;
-let currentCharacter: any;
+    let currentCharacter: Character | null | undefined;
 
     const dispatch = createEventDispatcher();
 
@@ -42,8 +43,9 @@ let currentCharacter: any;
     }
 
     function createNewPost() {
+        if (!character) return;
         editingSNSPost.set({
-            characterId: character.id,
+            characterId: character.id as string,
             isNew: true,
             isSecret: isSecretMode,
         });
@@ -52,7 +54,7 @@ let currentCharacter: any;
 
     $: {
         if (character) {
-            currentCharacter = $characters.find((c) => c.id === character.id);
+            currentCharacter = $characters.find((c) => c.id === character!.id);
         } else {
             currentCharacter = null;
         }
@@ -90,7 +92,7 @@ let currentCharacter: any;
         }
     }
 
-    function handleKeydown(event) {
+    function handleKeydown(event: KeyboardEvent) {
         if (event.key === "Escape") {
             closeModal();
         }

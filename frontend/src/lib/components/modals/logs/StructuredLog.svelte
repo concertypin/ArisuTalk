@@ -2,11 +2,13 @@
     import { t } from "$root/i18n";
     import { onMount } from "svelte";
     import { ChevronRight } from "lucide-svelte";
-export let log: any;
+    import type { LogEntry } from "$types/log";
+
+    export let log: LogEntry;
 
     let promptContent = "";
 
-    const getLogTypeColor = (type, data) => {
+    const getLogTypeColor = (type: string, data: Record<string, any> | undefined) => {
         if (type === "structured") {
             const chatType = data?.metadata?.chatType || "normal";
             switch (chatType) {
@@ -34,9 +36,10 @@ export let log: any;
             open: t("debugLogs.openChatType"),
             nai_generation: t("debugLogs.naiGeneration"),
             sns_generation: t("debugLogs.snsPostType"),
-        }[chatType] || t("debugLogs.normalChatType");
+        }[chatType as string] || t("debugLogs.normalChatType");
 
-    function formatTimestamp(timestamp) {
+    function formatTimestamp(timestamp: string | number | undefined) {
+        if (!timestamp) return t("debugLogs.invalidDate");
         const date =
             typeof timestamp === "number"
                 ? new Date(timestamp)
@@ -47,8 +50,8 @@ export let log: any;
         return date.toLocaleString();
     }
 
-    async function getChatPromptContent(chatType) {
-        const promptFileMap = {
+    async function getChatPromptContent(chatType: string) {
+        const promptFileMap: Record<string, string> = {
             general: "/src/texts/mainChatMLPrompt.txt",
             normal: "/src/texts/mainChatMLPrompt.txt",
             group: "/src/texts/groupChatMLPrompt.txt",

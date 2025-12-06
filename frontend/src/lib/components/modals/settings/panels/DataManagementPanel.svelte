@@ -21,15 +21,17 @@
         resetAllData,
     } from "../../../../services/dataService";
     import { prompts } from "../../../../stores/prompts";
-let restoreFileInput: any;
 
-    async function handleRestoreFile(event) {
-        const file = event.target.files[0];
+    let restoreFileInput: HTMLInputElement;
+
+    async function handleRestoreFile(event: Event) {
+        const target = event.target as HTMLInputElement;
+        const file = target.files?.[0];
         if (!file) return;
 
         const fileContent = await file.text();
         restoreData(fileContent);
-        event.target.value = ""; // Reset file input
+        target.value = ""; // Reset file input
     }
 </script>
 

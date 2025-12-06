@@ -1,6 +1,6 @@
 export interface Message {
     id: number | string;
-    sender: string;
+    sender: string | any; // Updated to any because it can be an object in runtime (e.g. Character object)
     characterId?: string;
     content: string;
     time?: string;
@@ -9,7 +9,7 @@ export interface Message {
     isError?: boolean;
     type?: string;
     hasText?: boolean;
-    sticker?: { name: string; [key: string]: any };
+    sticker?: { name: string; data?: string; stickerName?: string; [key: string]: any };
     stickerData?: { stickerName: string; [key: string]: any };
     imageUrl?: string;
     imageId?: string;
@@ -32,4 +32,19 @@ export interface ChatRoom {
     settings?: any;
     currentParticipants?: string[];
     [key: string]: any;
+}
+
+export interface DisplayCharacter {
+    id: string | number;
+    name: string;
+    avatar: string | null;
+    [key: string]: any;
+}
+
+export interface MessageGroupData {
+    id: number | string;
+    messages: Message[];
+    isMe: boolean;
+    showSenderInfo: boolean;
+    character?: DisplayCharacter | null;
 }

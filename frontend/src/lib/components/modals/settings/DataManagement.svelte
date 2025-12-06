@@ -23,15 +23,16 @@
     import SnapshotList from "./panels/SnapshotList.svelte";
 
     const dispatch = createEventDispatcher();
-let restoreFileInput: any;
+    let restoreFileInput: HTMLInputElement;
 
-    async function handleRestoreFile(event) {
-        const file = event.target.files[0];
+    async function handleRestoreFile(event: Event) {
+        const target = event.target as HTMLInputElement;
+        const file = target.files?.[0];
         if (!file) return;
 
         const fileContent = await file.text();
         restoreData(fileContent);
-        event.target.value = "";
+        target.value = "";
     }
 </script>
 
