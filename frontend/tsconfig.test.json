@@ -48,9 +48,6 @@
   "extends": "./tsconfig.base.json",
   "references": [
     {
-      "path": "./tsconfig.worker.json"
-    },
-    {
       "path": "./tsconfig.app.json"
     }
   ]
