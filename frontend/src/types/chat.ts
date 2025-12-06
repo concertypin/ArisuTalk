@@ -16,6 +16,12 @@ export interface Message {
     [key: string]: any;
 }
 
+export interface MessagePart {
+    content: string;
+    delay?: number;
+    sticker?: any;
+}
+
 export interface ChatRoom {
     id: string;
     characterId: string;

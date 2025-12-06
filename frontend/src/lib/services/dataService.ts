@@ -3,11 +3,13 @@ import {
     settings,
     settingsSnapshots,
     type SettingsSnapshot,
+    type Settings,
 } from "../stores/settings";
 import {
     characters,
     characterStateStore,
     userStickers,
+    type CharacterState,
 } from "../stores/character";
 import {
     chatRooms,
@@ -15,6 +17,7 @@ import {
     openChats,
     messages,
     unreadCounts,
+    type MessagesStore,
 } from "../stores/chat";
 import { replaceHooks } from "../stores/replaceHooks";
 import { t } from "$root/i18n";
@@ -22,11 +25,30 @@ import { saveToBrowserStorage } from "../../storage";
 import { secureStorage } from "../utils/secureStorage";
 import { getStorageKey } from "../utils/storageKey";
 import { showNotification, showConfirmation } from "./notificationService";
+import type { Character, Sticker } from "$types/character";
+import type { ReplaceHooksConfig } from "$types/replaceHook";
+
+interface BackupData {
+    version: string;
+    timestamp: string;
+    settings: Settings;
+    characters: Character[];
+    characterStates: Record<string, CharacterState>;
+    chatRooms: Record<string, any[]>;
+    groupChats: Record<string, any>;
+    openChats: Record<string, any>;
+    messages: MessagesStore;
+    unreadCounts: Record<string, number>;
+    userStickers: Sticker[];
+    settingsSnapshots: SettingsSnapshot[];
+    replaceHooks: ReplaceHooksConfig;
+    [key: string]: any;
+}
 
 // Debounce utility function
-function debounce(func: Function, wait: number) {
-    let timeout: any = null;
-    return function executedFunction(...args: any[]) {
+function debounce<T extends (...args: any[]) => void>(func: T, wait: number) {
+    let timeout: ReturnType<typeof setTimeout> | null = null;
+    return function executedFunction(...args: Parameters<T>) {
         const later = () => {
             timeout = null;
             func(...args);
@@ -43,11 +65,11 @@ function debounce(func: Function, wait: number) {
 
 export async function backupData() {
     try {
-        const backupObject = {
+        const backupObject: BackupData = {
             version: "v17-svelte",
             timestamp: new Date().toISOString(),
             settings: get(settings),
-            characters: get(characters),
+            characters: get(characters) as Character[],
             characterStates: get(characterStateStore),
             chatRooms: get(chatRooms),
             groupChats: get(groupChats),
@@ -87,7 +109,7 @@ export async function backupData() {
 
 export function restoreData(fileContent: string) {
     try {
-        const backupData = JSON.parse(fileContent);
+        const backupData = JSON.parse(fileContent) as BackupData;
         if (
             !backupData.settings ||
             !backupData.characters ||
@@ -112,7 +134,7 @@ export function restoreData(fileContent: string) {
                 characterStateStore.set(backupData.characterStates || {});
                 settingsSnapshots.set(backupData.settingsSnapshots || []);
                 replaceHooks.set(
-                    backupData.replaceHooks || { hooks: {}, order: [] }
+                    backupData.replaceHooks || { inputHooks: [], outputHooks: [], requestHooks: [], displayHooks: [] }
                 );
 
                 showNotification(
@@ -193,7 +215,7 @@ export function createSettingsSnapshot() {
     const currentSettings = get(settings);
     const timestamp = Date.now();
 
-    const snapshot = {
+    const snapshot: SettingsSnapshot = {
         timestamp,
         settings: { ...currentSettings },
         metadata: {

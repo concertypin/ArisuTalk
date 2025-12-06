@@ -16,7 +16,7 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
     const encoder = new TextEncoder();
     const keyMaterial = await crypto.subtle.importKey(
         "raw",
-        encoder.encode(password),
+        encoder.encode(password) as unknown as BufferSource,
         { name: "PBKDF2" },
         false,
         ["deriveKey"]
@@ -25,7 +25,7 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
     return await crypto.subtle.deriveKey(
         {
             name: "PBKDF2",
-            salt: salt,
+            salt: salt as unknown as BufferSource,
             iterations: 100000, // 높은 보안을 위한 반복 횟수
             hash: "SHA-256",
         },
@@ -67,7 +67,7 @@ export async function encryptText(text: string, password: string): Promise<strin
         const key = await deriveKey(password, salt);
 
         const encryptedData = await crypto.subtle.encrypt(
-            { name: ALGORITHM, iv: iv },
+            { name: ALGORITHM, iv: iv as unknown as BufferSource },
             key,
             data as unknown as BufferSource
         );
@@ -110,7 +110,7 @@ export async function decryptText(encryptedText: string, password: string): Prom
         const key = await deriveKey(password, salt);
 
         const decryptedData = await crypto.subtle.decrypt(
-            { name: ALGORITHM, iv: iv },
+            { name: ALGORITHM, iv: iv as unknown as BufferSource },
             key,
             encryptedData as unknown as BufferSource
         );

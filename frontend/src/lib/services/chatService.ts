@@ -30,13 +30,13 @@ import {
     applyRequestHooks,
 } from "./replaceHookService";
 const { replace } = await import("$lib/utils/worker/replace.js");
-import type { Message } from "$types/chat";
-import type { Character } from "$types/character";
+import type { Message, MessagePart, ChatRoom } from "$types/chat";
+import type { Character, SNSPost } from "$types/character";
 import type { APIConfig } from "$root/defaults";
 
 const apiManager = new APIManager();
 
-async function handleVirtualStream(chatId: string, character: Character, messageParts: any[]) {
+async function handleVirtualStream(chatId: string, character: Character, messageParts: MessagePart[]) {
     virtualStream.set({
         isStreaming: true,
         chatId: chatId,
@@ -82,7 +82,7 @@ async function handleVirtualStream(chatId: string, character: Character, message
             isStreaming: true,
             chatId: chatId,
             characterId: String(character.id),
-            messages: [...streamedMessages] as any,
+            messages: [...streamedMessages],
             isTyping: false,
         });
         await tick(); // Ensure UI updates
@@ -127,13 +127,13 @@ function getCurrentChatRoom(chatId: string | null) {
 
     for (const characterId in get(chatRooms)) {
         const rooms = get(chatRooms)[characterId];
-        const chatRoom = rooms.find((room: any) => room.id === chatId);
+        const chatRoom = rooms.find((room: ChatRoom) => room.id === chatId);
         if (chatRoom) return chatRoom;
     }
     return null;
 }
 
-function processAutoPost(character: Character, autoPost: any) {
+function processAutoPost(character: Character, autoPost: Partial<SNSPost>) {
     if (!autoPost || !autoPost.content?.trim()) return character;
 
     const allCharacterStates = get(characterStateStore);
@@ -156,7 +156,7 @@ function processAutoPost(character: Character, autoPost: any) {
         ? autoPost.tags.map((tag: string) => (tag.startsWith("#") ? tag : `#${tag}`))
         : [];
 
-    const newPost = {
+    const newPost: SNSPost = {
         id: `autopost_${character.id}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         type: autoPost.type || "memory",
         content: autoPost.content.trim(),
@@ -291,7 +291,7 @@ async function callApiAndHandleResponse(
         }
 
         if (response.newMemory && response.newMemory.trim() !== "") {
-            const legacyMemoryPost = {
+            const legacyMemoryPost: Partial<SNSPost> = {
                 type: "memory",
                 content: response.newMemory.trim(),
                 access_level: "main-public",
@@ -467,7 +467,7 @@ export async function sendMessage(content: string, type: string = "text", payloa
             }
 
             try {
-                await callApiAndHandleResponse(chatId, character as Character, history as any);
+                await callApiAndHandleResponse(chatId, character as Character, history);
             } catch (error) {
                 console.error(
                     `Error in group chat response for ${character.name}:`,
@@ -503,8 +503,8 @@ export async function sendMessage(content: string, type: string = "text", payloa
         }
 
         try {
-            await callApiAndHandleResponse(chatId, character as Character, history as any);
-            await callApiAndHandleResponse(chatId, character as Character, history as any);
+            await callApiAndHandleResponse(chatId, character as Character, history);
+            await callApiAndHandleResponse(chatId, character as Character, history);
         } finally {
             isWaitingForResponse.set(false);
             typingCharacterId.set(null);

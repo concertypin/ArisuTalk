@@ -6,7 +6,9 @@ export const characters = persistentStore(
     "personaChat_characters_v16",
     defaultCharacters
 );
-export const userStickers = persistentStore("personaChat_userStickers_v16", []);
+import type { Sticker } from "$types/character";
+
+export const userStickers = persistentStore<Sticker[]>("personaChat_userStickers_v16", []);
 
 export const editingCharacter = writable(null);
 export const expandedCharacterIds = writable(new Set());

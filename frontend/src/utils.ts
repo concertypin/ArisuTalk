@@ -1,17 +1,11 @@
 import { getLanguage } from "$root/i18n";
-
-interface Message {
-    id: number;
-    isMe: boolean;
-    sender?: string;
-    timestamp?: string | number | Date;
-}
+import type { Message } from "$types/chat";
 
 interface MessageGroup {
     startIndex: number;
     endIndex: number;
     messages: Message[];
-    lastMessageId: number;
+    lastMessageId: number | string;
 }
 
 export function debounce<T extends (...args: any[]) => any>(

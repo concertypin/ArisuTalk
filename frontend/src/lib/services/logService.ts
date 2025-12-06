@@ -1,10 +1,11 @@
 import { get } from "svelte/store";
 import { settings } from "../stores/settings";
 import { debugLogs } from "../stores/logs";
+import type { LogEntry } from "$types/log";
 
 const MAX_LOGS = 1000;
 
-export function addLog(logData: any) {
+export function addLog(logData: LogEntry) {
     const currentSettings = get(settings);
     if (!currentSettings.enableDebugLogs) {
         return;

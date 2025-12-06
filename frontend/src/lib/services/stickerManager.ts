@@ -1,6 +1,6 @@
 import { NovelAIClient, validateNAIApiKey } from "$lib/api/novelai";
 import { DEFAULT_EMOTIONS, type Emotion } from "$root/defaults";
-import type { Character } from "$root/types/character";
+import type { Character, Sticker } from "$root/types/character";
 import { characters } from "$stores/character";
 import { settings } from "$stores/settings";
 import { get } from "svelte/store";
@@ -22,9 +22,30 @@ interface NaiDelays {
 
 interface GenerationResult {
     success: boolean;
-    sticker?: any;
+    sticker?: Sticker;
     emotion?: string;
     error?: string;
+}
+
+interface StickerProgress {
+    type: "sticker" | "character";
+    current?: number;
+    total?: number;
+    emotion?: string;
+    character?: string;
+    status: "generating" | "completed" | "error" | "processing";
+    sticker?: Sticker;
+    error?: string;
+}
+
+interface GenerationSummary {
+    success: boolean;
+    generated?: Sticker[];
+    failed?: GenerationResult[];
+    total?: number;
+    message?: string;
+    results?: any[];
+    summary?: any;
 }
 
 /**
@@ -229,7 +250,7 @@ export class StickerManager {
     /**
      * 캐릭터의 스티커를 자동 생성 (대화 중 감정 감지 시)
      */
-    async autoGenerateSticker(character: Character, emotion: string): Promise<any | null> {
+    async autoGenerateSticker(character: Character, emotion: string): Promise<Sticker | null> {
         if (!this.shouldGenerateSticker(character, emotion)) {
             return null;
         }
@@ -265,7 +286,7 @@ export class StickerManager {
     /**
      * 캐릭터의 NAI 일괄 생성 목록 스티커 일괄 생성
      */
-    async generateBasicStickerSet(character: Character, options: { emotions?: EmotionType[], onProgress?: (data: any) => void } = {}): Promise<any> {
+    async generateBasicStickerSet(character: Character, options: { emotions?: EmotionType[], onProgress?: (data: StickerProgress) => void } = {}): Promise<GenerationSummary> {
         if (!this.initializeNAI()) {
             throw new Error("NAI API 키가 설정되지 않았습니다.");
         }
@@ -381,7 +402,7 @@ export class StickerManager {
 
             const generatedStickers = results
                 .filter((result) => result.success)
-                .map((result) => result.sticker);
+                .map((result) => result.sticker as Sticker);
 
             return {
                 success: true,
@@ -401,7 +422,7 @@ export class StickerManager {
     /**
      * 모든 캐릭터의 기본 스티커 일괄 생성
      */
-    async generateStickersForAllCharacters(options: { emotions?: EmotionType[], onProgress?: (data: any) => void } = {}): Promise<any> {
+    async generateStickersForAllCharacters(options: { emotions?: EmotionType[], onProgress?: (data: StickerProgress) => void } = {}): Promise<GenerationSummary> {
         if (!this.initializeNAI()) {
             throw new Error("NAI API 키가 설정되지 않았습니다.");
         }
@@ -430,7 +451,6 @@ export class StickerManager {
                     onProgress: (stickerProgress) => {
                         if (onProgress) {
                             onProgress({
-                                type: "sticker",
                                 character: character.name,
                                 ...stickerProgress,
                             });
@@ -468,7 +488,7 @@ export class StickerManager {
     /**
      * 캐릭터의 NAI 설정 업데이트
      */
-    updateCharacterNAISettings(character: Character, naiSettings: any): void {
+    updateCharacterNAISettings(character: Character, naiSettings: Record<string, any>): void {
         if (!character.naiSettings) {
             character.naiSettings = {};
         }
