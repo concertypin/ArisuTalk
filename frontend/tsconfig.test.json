@@ -1,7 +1,8 @@
 {
   "include": [
+    //test
     "tests/**/*.ts",
-    "tests/*.ts"
+    "tests/*.ts",
   ],
   "compilerOptions": {
     "lib": [
@@ -50,7 +51,7 @@
       "path": "./tsconfig.worker.json"
     },
     {
-      "path": "./tsconfig.json"
+      "path": "./tsconfig.app.json"
     }
   ]
 }
