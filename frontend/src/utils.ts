@@ -12,18 +12,21 @@ export function debounce<T extends (...args: any[]) => any>(
     func: T,
     delay: number
 ): T & { cancel: () => void } {
-    let timeout: number;
+    let timeout: ReturnType<typeof setTimeout> | null = null;
     const debounced = function (this: any, ...args: Parameters<T>) {
         const context = this;
-        clearTimeout(timeout);
+        if (timeout !== null) clearTimeout(timeout);
         timeout = setTimeout(
             () => func.apply(context, args),
             delay
-        ) as unknown as number;
+        );
     } as T;
 
-    (debounced as any).cancel = function () {
-        clearTimeout(timeout);
+    (debounced as T & { cancel?: () => void }).cancel = function () {
+        if (timeout !== null) {
+            clearTimeout(timeout);
+            timeout = null;
+        }
     };
 
     return debounced as T & { cancel: () => void };

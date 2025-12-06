@@ -149,7 +149,7 @@ export async function compressData(data: Uint8Array): Promise<Uint8Array> {
         const writer = stream.writable.getWriter();
         const reader = stream.readable.getReader();
 
-        await writer.write(data as unknown as BufferSource);
+        await writer.write(new Uint8Array(data));
         await writer.close();
 
         const chunks: Uint8Array[] = [];
@@ -189,7 +189,7 @@ export async function decompressData(compressedData: Uint8Array): Promise<Uint8A
         const writer = stream.writable.getWriter();
         const reader = stream.readable.getReader();
 
-        await writer.write(compressedData as unknown as BufferSource);
+        await writer.write(new Uint8Array(compressedData));
         await writer.close();
 
         const chunks: Uint8Array[] = [];

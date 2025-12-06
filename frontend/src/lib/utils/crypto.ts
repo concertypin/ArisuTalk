@@ -16,16 +16,17 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
     const encoder = new TextEncoder();
     const keyMaterial = await crypto.subtle.importKey(
         "raw",
-        encoder.encode(password) as unknown as BufferSource,
+        encoder.encode(password),
         { name: "PBKDF2" },
         false,
         ["deriveKey"]
     );
-
+    const saltBuffer = new Uint8Array(salt.buffer.byteLength);
+    saltBuffer.set(salt);
     return await crypto.subtle.deriveKey(
         {
             name: "PBKDF2",
-            salt: salt as unknown as BufferSource,
+            salt:saltBuffer,
             iterations: 100000, // 높은 보안을 위한 반복 횟수
             hash: "SHA-256",
         },
@@ -47,9 +48,16 @@ function generateSalt(): Uint8Array {
  * Generate random IV
  */
 function generateIV(): Uint8Array {
+    // Return a Uint8Array view (ArrayLike<number>) so it can be used with combined.set and Web Crypto APIs
     return crypto.getRandomValues(new Uint8Array(IV_LENGTH));
 }
 
+function uint8ArrayToArrayBuffer(uint8Array: Uint8Array): ArrayBuffer {
+    const arraybuf = new ArrayBuffer(uint8Array.length);
+    const view = new Uint8Array(arraybuf);
+    view.set(uint8Array);
+    return arraybuf;
+}
 /**
  * Encrypt text using AES-GCM
  */
@@ -67,18 +75,18 @@ export async function encryptText(text: string, password: string): Promise<strin
         const key = await deriveKey(password, salt);
 
         const encryptedData = await crypto.subtle.encrypt(
-            { name: ALGORITHM, iv: iv as unknown as BufferSource },
+            { name: ALGORITHM, iv: uint8ArrayToArrayBuffer(iv) },
             key,
-            data as unknown as BufferSource
+            data
         );
 
         // Combine salt + iv + encrypted data
         const combined = new Uint8Array(
-            salt.length + iv.length + encryptedData.byteLength
+            salt.length + iv.byteLength + encryptedData.byteLength
         );
         combined.set(salt);
         combined.set(iv, salt.length);
-        combined.set(new Uint8Array(encryptedData), salt.length + iv.length);
+        combined.set(new Uint8Array(encryptedData), salt.length + iv.byteLength);
 
         return btoa(String.fromCharCode(...combined));
     } catch (error) {
@@ -110,9 +118,9 @@ export async function decryptText(encryptedText: string, password: string): Prom
         const key = await deriveKey(password, salt);
 
         const decryptedData = await crypto.subtle.decrypt(
-            { name: ALGORITHM, iv: iv as unknown as BufferSource },
+            { name: ALGORITHM, iv: iv },
             key,
-            encryptedData as unknown as BufferSource
+            encryptedData
         );
 
         const decoder = new TextDecoder();

@@ -304,7 +304,7 @@ async function callApiAndHandleResponse(
                 if (charIndex !== -1) {
                     const newChars = [...chars];
                     newChars[charIndex] = processAutoPost(
-                        newChars[charIndex] as Character,
+                        newChars[charIndex],
                         legacyMemoryPost
                     );
                     return newChars;
@@ -503,7 +503,6 @@ export async function sendMessage(content: string, type: string = "text", payloa
         }
 
         try {
-            await callApiAndHandleResponse(chatId, character as Character, history);
             await callApiAndHandleResponse(chatId, character as Character, history);
         } finally {
             isWaitingForResponse.set(false);
@@ -791,36 +790,45 @@ export async function generateSnsPost(messageId: number | string) {
             };
         }
 
-        if (!currentConfig?.apiKey) throw new Error("API key not set");
+        if (!currentConfig || !currentConfig.apiKey) {
+            throw new Error("API configuration not found or API key missing");
+        }
 
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${currentConfig.model}:generateContent?key=${currentConfig.apiKey}`;
-        const payload = {
-            contents: [{ parts: [{ text: snsPrompt }] }],
-            generationConfig: {
-                temperature: currentConfig.temperature || 1.25,
-                maxOutputTokens: currentConfig.maxTokens || 4096,
+        const snsHistory: Message[] = [{
+            id: Date.now(),
+            sender: "user",
+            content: snsPrompt,
+            timestamp: Date.now(),
+            isMe: true,
+            type: "text",
+            time: new Date().toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+            })
+        }];
+
+        const response = await apiManager.generateContent(
+            apiProvider,
+            currentConfig.apiKey,
+            currentConfig.model || "",
+            {
+                userName: currentSettings.userName,
+                userDescription: currentSettings.userDescription,
+                character: character,
+                history: snsHistory,
+                prompts: await getAllPrompts(),
+                isProactive: false,
+                forceSummary: false,
+                chatId: chatId,
             },
-        };
-
-        const apiResponse = await fetch(apiUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-        });
-        if (!apiResponse.ok)
-            throw new Error(`Gemini API call failed: ${apiResponse.status}`);
-
-        const apiData = await apiResponse.json();
-        const responseText: string | null =
-            apiData.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (!responseText) throw new Error("No text response from Gemini API");
-
-        let parsedResponse = JSON.parse(
-            responseText
-                .trim()
-                .replace(/^```json/, "")
-                .replace(/```$/, "")
+            currentConfig.baseUrl,
+            {
+                maxTokens: currentConfig.maxTokens,
+                temperature: currentConfig.temperature
+            }
         );
+
+        const parsedResponse = response;
 
         if (parsedResponse && parsedResponse.autoPost) {
             characters.update((chars) => {
@@ -857,7 +865,7 @@ export async function generateSnsPost(messageId: number | string) {
                         chatId,
                         chatType: "sns_generation",
                         timestamp: new Date().toISOString(),
-                        apiProvider: "novelai",
+                        apiProvider: apiProvider,
                         model: currentConfig.model,
                     },
                 },
