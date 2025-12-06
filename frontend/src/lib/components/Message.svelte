@@ -1,23 +1,26 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
     import Avatar from "./Avatar.svelte";
     import { isImageZoomModalVisible, imageZoomModalData } from "../stores/ui";
+    import type { Message } from "$types/chat";
 
-    export let message;
+    export let message: Message;
     export let showSenderInfo = false;
 
     function openImageZoom() {
         if (message.type === "image" || message.type === "sticker") {
             const imageUrl =
                 message.type === "sticker"
-                    ? message.sticker.data
+                    ? message.sticker?.data
                     : message.imageUrl;
             const title =
                 message.type === "sticker"
-                    ? message.sticker.stickerName
+                    ? message.sticker?.stickerName
                     : t("mainChat.uploadPhoto");
-            imageZoomModalData.set({ imageUrl, title });
-            isImageZoomModalVisible.set(true);
+            if (imageUrl) {
+                imageZoomModalData.set({ imageUrl, title: title || "" });
+                isImageZoomModalVisible.set(true);
+            }
         }
     }
 </script>
@@ -40,19 +43,27 @@
             class:text-gray-200={!message.isMe}
         >
             {#if message.type === "image"}
-                <img
-                    src={message.imageUrl}
-                    alt="user upload"
-                    class="rounded-lg max-w-full h-auto cursor-pointer"
+                <button
+                    type="button"
+                    class="block text-left"
                     on:click={openImageZoom}
-                />
+                    on:keydown={(e) => e.key === 'Enter' && openImageZoom()}
+                >
+                    <img
+                        src={message.imageUrl}
+                        alt="user upload"
+                        class="rounded-lg max-w-full h-auto cursor-pointer"
+                    />
+                </button>
                 {#if message.content}
                     <p class="mt-2">{message.content}</p>
                 {/if}
-            {:else if message.type === "sticker"}
-                <div
+            {:else if message.type === "sticker" && message.sticker}
+                <button
+                    type="button"
                     class="flex flex-col items-center cursor-pointer"
                     on:click={openImageZoom}
+                    on:keydown={(e) => e.key === 'Enter' && openImageZoom()}
                 >
                     <img
                         src={message.sticker.data}
@@ -62,7 +73,7 @@
                     {#if message.content}
                         <p class="mt-2 text-center">{message.content}</p>
                     {/if}
-                </div>
+                </button>
             {:else}
                 <p>{message.content}</p>
             {/if}

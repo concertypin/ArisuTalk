@@ -11,7 +11,10 @@ import pako from "pako";
 import { addLog } from "../services/logService";
 
 type NAIEmotion = {
-    //todo
+    emotion: string;
+    title?: string;
+    action?: string;
+    [key: string]: any;
 };
 type BinaryData = Uint8Array<ArrayBufferLike>;
 const JSZip = await import("jszip");
@@ -48,7 +51,7 @@ export class NovelAIClient {
     currentRequest: null | AbortController;
     lastGenerationTime: number;
 
-    constructor(apiKey: string, options: any = {}) {
+    constructor(apiKey: string, options: { minDelay?: number; maxAdditionalDelay?: number; [key: string]: any } = {}) {
         this.apiKey = apiKey;
         this.baseUrl = "https://image.novelai.net";
         this.options = {
@@ -266,7 +269,7 @@ export class NovelAIClient {
     /**
      * 원시 데이터에서 이미지 추출 (최후 방법)
      */
-    async extractImageFromRawData(data) {
+    async extractImageFromRawData(data: Uint8Array) {
         // console.log('[NAI] 원시 데이터에서 이미지 검색 시작');
 
         // 1. 데이터 내에서 이미지 시그니처 찾기 (더 넓은 검색)
@@ -545,9 +548,9 @@ export class NovelAIClient {
 
     /**
      * 캐릭터와 감정에 맞는 프롬프트 생성 (전체 설정 지원)
-     * @param {Object} character - 캐릭터 정보
-     * @param {string} emotion - 감정 키워드
-     * @param {Object} options - 생성 옵션
+     * @param character - 캐릭터 정보
+     * @param emotion - 감정 키워드
+     * @param options - 생성 옵션
      * @returns {Object} 프롬프트 정보
      */
     buildPrompt(
@@ -558,12 +561,12 @@ export class NovelAIClient {
         prompt: string;
         negative_prompt: string;
         emotion: string | NAIEmotion;
-        character_name: any;
+        character_name: string;
         characterPrompts: { prompt: string; weight: number }[];
         naiSettings: any;
     } {
         console.log("[NAI buildPrompt] emotionData:", emotionData);
-        const { naiSettings = {} } = options;
+        const { naiSettings = {} } = options as { naiSettings?: Partial<NaiSettings> & { customPositivePrompt?: string; customNegativePrompt?: string; useCharacterPrompts?: boolean; } };
 
         // 캐릭터의 외모 정보 사용
         const characterPrompt = character.appearance || "";
@@ -577,8 +580,12 @@ export class NovelAIClient {
             emotionPrompt = naiSettings.customPositivePrompt.trim();
         } else {
             // 새로운 3필드 구조 처리
-            emotionPrompt = emotionData.emotion;
-            actionPrompt = emotionData.action || "";
+            if (typeof emotionData === "object") {
+                emotionPrompt = emotionData.emotion;
+                actionPrompt = emotionData.action || "";
+            } else {
+                emotionPrompt = emotionData;
+            }
         }
 
         // 스티커용 기본 프롬프트
@@ -833,7 +840,8 @@ export class NovelAIClient {
                 : isJPEG
                   ? "image/jpeg"
                   : "image/png"; // 기본값 PNG
-            const blob = new Blob([imageData], { type: mimeType });
+            const imageDataBuffer = new Uint8Array(imageData);
+            const blob = new Blob([imageDataBuffer], { type: mimeType });
             const dataUrl = await new Promise<string | null>(
                 (resolve, reject) => {
                     const reader = new FileReader();
@@ -942,8 +950,8 @@ export class NovelAIClient {
         character: Character,
         emotion: string | NAIEmotion,
         options: object = {}
-    ): Promise<object> {
-        const { naiSettings = {}, ...generateOptions } = options;
+    ): Promise<any> {
+        const { naiSettings = {}, ...generateOptions } = options as { naiSettings?: Partial<NaiSettings> & { imageSize?: string; preferredSize?: string; minDelay?: number; maxAdditionalDelay?: number; vibeTransferEnabled?: boolean; vibeTransferStrength?: number; vibeTransferInformationExtracted?: number; }; [key: string]: any; };
 
         // 캐릭터별 설정을 우선 사용, 없으면 전역 설정 사용
         const characterNaiSettings = character.naiSettings || {};
@@ -986,7 +994,7 @@ export class NovelAIClient {
 
             // 모델 및 이미지 설정 (캐릭터별 설정 우선)
             model:
-                this.validateModel(mergedSettings.model) ||
+                this.validateModel(mergedSettings.model || "") ||
                 "nai-diffusion-4-5-full", // 기본값을 최신 권장 모델로 변경
             width: sizeConfig.width,
             height: sizeConfig.height,
@@ -996,6 +1004,10 @@ export class NovelAIClient {
             steps: naiSettings.steps || 28,
             sampler: naiSettings.sampler || "k_euler",
             noise_schedule: naiSettings.noise_schedule || "native",
+            noise: naiSettings.noise || 0,
+            strength: naiSettings.strength || 0.7,
+            seed: naiSettings.seed || Math.floor(Math.random() * 9999999999),
+            controlnet_strength: naiSettings.controlnet_strength || 1.0,
 
             // SMEA 설정 (v3 모델 전용)
             sm: naiSettings.sm || false, // SMEA 활성화
@@ -1030,7 +1042,7 @@ export class NovelAIClient {
             ...generateOptions,
         };
 
-        const logData = {
+        const logData: any = {
             type: "structured",
             characterName: character.name,
             chatId: null,
@@ -1052,7 +1064,7 @@ export class NovelAIClient {
         };
 
         try {
-            const result = await this.generateImage(generationParams);
+            const result: any = await this.generateImage(generationParams);
             logData.data.outputResponse = { success: true, ...result };
             addLog(logData);
 
@@ -1132,7 +1144,7 @@ export class NovelAIClient {
             error?: string;
             emotion: string;
         }[] = [];
-        const { onProgress } = options;
+        const { onProgress } = options as any;
 
         for (let i = 0; i < emotions.length; i++) {
             const emotion = emotions[i];
@@ -1148,7 +1160,7 @@ export class NovelAIClient {
                 }
 
                 const sticker = await this.generateSticker(
-                    character,
+                    character as Character,
                     emotion,
                     options
                 );

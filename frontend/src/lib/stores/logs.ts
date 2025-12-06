@@ -1,3 +1,3 @@
 import { persistentStore } from "./persistentStore";
 
-export const debugLogs = persistentStore("personaChat_debugLogs_v1", []);
+export const debugLogs = persistentStore<any[]>("personaChat_debugLogs_v1", []);

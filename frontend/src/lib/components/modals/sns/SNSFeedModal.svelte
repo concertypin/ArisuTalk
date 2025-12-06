@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
     import { createEventDispatcher, onMount, onDestroy } from "svelte";
     import { get } from "svelte/store";
@@ -18,9 +18,10 @@
     import PostsTab from "./tabs/PostsTab.svelte";
     import SecretsTab from "./tabs/SecretsTab.svelte";
     import TagsTab from "./tabs/TagsTab.svelte";
+    import type { Character } from "$types/character";
 
     export let isOpen = false;
-    export let character = null;
+    export let character: Character | null = null;
 
     let activeTab = "posts";
     let isSecretMode = false;
@@ -29,8 +30,7 @@
     let postsCount = 0;
     let secretsCount = 0;
     let tagsCount = 0;
-
-    let currentCharacter;
+    let currentCharacter: Character | null | undefined;
 
     const dispatch = createEventDispatcher();
 
@@ -43,8 +43,9 @@
     }
 
     function createNewPost() {
+        if (!character) return;
         editingSNSPost.set({
-            characterId: character.id,
+            characterId: character.id as string,
             isNew: true,
             isSecret: isSecretMode,
         });
@@ -53,7 +54,7 @@
 
     $: {
         if (character) {
-            currentCharacter = $characters.find((c) => c.id === character.id);
+            currentCharacter = $characters.find((c) => c.id === character!.id);
         } else {
             currentCharacter = null;
         }
@@ -91,7 +92,7 @@
         }
     }
 
-    function handleKeydown(event) {
+    function handleKeydown(event: KeyboardEvent) {
         if (event.key === "Escape") {
             closeModal();
         }

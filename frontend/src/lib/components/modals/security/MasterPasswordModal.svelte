@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { onMount, onDestroy } from "svelte";
     import { t } from "$root/i18n";
     import { isMasterPasswordModalVisible } from "../../../stores/ui";

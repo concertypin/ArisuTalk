@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import Avatar from "./Avatar.svelte";
     import MessageBubble from "./MessageBubble.svelte";
     import {
@@ -15,9 +15,10 @@
         rerollMessage,
         generateSnsPost,
     } from "../services/chatService";
+    import type { MessageGroupData } from "$types/chat";
 
-    export let group;
-    export let isLastGroup;
+    export let group: MessageGroupData;
+    export let isLastGroup: boolean;
 
     const { messages, isMe, showSenderInfo, character } = group;
     const lastMessage = messages[messages.length - 1];

@@ -19,6 +19,7 @@ export async function replace(
     ...pattern: {
         pattern: RegExp | string;
         replace: string;
+        caseSensitive?: boolean;
     }[]
 ): Promise<string> {
     try {

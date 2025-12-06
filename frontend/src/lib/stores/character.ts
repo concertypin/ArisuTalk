@@ -6,9 +6,11 @@ export const characters = persistentStore(
     "personaChat_characters_v16",
     defaultCharacters
 );
-export const userStickers = persistentStore("personaChat_userStickers_v16", []);
+import type { Character, Sticker } from "$types/character";
 
-export const editingCharacter = writable(null);
+export const userStickers = persistentStore<Sticker[]>("personaChat_userStickers_v16", []);
+
+export const editingCharacter = writable<Character|null>(null);
 export const expandedCharacterIds = writable(new Set());
 export interface ImportedCharacterData {
     name: string;

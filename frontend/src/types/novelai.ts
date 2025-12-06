@@ -20,13 +20,13 @@ export type NaiSettings = {
     steps: number;
     noise: number;
     strength: number;
-    sampler: keyof typeof NOVELAI_SAMPLERS;
+    sampler: (typeof NOVELAI_SAMPLERS)[number];
     seed: number;
 
     sm: boolean;
-    sm_dyn: number;
+    sm_dyn: boolean;
 
-    characterPrompts: unknown[];
+    characterPrompts: any[];
 
     /**
      * Base64 encoded image for img2img or inpainting
@@ -36,7 +36,7 @@ export type NaiSettings = {
     maskImage?: string;
 
     cfg_rescale: number;
-    noise_schedule: keyof typeof NOVELAI_NOISE_SCHEDULES;
+    noise_schedule: (typeof NOVELAI_NOISE_SCHEDULES)[number];
     dynamic_thresholding: boolean;
     dynamic_thresholding_percentile: number;
     dynamic_thresholding_mimic_scale: number;

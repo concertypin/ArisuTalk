@@ -1,8 +1,9 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
     import { expandedImages } from "../stores/ui";
+    import type { Message } from "$types/chat";
 
-    export let message;
+    export let message: Message;
 
     function toggleImageSize() {
         expandedImages.update((set) => {

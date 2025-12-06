@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
     import { createEventDispatcher, beforeUpdate, afterUpdate } from "svelte";
     import { fade } from "svelte/transition";
@@ -6,15 +6,16 @@
     import { searchQuery } from "../../../stores/chat";
     import { characters } from "../../../stores/character";
     import CharacterItem from "../../CharacterItem.svelte";
+    import type { Character } from "$types/character";
 
     export let isOpen = false;
 
     const dispatch = createEventDispatcher();
 
-    let filteredCharacters = [];
-    let modalContentEl;
-    let oldHeight;
-    let inputEl;
+    let filteredCharacters: Character[] = [];
+    let modalContentEl: HTMLElement | null = null;
+    let oldHeight: number | undefined;
+    let inputEl: HTMLInputElement | null = null;
 
     beforeUpdate(() => {
         if (!modalContentEl) return;
@@ -36,10 +37,12 @@
         modalContentEl.style.overflow = "hidden"; // Prevent scrollbar flicker during animation
 
         requestAnimationFrame(() => {
+            if (!modalContentEl) return;
             modalContentEl.style.transition = `height 0.4s cubic-bezier(0.4, 0, 0.2, 1)`;
             modalContentEl.style.height = `${newHeight}px`;
 
             const onTransitionEnd = () => {
+                if (!modalContentEl) return;
                 modalContentEl.removeEventListener(
                     "transitionend",
                     onTransitionEnd
@@ -53,7 +56,7 @@
     });
 
     $: if (isOpen && inputEl) {
-        setTimeout(() => inputEl.focus(), 100);
+        setTimeout(() => inputEl?.focus(), 100);
     }
 
     $: {

@@ -40,7 +40,7 @@ export async function dumpIndexedDBToJson(): Promise<string | null> {
                 indexedDBData[dbName] = {};
 
                 const transaction: IDBTransaction = db.transaction(
-                    db.objectStoreNames,
+                    Array.from(db.objectStoreNames),
                     "readonly"
                 );
                 transaction.oncomplete = () => {
@@ -56,7 +56,7 @@ export async function dumpIndexedDBToJson(): Promise<string | null> {
                     reject((event.target as IDBRequest).error);
                 };
 
-                for (const storeName of db.objectStoreNames) {
+                for (const storeName of Array.from(db.objectStoreNames)) {
                     indexedDBData[dbName][storeName] = [];
                     const objectStore: IDBObjectStore =
                         transaction.objectStore(storeName);

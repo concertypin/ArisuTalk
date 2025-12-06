@@ -5,6 +5,7 @@ import type {
     ReplaceHook,
     ReplaceHookType,
     ReplaceHooksConfig,
+    ReplaceRule,
 } from "$types/replaceHook";
 import { get } from "svelte/store";
 
@@ -47,7 +48,7 @@ async function applyRule(
                 result: await replaceFn(text, {
                     pattern: regex,
                     replace: to,
-                } as any),
+                }),
                 matchCount,
             };
         }
@@ -78,13 +79,11 @@ async function applyRule(
             );
         }
         // Pass caseSensitive through as extra property; tests' mock expects it.
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         const resultStr = await replaceFn(text, {
             pattern: from,
             replace: to,
             caseSensitive,
-        } as any);
+        });
 
         return { result: resultStr, matchCount };
     } catch (error) {
@@ -136,7 +135,7 @@ async function applyHook(
 
         if (rule.useRegex) {
             // Collect consecutive regex rules into a group
-            const group: typeof hook.rules = [] as any;
+            const group: ReplaceRule[] = [];
             let j = i;
             while (j < hook.rules.length && hook.rules[j].useRegex) {
                 if (hook.rules[j].enabled) group.push(hook.rules[j]);

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { ShieldAlert, Database } from "lucide-svelte";
     import { chatRooms, groupChats, openChats } from "../../../../stores/chat";
     import { characters } from "../../../../stores/character";

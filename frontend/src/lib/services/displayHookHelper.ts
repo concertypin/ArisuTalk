@@ -21,8 +21,8 @@ export async function getDisplayContent(message: Message): Promise<string> {
  */
 export async function getDisplayContents(
     messages: Message[]
-): Promise<Map<number, string>> {
-    const displayMap = new Map<number, string>();
+): Promise<Map<number | string, string>> {
+    const displayMap = new Map<number | string, string>();
 
     for (const message of messages) {
         const displayContent = await getDisplayContent(message);

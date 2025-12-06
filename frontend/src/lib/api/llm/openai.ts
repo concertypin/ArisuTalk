@@ -73,9 +73,9 @@ export class OpenAIClient implements LLMApi {
         }
         for (const msg of contents) {
             if (msg.role === "user") {
-                messages.push(new HumanMessage(msg.parts[0].text));
+                messages.push(new HumanMessage(('text' in msg.parts[0] ? msg.parts[0].text : "")));
             } else if (msg.role === "assistant") {
-                messages.push(new AIMessage(msg.parts[0].text));
+                messages.push(new AIMessage(('text' in msg.parts[0] ? msg.parts[0].text : "")));
             }
         }
 
@@ -120,9 +120,9 @@ export class OpenAIClient implements LLMApi {
         }
         for (const msg of contents) {
             if (msg.role === "user") {
-                messages.push(new HumanMessage(msg.parts[0].text));
+                messages.push(new HumanMessage(('text' in msg.parts[0] ? msg.parts[0].text : "")));
             } else if (msg.role === "assistant") {
-                messages.push(new AIMessage(msg.parts[0].text));
+                messages.push(new AIMessage(('text' in msg.parts[0] ? msg.parts[0].text : "")));
             }
         }
 
@@ -158,9 +158,9 @@ export class OpenAIClient implements LLMApi {
         }
         for (const msg of contents) {
             if (msg.role === "user") {
-                messages.push(new HumanMessage(msg.parts[0].text));
+                messages.push(new HumanMessage(('text' in msg.parts[0] ? msg.parts[0].text : "")));
             } else if (msg.role === "assistant") {
-                messages.push(new AIMessage(msg.parts[0].text));
+                messages.push(new AIMessage(('text' in msg.parts[0] ? msg.parts[0].text : "")));
             }
         }
 

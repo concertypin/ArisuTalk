@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { t, getLanguage, setLanguage } from "$root/i18n";
     import { createEventDispatcher } from "svelte";
     import {

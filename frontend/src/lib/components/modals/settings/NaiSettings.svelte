@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
     import { createEventDispatcher } from "svelte";
     import {
@@ -22,13 +22,18 @@
         Trash2,
     } from "lucide-svelte";
     import { settings } from "$stores/settings";
-        import { DEFAULT_EMOTIONS } from "$constants/novelaiConfig";
+    import {
+        DEFAULT_EMOTIONS,
+        NOVELAI_MODELS,
+        NOVELAI_SAMPLERS,
+        NOVELAI_NOISE_SCHEDULES,
+    } from "$constants/novelaiConfig";
     import { NovelAIClient } from "$root/lib/api/novelai";
 
     const dispatch = createEventDispatcher();
 
     if (!$settings.naiSettings) {
-        $settings.naiSettings = {};
+        ($settings as any).naiSettings = {};
     }
 
     let apiKeyVisible = false;
@@ -45,7 +50,7 @@
 
     let isEditingNaiList = false;
 
-    let newNaiItem = { title: "", emotion: "", action: "" };
+    let newNaiItem: { title: string; emotion: string; action: string } = { title: "", emotion: "", action: "" };
 
     function addNaiItem() {
         if (!newNaiItem.title.trim()) return;
@@ -59,10 +64,12 @@
         newNaiItem = { title: "", emotion: "", action: "" };
     }
 
-    function deleteNaiItem(index) {
-        $settings.naiSettings.naiGenerationList.splice(index, 1);
-        $settings.naiSettings.naiGenerationList =
-            $settings.naiSettings.naiGenerationList;
+    function deleteNaiItem(index: number) {
+        if ($settings.naiSettings.naiGenerationList) {
+            $settings.naiSettings.naiGenerationList.splice(index, 1);
+            $settings.naiSettings.naiGenerationList =
+                $settings.naiSettings.naiGenerationList;
+        }
     }
 
     function saveNaiList() {
@@ -70,7 +77,7 @@
     }
 
     function resetNaiList() {
-        $settings.naiSettings.naiGenerationList = DEFAULT_EMOTIONS;
+        $settings.naiSettings.naiGenerationList = [...DEFAULT_EMOTIONS];
     }
 
     function generateAllStickers() {
@@ -175,7 +182,7 @@
                         bind:value={$settings.naiSettings.model}
                         class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-green-500/50 text-sm"
                     >
-                        {#each Object.entries(NovelAIClient.MODELS) as [modelId, modelInfo]}
+                        {#each Object.entries(NOVELAI_MODELS) as [modelId, modelInfo]}
                             <option value={modelId}
                                 >{modelInfo.name} ({modelInfo.version})</option
                             >
@@ -289,7 +296,7 @@
                         bind:value={$settings.naiSettings.sampler}
                         class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-green-500/50 text-sm"
                     >
-                        {#each NovelAIClient.SAMPLERS as samplerOption}
+                        {#each NOVELAI_SAMPLERS as samplerOption}
                             <option value={samplerOption}
                                 >{samplerOption
                                     .replace(/_/g, " ")
@@ -309,7 +316,7 @@
                         bind:value={$settings.naiSettings.noise_schedule}
                         class="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-green-500/50 text-sm"
                     >
-                        {#each NovelAIClient.NOISE_SCHEDULES as schedule}
+                        {#each NOVELAI_NOISE_SCHEDULES as schedule}
                             <option value={schedule}
                                 >{schedule.charAt(0).toUpperCase() +
                                     schedule.slice(1)}</option
@@ -582,10 +589,12 @@
             {#if !isEditingNaiList}
                 <div class="grid grid-cols-2 gap-2 mb-2">
                     {#each $settings.naiSettings.naiGenerationList || DEFAULT_EMOTIONS as item}
-                        {@const fullKey = item.titleKey
-                            ? `naiSettings.emotion.${item.titleKey}`
+                    {@const titleKey = 'titleKey' in item ? item.titleKey : undefined}
+                    {@const fullKey = titleKey
+                        ? `naiSettings.emotion.${titleKey}`
                             : null}
-                        {@const displayText = fullKey ? t(fullKey) : item.title}
+                    {@const title = 'title' in item ? (item.title || '') : ''}
+                    {@const displayText = fullKey ? t(fullKey) : title}
                         <div
                             class="bg-gray-700/50 rounded-md px-2 py-1 text-center"
                         >
@@ -599,12 +608,14 @@
                 <div class="space-y-3">
                     <div class="space-y-2 max-h-32 overflow-y-auto">
                         {#each $settings.naiSettings.naiGenerationList as item, index}
-                            {@const fullKey = item.titleKey
-                                ? `naiSettings.emotion.${item.titleKey}`
+                            {@const titleKey = 'titleKey' in item ? item.titleKey : undefined}
+                            {@const fullKey = titleKey
+                                ? `naiSettings.emotion.${titleKey}`
                                 : null}
+                            {@const title = 'title' in item ? (item.title || '') : ''}
                             {@const displayText = fullKey
                                 ? t(fullKey)
-                                : item.title}
+                                : title}
                             <div
                                 class="flex items-center gap-2 bg-gray-700/50 p-2 rounded-lg"
                             >

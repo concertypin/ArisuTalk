@@ -1,38 +1,41 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
     import { get } from "svelte/store";
     import { characterStateStore } from "../../../../stores/character";
     import { checkSNSAccess } from "../../../../utils/sns";
     import { Image } from "lucide-svelte";
     import SNSPost from "./SNSPost.svelte";
+    import type { Character, SNSPost as SNSPostType } from "$types/character";
 
-    export let character = null;
+    export let character: Character | null = null;
     export let isSecretMode = false;
 
-    let posts = [];
+    let posts: (SNSPostType & { isBlocked?: boolean })[] = [];
 
     $: {
         if (character && character.snsPosts) {
             posts = character.snsPosts
                 .filter((post) => {
+                    const accessLevel = post.accessLevel || post.access_level;
                     if (isSecretMode) {
                         return (
-                            post.access_level &&
-                            (post.access_level.includes("private") ||
-                                post.access_level.includes("secret"))
+                            accessLevel &&
+                            (accessLevel.includes("private") ||
+                                accessLevel.includes("secret"))
                         );
                     } else {
                         return (
-                            !post.access_level ||
-                            post.access_level === "main-public"
+                            !accessLevel ||
+                            accessLevel === "main-public"
                         );
                     }
                 })
                 .map((post) => {
+                    const accessLevel = post.accessLevel || post.access_level || "public";
                     const hasAccess = checkSNSAccess(
-                        character,
-                        post.access_level || "public",
-                        get(characterStateStore)[character.id]
+                        character!,
+                        accessLevel,
+                        get(characterStateStore)[String(character!.id)]
                     );
                     return {
                         ...post,

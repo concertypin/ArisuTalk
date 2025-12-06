@@ -1,32 +1,35 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
-    import { get } from "svelte/store";
+    import type { Character, Sticker } from "$types/character";
     import {
-        Plus,
-        CheckSquare,
+        Check,
         CheckCircle,
-        Trash2,
+        CheckSquare,
         Edit3,
         Music,
-        X,
+        Plus,
         Sparkles,
+        Trash2,
+        X,
     } from "lucide-svelte";
+    import { get } from "svelte/store";
+
+    import { editingCharacter } from "../../../stores/character";
     import { stickerManager } from "../../../stores/services";
     import { settings } from "../../../stores/settings";
-    import { editingCharacter } from "../../../stores/character";
-    import StickerProgressModal from "../sticker/StickerProgressModal.svelte";
     import StickerPreviewModal from "../sticker/StickerPreviewModal.svelte";
+    import StickerProgressModal from "../sticker/StickerProgressModal.svelte";
 
-    export let stickers = [];
+    export let stickers: Sticker[] = [];
 
     let selectionMode = false;
-    let selectedStickers = [];
-    let stickerInput;
+    let selectedStickers: string[] = [];
+    let stickerInput: HTMLInputElement;
     let showProgressModal = false;
     let progressData = {};
     let showPreviewModal = false;
-    let previewSticker = null;
-    let previewIndex = null;
+    let previewSticker: Sticker | null = null;
+    let previewIndex: number | null = null;
 
     // --- File Handling (from UserStickerPanel.svelte) ---
 
@@ -34,8 +37,9 @@
         stickerInput.click();
     }
 
-    async function handleFileChange(event) {
-        const files = Array.from(event.target.files);
+    async function handleFileChange(event: Event) {
+        const target = event.target as HTMLInputElement;
+        const files = target.files ? Array.from(target.files) : [];
         if (!files.length) return;
 
         for (const file of files) {
@@ -63,7 +67,7 @@
             }
 
             try {
-                let dataUrl;
+                let dataUrl: string;
                 if (file.type.startsWith("image/")) {
                     dataUrl = await compressImage(file, 1024, 1024, 0.85);
                 } else {
@@ -71,7 +75,7 @@
                 }
                 const stickerName =
                     file.name.split(".").slice(0, -1).join(".") || file.name;
-                const newSticker = {
+                const newSticker: Sticker = {
                     id: `sticker_${Date.now()}_${Math.random()}`,
                     name: stickerName,
                     data: dataUrl,
@@ -84,19 +88,24 @@
                 alert(t("ui.fileProcessingAlert"));
             }
         }
-        event.target.value = ""; // Reset file input
+        target.value = ""; // Reset file input
     }
 
-    function toBase64(file) {
+    function toBase64(file: File): Promise<string> {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
+            reader.onload = () => resolve(reader.result as string);
             reader.onerror = (error) => reject(error);
         });
     }
 
-    function compressImage(file, maxWidth, maxHeight, quality) {
+    function compressImage(
+        file: File,
+        maxWidth: number,
+        maxHeight: number,
+        quality: number
+    ): Promise<string> {
         return new Promise((resolve, reject) => {
             const img = new Image();
             img.src = URL.createObjectURL(file);
@@ -119,6 +128,10 @@
                 canvas.width = width;
                 canvas.height = height;
                 const ctx = canvas.getContext("2d");
+                if (!ctx) {
+                    reject(new Error("Could not get canvas context"));
+                    return;
+                }
                 ctx.drawImage(img, 0, 0, width, height);
                 resolve(canvas.toDataURL(file.type, quality));
             };
@@ -128,35 +141,42 @@
 
     // --- Sticker Management ---
 
-    function openPreviewModal(sticker, index) {
+    function openPreviewModal(sticker: Sticker, index: number) {
         previewSticker = sticker;
         previewIndex = index;
         showPreviewModal = true;
     }
 
-    function handleSaveSticker(event) {
+    function handleSaveSticker(event: Event) {
         const { name } = event.detail;
-        stickers[previewIndex].name = name;
-
-        stickers = stickers;
+        if (previewIndex !== null) {
+            stickers[previewIndex].name = name;
+            stickers = stickers;
+        }
         showPreviewModal = false;
     }
 
     function handleDeleteSticker() {
-        stickers = stickers.filter((_, i) => i !== previewIndex);
+        if (previewIndex !== null) {
+            stickers = stickers.filter((_, i) => i !== previewIndex);
+        }
         showPreviewModal = false;
     }
 
     function handleCopySticker() {
-        navigator.clipboard.writeText(previewSticker.dataUrl);
-        alert("Copied to clipboard!");
+        if (previewSticker && previewSticker.data) {
+            navigator.clipboard.writeText(previewSticker.data);
+            alert("Copied to clipboard!");
+        }
     }
 
     function handleDownloadSticker() {
-        const link = document.createElement("a");
-        link.href = previewSticker.dataUrl;
-        link.download = previewSticker.name;
-        link.click();
+        if (previewSticker && previewSticker.data) {
+            const link = document.createElement("a");
+            link.href = previewSticker.data;
+            link.download = previewSticker.name;
+            link.click();
+        }
     }
 
     async function handleRerollSticker(event) {
@@ -232,8 +252,11 @@
             generatedStickers: [],
         };
 
+        const char = get(editingCharacter);
+        if (!char) return;
+
         await get(stickerManager).generateBasicStickerSet(
-            get(editingCharacter),
+            char as Character,
             (progress) => {
                 progressData = { ...progressData, ...progress };
             }
@@ -314,7 +337,7 @@
                             <span class="text-xs"
                                 >{t("characterModal.deleteSelected").replace(
                                     "0",
-                                    selectedStickers.length
+                                    selectedStickers.length.toString()
                                 )}</span
                             >
                         </button>

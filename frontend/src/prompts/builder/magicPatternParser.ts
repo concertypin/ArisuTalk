@@ -6,7 +6,7 @@
  */
 export async function parseMagicPatterns(
     template: string,
-    context: object
+    context: Record<string,any>
 ): Promise<string> {
     if (!template) return "";
     const pattern = /{\|([\s\S]*?)\|}/g;
@@ -37,17 +37,17 @@ export async function parseMagicPatterns(
  * @param context - An object providing context variables for the sandbox execution.
  * @returns A promise that resolves to the result of the code execution as a string.
  */
-async function runMagicPattern(code: string, context: object): Promise<string> {
+async function runMagicPattern(code: string, context: Record<string,any>): Promise<string> {
     const Sandbox = (await import("@nyariv/sandboxjs")).default;
     const sandbox = new Sandbox();
     return new Promise<string>((resolve) => {
         sandbox
-            .compileAsync<any>(code)(context)
+            .compileAsync(code)(context)
             .run()
             .then((i) => {
                 if (typeof i === "string") resolve(i);
                 else if (typeof i?.toString === "function")
-                    resolve(i.toString() as string);
+                    resolve(i.toString());
                 else if (!i)
                     resolve(""); // Handle null/undefined/falses
                 else resolve(""); // Fallback to empty string if no toString method(it likely is error)

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
     import { Sparkles, TestTube, Loader } from "lucide-svelte";
     import { stickerManager } from "../../../stores/services";

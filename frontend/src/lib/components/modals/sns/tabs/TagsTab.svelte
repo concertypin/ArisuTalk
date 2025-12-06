@@ -1,16 +1,24 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
     import { Hash, Lock, EyeOff } from "lucide-svelte";
+    import type { Character } from "$types/character";
 
-    export let character = null;
+    export let character: Character | null = null;
 
-    let allTags = [];
+    interface TagData {
+        name: string;
+        count: number;
+        lastUsed: number;
+        isSecret: boolean;
+    }
+
+    let allTags: TagData[] = [];
 
     $: {
         if (character && character.snsPosts) {
-            const tagCounts = {};
-            const tagLastUsed = {};
-            const tagSecretStatus = {};
+            const tagCounts: Record<string, number> = {};
+            const tagLastUsed: Record<string, number> = {};
+            const tagSecretStatus: Record<string, boolean> = {};
 
             character.snsPosts.forEach((post) => {
                 if (post.tags && Array.isArray(post.tags)) {
@@ -25,9 +33,12 @@
                         ) {
                             tagLastUsed[tag] = postTimestamp;
                         }
+
+                        // Check access level (support both snake_case and camelCase)
+                        const accessLevel = post.accessLevel || post.access_level;
                         if (
-                            post.access_level &&
-                            post.access_level.includes("secret")
+                            accessLevel &&
+                            accessLevel.includes("secret")
                         ) {
                             tagSecretStatus[tag] = true;
                         }
@@ -46,25 +57,25 @@
         }
     }
 
-    function formatTimeAgo(timestamp) {
+    function formatTimeAgo(timestamp: number) {
         const now = Date.now();
         const diff = now - timestamp;
 
         if (diff < 60000) return t("sns.justNow");
         if (diff < 3600000)
-            return t("sns.minutesAgo", { minutes: Math.floor(diff / 60000) });
+            return t("sns.minutesAgo", { minutes: String(Math.floor(diff / 60000)) });
         if (diff < 86400000)
-            return t("sns.hoursAgo", { hours: Math.floor(diff / 3600000) });
+            return t("sns.hoursAgo", { hours: String(Math.floor(diff / 3600000)) });
         if (diff < 604800000)
-            return t("sns.daysAgo", { days: Math.floor(diff / 86400000) });
+            return t("sns.daysAgo", { days: String(Math.floor(diff / 86400000)) });
         if (diff < 2592000000)
-            return t("sns.weeksAgo", { weeks: Math.floor(diff / 604800000) });
+            return t("sns.weeksAgo", { weeks: String(Math.floor(diff / 604800000)) });
         if (diff < 31536000000)
             return t("sns.monthsAgo", {
-                months: Math.floor(diff / 2592000000),
+                months: String(Math.floor(diff / 2592000000)),
             });
 
-        return t("sns.yearsAgo", { years: Math.floor(diff / 31536000000) });
+        return t("sns.yearsAgo", { years: String(Math.floor(diff / 31536000000)) });
     }
 </script>
 
@@ -111,7 +122,7 @@
                     </div>
 
                     <div class="text-xs text-gray-400 space-y-1">
-                        <div>{t("sns.postsCount", { count: tag.count })}</div>
+                        <div>{t("sns.postsCount", { count: String(tag.count) })}</div>
                         <div class="opacity-75">
                             {formatTimeAgo(tag.lastUsed)}
                         </div>

@@ -3,14 +3,62 @@
  * NAI 프롬프트 및 이미지 메타데이터 추출
  */
 
+export interface ExifData {
+    make?: string;
+    model?: string;
+    software?: string;
+    userComment?: string;
+    naiPrompt?: string;
+    naiNegativePrompt?: string;
+    naiSteps?: number | string;
+    naiScale?: number | string;
+    naiCfgScale?: number | string;
+    naiSeed?: number | string;
+    naiSampler?: string;
+    naiModel?: string;
+    comment?: string;
+    description?: string;
+    steps?: number | string;
+    cfg_scale?: number | string;
+    [key: string]: any;
+}
+
+export interface FormattedExifInfo {
+    basic: {
+        make?: string;
+        model?: string;
+        software?: string;
+        comment?: string;
+        description?: string;
+    };
+    nai: {
+        prompt?: string;
+        negativePrompt?: string;
+        steps?: number | string;
+        scale?: number | string;
+        cfgScale?: number | string;
+        seed?: number | string;
+        sampler?: string;
+        model?: string;
+    };
+    raw: ExifData;
+}
+
+export interface RerollInfo {
+    prompt: string;
+    negativePrompt: string;
+    steps: number | string;
+    scale: number | string;
+    sampler: string;
+    model: string;
+}
+
 /**
  * 이미지에서 EXIF 데이터 추출
- * @param {File|string} imageData - 파일 객체 또는 data URL
- * @returns {Promise<Object>} EXIF 데이터 객체
  */
-export async function extractExifData(imageData) {
+export async function extractExifData(imageData: File | string): Promise<ExifData> {
     try {
-        let arrayBuffer;
+        let arrayBuffer: ArrayBuffer;
 
         if (typeof imageData === "string") {
             // Data URL인 경우
@@ -41,12 +89,10 @@ export async function extractExifData(imageData) {
 
 /**
  * ArrayBuffer에서 EXIF 데이터 파싱
- * @param {ArrayBuffer} arrayBuffer
- * @returns {Object} 파싱된 EXIF 데이터
  */
-function parseExifFromArrayBuffer(arrayBuffer) {
+function parseExifFromArrayBuffer(arrayBuffer: ArrayBuffer): ExifData {
     const uint8Array = new Uint8Array(arrayBuffer);
-    const exifData = {};
+    const exifData: ExifData = {};
 
     // PNG 파일 확인 (PNG 시그니처: 89 50 4E 47 0D 0A 1A 0A)
     if (
@@ -68,11 +114,9 @@ function parseExifFromArrayBuffer(arrayBuffer) {
 
 /**
  * PNG 메타데이터 파싱 (NAI 프롬프트 정보 포함)
- * @param {Uint8Array} uint8Array
- * @returns {Object} 파싱된 메타데이터
  */
-function parsePngMetadata(uint8Array) {
-    const metadata = {};
+function parsePngMetadata(uint8Array: Uint8Array): ExifData {
+    const metadata: ExifData = {};
     let offset = 8; // PNG 시그니처 건너뛰기
 
     while (offset < uint8Array.length) {
@@ -109,12 +153,9 @@ function parsePngMetadata(uint8Array) {
 
 /**
  * PNG 텍스트 청크 파싱
- * @param {Uint8Array} chunkData
- * @param {boolean} isCompressed
- * @returns {Object} 텍스트 데이터
  */
-function parsePngTextChunk(chunkData, isCompressed) {
-    const textData = {};
+function parsePngTextChunk(chunkData: Uint8Array, isCompressed: boolean): ExifData {
+    const textData: ExifData = {};
 
     try {
         // 키워드와 값 분리 (null 바이트로 구분)
@@ -129,7 +170,7 @@ function parsePngTextChunk(chunkData, isCompressed) {
         const keyword = String.fromCharCode(...chunkData.slice(0, nullIndex));
         const valueBytes = chunkData.slice(nullIndex + 1);
 
-        let value;
+        let value: string;
         if (isCompressed) {
             // zTXt는 압축된 데이터이므로 현재는 스킵
             value = "[Compressed text - not supported]";
@@ -174,10 +215,8 @@ function parsePngTextChunk(chunkData, isCompressed) {
 
 /**
  * JPEG EXIF 데이터 파싱
- * @param {Uint8Array} uint8Array
- * @returns {Object} EXIF 데이터
  */
-function parseJpegExif(uint8Array) {
+function parseJpegExif(uint8Array: Uint8Array): ExifData {
     // APP1 마커 찾기 (0xFFE1)
     let offset = 2;
     while (offset < uint8Array.length - 1) {
@@ -210,12 +249,9 @@ function parseJpegExif(uint8Array) {
 
 /**
  * TIFF 데이터에서 태그 파싱
- * @param {Uint8Array} data
- * @param {number} offset
- * @returns {Object} 파싱된 태그 데이터
  */
-function parseTiffData(data, offset) {
-    const tags = {};
+function parseTiffData(data: Uint8Array, offset: number): ExifData {
+    const tags: ExifData = {};
 
     try {
         // TIFF 헤더 확인
@@ -280,9 +316,8 @@ function parseTiffData(data, offset) {
 
 /**
  * UserComment에서 NAI 프롬프트 정보 추출
- * @param {Object} tags - EXIF 태그 객체
  */
-function extractNAIPromptInfo(tags) {
+function extractNAIPromptInfo(tags: ExifData): void {
     if (tags.userComment) {
         try {
             // JSON 형태의 데이터 파싱 시도
@@ -322,12 +357,8 @@ function extractNAIPromptInfo(tags) {
 
 /**
  * UserComment 필드 읽기 (특수 형식 처리)
- * @param {Uint8Array} data
- * @param {number} offset
- * @param {number} count
- * @returns {string}
  */
-function readUserComment(data, offset, count) {
+function readUserComment(data: Uint8Array, offset: number, count: number): string {
     // UserComment는 보통 8바이트 헤더 + 실제 데이터
     const headerSize = 8;
     if (count <= headerSize) return "";
@@ -338,24 +369,16 @@ function readUserComment(data, offset, count) {
 
 /**
  * 문자열 읽기
- * @param {Uint8Array} data
- * @param {number} offset
- * @param {number} count
- * @returns {string}
  */
-function readString(data, offset, count) {
+function readString(data: Uint8Array, offset: number, count: number): string {
     const stringData = data.slice(offset, offset + count - 1); // null terminator 제외
     return new TextDecoder("utf-8").decode(stringData);
 }
 
 /**
  * Little/Big Endian 처리하여 16비트 정수 읽기
- * @param {Uint8Array} data
- * @param {number} offset
- * @param {boolean} isLittleEndian
- * @returns {number}
  */
-function readUint16(data, offset, isLittleEndian) {
+function readUint16(data: Uint8Array, offset: number, isLittleEndian: boolean): number {
     if (isLittleEndian) {
         return data[offset] | (data[offset + 1] << 8);
     } else {
@@ -365,12 +388,8 @@ function readUint16(data, offset, isLittleEndian) {
 
 /**
  * Little/Big Endian 처리하여 32비트 정수 읽기
- * @param {Uint8Array} data
- * @param {number} offset
- * @param {boolean} isLittleEndian
- * @returns {number}
  */
-function readUint32(data, offset, isLittleEndian) {
+function readUint32(data: Uint8Array, offset: number, isLittleEndian: boolean): number {
     if (isLittleEndian) {
         return (
             data[offset] |
@@ -390,11 +409,8 @@ function readUint32(data, offset, isLittleEndian) {
 
 /**
  * 32비트 정수 읽기 (Big Endian)
- * @param {Uint8Array} data
- * @param {number} offset
- * @returns {number}
  */
-function readUint32Big(data, offset) {
+function readUint32Big(data: Uint8Array, offset: number): number {
     return (
         (data[offset] << 24) |
         (data[offset + 1] << 16) |
@@ -405,11 +421,9 @@ function readUint32Big(data, offset) {
 
 /**
  * EXIF 데이터를 사용자 친화적 형태로 포맷
- * @param {Object} exifData - 원본 EXIF 데이터
- * @returns {Object} 포맷된 EXIF 정보
  */
-export function formatExifInfo(exifData) {
-    const formatted = {
+export function formatExifInfo(exifData: ExifData): FormattedExifInfo {
+    const formatted: FormattedExifInfo = {
         basic: {},
         nai: {},
         raw: exifData,
@@ -424,10 +438,10 @@ export function formatExifInfo(exifData) {
     if (exifData.naiPrompt) formatted.nai.prompt = exifData.naiPrompt;
     if (exifData.naiNegativePrompt)
         formatted.nai.negativePrompt = exifData.naiNegativePrompt;
-    if (exifData.naiSteps) formatted.nai.steps = exifData.naiSteps;
-    if (exifData.naiScale) formatted.nai.scale = exifData.naiScale;
-    if (exifData.naiCfgScale) formatted.nai.cfgScale = exifData.naiCfgScale;
-    if (exifData.naiSeed) formatted.nai.seed = exifData.naiSeed;
+    if (exifData.naiSteps) formatted.nai.steps = exifData.naiSteps as number;
+    if (exifData.naiScale) formatted.nai.scale = exifData.naiScale as number;
+    if (exifData.naiCfgScale) formatted.nai.cfgScale = exifData.naiCfgScale as number;
+    if (exifData.naiSeed) formatted.nai.seed = exifData.naiSeed as number;
     if (exifData.naiSampler) formatted.nai.sampler = exifData.naiSampler;
     if (exifData.naiModel) formatted.nai.model = exifData.naiModel;
 
@@ -441,10 +455,8 @@ export function formatExifInfo(exifData) {
 
 /**
  * NAI 리롤을 위한 프롬프트 정보 추출
- * @param {Object} exifData - EXIF 데이터
- * @returns {Object|null} 리롤 가능한 프롬프트 정보
  */
-export function extractRerollInfo(exifData) {
+export function extractRerollInfo(exifData: ExifData): RerollInfo | null {
     if (!exifData.naiPrompt) {
         return null;
     }
