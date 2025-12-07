@@ -7,6 +7,9 @@
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.tabSize": 4
     },
+    "[github-actions-workflow]": {
+        "editor.tabSize": 2
+    },
     "typescript.preferences.preferTypeOnlyAutoImports": true,
     "js/ts.implicitProjectConfig.target": "ESNext",
     "typescript.preferences.importModuleSpecifier": "non-relative",
