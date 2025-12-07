@@ -1,25 +1,28 @@
 <script lang="ts">
     import { t } from "$root/i18n";
-    import {
-        replaceHooks,
-        addHook,
-        deleteHook,
-        updateHook,
-        moveHookUp,
-        moveHookDown,
-    } from "../../stores/replaceHooks";
     import type {
         ReplaceHook,
-        ReplaceHooksConfig,
         ReplaceHookType,
+        ReplaceHooksConfig,
     } from "$types/replaceHook";
+
+    import {
+        addHook,
+        deleteHook,
+        moveHookDown,
+        moveHookUp,
+        replaceHooks,
+        updateHook,
+    } from "../../stores/replaceHooks";
     import HookEditor from "./HookEditor.svelte";
 
     let selectedType: ReplaceHookType = "input";
     let editingHook: ReplaceHook | null = null;
     let isAddingNew = false;
 
-    $: hooks = $replaceHooks[`${selectedType}Hooks`] satisfies ReplaceHook[];
+    $: hooks = $replaceHooks[
+        `${selectedType}Hooks` as keyof ReplaceHooksConfig
+    ] satisfies ReplaceHook[];
 
     function handleAddHook() {
         isAddingNew = true;
@@ -104,7 +107,9 @@
                         >{getHookTypeLabel(type as ReplaceHookType)}</span
                     >
                     <span class="count"
-                        >{$replaceHooks[`${type}Hooks`].length}</span
+                        >{$replaceHooks[
+                            (type + "Hooks") as keyof ReplaceHooksConfig
+                        ].length}</span
                     >
                 </button>
             {/each}

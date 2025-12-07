@@ -13,7 +13,7 @@
     import { PROVIDERS, PROVIDER_MODELS } from "../../../constants/providers";
     import { settings } from "../../stores/settings";
 
-    export let provider: string;
+    export let provider: Lowercase<keyof typeof PROVIDERS>;
 
     let config = $settings.apiConfigs[provider] || {};
     let customModelInput = "";

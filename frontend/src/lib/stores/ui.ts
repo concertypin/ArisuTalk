@@ -27,7 +27,7 @@ export const isSNSCharacterListModalVisible = writable(false);
 export const isSNSFeedModalVisible = writable(false);
 export const snsFeedCharacter = writable<Character | null>(null);
 export const isSNSPostModalVisible = writable(false);
-export const editingSNSPost = writable<(SNSPost & { characterId?: string | number }) | null>(null);
+export const editingSNSPost = writable<(SNSPost & { characterId?: string | number, isNew?: boolean, isSecret?: boolean }) | { characterId: string | number; isNew: boolean; isSecret: boolean } | null>(null);
 export const isPhonebookModalVisible = writable(false);
 export const isMobileAuthModalVisible = writable(false);
 

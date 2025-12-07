@@ -248,10 +248,14 @@
                         class="border-b border-gray-700 px-6 py-4 bg-gray-800/50"
                     >
                         <h4 class="text-lg font-semibold text-white">
-                            {panelTitles[activePanel].title}
+                            {panelTitles[
+                                activePanel as keyof typeof panelTitles
+                            ].title}
                         </h4>
                         <p class="text-sm text-gray-400 mt-1">
-                            {panelTitles[activePanel].subtitle}
+                            {panelTitles[
+                                activePanel as keyof typeof panelTitles
+                            ].subtitle}
                         </p>
                     </div>
 

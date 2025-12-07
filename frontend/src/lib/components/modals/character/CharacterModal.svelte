@@ -161,17 +161,25 @@
         try {
             const provider = $settings.apiProvider;
             const config = $settings.apiConfigs[provider] || {};
-            const generatedPrompt = await apiManager.generateCharacterSheet(
+            const response = await apiManager.generateCharacterSheet(
                 provider,
                 config.apiKey,
                 config.model,
                 {
                     characterName: characterData.name,
-                    systemPrompt: $settings.prompts.characterSheet,
+                    characterDescription: "", // Not used by current prompt builder but required by type
+                    characterSheetPrompt: $settings.prompts.characterSheet,
                 },
                 config.baseUrl
             );
-            characterData.prompt = generatedPrompt;
+
+            if ("error" in response) {
+                throw new Error(response.error);
+            }
+
+            if (response.messages && response.messages.length > 0) {
+                characterData.prompt = response.messages[0].content;
+            }
         } catch (error) {
             console.error("Error generating character prompt:", error);
             if (error instanceof Error) {
@@ -321,9 +329,13 @@
                 mergedData.avatar = imported.avatar;
             }
 
-            if (!mergedData.memories) {
+            // Ensure memories is string[]
+            if (!mergedData.memories || !Array.isArray(mergedData.memories)) {
                 mergedData.memories = [];
+            } else {
+                mergedData.memories = mergedData.memories.map((m) => String(m));
             }
+
             if (!mergedData.stickers) {
                 mergedData.stickers = [];
             }
@@ -337,7 +349,7 @@
                 mergedData.hypnosis = { ...defaultHypnosis };
             }
 
-            characterData = mergedData;
+            characterData = mergedData as Partial<Character>;
             isNew = true;
             phonebookImportResult.set(null);
         });
@@ -358,6 +370,10 @@
                 const service = await import(
                     "../../../services/phonebookService"
                 );
+                if (!$auth.clerk) {
+                    phonebookAccessState.set("disabled");
+                    return;
+                }
                 const allowed = await service.verifyPhonebookAccess(
                     $auth.clerk
                 );
@@ -404,11 +420,16 @@
                 const service = await import(
                     "../../../services/phonebookService"
                 );
-                const allowed = await service.verifyPhonebookAccess(
-                    $auth.clerk
-                );
-                phonebookAccessState.set(allowed ? "enabled" : "disabled");
-                verificationFailed = !allowed;
+                if (!$auth.clerk) {
+                    phonebookAccessState.set("disabled");
+                    verificationFailed = true;
+                } else {
+                    const allowed = await service.verifyPhonebookAccess(
+                        $auth.clerk
+                    );
+                    phonebookAccessState.set(allowed ? "enabled" : "disabled");
+                    verificationFailed = !allowed;
+                }
             } catch (error) {
                 console.error("Phonebook availability check failed", error);
                 phonebookAccessState.set("disabled");

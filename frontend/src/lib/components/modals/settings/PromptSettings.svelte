@@ -1,19 +1,28 @@
 <script lang="ts">
+    import PromptSection from "$components/modals/prompt/PromptSection.svelte";
     import { t } from "$root/i18n";
-    import { createEventDispatcher } from "svelte";
+    import { prompts } from "$stores/prompts";
+    import type { PromptStorageType } from "$types/Prompt";
     import {
         ArrowLeft,
-        Save,
-        RefreshCw,
         Download,
+        RefreshCw,
+        Save,
         Upload,
     } from "lucide-svelte";
-    import { prompts } from "$stores/prompts";
-    import PromptSection from "$components/modals/prompt/PromptSection.svelte";
+    import { createEventDispatcher } from "svelte";
 
     const dispatch = createEventDispatcher();
 
-    let promptData = {};
+    let promptData: PromptStorageType = {
+        mainChat: "",
+        characterSheet: "",
+        profileCreation: "",
+        snsForce: "",
+        naiSticker: "",
+        groupChat: "",
+        openChat: "",
+    };
     prompts.subscribe((value) => {
         promptData = JSON.parse(JSON.stringify(value)); // Deep copy
     });
@@ -107,7 +116,7 @@
             <PromptSection
                 title={section.title}
                 description={section.description}
-                bind:value={promptData[section.key]}
+                bind:value={promptData[section.key as keyof PromptStorageType]}
             />
         {/each}
 

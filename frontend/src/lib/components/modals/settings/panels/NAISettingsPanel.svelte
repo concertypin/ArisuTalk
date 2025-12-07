@@ -1,35 +1,35 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import { t } from "$root/i18n";
-    import { settings } from "$stores/settings";
-    import {
-        Image,
-        Cpu,
-        UserPlus,
-        Settings,
-        Edit,
-        Smile,
-        Download,
-        BarChart3,
-        HelpCircle,
-        Eye,
-        EyeOff,
-        Plus,
-        Check,
-        X,
-        RefreshCw,
-        Users,
-        Trash2,
-        Loader2,
-    } from "lucide-svelte";
     import {
         NOVELAI_MODELS,
-        NOVELAI_SAMPLERS,
         NOVELAI_NOISE_SCHEDULES,
+        NOVELAI_SAMPLERS,
     } from "$constants/novelaiConfig";
     import { DEFAULT_EMOTIONS } from "$root/defaults";
+    import { t } from "$root/i18n";
     import { characters } from "$stores/character";
+    import { settings } from "$stores/settings";
     import type { NAIGenerationItem } from "$types/nai";
+    import {
+        BarChart3,
+        Check,
+        Cpu,
+        Download,
+        Edit,
+        Eye,
+        EyeOff,
+        HelpCircle,
+        Image,
+        Loader2,
+        Plus,
+        RefreshCw,
+        Settings,
+        Smile,
+        Trash2,
+        UserPlus,
+        Users,
+        X,
+    } from "lucide-svelte";
+    import { onMount } from "svelte";
 
     // Ensure naiSettings exists (runtime check for legacy data)
     if (!$settings.naiSettings) {
@@ -60,7 +60,11 @@
 
     let isEditingNaiList = false;
 
-    let newNaiItem: { title: string; emotion: string; action: string } = { title: "", emotion: "", action: "" };
+    let newNaiItem: { title: string; emotion: string; action: string } = {
+        title: "",
+        emotion: "",
+        action: "",
+    };
 
     let totalGenerated = 0;
     let charactersWithGenerated = 0;
@@ -93,7 +97,8 @@
         totalGenerated = generated;
         charactersWithGenerated = withGenerated;
         totalStickers = total;
-        generationRate = total > 0 ? ((generated / total) * 100).toFixed(1) : "0";
+        generationRate =
+            total > 0 ? ((generated / total) * 100).toFixed(1) : "0";
         characterStats = stats.sort((a, b) => b.count - a.count);
     }
 
@@ -122,7 +127,9 @@
     }
 
     function resetNaiList() {
-        $settings.naiSettings.naiGenerationList = [...DEFAULT_EMOTIONS];
+        $settings.naiSettings.naiGenerationList = [
+            ...DEFAULT_EMOTIONS,
+        ] as unknown as NAIGenerationItem[];
     }
 
     function generateAllStickers() {
@@ -761,11 +768,12 @@
         {#if !isEditingNaiList}
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
                 {#each $settings.naiSettings.naiGenerationList || DEFAULT_EMOTIONS as item}
-                    {@const titleKey = 'titleKey' in item ? item.titleKey : undefined}
+                    {@const titleKey =
+                        "titleKey" in item ? item.titleKey : undefined}
                     {@const fullKey = titleKey
                         ? `naiSettings.emotion.${titleKey}`
                         : null}
-                    {@const title = 'title' in item ? (item.title || '') : ''}
+                    {@const title = "title" in item ? item.title || "" : ""}
                     {@const displayText = fullKey ? t(fullKey) : title}
                     <div
                         class="bg-gray-600/50 rounded-lg px-3 py-2 text-center"
@@ -786,14 +794,14 @@
                     </h5>
                     <div class="space-y-2 max-h-32 overflow-y-auto">
                         {#each $settings.naiSettings.naiGenerationList || [] as item, index}
-                            {@const titleKey = 'titleKey' in item ? item.titleKey : undefined}
+                            {@const titleKey =
+                                "titleKey" in item ? item.titleKey : undefined}
                             {@const fullKey = titleKey
                                 ? `naiSettings.emotion.${titleKey}`
                                 : null}
-                            {@const title = 'title' in item ? (item.title || '') : ''}
-                            {@const displayText = fullKey
-                                ? t(fullKey)
-                                : title}
+                            {@const title =
+                                "title" in item ? item.title || "" : ""}
+                            {@const displayText = fullKey ? t(fullKey) : title}
                             <div
                                 class="flex items-center gap-2 bg-gray-600/30 p-2 rounded-lg"
                             >

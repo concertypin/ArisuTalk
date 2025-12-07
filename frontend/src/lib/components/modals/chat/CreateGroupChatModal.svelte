@@ -42,7 +42,21 @@
                 maxRespondingCharacters: 1,
                 responseDelay: 3000,
                 participantSettings: selectedParticipantIds.reduce(
-                    (acc, id) => {
+                    (
+                        acc: Record<
+                            string,
+                            {
+                                isActive: boolean;
+                                responseProbability: number;
+                                characterRole:
+                                    | "normal"
+                                    | "leader"
+                                    | "quiet"
+                                    | "active";
+                            }
+                        >,
+                        id
+                    ) => {
                         acc[id] = {
                             isActive: true,
                             responseProbability: 0.9,

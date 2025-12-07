@@ -27,7 +27,7 @@ interface GenerationResult {
     error?: string;
 }
 
-interface StickerProgress {
+export interface StickerProgress {
     type: "sticker" | "character";
     current?: number;
     total?: number;
@@ -53,15 +53,17 @@ interface GenerationSummary {
  * NAI를 활용한 캐릭터별 감정 스티커 자동 생성 및 관리
  */
 export class StickerManager {
-    private naiClient: NovelAIClient | null;
+    public naiClient: NovelAIClient | null;
     private generationQueue: any[];
     private isGenerating: boolean;
+    private isCancelled: boolean;
     private NAI_DELAYS: NaiDelays;
 
     constructor() {
         this.naiClient = null;
         this.generationQueue = [];
         this.isGenerating = false;
+        this.isCancelled = false;
         this.NAI_DELAYS = {
              minDelay: 10000,
             maxAdditionalDelay: 5000,
@@ -284,9 +286,17 @@ export class StickerManager {
     }
 
     /**
+     * 스티커 생성 취소
+     */
+    cancelGeneration() {
+        this.isCancelled = true;
+    }
+
+    /**
      * 캐릭터의 NAI 일괄 생성 목록 스티커 일괄 생성
      */
     async generateBasicStickerSet(character: Character, options: { emotions?: EmotionType[], onProgress?: (data: StickerProgress) => void } = {}): Promise<GenerationSummary> {
+        this.isCancelled = false;
         if (!this.initializeNAI()) {
             throw new Error("NAI API 키가 설정되지 않았습니다.");
         }
@@ -308,6 +318,10 @@ export class StickerManager {
             const results: GenerationResult[] = [];
 
             for (let i = 0; i < missingEmotions.length; i++) {
+                if (this.isCancelled) {
+                    break;
+                }
+
                 const emotion = missingEmotions[i];
                 const emotionName = typeof emotion === 'string' ? emotion : emotion.emotion;
 

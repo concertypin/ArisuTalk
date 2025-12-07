@@ -61,7 +61,7 @@
         const store = stores.find((s) => s.id === selectedStore);
         if (!store || !store.data) return [];
 
-        let data = Array.isArray(store.data)
+        let data: any[] = Array.isArray(store.data)
             ? [...store.data]
             : Object.entries(store.data).map(([key, value]) => ({
                   key,
@@ -150,10 +150,7 @@
                             })}
                         </h2>
                         <p class="text-gray-400 text-sm mt-1">
-                            {t("dataBrowser.subtitle", {
-                                defaultValue:
-                                    "Browse and inspect application data stores",
-                            })}
+                            {t("dataBrowser.subtitle")}
                         </p>
                     </div>
                     <div
@@ -164,9 +161,7 @@
                             class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg flex items-center gap-2 text-sm"
                         >
                             <Download class="w-4 h-4" />
-                            {t("dataBrowser.export", {
-                                defaultValue: "Export",
-                            })}
+                            {t("dataBrowser.export")}
                         </button>
                         <button
                             on:click={refreshData}
@@ -178,16 +173,14 @@
                                     ? 'animate-spin'
                                     : ''}"
                             />
-                            {t("dataBrowser.refresh", {
-                                defaultValue: "Refresh",
-                            })}
+                            {t("dataBrowser.refresh")}
                         </button>
                         <button
                             on:click={() =>
                                 isDataBrowserModalVisible.set(false)}
                             class="px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white rounded-lg text-sm"
                         >
-                            {t("dataBrowser.close", { defaultValue: "Close" })}
+                            {t("dataBrowser.close")}
                         </button>
                     </div>
                 </div>
@@ -199,13 +192,13 @@
                     <!-- Store Selector -->
                     <div class="flex-1">
                         <label
+                            for="store-selector"
                             class="block text-sm font-medium text-gray-300 mb-2"
                         >
-                            {t("dataBrowser.selectStore", {
-                                defaultValue: "Select Store",
-                            })}
+                            {t("dataBrowser.selectStore")}
                         </label>
                         <select
+                            id="store-selector"
                             bind:value={selectedStore}
                             class="w-full bg-gray-600 border border-gray-500 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         >
@@ -223,25 +216,20 @@
                     <!-- Search -->
                     <div class="flex-1">
                         <label
+                            for="search-input"
                             class="block text-sm font-medium text-gray-300 mb-2"
                         >
-                            {t("dataBrowser.search", {
-                                defaultValue: "Search",
-                            })}
+                            {t("dataBrowser.search")}
                         </label>
                         <div class="relative">
                             <Search
                                 class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
                             />
                             <input
+                                id="search-input"
                                 type="text"
                                 bind:value={searchQuery}
-                                placeholder={t(
-                                    "dataBrowser.searchPlaceholder",
-                                    {
-                                        defaultValue: "Search data...",
-                                    }
-                                )}
+                                placeholder={t("dataBrowser.searchPlaceholder")}
                                 class="w-full bg-gray-600 border border-gray-500 text-white rounded-lg pl-10 pr-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                         </div>
@@ -262,23 +250,13 @@
                         <Database class="w-16 h-16 mb-4 opacity-50" />
                         <h3 class="text-lg font-medium mb-2">
                             {searchQuery
-                                ? t("dataBrowser.noResults", {
-                                      defaultValue: "No matching results",
-                                  })
-                                : t("dataBrowser.noData", {
-                                      defaultValue: "No data available",
-                                  })}
+                                ? t("dataBrowser.noResults")
+                                : t("dataBrowser.noData")}
                         </h3>
                         <p class="text-sm text-center">
                             {searchQuery
-                                ? t("dataBrowser.tryDifferentQuery", {
-                                      defaultValue:
-                                          "Try a different search query",
-                                  })
-                                : t("dataBrowser.selectDifferentStore", {
-                                      defaultValue:
-                                          "Select a different data store",
-                                  })}
+                                ? t("dataBrowser.tryDifferentQuery")
+                                : t("dataBrowser.selectDifferentStore")}
                         </p>
                     </div>
                 {:else}
@@ -286,10 +264,7 @@
                         <div class="mb-4">
                             <p class="text-sm text-gray-400">
                                 {t("dataBrowser.showingResults", {
-                                    defaultValue: "Showing {count} results",
-                                    values: {
-                                        count: String(filteredData.length),
-                                    },
+                                    count: String(filteredData.length),
                                 })}
                             </p>
                         </div>

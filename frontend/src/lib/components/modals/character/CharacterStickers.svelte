@@ -1,6 +1,7 @@
 <script lang="ts">
     import { t } from "$root/i18n";
     import type { Character, Sticker } from "$types/character";
+    import type { StickerGenerationProgress } from "$types/sticker";
     import {
         Check,
         CheckCircle,
@@ -14,12 +15,12 @@
     } from "lucide-svelte";
     import { get } from "svelte/store";
 
+    import { type StickerProgress } from "../../../services/stickerManager";
     import { editingCharacter } from "../../../stores/character";
     import { stickerManager } from "../../../stores/services";
     import { settings } from "../../../stores/settings";
     import StickerPreviewModal from "../sticker/StickerPreviewModal.svelte";
     import StickerProgressModal from "../sticker/StickerProgressModal.svelte";
-    import type { StickerGenerationProgress } from "$types/sticker";
 
     export let stickers: Sticker[] = [];
 
@@ -245,27 +246,47 @@
             isVisible: true,
             status: "generating",
             currentIndex: 0,
-            totalCount: get(settings).naiSettings.naiGenerationList?.length || 0,
+            totalCount:
+                get(settings).naiSettings.naiGenerationList?.length || 0,
             currentEmotion: "",
             error: undefined,
             emotions: get(settings).naiSettings.naiGenerationList || [],
             generatedStickers: [],
-            character: get(editingCharacter) || undefined
+            character: get(editingCharacter) || undefined,
         };
 
         const char = get(editingCharacter);
         if (!char) return;
 
         const sm = get(stickerManager);
-        if (sm && typeof sm.generateBasicStickerSet === 'function') {
-            await sm.generateBasicStickerSet(
-                char as Character,
-                (progress: Partial<StickerGenerationProgress>) => {
+        if (sm && typeof sm.generateBasicStickerSet === "function") {
+            await sm.generateBasicStickerSet(char as Character, {
+                onProgress: (progress: StickerProgress) => {
                     if (progressData) {
-                        progressData = { ...progressData, ...progress };
+                        // Map StickerProgress to StickerGenerationProgress partial update
+                        // Map 'processing' status to 'generating' for compatibility
+                        const mappedStatus: StickerGenerationProgress["status"] =
+                            progress.status === "processing"
+                                ? "generating"
+                                : progress.status;
+                        const update: Partial<StickerGenerationProgress> = {
+                            currentIndex: progress.current,
+                            totalCount: progress.total,
+                            currentEmotion: progress.emotion,
+                            status: mappedStatus,
+                            error: progress.error,
+                        };
+                        if (progress.sticker) {
+                            // @ts-ignore: Assuming generatedStickers exists on StickerGenerationProgress
+                            update.generatedStickers = [
+                                ...(progressData.generatedStickers || []),
+                                progress.sticker,
+                            ];
+                        }
+                        progressData = { ...progressData, ...update };
                     }
-                }
-            );
+                },
+            });
         }
     }
 </script>
@@ -281,7 +302,10 @@
         <div
             class="flex items-center justify-between mb-3 text-xs text-gray-400"
         >
-            <span>{t("mainChat.stickerCount", { count: String(stickers.length) })}</span
+            <span
+                >{t("mainChat.stickerCount", {
+                    count: String(stickers.length),
+                })}</span
             >
             <span>{t("characterModal.totalSize")} {calculateSize()}</span>
         </div>
@@ -474,7 +498,7 @@
     on:close={() => (showProgressModal = false)}
     on:cancel={() => {
         const sm = get(stickerManager);
-        if (sm && typeof sm.cancelGeneration === 'function') {
+        if (sm && typeof sm.cancelGeneration === "function") {
             sm.cancelGeneration();
         }
     }}
@@ -482,7 +506,6 @@
 <StickerPreviewModal
     isOpen={showPreviewModal}
     sticker={previewSticker}
-    index={previewIndex}
     on:close={() => (showPreviewModal = false)}
     on:save={handleSaveSticker}
     on:delete={handleDeleteSticker}

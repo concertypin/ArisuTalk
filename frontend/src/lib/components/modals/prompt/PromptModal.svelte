@@ -12,7 +12,15 @@
 
     type TabType = "prompts" | "hooks";
 
-    let promptData: PromptStorageType = {};
+    let promptData: PromptStorageType = {
+        mainChat: "",
+        characterSheet: "",
+        profileCreation: "",
+        snsForce: "",
+        naiSticker: "",
+        groupChat: "",
+        openChat: "",
+    };
     let activeTab: TabType = "prompts";
 
     const promptSections = [

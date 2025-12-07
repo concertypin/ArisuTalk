@@ -1,16 +1,16 @@
 <script lang="ts">
-    import { createEventDispatcher, onMount, onDestroy } from "svelte";
-    import { fade } from "svelte/transition";
-    import { X, Image, Hash, Download, Copy, RefreshCw } from "lucide-svelte";
     import { t } from "$root/i18n";
+    import type { Sticker } from "$types/character";
+    import { Copy, Download, Hash, Image, RefreshCw, X } from "lucide-svelte";
+    import { createEventDispatcher, onDestroy, onMount } from "svelte";
+    import { fade } from "svelte/transition";
+
+    import ActionsTab from "./tabs/ActionsTab.svelte";
     import PreviewTab from "./tabs/PreviewTab.svelte";
     import RerollTab from "./tabs/RerollTab.svelte";
-    import ActionsTab from "./tabs/ActionsTab.svelte";
-    import type { Sticker } from "$types/character";
 
     export let isOpen = false;
     export let sticker: Sticker | null = null;
-    export let index: number | null = null;
 
     let activeTab = "preview";
 

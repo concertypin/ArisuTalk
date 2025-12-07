@@ -14,10 +14,17 @@
 
     const dispatch = createEventDispatcher();
 
-    let provider = $settings.apiProvider || "gemini";
+    // @ts-ignore: provider is used in contexts requiring specific string literals
+    let provider:
+        | "gemini"
+        | "claude"
+        | "openai"
+        | "grok"
+        | "openrouter"
+        | "custom_openai" = ($settings.apiProvider as any) || "gemini";
 
     function handleProviderChange(e: Event) {
-        provider = (e.target as HTMLSelectElement).value;
+        provider = (e.target as HTMLSelectElement).value as typeof provider;
         settings.update((s) => ({ ...s, apiProvider: provider }));
     }
 

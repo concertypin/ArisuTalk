@@ -43,6 +43,11 @@
                 },
             };
 
+            if (!$stickerManager || !$stickerManager.naiClient) {
+                throw new Error(
+                    "Sticker manager or NAI client not initialized"
+                );
+            }
             const result = await $stickerManager.naiClient.generateSticker(
                 testCharacter,
                 "happy",

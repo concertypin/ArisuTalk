@@ -255,7 +255,7 @@
                             {isSecretMode}
                         />
                     {:else if activeTab === "tags"}
-                        <TagsTab character={currentCharacter} {isSecretMode} />
+                        <TagsTab character={currentCharacter} />
                     {/if}
                 </div>
             {:else}

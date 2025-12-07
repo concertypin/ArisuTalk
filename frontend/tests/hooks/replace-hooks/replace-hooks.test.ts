@@ -307,7 +307,7 @@ describe("replaceHooks store", () => {
 
         describe("moveHookUp", () => {
             it("should move a hook up in array order", () => {
-                moveHookUp("inputHooks", hook3.id);
+                moveHookUp("input", hook3.id);
 
                 const store = get(replaceHooks);
                 expect(store.inputHooks[0].id).toBe(hook1.id);
@@ -317,7 +317,7 @@ describe("replaceHooks store", () => {
 
             it("should not move first hook up", () => {
                 const originalOrder = [...get(replaceHooks).inputHooks];
-                moveHookUp("inputHooks", hook1.id);
+                moveHookUp("input", hook1.id);
 
                 const store = get(replaceHooks);
                 expect(store.inputHooks).toEqual(originalOrder);
