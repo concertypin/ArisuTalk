@@ -1,25 +1,26 @@
 <script lang="ts">
     import { t } from "$root/i18n";
+    import {
+        Download,
+        Loader2,
+        RefreshCcw,
+        ShieldAlert,
+        X,
+    } from "lucide-svelte";
     import { onDestroy } from "svelte";
     import { fade } from "svelte/transition";
+
+    import { logUserFlowEvent } from "../../../analytics/userFlow";
+    import type { PhonebookEntrySummary } from "../../../services/phonebookService";
     import { auth } from "../../../stores/auth";
     import type { AuthState } from "../../../stores/auth";
     import { phonebookImportResult } from "../../../stores/character";
+    import { experimentalTracingOptIn } from "../../../stores/settings";
     import {
+        type PhonebookAccessState,
         isPhonebookModalVisible,
         phonebookAccessState,
-        type PhonebookAccessState,
     } from "../../../stores/ui";
-    import { experimentalTracingOptIn } from "../../../stores/settings";
-    import type { PhonebookEntrySummary } from "../../../services/phonebookService";
-    import { logUserFlowEvent } from "../../../analytics/userFlow";
-    import {
-        X,
-        Download,
-        RefreshCcw,
-        ShieldAlert,
-        Loader2,
-    } from "lucide-svelte";
 
     export let isOpen = false;
 
@@ -78,9 +79,7 @@
 
     const ensureService = async () => {
         if (!serviceModule) {
-            serviceModule = await import(
-                "../../../services/phonebookService.ts"
-            );
+            serviceModule = await import("$lib/services/phonebookService");
         }
         return serviceModule;
     };

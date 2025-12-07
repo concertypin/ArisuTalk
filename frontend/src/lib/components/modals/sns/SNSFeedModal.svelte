@@ -1,24 +1,25 @@
 <script lang="ts">
     import { t } from "$root/i18n";
-    import { createEventDispatcher, onMount, onDestroy } from "svelte";
-    import { get } from "svelte/store";
-    import { fade } from "svelte/transition";
+    import type { Character } from "$types/character";
     import {
-        X,
-        Plus,
+        Hash,
+        Image,
         Instagram,
         Lock,
+        Plus,
         ShieldAlert,
-        Image,
-        Hash,
+        X,
     } from "lucide-svelte";
-    import { characters, characterStateStore } from "../../../stores/character";
-    import { isSNSPostModalVisible, editingSNSPost } from "../../../stores/ui";
+    import { createEventDispatcher, onDestroy, onMount } from "svelte";
+    import { get } from "svelte/store";
+    import { fade } from "svelte/transition";
+
+    import { characterStateStore, characters } from "../../../stores/character";
+    import { editingSNSPost, isSNSPostModalVisible } from "../../../stores/ui";
     import { checkSNSAccess, requirements } from "../../../utils/sns";
     import PostsTab from "./tabs/PostsTab.svelte";
     import SecretsTab from "./tabs/SecretsTab.svelte";
     import TagsTab from "./tabs/TagsTab.svelte";
-    import type { Character } from "$types/character";
 
     export let isOpen = false;
     export let character: Character | null = null;
@@ -274,24 +275,31 @@
                         <div class="text-xs text-red-400 space-y-1">
                             <div>
                                 {t("sns.requiresAffection", {
-                                    level: requirements.private.affection * 100,
+                                    level: String(
+                                        requirements.private.affection * 100
+                                    ),
                                 })}
                             </div>
                             <div>
                                 {t("sns.requiresIntimacy", {
-                                    level: requirements.private.intimacy * 100,
+                                    level: String(
+                                        requirements.private.intimacy * 100
+                                    ),
                                 })}
                             </div>
                             <div>
                                 {t("sns.requiresTrust", {
-                                    level: requirements.private.trust * 100,
+                                    level: String(
+                                        requirements.private.trust * 100
+                                    ),
                                 })}
                             </div>
                             <div>
                                 {t("sns.requiresRomance", {
-                                    level:
+                                    level: String(
                                         requirements.private.romantic_interest *
-                                        100,
+                                            100
+                                    ),
                                 })}
                             </div>
                         </div>

@@ -1,21 +1,22 @@
 <script lang="ts">
-    import { t, getLanguage, setLanguage } from "$root/i18n";
-    import { settings } from "../../../../stores/settings";
+    import { getLanguage, setLanguage, t } from "$root/i18n";
     import {
-        Type,
-        Info,
-        Globe,
-        Palette,
-        Moon,
         Clock,
+        Globe,
+        Info,
+        Moon,
+        Palette,
+        Type,
         Zap,
     } from "lucide-svelte";
 
+    import { settings } from "../../../../stores/settings";
+
     let currentLanguage = getLanguage();
 
-    function handleLanguageChange(lang) {
+    function handleLanguageChange(lang: string) {
         if (currentLanguage === lang) return;
-        setLanguage(lang);
+        setLanguage(lang as "en" | "ko");
         alert(t("system.languageChangeMessage"));
         setTimeout(() => window.location.reload(), 300);
     }

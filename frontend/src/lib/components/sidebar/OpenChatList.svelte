@@ -1,28 +1,30 @@
 <script lang="ts">
     import { t } from "$root/i18n";
+    import { formatTimestamp } from "$root/utils";
     import {
+        type ChatRoom,
+        messages,
         openChats,
         selectedChatId,
-        messages,
         unreadCounts,
-    } from "../../stores/chat";
+    } from "$stores/chat";
     import {
-        isCreateOpenChatModalVisible,
-        isConfirmationModalVisible,
         confirmationModalData,
-    } from "../../stores/ui";
+        isConfirmationModalVisible,
+        isCreateOpenChatModalVisible,
+    } from "$stores/ui";
     import { Globe, Plus, Trash2 } from "lucide-svelte";
-    import { formatTimestamp } from "../../../utils";
+    import { stopPropagation } from "svelte/legacy";
 
     function openCreateOpenChatModal() {
         isCreateOpenChatModalVisible.set(true);
     }
 
-    function selectChat(chatId) {
+    function selectChat(chatId: string) {
         selectedChatId.set(chatId);
     }
 
-    function deleteOpenChat(chat) {
+    function deleteOpenChat(chat: ChatRoom) {
         confirmationModalData.set({
             title: t("openChat.deleteOpenChatTitle"),
             message: t("openChat.deleteOpenChatConfirm", { name: chat.name }),
@@ -47,7 +49,7 @@
             </h3>
         </div>
         <button
-            on:click={openCreateOpenChatModal}
+            onclick={openCreateOpenChatModal}
             class="opacity-0 group-hover:opacity-100 transition-opacity p-1 bg-gray-700 hover:bg-green-600 rounded text-gray-300 hover:text-white transition-colors"
             title={t("openChat.newOpenChat")}
         >
@@ -60,8 +62,8 @@
             $messages[chat.id]?.[$messages[chat.id]?.length - 1]}
         {@const unreadCount = $unreadCounts[chat.id] || 0}
         <div
-            on:click={() => selectChat(chat.id)}
-            on:keydown={(e) => {
+            onclick={() => selectChat(chat.id)}
+            onkeydown={(e) => {
                 if (e.key === "Enter" || e.key === " ") selectChat(chat.id);
             }}
             role="button"
@@ -77,7 +79,7 @@
                     : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-200 flex space-x-1 z-20"
             >
                 <button
-                    on:click|stopPropagation={() => deleteOpenChat(chat)}
+                    onclick={stopPropagation(() => deleteOpenChat(chat))}
                     class="p-2 bg-gray-700 hover:bg-red-600 rounded text-gray-300 hover:text-white transition-colors"
                     title={t("common.delete")}
                 >
@@ -112,7 +114,9 @@
                     </div>
                     <p class="text-sm text-gray-400 truncate">
                         {t("openChat.participantsConnected", {
-                            count: (chat.currentParticipants || []).length,
+                            count: String(
+                                (chat.currentParticipants || []).length
+                            ),
                         })}
                     </p>
                     <p class="text-xs text-gray-500 truncate mt-1">

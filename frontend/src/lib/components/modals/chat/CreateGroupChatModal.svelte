@@ -10,7 +10,7 @@
     import Avatar from "../../Avatar.svelte";
 
     let groupName = "";
-    let selectedParticipantIds = [];
+    let selectedParticipantIds: string[] = [];
 
     function closeModal() {
         isCreateGroupChatModalVisible.set(false);

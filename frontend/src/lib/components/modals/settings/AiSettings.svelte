@@ -1,13 +1,14 @@
 <script lang="ts">
     import { t } from "$root/i18n";
-    import { createEventDispatcher } from "svelte";
     import {
         ArrowLeft,
+        Edit,
+        FilePenLine,
         Globe,
         Settings,
-        FilePenLine,
-        Edit,
     } from "lucide-svelte";
+    import { createEventDispatcher } from "svelte";
+
     import { settings } from "../../../stores/settings";
     import ProviderSettings from "../../settings/ProviderSettings.svelte";
 
@@ -15,13 +16,13 @@
 
     let provider = $settings.apiProvider || "gemini";
 
-    function handleProviderChange(e) {
-        provider = e.target.value;
+    function handleProviderChange(e: Event) {
+        provider = (e.target as HTMLSelectElement).value;
         settings.update((s) => ({ ...s, apiProvider: provider }));
     }
 
-    function getProviderDisplayName(p) {
-        const displayNames = {
+    function getProviderDisplayName(p: string) {
+        const displayNames: Record<string, string> = {
             gemini: "Google Gemini",
             claude: "Anthropic Claude",
             openai: "OpenAI ChatGPT",

@@ -264,7 +264,7 @@
         const character = get(chatSelectionModalData).character;
         if (character) {
             const roomsBefore = totalChatRoomCount();
-            const newChatRoomId = createNewChatRoom(character.id);
+            const newChatRoomId = createNewChatRoom(String(character.id));
             selectedChatId.set(newChatRoomId);
             isChatSelectionModalVisible.set(false);
 
@@ -303,7 +303,7 @@
             });
         } else {
             const roomsBefore = totalChatRoomCount();
-            const newChatRoomId = createNewChatRoom(character.id);
+            const newChatRoomId = createNewChatRoom(String(character.id));
             selectedChatId.set(newChatRoomId);
             void logUserFlowEvent("chat_created", {
                 device_type: deviceType,

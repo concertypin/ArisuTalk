@@ -1,35 +1,36 @@
 <script lang="ts">
     import { t } from "$root/i18n";
+    import { formatTimestamp } from "$root/utils";
     import {
-        groupChats,
-        selectedChatId,
-        messages,
-        unreadCounts,
+        type GroupChat,
         editingGroupChat,
-    } from "../../stores/chat";
+        groupChats,
+        messages,
+        selectedChatId,
+        unreadCounts,
+    } from "$stores/chat";
     import {
+        confirmationModalData,
+        isConfirmationModalVisible,
         isCreateGroupChatModalVisible,
         isEditGroupChatModalVisible,
-        isConfirmationModalVisible,
-        confirmationModalData,
-    } from "../../stores/ui";
-    import { Users, Plus, Edit3, Trash2 } from "lucide-svelte";
-    import { formatTimestamp } from "../../../utils";
+    } from "$stores/ui";
+    import { Edit3, Plus, Trash2, Users } from "lucide-svelte";
 
     function openCreateGroupChatModal() {
         isCreateGroupChatModalVisible.set(true);
     }
 
-    function selectChat(chatId) {
+    function selectChat(chatId: string) {
         selectedChatId.set(chatId);
     }
 
-    function editGroupChat(chat) {
+    function editGroupChat(chat: GroupChat) {
         editingGroupChat.set(chat);
         isEditGroupChatModalVisible.set(true);
     }
 
-    function deleteGroupChat(chat) {
+    function deleteGroupChat(chat: GroupChat) {
         confirmationModalData.set({
             title: t("groupChat.deleteGroupChat"),
             message: t("groupChat.deleteGroupChatConfirm", { name: chat.name }),

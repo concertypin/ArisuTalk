@@ -56,7 +56,8 @@
             isMasterPasswordModalVisible.set(false);
             alert(t("security.encryptionEnabledSuccess"));
         } catch (error) {
-            errorMessage = error.message;
+            errorMessage =
+                error instanceof Error ? error.message : String(error);
         }
     }
 

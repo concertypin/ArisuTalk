@@ -1,5 +1,6 @@
 <script lang="ts">
     import { t } from "$root/i18n";
+    import type { ChatRoom } from "$types/chat";
     import { Globe, Info, Users, X } from "lucide-svelte";
     import { onDestroy, onMount } from "svelte";
     import { get } from "svelte/store";
@@ -23,12 +24,14 @@
         }
 
         const newChatId = `open_${Date.now()}`;
-        const newOpenChat = {
+        const newOpenChat: ChatRoom = {
             id: newChatId,
             name: chatName,
             type: "open",
+            characterId: "",
             createdAt: Date.now(),
-            currentParticipants: [], // Initially empty, managed by openChatService
+            lastActivity: Date.now(),
+            currentParticipants: [],
             participantHistory: [],
         };
 
@@ -130,7 +133,7 @@
                             <Users class="w-4 h-4 text-green-400" />
                             <span class="text-xs text-green-300"
                                 >{t("openChat.availableCharacters", {
-                                    count: $characters.length,
+                                    count: String($characters.length),
                                 })}</span
                             >
                         </div>

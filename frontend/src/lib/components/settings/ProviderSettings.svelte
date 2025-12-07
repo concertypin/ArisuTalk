@@ -1,16 +1,17 @@
 <script lang="ts">
     import { t } from "$root/i18n";
-    import { settings } from "../../stores/settings";
-    import { PROVIDERS, PROVIDER_MODELS } from "../../../constants/providers";
     import {
+        ChevronDown,
+        Cpu,
         Key,
         Link,
-        Cpu,
-        Settings as SettingsIcon,
         Plus,
+        Settings as SettingsIcon,
         Trash2,
-        ChevronDown,
     } from "lucide-svelte";
+
+    import { PROVIDERS, PROVIDER_MODELS } from "../../../constants/providers";
+    import { settings } from "../../stores/settings";
 
     export let provider: string;
 
@@ -22,7 +23,10 @@
     const models = PROVIDER_MODELS[provider] || [];
     $: customModels = config.customModels || [];
 
-    function handleConfigChange<T extends string | number | string[]>(key: string, value: T) {
+    function handleConfigChange<T extends string | number | string[]>(
+        key: string,
+        value: T
+    ) {
         const newConfig = { ...$settings.apiConfigs[provider], [key]: value };
         const newApiConfigs = {
             ...$settings.apiConfigs,
@@ -43,7 +47,7 @@
 
     function removeCustomModel(index: number) {
         const newCustomModels = (config.customModels || []).filter(
-            (_, i) => i !== index
+            (_: string, i: number) => i !== index
         );
         handleConfigChange("customModels", newCustomModels);
     }
@@ -62,7 +66,11 @@
             id="api-key-{provider}"
             type="password"
             value={config.apiKey || ""}
-            on:input={(e) => handleConfigChange("apiKey", (e.target as HTMLInputElement).value)}
+            on:input={(e) =>
+                handleConfigChange(
+                    "apiKey",
+                    (e.target as HTMLInputElement).value
+                )}
             placeholder={t("settings.apiKeyPlaceholder")}
             class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm"
         />
@@ -80,7 +88,11 @@
                 id="base-url-{provider}"
                 type="text"
                 value={config.baseUrl || ""}
-                on:input={(e) => handleConfigChange("baseUrl", (e.target as HTMLInputElement).value)}
+                on:input={(e) =>
+                    handleConfigChange(
+                        "baseUrl",
+                        (e.target as HTMLInputElement).value
+                    )}
                 placeholder="https://api.openai.com/v1"
                 class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm"
             />
@@ -266,7 +278,9 @@
                             on:input={(e) =>
                                 handleConfigChange(
                                     "profileMaxTokens",
-                                    parseInt((e.target as HTMLInputElement).value)
+                                    parseInt(
+                                        (e.target as HTMLInputElement).value
+                                    )
                                 )}
                             class="w-full"
                         />
@@ -297,7 +311,9 @@
                             on:input={(e) =>
                                 handleConfigChange(
                                     "profileTemperature",
-                                    parseFloat((e.target as HTMLInputElement).value)
+                                    parseFloat(
+                                        (e.target as HTMLInputElement).value
+                                    )
                                 )}
                             class="w-full"
                         />

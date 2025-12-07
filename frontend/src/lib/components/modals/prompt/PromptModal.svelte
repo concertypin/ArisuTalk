@@ -158,7 +158,7 @@
                         <PromptSection
                             title={section.title}
                             description={section.description}
-                            bind:value={promptData[section.key]}
+                            value={promptData[section.key]}
                         />
                     {/each}
                 {:else if activeTab === "hooks"}

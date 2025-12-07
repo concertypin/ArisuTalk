@@ -1,25 +1,26 @@
 <script lang="ts">
-    import { t, getLanguage, setLanguage } from "$root/i18n";
-    import { createEventDispatcher } from "svelte";
+    import { getLanguage, setLanguage, t } from "$root/i18n";
     import {
         ArrowLeft,
-        Type,
-        Info,
-        Globe,
-        Palette,
-        Moon,
-        Clock,
-        Zap,
         Check,
+        Clock,
+        Globe,
+        Info,
+        Moon,
+        Palette,
+        Type,
+        Zap,
     } from "lucide-svelte";
+    import { createEventDispatcher } from "svelte";
+
     import { settings } from "../../../stores/settings";
 
     const dispatch = createEventDispatcher();
     let currentLanguage = getLanguage();
 
-    function handleLanguageChange(lang) {
+    function handleLanguageChange(lang: string) {
         if (currentLanguage === lang) return;
-        setLanguage(lang);
+        setLanguage(lang as "en" | "ko");
         alert(t("system.languageChangeMessage"));
         setTimeout(() => window.location.reload(), 300);
     }

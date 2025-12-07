@@ -1,24 +1,25 @@
 <script lang="ts">
     import { t } from "$root/i18n";
-    import { settings } from "../../../../stores/settings";
+    import {
+        Activity,
+        AlertTriangle,
+        BarChart3,
+        Bug,
+        Clock,
+        FlaskConical,
+        Gauge,
+        Info,
+        Link,
+        Trash2,
+    } from "lucide-svelte";
+
+    import { clearDebugLogs } from "../../../../services/logService";
     import { debugLogs } from "../../../../stores/logs";
+    import { settings } from "../../../../stores/settings";
     import {
         isDebugLogModalVisible,
         isMasterPasswordModalVisible,
     } from "../../../../stores/ui";
-    import { clearDebugLogs } from "../../../../services/logService";
-    import {
-        Bug,
-        Activity,
-        BarChart3,
-        Trash2,
-        Gauge,
-        Clock,
-        FlaskConical,
-        AlertTriangle,
-        Info,
-        Link,
-    } from "lucide-svelte";
 
     function handleClearLogs() {
         if (
@@ -33,14 +34,18 @@
         }
     }
 
-    function handleEnableDebugLogs(e) {
-        settings.update((s) => ({ ...s, enableDebugLogs: e.target.checked }));
+    function handleEnableDebugLogs(e: Event) {
+        settings.update((s) => ({
+            ...s,
+            enableDebugLogs: (e.target as HTMLInputElement).checked,
+        }));
     }
 
-    function handleExperimentalTracingToggle(event) {
+    function handleExperimentalTracingToggle(event: Event) {
         settings.update((current) => ({
             ...current,
-            experimentalTracingEnabled: event.target.checked,
+            experimentalTracingEnabled: (event.target as HTMLInputElement)
+                .checked,
         }));
     }
 </script>

@@ -1,11 +1,12 @@
 <script lang="ts">
-    import { MessageCircle, Wrench, RefreshCw } from "lucide-svelte";
     import { t } from "$root/i18n";
+    import { MessageCircle, RefreshCw, Wrench } from "lucide-svelte";
+    import { get } from "svelte/store";
+
     import {
         isResetOnRefreshEnabled,
         toggleResetOnRefresh,
     } from "../stores/debugSettings";
-    import { get } from "svelte/store";
 
     let isEnabled = get(isResetOnRefreshEnabled);
 
@@ -36,10 +37,7 @@
             <!-- 개발 서버에서는 항상 ResetAtRefresh UI 표시 -->
             <div class="mt-8 flex items-center justify-center">
                 <span class="mr-3 text-white"
-                    >{t(
-                        "debug.quickPanel.resetOnRefresh.title",
-                        "Reset on refresh"
-                    )}</span
+                    >{t("debug.quickPanel.resetOnRefresh.title")}</span
                 >
                 <label class="switch">
                     <input
