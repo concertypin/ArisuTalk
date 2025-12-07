@@ -1,28 +1,29 @@
 <script lang="ts">
-    import { onMount, onDestroy } from "svelte";
     import { t } from "$root/i18n";
-    import { isDesktopSettingsModalVisible } from "../../../stores/ui";
     import {
-        Settings,
-        X,
-        Globe,
-        Palette,
-        User,
-        HardDrive,
         Cog,
-        Info,
+        Globe,
+        HardDrive,
         Image,
+        Info,
+        Palette,
+        Settings,
         Shield,
+        User,
+        X,
     } from "lucide-svelte";
-    import { isDevModeActive } from "../../../stores/ui";
+    import { onDestroy, onMount } from "svelte";
     import { fade } from "svelte/transition";
+
+    import { isDesktopSettingsModalVisible } from "../../../stores/ui";
+    import { isDevModeActive } from "../../../stores/ui";
     import APISettingsPanel from "./panels/APISettingsPanel.svelte";
     import AdvancedSettingsPanel from "./panels/AdvancedSettingsPanel.svelte";
     import AppearanceSettingsPanel from "./panels/AppearanceSettingsPanel.svelte";
     import CharacterDefaultsPanel from "./panels/CharacterDefaultsPanel.svelte";
     import DataManagementPanel from "./panels/DataManagementPanel.svelte";
-    import NAISettingsPanel from "./panels/NAISettingsPanel.svelte";
     import DebugSettingsPanel from "./panels/DebugSettingsPanel.svelte";
+    import NAISettingsPanel from "./panels/NAISettingsPanel.svelte";
 
     let activePanel = "api"; // Default panel
 
@@ -113,7 +114,7 @@
         handleClose();
     }
 
-    function handleKeydown(event) {
+    function handleKeydown(event: KeyboardEvent) {
         if (event.key === "Escape") {
             handleClose();
         }

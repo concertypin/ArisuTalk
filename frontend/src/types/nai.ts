@@ -3,7 +3,7 @@ export interface NAIGenerationItem {
     emotion: string;
     action: string;
     titleKey?: string;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export interface NAISettings {
@@ -31,5 +31,5 @@ export interface NAISettings {
     legacy?: boolean;
     add_original_image?: boolean;
     naiGenerationList?: NAIGenerationItem[];
-    [key: string]: any;
+    [key: string]: unknown;
 }

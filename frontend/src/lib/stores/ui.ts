@@ -40,7 +40,7 @@ export const phonebookAccessState = writable<PhonebookAccessState>("unknown");
 
 // Chat Selection Modal
 export const isChatSelectionModalVisible = writable(false);
-export const chatSelectionModalData = writable({});
+export const chatSelectionModalData = writable<{ character?: Character }>({});
 
 // UI component states
 export const isMobile = writable(window.innerWidth < 768);
@@ -52,10 +52,10 @@ export const isUserStickerPanelVisible = writable(false);
 
 // Image Zoom Modal
 export const isImageZoomModalVisible = writable(false);
-export const imageZoomModalData = writable({ imageUrl: null, title: null });
+export const imageZoomModalData = writable<{ imageUrl: string | null; title: string | null }>({ imageUrl: null, title: null });
 
 // Expanded images/stickers in chat
-export const expandedImages = writable(new Set());
+export const expandedImages = writable<Set<number | string>>(new Set());
 
 // Desktop UI states
 export const desktopSettings = writable({

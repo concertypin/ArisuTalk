@@ -15,8 +15,8 @@ import {
 import {
     characters,
     characterStateStore,
-    type CharacterState,
 } from "$stores/character";
+import type { CharacterState } from "$types/character";
 import { settings } from "$stores/settings";
 import { APIManager } from "$lib/api/apiManager";
 import { getPrompt, getAllPrompts } from "$root/prompts/promptManager";
@@ -30,7 +30,7 @@ import {
     applyRequestHooks,
 } from "./replaceHookService";
 const { replace } = await import("$lib/utils/worker/replace.js");
-import type { Message, MessagePart, ChatRoom } from "$types/chat";
+import type { Message, MessagePart, ChatRoom, GroupChatSettings } from "$types/chat";
 import type { Character, SNSPost } from "$types/character";
 import type { APIConfig } from "$root/defaults";
 
@@ -318,10 +318,12 @@ async function callApiAndHandleResponse(
                 const charIndex = chars.findIndex((c) => c.id === character.id);
                 if (charIndex !== -1) {
                     const newChars = [...chars];
-                    newChars[charIndex] = processAutoPost(
-                        newChars[charIndex] as Character,
-                        response.autoPost
-                    );
+                    if (response.autoPost) {
+                         newChars[charIndex] = processAutoPost(
+                            newChars[charIndex] as Character,
+                            response.autoPost
+                        );
+                    }
                     return newChars;
                 }
                 return chars;
@@ -397,6 +399,8 @@ export async function sendMessage(content: string, type: string = "text", payloa
     currentMessage.set("");
 
     const chatRoom = getCurrentChatRoom(chatId);
+    if (!chatRoom) return;
+
     const history = get(messages)[chatId] || [];
 
     if (isGroupChat(chatId)) {
@@ -406,8 +410,8 @@ export async function sendMessage(content: string, type: string = "text", payloa
             return;
         }
 
-        // Get group chat settings
-        const groupSettings = chatRoom.settings || {
+        // Get group chat settings with strict typing
+        const groupSettings = (chatRoom.settings as unknown as GroupChatSettings) || {
             responseFrequency: 0.5,
             maxRespondingCharacters: 1,
             responseDelay: 3000,
@@ -415,22 +419,22 @@ export async function sendMessage(content: string, type: string = "text", payloa
         };
 
         // Check overall response frequency
-        if (Math.random() > groupSettings.responseFrequency) {
+        if (Math.random() > (groupSettings.responseFrequency ?? 0.5)) {
             isWaitingForResponse.set(false);
             return;
         }
 
         // Filter active participants based on individual settings
         const activeParticipants = participants.filter((participantId: string) => {
-            const settings = groupSettings.participantSettings[
+            const participantSettings = groupSettings.participantSettings?.[
                 participantId
             ] || {
                 isActive: true,
                 responseProbability: 0.9,
             };
             return (
-                settings.isActive &&
-                Math.random() < settings.responseProbability
+                participantSettings.isActive &&
+                Math.random() < participantSettings.responseProbability
             );
         });
 
@@ -441,7 +445,7 @@ export async function sendMessage(content: string, type: string = "text", payloa
 
         // Limit number of responding characters
         const maxResponders = Math.min(
-            groupSettings.maxRespondingCharacters,
+            groupSettings.maxRespondingCharacters ?? 1,
             activeParticipants.length
         );
         const shuffledParticipants = [...activeParticipants].sort(
@@ -462,7 +466,7 @@ export async function sendMessage(content: string, type: string = "text", payloa
             // Add delay between responses if not the first one
             if (i > 0) {
                 await new Promise((resolve) =>
-                    setTimeout(resolve, groupSettings.responseDelay)
+                    setTimeout(resolve, groupSettings.responseDelay ?? 3000)
                 );
             }
 
@@ -479,7 +483,7 @@ export async function sendMessage(content: string, type: string = "text", payloa
         isWaitingForResponse.set(false);
         typingCharacterId.set(null);
     } else if (isOpenChat(chatId)) {
-        const participants = chatRoom.currentParticipants || [];
+        const participants = (chatRoom.currentParticipants || []) as string[];
         if (participants.length === 0) {
             isWaitingForResponse.set(false);
             return;
@@ -835,10 +839,12 @@ export async function generateSnsPost(messageId: number | string) {
                 const charIndex = chars.findIndex((c) => c.id === character.id);
                 if (charIndex !== -1) {
                     const newChars = [...chars];
-                    newChars[charIndex] = processAutoPost(
-                        newChars[charIndex] as Character,
-                        parsedResponse.autoPost
-                    );
+                    if (parsedResponse.autoPost) {
+                         newChars[charIndex] = processAutoPost(
+                            newChars[charIndex] as Character,
+                            parsedResponse.autoPost
+                        );
+                    }
                     return newChars;
                 }
                 return chars;

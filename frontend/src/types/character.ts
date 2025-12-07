@@ -43,5 +43,21 @@ export type Character = {
     [key: string]: any;
 };
 
+export interface CharacterState {
+    mood: number; // 0.0 ~ 1.0
+    socialBattery: number; // 0.0 ~ 1.0
+    energy: number; // 0.0 ~ 1.0
+    personality: {
+        extroversion: number; // 0.0 ~ 1.0
+    };
+    currentRooms: string[];
+    lastActivity: number;
+    affection?: number; // 0.0 ~ 1.0
+    intimacy?: number; // 0.0 ~ 1.0
+    trust?: number; // 0.0 ~ 1.0
+    romantic_interest?: number; // 0.0 ~ 1.0
+    messageCount?: number;
+}
+
 export * from "./sticker";
 export * from "./sns";

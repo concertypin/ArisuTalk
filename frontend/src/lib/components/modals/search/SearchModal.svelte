@@ -1,12 +1,13 @@
 <script lang="ts">
     import { t } from "$root/i18n";
-    import { createEventDispatcher, beforeUpdate, afterUpdate } from "svelte";
-    import { fade } from "svelte/transition";
-    import { Search, X, SearchX } from "lucide-svelte";
-    import { searchQuery } from "../../../stores/chat";
-    import { characters } from "../../../stores/character";
-    import CharacterItem from "../../CharacterItem.svelte";
     import type { Character } from "$types/character";
+    import { Search, SearchX, X } from "lucide-svelte";
+    import { afterUpdate, beforeUpdate, createEventDispatcher } from "svelte";
+    import { fade } from "svelte/transition";
+
+    import { characters } from "../../../stores/character";
+    import { searchQuery } from "../../../stores/chat";
+    import CharacterItem from "../../CharacterItem.svelte";
 
     export let isOpen = false;
 
@@ -74,7 +75,7 @@
         dispatch("close");
     }
 
-    function handleSelect(event) {
+    function handleSelect(event: CustomEvent) {
         dispatch("select", event.detail);
         closeModal();
     }

@@ -381,18 +381,21 @@
         characters.update((chars) => {
             const charIndex = chars.findIndex((c) => c.id === post.characterId);
             if (charIndex !== -1) {
+                if (!chars[charIndex].snsPosts) {
+                    chars[charIndex].snsPosts = [];
+                }
                 if (post.isNew) {
-                    chars[charIndex].snsPosts.push({
+                    chars[charIndex].snsPosts!.push({
                         ...post,
                         id: Date.now(),
                         isNew: false,
                     });
                 } else {
-                    const postIndex = chars[charIndex].snsPosts.findIndex(
+                    const postIndex = chars[charIndex].snsPosts!.findIndex(
                         (p) => p.id === post.id
                     );
                     if (postIndex !== -1) {
-                        chars[charIndex].snsPosts[postIndex] = post;
+                        chars[charIndex].snsPosts![postIndex] = post;
                     }
                 }
             }
@@ -404,7 +407,7 @@
         if (typeof document !== "undefined" && $settings.fontScale) {
             document.documentElement.style.setProperty(
                 "--font-scale",
-                $settings.fontScale
+                String($settings.fontScale)
             );
         }
     }

@@ -1,6 +1,7 @@
 <script lang="ts">
     import { t } from "$root/i18n";
-    import { Sparkles, TestTube, Loader } from "lucide-svelte";
+    import { Loader, Sparkles, TestTube } from "lucide-svelte";
+
     import { stickerManager } from "../../../stores/services";
     import { settings } from "../../../stores/settings";
     import ImageResultModal from "../image/ImageResultModal.svelte";
@@ -35,6 +36,8 @@
                 id: "test",
                 name: "테스트",
                 appearance: appearance,
+                prompt: "",
+                avatar: null,
                 naiSettings: {
                     qualityPrompt: naiQualityPrompt,
                 },
@@ -57,7 +60,11 @@
             }
         } catch (error) {
             console.error("[Test] 외모 프롬프트 테스트 실패:", error);
-            alert(`외모 프롬프트 테스트 실패: ${error.message}`);
+            if (error instanceof Error) {
+                alert(`외모 프롬프트 테스트 실패: ${error.message}`);
+            } else {
+                alert(`외모 프롬프트 테스트 실패: ${String(error)}`);
+            }
         } finally {
             isTesting = false;
         }

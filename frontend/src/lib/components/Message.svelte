@@ -1,10 +1,13 @@
 <script lang="ts">
     import { t } from "$root/i18n";
+    import type { DisplayCharacter, Message } from "$types/chat";
+    import { createEventDispatcher } from "svelte";
+
+    import { imageZoomModalData, isImageZoomModalVisible } from "../stores/ui";
     import Avatar from "./Avatar.svelte";
-    import { isImageZoomModalVisible, imageZoomModalData } from "../stores/ui";
-    import type { Message } from "$types/chat";
 
     export let message: Message;
+    export let senderCharacter: DisplayCharacter | null = null;
     export let showSenderInfo = false;
 
     function openImageZoom() {
@@ -15,7 +18,7 @@
                     : message.imageUrl;
             const title =
                 message.type === "sticker"
-                    ? message.sticker?.stickerName
+                    ? message.sticker?.name
                     : t("mainChat.uploadPhoto");
             if (imageUrl) {
                 imageZoomModalData.set({ imageUrl, title: title || "" });
@@ -26,13 +29,13 @@
 </script>
 
 <div class="flex items-start gap-3" class:justify-end={message.isMe}>
-    {#if showSenderInfo}
-        <Avatar character={message.sender} size="xs" />
+    {#if showSenderInfo && senderCharacter}
+        <Avatar character={senderCharacter} size="xs" />
     {/if}
     <div class="flex flex-col" class:items-end={message.isMe}>
         {#if showSenderInfo}
             <span class="text-sm text-gray-400 ml-2 mb-1"
-                >{message.sender.name}</span
+                >{senderCharacter ? senderCharacter.name : message.sender}</span
             >
         {/if}
         <div
@@ -47,7 +50,7 @@
                     type="button"
                     class="block text-left"
                     on:click={openImageZoom}
-                    on:keydown={(e) => e.key === 'Enter' && openImageZoom()}
+                    on:keydown={(e) => e.key === "Enter" && openImageZoom()}
                 >
                     <img
                         src={message.imageUrl}
@@ -63,11 +66,11 @@
                     type="button"
                     class="flex flex-col items-center cursor-pointer"
                     on:click={openImageZoom}
-                    on:keydown={(e) => e.key === 'Enter' && openImageZoom()}
+                    on:keydown={(e) => e.key === "Enter" && openImageZoom()}
                 >
                     <img
                         src={message.sticker.data}
-                        alt={message.sticker.stickerName}
+                        alt={message.sticker.name}
                         class="max-w-[120px] h-auto"
                     />
                     {#if message.content}

@@ -55,8 +55,8 @@
         moveHookDown(selectedType, hookId);
     }
 
-    function getHookTypeLabel(type: HookType): string {
-        const labels: Record<HookType, string> = {
+    function getHookTypeLabel(type: ReplaceHookType): string {
+        const labels: Record<ReplaceHookType, string> = {
             input: t("modal.replaceHooks.inputType"),
             output: t("modal.replaceHooks.outputType"),
             request: t("modal.replaceHooks.requestType"),
@@ -65,8 +65,8 @@
         return labels[type];
     }
 
-    function getHookTypeDescription(type: HookType): string {
-        const descriptions: Record<HookType, string> = {
+    function getHookTypeDescription(type: ReplaceHookType): string {
+        const descriptions: Record<ReplaceHookType, string> = {
             input: t("modal.replaceHooks.inputDesc"),
             output: t("modal.replaceHooks.outputDesc"),
             request: t("modal.replaceHooks.requestDesc"),
@@ -98,10 +98,10 @@
                 <button
                     class="type-button"
                     class:active={selectedType === type}
-                    on:click={() => (selectedType = type as HookType)}
+                    on:click={() => (selectedType = type as ReplaceHookType)}
                 >
                     <span class="label"
-                        >{getHookTypeLabel(type as HookType)}</span
+                        >{getHookTypeLabel(type as ReplaceHookType)}</span
                     >
                     <span class="count"
                         >{$replaceHooks[`${type}Hooks`].length}</span

@@ -166,7 +166,7 @@ export class ClaudeClient implements LLMApi {
             const response = await this.client.invoke(messages);
 
             return {
-                messages: [{ content: response.content }],
+                messages: [{ content: String(response.content) }],
                 reactionDelay: 1000,
             };
         } catch (error) {

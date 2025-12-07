@@ -205,11 +205,11 @@
             : [];
 
     $: typingIndicatorInfo =
-        $typingCharacterId && ($typingCharacterId as any).chatId === $selectedChatId
+        $typingCharacterId && $typingCharacterId.chatId === $selectedChatId
             ? $typingCharacterId
             : null;
     $: typingCharacter = typingIndicatorInfo
-        ? $characters.find((c) => c.id === (typingIndicatorInfo as any).characterId)
+        ? $characters.find((c) => c.id === typingIndicatorInfo.characterId)
         : null;
     $: virtualTypingCharacter =
         $virtualStream.isTyping && $virtualStream.chatId === $selectedChatId
@@ -219,7 +219,7 @@
     async function handleSendMessage() {
         let content = messageInput;
         let type = "text";
-        let payload: any = {};
+        let payload: Record<string, unknown> = {};
 
         if ($imageToSend) {
             const imageId = nanoid();

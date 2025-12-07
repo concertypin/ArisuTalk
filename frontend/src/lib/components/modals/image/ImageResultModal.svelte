@@ -1,7 +1,7 @@
 <script lang="ts">
-    import { createEventDispatcher, onMount, onDestroy } from "svelte";
+    import { Info, X } from "lucide-svelte";
+    import { createEventDispatcher, onDestroy, onMount } from "svelte";
     import { fade } from "svelte/transition";
-    import { X, Info } from "lucide-svelte";
 
     export let isOpen = false;
     export let imageUrl = "";
@@ -13,7 +13,7 @@
         dispatch("close");
     }
 
-    function handleKeydown(event) {
+    function handleKeydown(event: KeyboardEvent) {
         if (event.key === "Escape") {
             closeModal();
         }

@@ -123,7 +123,7 @@ export interface APIConfig {
     customModels: string[];
     maxTokens?: number;
     temperature?: number;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export interface APISettings {

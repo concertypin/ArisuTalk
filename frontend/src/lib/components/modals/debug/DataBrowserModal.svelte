@@ -1,24 +1,25 @@
 <script lang="ts">
-    import { onMount, onDestroy } from "svelte";
     import { t } from "$root/i18n";
-    import { isDataBrowserModalVisible } from "../../../stores/ui";
-    import { characters, characterStateStore } from "../../../stores/character";
-    import { chatRooms, groupChats, openChats } from "../../../stores/chat";
-    import { settings } from "../../../stores/settings";
-    import { prompts } from "../../../stores/prompts";
     import {
         Database,
-        X,
-        Search,
-        Filter,
         Download,
+        Filter,
         RefreshCw,
+        Search,
+        X,
     } from "lucide-svelte";
+    import { onDestroy, onMount } from "svelte";
     import { fade } from "svelte/transition";
+
+    import { characterStateStore, characters } from "../../../stores/character";
+    import { chatRooms, groupChats, openChats } from "../../../stores/chat";
+    import { prompts } from "../../../stores/prompts";
+    import { settings } from "../../../stores/settings";
+    import { isDataBrowserModalVisible } from "../../../stores/ui";
 
     let selectedStore = "characters";
     let searchQuery = "";
-    let filteredData = [];
+    let filteredData: any[] = [];
     let isLoading = false;
 
     const stores = [
@@ -41,7 +42,7 @@
         { id: "prompts", name: "Prompts", icon: "📝", data: $prompts },
     ];
 
-    function handleKeydown(event) {
+    function handleKeydown(event: KeyboardEvent) {
         if (event.key === "Escape") {
             isDataBrowserModalVisible.set(false);
         }
@@ -286,7 +287,9 @@
                             <p class="text-sm text-gray-400">
                                 {t("dataBrowser.showingResults", {
                                     defaultValue: "Showing {count} results",
-                                    values: { count: filteredData.length },
+                                    values: {
+                                        count: String(filteredData.length),
+                                    },
                                 })}
                             </p>
                         </div>

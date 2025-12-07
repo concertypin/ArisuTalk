@@ -26,7 +26,7 @@ export type NaiSettings = {
     sm: boolean;
     sm_dyn: boolean;
 
-    characterPrompts: any[];
+    characterPrompts: Record<string, unknown>[];
 
     /**
      * Base64 encoded image for img2img or inpainting

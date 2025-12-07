@@ -9,8 +9,8 @@ import {
     characters,
     characterStateStore,
     userStickers,
-    type CharacterState,
 } from "../stores/character";
+import type { CharacterState } from "$types/character";
 import {
     chatRooms,
     groupChats,

@@ -1,21 +1,22 @@
 <script lang="ts">
-    import { onMount, onDestroy } from "svelte";
     import { t } from "$root/i18n";
-    import { isMasterPasswordModalVisible } from "../../../stores/ui";
     import {
-        validatePassword,
-        generateMasterPassword,
-    } from "../../../utils/crypto";
-    import { secureStorage } from "../../../utils/secureStorage";
-    import {
-        ShieldCheck,
-        Info,
-        Key,
         Check,
         HelpCircle,
+        Info,
+        Key,
         RefreshCw,
+        ShieldCheck,
     } from "lucide-svelte";
+    import { onDestroy, onMount } from "svelte";
     import { fade } from "svelte/transition";
+
+    import { isMasterPasswordModalVisible } from "../../../stores/ui";
+    import {
+        generateMasterPassword,
+        validatePassword,
+    } from "../../../utils/crypto";
+    import { secureStorage } from "../../../utils/secureStorage";
 
     let password = "";
     let confirmPassword = "";
@@ -73,7 +74,7 @@
         isMasterPasswordModalVisible.set(false);
     }
 
-    function handleKeydown(event) {
+    function handleKeydown(event: KeyboardEvent) {
         if (event.key === "Escape") {
             handleSkip();
         }

@@ -1,12 +1,13 @@
 <script lang="ts">
-    import { onMount, onDestroy } from "svelte";
-    import { get } from "svelte/store";
     import { t } from "$root/i18n";
-    import { openChats, selectedChatId } from "../../../stores/chat";
-    import { characters } from "../../../stores/character";
-    import { isCreateOpenChatModalVisible } from "../../../stores/ui";
-    import { X, Globe, Info, Users } from "lucide-svelte";
+    import { Globe, Info, Users, X } from "lucide-svelte";
+    import { onDestroy, onMount } from "svelte";
+    import { get } from "svelte/store";
     import { fade } from "svelte/transition";
+
+    import { characters } from "../../../stores/character";
+    import { openChats, selectedChatId } from "../../../stores/chat";
+    import { isCreateOpenChatModalVisible } from "../../../stores/ui";
 
     let chatName = "";
 
@@ -40,7 +41,7 @@
         closeModal();
     }
 
-    function handleKeydown(event) {
+    function handleKeydown(event: KeyboardEvent) {
         if (event.key === "Escape") {
             closeModal();
         }

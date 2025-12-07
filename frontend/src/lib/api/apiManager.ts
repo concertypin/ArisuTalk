@@ -105,7 +105,7 @@ export class APIManager {
         model: string,
         params: LLMApiGenerateContentParams,
         baseUrl: string | null = null,
-        options: object = {}
+        options: LLMApiConstructorOptions = {}
     ): LLMApiGenerateContentResponse {
         try {
             // Resolve actual API key if encrypted
@@ -140,7 +140,7 @@ export class APIManager {
         model: string,
         params: LLMApiGenerateProfileParams,
         baseUrl: string | null = null,
-        options: object = {}
+        options: LLMApiConstructorOptions = {}
     ): LLMApiGenerateProfileResponse {
         try {
             // Resolve actual API key if encrypted
@@ -175,7 +175,7 @@ export class APIManager {
         model: string,
         params: LLMApiGenerateCharacterSheetParams,
         baseUrl: string | null = null,
-        options: object = {}
+        options: LLMApiConstructorOptions = {}
     ): LLMApiGenerateCharacterSheetResponse {
         try {
             // Resolve actual API key if encrypted

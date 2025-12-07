@@ -2,7 +2,7 @@ import type { Sticker } from "./sticker";
 
 export interface Message {
     id: number | string;
-    sender: string | any;
+    sender: string;
     characterId?: string;
     content: string;
     time?: string;
@@ -12,16 +12,33 @@ export interface Message {
     type?: string;
     hasText?: boolean;
     sticker?: Sticker;
-    stickerData?: { stickerName: string; [key: string]: any };
+    stickerData?: { stickerName: string; [key: string]: unknown };
     imageUrl?: string;
     imageId?: string;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export interface MessagePart {
     content: string;
     delay?: number;
-    sticker?: any;
+    sticker?: Sticker | null;
+}
+
+export interface ChatRoomSettings {
+    [key: string]: unknown;
+}
+
+export interface GroupChatParticipantSettings {
+    isActive: boolean;
+    responseProbability: number;
+    characterRole?: "normal" | "leader" | "quiet" | "active";
+}
+
+export interface GroupChatSettings extends ChatRoomSettings {
+    responseFrequency: number;
+    maxRespondingCharacters: number;
+    responseDelay: number;
+    participantSettings: Record<string, GroupChatParticipantSettings>;
 }
 
 export interface ChatRoom {
@@ -31,22 +48,10 @@ export interface ChatRoom {
     createdAt: number;
     lastActivity: number;
     participantIds?: string[];
-    settings?: any;
+    settings?: ChatRoomSettings;
     currentParticipants?: string[];
-    [key: string]: any;
-}
-
-export interface GroupChatParticipantSettings {
-    isActive: boolean;
-    responseProbability: number;
-    characterRole: "normal" | "leader" | "quiet" | "active";
-}
-
-export interface GroupChatSettings {
-    responseFrequency?: number;
-    maxRespondingCharacters?: number;
-    responseDelay?: number;
-    participantSettings?: Record<string, GroupChatParticipantSettings>;
+    participantHistory?: { characterId: string; joinedAt: number }[];
+    [key: string]: unknown;
 }
 
 export interface GroupChat {
@@ -56,14 +61,14 @@ export interface GroupChat {
     settings: GroupChatSettings;
     createdAt?: number;
     lastActivity?: number;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export interface DisplayCharacter {
     id: string | number;
     name: string;
     avatar: string | null;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export interface MessageGroupData {

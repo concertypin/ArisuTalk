@@ -18,7 +18,7 @@ export const groupChats = persistentStore<Record<string, GroupChat>>(
     "personaChat_groupChats_v16",
     {}
 );
-export const openChats = persistentStore<Record<string, any>>(
+export const openChats = persistentStore<Record<string, ChatRoom>>(
     "personaChat_openChats_v16",
     {}
 );
@@ -40,7 +40,10 @@ export const editingChatRoomId = writable<string | null>(null);
 export const editingGroupChat = writable<GroupChat | null>(null);
 
 export const isWaitingForResponse = writable(false);
-export const typingCharacterId = writable(null);
+export const typingCharacterId = writable<{
+    chatId: string;
+    characterId: string;
+} | null>(null);
 
 export const searchQuery = writable("");
 export const imageToSend = writable<string | null>(null);

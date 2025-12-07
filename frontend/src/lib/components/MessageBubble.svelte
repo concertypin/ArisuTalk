@@ -1,7 +1,8 @@
 <script lang="ts">
     import { t } from "$root/i18n";
-    import { expandedImages } from "../stores/ui";
     import type { Message } from "$types/chat";
+
+    import { expandedImages } from "../stores/ui";
 
     export let message: Message;
 
@@ -60,7 +61,7 @@
             >
                 <img
                     src={message.sticker.data}
-                    alt={message.sticker.stickerName}
+                    alt={message.sticker.name}
                     class="max-w-[120px] h-auto"
                 />
                 {#if message.content}

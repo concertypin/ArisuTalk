@@ -1,50 +1,51 @@
 <script lang="ts">
-    import { onMount, onDestroy } from "svelte";
-    import { get } from "svelte/store";
     import { t } from "$root/i18n";
+    import type { Character } from "$types/character";
+    import {
+        ChevronDown,
+        Download,
+        Image,
+        Instagram,
+        MessageSquarePlus,
+        Sparkles,
+        Upload,
+        X,
+    } from "lucide-svelte";
+    import { onDestroy, onMount } from "svelte";
+    import { createEventDispatcher } from "svelte";
+    import { get } from "svelte/store";
+    import type { Unsubscriber } from "svelte/store";
+    import { fade } from "svelte/transition";
+
+    import { APIManager } from "../../../api/apiManager";
+    import { auth } from "../../../stores/auth";
     import {
         characters,
         editingCharacter,
         phonebookImportResult,
     } from "../../../stores/character";
     import {
-        settings,
         experimentalTracingOptIn,
+        settings,
     } from "../../../stores/settings";
     import {
         isCharacterModalVisible,
-        isSNSCharacterListModalVisible,
         isPhonebookModalVisible,
+        isSNSCharacterListModalVisible,
         phonebookAccessState,
     } from "../../../stores/ui";
     import {
-        X,
-        Image,
-        Upload,
-        Download,
-        ChevronDown,
-        Sparkles,
-        MessageSquarePlus,
-        Instagram,
-    } from "lucide-svelte";
-    import { fade } from "svelte/transition";
-    import { createEventDispatcher } from "svelte";
-    import CharacterMemory from "./CharacterMemory.svelte";
-    import CharacterStickers from "./CharacterStickers.svelte";
+        addPngChunk,
+        compressData,
+        dataUrlToUint8Array,
+        decompressData,
+        extractPngChunk,
+        uint8ArrayToDataUrl,
+    } from "../../../utils/png-utils";
     import CharacterAISettings from "./CharacterAISettings.svelte";
     import CharacterHypnosis from "./CharacterHypnosis.svelte";
-    import { APIManager } from "../../../api/apiManager";
-    import { auth } from "../../../stores/auth";
-    import {
-        dataUrlToUint8Array,
-        uint8ArrayToDataUrl,
-        addPngChunk,
-        extractPngChunk,
-        compressData,
-        decompressData,
-    } from "../../../utils/png-utils";
-    import type { Unsubscriber } from "svelte/store";
-    import type { Character } from "$types/character";
+    import CharacterMemory from "./CharacterMemory.svelte";
+    import CharacterStickers from "./CharacterStickers.svelte";
 
     const dispatch = createEventDispatcher();
 
@@ -114,7 +115,10 @@
     function saveCharacter() {
         if (isNew) {
             characters.update((chars) => {
-                const newChar = { ...characterData, id: `char_${Date.now()}` } as Character;
+                const newChar = {
+                    ...characterData,
+                    id: `char_${Date.now()}`,
+                } as Character;
                 return [...chars, newChar];
             });
         } else {
@@ -170,7 +174,11 @@
             characterData.prompt = generatedPrompt;
         } catch (error) {
             console.error("Error generating character prompt:", error);
-            alert(`${t("modal.generationFailed.title")}: ${error.message}`);
+            if (error instanceof Error) {
+                alert(`${t("modal.generationFailed.title")}: ${error.message}`);
+            } else {
+                alert(`${t("modal.generationFailed.title")}: ${String(error)}`);
+            }
         } finally {
             isGeneratingPersona = false;
         }
@@ -586,15 +594,15 @@
                 </div>
 
                 {#if characterData.naiSettings}
-                <CharacterAISettings
-                    bind:appearance={characterData.appearance}
-                    bind:naiQualityPrompt={
-                        characterData.naiSettings.qualityPrompt
-                    }
-                    bind:naiAutoGenerate={
-                        characterData.naiSettings.autoGenerate
-                    }
-                />
+                    <CharacterAISettings
+                        bind:appearance={characterData.appearance}
+                        bind:naiQualityPrompt={
+                            characterData.naiSettings.qualityPrompt
+                        }
+                        bind:naiAutoGenerate={
+                            characterData.naiSettings.autoGenerate
+                        }
+                    />
                 {/if}
 
                 <details class="group border-t border-gray-700/50 pt-4">
