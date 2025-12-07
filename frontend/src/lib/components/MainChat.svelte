@@ -138,7 +138,7 @@
     let character: Character | DisplayCharacter | null = null;
     $: {
         if (selectedRoom) {
-            const roomType = (selectedRoom as any).type; // Type property might not be on all room types explicitly
+            const roomType = 'type' in selectedRoom ? selectedRoom.type : undefined;
              if (roomType === "group" || roomType === "open") {
                 character = {
                     id: `${roomType}_chat_avatar`,
@@ -146,7 +146,7 @@
                     avatar: "",
                 };
              } else {
-                 character = $characters.find((c) => String(c.id) === String(selectedRoom.characterId)) || null;
+                 character = 'characterId' in selectedRoom && selectedRoom.characterId ? $characters.find((c) => String(c.id) === String(selectedRoom.characterId)) || null : null;
              }
         } else {
             character = null;
@@ -288,8 +288,7 @@
         if (
             character &&
             selectedRoom &&
-            (selectedRoom as any).type !== "open" &&
-            (selectedRoom as any).type !== "group"
+            (!('type' in selectedRoom) || (selectedRoom.type !== "open" && selectedRoom.type !== "group"))
         ) {
             // Need full character object for SNS feed
              const fullCharacter = $characters.find((c) => c.id === character!.id);
@@ -358,13 +357,13 @@
                 >
                     <ArrowLeft class="w-6 h-6" />
                 </button>
-                {#if (selectedRoom as any).type === "open"}
+                {#if 'type' in selectedRoom && selectedRoom.type === "open"}
                     <div
                         class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center"
                     >
                         <Globe class="w-6 h-6 text-white" />
                     </div>
-                {:else if (selectedRoom as any).type === "group"}
+                {:else if 'type' in selectedRoom && selectedRoom.type === "group"}
                     <div
                         class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center"
                     >
@@ -405,8 +404,7 @@
                 <button
                     on:click={openSNSModal}
                     class="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
-                    disabled={(selectedRoom as any).type === "open" ||
-                        (selectedRoom as any).type === "group"}
+                    disabled={'type' in selectedRoom && (selectedRoom.type === "open" || selectedRoom.type === "group")}
                 >
                     <Instagram class="w-4 h-4 text-gray-300" />
                 </button>

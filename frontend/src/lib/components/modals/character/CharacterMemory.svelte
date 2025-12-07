@@ -2,17 +2,17 @@
     import { t } from "$root/i18n";
     import { PlusCircle, Trash2 } from "lucide-svelte";
 
-    export let memories = [];
+    export let memories: string[] = [];
 
     function addMemory() {
         memories = [...memories, ""];
     }
 
-    function deleteMemory(index) {
+    function deleteMemory(index: number) {
         memories = memories.filter((_, i) => i !== index);
     }
 
-    function updateMemory(index, value) {
+    function updateMemory(index: number, value: string) {
         memories[index] = value;
         // Svelte needs a reassignment to trigger reactivity for arrays
         memories = memories;
@@ -33,7 +33,7 @@
                     type="text"
                     class="memory-input flex-1 px-3 py-2 bg-gray-700 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-500/50 text-sm"
                     value={memory}
-                    on:input={(e) => updateMemory(i, e.target.value)}
+                    on:input={(e) => updateMemory(i, (e.target as HTMLInputElement).value)}
                     placeholder={t("characterModal.memoryPlaceholder")}
                 />
                 <button

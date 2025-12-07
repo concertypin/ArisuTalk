@@ -19,6 +19,7 @@
     import { settings } from "../../../stores/settings";
     import StickerPreviewModal from "../sticker/StickerPreviewModal.svelte";
     import StickerProgressModal from "../sticker/StickerProgressModal.svelte";
+    import type { StickerGenerationProgress } from "$types/sticker";
 
     export let stickers: Sticker[] = [];
 
@@ -26,7 +27,7 @@
     let selectedStickers: string[] = [];
     let stickerInput: HTMLInputElement;
     let showProgressModal = false;
-    let progressData = {};
+    let progressData: StickerGenerationProgress | null = null;
     let showPreviewModal = false;
     let previewSticker: Sticker | null = null;
     let previewIndex: number | null = null;
@@ -147,7 +148,7 @@
         showPreviewModal = true;
     }
 
-    function handleSaveSticker(event: Event) {
+    function handleSaveSticker(event: CustomEvent) {
         const { name } = event.detail;
         if (previewIndex !== null) {
             stickers[previewIndex].name = name;
@@ -179,7 +180,7 @@
         }
     }
 
-    async function handleRerollSticker(event) {
+    async function handleRerollSticker(event: CustomEvent) {
         // TODO: Implement reroll logic
     }
 
@@ -204,7 +205,7 @@
         if (
             confirm(
                 t("stickerPreview.confirmRemoveMultiple", {
-                    count: selectedStickers.length,
+                    count: String(selectedStickers.length),
                 })
             )
         ) {
@@ -242,25 +243,30 @@
         showProgressModal = true;
         progressData = {
             isVisible: true,
-            character: get(editingCharacter),
-            emotions: get(settings).naiGenerationList || [],
+            status: "generating",
             currentIndex: 0,
-            totalCount: get(settings).naiGenerationList?.length || 0,
+            totalCount: get(settings).naiSettings.naiGenerationList?.length || 0,
             currentEmotion: "",
-            status: "preparing",
-            error: null,
+            error: undefined,
+            emotions: get(settings).naiSettings.naiGenerationList || [],
             generatedStickers: [],
+            character: get(editingCharacter) || undefined
         };
 
         const char = get(editingCharacter);
         if (!char) return;
 
-        await get(stickerManager).generateBasicStickerSet(
-            char as Character,
-            (progress) => {
-                progressData = { ...progressData, ...progress };
-            }
-        );
+        const sm = get(stickerManager);
+        if (sm && typeof sm.generateBasicStickerSet === 'function') {
+            await sm.generateBasicStickerSet(
+                char as Character,
+                (progress: Partial<StickerGenerationProgress>) => {
+                    if (progressData) {
+                        progressData = { ...progressData, ...progress };
+                    }
+                }
+            );
+        }
     }
 </script>
 
@@ -275,7 +281,7 @@
         <div
             class="flex items-center justify-between mb-3 text-xs text-gray-400"
         >
-            <span>{t("mainChat.stickerCount", { count: stickers.length })}</span
+            <span>{t("mainChat.stickerCount", { count: String(stickers.length) })}</span
             >
             <span>{t("characterModal.totalSize")} {calculateSize()}</span>
         </div>
@@ -466,7 +472,12 @@
 <StickerProgressModal
     bind:progress={progressData}
     on:close={() => (showProgressModal = false)}
-    on:cancel={() => get(stickerManager)?.cancelGeneration()}
+    on:cancel={() => {
+        const sm = get(stickerManager);
+        if (sm && typeof sm.cancelGeneration === 'function') {
+            sm.cancelGeneration();
+        }
+    }}
 />
 <StickerPreviewModal
     isOpen={showPreviewModal}

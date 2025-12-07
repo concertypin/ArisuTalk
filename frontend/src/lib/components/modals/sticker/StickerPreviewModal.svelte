@@ -6,10 +6,11 @@
     import PreviewTab from "./tabs/PreviewTab.svelte";
     import RerollTab from "./tabs/RerollTab.svelte";
     import ActionsTab from "./tabs/ActionsTab.svelte";
+    import type { Sticker } from "$types/character";
 
     export let isOpen = false;
-    export let sticker = null;
-    export let index = null;
+    export let sticker: Sticker | null = null;
+    export let index: number | null = null;
 
     let activeTab = "preview";
 
@@ -19,7 +20,7 @@
         dispatch("close");
     }
 
-    function handleSave(event) {
+    function handleSave(event: CustomEvent) {
         dispatch("save", event.detail);
     }
 
@@ -35,11 +36,11 @@
         dispatch("download");
     }
 
-    function handleReroll(event) {
+    function handleReroll(event: CustomEvent) {
         dispatch("reroll", event.detail);
     }
 
-    function handleKeydown(event) {
+    function handleKeydown(event: KeyboardEvent) {
         if (event.key === "Escape") {
             closeModal();
         }
@@ -131,11 +132,9 @@
                     {#if activeTab === "preview"}
                         <PreviewTab {sticker} on:save={handleSave} />
                     {:else if activeTab === "reroll"}
-                        <RerollTab {sticker} {index} on:reroll={handleReroll} />
+                        <RerollTab {sticker} on:reroll={handleReroll} />
                     {:else if activeTab === "actions"}
                         <ActionsTab
-                            {sticker}
-                            {index}
                             on:delete={handleDelete}
                             on:copy={handleCopy}
                             on:download={handleDownload}
