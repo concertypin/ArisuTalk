@@ -2,7 +2,7 @@
 
 [Korean Version (한국어)](CONTRIBUTING.ko.md)
 
-Thank you *so much* for contributing to the project! 🥳 Your participation greatly helps make this project even better. Please make sure to read the following guidelines before contributing! 😉
+Thank you _so much_ for contributing to the project! 🥳 Your participation greatly helps make this project even better. Please make sure to read the following guidelines before contributing! 😉
 
 ## Table of Contents
 
@@ -16,13 +16,14 @@ Thank you *so much* for contributing to the project! 🥳 Your participation gre
     - [Pull Request Process 🚀](#pull-request-process-)
 
 ## General Rules 📜
+
 - Please primarily use English! This applies everywhere: comments, commit messages, issues, PR descriptions, etc.
 - Write meaningful commit messages! (e.g., `fix typo in README`, `add feature X`, `update dependency Y`)
 - Please follow the [Conventional Commits](https://www.conventionalcommits.org) style for commit messages.
 - Do not include too many changes in one PR! Please split them into the smallest possible units. It makes it easier to review.
 - If there are `README.md` files in each directory, please follow their rules as well.
 - For developers, please leave documentation as comments in the source code if possible. If a very long or complex explanation is needed, please write it as a separate document.
-- *Actively* use JSDoc or KDoc!
+- _Actively_ use JSDoc!
 
 ## Bug Report 🐛
 
@@ -53,10 +54,11 @@ If you want to contribute code, please follow these steps:
 ### Coding Style 🎨
 
 Maintaining a consistent coding style is really important to make the project readable and manageable!
-*   Please follow the style of the existing codebase.
-*   It's good to maintain consistency in indentation, variable names, function names, etc.
-*   If possible, use the linter or formatter configured in the project to prettify your code.
-*   Unless there's a special reason, please do not disable Git hooks.
+
+- Please follow the style of the existing codebase.
+- It's good to maintain consistency in indentation, variable names, function names, etc.
+- If possible, use the linter or formatter configured in the project to prettify your code.
+- Unless there's a special reason, please do not disable Git hooks.
 
 ### Pull Request Process 🚀
 

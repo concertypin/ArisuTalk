@@ -19,7 +19,7 @@
         "postinstall": "pnpm run cf-typegen",
         "format": "biome format --write .",
         "lint": "biome lint .",
-        "check": "biome check --write .",
+        "check": "biome check .",
         "auth": "pnpx http-server -p 5000 -c-1 tools/"
     },
     "engines": {

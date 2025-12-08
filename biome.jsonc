@@ -17,14 +17,23 @@
         "rules": {
             "recommended": true
         },
-        "includes": ["src"]
+        "includes": [
+            "**/*.ts",
+            "**/*.js",
+            "**/*.svelte"
+        ]
     },
     "formatter": {
         "enabled": true,
         "indentStyle": "space",
         "indentWidth": 4,
         "lineWidth": 80,
-        "lineEnding": "lf"
+        "lineEnding": "lf",
+        "includes": [
+            "**/*.ts",
+            "**/*.js",
+            "**/*.svelte"
+        ]
     },
     "javascript": {
         "formatter": {
@@ -36,7 +45,9 @@
     },
     "overrides": [
         {
-            "includes": ["**/*.svelte"],
+            "includes": [
+                "**/*.svelte"
+            ],
             "linter": {
                 "rules": {
                     "style": {

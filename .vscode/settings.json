@@ -7,8 +7,8 @@
         "editor.defaultFormatter": "biomejs.biome",
         "editor.tabSize": 4
     },
-    "[github-actions-workflow]": {
-        "editor.tabSize": 2
+    "[jsonc]": {
+        "editor.tabSize": 4
     },
     "typescript.preferences.preferTypeOnlyAutoImports": true,
     "js/ts.implicitProjectConfig.target": "ESNext",
@@ -16,5 +16,4 @@
     "javascript.preferences.importModuleSpecifier": "non-relative",
     "javascript.preferences.importModuleSpecifierEnding": "minimal",
     "typescript.preferences.importModuleSpecifierEnding": "minimal",
-    "editor.tabSize": 4
 }
