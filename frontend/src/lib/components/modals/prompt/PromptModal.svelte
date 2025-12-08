@@ -1,108 +1,106 @@
 <script lang="ts">
-    import { t } from "$root/i18n";
-    import type { PromptStorageType } from "$types/Prompt";
-    import { Download, RefreshCw, Upload, X } from "lucide-svelte";
-    import { onDestroy, onMount } from "svelte";
-    import { fade } from "svelte/transition";
+import { t } from "$root/i18n";
+import type { PromptStorageType } from "$types/Prompt";
+import { Download, RefreshCw, Upload, X } from "lucide-svelte";
+import { onDestroy, onMount } from "svelte";
+import { fade } from "svelte/transition";
 
-    import { prompts } from "../../../stores/prompts";
-    import { isPromptModalVisible } from "../../../stores/ui";
-    import HookManager from "../HookManager.svelte";
-    import PromptSection from "./PromptSection.svelte";
+import { prompts } from "../../../stores/prompts";
+import { isPromptModalVisible } from "../../../stores/ui";
+import HookManager from "../HookManager.svelte";
+import PromptSection from "./PromptSection.svelte";
 
-    type TabType = "prompts" | "hooks";
+type TabType = "prompts" | "hooks";
 
-    let promptData: PromptStorageType = {
-        mainChat: "",
-        characterSheet: "",
-        profileCreation: "",
-        snsForce: "",
-        naiSticker: "",
-        groupChat: "",
-        openChat: "",
-    };
-    let activeTab: TabType = "prompts";
+let promptData: PromptStorageType = {
+    mainChat: "",
+    characterSheet: "",
+    profileCreation: "",
+    snsForce: "",
+    naiSticker: "",
+    groupChat: "",
+    openChat: "",
+};
+let activeTab: TabType = "prompts";
 
-    const promptSections = [
-        {
-            key: "mainChat",
-            title: t("promptModal.mainChatPrompt"),
-            description: t("promptModal.mainChatPromptDescription"),
-        },
-        {
-            key: "characterSheet",
-            title: t("promptModal.characterSheetGenerationPrompt"),
-            description: t(
-                "promptModal.characterSheetGenerationPromptDescription"
-            ),
-        },
-        {
-            key: "profileCreation",
-            title: t("promptModal.randomFirstMessagePrompt"),
-            description: t("promptModal.randomFirstMessagePromptDescription"),
-        },
-        {
-            key: "snsForce",
-            title: t("promptModal.snsForcePrompt"),
-            description: t("promptModal.snsForcePromptDescription"),
-        },
-        {
-            key: "naiSticker",
-            title: t("promptModal.naiStickerPrompt"),
-            description: t("promptModal.naiStickerPromptDescription"),
-        },
-        {
-            key: "groupChat",
-            title: t("promptModal.groupChatPrompt"),
-            description: t("promptModal.groupChatPromptDescription"),
-        },
-        {
-            key: "openChat",
-            title: t("promptModal.openChatPrompt"),
-            description: t("promptModal.openChatPromptDescription"),
-        },
-    ] satisfies {
-        key: keyof PromptStorageType;
-        title: string;
-        description: string;
-    }[];
+const promptSections = [
+    {
+        key: "mainChat",
+        title: t("promptModal.mainChatPrompt"),
+        description: t("promptModal.mainChatPromptDescription"),
+    },
+    {
+        key: "characterSheet",
+        title: t("promptModal.characterSheetGenerationPrompt"),
+        description: t("promptModal.characterSheetGenerationPromptDescription"),
+    },
+    {
+        key: "profileCreation",
+        title: t("promptModal.randomFirstMessagePrompt"),
+        description: t("promptModal.randomFirstMessagePromptDescription"),
+    },
+    {
+        key: "snsForce",
+        title: t("promptModal.snsForcePrompt"),
+        description: t("promptModal.snsForcePromptDescription"),
+    },
+    {
+        key: "naiSticker",
+        title: t("promptModal.naiStickerPrompt"),
+        description: t("promptModal.naiStickerPromptDescription"),
+    },
+    {
+        key: "groupChat",
+        title: t("promptModal.groupChatPrompt"),
+        description: t("promptModal.groupChatPromptDescription"),
+    },
+    {
+        key: "openChat",
+        title: t("promptModal.openChatPrompt"),
+        description: t("promptModal.openChatPromptDescription"),
+    },
+] satisfies {
+    key: keyof PromptStorageType;
+    title: string;
+    description: string;
+}[];
 
-    async function handleSave() {
-        await prompts.save(promptData);
+async function handleSave() {
+    await prompts.save(promptData);
+    isPromptModalVisible.set(false);
+}
+
+async function handleReset() {
+    if (confirm(t("promptModal.resetAllPromptsConfirmation"))) {
+        await prompts.reset();
+    }
+}
+
+async function handleBackup() {
+    await prompts.backup();
+}
+
+async function handleRestore() {
+    try {
+        await prompts.restore();
+    } catch (e) {
+        alert(t("promptModal.restoreFailed"));
+    }
+}
+
+function handleKeydown(event: KeyboardEvent) {
+    if (event.key === "Escape") {
         isPromptModalVisible.set(false);
     }
+}
 
-    async function handleReset() {
-        if (confirm(t("promptModal.resetAllPromptsConfirmation"))) {
-            await prompts.reset();
-        }
-    }
+onMount(() => {
+    window.addEventListener("keydown", handleKeydown);
+});
 
-    async function handleBackup() {
-        await prompts.backup();
-    }
-
-    async function handleRestore() {
-        try {
-            await prompts.restore();
-        } catch (e) {
-            alert(t("promptModal.restoreFailed"));
-        }
-    }
-
-    function handleKeydown(event: KeyboardEvent) {
-        if (event.key === "Escape") {
-            isPromptModalVisible.set(false);
-        }
-    }
-
-    onMount(() => {
-        window.addEventListener("keydown", handleKeydown);
-    });
-
-    onDestroy(() => {
-        window.removeEventListener("keydown", handleKeydown);
-    });
+onDestroy(() => {
+    window.removeEventListener("keydown", handleKeydown);
+});
 </script>
 
 {#if $isPromptModalVisible}

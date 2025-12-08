@@ -1,111 +1,111 @@
 <script lang="ts">
-    import { t } from "$root/i18n";
-    import type { Character } from "$types/character";
-    import {
-        Hash,
-        Image,
-        Instagram,
-        Lock,
-        Plus,
-        ShieldAlert,
-        X,
-    } from "lucide-svelte";
-    import { createEventDispatcher, onDestroy, onMount } from "svelte";
-    import { get } from "svelte/store";
-    import { fade } from "svelte/transition";
+import { t } from "$root/i18n";
+import type { Character } from "$types/character";
+import {
+    Hash,
+    Image,
+    Instagram,
+    Lock,
+    Plus,
+    ShieldAlert,
+    X,
+} from "lucide-svelte";
+import { createEventDispatcher, onDestroy, onMount } from "svelte";
+import { get } from "svelte/store";
+import { fade } from "svelte/transition";
 
-    import { characterStateStore, characters } from "../../../stores/character";
-    import { editingSNSPost, isSNSPostModalVisible } from "../../../stores/ui";
-    import { checkSNSAccess, requirements } from "../../../utils/sns";
-    import PostsTab from "./tabs/PostsTab.svelte";
-    import SecretsTab from "./tabs/SecretsTab.svelte";
-    import TagsTab from "./tabs/TagsTab.svelte";
+import { characterStateStore, characters } from "../../../stores/character";
+import { editingSNSPost, isSNSPostModalVisible } from "../../../stores/ui";
+import { checkSNSAccess, requirements } from "../../../utils/sns";
+import PostsTab from "./tabs/PostsTab.svelte";
+import SecretsTab from "./tabs/SecretsTab.svelte";
+import TagsTab from "./tabs/TagsTab.svelte";
 
-    export let isOpen = false;
-    export let character: Character | null = null;
+export let isOpen = false;
+export let character: Character | null = null;
 
-    let activeTab = "posts";
-    let isSecretMode = false;
-    let hasAccess = false;
+let activeTab = "posts";
+let isSecretMode = false;
+let hasAccess = false;
 
-    let postsCount = 0;
-    let secretsCount = 0;
-    let tagsCount = 0;
-    let currentCharacter: Character | null | undefined;
+let postsCount = 0;
+let secretsCount = 0;
+let tagsCount = 0;
+let currentCharacter: Character | null | undefined;
 
-    const dispatch = createEventDispatcher();
+const dispatch = createEventDispatcher();
 
-    function closeModal() {
-        dispatch("close");
+function closeModal() {
+    dispatch("close");
+}
+
+function toggleSecretMode() {
+    isSecretMode = !isSecretMode;
+}
+
+function createNewPost() {
+    if (!character) return;
+    editingSNSPost.set({
+        characterId: character.id as string,
+        isNew: true,
+        isSecret: isSecretMode,
+    });
+    isSNSPostModalVisible.set(true);
+}
+
+$: {
+    if (character) {
+        currentCharacter = $characters.find((c) => c.id === character!.id);
+    } else {
+        currentCharacter = null;
     }
+    if (currentCharacter) {
+        const requiredLevel = isSecretMode ? "private" : "public";
+        hasAccess = checkSNSAccess(
+            currentCharacter,
+            requiredLevel,
+            get(characterStateStore)[currentCharacter.id],
+        );
 
-    function toggleSecretMode() {
-        isSecretMode = !isSecretMode;
-    }
+        if (currentCharacter.snsPosts) {
+            postsCount = currentCharacter.snsPosts.filter(
+                (p) => !p.access_level || p.access_level === "main-public",
+            ).length;
+            secretsCount = currentCharacter.snsPosts.filter(
+                (p) =>
+                    p.access_level &&
+                    (p.access_level.includes("private") ||
+                        p.access_level.includes("secret")),
+            ).length;
 
-    function createNewPost() {
-        if (!character) return;
-        editingSNSPost.set({
-            characterId: character.id as string,
-            isNew: true,
-            isSecret: isSecretMode,
-        });
-        isSNSPostModalVisible.set(true);
-    }
-
-    $: {
-        if (character) {
-            currentCharacter = $characters.find((c) => c.id === character!.id);
+            const allTags = new Set();
+            currentCharacter.snsPosts.forEach((post) => {
+                if (post.tags && Array.isArray(post.tags)) {
+                    post.tags.forEach((tag) => allTags.add(tag));
+                }
+            });
+            tagsCount = allTags.size;
         } else {
-            currentCharacter = null;
-        }
-        if (currentCharacter) {
-            const requiredLevel = isSecretMode ? "private" : "public";
-            hasAccess = checkSNSAccess(
-                currentCharacter,
-                requiredLevel,
-                get(characterStateStore)[currentCharacter.id]
-            );
-
-            if (currentCharacter.snsPosts) {
-                postsCount = currentCharacter.snsPosts.filter(
-                    (p) => !p.access_level || p.access_level === "main-public"
-                ).length;
-                secretsCount = currentCharacter.snsPosts.filter(
-                    (p) =>
-                        p.access_level &&
-                        (p.access_level.includes("private") ||
-                            p.access_level.includes("secret"))
-                ).length;
-
-                const allTags = new Set();
-                currentCharacter.snsPosts.forEach((post) => {
-                    if (post.tags && Array.isArray(post.tags)) {
-                        post.tags.forEach((tag) => allTags.add(tag));
-                    }
-                });
-                tagsCount = allTags.size;
-            } else {
-                postsCount = 0;
-                secretsCount = 0;
-                tagsCount = 0;
-            }
+            postsCount = 0;
+            secretsCount = 0;
+            tagsCount = 0;
         }
     }
+}
 
-    function handleKeydown(event: KeyboardEvent) {
-        if (event.key === "Escape") {
-            closeModal();
-        }
+function handleKeydown(event: KeyboardEvent) {
+    if (event.key === "Escape") {
+        closeModal();
     }
+}
 
-    onMount(() => {
-        window.addEventListener("keydown", handleKeydown);
-    });
+onMount(() => {
+    window.addEventListener("keydown", handleKeydown);
+});
 
-    onDestroy(() => {
-        window.removeEventListener("keydown", handleKeydown);
-    });
+onDestroy(() => {
+    window.removeEventListener("keydown", handleKeydown);
+});
 </script>
 
 {#if isOpen && currentCharacter}

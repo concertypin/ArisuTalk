@@ -1,223 +1,208 @@
 <script lang="ts">
-    import { t } from "$root/i18n";
-    import {
-        Download,
-        Loader2,
-        RefreshCcw,
-        ShieldAlert,
-        X,
-    } from "lucide-svelte";
-    import { onDestroy } from "svelte";
-    import { fade } from "svelte/transition";
+import { t } from "$root/i18n";
+import { Download, Loader2, RefreshCcw, ShieldAlert, X } from "lucide-svelte";
+import { onDestroy } from "svelte";
+import { fade } from "svelte/transition";
 
-    import { logUserFlowEvent } from "../../../analytics/userFlow";
-    import type { PhonebookEntrySummary } from "../../../services/phonebookService";
-    import { auth } from "../../../stores/auth";
-    import type { AuthState } from "../../../stores/auth";
-    import { phonebookImportResult } from "../../../stores/character";
-    import { experimentalTracingOptIn } from "../../../stores/settings";
-    import {
-        type PhonebookAccessState,
-        isPhonebookModalVisible,
-        phonebookAccessState,
-    } from "../../../stores/ui";
+import { logUserFlowEvent } from "../../../analytics/userFlow";
+import type { PhonebookEntrySummary } from "../../../services/phonebookService";
+import { auth } from "../../../stores/auth";
+import type { AuthState } from "../../../stores/auth";
+import { phonebookImportResult } from "../../../stores/character";
+import { experimentalTracingOptIn } from "../../../stores/settings";
+import {
+    type PhonebookAccessState,
+    isPhonebookModalVisible,
+    phonebookAccessState,
+} from "../../../stores/ui";
 
-    export let isOpen = false;
+export let isOpen = false;
 
-    const defaultAuthState: AuthState = {
-        status: "idle",
-        clerk: null,
-        user: null,
-        isSignedIn: false,
-        error: null,
-    };
+const defaultAuthState: AuthState = {
+    status: "idle",
+    clerk: null,
+    user: null,
+    isSignedIn: false,
+    error: null,
+};
 
-    let authState: AuthState = defaultAuthState;
-    let currentPhonebookAccess: PhonebookAccessState = "unknown";
-    let isTracingEnabled = false;
-    let entries: PhonebookEntrySummary[] = [];
-    let errorMessage = "";
-    let isInitializing = false;
-    let hasInitialized = false;
-    let busyEntryId: string | null = null;
-    let serviceModule:
-        | typeof import("../../../services/phonebookService")
-        | null = null;
+let authState: AuthState = defaultAuthState;
+let currentPhonebookAccess: PhonebookAccessState = "unknown";
+let isTracingEnabled = false;
+let entries: PhonebookEntrySummary[] = [];
+let errorMessage = "";
+let isInitializing = false;
+let hasInitialized = false;
+let busyEntryId: string | null = null;
+let serviceModule: typeof import("../../../services/phonebookService") | null =
+    null;
 
-    const unsubscribeAuth = auth.subscribe((value) => {
-        authState = value ?? defaultAuthState;
-    });
+const unsubscribeAuth = auth.subscribe((value) => {
+    authState = value ?? defaultAuthState;
+});
 
-    const unsubscribePhonebook = phonebookAccessState.subscribe((value) => {
-        currentPhonebookAccess = value;
-    });
+const unsubscribePhonebook = phonebookAccessState.subscribe((value) => {
+    currentPhonebookAccess = value;
+});
 
-    const unsubscribeTracing = experimentalTracingOptIn.subscribe((value) => {
-        isTracingEnabled = value;
-        if (!value) {
-            entries = [];
-            errorMessage = t("phonebook.experimentalRequired");
-            hasInitialized = true;
-            isInitializing = false;
-            busyEntryId = null;
-        }
-    });
-
-    onDestroy(() => {
-        unsubscribeAuth();
-        unsubscribePhonebook();
-        unsubscribeTracing();
-    });
-
-    const resetState = (): void => {
+const unsubscribeTracing = experimentalTracingOptIn.subscribe((value) => {
+    isTracingEnabled = value;
+    if (!value) {
         entries = [];
-        errorMessage = "";
-        hasInitialized = false;
+        errorMessage = t("phonebook.experimentalRequired");
+        hasInitialized = true;
         isInitializing = false;
         busyEntryId = null;
-    };
+    }
+});
 
-    const ensureService = async () => {
-        if (!serviceModule) {
-            serviceModule = await import("$lib/services/phonebookService");
-        }
-        return serviceModule;
-    };
+onDestroy(() => {
+    unsubscribeAuth();
+    unsubscribePhonebook();
+    unsubscribeTracing();
+});
 
-    const closeModal = (): void => {
-        isPhonebookModalVisible.set(false);
-        resetState();
-    };
+const resetState = (): void => {
+    entries = [];
+    errorMessage = "";
+    hasInitialized = false;
+    isInitializing = false;
+    busyEntryId = null;
+};
 
-    const initialize = async (): Promise<void> => {
-        if (isInitializing || hasInitialized) {
-            return;
-        }
-        isInitializing = true;
-        errorMessage = "";
-        if (!isTracingEnabled) {
-            errorMessage = t("phonebook.experimentalRequired");
+const ensureService = async () => {
+    if (!serviceModule) {
+        serviceModule = await import("$lib/services/phonebookService");
+    }
+    return serviceModule;
+};
+
+const closeModal = (): void => {
+    isPhonebookModalVisible.set(false);
+    resetState();
+};
+
+const initialize = async (): Promise<void> => {
+    if (isInitializing || hasInitialized) {
+        return;
+    }
+    isInitializing = true;
+    errorMessage = "";
+    if (!isTracingEnabled) {
+        errorMessage = t("phonebook.experimentalRequired");
+        void logUserFlowEvent("phonebook_access_blocked", {
+            reason: "disabled",
+        });
+        hasInitialized = true;
+        isInitializing = false;
+        return;
+    }
+    try {
+        const state = authState;
+        void logUserFlowEvent("phonebook_opened", {
+            auth_status: state.isSignedIn ? "signed_in" : "guest",
+            access_state: currentPhonebookAccess,
+        });
+        if (!state.isSignedIn || !state.clerk) {
+            errorMessage = t("phonebook.signInRequired");
             void logUserFlowEvent("phonebook_access_blocked", {
-                reason: "disabled",
+                reason: "auth_required",
             });
-            hasInitialized = true;
-            isInitializing = false;
-            return;
-        }
-        try {
-            const state = authState;
-            void logUserFlowEvent("phonebook_opened", {
-                auth_status: state.isSignedIn ? "signed_in" : "guest",
-                access_state: currentPhonebookAccess,
-            });
-            if (!state.isSignedIn || !state.clerk) {
-                errorMessage = t("phonebook.signInRequired");
-                void logUserFlowEvent("phonebook_access_blocked", {
-                    reason: "auth_required",
-                });
-                return;
-            }
-
-            const service = await ensureService();
-            let accessState = currentPhonebookAccess;
-            if (accessState === "unknown") {
-                const canAccess = await service.verifyPhonebookAccess(
-                    state.clerk
-                );
-                phonebookAccessState.set(canAccess ? "enabled" : "disabled");
-                accessState = canAccess ? "enabled" : "disabled";
-            }
-
-            if (accessState !== "enabled") {
-                void logUserFlowEvent("phonebook_access_blocked", {
-                    reason: accessState === "disabled" ? "disabled" : "unknown",
-                });
-                closeModal();
-                return;
-            }
-
-            const result = await service.listPhonebookEntries(state.clerk);
-            entries = result;
-        } catch (error) {
-            console.error("Failed to load phonebook entries", error);
-            errorMessage =
-                error instanceof Error
-                    ? error.message
-                    : t("phonebook.fetchFailed");
-        } finally {
-            hasInitialized = true;
-            isInitializing = false;
-        }
-    };
-
-    const handleRetry = async (): Promise<void> => {
-        const hadError = errorMessage.length > 0;
-        const wasEmpty = !hadError && hasInitialized && entries.length === 0;
-        const reason: "error" | "empty" | "manual" = hadError
-            ? "error"
-            : wasEmpty
-              ? "empty"
-              : "manual";
-        resetState();
-        void logUserFlowEvent("phonebook_retry", { reason });
-        await initialize();
-    };
-
-    const handleImport = async (
-        entry: PhonebookEntrySummary
-    ): Promise<void> => {
-        if (busyEntryId || entry.encrypted) {
             return;
         }
 
-        try {
-            const state = authState;
-            if (!state.isSignedIn || !state.clerk) {
-                errorMessage = t("phonebook.signInRequired");
-                void logUserFlowEvent("phonebook_import_result", {
-                    outcome: "failure",
-                    encrypted: Boolean(entry.encrypted),
-                    error_type: "not_signed_in",
-                });
-                return;
-            }
+        const service = await ensureService();
+        let accessState = currentPhonebookAccess;
+        if (accessState === "unknown") {
+            const canAccess = await service.verifyPhonebookAccess(state.clerk);
+            phonebookAccessState.set(canAccess ? "enabled" : "disabled");
+            accessState = canAccess ? "enabled" : "disabled";
+        }
 
-            const service = await ensureService();
-            busyEntryId = entry.id;
-            void logUserFlowEvent("phonebook_import_attempt", {
-                encrypted: Boolean(entry.encrypted),
+        if (accessState !== "enabled") {
+            void logUserFlowEvent("phonebook_access_blocked", {
+                reason: accessState === "disabled" ? "disabled" : "unknown",
             });
-            const result = await service.importPhonebookCharacter(
-                state.clerk,
-                entry.id
-            );
-            phonebookImportResult.set(result);
             closeModal();
-            void logUserFlowEvent("phonebook_import_result", {
-                outcome: "success",
-                encrypted: Boolean(entry.encrypted),
-            });
-        } catch (error) {
-            console.error("Failed to import phonebook entry", error);
-            errorMessage =
-                error instanceof Error
-                    ? error.message
-                    : t("phonebook.fetchFailed");
+            return;
+        }
+
+        const result = await service.listPhonebookEntries(state.clerk);
+        entries = result;
+    } catch (error) {
+        console.error("Failed to load phonebook entries", error);
+        errorMessage =
+            error instanceof Error ? error.message : t("phonebook.fetchFailed");
+    } finally {
+        hasInitialized = true;
+        isInitializing = false;
+    }
+};
+
+const handleRetry = async (): Promise<void> => {
+    const hadError = errorMessage.length > 0;
+    const wasEmpty = !hadError && hasInitialized && entries.length === 0;
+    const reason: "error" | "empty" | "manual" = hadError
+        ? "error"
+        : wasEmpty
+          ? "empty"
+          : "manual";
+    resetState();
+    void logUserFlowEvent("phonebook_retry", { reason });
+    await initialize();
+};
+
+const handleImport = async (entry: PhonebookEntrySummary): Promise<void> => {
+    if (busyEntryId || entry.encrypted) {
+        return;
+    }
+
+    try {
+        const state = authState;
+        if (!state.isSignedIn || !state.clerk) {
+            errorMessage = t("phonebook.signInRequired");
             void logUserFlowEvent("phonebook_import_result", {
                 outcome: "failure",
                 encrypted: Boolean(entry.encrypted),
-                error_type: "unknown",
+                error_type: "not_signed_in",
             });
-        } finally {
-            busyEntryId = null;
+            return;
         }
-    };
 
-    $: if (isOpen) {
-        void initialize();
-    } else {
-        resetState();
+        const service = await ensureService();
+        busyEntryId = entry.id;
+        void logUserFlowEvent("phonebook_import_attempt", {
+            encrypted: Boolean(entry.encrypted),
+        });
+        const result = await service.importPhonebookCharacter(
+            state.clerk,
+            entry.id,
+        );
+        phonebookImportResult.set(result);
+        closeModal();
+        void logUserFlowEvent("phonebook_import_result", {
+            outcome: "success",
+            encrypted: Boolean(entry.encrypted),
+        });
+    } catch (error) {
+        console.error("Failed to import phonebook entry", error);
+        errorMessage =
+            error instanceof Error ? error.message : t("phonebook.fetchFailed");
+        void logUserFlowEvent("phonebook_import_result", {
+            outcome: "failure",
+            encrypted: Boolean(entry.encrypted),
+            error_type: "unknown",
+        });
+    } finally {
+        busyEntryId = null;
     }
+};
+
+$: if (isOpen) {
+    void initialize();
+} else {
+    resetState();
+}
 </script>
 
 {#if isOpen}

@@ -1,37 +1,41 @@
 <script lang="ts">
-    import { createEventDispatcher } from "svelte";
-    import { t } from "$root/i18n";
-    import { RefreshCw, ArrowLeft, ArrowRight } from "lucide-svelte";
-    import type { Sticker } from "$types/character";
+import { createEventDispatcher } from "svelte";
+import { t } from "$root/i18n";
+import { RefreshCw, ArrowLeft, ArrowRight } from "lucide-svelte";
+import type { Sticker } from "$types/character";
 
-    export let rerollData: { prompt?: string; steps?: number; scale?: number } | null = null;
-    export let sticker: Sticker | null = null;
-    export let rerollResult: Sticker | null = null;
-    export let rerolling = false;
+export let rerollData: {
+    prompt?: string;
+    steps?: number;
+    scale?: number;
+} | null = null;
+export let sticker: Sticker | null = null;
+export let rerollResult: Sticker | null = null;
+export let rerolling = false;
 
-    let rerollPrompt = rerollData?.prompt || "";
-    let rerollSteps = rerollData?.steps || 28;
-    let rerollScale = rerollData?.scale || 3;
-    let rerollSize = "square";
+let rerollPrompt = rerollData?.prompt || "";
+let rerollSteps = rerollData?.steps || 28;
+let rerollScale = rerollData?.scale || 3;
+let rerollSize = "square";
 
-    const dispatch = createEventDispatcher();
+const dispatch = createEventDispatcher();
 
-    function startReroll() {
-        dispatch("reroll", {
-            prompt: rerollPrompt,
-            steps: rerollSteps,
-            scale: rerollScale,
-            size: rerollSize,
-        });
-    }
+function startReroll() {
+    dispatch("reroll", {
+        prompt: rerollPrompt,
+        steps: rerollSteps,
+        scale: rerollScale,
+        size: rerollSize,
+    });
+}
 
-    function selectOriginal() {
-        dispatch("select", { original: true });
-    }
+function selectOriginal() {
+    dispatch("select", { original: true });
+}
 
-    function selectReroll() {
-        dispatch("select", { original: false });
-    }
+function selectReroll() {
+    dispatch("select", { original: false });
+}
 </script>
 
 {#if !rerollData || !sticker}

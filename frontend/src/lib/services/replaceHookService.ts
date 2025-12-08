@@ -22,7 +22,7 @@ async function applyRule(
     from: string,
     to: string,
     useRegex: boolean,
-    caseSensitive: boolean
+    caseSensitive: boolean,
 ): Promise<{ result: string; matchCount: number }> {
     try {
         if (useRegex) {
@@ -41,7 +41,7 @@ async function applyRule(
                     "applyRule (regex): invoking worker.replace with pattern",
                     regex,
                     "replace->",
-                    to
+                    to,
                 );
             }
             return {
@@ -75,7 +75,7 @@ async function applyRule(
                 "caseSensitive=",
                 caseSensitive,
                 "replace->",
-                to
+                to,
             );
         }
         // Pass caseSensitive through as extra property; tests' mock expects it.
@@ -100,7 +100,7 @@ async function applyRule(
 async function applyHook(
     text: string,
     hook: ReplaceHook,
-    maxIterations: number = 10
+    maxIterations: number = 10,
 ): Promise<{
     result: string;
     appliedRules: Array<{
@@ -214,7 +214,7 @@ async function applyHook(
                 rule.from,
                 rule.to,
                 rule.useRegex,
-                rule.caseSensitive
+                rule.caseSensitive,
             );
 
             // Accumulate matches across iterations
@@ -257,7 +257,7 @@ async function applyHook(
 export async function applyHooksByType(
     text: string,
     type: ReplaceHookType,
-    options: ApplyHookOptions = {}
+    options: ApplyHookOptions = {},
 ): Promise<HookResult> {
     const config = get(replaceHooks);
     const hooksKey = `${type}Hooks` satisfies keyof ReplaceHooksConfig;
@@ -271,7 +271,7 @@ export async function applyHooksByType(
                 "applyHooksByType: hooksKey",
                 hooksKey,
                 "count",
-                allHooks.length
+                allHooks.length,
             );
 
             console.debug(allHooks.map((h) => h.name));
@@ -293,7 +293,7 @@ export async function applyHooksByType(
         const { result: newResult, appliedRules } = await applyHook(
             result,
             hook,
-            options.maxIterations || 10
+            options.maxIterations || 10,
         );
 
         if (appliedRules.length > 0) {
@@ -308,7 +308,7 @@ export async function applyHooksByType(
                     from: rule.from,
                     to: rule.to,
                     matchCount: rule.matchCount,
-                }))
+                })),
             );
         }
     }
@@ -326,7 +326,7 @@ export async function applyHooksByType(
  */
 export async function applyInputHooks(
     text: string,
-    options?: ApplyHookOptions
+    options?: ApplyHookOptions,
 ): Promise<HookResult> {
     return applyHooksByType(text, "input", options);
 }
@@ -336,7 +336,7 @@ export async function applyInputHooks(
  */
 export async function applyOutputHooks(
     text: string,
-    options?: ApplyHookOptions
+    options?: ApplyHookOptions,
 ): Promise<HookResult> {
     return applyHooksByType(text, "output", options);
 }
@@ -346,7 +346,7 @@ export async function applyOutputHooks(
  */
 export async function applyRequestHooks(
     text: string,
-    options?: ApplyHookOptions
+    options?: ApplyHookOptions,
 ): Promise<HookResult> {
     return applyHooksByType(text, "request", options);
 }
@@ -356,7 +356,7 @@ export async function applyRequestHooks(
  */
 export async function applyDisplayHooks(
     text: string,
-    options?: ApplyHookOptions
+    options?: ApplyHookOptions,
 ): Promise<HookResult> {
     return applyHooksByType(text, "display", options);
 }
@@ -367,7 +367,7 @@ export async function applyDisplayHooks(
  */
 export async function applyAllHooks(
     text: string,
-    options?: ApplyHookOptions
+    options?: ApplyHookOptions,
 ): Promise<{
     afterInput: HookResult;
     afterOutput: HookResult;
@@ -379,7 +379,7 @@ export async function applyAllHooks(
     const afterRequest = await applyRequestHooks(afterOutput.modified, options);
     const afterDisplay = await applyDisplayHooks(
         afterRequest.modified,
-        options
+        options,
     );
 
     return {

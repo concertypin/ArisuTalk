@@ -1,62 +1,62 @@
 <script lang="ts">
-    import Avatar from "./Avatar.svelte";
-    import MessageBubble from "./MessageBubble.svelte";
-    import {
-        isWaitingForResponse,
-        typingCharacterId,
-        editingMessageId,
-    } from "../stores/chat";
-    import { Edit3, Trash2, RefreshCw, Newspaper, Image } from "lucide-svelte";
-    import { t } from "$root/i18n";
-    import {
-        deleteMessageGroup,
-        editMessage,
-        saveEditedMessage,
-        rerollMessage,
-        generateSnsPost,
-    } from "../services/chatService";
-    import type { MessageGroupData } from "$types/chat";
+import Avatar from "./Avatar.svelte";
+import MessageBubble from "./MessageBubble.svelte";
+import {
+    isWaitingForResponse,
+    typingCharacterId,
+    editingMessageId,
+} from "../stores/chat";
+import { Edit3, Trash2, RefreshCw, Newspaper, Image } from "lucide-svelte";
+import { t } from "$root/i18n";
+import {
+    deleteMessageGroup,
+    editMessage,
+    saveEditedMessage,
+    rerollMessage,
+    generateSnsPost,
+} from "../services/chatService";
+import type { MessageGroupData } from "$types/chat";
 
-    export let group: MessageGroupData;
-    export let isLastGroup: boolean;
+export let group: MessageGroupData;
+export let isLastGroup: boolean;
 
-    const { messages, isMe, showSenderInfo, character } = group;
-    const lastMessage = messages[messages.length - 1];
+const { messages, isMe, showSenderInfo, character } = group;
+const lastMessage = messages[messages.length - 1];
 
-    const canEdit = isMe;
-    $: canReroll = !isMe && isLastGroup && !$isWaitingForResponse;
-    $: canGenerateExtra = canReroll;
+const canEdit = isMe;
+$: canReroll = !isMe && isLastGroup && !$isWaitingForResponse;
+$: canGenerateExtra = canReroll;
 
-    let editedContent = messages.map((m) => m.content).join("\n");
+let editedContent = messages.map((m) => m.content).join("\n");
 
-    $: showUnread =
-        isMe && isLastGroup && $isWaitingForResponse && !$typingCharacterId;
+$: showUnread =
+    isMe && isLastGroup && $isWaitingForResponse && !$typingCharacterId;
 
-    function handleEdit() {
-        editMessage(lastMessage.id);
-    }
+function handleEdit() {
+    editMessage(lastMessage.id);
+}
 
-    function handleDelete() {
-        deleteMessageGroup(lastMessage.id);
-    }
+function handleDelete() {
+    deleteMessageGroup(lastMessage.id);
+}
 
-    function handleSaveEdit() {
-        saveEditedMessage(lastMessage.id, editedContent);
-    }
+function handleSaveEdit() {
+    saveEditedMessage(lastMessage.id, editedContent);
+}
 
-    function handleCancelEdit() {
-        editingMessageId.set(null);
-    }
+function handleCancelEdit() {
+    editingMessageId.set(null);
+}
 
-    function handleReroll() {
-        rerollMessage(lastMessage.id);
-    }
-    function handleGenerateSns() {
-        generateSnsPost(lastMessage.id);
-    }
-    function handleGenerateNai() {
-        alert("NAI sticker generation is not implemented yet.");
-    }
+function handleReroll() {
+    rerollMessage(lastMessage.id);
+}
+function handleGenerateSns() {
+    generateSnsPost(lastMessage.id);
+}
+function handleGenerateNai() {
+    alert("NAI sticker generation is not implemented yet.");
+}
 </script>
 
 {#if $editingMessageId === lastMessage.id}

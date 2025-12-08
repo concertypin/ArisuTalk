@@ -1,18 +1,18 @@
 <script lang="ts">
-    import { t } from "$root/i18n";
-    import { createEventDispatcher } from "svelte";
-    import {
-        ArrowLeft,
-        User,
-        Badge,
-        BrainCircuit,
-        MessageSquarePlus,
-        Shuffle,
-        Users,
-    } from "lucide-svelte";
-    import { settings } from "../../../stores/settings";
+import { t } from "$root/i18n";
+import { createEventDispatcher } from "svelte";
+import {
+    ArrowLeft,
+    User,
+    Badge,
+    BrainCircuit,
+    MessageSquarePlus,
+    Shuffle,
+    Users,
+} from "lucide-svelte";
+import { settings } from "../../../stores/settings";
 
-    const dispatch = createEventDispatcher();
+const dispatch = createEventDispatcher();
 </script>
 
 <div class="flex flex-col h-full">

@@ -12,10 +12,7 @@ import {
     editingMessageId,
     virtualStream,
 } from "$stores/chat";
-import {
-    characters,
-    characterStateStore,
-} from "$stores/character";
+import { characters, characterStateStore } from "$stores/character";
 import type { CharacterState } from "$types/character";
 import { settings } from "$stores/settings";
 import { APIManager } from "$lib/api/apiManager";
@@ -30,13 +27,22 @@ import {
     applyRequestHooks,
 } from "./replaceHookService";
 const { replace } = await import("$lib/utils/worker/replace.js");
-import type { Message, MessagePart, ChatRoom, GroupChatSettings } from "$types/chat";
+import type {
+    Message,
+    MessagePart,
+    ChatRoom,
+    GroupChatSettings,
+} from "$types/chat";
 import type { Character, SNSPost } from "$types/character";
 import type { APIConfig } from "$root/defaults";
 
 const apiManager = new APIManager();
 
-async function handleVirtualStream(chatId: string, character: Character, messageParts: MessagePart[]) {
+async function handleVirtualStream(
+    chatId: string,
+    character: Character,
+    messageParts: MessagePart[],
+) {
     virtualStream.set({
         isStreaming: true,
         chatId: chatId,
@@ -53,7 +59,7 @@ async function handleVirtualStream(chatId: string, character: Character, message
         // 1. Show typing indicator
         virtualStream.update((s) => ({ ...s, isTyping: true }));
         await new Promise((resolve) =>
-            setTimeout(resolve, messagePart.delay || 1000)
+            setTimeout(resolve, messagePart.delay || 1000),
         );
 
         // 2. Add message and hide typing indicator
@@ -153,7 +159,9 @@ function processAutoPost(character: Character, autoPost: Partial<SNSPost>) {
     const timestamp = new Date().toISOString();
 
     const formattedTags = Array.isArray(autoPost.tags)
-        ? autoPost.tags.map((tag: string) => (tag.startsWith("#") ? tag : `#${tag}`))
+        ? autoPost.tags.map((tag: string) =>
+              tag.startsWith("#") ? tag : `#${tag}`,
+          )
         : [];
 
     const newPost: SNSPost = {
@@ -186,7 +194,7 @@ async function callApiAndHandleResponse(
     character: Character,
     history: Message[],
     isProactive = false,
-    forceSummary = false
+    forceSummary = false,
 ) {
     const currentSettings = get(settings);
     const apiProvider = currentSettings.apiProvider || "gemini";
@@ -220,7 +228,7 @@ async function callApiAndHandleResponse(
                     return { ...msg, content: hookResult.modified };
                 }
                 return msg;
-            })
+            }),
         );
 
         const response = await apiManager.generateContent(
@@ -238,7 +246,7 @@ async function callApiAndHandleResponse(
                 chatId, // Add chatId to pass to buildContentPrompt
             },
             currentConfig.baseUrl,
-            options
+            options,
         );
 
         const chatType = isGroupChat(chatId)
@@ -305,7 +313,7 @@ async function callApiAndHandleResponse(
                     const newChars = [...chars];
                     newChars[charIndex] = processAutoPost(
                         newChars[charIndex],
-                        legacyMemoryPost
+                        legacyMemoryPost,
                     );
                     return newChars;
                 }
@@ -319,9 +327,9 @@ async function callApiAndHandleResponse(
                 if (charIndex !== -1) {
                     const newChars = [...chars];
                     if (response.autoPost) {
-                         newChars[charIndex] = processAutoPost(
+                        newChars[charIndex] = processAutoPost(
                             newChars[charIndex] as Character,
-                            response.autoPost
+                            response.autoPost,
                         );
                     }
                     return newChars;
@@ -364,9 +372,13 @@ async function callApiAndHandleResponse(
     }
 }
 
-export async function sendMessage(content: string, type: string = "text", payload: object = {}) {
+export async function sendMessage(
+    content: string,
+    type: string = "text",
+    payload: object = {},
+) {
     console.log(
-        `sendMessage called with chatId: ${get(selectedChatId)}, isGroupChat: ${isGroupChat(get(selectedChatId))}`
+        `sendMessage called with chatId: ${get(selectedChatId)}, isGroupChat: ${isGroupChat(get(selectedChatId))}`,
     );
     const chatId = get(selectedChatId);
     if (!chatId) return;
@@ -411,12 +423,13 @@ export async function sendMessage(content: string, type: string = "text", payloa
         }
 
         // Get group chat settings with strict typing
-        const groupSettings = (chatRoom.settings as unknown as GroupChatSettings) || {
-            responseFrequency: 0.5,
-            maxRespondingCharacters: 1,
-            responseDelay: 3000,
-            participantSettings: {},
-        };
+        const groupSettings =
+            (chatRoom.settings as unknown as GroupChatSettings) || {
+                responseFrequency: 0.5,
+                maxRespondingCharacters: 1,
+                responseDelay: 3000,
+                participantSettings: {},
+            };
 
         // Check overall response frequency
         if (Math.random() > (groupSettings.responseFrequency ?? 0.5)) {
@@ -425,18 +438,20 @@ export async function sendMessage(content: string, type: string = "text", payloa
         }
 
         // Filter active participants based on individual settings
-        const activeParticipants = participants.filter((participantId: string) => {
-            const participantSettings = groupSettings.participantSettings?.[
-                participantId
-            ] || {
-                isActive: true,
-                responseProbability: 0.9,
-            };
-            return (
-                participantSettings.isActive &&
-                Math.random() < participantSettings.responseProbability
-            );
-        });
+        const activeParticipants = participants.filter(
+            (participantId: string) => {
+                const participantSettings = groupSettings.participantSettings?.[
+                    participantId
+                ] || {
+                    isActive: true,
+                    responseProbability: 0.9,
+                };
+                return (
+                    participantSettings.isActive &&
+                    Math.random() < participantSettings.responseProbability
+                );
+            },
+        );
 
         if (activeParticipants.length === 0) {
             isWaitingForResponse.set(false);
@@ -446,14 +461,14 @@ export async function sendMessage(content: string, type: string = "text", payloa
         // Limit number of responding characters
         const maxResponders = Math.min(
             groupSettings.maxRespondingCharacters ?? 1,
-            activeParticipants.length
+            activeParticipants.length,
         );
         const shuffledParticipants = [...activeParticipants].sort(
-            () => Math.random() - 0.5
+            () => Math.random() - 0.5,
         );
         const respondingCharacterIds = shuffledParticipants.slice(
             0,
-            maxResponders
+            maxResponders,
         );
 
         // Process responses for each character with delay
@@ -466,16 +481,20 @@ export async function sendMessage(content: string, type: string = "text", payloa
             // Add delay between responses if not the first one
             if (i > 0) {
                 await new Promise((resolve) =>
-                    setTimeout(resolve, groupSettings.responseDelay ?? 3000)
+                    setTimeout(resolve, groupSettings.responseDelay ?? 3000),
                 );
             }
 
             try {
-                await callApiAndHandleResponse(chatId, character as Character, history);
+                await callApiAndHandleResponse(
+                    chatId,
+                    character as Character,
+                    history,
+                );
             } catch (error) {
                 console.error(
                     `Error in group chat response for ${character.name}:`,
-                    error
+                    error,
                 );
             }
         }
@@ -498,7 +517,7 @@ export async function sendMessage(content: string, type: string = "text", payloa
         const respondingCharacterId =
             participants[Math.floor(Math.random() * participants.length)];
         const character = get(characters).find(
-            (c) => c.id === respondingCharacterId
+            (c) => c.id === respondingCharacterId,
         );
 
         if (!character) {
@@ -507,7 +526,11 @@ export async function sendMessage(content: string, type: string = "text", payloa
         }
 
         try {
-            await callApiAndHandleResponse(chatId, character as Character, history);
+            await callApiAndHandleResponse(
+                chatId,
+                character as Character,
+                history,
+            );
         } finally {
             isWaitingForResponse.set(false);
             typingCharacterId.set(null);
@@ -523,7 +546,11 @@ export async function sendMessage(content: string, type: string = "text", payloa
         }
 
         try {
-            await callApiAndHandleResponse(chatId, character as Character, history);
+            await callApiAndHandleResponse(
+                chatId,
+                character as Character,
+                history,
+            );
         } finally {
             isWaitingForResponse.set(false);
             typingCharacterId.set(null);
@@ -543,7 +570,7 @@ export function deleteMessageGroup(messageId: number | string) {
             const currentMessages = allMessages[chatId] || [];
 
             const messageIndex = currentMessages.findIndex(
-                (msg) => msg.id === messageId
+                (msg) => msg.id === messageId,
             );
             const messageAtTarget = currentMessages[messageIndex];
             const characterName = messageAtTarget?.sender || "";
@@ -551,7 +578,7 @@ export function deleteMessageGroup(messageId: number | string) {
             const groupInfo = findMessageGroup(
                 currentMessages,
                 messageIndex,
-                characterName
+                characterName,
             );
 
             if (!groupInfo) return;
@@ -574,7 +601,10 @@ export function editMessage(messageId: number | string) {
     editingMessageId.set(messageId);
 }
 
-export async function saveEditedMessage(messageId: number | string, newContent: string) {
+export async function saveEditedMessage(
+    messageId: number | string,
+    newContent: string,
+) {
     const chatId = get(selectedChatId);
     if (!chatId) return;
 
@@ -582,7 +612,7 @@ export async function saveEditedMessage(messageId: number | string, newContent: 
     const currentMessages = allMessages[chatId] || [];
 
     const messageIndex = currentMessages.findIndex(
-        (msg) => msg.id === messageId
+        (msg) => msg.id === messageId,
     );
     const messageAtTarget = currentMessages[messageIndex];
     const characterName = messageAtTarget?.sender || "";
@@ -590,7 +620,7 @@ export async function saveEditedMessage(messageId: number | string, newContent: 
     const groupInfo = findMessageGroup(
         currentMessages,
         messageIndex,
-        characterName
+        characterName,
     );
 
     if (!groupInfo) return;
@@ -620,7 +650,7 @@ export async function saveEditedMessage(messageId: number | string, newContent: 
     isWaitingForResponse.set(true);
 
     const character = get(characters).find(
-        (c) => c.id === getCurrentChatRoom(chatId)?.characterId
+        (c) => c.id === getCurrentChatRoom(chatId)?.characterId,
     );
     if (!character) {
         isWaitingForResponse.set(false);
@@ -633,7 +663,7 @@ export async function saveEditedMessage(messageId: number | string, newContent: 
             character as Character,
             updatedMessages,
             false,
-            true
+            true,
         );
     } finally {
         isWaitingForResponse.set(false);
@@ -649,7 +679,7 @@ export async function rerollMessage(messageId: number | string) {
     const currentMessages = allMessages[chatId] || [];
 
     const messageIndex = currentMessages.findIndex(
-        (msg) => msg.id === messageId
+        (msg) => msg.id === messageId,
     );
     const messageAtTarget = currentMessages[messageIndex];
     const characterName = messageAtTarget?.sender || "";
@@ -657,7 +687,7 @@ export async function rerollMessage(messageId: number | string) {
     const groupInfo = findMessageGroup(
         currentMessages,
         messageIndex,
-        characterName
+        characterName,
     );
 
     if (!groupInfo) return;
@@ -683,19 +713,19 @@ export async function rerollMessage(messageId: number | string) {
     // For group chats, use the characterId from the message
     if (isGroupChat(chatId) && targetMessage.characterId) {
         character = get(characters).find(
-            (c) => c.id === targetMessage.characterId
+            (c) => c.id === targetMessage.characterId,
         );
     }
     // For open chats, use the characterId from the message or find by name
     else if (isOpenChat(chatId) && targetMessage.characterId) {
         character = get(characters).find(
-            (c) => c.id === targetMessage.characterId
+            (c) => c.id === targetMessage.characterId,
         );
     }
     // For regular chats, use the chat room's characterId
     else {
         character = get(characters).find(
-            (c) => c.id === getCurrentChatRoom(chatId)?.characterId
+            (c) => c.id === getCurrentChatRoom(chatId)?.characterId,
         );
     }
 
@@ -707,7 +737,7 @@ export async function rerollMessage(messageId: number | string) {
         targetMessage.sender !== "System"
     ) {
         character = get(characters).find(
-            (c) => c.name === targetMessage.sender
+            (c) => c.name === targetMessage.sender,
         );
     }
 
@@ -722,7 +752,7 @@ export async function rerollMessage(messageId: number | string) {
             character as Character,
             truncatedMessages,
             false,
-            true
+            true,
         );
     } finally {
         isWaitingForResponse.set(false);
@@ -741,11 +771,11 @@ export async function generateSnsPost(messageId: number | string) {
     if (!targetMessage || targetMessage.isMe) return;
 
     let character = get(characters).find(
-        (c) => c.id === getCurrentChatRoom(chatId)?.characterId
+        (c) => c.id === getCurrentChatRoom(chatId)?.characterId,
     );
     if (!character && targetMessage) {
         character = get(characters).find(
-            (c) => c.name === targetMessage.sender
+            (c) => c.name === targetMessage.sender,
         );
     }
 
@@ -780,7 +810,7 @@ export async function generateSnsPost(messageId: number | string) {
             {
                 pattern: "{recentContext}",
                 replace: recentConversation,
-            }
+            },
         );
 
         const apiProvider = currentSettings.apiProvider || "gemini";
@@ -798,18 +828,20 @@ export async function generateSnsPost(messageId: number | string) {
             throw new Error("API configuration not found or API key missing");
         }
 
-        const snsHistory: Message[] = [{
-            id: Date.now(),
-            sender: "user",
-            content: snsPrompt,
-            timestamp: Date.now(),
-            isMe: true,
-            type: "text",
-            time: new Date().toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-            })
-        }];
+        const snsHistory: Message[] = [
+            {
+                id: Date.now(),
+                sender: "user",
+                content: snsPrompt,
+                timestamp: Date.now(),
+                isMe: true,
+                type: "text",
+                time: new Date().toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                }),
+            },
+        ];
 
         const response = await apiManager.generateContent(
             apiProvider,
@@ -828,8 +860,8 @@ export async function generateSnsPost(messageId: number | string) {
             currentConfig.baseUrl,
             {
                 maxTokens: currentConfig.maxTokens,
-                temperature: currentConfig.temperature
-            }
+                temperature: currentConfig.temperature,
+            },
         );
 
         const parsedResponse = response;
@@ -840,9 +872,9 @@ export async function generateSnsPost(messageId: number | string) {
                 if (charIndex !== -1) {
                     const newChars = [...chars];
                     if (parsedResponse.autoPost) {
-                         newChars[charIndex] = processAutoPost(
+                        newChars[charIndex] = processAutoPost(
                             newChars[charIndex] as Character,
-                            parsedResponse.autoPost
+                            parsedResponse.autoPost,
                         );
                     }
                     return newChars;

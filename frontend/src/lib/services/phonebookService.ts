@@ -38,7 +38,7 @@ const IMAGE_MIME_PATTERN = /^image\//i;
  * Acquire an authorization context for the current user.
  */
 async function createFetchContext(
-    clerk: ClerkInstance
+    clerk: ClerkInstance,
 ): Promise<PhonebookFetchContext> {
     const session = clerk.session;
     if (!session) {
@@ -63,7 +63,7 @@ function authHeaders(token: string): HeadersInit {
  * Check whether the authenticated user can access the phonebook service.
  */
 export async function verifyPhonebookAccess(
-    clerk: ClerkInstance
+    clerk: ClerkInstance,
 ): Promise<boolean> {
     const { token } = await createFetchContext(clerk);
     const response = await fetch(PHONEBOOK_CHECK_URL, {
@@ -76,7 +76,7 @@ export async function verifyPhonebookAccess(
         console.error(
             "Phonebook access check failed",
             response.status,
-            response.statusText
+            response.statusText,
         );
         return false;
     }
@@ -129,7 +129,7 @@ function normalizeEntry(raw: unknown): PhonebookEntrySummary | null {
  * Retrieve phonebook entry summaries for the authenticated user.
  */
 export async function listPhonebookEntries(
-    clerk: ClerkInstance
+    clerk: ClerkInstance,
 ): Promise<PhonebookEntrySummary[]> {
     const { token } = await createFetchContext(clerk);
     const response = await fetch(`${PHONEBOOK_BASE_URL}/api/data`, {
@@ -140,7 +140,7 @@ export async function listPhonebookEntries(
 
     if (!response.ok) {
         throw new Error(
-            `Failed to fetch phonebook entries: ${response.status} ${response.statusText}`
+            `Failed to fetch phonebook entries: ${response.status} ${response.statusText}`,
         );
     }
 
@@ -161,7 +161,7 @@ export async function listPhonebookEntries(
 
 async function getEntryDetail(
     clerk: ClerkInstance,
-    id: string
+    id: string,
 ): Promise<PhonebookEntryDetail> {
     const { token } = await createFetchContext(clerk);
     const response = await fetch(
@@ -170,7 +170,7 @@ async function getEntryDetail(
             method: "GET",
             headers: authHeaders(token),
             credentials: "include",
-        }
+        },
     );
 
     if (!response.ok) {
@@ -196,7 +196,7 @@ function parseJsonCharacter(payload: unknown): ImportedCharacterData {
 
     if (!name || !prompt) {
         throw new Error(
-            "Phonebook character payload is missing mandatory fields"
+            "Phonebook character payload is missing mandatory fields",
         );
     }
 
@@ -244,7 +244,7 @@ function parseJsonCharacter(payload: unknown): ImportedCharacterData {
 
 async function parsePngCharacter(
     bytes: Uint8Array,
-    mimeType: string
+    mimeType: string,
 ): Promise<ImportedCharacterData> {
     const cChrChunk = extractPngChunk(bytes, "cChr");
     const chArChunk = cChrChunk ?? extractPngChunk(bytes, "chAr");
@@ -268,17 +268,17 @@ async function parsePngCharacter(
 
 async function downloadCharacterData(
     ctx: PhonebookFetchContext,
-    entry: PhonebookEntryDetail
+    entry: PhonebookEntryDetail,
 ): Promise<ImportedCharacterData> {
     if (entry.encrypted) {
         throw new Error(
-            "This character is encrypted and cannot be imported. Please contact the character creator for an unencrypted version."
+            "This character is encrypted and cannot be imported. Please contact the character creator for an unencrypted version.",
         );
     }
 
     const downloadUrl = new URL(
         entry.additionalData,
-        PHONEBOOK_BASE_URL
+        PHONEBOOK_BASE_URL,
     ).toString();
 
     const response = await fetch(downloadUrl, {
@@ -289,7 +289,7 @@ async function downloadCharacterData(
 
     if (!response.ok) {
         throw new Error(
-            `Failed to download phonebook card: ${response.status}`
+            `Failed to download phonebook card: ${response.status}`,
         );
     }
 
@@ -304,7 +304,7 @@ async function downloadCharacterData(
         const buffer = await response.arrayBuffer();
         return parsePngCharacter(
             new Uint8Array(buffer),
-            contentType.split(";")[0]
+            contentType.split(";")[0],
         );
     }
 
@@ -322,7 +322,7 @@ async function downloadCharacterData(
  */
 export async function importPhonebookCharacter(
     clerk: ClerkInstance,
-    entryId: string
+    entryId: string,
 ): Promise<PhonebookImportResult> {
     const ctx = await createFetchContext(clerk);
     const entry = await getEntryDetail(ctx.clerk, entryId);

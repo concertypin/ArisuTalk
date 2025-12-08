@@ -11,7 +11,7 @@ export function dumpLocalStorageToJson(): string {
         if (key) {
             try {
                 localStorageData[key] = JSON.parse(
-                    localStorage.getItem(key) || "null"
+                    localStorage.getItem(key) || "null",
                 );
             } catch (e) {
                 localStorageData[key] = localStorage.getItem(key);
@@ -41,7 +41,7 @@ export async function dumpIndexedDBToJson(): Promise<string | null> {
 
                 const transaction: IDBTransaction = db.transaction(
                     Array.from(db.objectStoreNames),
-                    "readonly"
+                    "readonly",
                 );
                 transaction.oncomplete = () => {
                     db.close();
@@ -50,7 +50,7 @@ export async function dumpIndexedDBToJson(): Promise<string | null> {
                 transaction.onerror = (event: Event) => {
                     console.error(
                         `Transaction error for ${dbName}:`,
-                        (event.target as IDBRequest).error
+                        (event.target as IDBRequest).error,
                     );
                     db.close();
                     reject((event.target as IDBRequest).error);
@@ -74,7 +74,7 @@ export async function dumpIndexedDBToJson(): Promise<string | null> {
             request.onerror = (event: Event) => {
                 console.error(
                     `Error opening IndexedDB database ${dbName}:`,
-                    (event.target as IDBRequest).error
+                    (event.target as IDBRequest).error,
                 );
                 reject((event.target as IDBRequest).error);
             };
@@ -84,7 +84,7 @@ export async function dumpIndexedDBToJson(): Promise<string | null> {
     try {
         const databases: IDBDatabaseInfo[] = await indexedDB.databases();
         const dumpPromises = databases.map((db) =>
-            db.name ? dumpDatabase(db.name) : Promise.resolve()
+            db.name ? dumpDatabase(db.name) : Promise.resolve(),
         );
         await Promise.all(dumpPromises);
         const jsonOutput = JSON.stringify(indexedDBData, null, 2);

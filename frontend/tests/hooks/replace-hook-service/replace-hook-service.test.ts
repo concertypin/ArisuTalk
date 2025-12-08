@@ -25,7 +25,7 @@ vi.mock("$lib/utils/worker/replace", () => ({
                     const flags = pattern.caseSensitive === false ? "gi" : "g";
                     const regex = new RegExp(
                         pattern.pattern.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
-                        flags
+                        flags,
                     );
                     result = result.replace(regex, pattern.replace);
                 }

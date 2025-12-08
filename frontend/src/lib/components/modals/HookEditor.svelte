@@ -1,68 +1,68 @@
 <script lang="ts">
-    import { t } from "$root/i18n";
-    import type { ReplaceHook, ReplaceRule } from "../../../types/replaceHook";
-    import { generateId } from "../../stores/replaceHooks";
-    import RuleItem from "./RuleItem.svelte";
+import { t } from "$root/i18n";
+import type { ReplaceHook, ReplaceRule } from "../../../types/replaceHook";
+import { generateId } from "../../stores/replaceHooks";
+import RuleItem from "./RuleItem.svelte";
 
-    export let hook: ReplaceHook | null;
-    export let hookType: "input" | "output" | "request" | "display";
-    export let onSave: (hook: ReplaceHook) => void;
-    export let onCancel: () => void;
+export let hook: ReplaceHook | null;
+export let hookType: "input" | "output" | "request" | "display";
+export let onSave: (hook: ReplaceHook) => void;
+export let onCancel: () => void;
 
-    let formData = hook || {
+let formData = hook || {
+    id: generateId(),
+    name: "",
+    description: "",
+    type: hookType,
+    enabled: true,
+    priority: 0,
+    rules: [],
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+};
+
+let editingRuleIndex: number | null = null;
+
+function addRule() {
+    const newRule: ReplaceRule = {
         id: generateId(),
         name: "",
-        description: "",
-        type: hookType,
         enabled: true,
-        priority: 0,
-        rules: [],
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
+        from: "",
+        to: "",
+        useRegex: false,
+        caseSensitive: false,
     };
+    formData.rules = [...formData.rules, newRule];
+}
 
-    let editingRuleIndex: number | null = null;
+function deleteRule(index: number) {
+    formData.rules = formData.rules.filter((_, i) => i !== index);
+}
 
-    function addRule() {
-        const newRule: ReplaceRule = {
-            id: generateId(),
-            name: "",
-            enabled: true,
-            from: "",
-            to: "",
-            useRegex: false,
-            caseSensitive: false,
-        };
-        formData.rules = [...formData.rules, newRule];
+function updateRule(index: number, rule: ReplaceRule) {
+    formData.rules[index] = rule;
+    editingRuleIndex = null;
+}
+
+function handleSave() {
+    if (!formData.name.trim()) {
+        alert(t("modal.replaceHooks.nameRequired"));
+        return;
     }
 
-    function deleteRule(index: number) {
-        formData.rules = formData.rules.filter((_, i) => i !== index);
+    if (formData.rules.length === 0) {
+        alert(t("modal.replaceHooks.rulesRequired"));
+        return;
     }
 
-    function updateRule(index: number, rule: ReplaceRule) {
-        formData.rules[index] = rule;
-        editingRuleIndex = null;
-    }
+    formData.updatedAt = Date.now();
+    onSave(formData);
+}
 
-    function handleSave() {
-        if (!formData.name.trim()) {
-            alert(t("modal.replaceHooks.nameRequired"));
-            return;
-        }
-
-        if (formData.rules.length === 0) {
-            alert(t("modal.replaceHooks.rulesRequired"));
-            return;
-        }
-
-        formData.updatedAt = Date.now();
-        onSave(formData);
-    }
-
-    function toggleEnabled() {
-        formData.enabled = !formData.enabled;
-    }
+function toggleEnabled() {
+    formData.enabled = !formData.enabled;
+}
 </script>
 
 <div class="hook-editor">

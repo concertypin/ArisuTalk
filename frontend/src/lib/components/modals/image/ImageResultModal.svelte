@@ -1,31 +1,31 @@
 <script lang="ts">
-    import { Info, X } from "lucide-svelte";
-    import { createEventDispatcher, onDestroy, onMount } from "svelte";
-    import { fade } from "svelte/transition";
+import { Info, X } from "lucide-svelte";
+import { createEventDispatcher, onDestroy, onMount } from "svelte";
+import { fade } from "svelte/transition";
 
-    export let isOpen = false;
-    export let imageUrl = "";
-    export let promptText = "";
+export let isOpen = false;
+export let imageUrl = "";
+export let promptText = "";
 
-    const dispatch = createEventDispatcher();
+const dispatch = createEventDispatcher();
 
-    function closeModal() {
-        dispatch("close");
+function closeModal() {
+    dispatch("close");
+}
+
+function handleKeydown(event: KeyboardEvent) {
+    if (event.key === "Escape") {
+        closeModal();
     }
+}
 
-    function handleKeydown(event: KeyboardEvent) {
-        if (event.key === "Escape") {
-            closeModal();
-        }
-    }
+onMount(() => {
+    window.addEventListener("keydown", handleKeydown);
+});
 
-    onMount(() => {
-        window.addEventListener("keydown", handleKeydown);
-    });
-
-    onDestroy(() => {
-        window.removeEventListener("keydown", handleKeydown);
-    });
+onDestroy(() => {
+    window.removeEventListener("keydown", handleKeydown);
+});
 </script>
 
 {#if isOpen}

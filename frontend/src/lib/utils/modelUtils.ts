@@ -27,7 +27,10 @@ export function shouldUseMaxCompletionTokens(model: string): boolean {
 /**
  * Gets the correct token limit parameter name for a given model
  */
-export function getTokenLimitParameter(model: string, tokenLimit: number): { max_tokens: number } | { max_completion_tokens: number } {
+export function getTokenLimitParameter(
+    model: string,
+    tokenLimit: number,
+): { max_tokens: number } | { max_completion_tokens: number } {
     if (shouldUseMaxCompletionTokens(model)) {
         return { max_completion_tokens: tokenLimit };
     }

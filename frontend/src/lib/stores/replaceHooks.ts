@@ -30,7 +30,7 @@ const initialConfig: ReplaceHooksConfig = {
  */
 export const replaceHooks = persistentStore<ReplaceHooksConfig>(
     "personaChat_replaceHooks_v1",
-    initialConfig
+    initialConfig,
 );
 
 if (import.meta.env.DEV) {
@@ -47,7 +47,7 @@ if (import.meta.env.DEV) {
  * Add a new hook to the store
  */
 export function addHook(
-    hook: Omit<ReplaceHook, "id" | "createdAt" | "updatedAt">
+    hook: Omit<ReplaceHook, "id" | "createdAt" | "updatedAt">,
 ): ReplaceHook {
     const newHook: ReplaceHook = {
         ...hook,
@@ -73,7 +73,7 @@ export function addHook(
 export function updateHook(
     type: ReplaceHookType,
     hookId: string,
-    updates: Partial<ReplaceHook>
+    updates: Partial<ReplaceHook>,
 ): void {
     replaceHooks.update((config) => {
         const hooks = config[`${type}Hooks` satisfies keyof ReplaceHooksConfig];
@@ -87,7 +87,7 @@ export function updateHook(
                               ...updates,
                               updatedAt: Date.now(),
                           } satisfies ReplaceHook)
-                        : h
+                        : h,
             ),
         };
     });
@@ -98,7 +98,7 @@ export function updateHook(
  */
 export function deleteHook(
     type: "input" | "output" | "request" | "display",
-    hookId: string
+    hookId: string,
 ): void {
     replaceHooks.update((config) => {
         const hooks = config[`${type}Hooks`];
@@ -115,7 +115,7 @@ export function deleteHook(
 export function addRuleToHook(
     type: "input" | "output" | "request" | "display",
     hookId: string,
-    rule: Omit<ReplaceRule, "id">
+    rule: Omit<ReplaceRule, "id">,
 ): void {
     replaceHooks.update((config) => {
         const hooks = config[`${type}Hooks`];
@@ -134,7 +134,7 @@ export function addRuleToHook(
                           ],
                           updatedAt: Date.now(),
                       }
-                    : h
+                    : h,
             ),
         };
     });
@@ -147,7 +147,7 @@ export function updateRuleInHook(
     type: "input" | "output" | "request" | "display",
     hookId: string,
     ruleId: string,
-    updates: Partial<ReplaceRule>
+    updates: Partial<ReplaceRule>,
 ): void {
     replaceHooks.update((config) => {
         const hooks = config[`${type}Hooks`];
@@ -158,11 +158,11 @@ export function updateRuleInHook(
                     ? {
                           ...h,
                           rules: h.rules.map((r) =>
-                              r.id === ruleId ? { ...r, ...updates } : r
+                              r.id === ruleId ? { ...r, ...updates } : r,
                           ),
                           updatedAt: Date.now(),
                       }
-                    : h
+                    : h,
             ),
         };
     });
@@ -174,7 +174,7 @@ export function updateRuleInHook(
 export function deleteRuleFromHook(
     type: "input" | "output" | "request" | "display",
     hookId: string,
-    ruleId: string
+    ruleId: string,
 ): void {
     replaceHooks.update((config) => {
         const hooks = config[`${type}Hooks`];
@@ -187,7 +187,7 @@ export function deleteRuleFromHook(
                           rules: h.rules.filter((r) => r.id !== ruleId),
                           updatedAt: Date.now(),
                       }
-                    : h
+                    : h,
             ),
         };
     });
@@ -197,7 +197,7 @@ export function deleteRuleFromHook(
  * Clear all hooks of a specific type
  */
 export function clearHooksOfType(
-    type: "input" | "output" | "request" | "display"
+    type: "input" | "output" | "request" | "display",
 ): void {
     replaceHooks.update((config) => ({
         ...config,
@@ -241,7 +241,7 @@ export function importHooksConfig(jsonString: string): ReplaceHooksConfig {
         return config;
     } catch (error) {
         throw new Error(
-            `Failed to import hooks config: ${error instanceof Error ? error.message : String(error)}`
+            `Failed to import hooks config: ${error instanceof Error ? error.message : String(error)}`,
         );
     }
 }
@@ -249,10 +249,7 @@ export function importHooksConfig(jsonString: string): ReplaceHooksConfig {
 /**
  * Move a hook up in order (lower index = higher priority = executes first)
  */
-export function moveHookUp(
-    type: ReplaceHookType,
-    hookId: string
-): void {
+export function moveHookUp(type: ReplaceHookType, hookId: string): void {
     replaceHooks.update((config) => {
         const key = `${type}Hooks` satisfies keyof ReplaceHooksConfig;
         const hooks = config[key] as ReplaceHook[];
@@ -302,7 +299,7 @@ export function moveHookDown(type: ReplaceHookType, hookId: string): void {
  */
 export function reorderHooks(
     type: "input" | "output" | "request" | "display",
-    orderedIds: string[]
+    orderedIds: string[],
 ): void {
     replaceHooks.update((config) => {
         const key = `${type}Hooks` satisfies keyof ReplaceHooksConfig;
@@ -326,7 +323,7 @@ export function reorderHooks(
 export function moveRuleUp(
     type: ReplaceHookType,
     hookId: string,
-    ruleId: string
+    ruleId: string,
 ): void {
     replaceHooks.update((config) => {
         const key = `${type}Hooks` satisfies keyof ReplaceHooksConfig;
@@ -366,7 +363,7 @@ export function moveRuleUp(
 export function moveRuleDown(
     type: ReplaceHookType,
     hookId: string,
-    ruleId: string
+    ruleId: string,
 ): void {
     replaceHooks.update((config) => {
         const key = `${type}Hooks` satisfies keyof ReplaceHooksConfig;
@@ -406,7 +403,7 @@ export function moveRuleDown(
 export function reorderRules(
     type: ReplaceHookType,
     hookId: string,
-    orderedRuleIds: string[]
+    orderedRuleIds: string[],
 ): void {
     replaceHooks.update((config) => {
         const key = `${type}Hooks` satisfies keyof ReplaceHooksConfig;

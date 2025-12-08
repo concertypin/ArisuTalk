@@ -1,345 +1,356 @@
 <script lang="ts">
-    import { derived } from "svelte/store";
-    import { onMount, afterUpdate, onDestroy } from "svelte";
-    import { slide } from "svelte/transition";
-    import {
-        Menu,
-        Send,
-        Paperclip,
-        X,
-        Mic,
-        Image as ImageIcon,
-        Bot,
-        ArrowLeft,
-        Globe,
-        Users,
-        Instagram,
-        Phone,
-        Video,
-        BarChart3,
-        Plus,
-        Smile,
-        MessageCircle,
-    } from "lucide-svelte";
-    import { nanoid } from "nanoid";
-    import { t } from "$root/i18n";
+import { derived } from "svelte/store";
+import { onMount, afterUpdate, onDestroy } from "svelte";
+import { slide } from "svelte/transition";
+import {
+    Menu,
+    Send,
+    Paperclip,
+    X,
+    Mic,
+    Image as ImageIcon,
+    Bot,
+    ArrowLeft,
+    Globe,
+    Users,
+    Instagram,
+    Phone,
+    Video,
+    BarChart3,
+    Plus,
+    Smile,
+    MessageCircle,
+} from "lucide-svelte";
+import { nanoid } from "nanoid";
+import { t } from "$root/i18n";
 
-    import {
-        selectedChatId,
-        messages,
-        isWaitingForResponse,
-        imageToSend,
-        stickerToSend,
-        chatRooms,
-        groupChats,
-        openChats,
-        typingCharacterId,
-        virtualStream,
-    } from "../stores/chat";
-    import { settings } from "../stores/settings";
-    import { characters } from "../stores/character";
-    import {
-        isSidebarCollapsed,
-        isDebugLogModalVisible,
-        isSNSFeedModalVisible,
-        isInputOptionsVisible,
-        isUserStickerPanelVisible,
-        snsFeedCharacter,
-    } from "../stores/ui";
-    import { sendMessage } from "../services/chatService";
-    import {
-        initializeOpenChat,
-        updateParticipantStates,
-    } from "../services/openChatService";
-    import {
-        chatType,
-        selectedChat,
-        selectedCharacter,
-    } from "../stores/derived";
+import {
+    selectedChatId,
+    messages,
+    isWaitingForResponse,
+    imageToSend,
+    stickerToSend,
+    chatRooms,
+    groupChats,
+    openChats,
+    typingCharacterId,
+    virtualStream,
+} from "../stores/chat";
+import { settings } from "../stores/settings";
+import { characters } from "../stores/character";
+import {
+    isSidebarCollapsed,
+    isDebugLogModalVisible,
+    isSNSFeedModalVisible,
+    isInputOptionsVisible,
+    isUserStickerPanelVisible,
+    snsFeedCharacter,
+} from "../stores/ui";
+import { sendMessage } from "../services/chatService";
+import {
+    initializeOpenChat,
+    updateParticipantStates,
+} from "../services/openChatService";
+import { chatType, selectedChat, selectedCharacter } from "../stores/derived";
 
-    import Avatar from "./Avatar.svelte";
-    import MessageGroup from "./MessageGroup.svelte";
-    import UserStickerPanel from "./UserStickerPanel.svelte";
-    import type { Character } from "$types/character";
-    import type { Message, MessageGroupData, DisplayCharacter, ChatRoom, GroupChat } from "$types/chat";
+import Avatar from "./Avatar.svelte";
+import MessageGroup from "./MessageGroup.svelte";
+import UserStickerPanel from "./UserStickerPanel.svelte";
+import type { Character } from "$types/character";
+import type {
+    Message,
+    MessageGroupData,
+    DisplayCharacter,
+    ChatRoom,
+    GroupChat,
+} from "$types/chat";
 
-    let messagesContainer: HTMLElement;
-    let imageUploadInput: HTMLInputElement;
-    let messageInput = "";
-    let imageCaption = "";
-    const participants = derived(
-        [chatType, selectedChatId, openChats, characters],
-        ([$chatType, $selectedChatId, $openChats, $characters]) => {
-            if (
-                $chatType === "open" &&
-                $selectedChatId &&
-                $openChats[$selectedChatId]
-            ) {
-                const participantIds =
-                    $openChats[$selectedChatId].currentParticipants || [];
-                return participantIds
-                    .map((id: string) => $characters.find((c) => c.id === id))
-                    .filter(Boolean) as Character[];
-            }
-            return [] as Character[];
-        }
-    );
-    let isAtBottom = true;
-    let participantUpdateInterval: ReturnType<typeof setInterval> | null = null;
-
-    function checkScrollPosition() {
-        if (!messagesContainer) return;
-        const { scrollTop, scrollHeight, clientHeight } = messagesContainer;
-        isAtBottom = scrollHeight - scrollTop - clientHeight < 5; // Increased tolerance
-    }
-
-    onMount(() => {
-        checkScrollPosition();
-    });
-
-    afterUpdate(() => {
-        checkScrollPosition();
-    });
-
-    $: {
-        if (participantUpdateInterval) {
-            clearInterval(participantUpdateInterval);
-            participantUpdateInterval = null;
-        }
-        if ($chatType === "open" && $selectedChatId) {
-            const chat = $openChats[$selectedChatId];
-            if (chat && chat.participantHistory && chat.participantHistory.length === 0) {
-                initializeOpenChat($selectedChatId);
-            }
-
-            participantUpdateInterval = setInterval(() => {
-                if ($selectedChatId) {
-                    updateParticipantStates($selectedChatId);
-                }
-            }, 30000);
-        }
-    }
-
-    onDestroy(() => {
-        if (participantUpdateInterval) {
-            clearInterval(participantUpdateInterval);
-        }
-    });
-
-    $: chatMessages = $selectedChatId ? ($messages[$selectedChatId] || []) : [];
-    $: allRooms = [
-        ...Object.values($chatRooms).flat(),
-        ...Object.values($groupChats),
-        ...Object.values($openChats),
-    ];
-    $: selectedRoom = allRooms.find((room) => room.id === $selectedChatId);
-
-    // Determine character or display character based on room type
-    let character: Character | DisplayCharacter | null = null;
-    $: {
-        if (selectedRoom) {
-            const roomType = 'type' in selectedRoom ? selectedRoom.type : undefined;
-             if (roomType === "group" || roomType === "open") {
-                character = {
-                    id: `${roomType}_chat_avatar`,
-                    name: selectedRoom.name,
-                    avatar: "",
-                };
-             } else {
-                 character = 'characterId' in selectedRoom && selectedRoom.characterId ? $characters.find((c) => String(c.id) === String(selectedRoom.characterId)) || null : null;
-             }
-        } else {
-            character = null;
-        }
-    }
-
-    const getSenderId = (msg: Message) => {
-        if (msg.isMe) return "user";
-        if (msg.type === "system") return "system";
-        return msg.characterId;
-    };
-
-    const createMessageGroups = (msgs: Message[]): MessageGroupData[] => {
-        if (!msgs || msgs.length === 0) {
-            return [];
-        }
-
-        const groups: MessageGroupData[] = [];
-        let i = 0;
-        while (i < msgs.length) {
-            const currentMessage = msgs[i];
-            const senderId = getSenderId(currentMessage);
-
-            let endIndex = i;
-            while (endIndex < msgs.length - 1) {
-                if (getSenderId(msgs[endIndex + 1]) !== senderId) {
-                    break;
-                }
-                endIndex++;
-            }
-
-            const groupMessages = msgs.slice(i, endIndex + 1);
-            const firstMessage = groupMessages[0];
-            const senderCharacter = firstMessage.characterId
-                ? $characters.find((c) => String(c.id) === String(firstMessage.characterId))
-                : (character as DisplayCharacter | null); // Use cast to generic display character
-
-            groups.push({
-                id: firstMessage.id,
-                messages: groupMessages,
-                isMe: firstMessage.isMe,
-                showSenderInfo:
-                    !firstMessage.isMe && firstMessage.type !== "system",
-                character: senderCharacter || null,
-            });
-
-            i = endIndex + 1;
-        }
-        return groups;
-    };
-
-    $: messageGroups = createMessageGroups(chatMessages);
-    $: virtualMessageGroups =
-        $virtualStream.isStreaming && $virtualStream.chatId === $selectedChatId
-            ? createMessageGroups($virtualStream.messages)
-            : [];
-
-    $: typingIndicatorInfo =
-        $typingCharacterId && $typingCharacterId.chatId === $selectedChatId
-            ? $typingCharacterId
-            : null;
-    $: typingCharacter = typingIndicatorInfo
-        ? $characters.find((c) => c.id === typingIndicatorInfo.characterId)
-        : null;
-    $: virtualTypingCharacter =
-        $virtualStream.isTyping && $virtualStream.chatId === $selectedChatId
-            ? $characters.find((c) => c.id === $virtualStream.characterId)
-            : null;
-
-    async function handleSendMessage() {
-        let content = messageInput;
-        let type = "text";
-        let payload: Record<string, unknown> = {};
-
-        if ($imageToSend) {
-            const imageId = nanoid();
-            const match = $imageToSend.match(
-                /^data:(image\/[a-zA-Z]+);base64,(.*)$/
-            );
-            const mimeType = match ? match[1] : "image/png";
-
-            const newMedia = {
-                id: imageId,
-                mimeType: mimeType,
-                dataUrl: $imageToSend,
-            };
-
-            // Update character
-            if (character && 'media' in character) { // Only if character has media property
-                characters.update((allChars) => {
-                    const charIndex = allChars.findIndex(
-                        (c) => c.id === character!.id
-                    );
-                    if (charIndex !== -1) {
-                        const updatedChar = { ...allChars[charIndex] };
-                        if (!updatedChar.media) {
-                            updatedChar.media = [];
-                        }
-                        updatedChar.media.push(newMedia);
-                        allChars[charIndex] = updatedChar;
-                    }
-                    return allChars;
-                });
-            }
-
-            content = imageCaption;
-            type = "image";
-            payload = { imageId: imageId, imageUrl: $imageToSend }; // Keep imageUrl for rendering
-        } else if ($stickerToSend) {
-            type = "sticker";
-            payload = { sticker: $stickerToSend, content: content }; // Pass text content along with sticker
-        }
-
+let messagesContainer: HTMLElement;
+let imageUploadInput: HTMLInputElement;
+let messageInput = "";
+let imageCaption = "";
+const participants = derived(
+    [chatType, selectedChatId, openChats, characters],
+    ([$chatType, $selectedChatId, $openChats, $characters]) => {
         if (
-            !content.trim() &&
-            type === "text" &&
-            !$imageToSend &&
-            !$stickerToSend
-        )
-            return;
-
-        const contentToSend = content;
-        const typeToSend = type;
-        const payloadToSend = payload;
-
-        messageInput = "";
-        imageCaption = "";
-        imageToSend.set(null);
-        stickerToSend.set(null);
-
-        await sendMessage(contentToSend, typeToSend, payloadToSend);
-    }
-
-    function openDebugLogs() {
-        isDebugLogModalVisible.set(true);
-    }
-
-    function openSNSModal() {
-        if (
-            character &&
-            selectedRoom &&
-            (!('type' in selectedRoom) || (selectedRoom.type !== "open" && selectedRoom.type !== "group"))
+            $chatType === "open" &&
+            $selectedChatId &&
+            $openChats[$selectedChatId]
         ) {
-            // Need full character object for SNS feed
-             const fullCharacter = $characters.find((c) => c.id === character!.id);
-             if (fullCharacter) {
-                snsFeedCharacter.set(fullCharacter);
-                isSNSFeedModalVisible.set(true);
-             }
+            const participantIds =
+                $openChats[$selectedChatId].currentParticipants || [];
+            return participantIds
+                .map((id: string) => $characters.find((c) => c.id === id))
+                .filter(Boolean) as Character[];
+        }
+        return [] as Character[];
+    },
+);
+let isAtBottom = true;
+let participantUpdateInterval: ReturnType<typeof setInterval> | null = null;
+
+function checkScrollPosition() {
+    if (!messagesContainer) return;
+    const { scrollTop, scrollHeight, clientHeight } = messagesContainer;
+    isAtBottom = scrollHeight - scrollTop - clientHeight < 5; // Increased tolerance
+}
+
+onMount(() => {
+    checkScrollPosition();
+});
+
+afterUpdate(() => {
+    checkScrollPosition();
+});
+
+$: {
+    if (participantUpdateInterval) {
+        clearInterval(participantUpdateInterval);
+        participantUpdateInterval = null;
+    }
+    if ($chatType === "open" && $selectedChatId) {
+        const chat = $openChats[$selectedChatId];
+        if (
+            chat &&
+            chat.participantHistory &&
+            chat.participantHistory.length === 0
+        ) {
+            initializeOpenChat($selectedChatId);
+        }
+
+        participantUpdateInterval = setInterval(() => {
+            if ($selectedChatId) {
+                updateParticipantStates($selectedChatId);
+            }
+        }, 30000);
+    }
+}
+
+onDestroy(() => {
+    if (participantUpdateInterval) {
+        clearInterval(participantUpdateInterval);
+    }
+});
+
+$: chatMessages = $selectedChatId ? $messages[$selectedChatId] || [] : [];
+$: allRooms = [
+    ...Object.values($chatRooms).flat(),
+    ...Object.values($groupChats),
+    ...Object.values($openChats),
+];
+$: selectedRoom = allRooms.find((room) => room.id === $selectedChatId);
+
+// Determine character or display character based on room type
+let character: Character | DisplayCharacter | null = null;
+$: {
+    if (selectedRoom) {
+        const roomType = "type" in selectedRoom ? selectedRoom.type : undefined;
+        if (roomType === "group" || roomType === "open") {
+            character = {
+                id: `${roomType}_chat_avatar`,
+                name: selectedRoom.name,
+                avatar: "",
+            };
+        } else {
+            character =
+                "characterId" in selectedRoom && selectedRoom.characterId
+                    ? $characters.find(
+                          (c) =>
+                              String(c.id) === String(selectedRoom.characterId),
+                      ) || null
+                    : null;
+        }
+    } else {
+        character = null;
+    }
+}
+
+const getSenderId = (msg: Message) => {
+    if (msg.isMe) return "user";
+    if (msg.type === "system") return "system";
+    return msg.characterId;
+};
+
+const createMessageGroups = (msgs: Message[]): MessageGroupData[] => {
+    if (!msgs || msgs.length === 0) {
+        return [];
+    }
+
+    const groups: MessageGroupData[] = [];
+    let i = 0;
+    while (i < msgs.length) {
+        const currentMessage = msgs[i];
+        const senderId = getSenderId(currentMessage);
+
+        let endIndex = i;
+        while (endIndex < msgs.length - 1) {
+            if (getSenderId(msgs[endIndex + 1]) !== senderId) {
+                break;
+            }
+            endIndex++;
+        }
+
+        const groupMessages = msgs.slice(i, endIndex + 1);
+        const firstMessage = groupMessages[0];
+        const senderCharacter = firstMessage.characterId
+            ? $characters.find(
+                  (c) => String(c.id) === String(firstMessage.characterId),
+              )
+            : (character as DisplayCharacter | null); // Use cast to generic display character
+
+        groups.push({
+            id: firstMessage.id,
+            messages: groupMessages,
+            isMe: firstMessage.isMe,
+            showSenderInfo:
+                !firstMessage.isMe && firstMessage.type !== "system",
+            character: senderCharacter || null,
+        });
+
+        i = endIndex + 1;
+    }
+    return groups;
+};
+
+$: messageGroups = createMessageGroups(chatMessages);
+$: virtualMessageGroups =
+    $virtualStream.isStreaming && $virtualStream.chatId === $selectedChatId
+        ? createMessageGroups($virtualStream.messages)
+        : [];
+
+$: typingIndicatorInfo =
+    $typingCharacterId && $typingCharacterId.chatId === $selectedChatId
+        ? $typingCharacterId
+        : null;
+$: typingCharacter = typingIndicatorInfo
+    ? $characters.find((c) => c.id === typingIndicatorInfo.characterId)
+    : null;
+$: virtualTypingCharacter =
+    $virtualStream.isTyping && $virtualStream.chatId === $selectedChatId
+        ? $characters.find((c) => c.id === $virtualStream.characterId)
+        : null;
+
+async function handleSendMessage() {
+    let content = messageInput;
+    let type = "text";
+    let payload: Record<string, unknown> = {};
+
+    if ($imageToSend) {
+        const imageId = nanoid();
+        const match = $imageToSend.match(
+            /^data:(image\/[a-zA-Z]+);base64,(.*)$/,
+        );
+        const mimeType = match ? match[1] : "image/png";
+
+        const newMedia = {
+            id: imageId,
+            mimeType: mimeType,
+            dataUrl: $imageToSend,
+        };
+
+        // Update character
+        if (character && "media" in character) {
+            // Only if character has media property
+            characters.update((allChars) => {
+                const charIndex = allChars.findIndex(
+                    (c) => c.id === character!.id,
+                );
+                if (charIndex !== -1) {
+                    const updatedChar = { ...allChars[charIndex] };
+                    if (!updatedChar.media) {
+                        updatedChar.media = [];
+                    }
+                    updatedChar.media.push(newMedia);
+                    allChars[charIndex] = updatedChar;
+                }
+                return allChars;
+            });
+        }
+
+        content = imageCaption;
+        type = "image";
+        payload = { imageId: imageId, imageUrl: $imageToSend }; // Keep imageUrl for rendering
+    } else if ($stickerToSend) {
+        type = "sticker";
+        payload = { sticker: $stickerToSend, content: content }; // Pass text content along with sticker
+    }
+
+    if (!content.trim() && type === "text" && !$imageToSend && !$stickerToSend)
+        return;
+
+    const contentToSend = content;
+    const typeToSend = type;
+    const payloadToSend = payload;
+
+    messageInput = "";
+    imageCaption = "";
+    imageToSend.set(null);
+    stickerToSend.set(null);
+
+    await sendMessage(contentToSend, typeToSend, payloadToSend);
+}
+
+function openDebugLogs() {
+    isDebugLogModalVisible.set(true);
+}
+
+function openSNSModal() {
+    if (
+        character &&
+        selectedRoom &&
+        (!("type" in selectedRoom) ||
+            (selectedRoom.type !== "open" && selectedRoom.type !== "group"))
+    ) {
+        // Need full character object for SNS feed
+        const fullCharacter = $characters.find((c) => c.id === character!.id);
+        if (fullCharacter) {
+            snsFeedCharacter.set(fullCharacter);
+            isSNSFeedModalVisible.set(true);
         }
     }
+}
 
-    function handleDummyClick() {
-        console.log("This feature is not yet migrated.");
-    }
+function handleDummyClick() {
+    console.log("This feature is not yet migrated.");
+}
 
-    function toggleInputOptions() {
-        isUserStickerPanelVisible.set(false);
-        isInputOptionsVisible.update((v) => !v);
-    }
+function toggleInputOptions() {
+    isUserStickerPanelVisible.set(false);
+    isInputOptionsVisible.update((v) => !v);
+}
 
-    function toggleStickerPanel() {
-        isInputOptionsVisible.set(false);
-        isUserStickerPanelVisible.update((v) => !v);
-    }
+function toggleStickerPanel() {
+    isInputOptionsVisible.set(false);
+    isUserStickerPanelVisible.update((v) => !v);
+}
 
-    function openImageUpload() {
-        imageUploadInput.click();
-        isInputOptionsVisible.set(false);
-    }
+function openImageUpload() {
+    imageUploadInput.click();
+    isInputOptionsVisible.set(false);
+}
 
-    function handleImageFileChange(event: Event) {
-        const target = event.target as HTMLInputElement;
-        const file = target.files?.[0];
-        if (!file) return;
+function handleImageFileChange(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+    if (!file) return;
 
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            if (e.target?.result && typeof e.target.result === 'string') {
-                imageToSend.set(e.target.result);
-            }
-        };
-        reader.readAsDataURL(file);
-    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        if (e.target?.result && typeof e.target.result === "string") {
+            imageToSend.set(e.target.result);
+        }
+    };
+    reader.readAsDataURL(file);
+}
 
-    function removeImage() {
-        imageToSend.set(null);
-        imageCaption = "";
-    }
+function removeImage() {
+    imageToSend.set(null);
+    imageCaption = "";
+}
 
-    function removeSticker() {
-        stickerToSend.set(null);
-    }
+function removeSticker() {
+    stickerToSend.set(null);
+}
 </script>
 
 <div

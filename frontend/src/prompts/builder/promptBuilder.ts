@@ -16,7 +16,10 @@ import type { Message } from "../../types/chat";
  * Populates a template with magic patterns.
  * It also makes the context safe by deep copying objects to avoid mutations.
  */
-async function populateTemplate(template: string, context: Record<string, any>): Promise<string> {
+async function populateTemplate(
+    template: string,
+    context: Record<string, any>,
+): Promise<string> {
     const defaultContext = {
         sessionStorage: window.sessionStorage,
         console: { log: console.log },
@@ -81,7 +84,7 @@ function formatGroupChatMessages(messages: Message[]): string {
                 {
                     hour: "2-digit",
                     minute: "2-digit",
-                }
+                },
             );
             const sender = msg.isMe ? "User" : msg.sender;
             return `[${timestamp}] ${sender}: ${msg.content || "(No content)"}`;
@@ -112,7 +115,10 @@ export async function buildContentPrompt({
     forceSummary = false,
     isGroupChat = false,
     isOpenChat = false,
-}: BuildContentPromptParams): Promise<{ contents: InternalContent[]; systemPrompt: string }> {
+}: BuildContentPromptParams): Promise<{
+    contents: InternalContent[];
+    systemPrompt: string;
+}> {
     const chatMLTemplate = await getPrompt("mainChat");
 
     const lastMessageTime =
@@ -120,7 +126,9 @@ export async function buildContentPrompt({
             ? new Date(history[history.length - 1].timestamp) // Use timestamp instead of id
             : new Date();
     const currentTime = new Date();
-    const timeDiff = Math.round((currentTime.getTime() - lastMessageTime.getTime()) / 1000 / 60);
+    const timeDiff = Math.round(
+        (currentTime.getTime() - lastMessageTime.getTime()) / 1000 / 60,
+    );
 
     let timeContext = `(Context: It's currently ${currentTime.toLocaleString("en-US")}.`;
     if (isProactive) {
@@ -153,7 +161,11 @@ export async function buildContentPrompt({
         // 1. SNS 포스트가 있으면 SNS 포스트를 메모리로 사용
         if (character.snsPosts && character.snsPosts.length > 0) {
             return character.snsPosts
-                .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()) // 최신순 정렬
+                .sort(
+                    (a, b) =>
+                        new Date(b.timestamp).getTime() -
+                        new Date(a.timestamp).getTime(),
+                ) // 최신순 정렬
                 .slice(0, 15) // 최근 15개만 사용 (컨텍스트 제한)
                 .map((post) => {
                     const tags =
@@ -161,7 +173,7 @@ export async function buildContentPrompt({
                             ? ` [${post.tags.join(", ")}]`
                             : "";
                     const date = new Date(post.timestamp).toLocaleDateString(
-                        "ko-KR"
+                        "ko-KR",
                     );
                     return `- ${post.content}${tags} (${date})`;
                 })
@@ -238,7 +250,7 @@ export async function buildContentPrompt({
         character as any, // chatMLParser expects CharacterData from defaults, but we use Character from types. They should be compatible.
         userName,
         userDescription,
-        false // Don't include user/assistant messages from ChatML prompts
+        false, // Don't include user/assistant messages from ChatML prompts
     );
 
     let conversationContents: InternalContent[] = [];
@@ -248,7 +260,7 @@ export async function buildContentPrompt({
 
         if (msg.isMe && msg.type === "image" && msg.imageId) {
             const imageData = character?.media?.find(
-                (m) => m.id === msg.imageId
+                (m) => m.id === msg.imageId,
             );
             if (imageData) {
                 let textContent =
@@ -267,9 +279,15 @@ export async function buildContentPrompt({
                         "(User sent an image that is no longer available)",
                 });
             }
-        } else if (msg.isMe && msg.type === "sticker" && (msg.stickerData || msg.sticker)) {
+        } else if (
+            msg.isMe &&
+            msg.type === "sticker" &&
+            (msg.stickerData || msg.sticker)
+        ) {
             const stickerName =
-                msg.stickerData?.stickerName || msg.sticker?.name || "Unknown Sticker";
+                msg.stickerData?.stickerName ||
+                msg.sticker?.name ||
+                "Unknown Sticker";
             let stickerText = `[User sent a sticker: "${stickerName}"]`;
             if (msg.content && msg.content.trim()) {
                 stickerText += ` with message: ${msg.content}`;
@@ -320,7 +338,10 @@ export interface BuildCharacterSheetPromptParams {
 export async function buildCharacterSheetPrompt({
     characterName,
     characterDescription,
-}: BuildCharacterSheetPromptParams): Promise<{ systemPrompt: string; contents: InternalContent[] }> {
+}: BuildCharacterSheetPromptParams): Promise<{
+    systemPrompt: string;
+    contents: InternalContent[];
+}> {
     const chatMLTemplate = await getPrompt("characterSheet");
 
     const data = {
@@ -341,7 +362,7 @@ export async function buildCharacterSheetPrompt({
         null,
         "",
         "",
-        true // Allow conversation messages for character sheet generation
+        true, // Allow conversation messages for character sheet generation
     );
 
     return { systemPrompt, contents };
@@ -355,7 +376,13 @@ export interface BuildProfilePromptParams {
 /**
  * Builds the system prompt and contents for a profile generation request.
  */
-export async function buildProfilePrompt({ userName, userDescription }: BuildProfilePromptParams): Promise<{ systemPrompt: string; contents: InternalContent[] }> {
+export async function buildProfilePrompt({
+    userName,
+    userDescription,
+}: BuildProfilePromptParams): Promise<{
+    systemPrompt: string;
+    contents: InternalContent[];
+}> {
     const chatMLTemplate = await getPrompt("profileCreation");
 
     const data: any = {
@@ -375,7 +402,7 @@ export async function buildProfilePrompt({ userName, userDescription }: BuildPro
         null,
         "",
         "",
-        true // Allow conversation messages for profile generation
+        true, // Allow conversation messages for profile generation
     );
 
     return { systemPrompt, contents };
