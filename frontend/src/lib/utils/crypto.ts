@@ -21,15 +21,13 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
         false,
         ["deriveKey"]
     );
-    const saltBuffer = new Uint8Array(salt.buffer.byteLength);
-    saltBuffer.set(salt);
     return await crypto.subtle.deriveKey(
         {
             name: "PBKDF2",
-            salt:saltBuffer,
+            salt:Uint8Array.from(salt),
             iterations: 100000, // 높은 보안을 위한 반복 횟수
             hash: "SHA-256",
-        },
+        } satisfies Pbkdf2Params,
         keyMaterial,
         { name: ALGORITHM, length: KEY_LENGTH },
         false,

@@ -633,8 +633,8 @@ export class NovelAIClient {
 
     /**
      * NAI 이미지 생성 API 호출 (전체 파라미터 지원)
-     * @param {Object} params - 생성 파라미터
-     * @returns {Promise<Object>} 생성 결과
+     * @param params - 생성 파라미터
+     * @returns 생성 결과
      */
     async generateImage(params: NaiSettings): Promise<object> {
         const {
@@ -700,11 +700,7 @@ export class NovelAIClient {
                     n_samples: 1,
                     ucPreset: 0,
                     qualityToggle: true,
-                    /**
-                     * @todo Needs verify that `uc` is existing field for API
-                     */
-                    //@ts-ignore
-                    uc: negative_prompt,
+                    negative_prompt: negative_prompt,
                     seed: seed || Math.floor(Math.random() * 9999999999),
                     // SMEA 및 고급 설정 (v3 전용)
                     sm, // SMEA 활성화
@@ -715,6 +711,7 @@ export class NovelAIClient {
                 },
             } satisfies NaiRawRequest;
         } else {
+            type Defined<T> = T extends undefined ? never : T;
             // v4/v4.5 모델용 구조
             requestBody = {
                 input: prompt,
@@ -738,7 +735,11 @@ export class NovelAIClient {
                         use_order: false,
                         caption: {
                             base_caption: prompt,
-                            char_captions: characterPrompts || [],
+                            char_captions: (characterPrompts || []).map(
+                                i=>({
+                                    char_caption: i.prompt
+                                } satisfies Defined<Defined<Defined<NaiRawRequest["parameters"]["v4_prompt"]>["caption"]>["char_captions"]>[number])
+                            ),
                         },
                     },
                     v4_negative_prompt: {
@@ -769,7 +770,7 @@ export class NovelAIClient {
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${this.apiKey}`,
-                    Accept: "*/*",
+                    Accept: "application/zip",
                     "User-Agent": "Mozilla/5.0 (compatible; ArisuTalk/1.0)",
                 },
                 body: JSON.stringify(requestBody),
@@ -794,7 +795,7 @@ export class NovelAIClient {
             const arrayBuffer = await response.arrayBuffer();
             const bytes = new Uint8Array(arrayBuffer);
 
-            // ZIP 파일인지 확인 (NovelAI는 때때로 ZIP으로 압축해서 보냄)
+            // Check if the response is a ZIP file
             const isZip = bytes[0] === 0x50 && bytes[1] === 0x4b; // 'PK' ZIP 시그니처
 
             let imageData;
