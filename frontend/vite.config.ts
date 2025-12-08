@@ -24,6 +24,7 @@ export default defineConfig(async (ctx) => {
     const mode = ctx.mode;
     const env = loadEnv(mode, process.cwd(), "");
     const defines: Record<string, any> = {
+        // General env vars, since it will be typed on vite-env.d.ts
         ...getEnvVar(ctx, env),
     };
 
@@ -65,6 +66,9 @@ export default defineConfig(async (ctx) => {
             rollupOptions: {
                 output: {
                     manualChunks: predefinedChunks,
+                    sourcemapIgnoreList(relativePath) {
+                        return relativePath.includes("node_modules");
+                    },
                 },
             },
         },
