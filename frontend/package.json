@@ -13,7 +13,7 @@
         "serve": "pnpx http-server -p 5173 -c-1 dist/",
         "format": "biome format --write .",
         "lint": "biome lint .",
-        "check": "biome check .",
+        "check": "biome check . && pnpm run check:types",
         "test": "vitest",
         "test:run": "vitest run",
         "test:ui": "vitest --ui",

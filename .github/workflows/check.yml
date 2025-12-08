@@ -1,28 +1,17 @@
-name: Frontend Check
-description: Check for type errors in the frontend code. Fails the workflow if there are type errors.
+name: Check code
+description: Check for type errors in the code. Fails the workflow if there are type errors.
 
 on:
   push:
     branches:
       - dev-*
       - dev/*
-    paths: 
-      - "frontend/**"
-      - ".github/workflows/frontend_check.yml"
-      - "pnpm*"
-      - "package.json"
   pull_request:
     branches:
       - main
-    paths: 
-      - "frontend/**"
-      - ".github/workflows/frontend_check.yml"
-      - "pnpm*"
-      - "package.json"
   workflow_dispatch:
-permissions: 
+permissions:
   contents: read
-
 
 jobs:
   build:
@@ -31,8 +20,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          sparse-checkout: frontend
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -50,7 +37,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Check frontend type errors
+      - name: Check type errors
         timeout-minutes: 5 # It usually takes less than 30 seconds, but just in case
-        run: pnpm run --filter frontend check:types
-        
+        run: pnpm run check:fe && pnpm run check:be
