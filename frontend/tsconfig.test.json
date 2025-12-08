@@ -1,7 +1,8 @@
 {
   "include": [
+    //test
     "tests/**/*.ts",
-    "tests/*.ts"
+    "tests/*.ts",
   ],
   "compilerOptions": {
     "lib": [
@@ -47,10 +48,7 @@
   "extends": "./tsconfig.base.json",
   "references": [
     {
-      "path": "./tsconfig.worker.json"
-    },
-    {
-      "path": "./tsconfig.json"
+      "path": "./tsconfig.app.json"
     }
   ]
 }

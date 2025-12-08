@@ -1,13 +1,14 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
     import { userStickers } from "../stores/character";
     import { stickerToSend } from "../stores/chat";
     import { isUserStickerPanelVisible } from "../stores/ui";
     import { Plus, X, Smile, Music, Edit3, Trash2 } from "lucide-svelte";
+    import type { Sticker } from "$types/character";
 
-    let stickerInput;
+    let stickerInput: HTMLInputElement;
 
-    function selectSticker(sticker) {
+    function selectSticker(sticker: Sticker) {
         stickerToSend.set(sticker);
         isUserStickerPanelVisible.set(false);
     }
@@ -16,8 +17,9 @@
         stickerInput.click();
     }
 
-    async function handleFileChange(event) {
-        const files = Array.from(event.target.files);
+    async function handleFileChange(event: Event) {
+        const target = event.target as HTMLInputElement;
+        const files = target.files ? Array.from(target.files) : [];
         if (!files.length) return;
 
         for (const file of files) {
@@ -44,15 +46,15 @@
             }
 
             try {
-                let dataUrl;
+                let dataUrl: string;
                 if (file.type.startsWith("image/")) {
                     dataUrl = await compressImage(file, 1024, 1024, 0.85);
                 } else {
                     dataUrl = await toBase64(file);
                 }
                 const stickerName = file.name.split(".")[0];
-                const newSticker = {
-                    id: Date.now() + Math.random(),
+                const newSticker: Sticker = {
+                    id: String(Date.now() + Math.random()),
                     name: stickerName,
                     data: dataUrl,
                     type: file.type,
@@ -64,19 +66,19 @@
                 alert(t("ui.fileProcessingAlert"));
             }
         }
-        event.target.value = "";
+        target.value = "";
     }
 
-    function toBase64(file) {
+    function toBase64(file: File): Promise<string> {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
+            reader.onload = () => resolve(reader.result as string);
             reader.onerror = (error) => reject(error);
         });
     }
 
-    function compressImage(file, maxWidth, maxHeight, quality) {
+    function compressImage(file: File, maxWidth: number, maxHeight: number, quality: number): Promise<string> {
         return new Promise((resolve, reject) => {
             const img = new Image();
             img.src = URL.createObjectURL(file);
@@ -99,6 +101,10 @@
                 canvas.width = width;
                 canvas.height = height;
                 const ctx = canvas.getContext("2d");
+                if (!ctx) {
+                    reject(new Error("Could not get canvas context"));
+                    return;
+                }
                 ctx.drawImage(img, 0, 0, width, height);
                 resolve(canvas.toDataURL(file.type, quality));
             };
@@ -106,7 +112,7 @@
         });
     }
 
-    function editName(sticker, event) {
+    function editName(sticker: Sticker, event: Event) {
         event.stopPropagation();
         const newName = prompt(t("modal.editStickerName.title"), sticker.name);
         if (newName && newName.trim() !== "") {
@@ -120,7 +126,7 @@
         }
     }
 
-    function deleteSticker(sticker, event) {
+    function deleteSticker(sticker: Sticker, event: Event) {
         event.stopPropagation();
         if (confirm(t("stickerPreview.confirmRemove"))) {
             userStickers.update((stickers) =>
@@ -179,7 +185,7 @@
             <span>{t("mainChat.stickerSupport")}</span>
             <span
                 >{t("mainChat.stickerCount", {
-                    count: $userStickers.length,
+                    count: String($userStickers.length),
                 })}</span
             >
         </div>

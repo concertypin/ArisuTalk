@@ -11,11 +11,8 @@ const IV_LENGTH = 12; // 96 bits for AES-GCM
 
 /**
  * Generate a cryptographic key from a password
- * @param {string} password - User password
- * @param {Uint8Array} salt - Salt for key derivation
- * @returns {Promise<CryptoKey>} - Derived key
  */
-async function deriveKey(password, salt) {
+async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey> {
     const encoder = new TextEncoder();
     const keyMaterial = await crypto.subtle.importKey(
         "raw",
@@ -24,14 +21,13 @@ async function deriveKey(password, salt) {
         false,
         ["deriveKey"]
     );
-
     return await crypto.subtle.deriveKey(
         {
             name: "PBKDF2",
-            salt: salt,
+            salt:Uint8Array.from(salt),
             iterations: 100000, // 높은 보안을 위한 반복 횟수
             hash: "SHA-256",
-        },
+        } satisfies Pbkdf2Params,
         keyMaterial,
         { name: ALGORITHM, length: KEY_LENGTH },
         false,
@@ -41,27 +37,29 @@ async function deriveKey(password, salt) {
 
 /**
  * Generate random salt
- * @returns {Uint8Array} - Random salt
  */
-function generateSalt() {
+function generateSalt(): Uint8Array {
     return crypto.getRandomValues(new Uint8Array(16));
 }
 
 /**
  * Generate random IV
- * @returns {Uint8Array} - Random IV
  */
-function generateIV() {
+function generateIV(): Uint8Array {
+    // Return a Uint8Array view (ArrayLike<number>) so it can be used with combined.set and Web Crypto APIs
     return crypto.getRandomValues(new Uint8Array(IV_LENGTH));
 }
 
+function uint8ArrayToArrayBuffer(uint8Array: Uint8Array): ArrayBuffer {
+    const arraybuf = new ArrayBuffer(uint8Array.length);
+    const view = new Uint8Array(arraybuf);
+    view.set(uint8Array);
+    return arraybuf;
+}
 /**
  * Encrypt text using AES-GCM
- * @param {string} text - Text to encrypt
- * @param {string} password - Password for encryption
- * @returns {Promise<string>} - Base64 encoded encrypted data
  */
-export async function encryptText(text, password) {
+export async function encryptText(text: string, password: string): Promise<string> {
     if (!text || !password) {
         throw new Error("Text and password are required");
     }
@@ -75,18 +73,18 @@ export async function encryptText(text, password) {
         const key = await deriveKey(password, salt);
 
         const encryptedData = await crypto.subtle.encrypt(
-            { name: ALGORITHM, iv: iv },
+            { name: ALGORITHM, iv: uint8ArrayToArrayBuffer(iv) },
             key,
             data
         );
 
         // Combine salt + iv + encrypted data
         const combined = new Uint8Array(
-            salt.length + iv.length + encryptedData.byteLength
+            salt.length + iv.byteLength + encryptedData.byteLength
         );
         combined.set(salt);
         combined.set(iv, salt.length);
-        combined.set(new Uint8Array(encryptedData), salt.length + iv.length);
+        combined.set(new Uint8Array(encryptedData), salt.length + iv.byteLength);
 
         return btoa(String.fromCharCode(...combined));
     } catch (error) {
@@ -97,11 +95,8 @@ export async function encryptText(text, password) {
 
 /**
  * Decrypt text using AES-GCM
- * @param {string} encryptedText - Base64 encoded encrypted text
- * @param {string} password - Password for decryption
- * @returns {Promise<string>} - Decrypted text
  */
-export async function decryptText(encryptedText, password) {
+export async function decryptText(encryptedText: string, password: string): Promise<string> {
     if (!encryptedText || !password) {
         throw new Error("Encrypted text and password are required");
     }
@@ -136,9 +131,8 @@ export async function decryptText(encryptedText, password) {
 
 /**
  * Generate a random master password
- * @returns {string} - Random master password
  */
-export function generateMasterPassword() {
+export function generateMasterPassword(): string {
     const chars =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
     let result = "";
@@ -148,19 +142,17 @@ export function generateMasterPassword() {
     return result;
 }
 
+export interface ValidationResult {
+    isValid: boolean;
+    length: boolean;
+    strength: number;
+    message: string;
+}
+
 /**
  * Validate password strength
- * @param {string} password - Password to validate
- *
- * @typedef {Object} ValidationResult
- * @property {boolean} isValid - Whether the password is valid
- * @property {boolean} length - Whether the password meets length requirement
- * @property {number} strength - Strength score (0-4)
- * @property {string} message - Validation message
- *
- * @returns {ValidationResult} - Validation result
  */
-export function validatePassword(password) {
+export function validatePassword(password: string): ValidationResult {
     const minLength = 8;
     const hasUpper = /[A-Z]/.test(password);
     const hasLower = /[a-z]/.test(password);
@@ -177,7 +169,7 @@ export function validatePassword(password) {
         strength: strength,
         message:
             password.length < minLength
-                ? t("security.passwordTooShort", { minLength })
+                ? t("security.passwordTooShort", { minLength: minLength.toString() })
                 : strength < 3
                   ? t("security.passwordNotComplex")
                   : t("security.passwordStrong"),

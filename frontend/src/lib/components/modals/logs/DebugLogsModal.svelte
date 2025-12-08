@@ -1,17 +1,18 @@
-<script>
-    import { onMount, onDestroy } from "svelte";
+<script lang="ts">
     import { t } from "$root/i18n";
-    import { isDebugLogModalVisible } from "../../../stores/ui";
+    import { BarChart3, Download, FileX, Trash2, X } from "lucide-svelte";
+    import { onDestroy, onMount } from "svelte";
+    import { fade } from "svelte/transition";
+
+    import {
+        clearDebugLogs,
+        exportDebugLogs,
+    } from "../../../services/logService";
     import { debugLogs } from "../../../stores/logs";
     import { settings } from "../../../stores/settings";
-    import {
-        exportDebugLogs,
-        clearDebugLogs,
-    } from "../../../services/logService";
-    import { BarChart3, Download, Trash2, X, FileX } from "lucide-svelte";
+    import { isDebugLogModalVisible } from "../../../stores/ui";
     import SimpleLog from "./SimpleLog.svelte";
     import StructuredLog from "./StructuredLog.svelte";
-    import { fade } from "svelte/transition";
 
     const maxLogs = 1000;
 
@@ -28,7 +29,7 @@
         }
     }
 
-    function handleKeydown(event) {
+    function handleKeydown(event: KeyboardEvent) {
         if (event.key === "Escape") {
             isDebugLogModalVisible.set(false);
         }

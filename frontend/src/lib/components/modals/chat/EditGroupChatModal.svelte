@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
     import { characters } from "../../../stores/character";
     import { groupChats, editingGroupChat } from "../../../stores/chat";
@@ -7,20 +7,22 @@
     import { fade } from "svelte/transition";
     import { onMount, onDestroy } from "svelte";
     import Avatar from "../../Avatar.svelte";
+    import type { GroupChat, GroupChatParticipantSettings } from "$types/chat";
+    import type { Character } from "$types/character";
 
     let chatName = "";
     let responseFrequency = 50;
     let maxRespondingCharacters = 1;
     let responseDelay = 3;
-    let participantSettings = {};
+    let participantSettings: Record<string, GroupChatParticipantSettings> = {};
 
-    let participants = [];
+    let participants: Character[] = [];
 
     editingGroupChat.subscribe((chat) => {
         if (chat) {
             participants = chat.participantIds
-                .map((id) => $characters.find((c) => c.id === id))
-                .filter(Boolean);
+                .map((id) => $characters.find((c) => String(c.id) === String(id)))
+                .filter((c): c is Character => !!c);
             chatName = chat.name;
             responseFrequency = Math.round(
                 (chat.settings.responseFrequency || 0.5) * 100
@@ -38,8 +40,8 @@
 
             // Ensure all participants have a settings object
             for (const p of participants) {
-                if (!participantSettings[p.id]) {
-                    participantSettings[p.id] = {
+                if (!participantSettings[String(p.id)]) {
+                    participantSettings[String(p.id)] = {
                         isActive: true,
                         responseProbability: 0.9,
                         characterRole: "normal",
@@ -59,13 +61,13 @@
 
         const updatedSettings = {
             responseFrequency: responseFrequency / 100,
-            maxRespondingCharacters: parseInt(maxRespondingCharacters, 10),
+            maxRespondingCharacters: Number(maxRespondingCharacters), // Ensure number
             responseDelay: responseDelay * 1000,
             participantSettings: participantSettings,
         };
 
         groupChats.update((chats) => {
-            const chatToUpdate = chats[$editingGroupChat.id];
+            const chatToUpdate = chats[$editingGroupChat!.id];
             if (chatToUpdate) {
                 chatToUpdate.name = chatName;
                 chatToUpdate.settings = updatedSettings;
@@ -76,7 +78,7 @@
         closeModal();
     }
 
-    function handleKeydown(event) {
+    function handleKeydown(event: KeyboardEvent) {
         if (event.key === "Escape") {
             closeModal();
         }
@@ -163,7 +165,7 @@
                             max="100"
                             class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
                             on:input={(e) =>
-                                (responseFrequency = parseInt(e.target.value))}
+                                (responseFrequency = parseInt((e.target as HTMLInputElement).value))}
                         />
                         <p class="text-xs text-gray-400 mt-1">
                             {t("groupChat.responseFrequencyInfo")}
@@ -202,7 +204,7 @@
                             max="10"
                             class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
                             on:input={(e) =>
-                                (responseDelay = parseInt(e.target.value))}
+                                (responseDelay = parseInt((e.target as HTMLInputElement).value))}
                         />
                         <p class="text-xs text-gray-400 mt-1">
                             {t("groupChat.responseIntervalInfo")}
@@ -218,7 +220,7 @@
                     <div class="space-y-4">
                         {#each participants as participant (participant.id)}
                             {@const settings =
-                                participantSettings[participant.id]}
+                                participantSettings[String(participant.id)]}
                             <div class="bg-gray-700/50 p-4 rounded-lg">
                                 <div class="flex items-center gap-3 mb-4">
                                     <Avatar character={participant} size="sm" />
@@ -266,7 +268,7 @@
                                             class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
                                             on:input={(e) =>
                                                 (settings.responseProbability =
-                                                    parseFloat(e.target.value))}
+                                                    parseFloat((e.target as HTMLInputElement).value))}
                                         />
                                     </div>
                                     <div>

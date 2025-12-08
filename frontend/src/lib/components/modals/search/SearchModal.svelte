@@ -1,20 +1,22 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
-    import { createEventDispatcher, beforeUpdate, afterUpdate } from "svelte";
+    import type { Character } from "$types/character";
+    import { Search, SearchX, X } from "lucide-svelte";
+    import { afterUpdate, beforeUpdate, createEventDispatcher } from "svelte";
     import { fade } from "svelte/transition";
-    import { Search, X, SearchX } from "lucide-svelte";
-    import { searchQuery } from "../../../stores/chat";
+
     import { characters } from "../../../stores/character";
+    import { searchQuery } from "../../../stores/chat";
     import CharacterItem from "../../CharacterItem.svelte";
 
     export let isOpen = false;
 
     const dispatch = createEventDispatcher();
 
-    let filteredCharacters = [];
-    let modalContentEl;
-    let oldHeight;
-    let inputEl;
+    let filteredCharacters: Character[] = [];
+    let modalContentEl: HTMLElement | null = null;
+    let oldHeight: number | undefined;
+    let inputEl: HTMLInputElement | null = null;
 
     beforeUpdate(() => {
         if (!modalContentEl) return;
@@ -36,10 +38,12 @@
         modalContentEl.style.overflow = "hidden"; // Prevent scrollbar flicker during animation
 
         requestAnimationFrame(() => {
+            if (!modalContentEl) return;
             modalContentEl.style.transition = `height 0.4s cubic-bezier(0.4, 0, 0.2, 1)`;
             modalContentEl.style.height = `${newHeight}px`;
 
             const onTransitionEnd = () => {
+                if (!modalContentEl) return;
                 modalContentEl.removeEventListener(
                     "transitionend",
                     onTransitionEnd
@@ -53,7 +57,7 @@
     });
 
     $: if (isOpen && inputEl) {
-        setTimeout(() => inputEl.focus(), 100);
+        setTimeout(() => inputEl?.focus(), 100);
     }
 
     $: {
@@ -71,7 +75,7 @@
         dispatch("close");
     }
 
-    function handleSelect(event) {
+    function handleSelect(event: CustomEvent) {
         dispatch("select", event.detail);
         closeModal();
     }

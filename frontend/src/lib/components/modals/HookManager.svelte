@@ -1,25 +1,28 @@
 <script lang="ts">
     import { t } from "$root/i18n";
-    import {
-        replaceHooks,
-        addHook,
-        deleteHook,
-        updateHook,
-        moveHookUp,
-        moveHookDown,
-    } from "../../stores/replaceHooks";
     import type {
         ReplaceHook,
-        ReplaceHooksConfig,
         ReplaceHookType,
+        ReplaceHooksConfig,
     } from "$types/replaceHook";
+
+    import {
+        addHook,
+        deleteHook,
+        moveHookDown,
+        moveHookUp,
+        replaceHooks,
+        updateHook,
+    } from "../../stores/replaceHooks";
     import HookEditor from "./HookEditor.svelte";
 
     let selectedType: ReplaceHookType = "input";
     let editingHook: ReplaceHook | null = null;
     let isAddingNew = false;
 
-    $: hooks = $replaceHooks[`${selectedType}Hooks`] satisfies ReplaceHook[];
+    $: hooks = $replaceHooks[
+        `${selectedType}Hooks` as keyof ReplaceHooksConfig
+    ] satisfies ReplaceHook[];
 
     function handleAddHook() {
         isAddingNew = true;
@@ -55,8 +58,8 @@
         moveHookDown(selectedType, hookId);
     }
 
-    function getHookTypeLabel(type: HookType): string {
-        const labels: Record<HookType, string> = {
+    function getHookTypeLabel(type: ReplaceHookType): string {
+        const labels: Record<ReplaceHookType, string> = {
             input: t("modal.replaceHooks.inputType"),
             output: t("modal.replaceHooks.outputType"),
             request: t("modal.replaceHooks.requestType"),
@@ -65,8 +68,8 @@
         return labels[type];
     }
 
-    function getHookTypeDescription(type: HookType): string {
-        const descriptions: Record<HookType, string> = {
+    function getHookTypeDescription(type: ReplaceHookType): string {
+        const descriptions: Record<ReplaceHookType, string> = {
             input: t("modal.replaceHooks.inputDesc"),
             output: t("modal.replaceHooks.outputDesc"),
             request: t("modal.replaceHooks.requestDesc"),
@@ -98,13 +101,15 @@
                 <button
                     class="type-button"
                     class:active={selectedType === type}
-                    on:click={() => (selectedType = type as HookType)}
+                    on:click={() => (selectedType = type as ReplaceHookType)}
                 >
                     <span class="label"
-                        >{getHookTypeLabel(type as HookType)}</span
+                        >{getHookTypeLabel(type as ReplaceHookType)}</span
                     >
                     <span class="count"
-                        >{$replaceHooks[`${type}Hooks`].length}</span
+                        >{$replaceHooks[
+                            (type + "Hooks") as keyof ReplaceHooksConfig
+                        ].length}</span
                     >
                 </button>
             {/each}

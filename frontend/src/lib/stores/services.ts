@@ -1,3 +1,5 @@
 import { writable } from "svelte/store";
 
-export const stickerManager = writable(null);
+import { StickerManager } from "../services/stickerManager";
+
+export const stickerManager = writable<StickerManager | null>(null);

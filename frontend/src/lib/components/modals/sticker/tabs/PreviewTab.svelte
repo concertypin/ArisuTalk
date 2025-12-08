@@ -1,8 +1,10 @@
-<script>
+<script lang="ts">
     import { createEventDispatcher } from "svelte";
     import { t } from "$root/i18n";
+    import { Music } from "lucide-svelte";
+    import type { Sticker } from "$types/character";
 
-    export let sticker = null;
+    export let sticker: Sticker | null = null;
 
     let stickerName = sticker?.name || "";
 
@@ -12,7 +14,7 @@
         dispatch("save", { name: stickerName });
     }
 
-    function formatStickerSize(bytes) {
+    function formatStickerSize(bytes: number) {
         if (bytes === 0) return "0 Bytes";
         const k = 1024;
         const sizes = ["Bytes", "KB", "MB", "GB"];
@@ -28,8 +30,7 @@
                 <div
                     class="w-full h-64 bg-gray-600 rounded-lg flex flex-col items-center justify-center"
                 >
-                    <i data-lucide="music" class="w-16 h-16 text-gray-300 mb-4"
-                    ></i>
+                    <Music class="w-16 h-16 text-gray-300 mb-4" />
                     <audio controls class="w-full max-w-xs">
                         <source src={sticker.dataUrl} type={sticker.type} />
                     </audio>

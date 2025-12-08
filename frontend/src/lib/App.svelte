@@ -1,79 +1,79 @@
-<script>
+<script lang="ts">
     import { onMount } from "svelte";
     import { get } from "svelte/store";
-    import {
-        selectedChatId,
-        createNewChatRoom,
-        chatRooms,
-    } from "./stores/chat";
-    import { characters, editingCharacter } from "./stores/character";
-    import {
-        isSidebarCollapsed,
-        isChatSelectionModalVisible,
-        chatSelectionModalData,
-        isSearchModalVisible,
-        isMobile,
-        isSNSCharacterListModalVisible,
-        isSNSFeedModalVisible,
-        snsFeedCharacter,
-        isSNSPostModalVisible,
-        editingSNSPost,
-        isMobileSettingsPageVisible,
-        isCharacterModalVisible,
-        isPhonebookModalVisible,
-        isMobileAuthModalVisible,
-    } from "./stores/ui";
     import { fade } from "svelte/transition";
-    import { stickerManager } from "./stores/services";
-    import { StickerManager } from "./services/stickerManager";
-    import { loadFirebaseAnalytics } from "./stores/firebaseAnalytics";
-    import { logUserFlowEvent } from "./analytics/userFlow";
 
-    // Core components - always loaded
-    import Sidebar from "./components/Sidebar.svelte";
+    import { logUserFlowEvent } from "./analytics/userFlow";
+    import DevModeIndicator from "./components/DevModeIndicator.svelte";
     import LandingPage from "./components/LandingPage.svelte";
     import MainChat from "./components/MainChat.svelte";
-    import DevModeIndicator from "./components/DevModeIndicator.svelte";
-
-    // Lazy load heavy components
-    let ConfirmationModal,
-        ImageZoomModal,
-        CreateGroupChatModal,
-        CreateOpenChatModal,
-        EditGroupChatModal,
-        CharacterModal,
-        DesktopSettingsUI,
-        MasterPasswordModal,
-        ChatSelectionModal,
-        SearchModal,
-        CharacterListPage,
-        MobileSettings,
-        SNSCharacterListModal,
-        SNSFeedModal,
-        SNSPostModal,
-        PromptModal,
-        DebugLogsModal,
-        DataBrowserModal,
-        PhonebookModal,
-        MobileAuthModal;
-    let deviceType = "desktop";
-    import { settings } from "./stores/settings";
-    import {
-        isConfirmationModalVisible,
-        isImageZoomModalVisible,
-        isCreateGroupChatModalVisible,
-        isCreateOpenChatModalVisible,
-        isEditGroupChatModalVisible,
-        isPromptModalVisible,
-        isDebugLogModalVisible,
-        isDataBrowserModalVisible,
-        isMasterPasswordModalVisible,
-        desktopSettings,
-        isDesktopSettingsModalVisible,
-    } from "./stores/ui";
+    // Core components - always loaded
+    import Sidebar from "./components/Sidebar.svelte";
     import { enableAutoSnapshots } from "./services/dataService";
     import { addLog } from "./services/logService";
+    import { StickerManager } from "./services/stickerManager";
     import { initializeAuth } from "./stores/auth";
+    import { characters, editingCharacter } from "./stores/character";
+    import {
+        chatRooms,
+        createNewChatRoom,
+        selectedChatId,
+    } from "./stores/chat";
+    import { loadFirebaseAnalytics } from "./stores/firebaseAnalytics";
+    import { stickerManager } from "./stores/services";
+    import { settings } from "./stores/settings";
+    import {
+        chatSelectionModalData,
+        editingSNSPost,
+        isCharacterModalVisible,
+        isChatSelectionModalVisible,
+        isMobile,
+        isMobileAuthModalVisible,
+        isMobileSettingsPageVisible,
+        isPhonebookModalVisible,
+        isSNSCharacterListModalVisible,
+        isSNSFeedModalVisible,
+        isSNSPostModalVisible,
+        isSearchModalVisible,
+        isSidebarCollapsed,
+        snsFeedCharacter,
+    } from "./stores/ui";
+    import {
+        desktopSettings,
+        isConfirmationModalVisible,
+        isCreateGroupChatModalVisible,
+        isCreateOpenChatModalVisible,
+        isDataBrowserModalVisible,
+        isDebugLogModalVisible,
+        isDesktopSettingsModalVisible,
+        isEditGroupChatModalVisible,
+        isImageZoomModalVisible,
+        isMasterPasswordModalVisible,
+        isPromptModalVisible,
+    } from "./stores/ui";
+
+    // Lazy load heavy components
+    let ConfirmationModal: any,
+        ImageZoomModal: any,
+        CreateGroupChatModal: any,
+        CreateOpenChatModal: any,
+        EditGroupChatModal: any,
+        CharacterModal: any,
+        DesktopSettingsUI: any,
+        MasterPasswordModal: any,
+        ChatSelectionModal: any,
+        SearchModal: any,
+        CharacterListPage: any,
+        MobileSettings: any,
+        SNSCharacterListModal: any,
+        SNSFeedModal: any,
+        SNSPostModal: any,
+        PromptModal: any,
+        DebugLogsModal: any,
+        DataBrowserModal: any,
+        PhonebookModal: any,
+        MobileAuthModal: any;
+    let deviceType: "mobile" | "desktop" = "desktop";
 
     $: deviceType = $isMobile ? "mobile" : "desktop";
 
@@ -121,7 +121,7 @@
 
     function totalChatRoomCount() {
         const roomsMap = get(chatRooms);
-        return Object.values(roomsMap).reduce((total, rooms) => {
+        return Object.values(roomsMap).reduce((total: number, rooms: any) => {
             if (Array.isArray(rooms)) {
                 return total + rooms.length;
             }
@@ -196,7 +196,7 @@
     }
 
     // Lazy load components when needed
-    async function lazyLoadComponent(loadFunction, componentVar) {
+    async function lazyLoadComponent(loadFunction: any, componentVar: any) {
         if (!componentVar) {
             const module = await loadFunction();
             componentVar = module.default;
@@ -264,7 +264,7 @@
         const character = get(chatSelectionModalData).character;
         if (character) {
             const roomsBefore = totalChatRoomCount();
-            const newChatRoomId = createNewChatRoom(character.id);
+            const newChatRoomId = createNewChatRoom(String(character.id));
             selectedChatId.set(newChatRoomId);
             isChatSelectionModalVisible.set(false);
 
@@ -280,7 +280,7 @@
         }
     }
 
-    async function handleCharacterSelect(event) {
+    async function handleCharacterSelect(event: CustomEvent<any>) {
         // Lazy load SearchModal if needed
         SearchModal = await lazyLoadComponent(loadSearchModal, SearchModal);
         const character = event.detail;
@@ -303,7 +303,7 @@
             });
         } else {
             const roomsBefore = totalChatRoomCount();
-            const newChatRoomId = createNewChatRoom(character.id);
+            const newChatRoomId = createNewChatRoom(String(character.id));
             selectedChatId.set(newChatRoomId);
             void logUserFlowEvent("chat_created", {
                 device_type: deviceType,
@@ -317,7 +317,7 @@
         }
     }
 
-    async function handleMobileCharacterSelect(event) {
+    async function handleMobileCharacterSelect(event: CustomEvent<any>) {
         // Lazy load ChatSelectionModal if needed
         ChatSelectionModal = await lazyLoadComponent(
             loadChatSelectionModal,
@@ -334,7 +334,7 @@
         isChatSelectionModalVisible.set(true);
     }
 
-    async function handleOpenSns(event) {
+    async function handleOpenSns(event: CustomEvent<any>) {
         // Lazy load SNS components if needed
         SNSCharacterListModal = await lazyLoadComponent(
             loadSNSCharacterListModal,
@@ -346,7 +346,7 @@
         void logUserFlowEvent("sns_feed_opened", { device_type: deviceType });
     }
 
-    async function handleCharacterSettings(event) {
+    async function handleCharacterSettings(event: CustomEvent<any>) {
         // Lazy load CharacterModal if needed
         CharacterModal = await lazyLoadComponent(
             loadCharacterModal,
@@ -374,25 +374,28 @@
         });
     }
 
-    async function handleSaveSNSPost(event) {
+    async function handleSaveSNSPost(event: CustomEvent<any>) {
         // Lazy load SNSPostModal if needed
         SNSPostModal = await lazyLoadComponent(loadSNSPostModal, SNSPostModal);
         const post = event.detail;
         characters.update((chars) => {
             const charIndex = chars.findIndex((c) => c.id === post.characterId);
             if (charIndex !== -1) {
+                if (!chars[charIndex].snsPosts) {
+                    chars[charIndex].snsPosts = [];
+                }
                 if (post.isNew) {
-                    chars[charIndex].snsPosts.push({
+                    chars[charIndex].snsPosts!.push({
                         ...post,
                         id: Date.now(),
                         isNew: false,
                     });
                 } else {
-                    const postIndex = chars[charIndex].snsPosts.findIndex(
+                    const postIndex = chars[charIndex].snsPosts!.findIndex(
                         (p) => p.id === post.id
                     );
                     if (postIndex !== -1) {
-                        chars[charIndex].snsPosts[postIndex] = post;
+                        chars[charIndex].snsPosts![postIndex] = post;
                     }
                 }
             }
@@ -404,7 +407,7 @@
         if (typeof document !== "undefined" && $settings.fontScale) {
             document.documentElement.style.setProperty(
                 "--font-scale",
-                $settings.fontScale
+                String($settings.fontScale)
             );
         }
     }

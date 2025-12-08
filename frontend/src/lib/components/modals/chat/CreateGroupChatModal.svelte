@@ -1,15 +1,16 @@
-<script>
-    import { onMount, onDestroy } from "svelte";
+<script lang="ts">
     import { t } from "$root/i18n";
+    import { Users, X } from "lucide-svelte";
+    import { onDestroy, onMount } from "svelte";
+    import { fade } from "svelte/transition";
+
     import { characters } from "../../../stores/character";
     import { groupChats, selectedChatId } from "../../../stores/chat";
     import { isCreateGroupChatModalVisible } from "../../../stores/ui";
-    import { X, Users } from "lucide-svelte";
-    import { fade } from "svelte/transition";
     import Avatar from "../../Avatar.svelte";
 
     let groupName = "";
-    let selectedParticipantIds = [];
+    let selectedParticipantIds: string[] = [];
 
     function closeModal() {
         isCreateGroupChatModalVisible.set(false);
@@ -41,7 +42,21 @@
                 maxRespondingCharacters: 1,
                 responseDelay: 3000,
                 participantSettings: selectedParticipantIds.reduce(
-                    (acc, id) => {
+                    (
+                        acc: Record<
+                            string,
+                            {
+                                isActive: boolean;
+                                responseProbability: number;
+                                characterRole:
+                                    | "normal"
+                                    | "leader"
+                                    | "quiet"
+                                    | "active";
+                            }
+                        >,
+                        id
+                    ) => {
                         acc[id] = {
                             isActive: true,
                             responseProbability: 0.9,
@@ -63,7 +78,7 @@
         closeModal();
     }
 
-    function handleKeydown(event) {
+    function handleKeydown(event: KeyboardEvent) {
         if (event.key === "Escape") {
             closeModal();
         }

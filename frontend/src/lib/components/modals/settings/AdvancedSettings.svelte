@@ -1,27 +1,28 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
-    import { createEventDispatcher } from "svelte";
     import {
-        ArrowLeft,
-        Bug,
         Activity,
+        AlertTriangle,
+        ArrowLeft,
         BarChart3,
-        Trash2,
-        Gauge,
+        Bug,
         Clock,
         FlaskConical,
-        AlertTriangle,
+        Gauge,
         Info,
         Key,
         Link,
+        Trash2,
     } from "lucide-svelte";
-    import { settings } from "../../../stores/settings";
+    import { createEventDispatcher } from "svelte";
+
+    import { clearDebugLogs } from "../../../services/logService";
     import { debugLogs } from "../../../stores/logs";
+    import { settings } from "../../../stores/settings";
     import {
         isDebugLogModalVisible,
         isMasterPasswordModalVisible,
     } from "../../../stores/ui";
-    import { clearDebugLogs } from "../../../services/logService";
 
     const dispatch = createEventDispatcher();
 
@@ -38,14 +39,18 @@
         }
     }
 
-    function handleEnableDebugLogs(e) {
-        settings.update((s) => ({ ...s, enableDebugLogs: e.target.checked }));
+    function handleEnableDebugLogs(e: Event) {
+        settings.update((s) => ({
+            ...s,
+            enableDebugLogs: (e.target as HTMLInputElement).checked,
+        }));
     }
 
-    function handleExperimentalTracingToggle(event) {
+    function handleExperimentalTracingToggle(event: Event) {
         settings.update((current) => ({
             ...current,
-            experimentalTracingEnabled: event.target.checked,
+            experimentalTracingEnabled: (event.target as HTMLInputElement)
+                .checked,
         }));
     }
 </script>

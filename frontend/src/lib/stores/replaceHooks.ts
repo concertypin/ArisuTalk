@@ -250,11 +250,11 @@ export function importHooksConfig(jsonString: string): ReplaceHooksConfig {
  * Move a hook up in order (lower index = higher priority = executes first)
  */
 export function moveHookUp(
-    type: keyof ReplaceHooksConfig,
+    type: ReplaceHookType,
     hookId: string
 ): void {
     replaceHooks.update((config) => {
-        const key = type;
+        const key = `${type}Hooks` satisfies keyof ReplaceHooksConfig;
         const hooks = config[key] as ReplaceHook[];
         const index = hooks.findIndex((h) => h.id === hookId);
 

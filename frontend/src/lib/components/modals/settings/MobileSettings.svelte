@@ -1,37 +1,38 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
+    import {
+        Activity,
+        ArrowLeft,
+        BookUser,
+        BrainCircuit,
+        Bug,
+        Camera,
+        Check,
+        ChevronDown,
+        ChevronRight,
+        Database,
+        FileArchive,
+        Image,
+        Info,
+        MessageSquarePlus,
+        Palette,
+        Settings,
+        Shuffle,
+        SlidersHorizontal,
+        Type,
+        User,
+    } from "lucide-svelte";
     import { createEventDispatcher } from "svelte";
     import { fly } from "svelte/transition";
-    import {
-        ArrowLeft,
-        ChevronRight,
-        User,
-        BrainCircuit,
-        MessageSquarePlus,
-        Shuffle,
-        Camera,
-        Activity,
-        Database,
-        Image,
-        Type,
-        Settings,
-        ChevronDown,
-        Check,
-        Info,
-        Palette,
-        BookUser,
-        FileArchive,
-        SlidersHorizontal,
-        Bug,
-    } from "lucide-svelte";
+
     import { isMobileSettingsPageVisible } from "../../../stores/ui";
-    import AiSettings from "./AiSettings.svelte";
-    import NaiSettings from "./NaiSettings.svelte";
-    import AppearanceSettings from "./AppearanceSettings.svelte";
     import CharacterDefaults from "../character/CharacterDefaults.svelte";
-    import DataManagement from "./DataManagement.svelte";
     import AdvancedSettings from "./AdvancedSettings.svelte";
+    import AiSettings from "./AiSettings.svelte";
+    import AppearanceSettings from "./AppearanceSettings.svelte";
+    import DataManagement from "./DataManagement.svelte";
     import DebugSettings from "./DebugSettings.svelte";
+    import NaiSettings from "./NaiSettings.svelte";
     import PromptSettings from "./PromptSettings.svelte";
 
     export let isOpen = false;
@@ -45,7 +46,7 @@
         isMobileSettingsPageVisible.set(false);
     }
 
-    function navigateTo(page) {
+    function navigateTo(page: string) {
         previousPage = activePage;
         activePage = page;
     }

@@ -1,17 +1,19 @@
-<script>
-    import { onMount, onDestroy } from "svelte";
+<script lang="ts">
     import { t } from "$root/i18n";
+    import type { Character } from "$types/character";
+    import { ChevronRight, Lock, Search, X } from "lucide-svelte";
+    import { onDestroy, onMount } from "svelte";
     import { createEventDispatcher } from "svelte";
     import { fade } from "svelte/transition";
-    import { X, Search, ChevronRight, Lock } from "lucide-svelte";
-    import { characters, characterStateStore } from "../../../stores/character";
+
+    import { characterStateStore, characters } from "../../../stores/character";
     import { checkSNSAccess } from "../../../utils/sns";
 
     export let isOpen = false;
 
     let searchTerm = "";
-    let accessibleCharacters = [];
-    let inaccessibleCharacters = [];
+    let accessibleCharacters: Character[] = [];
+    let inaccessibleCharacters: Character[] = [];
 
     const dispatch = createEventDispatcher();
 
@@ -34,12 +36,12 @@
         dispatch("close");
     }
 
-    function openSns(character) {
+    function openSns(character: Character) {
         dispatch("openSns", character);
         closeModal();
     }
 
-    function handleKeydown(event) {
+    function handleKeydown(event: KeyboardEvent) {
         if (event.key === "Escape") {
             closeModal();
         }

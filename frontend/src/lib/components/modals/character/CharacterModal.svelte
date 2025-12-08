@@ -1,58 +1,61 @@
-<script>
-    import { onMount, onDestroy } from "svelte";
-    import { get } from "svelte/store";
+<script lang="ts">
     import { t } from "$root/i18n";
+    import type { Character } from "$types/character";
+    import {
+        ChevronDown,
+        Download,
+        Image,
+        Instagram,
+        MessageSquarePlus,
+        Sparkles,
+        Upload,
+        X,
+    } from "lucide-svelte";
+    import { onDestroy, onMount } from "svelte";
+    import { createEventDispatcher } from "svelte";
+    import { get } from "svelte/store";
+    import type { Unsubscriber } from "svelte/store";
+    import { fade } from "svelte/transition";
+
+    import { APIManager } from "../../../api/apiManager";
+    import { auth } from "../../../stores/auth";
     import {
         characters,
         editingCharacter,
         phonebookImportResult,
     } from "../../../stores/character";
     import {
-        settings,
         experimentalTracingOptIn,
+        settings,
     } from "../../../stores/settings";
     import {
         isCharacterModalVisible,
-        isSNSCharacterListModalVisible,
         isPhonebookModalVisible,
+        isSNSCharacterListModalVisible,
         phonebookAccessState,
     } from "../../../stores/ui";
     import {
-        X,
-        Image,
-        Upload,
-        Download,
-        ChevronDown,
-        Sparkles,
-        MessageSquarePlus,
-        Instagram,
-    } from "lucide-svelte";
-    import { fade } from "svelte/transition";
-    import { createEventDispatcher } from "svelte";
-    import CharacterMemory from "./CharacterMemory.svelte";
-    import CharacterStickers from "./CharacterStickers.svelte";
+        addPngChunk,
+        compressData,
+        dataUrlToUint8Array,
+        decompressData,
+        extractPngChunk,
+        uint8ArrayToDataUrl,
+    } from "../../../utils/png-utils";
     import CharacterAISettings from "./CharacterAISettings.svelte";
     import CharacterHypnosis from "./CharacterHypnosis.svelte";
-    import { APIManager } from "../../../api/apiManager";
-    import { auth } from "../../../stores/auth";
-    import {
-        dataUrlToUint8Array,
-        uint8ArrayToDataUrl,
-        addPngChunk,
-        extractPngChunk,
-        compressData,
-        decompressData,
-    } from "../../../utils/png-utils";
+    import CharacterMemory from "./CharacterMemory.svelte";
+    import CharacterStickers from "./CharacterStickers.svelte";
 
     const dispatch = createEventDispatcher();
 
     let isNew = false;
-    let characterData = {};
-    let avatarInput;
-    let cardInput;
+    let characterData: Partial<Character> = {};
+    let avatarInput: HTMLInputElement;
+    let cardInput: HTMLInputElement;
     let isGeneratingPersona = false;
     const apiManager = new APIManager();
-    let phonebookUnsubscribe;
+    let phonebookUnsubscribe: Unsubscriber;
     let isCheckingPhonebook = false;
 
     const defaultHypnosis = {
@@ -112,14 +115,17 @@
     function saveCharacter() {
         if (isNew) {
             characters.update((chars) => {
-                const newChar = { ...characterData, id: `char_${Date.now()}` };
+                const newChar = {
+                    ...characterData,
+                    id: `char_${Date.now()}`,
+                } as Character;
                 return [...chars, newChar];
             });
         } else {
             characters.update((chars) => {
                 const index = chars.findIndex((c) => c.id === characterData.id);
                 if (index !== -1) {
-                    chars[index] = characterData;
+                    chars[index] = characterData as Character;
                 }
                 return chars;
             });
@@ -131,13 +137,14 @@
         avatarInput.click();
     }
 
-    function handleAvatarChange(event) {
-        const file = event.target.files[0];
+    function handleAvatarChange(event: Event) {
+        const target = event.target as HTMLInputElement;
+        const file = target.files?.[0];
         if (!file) return;
 
         const reader = new FileReader();
         reader.onload = (e) => {
-            characterData.avatar = e.target.result;
+            characterData.avatar = e.target?.result as string;
             // Force reactivity
             characterData = characterData;
         };
@@ -145,7 +152,7 @@
     }
 
     async function generatePersona() {
-        if (!characterData.name.trim()) {
+        if (!characterData.name?.trim()) {
             alert(t("modal.characterNameRequiredMessage"));
             return;
         }
@@ -154,20 +161,32 @@
         try {
             const provider = $settings.apiProvider;
             const config = $settings.apiConfigs[provider] || {};
-            const generatedPrompt = await apiManager.generateCharacterSheet(
+            const response = await apiManager.generateCharacterSheet(
                 provider,
                 config.apiKey,
                 config.model,
                 {
                     characterName: characterData.name,
-                    systemPrompt: $settings.prompts.characterSheet,
+                    characterDescription: "", // Not used by current prompt builder but required by type
+                    characterSheetPrompt: $settings.prompts.characterSheet,
                 },
                 config.baseUrl
             );
-            characterData.prompt = generatedPrompt;
+
+            if ("error" in response) {
+                throw new Error(response.error);
+            }
+
+            if (response.messages && response.messages.length > 0) {
+                characterData.prompt = response.messages[0].content;
+            }
         } catch (error) {
             console.error("Error generating character prompt:", error);
-            alert(`${t("modal.generationFailed.title")}: ${error.message}`);
+            if (error instanceof Error) {
+                alert(`${t("modal.generationFailed.title")}: ${error.message}`);
+            } else {
+                alert(`${t("modal.generationFailed.title")}: ${String(error)}`);
+            }
         } finally {
             isGeneratingPersona = false;
         }
@@ -177,20 +196,21 @@
         cardInput.click();
     }
 
-    async function handleCardChange(event) {
-        const file = event.target.files[0];
+    async function handleCardChange(event: Event) {
+        const target = event.target as HTMLInputElement;
+        const file = target.files?.[0];
         if (!file) return;
 
         const reader = new FileReader();
         reader.onload = (e) => {
-            const imageSrc = e.target.result;
-            const image = new Image();
+            const imageSrc = e.target?.result as string;
+            const image = new globalThis.Image();
             image.onload = async () => {
                 try {
                     const pngData = dataUrlToUint8Array(imageSrc);
 
                     let chunkData = extractPngChunk(pngData, "cChr");
-                    let jsonString;
+                    let jsonString: string | undefined;
 
                     if (chunkData) {
                         const decompressedData = await compressData(chunkData);
@@ -253,7 +273,7 @@
             stickers: characterData.stickers,
         };
 
-        const image = new Image();
+        const image = new globalThis.Image();
         image.crossOrigin = "Anonymous";
         image.onload = async () => {
             try {
@@ -261,6 +281,7 @@
                 canvas.width = 1024;
                 canvas.height = 1024;
                 const ctx = canvas.getContext("2d");
+                if (!ctx) return;
                 ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
                 const jsonString = JSON.stringify(dataToSave);
@@ -284,7 +305,7 @@
         image.src = characterData.avatar;
     }
 
-    function handleKeydown(event) {
+    function handleKeydown(event: KeyboardEvent) {
         if (event.key === "Escape") {
             closeModal();
         }
@@ -308,9 +329,13 @@
                 mergedData.avatar = imported.avatar;
             }
 
-            if (!mergedData.memories) {
+            // Ensure memories is string[]
+            if (!mergedData.memories || !Array.isArray(mergedData.memories)) {
                 mergedData.memories = [];
+            } else {
+                mergedData.memories = mergedData.memories.map((m) => String(m));
             }
+
             if (!mergedData.stickers) {
                 mergedData.stickers = [];
             }
@@ -324,7 +349,7 @@
                 mergedData.hypnosis = { ...defaultHypnosis };
             }
 
-            characterData = mergedData;
+            characterData = mergedData as Partial<Character>;
             isNew = true;
             phonebookImportResult.set(null);
         });
@@ -343,8 +368,12 @@
             isCheckingPhonebook = true;
             try {
                 const service = await import(
-                    "../../../services/phonebookService.ts"
+                    "../../../services/phonebookService"
                 );
+                if (!$auth.clerk) {
+                    phonebookAccessState.set("disabled");
+                    return;
+                }
                 const allowed = await service.verifyPhonebookAccess(
                     $auth.clerk
                 );
@@ -389,13 +418,18 @@
             isCheckingPhonebook = true;
             try {
                 const service = await import(
-                    "../../../services/phonebookService.ts"
+                    "../../../services/phonebookService"
                 );
-                const allowed = await service.verifyPhonebookAccess(
-                    $auth.clerk
-                );
-                phonebookAccessState.set(allowed ? "enabled" : "disabled");
-                verificationFailed = !allowed;
+                if (!$auth.clerk) {
+                    phonebookAccessState.set("disabled");
+                    verificationFailed = true;
+                } else {
+                    const allowed = await service.verifyPhonebookAccess(
+                        $auth.clerk
+                    );
+                    phonebookAccessState.set(allowed ? "enabled" : "disabled");
+                    verificationFailed = !allowed;
+                }
             } catch (error) {
                 console.error("Phonebook availability check failed", error);
                 phonebookAccessState.set("disabled");
@@ -580,15 +614,17 @@
                     ></textarea>
                 </div>
 
-                <CharacterAISettings
-                    bind:appearance={characterData.appearance}
-                    bind:naiQualityPrompt={
-                        characterData.naiSettings.qualityPrompt
-                    }
-                    bind:naiAutoGenerate={
-                        characterData.naiSettings.autoGenerate
-                    }
-                />
+                {#if characterData.naiSettings}
+                    <CharacterAISettings
+                        bind:appearance={characterData.appearance}
+                        bind:naiQualityPrompt={
+                            characterData.naiSettings.qualityPrompt
+                        }
+                        bind:naiAutoGenerate={
+                            characterData.naiSettings.autoGenerate
+                        }
+                    />
+                {/if}
 
                 <details class="group border-t border-gray-700/50 pt-4">
                     <summary
@@ -788,7 +824,7 @@
                     </div>
                 </details>
 
-                {#if !isNew}
+                {#if !isNew && characterData.hypnosis}
                     <CharacterHypnosis bind:hypnosis={characterData.hypnosis}>
                         <ChevronDown
                             slot="chevron"

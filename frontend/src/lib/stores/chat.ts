@@ -1,35 +1,24 @@
 import { writable } from "svelte/store";
 import { persistentStore } from "./persistentStore";
 import { t } from "$root/i18n";
+import type { Message, GroupChat, ChatRoom } from "../../types/chat";
+import type { Sticker } from "../../types/character";
 
-export interface Message {
-    id: number;
-    sender: string;
-    characterId?: string;
-    content: string;
-    time: string;
-    timestamp: number;
-    isMe: boolean;
-    isError: boolean;
-    type: string;
-    hasText?: boolean;
-    sticker?: any;
-    imageUrl?: string;
-}
+export type { Message, GroupChat, ChatRoom };
 
 export interface MessagesStore {
     [chatId: string]: Message[];
 }
 
-export const chatRooms = persistentStore<Record<string, any[]>>(
+export const chatRooms = persistentStore<Record<string, ChatRoom[]>>(
     "personaChat_chatRooms_v16",
     {}
 );
-export const groupChats = persistentStore<Record<string, any>>(
+export const groupChats = persistentStore<Record<string, GroupChat>>(
     "personaChat_groupChats_v16",
     {}
 );
-export const openChats = persistentStore<Record<string, any>>(
+export const openChats = persistentStore<Record<string, ChatRoom>>(
     "personaChat_openChats_v16",
     {}
 );
@@ -43,22 +32,33 @@ export const unreadCounts = persistentStore<Record<string, number>>(
 );
 
 // Forcing the landing page to be visible on refresh.
-export const selectedChatId = writable(null);
+export const selectedChatId = writable<string | null>(null);
 
 // Non-persistent stores
-export const editingMessageId = writable(null);
-export const editingChatRoomId = writable(null);
-export const editingGroupChat = writable(null);
+export const editingMessageId = writable<number | string | null>(null);
+export const editingChatRoomId = writable<string | null>(null);
+export const editingGroupChat = writable<GroupChat | null>(null);
 
 export const isWaitingForResponse = writable(false);
-export const typingCharacterId = writable(null);
+export const typingCharacterId = writable<{
+    chatId: string;
+    characterId: string;
+} | null>(null);
 
 export const searchQuery = writable("");
-export const imageToSend = writable(null);
-export const stickerToSend = writable(null);
+export const imageToSend = writable<string | null>(null);
+export const stickerToSend = writable<Sticker | null>(null);
 export const currentMessage = writable("");
 
-export const virtualStream = writable({
+export interface VirtualStreamState {
+    isStreaming: boolean;
+    chatId: string | null;
+    characterId: string | null;
+    messages: Message[];
+    isTyping: boolean;
+}
+
+export const virtualStream = writable<VirtualStreamState>({
     isStreaming: false,
     chatId: null,
     characterId: null,
@@ -66,7 +66,7 @@ export const virtualStream = writable({
     isTyping: false,
 });
 
-export function createNewChatRoom(characterId) {
+export function createNewChatRoom(characterId: string) {
     const newChatRoomId = `${characterId}_${Date.now()}`;
     const newChatRoom = {
         id: newChatRoomId,

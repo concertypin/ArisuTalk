@@ -1,4 +1,5 @@
-import type { Character } from "$root/types/character";
+import type { Character, CharacterState, SNSPost } from "$root/types/character";
+import type { Message } from "$root/types/chat";
 
 export type LLMApiGenerateContentParams = {
     /**
@@ -15,16 +16,14 @@ export type LLMApiGenerateContentParams = {
     character: Character;
     /**
      * Conversation history
-     * It has not been typed strictly.
-     * @todo Define the type properly.
      */
-    history: Array<object>;
+    history: Message[];
     /**
      * Prompt settings
      * It has not been typed strictly.
      * @todo Define the type properly.
      */
-    prompts: object;
+    prompts: Record<string, unknown>;
     /**
      * Whether this is a proactive message
      * If true, the character initiates the conversation without user input.
@@ -44,9 +43,13 @@ export type LLMApiGenerateContentParams = {
     chatId: string | null;
 };
 export type LLMApiGenerateContentResponse = Promise<{
-    reactionDelay: number;
-    messages: Array<Object>;
-    characterState: Object;
+    reactionDelay?: number;
+    messages?: Message[];
+    characterState?: CharacterState;
+    newMemory?: string;
+    autoPost?: Partial<SNSPost>;
+    error?: string;
+    [key: string]: unknown;
 }>;
 export type LLMApiGenerateProfileParams = {
     /**
@@ -96,7 +99,7 @@ export type LLMApiGenerateCharacterSheetResponse = Promise<
            * It has not been typed strictly.
            * @todo Define the type properly.
            */
-          messages: any[];
+          messages: { content: string }[];
           /**
            * Reaction delay time in milliseconds
            * It seems sometimes not to be included in the response.

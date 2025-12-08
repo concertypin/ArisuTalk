@@ -1,18 +1,19 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
-    import { settings } from "../../stores/settings";
-    import { PROVIDERS, PROVIDER_MODELS } from "../../../constants/providers";
     import {
+        ChevronDown,
+        Cpu,
         Key,
         Link,
-        Cpu,
-        Settings as SettingsIcon,
         Plus,
+        Settings as SettingsIcon,
         Trash2,
-        ChevronDown,
     } from "lucide-svelte";
 
-    export let provider;
+    import { PROVIDERS, PROVIDER_MODELS } from "../../../constants/providers";
+    import { settings } from "../../stores/settings";
+
+    export let provider: Lowercase<keyof typeof PROVIDERS>;
 
     let config = $settings.apiConfigs[provider] || {};
     let customModelInput = "";
@@ -20,9 +21,12 @@
     $: (provider, (config = $settings.apiConfigs[provider] || {}));
 
     const models = PROVIDER_MODELS[provider] || [];
-    const customModels = config.customModels || [];
+    $: customModels = config.customModels || [];
 
-    function handleConfigChange(key, value) {
+    function handleConfigChange<T extends string | number | string[]>(
+        key: string,
+        value: T
+    ) {
         const newConfig = { ...$settings.apiConfigs[provider], [key]: value };
         const newApiConfigs = {
             ...$settings.apiConfigs,
@@ -41,9 +45,9 @@
         customModelInput = "";
     }
 
-    function removeCustomModel(index) {
-        const newCustomModels = config.customModels.filter(
-            (_, i) => i !== index
+    function removeCustomModel(index: number) {
+        const newCustomModels = (config.customModels || []).filter(
+            (_: string, i: number) => i !== index
         );
         handleConfigChange("customModels", newCustomModels);
     }
@@ -62,7 +66,11 @@
             id="api-key-{provider}"
             type="password"
             value={config.apiKey || ""}
-            on:input={(e) => handleConfigChange("apiKey", e.target.value)}
+            on:input={(e) =>
+                handleConfigChange(
+                    "apiKey",
+                    (e.target as HTMLInputElement).value
+                )}
             placeholder={t("settings.apiKeyPlaceholder")}
             class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm"
         />
@@ -80,7 +88,11 @@
                 id="base-url-{provider}"
                 type="text"
                 value={config.baseUrl || ""}
-                on:input={(e) => handleConfigChange("baseUrl", e.target.value)}
+                on:input={(e) =>
+                    handleConfigChange(
+                        "baseUrl",
+                        (e.target as HTMLInputElement).value
+                    )}
                 placeholder="https://api.openai.com/v1"
                 class="w-full px-4 py-3 bg-gray-700 text-white rounded-xl border-0 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 text-sm"
             />
@@ -198,7 +210,7 @@
                     on:input={(e) =>
                         handleConfigChange(
                             "maxTokens",
-                            parseInt(e.target.value)
+                            parseInt((e.target as HTMLInputElement).value)
                         )}
                     class="w-full"
                 />
@@ -233,7 +245,7 @@
                     on:input={(e) =>
                         handleConfigChange(
                             "temperature",
-                            parseFloat(e.target.value)
+                            parseFloat((e.target as HTMLInputElement).value)
                         )}
                     class="w-full"
                 />
@@ -266,7 +278,9 @@
                             on:input={(e) =>
                                 handleConfigChange(
                                     "profileMaxTokens",
-                                    parseInt(e.target.value)
+                                    parseInt(
+                                        (e.target as HTMLInputElement).value
+                                    )
                                 )}
                             class="w-full"
                         />
@@ -297,7 +311,9 @@
                             on:input={(e) =>
                                 handleConfigChange(
                                     "profileTemperature",
-                                    parseFloat(e.target.value)
+                                    parseFloat(
+                                        (e.target as HTMLInputElement).value
+                                    )
                                 )}
                             class="w-full"
                         />

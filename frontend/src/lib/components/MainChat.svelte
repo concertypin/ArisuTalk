@@ -60,6 +60,8 @@
     import Avatar from "./Avatar.svelte";
     import MessageGroup from "./MessageGroup.svelte";
     import UserStickerPanel from "./UserStickerPanel.svelte";
+    import type { Character } from "$types/character";
+    import type { Message, MessageGroupData, DisplayCharacter, ChatRoom, GroupChat } from "$types/chat";
 
     let messagesContainer: HTMLElement;
     let imageUploadInput: HTMLInputElement;
@@ -76,14 +78,14 @@
                 const participantIds =
                     $openChats[$selectedChatId].currentParticipants || [];
                 return participantIds
-                    .map((id) => $characters.find((c) => c.id === id))
-                    .filter(Boolean);
+                    .map((id: string) => $characters.find((c) => c.id === id))
+                    .filter(Boolean) as Character[];
             }
-            return [];
+            return [] as Character[];
         }
     );
     let isAtBottom = true;
-    let participantUpdateInterval: number;
+    let participantUpdateInterval: ReturnType<typeof setInterval> | null = null;
 
     function checkScrollPosition() {
         if (!messagesContainer) return;
@@ -106,12 +108,14 @@
         }
         if ($chatType === "open" && $selectedChatId) {
             const chat = $openChats[$selectedChatId];
-            if (chat && chat.participantHistory.length === 0) {
+            if (chat && chat.participantHistory && chat.participantHistory.length === 0) {
                 initializeOpenChat($selectedChatId);
             }
 
             participantUpdateInterval = setInterval(() => {
-                updateParticipantStates($selectedChatId);
+                if ($selectedChatId) {
+                    updateParticipantStates($selectedChatId);
+                }
             }, 30000);
         }
     }
@@ -122,35 +126,45 @@
         }
     });
 
-    $: chatMessages = $messages[$selectedChatId] || [];
+    $: chatMessages = $selectedChatId ? ($messages[$selectedChatId] || []) : [];
     $: allRooms = [
         ...Object.values($chatRooms).flat(),
         ...Object.values($groupChats),
         ...Object.values($openChats),
     ];
     $: selectedRoom = allRooms.find((room) => room.id === $selectedChatId);
-    $: character = selectedRoom
-        ? selectedRoom.type === "group" || selectedRoom.type === "open"
-            ? {
-                  id: `${selectedRoom.type}_chat_avatar`,
-                  name: selectedRoom.name,
-                  avatar: "",
-              }
-            : $characters.find((c) => c.id === selectedRoom.characterId)
-        : null;
 
-    const getSenderId = (msg) => {
+    // Determine character or display character based on room type
+    let character: Character | DisplayCharacter | null = null;
+    $: {
+        if (selectedRoom) {
+            const roomType = 'type' in selectedRoom ? selectedRoom.type : undefined;
+             if (roomType === "group" || roomType === "open") {
+                character = {
+                    id: `${roomType}_chat_avatar`,
+                    name: selectedRoom.name,
+                    avatar: "",
+                };
+             } else {
+                 character = 'characterId' in selectedRoom && selectedRoom.characterId ? $characters.find((c) => String(c.id) === String(selectedRoom.characterId)) || null : null;
+             }
+        } else {
+            character = null;
+        }
+    }
+
+    const getSenderId = (msg: Message) => {
         if (msg.isMe) return "user";
         if (msg.type === "system") return "system";
         return msg.characterId;
     };
 
-    const createMessageGroups = (msgs) => {
+    const createMessageGroups = (msgs: Message[]): MessageGroupData[] => {
         if (!msgs || msgs.length === 0) {
             return [];
         }
 
-        const groups = [];
+        const groups: MessageGroupData[] = [];
         let i = 0;
         while (i < msgs.length) {
             const currentMessage = msgs[i];
@@ -167,8 +181,8 @@
             const groupMessages = msgs.slice(i, endIndex + 1);
             const firstMessage = groupMessages[0];
             const senderCharacter = firstMessage.characterId
-                ? $characters.find((c) => c.id === firstMessage.characterId)
-                : character;
+                ? $characters.find((c) => String(c.id) === String(firstMessage.characterId))
+                : (character as DisplayCharacter | null); // Use cast to generic display character
 
             groups.push({
                 id: firstMessage.id,
@@ -176,7 +190,7 @@
                 isMe: firstMessage.isMe,
                 showSenderInfo:
                     !firstMessage.isMe && firstMessage.type !== "system",
-                character: senderCharacter,
+                character: senderCharacter || null,
             });
 
             i = endIndex + 1;
@@ -205,7 +219,7 @@
     async function handleSendMessage() {
         let content = messageInput;
         let type = "text";
-        let payload = {};
+        let payload: Record<string, unknown> = {};
 
         if ($imageToSend) {
             const imageId = nanoid();
@@ -221,20 +235,22 @@
             };
 
             // Update character
-            characters.update((allChars) => {
-                const charIndex = allChars.findIndex(
-                    (c) => c.id === character.id
-                );
-                if (charIndex !== -1) {
-                    const updatedChar = { ...allChars[charIndex] };
-                    if (!updatedChar.media) {
-                        updatedChar.media = [];
+            if (character && 'media' in character) { // Only if character has media property
+                characters.update((allChars) => {
+                    const charIndex = allChars.findIndex(
+                        (c) => c.id === character!.id
+                    );
+                    if (charIndex !== -1) {
+                        const updatedChar = { ...allChars[charIndex] };
+                        if (!updatedChar.media) {
+                            updatedChar.media = [];
+                        }
+                        updatedChar.media.push(newMedia);
+                        allChars[charIndex] = updatedChar;
                     }
-                    updatedChar.media.push(newMedia);
-                    allChars[charIndex] = updatedChar;
-                }
-                return allChars;
-            });
+                    return allChars;
+                });
+            }
 
             content = imageCaption;
             type = "image";
@@ -271,11 +287,15 @@
     function openSNSModal() {
         if (
             character &&
-            selectedRoom.type !== "open" &&
-            selectedRoom.type !== "group"
+            selectedRoom &&
+            (!('type' in selectedRoom) || (selectedRoom.type !== "open" && selectedRoom.type !== "group"))
         ) {
-            snsFeedCharacter.set(character);
-            isSNSFeedModalVisible.set(true);
+            // Need full character object for SNS feed
+             const fullCharacter = $characters.find((c) => c.id === character!.id);
+             if (fullCharacter) {
+                snsFeedCharacter.set(fullCharacter);
+                isSNSFeedModalVisible.set(true);
+             }
         }
     }
 
@@ -298,13 +318,16 @@
         isInputOptionsVisible.set(false);
     }
 
-    function handleImageFileChange(event) {
-        const file = event.target.files[0];
+    function handleImageFileChange(event: Event) {
+        const target = event.target as HTMLInputElement;
+        const file = target.files?.[0];
         if (!file) return;
 
         const reader = new FileReader();
         reader.onload = (e) => {
-            imageToSend.set(e.target.result);
+            if (e.target?.result && typeof e.target.result === 'string') {
+                imageToSend.set(e.target.result);
+            }
         };
         reader.readAsDataURL(file);
     }
@@ -323,7 +346,7 @@
     id="main-chat-area"
     class="w-full h-full absolute top-0 left-0 flex flex-col bg-gray-950"
 >
-    {#if character}
+    {#if character && selectedRoom}
         <header
             class="py-4 pl-6 pr-4 bg-gray-900/80 border-b border-gray-800 glass-effect flex items-center justify-between z-10"
         >
@@ -334,20 +357,20 @@
                 >
                     <ArrowLeft class="w-6 h-6" />
                 </button>
-                {#if selectedRoom.type === "open"}
+                {#if 'type' in selectedRoom && selectedRoom.type === "open"}
                     <div
                         class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center"
                     >
                         <Globe class="w-6 h-6 text-white" />
                     </div>
-                {:else if selectedRoom.type === "group"}
+                {:else if 'type' in selectedRoom && selectedRoom.type === "group"}
                     <div
                         class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center"
                     >
                         <Users class="w-6 h-6 text-white" />
                     </div>
                 {:else}
-                    <Avatar {character} size="sm" />
+                    <Avatar character={character} size="sm" />
                 {/if}
                 <div>
                     {#if $chatType === "regular" && $selectedCharacter}
@@ -358,7 +381,7 @@
                             class="text-xs text-gray-400 flex items-center gap-1.5"
                         >
                             <MessageCircle class="w-4 h-4" />
-                            <span>{$selectedChat.name}</span>
+                            <span>{$selectedChat?.name}</span>
                         </p>
                     {:else if $selectedChat}
                         <h2 class="text-lg font-semibold">
@@ -381,8 +404,7 @@
                 <button
                     on:click={openSNSModal}
                     class="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
-                    disabled={selectedRoom.type === "open" ||
-                        selectedRoom.type === "group"}
+                    disabled={'type' in selectedRoom && (selectedRoom.type === "open" || selectedRoom.type === "group")}
                 >
                     <Instagram class="w-4 h-4 text-gray-300" />
                 </button>
@@ -505,7 +527,7 @@
                         on:click={openImageUpload}
                         class="w-full flex items-center gap-3 px-3 py-2 text-sm text-left rounded-lg hover:bg-gray-600"
                     >
-                        <Image class="w-4 h-4" />
+                        <ImageIcon class="w-4 h-4" />
                         {t("mainChat.uploadPhoto")}
                     </button>
                     <input
@@ -564,7 +586,7 @@
                     id="open-input-options-btn"
                     on:click={toggleInputOptions}
                     class="flex-shrink-0 hover:bg-gray-600 text-white rounded-full h-[44px] w-[44px] flex items-center justify-center"
-                    disabled={$imageToSend || $stickerToSend}
+                    disabled={!!($imageToSend || $stickerToSend)}
                 >
                     <Plus class="w-5 h-5" />
                 </button>
@@ -580,13 +602,13 @@
                         : t("mainChat.messagePlaceholder")}
                     class="flex-1 self-center pl-5 pr-5 py-3 text-white rounded-full resize-none"
                     rows="1"
-                    disabled={$imageToSend}
+                    disabled={!!$imageToSend}
                 ></textarea>
                 <button
                     id="sticker-btn"
                     on:click={toggleStickerPanel}
                     class="flex-shrink-0 hover:bg-gray-600 text-white rounded-full h-[44px] w-[44px] flex items-center justify-center"
-                    disabled={$imageToSend}
+                    disabled={!!$imageToSend}
                 >
                     <Smile class="w-5 h-5" />
                 </button>

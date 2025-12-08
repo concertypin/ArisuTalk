@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { onMount, afterUpdate } from "svelte";
     import { t } from "$root/i18n";
     import {
@@ -49,11 +49,13 @@
     import GroupChatList from "./sidebar/GroupChatList.svelte";
     import OpenChatList from "./sidebar/OpenChatList.svelte";
     import AuthWidget from "./auth/AuthWidget.svelte";
+    import type { Character } from "$types/character";
+    import type { ChatRoom, Message, GroupChat } from "$types/chat";
 
-    let characterGroupEls = {};
-    let avatarEls = {};
-    let headerEls = {};
-    let roomListEls = {};
+    let characterGroupEls: Record<string, HTMLElement> = {};
+    let avatarEls: Record<string, HTMLElement> = {};
+    let headerEls: Record<string, HTMLElement> = {};
+    let roomListEls: Record<string, HTMLElement> = {};
     let editingName = "";
 
     $: filteredCharacters = $characters.filter((char) =>
@@ -62,7 +64,7 @@
 
     $: characterLastAiMessages = Object.fromEntries(
         $characters.map((char) => {
-            const rooms = $chatRooms[char.id] || [];
+            const rooms = $chatRooms[String(char.id)] || [];
             if (!rooms.length) return [char.id, null];
 
             const lastAiMessage = rooms
@@ -76,11 +78,11 @@
 
     afterUpdate(() => {
         $expandedCharacterIds.forEach((id) => {
-            updateTreeLine(id);
+            updateTreeLine(String(id));
         });
     });
 
-    function updateTreeLine(characterId) {
+    function updateTreeLine(characterId: string) {
         const characterGroup = characterGroupEls[characterId];
         const avatar = avatarEls[characterId];
         const header = headerEls[characterId];
@@ -134,8 +136,8 @@
         isCharacterModalVisible.set(true);
     }
 
-    function handleCharacterSelect(character) {
-        const rooms = $chatRooms[character.id] || [];
+    function handleCharacterSelect(character: Character) {
+        const rooms = $chatRooms[String(character.id)] || [];
         if (rooms.length === 1) {
             selectChat(rooms[0].id);
         } else if (rooms.length > 1) {
@@ -144,7 +146,7 @@
         }
     }
 
-    function toggleCharacterExpansion(characterId) {
+    function toggleCharacterExpansion(characterId: string | number) {
         expandedCharacterIds.update((ids) => {
             const newIds = new Set(ids);
             if (newIds.has(characterId)) {
@@ -156,16 +158,16 @@
         });
     }
 
-    function selectChat(chatId) {
+    function selectChat(chatId: string) {
         if ($editingChatRoomId) return;
         selectedChatId.set(chatId);
     }
 
-    function createNewChatRoomForCharacter(characterId) {
+    function createNewChatRoomForCharacter(characterId: string | number) {
         const newChatRoomId = `${characterId}_${Date.now()}`;
         const newChatRoom = {
             id: newChatRoomId,
-            characterId: characterId,
+            characterId: String(characterId),
             name: t("ui.newChatName"),
             createdAt: Date.now(),
             lastActivity: Date.now(),
@@ -173,10 +175,10 @@
 
         chatRooms.update((rooms) => {
             const characterChatRooms = [
-                ...(rooms[characterId] || []),
+                ...(rooms[String(characterId)] || []),
                 newChatRoom,
             ];
-            return { ...rooms, [characterId]: characterChatRooms };
+            return { ...rooms, [String(characterId)]: characterChatRooms };
         });
 
         messages.update((msgs) => ({ ...msgs, [newChatRoomId]: [] }));
@@ -184,12 +186,12 @@
         selectChat(newChatRoomId);
     }
 
-    function editCharacter(character) {
+    function editCharacter(character: Character) {
         editingCharacter.set(character);
         isCharacterModalVisible.set(true);
     }
 
-    function deleteCharacter(charToDelete) {
+    function deleteCharacter(charToDelete: Character) {
         confirmationModalData.set({
             title: t("sidebar.deleteCharacterTitle"),
             message: t("sidebar.deleteCharacterConfirm", {
@@ -200,7 +202,7 @@
                     chars.filter((c) => c.id !== charToDelete.id)
                 );
                 chatRooms.update((rooms) => {
-                    delete rooms[charToDelete.id];
+                    delete rooms[String(charToDelete.id)];
                     return rooms;
                 });
                 // TODO: Also delete messages for all rooms of this character
@@ -209,19 +211,19 @@
         isConfirmationModalVisible.set(true);
     }
 
-    function editChatRoom(room) {
+    function editChatRoom(room: ChatRoom) {
         editingChatRoomId.set(room.id);
         editingName = room.name;
     }
 
-    function deleteChatRoom(room, characterId) {
+    function deleteChatRoom(room: ChatRoom, characterId: string | number) {
         confirmationModalData.set({
             title: t("sidebar.deleteChatRoom"),
             message: t("modal.deleteChatRoom.message"),
             onConfirm: () => {
                 chatRooms.update((rooms) => {
-                    const characterRooms = rooms[characterId] || [];
-                    rooms[characterId] = characterRooms.filter(
+                    const characterRooms = rooms[String(characterId)] || [];
+                    rooms[String(characterId)] = characterRooms.filter(
                         (r) => r.id !== room.id
                     );
                     return rooms;
@@ -235,13 +237,13 @@
         isConfirmationModalVisible.set(true);
     }
 
-    function saveName(room, characterId) {
+    function saveName(room: ChatRoom | GroupChat, characterId?: string | number) {
         if (!editingName.trim()) return;
 
         if (characterId) {
             // It's a character room
             chatRooms.update((rooms) => {
-                const characterRooms = rooms[characterId] || [];
+                const characterRooms = rooms[String(characterId)] || [];
                 const roomToUpdate = characterRooms.find(
                     (r) => r.id === room.id
                 );
@@ -349,14 +351,14 @@
                         </div>
                     </div>
                     {#each filteredCharacters as char (char.id)}
-                        {@const rooms = $chatRooms[char.id] || []}
+                        {@const rooms = $chatRooms[String(char.id)] || []}
                         {@const isExpanded = $expandedCharacterIds.has(char.id)}
                         {@const lastAiMessage =
                             characterLastAiMessages[char.id]}
                         <div
                             class="character-group"
                             class:is-expanded={isExpanded}
-                            bind:this={characterGroupEls[char.id]}
+                            bind:this={characterGroupEls[String(char.id)]}
                         >
                             <div
                                 on:click={() =>
@@ -368,14 +370,14 @@
                                 role="button"
                                 tabindex="0"
                                 class="character-header group p-3 md:p-4 rounded-xl cursor-pointer transition-all duration-200 relative hover:bg-gray-800/50"
-                                bind:this={headerEls[char.id]}
+                                bind:this={headerEls[String(char.id)]}
                             >
                                 <div
                                     class="flex items-center space-x-4 md:space-x-5"
                                 >
                                     <div
                                         class="character-avatar relative"
-                                        bind:this={avatarEls[char.id]}
+                                        bind:this={avatarEls[String(char.id)]}
                                     >
                                         <Avatar character={char} />
                                     </div>
@@ -455,7 +457,7 @@
                             {#if isExpanded}
                                 <div
                                     class="ml-2 space-y-1 pb-2 chat-room-list"
-                                    bind:this={roomListEls[char.id]}
+                                    bind:this={roomListEls[String(char.id)]}
                                 >
                                     {#each rooms as room (room.id)}
                                         {@const lastMessage =

@@ -1,35 +1,41 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
-    import Avatar from "./Avatar.svelte";
-    import { isImageZoomModalVisible, imageZoomModalData } from "../stores/ui";
+    import type { DisplayCharacter, Message } from "$types/chat";
+    import { createEventDispatcher } from "svelte";
 
-    export let message;
+    import { imageZoomModalData, isImageZoomModalVisible } from "../stores/ui";
+    import Avatar from "./Avatar.svelte";
+
+    export let message: Message;
+    export let senderCharacter: DisplayCharacter | null = null;
     export let showSenderInfo = false;
 
     function openImageZoom() {
         if (message.type === "image" || message.type === "sticker") {
             const imageUrl =
                 message.type === "sticker"
-                    ? message.sticker.data
+                    ? message.sticker?.data
                     : message.imageUrl;
             const title =
                 message.type === "sticker"
-                    ? message.sticker.stickerName
+                    ? message.sticker?.name
                     : t("mainChat.uploadPhoto");
-            imageZoomModalData.set({ imageUrl, title });
-            isImageZoomModalVisible.set(true);
+            if (imageUrl) {
+                imageZoomModalData.set({ imageUrl, title: title || "" });
+                isImageZoomModalVisible.set(true);
+            }
         }
     }
 </script>
 
 <div class="flex items-start gap-3" class:justify-end={message.isMe}>
-    {#if showSenderInfo}
-        <Avatar character={message.sender} size="xs" />
+    {#if showSenderInfo && senderCharacter}
+        <Avatar character={senderCharacter} size="xs" />
     {/if}
     <div class="flex flex-col" class:items-end={message.isMe}>
         {#if showSenderInfo}
             <span class="text-sm text-gray-400 ml-2 mb-1"
-                >{message.sender.name}</span
+                >{senderCharacter ? senderCharacter.name : message.sender}</span
             >
         {/if}
         <div
@@ -40,29 +46,37 @@
             class:text-gray-200={!message.isMe}
         >
             {#if message.type === "image"}
-                <img
-                    src={message.imageUrl}
-                    alt="user upload"
-                    class="rounded-lg max-w-full h-auto cursor-pointer"
+                <button
+                    type="button"
+                    class="block text-left"
                     on:click={openImageZoom}
-                />
+                    on:keydown={(e) => e.key === "Enter" && openImageZoom()}
+                >
+                    <img
+                        src={message.imageUrl}
+                        alt="user upload"
+                        class="rounded-lg max-w-full h-auto cursor-pointer"
+                    />
+                </button>
                 {#if message.content}
                     <p class="mt-2">{message.content}</p>
                 {/if}
-            {:else if message.type === "sticker"}
-                <div
+            {:else if message.type === "sticker" && message.sticker}
+                <button
+                    type="button"
                     class="flex flex-col items-center cursor-pointer"
                     on:click={openImageZoom}
+                    on:keydown={(e) => e.key === "Enter" && openImageZoom()}
                 >
                     <img
                         src={message.sticker.data}
-                        alt={message.sticker.stickerName}
+                        alt={message.sticker.name}
                         class="max-w-[120px] h-auto"
                     />
                     {#if message.content}
                         <p class="mt-2 text-center">{message.content}</p>
                     {/if}
-                </div>
+                </button>
             {:else}
                 <p>{message.content}</p>
             {/if}

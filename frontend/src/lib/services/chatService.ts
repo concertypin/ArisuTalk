@@ -15,8 +15,8 @@ import {
 import {
     characters,
     characterStateStore,
-    type CharacterState,
 } from "$stores/character";
+import type { CharacterState } from "$types/character";
 import { settings } from "$stores/settings";
 import { APIManager } from "$lib/api/apiManager";
 import { getPrompt, getAllPrompts } from "$root/prompts/promptManager";
@@ -30,14 +30,17 @@ import {
     applyRequestHooks,
 } from "./replaceHookService";
 const { replace } = await import("$lib/utils/worker/replace.js");
+import type { Message, MessagePart, ChatRoom, GroupChatSettings } from "$types/chat";
+import type { Character, SNSPost } from "$types/character";
+import type { APIConfig } from "$root/defaults";
 
 const apiManager = new APIManager();
 
-async function handleVirtualStream(chatId, character, messageParts) {
+async function handleVirtualStream(chatId: string, character: Character, messageParts: MessagePart[]) {
     virtualStream.set({
         isStreaming: true,
         chatId: chatId,
-        characterId: character.id,
+        characterId: character.id as string, // Cast to string if needed
         messages: [],
         isTyping: false,
     });
@@ -58,10 +61,10 @@ async function handleVirtualStream(chatId, character, messageParts) {
         const outputHookResult = await applyOutputHooks(messagePart.content);
         const processedContent = outputHookResult.modified;
 
-        const botMessage = {
+        const botMessage: Message = {
             id: Date.now() + Math.random(),
             sender: character.name,
-            characterId: character.id,
+            characterId: String(character.id),
             content: processedContent,
             time: new Date().toLocaleTimeString([], {
                 hour: "2-digit",
@@ -78,8 +81,8 @@ async function handleVirtualStream(chatId, character, messageParts) {
         virtualStream.set({
             isStreaming: true,
             chatId: chatId,
-            characterId: character.id,
-            messages: [...streamedMessages] as any,
+            characterId: String(character.id),
+            messages: [...streamedMessages],
             isTyping: false,
         });
         await tick(); // Ensure UI updates
@@ -103,15 +106,15 @@ async function handleVirtualStream(chatId, character, messageParts) {
     });
 }
 
-function isGroupChat(chatId) {
+function isGroupChat(chatId: string | null) {
     return chatId && typeof chatId === "string" && chatId.startsWith("group_");
 }
 
-function isOpenChat(chatId) {
+function isOpenChat(chatId: string | null) {
     return chatId && typeof chatId === "string" && chatId.startsWith("open_");
 }
 
-function getCurrentChatRoom(chatId) {
+function getCurrentChatRoom(chatId: string | null) {
     if (!chatId) return null;
 
     if (isGroupChat(chatId)) {
@@ -124,13 +127,13 @@ function getCurrentChatRoom(chatId) {
 
     for (const characterId in get(chatRooms)) {
         const rooms = get(chatRooms)[characterId];
-        const chatRoom = rooms.find((room) => room.id === chatId);
+        const chatRoom = rooms.find((room: ChatRoom) => room.id === chatId);
         if (chatRoom) return chatRoom;
     }
     return null;
 }
 
-function processAutoPost(character, autoPost) {
+function processAutoPost(character: Character, autoPost: Partial<SNSPost>) {
     if (!autoPost || !autoPost.content?.trim()) return character;
 
     const allCharacterStates = get(characterStateStore);
@@ -150,10 +153,10 @@ function processAutoPost(character, autoPost) {
     const timestamp = new Date().toISOString();
 
     const formattedTags = Array.isArray(autoPost.tags)
-        ? autoPost.tags.map((tag) => (tag.startsWith("#") ? tag : `#${tag}`))
+        ? autoPost.tags.map((tag: string) => (tag.startsWith("#") ? tag : `#${tag}`))
         : [];
 
-    const newPost = {
+    const newPost: SNSPost = {
         id: `autopost_${character.id}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         type: autoPost.type || "memory",
         content: autoPost.content.trim(),
@@ -179,20 +182,21 @@ function processAutoPost(character, autoPost) {
 }
 
 async function callApiAndHandleResponse(
-    chatId,
-    character,
-    history,
+    chatId: string,
+    character: Character,
+    history: Message[],
     isProactive = false,
     forceSummary = false
 ) {
     const currentSettings = get(settings);
     const apiProvider = currentSettings.apiProvider || "gemini";
     const apiConfigs = currentSettings.apiConfigs || {};
-    let currentConfig = apiConfigs[apiProvider];
+    let currentConfig: APIConfig = apiConfigs[apiProvider];
     if (!currentConfig && apiProvider === "gemini") {
         currentConfig = {
             apiKey: currentSettings.apiKey,
             model: currentSettings.model,
+            customModels: [],
         };
     }
 
@@ -222,7 +226,7 @@ async function callApiAndHandleResponse(
         const response = await apiManager.generateContent(
             apiProvider,
             currentConfig.apiKey,
-            currentConfig.model,
+            currentConfig.model || "",
             {
                 userName: currentSettings.userName,
                 userDescription: currentSettings.userDescription,
@@ -287,7 +291,7 @@ async function callApiAndHandleResponse(
         }
 
         if (response.newMemory && response.newMemory.trim() !== "") {
-            const legacyMemoryPost = {
+            const legacyMemoryPost: Partial<SNSPost> = {
                 type: "memory",
                 content: response.newMemory.trim(),
                 access_level: "main-public",
@@ -314,10 +318,12 @@ async function callApiAndHandleResponse(
                 const charIndex = chars.findIndex((c) => c.id === character.id);
                 if (charIndex !== -1) {
                     const newChars = [...chars];
-                    newChars[charIndex] = processAutoPost(
-                        newChars[charIndex],
-                        response.autoPost
-                    );
+                    if (response.autoPost) {
+                         newChars[charIndex] = processAutoPost(
+                            newChars[charIndex] as Character,
+                            response.autoPost
+                        );
+                    }
                     return newChars;
                 }
                 return chars;
@@ -335,7 +341,7 @@ async function callApiAndHandleResponse(
         }
     } catch (error) {
         console.error("Error sending message:", error);
-        const errorMessage = {
+        const errorMessage: Message = {
             id: Date.now() + 1,
             sender: "System",
             content: (error as Error).message || "Error sending message",
@@ -358,7 +364,7 @@ async function callApiAndHandleResponse(
     }
 }
 
-export async function sendMessage(content, type = "text", payload = {}) {
+export async function sendMessage(content: string, type: string = "text", payload: object = {}) {
     console.log(
         `sendMessage called with chatId: ${get(selectedChatId)}, isGroupChat: ${isGroupChat(get(selectedChatId))}`
     );
@@ -371,7 +377,7 @@ export async function sendMessage(content, type = "text", payload = {}) {
     const inputHookResult = await applyInputHooks(content);
     const processedContent = inputHookResult.modified;
 
-    const userMessage = {
+    const userMessage: Message = {
         id: Date.now(),
         sender: "user",
         isMe: true,
@@ -393,6 +399,8 @@ export async function sendMessage(content, type = "text", payload = {}) {
     currentMessage.set("");
 
     const chatRoom = getCurrentChatRoom(chatId);
+    if (!chatRoom) return;
+
     const history = get(messages)[chatId] || [];
 
     if (isGroupChat(chatId)) {
@@ -402,8 +410,8 @@ export async function sendMessage(content, type = "text", payload = {}) {
             return;
         }
 
-        // Get group chat settings
-        const groupSettings = chatRoom.settings || {
+        // Get group chat settings with strict typing
+        const groupSettings = (chatRoom.settings as unknown as GroupChatSettings) || {
             responseFrequency: 0.5,
             maxRespondingCharacters: 1,
             responseDelay: 3000,
@@ -411,22 +419,22 @@ export async function sendMessage(content, type = "text", payload = {}) {
         };
 
         // Check overall response frequency
-        if (Math.random() > groupSettings.responseFrequency) {
+        if (Math.random() > (groupSettings.responseFrequency ?? 0.5)) {
             isWaitingForResponse.set(false);
             return;
         }
 
         // Filter active participants based on individual settings
-        const activeParticipants = participants.filter((participantId) => {
-            const settings = groupSettings.participantSettings[
+        const activeParticipants = participants.filter((participantId: string) => {
+            const participantSettings = groupSettings.participantSettings?.[
                 participantId
             ] || {
                 isActive: true,
                 responseProbability: 0.9,
             };
             return (
-                settings.isActive &&
-                Math.random() < settings.responseProbability
+                participantSettings.isActive &&
+                Math.random() < participantSettings.responseProbability
             );
         });
 
@@ -437,7 +445,7 @@ export async function sendMessage(content, type = "text", payload = {}) {
 
         // Limit number of responding characters
         const maxResponders = Math.min(
-            groupSettings.maxRespondingCharacters,
+            groupSettings.maxRespondingCharacters ?? 1,
             activeParticipants.length
         );
         const shuffledParticipants = [...activeParticipants].sort(
@@ -458,12 +466,12 @@ export async function sendMessage(content, type = "text", payload = {}) {
             // Add delay between responses if not the first one
             if (i > 0) {
                 await new Promise((resolve) =>
-                    setTimeout(resolve, groupSettings.responseDelay)
+                    setTimeout(resolve, groupSettings.responseDelay ?? 3000)
                 );
             }
 
             try {
-                await callApiAndHandleResponse(chatId, character, history);
+                await callApiAndHandleResponse(chatId, character as Character, history);
             } catch (error) {
                 console.error(
                     `Error in group chat response for ${character.name}:`,
@@ -475,7 +483,7 @@ export async function sendMessage(content, type = "text", payload = {}) {
         isWaitingForResponse.set(false);
         typingCharacterId.set(null);
     } else if (isOpenChat(chatId)) {
-        const participants = chatRoom.currentParticipants || [];
+        const participants = (chatRoom.currentParticipants || []) as string[];
         if (participants.length === 0) {
             isWaitingForResponse.set(false);
             return;
@@ -499,7 +507,7 @@ export async function sendMessage(content, type = "text", payload = {}) {
         }
 
         try {
-            await callApiAndHandleResponse(chatId, character, history);
+            await callApiAndHandleResponse(chatId, character as Character, history);
         } finally {
             isWaitingForResponse.set(false);
             typingCharacterId.set(null);
@@ -515,7 +523,7 @@ export async function sendMessage(content, type = "text", payload = {}) {
         }
 
         try {
-            await callApiAndHandleResponse(chatId, character, history);
+            await callApiAndHandleResponse(chatId, character as Character, history);
         } finally {
             isWaitingForResponse.set(false);
             typingCharacterId.set(null);
@@ -523,7 +531,7 @@ export async function sendMessage(content, type = "text", payload = {}) {
     }
 }
 
-export function deleteMessageGroup(messageId) {
+export function deleteMessageGroup(messageId: number | string) {
     confirmationModalData.set({
         title: t("modal.messageGroupDeleteConfirm.title"),
         message: t("modal.messageGroupDeleteConfirm.message"),
@@ -562,11 +570,11 @@ export function deleteMessageGroup(messageId) {
     isConfirmationModalVisible.set(true);
 }
 
-export function editMessage(messageId) {
+export function editMessage(messageId: number | string) {
     editingMessageId.set(messageId);
 }
 
-export async function saveEditedMessage(messageId, newContent) {
+export async function saveEditedMessage(messageId: number | string, newContent: string) {
     const chatId = get(selectedChatId);
     if (!chatId) return;
 
@@ -589,7 +597,7 @@ export async function saveEditedMessage(messageId, newContent) {
 
     const originalMessage = currentMessages[groupInfo.startIndex];
 
-    const editedMessage = {
+    const editedMessage: Message = {
         ...originalMessage,
         id: Date.now(),
         content: newContent,
@@ -622,7 +630,7 @@ export async function saveEditedMessage(messageId, newContent) {
     try {
         await callApiAndHandleResponse(
             chatId,
-            character,
+            character as Character,
             updatedMessages,
             false,
             true
@@ -633,7 +641,7 @@ export async function saveEditedMessage(messageId, newContent) {
     }
 }
 
-export async function rerollMessage(messageId) {
+export async function rerollMessage(messageId: number | string) {
     const chatId = get(selectedChatId);
     if (!chatId) return;
 
@@ -711,7 +719,7 @@ export async function rerollMessage(messageId) {
     try {
         await callApiAndHandleResponse(
             chatId,
-            character,
+            character as Character,
             truncatedMessages,
             false,
             true
@@ -722,8 +730,10 @@ export async function rerollMessage(messageId) {
     }
 }
 
-export async function generateSnsPost(messageId) {
+export async function generateSnsPost(messageId: number | string) {
     const chatId = get(selectedChatId);
+    if (!chatId) return;
+
     const allMessages = get(messages);
     const currentMessages = allMessages[chatId] || [];
     const targetMessage = currentMessages.find((msg) => msg.id === messageId);
@@ -775,54 +785,66 @@ export async function generateSnsPost(messageId) {
 
         const apiProvider = currentSettings.apiProvider || "gemini";
         const apiConfigs = currentSettings.apiConfigs || {};
-        let currentConfig = apiConfigs[apiProvider];
+        let currentConfig: APIConfig = apiConfigs[apiProvider];
         if (!currentConfig && apiProvider === "gemini") {
             currentConfig = {
                 apiKey: currentSettings.apiKey,
                 model: currentSettings.model,
+                customModels: [],
             };
         }
 
-        if (!currentConfig?.apiKey) throw new Error("API key not set");
+        if (!currentConfig || !currentConfig.apiKey) {
+            throw new Error("API configuration not found or API key missing");
+        }
 
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${currentConfig.model}:generateContent?key=${currentConfig.apiKey}`;
-        const payload = {
-            contents: [{ parts: [{ text: snsPrompt }] }],
-            generationConfig: {
-                temperature: currentConfig.temperature || 1.25,
-                maxOutputTokens: currentConfig.maxTokens || 4096,
+        const snsHistory: Message[] = [{
+            id: Date.now(),
+            sender: "user",
+            content: snsPrompt,
+            timestamp: Date.now(),
+            isMe: true,
+            type: "text",
+            time: new Date().toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+            })
+        }];
+
+        const response = await apiManager.generateContent(
+            apiProvider,
+            currentConfig.apiKey,
+            currentConfig.model || "",
+            {
+                userName: currentSettings.userName,
+                userDescription: currentSettings.userDescription,
+                character: character,
+                history: snsHistory,
+                prompts: await getAllPrompts(),
+                isProactive: false,
+                forceSummary: false,
+                chatId: chatId,
             },
-        };
-
-        const apiResponse = await fetch(apiUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-        });
-        if (!apiResponse.ok)
-            throw new Error(`Gemini API call failed: ${apiResponse.status}`);
-
-        const apiData = await apiResponse.json();
-        const responseText: string | null =
-            apiData.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (!responseText) throw new Error("No text response from Gemini API");
-
-        let parsedResponse = JSON.parse(
-            responseText
-                .trim()
-                .replace(/^```json/, "")
-                .replace(/```$/, "")
+            currentConfig.baseUrl,
+            {
+                maxTokens: currentConfig.maxTokens,
+                temperature: currentConfig.temperature
+            }
         );
+
+        const parsedResponse = response;
 
         if (parsedResponse && parsedResponse.autoPost) {
             characters.update((chars) => {
                 const charIndex = chars.findIndex((c) => c.id === character.id);
                 if (charIndex !== -1) {
                     const newChars = [...chars];
-                    newChars[charIndex] = processAutoPost(
-                        newChars[charIndex],
-                        parsedResponse.autoPost
-                    );
+                    if (parsedResponse.autoPost) {
+                         newChars[charIndex] = processAutoPost(
+                            newChars[charIndex] as Character,
+                            parsedResponse.autoPost
+                        );
+                    }
                     return newChars;
                 }
                 return chars;
@@ -849,7 +871,7 @@ export async function generateSnsPost(messageId) {
                         chatId,
                         chatType: "sns_generation",
                         timestamp: new Date().toISOString(),
-                        apiProvider,
+                        apiProvider: apiProvider,
                         model: currentConfig.model,
                     },
                 },
@@ -864,11 +886,11 @@ export async function generateSnsPost(messageId) {
         } else {
             throw new Error("Failed to generate SNS post from response.");
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error generating SNS post:", error);
         addLog({
             type: "structured",
-            characterName: character.name,
+            characterName: character?.name || "Unknown",
             chatId: chatId,
             chatType: "sns_generation",
             data: { error: { message: error.message, stack: error.stack } },
@@ -883,7 +905,7 @@ export async function generateSnsPost(messageId) {
 }
 
 export function addSystemMessage(chatId: string, content: string) {
-    const systemMessage = {
+    const systemMessage: Message = {
         id: Date.now() + Math.random(),
         sender: "System",
         content: content,

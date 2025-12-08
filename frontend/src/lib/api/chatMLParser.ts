@@ -1,27 +1,29 @@
+import type { Character } from "$root/types/character";
+
 /**
  * ChatML (Chat Markup Language) Parser for ArisuTalk
- *
- * This module parses ChatML format prompts and converts them to the internal prompt structure
- * used by different API providers.
- *
- * ChatML Format:
- * <|im_start|>system
- * You are a helpful assistant.
- * <|im_end|>
- * <|im_start|>user
- * Hello!
- * <|im_end|>
- * <|im_start|>assistant
- * Hello! How can I help you today?
- * <|im_end|>
  */
+
+export interface ChatMLMessage {
+    role: string;
+    content: string;
+}
+
+export interface InternalContent {
+    role: string;
+    parts: ({ text: string } | { inlineData: { mimeType: string; data: string } })[];
+    content?: string;
+}
+
+export interface PromptStructure {
+    systemPrompt: string;
+    contents: InternalContent[];
+}
 
 /**
  * Parses ChatML format text or plain text into message objects
- * @param {string} chatMLText - The ChatML formatted text or plain text
- * @returns {Array<{role: string, content: string}>} Array of parsed messages
  */
-export function parseChatML(chatMLText) {
+export function parseChatML(chatMLText: string): ChatMLMessage[] {
     if (!chatMLText || typeof chatMLText !== "string") {
         return [];
     }
@@ -37,10 +39,10 @@ export function parseChatML(chatMLText) {
         ];
     }
 
-    const messages = [];
+    const messages: ChatMLMessage[] = [];
     const lines = chatMLText.split("\n");
-    let currentMessage = null;
-    let contentLines = [];
+    let currentMessage: { role: string } | null = null;
+    let contentLines: string[] = [];
 
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i].trim();
@@ -87,24 +89,18 @@ export function parseChatML(chatMLText) {
 
 /**
  * Converts ChatML messages to the internal prompt structure
- * @param {Array<{role: string, content: string}>} messages - Parsed ChatML messages
- * @param {Object} character - Character object
- * @param {string} userName - User name
- * @param {string} userDescription - User description
- * @param {boolean} includeConversation - Whether to include user/assistant messages from ChatML (default: false)
- * @returns {{systemPrompt: string, contents: Array<Object>}} Internal prompt structure
  */
 export function chatMLToPromptStructure(
-    messages,
-    character,
-    userName = "",
-    userDescription = "",
-    includeConversation = false
-) {
+    messages: ChatMLMessage[],
+    character: Character | null,
+    userName: string = "",
+    userDescription: string = "",
+    includeConversation: boolean = false
+): PromptStructure {
     let systemPrompt = "";
-    const contents = [];
+    const contents: InternalContent[] = [];
 
-    const replacements = {
+    const replacements: Record<string, string> = {
         "character.name": character ? character.name : "",
         "user.name": userName,
         "persona.name": userName,
@@ -112,7 +108,7 @@ export function chatMLToPromptStructure(
         "persona.description": userDescription,
     };
 
-    const replacePlaceholders = (text) => {
+    const replacePlaceholders = (text: string) => {
         if (!text) return "";
         let result = text;
         for (const key in replacements) {
@@ -157,11 +153,8 @@ export function chatMLToPromptStructure(
 
 /**
  * Converts internal prompt structure back to ChatML format
- * @param {string} systemPrompt - System prompt
- * @param {Array<Object>} contents - Internal contents array
- * @returns {string} ChatML formatted text
  */
-export function promptStructureToChatML(systemPrompt, contents) {
+export function promptStructureToChatML(systemPrompt: string, contents: InternalContent[]): string {
     let chatML = "";
 
     // Add system message if present
@@ -172,7 +165,8 @@ export function promptStructureToChatML(systemPrompt, contents) {
     // Add conversation contents
     for (const content of contents) {
         const role = content.role === "model" ? "assistant" : content.role;
-        const text = content.parts?.[0]?.text || content.content || "";
+        const part = content.parts?.[0];
+        const text = (part && 'text' in part) ? (part as { text: string }).text : (content.content || "");
 
         if (text) {
             chatML += "<|im_start|>" + role + "\n" + text + "\n<|im_end|>\n";
@@ -184,10 +178,8 @@ export function promptStructureToChatML(systemPrompt, contents) {
 
 /**
  * Validates if a string is valid ChatML format
- * @param {string} text - Text to validate
- * @returns {boolean} True if valid ChatML format
  */
-export function isValidChatML(text) {
+export function isValidChatML(text: string): boolean {
     if (!text || typeof text !== "string") {
         return false;
     }
@@ -209,10 +201,8 @@ export function isValidChatML(text) {
 
 /**
  * Creates a default ChatML template for users to start with
- * @param {Object} character - Character object (optional)
- * @returns {string} Default ChatML template
  */
-export function getDefaultChatMLTemplate(character = null) {
+export function getDefaultChatMLTemplate(character: Character | null = null): string {
     const characterName = character?.name || "Assistant";
     const characterPrompt =
         character?.prompt || "You are a helpful AI assistant.";
@@ -232,37 +222,31 @@ You should respond naturally and stay in character. All responses should be in K
 
 /**
  * Builds ChatML from traditional complex prompt sections
- * @param {Object} prompts - Traditional prompt sections
- * @param {Object} character - Character object
- * @param {string} userName - User name
- * @param {string} userDescription - User description
- * @param {Object} context - Additional context (timeContext, availableStickers, etc.)
- * @returns {string} ChatML formatted text
  */
 export function buildChatMLFromTraditionalPrompts(
-    prompts,
-    character,
-    userName = "",
-    userDescription = "",
-    context = {}
-) {
+    prompts: any, // defined as object in usage
+    character: Character | null,
+    userName: string = "",
+    userDescription: string = "",
+    context: Record<string, string> = {}
+): string {
     // Combine all the traditional prompt sections into a comprehensive system message
     const mainPrompts = prompts.main || {};
 
     // Include ALL sections from mainPrompts, not just hardcoded ones
-    const systemSections = [];
+    const systemSections: string[] = [];
 
     // Process all sections in the order they appear, with special handling for certain sections
     for (const [key, value] of Object.entries(mainPrompts)) {
-        if (!value || !value.trim()) {
+        if (!value || !(value as string).trim()) {
             continue; // Skip empty sections
         }
 
-        let processedValue = value;
+        let processedValue = value as string;
 
         // Special processing for specific sections
         if (key === "sticker_usage") {
-            processedValue = value.replace(
+            processedValue = processedValue.replace(
                 "{availableStickers}",
                 context.availableStickers || "none"
             );

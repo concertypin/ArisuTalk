@@ -1,0 +1,56 @@
+name: Frontend Check
+description: Check for type errors in the frontend code. Fails the workflow if there are type errors.
+
+on:
+  push:
+    branches:
+      - dev-*
+      - dev/*
+    paths: 
+      - "frontend/**"
+      - ".github/workflows/frontend_check.yml"
+      - "pnpm*"
+      - "package.json"
+  pull_request:
+    branches:
+      - main
+    paths: 
+      - "frontend/**"
+      - ".github/workflows/frontend_check.yml"
+      - "pnpm*"
+      - "package.json"
+  workflow_dispatch:
+permissions: 
+  contents: read
+
+
+jobs:
+  build:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: frontend
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: "package.json"
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: "package.json"
+          cache: "pnpm"
+          cache-dependency-path: "pnpm-lock.yaml"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check frontend type errors
+        timeout-minutes: 5 # It usually takes less than 30 seconds, but just in case
+        run: pnpm run --filter frontend check:types
+        

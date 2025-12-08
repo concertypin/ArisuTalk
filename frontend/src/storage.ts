@@ -3,7 +3,7 @@ import { getStorageKey } from "./lib/utils/storageKey";
 
 interface IndexedDBItem {
     key: string;
-    value: any;
+    value: unknown;
 }
 
 interface StorageQuota {
@@ -18,7 +18,7 @@ export async function loadFromBrowserStorage<T>(
 ): Promise<T> {
     try {
         const value = await loadFromIndexedDB(key);
-        return value !== null ? value : defaultValue;
+        return value !== null ? (value as T) : defaultValue;
     } catch (error) {
         console.error(`Error reading from IndexedDB key "${key}":`, error);
         return defaultValue;
@@ -27,7 +27,7 @@ export async function loadFromBrowserStorage<T>(
 
 export async function saveToBrowserStorage(
     key: string,
-    value: any
+    value: unknown
 ): Promise<void> {
     try {
         await saveToIndexedDB(key, value);
@@ -42,7 +42,7 @@ export async function saveToBrowserStorage(
     }
 }
 
-export async function loadFromIndexedDB(key: string): Promise<any> {
+export async function loadFromIndexedDB(key: string): Promise<unknown> {
     return new Promise((resolve, reject) => {
         const dbName = getStorageKey("PersonaChatDB");
         const request = indexedDB.open(dbName, 1);
@@ -72,10 +72,10 @@ export async function loadFromIndexedDB(key: string): Promise<any> {
     });
 }
 /**
- * @param {any} value
+ * @param {unknown} value
  * @returns {Promise<void>}
  */
-export async function saveToIndexedDB(key: string, value: any): Promise<void> {
+export async function saveToIndexedDB(key: string, value: unknown): Promise<void> {
     return new Promise((resolve, reject) => {
         const dbName = getStorageKey("PersonaChatDB");
         const request = indexedDB.open(dbName, 1);

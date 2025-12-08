@@ -608,7 +608,7 @@ const enDataBrowser: LanguageStrings["dataBrowser"] = {
     export: "Export",
     refresh: "Refresh",
     close: "Close",
-    showingResults: "Showing {count} results",
+    showingResults: "Showing {{count}} results",
     noResults: "No matching results",
     noData: "No data available",
     tryDifferentQuery: "Try a different search query",

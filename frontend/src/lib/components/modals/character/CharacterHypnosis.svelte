@@ -1,8 +1,9 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
     import { AlertTriangle } from "lucide-svelte";
+    import type { HypnosisSettings } from "$types/character";
 
-    export let hypnosis = {};
+    export let hypnosis: HypnosisSettings = {};
 </script>
 
 <details class="group border-t border-gray-700/50 pt-4">

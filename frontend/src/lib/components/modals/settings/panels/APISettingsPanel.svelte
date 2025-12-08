@@ -1,19 +1,27 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
+    import { Edit, FilePenLine, Globe, Settings } from "lucide-svelte";
+
     import { settings } from "../../../../stores/settings";
     import { isPromptModalVisible } from "../../../../stores/ui";
     import ProviderSettings from "../../../settings/ProviderSettings.svelte";
-    import { Globe, Settings, FilePenLine, Edit } from "lucide-svelte";
 
-    let provider = $settings.apiProvider || "gemini";
+    // @ts-ignore: provider is used in contexts requiring specific string literals
+    let provider:
+        | "gemini"
+        | "claude"
+        | "openai"
+        | "grok"
+        | "openrouter"
+        | "custom_openai" = ($settings.apiProvider as any) || "gemini";
 
-    function handleProviderChange(e) {
-        provider = e.target.value;
+    function handleProviderChange(e: Event) {
+        provider = (e.target as HTMLSelectElement).value as typeof provider;
         settings.update((s) => ({ ...s, apiProvider: provider }));
     }
 
-    function getProviderDisplayName(p) {
-        const displayNames = {
+    function getProviderDisplayName(p: string) {
+        const displayNames: Record<string, string> = {
             gemini: "Google Gemini",
             claude: "Anthropic Claude",
             openai: "OpenAI ChatGPT",

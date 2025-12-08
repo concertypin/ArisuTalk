@@ -1,16 +1,17 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
+    import { Plus, Search, Settings, UserCircle2, X } from "lucide-svelte";
+    import { createEventDispatcher } from "svelte";
+
+    import { auth } from "../../stores/auth";
     import { characters } from "../../stores/character";
     import {
-        isSearchModalVisible,
-        isMobileSettingsPageVisible,
         isFabMenuVisible,
         isMobileAuthModalVisible,
+        isMobileSettingsPageVisible,
+        isSearchModalVisible,
     } from "../../stores/ui";
-    import { auth } from "../../stores/auth";
     import CharacterItem from "../CharacterItem.svelte";
-    import { Search, Settings, Plus, X, UserCircle2 } from "lucide-svelte";
-    import { createEventDispatcher } from "svelte";
 
     const dispatch = createEventDispatcher();
 
@@ -34,7 +35,7 @@
         dispatch("newcharacter");
     }
 
-    function handleCharacterSelect(event) {
+    function handleCharacterSelect(event: CustomEvent) {
         dispatch("characterselect", event.detail);
     }
 </script>

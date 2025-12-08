@@ -1,12 +1,14 @@
-<script>
-    import { onMount, onDestroy } from "svelte";
-    import { get } from "svelte/store";
+<script lang="ts">
     import { t } from "$root/i18n";
-    import { openChats, selectedChatId } from "../../../stores/chat";
-    import { characters } from "../../../stores/character";
-    import { isCreateOpenChatModalVisible } from "../../../stores/ui";
-    import { X, Globe, Info, Users } from "lucide-svelte";
+    import type { ChatRoom } from "$types/chat";
+    import { Globe, Info, Users, X } from "lucide-svelte";
+    import { onDestroy, onMount } from "svelte";
+    import { get } from "svelte/store";
     import { fade } from "svelte/transition";
+
+    import { characters } from "../../../stores/character";
+    import { openChats, selectedChatId } from "../../../stores/chat";
+    import { isCreateOpenChatModalVisible } from "../../../stores/ui";
 
     let chatName = "";
 
@@ -22,12 +24,14 @@
         }
 
         const newChatId = `open_${Date.now()}`;
-        const newOpenChat = {
+        const newOpenChat: ChatRoom = {
             id: newChatId,
             name: chatName,
             type: "open",
+            characterId: "",
             createdAt: Date.now(),
-            currentParticipants: [], // Initially empty, managed by openChatService
+            lastActivity: Date.now(),
+            currentParticipants: [],
             participantHistory: [],
         };
 
@@ -40,7 +44,7 @@
         closeModal();
     }
 
-    function handleKeydown(event) {
+    function handleKeydown(event: KeyboardEvent) {
         if (event.key === "Escape") {
             closeModal();
         }
@@ -129,7 +133,7 @@
                             <Users class="w-4 h-4 text-green-400" />
                             <span class="text-xs text-green-300"
                                 >{t("openChat.availableCharacters", {
-                                    count: $characters.length,
+                                    count: String($characters.length),
                                 })}</span
                             >
                         </div>

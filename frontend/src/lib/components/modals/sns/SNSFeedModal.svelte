@@ -1,26 +1,28 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
-    import { createEventDispatcher, onMount, onDestroy } from "svelte";
-    import { get } from "svelte/store";
-    import { fade } from "svelte/transition";
+    import type { Character } from "$types/character";
     import {
-        X,
-        Plus,
+        Hash,
+        Image,
         Instagram,
         Lock,
+        Plus,
         ShieldAlert,
-        Image,
-        Hash,
+        X,
     } from "lucide-svelte";
-    import { characters, characterStateStore } from "../../../stores/character";
-    import { isSNSPostModalVisible, editingSNSPost } from "../../../stores/ui";
+    import { createEventDispatcher, onDestroy, onMount } from "svelte";
+    import { get } from "svelte/store";
+    import { fade } from "svelte/transition";
+
+    import { characterStateStore, characters } from "../../../stores/character";
+    import { editingSNSPost, isSNSPostModalVisible } from "../../../stores/ui";
     import { checkSNSAccess, requirements } from "../../../utils/sns";
     import PostsTab from "./tabs/PostsTab.svelte";
     import SecretsTab from "./tabs/SecretsTab.svelte";
     import TagsTab from "./tabs/TagsTab.svelte";
 
     export let isOpen = false;
-    export let character = null;
+    export let character: Character | null = null;
 
     let activeTab = "posts";
     let isSecretMode = false;
@@ -29,8 +31,7 @@
     let postsCount = 0;
     let secretsCount = 0;
     let tagsCount = 0;
-
-    let currentCharacter;
+    let currentCharacter: Character | null | undefined;
 
     const dispatch = createEventDispatcher();
 
@@ -43,8 +44,9 @@
     }
 
     function createNewPost() {
+        if (!character) return;
         editingSNSPost.set({
-            characterId: character.id,
+            characterId: character.id as string,
             isNew: true,
             isSecret: isSecretMode,
         });
@@ -53,7 +55,7 @@
 
     $: {
         if (character) {
-            currentCharacter = $characters.find((c) => c.id === character.id);
+            currentCharacter = $characters.find((c) => c.id === character!.id);
         } else {
             currentCharacter = null;
         }
@@ -91,7 +93,7 @@
         }
     }
 
-    function handleKeydown(event) {
+    function handleKeydown(event: KeyboardEvent) {
         if (event.key === "Escape") {
             closeModal();
         }
@@ -253,7 +255,7 @@
                             {isSecretMode}
                         />
                     {:else if activeTab === "tags"}
-                        <TagsTab character={currentCharacter} {isSecretMode} />
+                        <TagsTab character={currentCharacter} />
                     {/if}
                 </div>
             {:else}
@@ -273,24 +275,31 @@
                         <div class="text-xs text-red-400 space-y-1">
                             <div>
                                 {t("sns.requiresAffection", {
-                                    level: requirements.private.affection * 100,
+                                    level: String(
+                                        requirements.private.affection * 100
+                                    ),
                                 })}
                             </div>
                             <div>
                                 {t("sns.requiresIntimacy", {
-                                    level: requirements.private.intimacy * 100,
+                                    level: String(
+                                        requirements.private.intimacy * 100
+                                    ),
                                 })}
                             </div>
                             <div>
                                 {t("sns.requiresTrust", {
-                                    level: requirements.private.trust * 100,
+                                    level: String(
+                                        requirements.private.trust * 100
+                                    ),
                                 })}
                             </div>
                             <div>
                                 {t("sns.requiresRomance", {
-                                    level:
+                                    level: String(
                                         requirements.private.romantic_interest *
-                                        100,
+                                            100
+                                    ),
                                 })}
                             </div>
                         </div>

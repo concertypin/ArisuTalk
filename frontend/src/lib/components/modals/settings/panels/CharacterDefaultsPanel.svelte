@@ -1,16 +1,17 @@
-<script>
+<script lang="ts">
     import { t } from "$root/i18n";
-    import { settings } from "../../../../stores/settings";
     import {
-        User,
         Badge,
         BrainCircuit,
         MessageSquarePlus,
         Shuffle,
+        User,
         Users,
     } from "lucide-svelte";
 
-    function handleSettingChange(key, value) {
+    import { settings } from "../../../../stores/settings";
+
+    function handleSettingChange(key: string, value: unknown) {
         settings.update((s) => ({ ...s, [key]: value }));
     }
 </script>

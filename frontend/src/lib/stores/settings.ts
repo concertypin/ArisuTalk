@@ -1,8 +1,33 @@
 import { derived } from "svelte/store";
 import { persistentStore } from "./persistentStore";
 import { defaultAPISettings } from "../../defaults";
+import type { NAISettings } from "../../types/nai";
 
-const initialSettings = {
+export interface Settings {
+    /**
+     * @deprecated Use apiConfigs with apiProvider instead.
+     */
+    apiKey: string;
+    model: string;
+    apiProvider: string;
+    apiConfigs: Record<string, any>;
+    userName: string;
+    userDescription: string;
+    proactiveChatEnabled: boolean;
+    randomFirstMessageEnabled: boolean;
+    randomCharacterCount: number;
+    randomMessageFrequencyMin: number;
+    randomMessageFrequencyMax: number;
+    snapshotsEnabled: boolean;
+    enableDebugLogs: boolean;
+    experimentalFeaturesEnabled: boolean;
+    experimentalTracingEnabled: boolean;
+    fontScale: number;
+    naiSettings: NAISettings;
+    [key: string]: any;
+}
+
+const initialSettings: Settings = {
     apiKey: "", // Legacy
     model: "gemini-2.5-flash",
     ...defaultAPISettings,
@@ -27,10 +52,11 @@ const initialSettings = {
         sampler: "k_euler_ancestral",
         minDelay: 20000,
         maxAdditionalDelay: 10000,
+        autoGenerate: false,
     },
 };
 
-export const settings = persistentStore(
+export const settings = persistentStore<Settings>(
     "personaChat_settings_v16",
     initialSettings
 );
@@ -44,7 +70,7 @@ export const experimentalTracingOptIn = derived(settings, ($settings) =>
 );
 export interface SettingsSnapshot {
     timestamp: number;
-    settings: any;
+    settings: Settings;
     metadata: {
         createdAt: string;
         version: string;

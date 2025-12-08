@@ -1,11 +1,12 @@
-<script>
-    import { onMount, onDestroy } from "svelte";
-    import { AlertTriangle } from "lucide-svelte";
-    import {
-        isConfirmationModalVisible,
-        confirmationModalData,
-    } from "../stores/ui";
+<script lang="ts">
     import { t } from "$root/i18n";
+    import { AlertTriangle } from "lucide-svelte";
+    import { onDestroy, onMount } from "svelte";
+
+    import {
+        confirmationModalData,
+        isConfirmationModalVisible,
+    } from "../stores/ui";
 
     function handleCancel() {
         isConfirmationModalVisible.set(false);
@@ -19,7 +20,7 @@
         handleCancel(); // Close modal after confirm
     }
 
-    function handleKeydown(event) {
+    function handleKeydown(event: KeyboardEvent) {
         if (event.key === "Escape") {
             handleCancel();
         }

@@ -6,26 +6,25 @@ import { getPrompt } from "../promptManager";
 import {
     parseChatML,
     chatMLToPromptStructure,
+    type InternalContent,
 } from "../../lib/api/chatMLParser";
 import { parseMagicPatterns } from "./magicPatternParser";
+import type { Character } from "../../types/character";
+import type { Message } from "../../types/chat";
 
 /**
  * Populates a template with magic patterns.
  * It also makes the context safe by deep copying objects to avoid mutations.
- *
- * @param {string} template - The string template with magic patterns.
- * @param {object} context - The context to be available in the sandbox.
- * @returns {Promise<string>} The populated string.
  */
-async function populateTemplate(template, context) {
+async function populateTemplate(template: string, context: Record<string, any>): Promise<string> {
     const defaultContext = {
         sessionStorage: window.sessionStorage,
         console: { log: console.log },
     };
-    const allowed = { ...defaultContext };
+    const allowed: Record<string, any> = { ...defaultContext };
     for (const key in context) {
         try {
-            // Merge primpitive context property with default context
+            // Merge primitive context property with default context
             if (
                 context[key] === null ||
                 (typeof context[key] !== "object" &&
@@ -55,7 +54,7 @@ async function populateTemplate(template, context) {
         try {
             const value = path
                 .split(".")
-                .reduce((obj, key) => obj?.[key], allowed);
+                .reduce((obj: any, key: string) => obj?.[key], allowed);
             return value !== undefined ? String(value) : match;
         } catch (e) {
             console.warn(`[populateTemplate] 변수 치환 실패: ${path}`, e);
@@ -69,10 +68,8 @@ async function populateTemplate(template, context) {
 
 /**
  * Formats group chat messages with sender names and timestamps
- * @param {Array<object>} messages - The conversation history
- * @returns {string} - Formatted messages with sender info and timestamps
  */
-function formatGroupChatMessages(messages) {
+function formatGroupChatMessages(messages: Message[]): string {
     if (!messages || messages.length === 0) {
         return "No recent messages.";
     }
@@ -92,18 +89,19 @@ function formatGroupChatMessages(messages) {
         .join("\n");
 }
 
+export interface BuildContentPromptParams {
+    userName: string;
+    userDescription: string;
+    character: Character;
+    history: Message[];
+    isProactive?: boolean;
+    forceSummary?: boolean;
+    isGroupChat?: boolean;
+    isOpenChat?: boolean;
+}
+
 /**
  * Builds the contents and system prompt for a content generation request.
- * @param {object} params - The parameters for building the prompt.
- * @param {string} params.userName - The user's name.
- * @param {string} params.userDescription - The user's description.
- * @param {object} params.character - The character object.
- * @param {Array<object>} params.history - The conversation history.
- * @param {boolean} [params.isProactive=false] - Whether the AI is initiating the conversation.
- * @param {boolean} [params.forceSummary=false] - Whether to force a memory summary.
- * @param {boolean} [params.isGroupChat=false] - Whether this is a group chat context.
- * @param {boolean} [params.isOpenChat=false] - Whether this is an open chat context.
- * @returns {Promise<{contents: Array<object>, systemPrompt: string}>} - The generated contents and system prompt.
  */
 export async function buildContentPrompt({
     userName,
@@ -114,15 +112,15 @@ export async function buildContentPrompt({
     forceSummary = false,
     isGroupChat = false,
     isOpenChat = false,
-}) {
+}: BuildContentPromptParams): Promise<{ contents: InternalContent[]; systemPrompt: string }> {
     const chatMLTemplate = await getPrompt("mainChat");
 
     const lastMessageTime =
         history.length > 0
-            ? new Date(history[history.length - 1].id)
+            ? new Date(history[history.length - 1].timestamp) // Use timestamp instead of id
             : new Date();
     const currentTime = new Date();
-    const timeDiff = Math.round((currentTime - lastMessageTime) / 1000 / 60);
+    const timeDiff = Math.round((currentTime.getTime() - lastMessageTime.getTime()) / 1000 / 60);
 
     let timeContext = `(Context: It's currently ${currentTime.toLocaleString("en-US")}.`;
     if (isProactive) {
@@ -149,17 +147,13 @@ export async function buildContentPrompt({
         character.stickers
             ?.map((sticker) => `${sticker.id} (${sticker.name})`)
             .join(", ") || "none";
-    const stickerInfo =
-        character.stickers && character.stickers.length > 0
-            ? `The character has access to the following stickers: ${availableStickers}`
-            : "The character has no stickers.";
 
     // SNS 포스트를 메모리로 변환 (SNS 기반 메모리 시스템)
     const memories = (() => {
         // 1. SNS 포스트가 있으면 SNS 포스트를 메모리로 사용
         if (character.snsPosts && character.snsPosts.length > 0) {
             return character.snsPosts
-                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) // 최신순 정렬
+                .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()) // 최신순 정렬
                 .slice(0, 15) // 최근 15개만 사용 (컨텍스트 제한)
                 .map((post) => {
                     const tags =
@@ -183,17 +177,17 @@ export async function buildContentPrompt({
         return "No specific memories recorded yet.";
     })();
 
-    const chat = (a, b) => {
+    const chat = (a: number, b: number) => {
         // Create a reversed copy of the history array to make indexing easier.
         const reversedHistory = [...history].reverse();
         const historyLength = history.length;
 
         // Helper to clamp index to the valid range.
-        const clamp = (index, length) =>
+        const clamp = (index: number, length: number) =>
             Math.max(0, Math.min(length - 1, index));
 
         // Adjust for negative indices.
-        const resolveIndex = (index, length) => {
+        const resolveIndex = (index: number, length: number) => {
             if (index >= 0) {
                 return clamp(index, length);
             } else {
@@ -218,7 +212,7 @@ export async function buildContentPrompt({
         return result;
     };
 
-    const data = {
+    const data: any = {
         character: { ...character, memories: memories },
         persona: { name: userName, description: userDescription },
         time: {
@@ -226,6 +220,7 @@ export async function buildContentPrompt({
             diff: timeDiff,
         },
         chat: chat,
+        availableStickers: availableStickers,
     };
     data.char = data.character.name;
     data.user = data.persona.name;
@@ -237,15 +232,16 @@ export async function buildContentPrompt({
 
     const populatedPrompt = await populateTemplate(chatMLTemplate, data);
     const chatMLMessages = parseChatML(populatedPrompt);
+    // Use CharacterData type matching
     const { systemPrompt, contents: promptContents } = chatMLToPromptStructure(
         chatMLMessages,
-        character,
+        character as any, // chatMLParser expects CharacterData from defaults, but we use Character from types. They should be compatible.
         userName,
         userDescription,
         false // Don't include user/assistant messages from ChatML prompts
     );
 
-    let conversationContents = [];
+    let conversationContents: InternalContent[] = [];
     for (const msg of history) {
         const role = msg.isMe ? "user" : "model";
         let parts = [];
@@ -271,9 +267,9 @@ export async function buildContentPrompt({
                         "(User sent an image that is no longer available)",
                 });
             }
-        } else if (msg.isMe && msg.type === "sticker" && msg.stickerData) {
+        } else if (msg.isMe && msg.type === "sticker" && (msg.stickerData || msg.sticker)) {
             const stickerName =
-                msg.stickerData.stickerName || "Unknown Sticker";
+                msg.stickerData?.stickerName || msg.sticker?.name || "Unknown Sticker";
             let stickerText = `[User sent a sticker: "${stickerName}"]`;
             if (msg.content && msg.content.trim()) {
                 stickerText += ` with message: ${msg.content}`;
@@ -313,17 +309,18 @@ export async function buildContentPrompt({
     };
 }
 
+export interface BuildCharacterSheetPromptParams {
+    characterName: string;
+    characterDescription: string;
+}
+
 /**
  * Builds the system prompt and contents for a character sheet generation request.
- * @param {object} params - The parameters for building the prompt.
- * @param {string} params.characterName - The character's name.
- * @param {string} params.characterDescription - The character's description.
- * @returns {Promise<{systemPrompt: string, contents: Array<object>}>} - The generated system prompt and contents.
  */
 export async function buildCharacterSheetPrompt({
     characterName,
     characterDescription,
-}) {
+}: BuildCharacterSheetPromptParams): Promise<{ systemPrompt: string; contents: InternalContent[] }> {
     const chatMLTemplate = await getPrompt("characterSheet");
 
     const data = {
@@ -331,9 +328,10 @@ export async function buildCharacterSheetPrompt({
             name: characterName,
             description: characterDescription || undefined,
         },
+        char: characterName,
         persona: {},
     };
-    data.char = data.character.name;
+    //@ts-ignore
     data.user = data.persona.name;
 
     const populatedPrompt = await populateTemplate(chatMLTemplate, data);
@@ -349,17 +347,18 @@ export async function buildCharacterSheetPrompt({
     return { systemPrompt, contents };
 }
 
+export interface BuildProfilePromptParams {
+    userName: string;
+    userDescription: string;
+}
+
 /**
  * Builds the system prompt and contents for a profile generation request.
- * @param {object} params - The parameters for building the prompt.
- * @param {string} params.userName - The user's name.
- * @param {string} params.userDescription - The user's description.
- * @returns {Promise<{systemPrompt: string, contents: Array<object>}>} - The generated system prompt and contents.
  */
-export async function buildProfilePrompt({ userName, userDescription }) {
+export async function buildProfilePrompt({ userName, userDescription }: BuildProfilePromptParams): Promise<{ systemPrompt: string; contents: InternalContent[] }> {
     const chatMLTemplate = await getPrompt("profileCreation");
 
-    const data = {
+    const data: any = {
         character: {},
         persona: {
             name: userName,

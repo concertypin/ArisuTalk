@@ -60,8 +60,7 @@ export class APIManager {
         options: LLMApiConstructorOptions = {}
     ): Promise<LLMApi> {
         // Map provider to client import
-        // Used "as" syntax, because when writing type directly, it is ugly due to auto-formatting
-        const providerMap = {
+        const providerMap: Record<string, () => Promise<{ default: LLMApiConstructor }>> = {
             [PROVIDERS.GEMINI]: () => import("$root/lib/api/llm/gemini"),
             [PROVIDERS.CLAUDE]: () => import("$root/lib/api/llm/claude"),
             [PROVIDERS.OPENAI]: () => import("$root/lib/api/llm/openai"),
@@ -69,10 +68,7 @@ export class APIManager {
             [PROVIDERS.OPENROUTER]: () => import("$root/lib/api/llm/openrouter"),
             [PROVIDERS.CUSTOM_OPENAI]: () =>
                 import("$root/lib/api/llm/customopenai"),
-        } as Record<
-            (typeof PROVIDERS)[keyof typeof PROVIDERS],
-            () => Promise<{ default: LLMApiConstructor }>
-        >;
+        };
         const clientKey = `${provider}_${model}`;
 
         // Return existing client if available
@@ -109,7 +105,7 @@ export class APIManager {
         model: string,
         params: LLMApiGenerateContentParams,
         baseUrl: string | null = null,
-        options: object = {}
+        options: LLMApiConstructorOptions = {}
     ): LLMApiGenerateContentResponse {
         try {
             // Resolve actual API key if encrypted
@@ -144,7 +140,7 @@ export class APIManager {
         model: string,
         params: LLMApiGenerateProfileParams,
         baseUrl: string | null = null,
-        options: object = {}
+        options: LLMApiConstructorOptions = {}
     ): LLMApiGenerateProfileResponse {
         try {
             // Resolve actual API key if encrypted
@@ -179,7 +175,7 @@ export class APIManager {
         model: string,
         params: LLMApiGenerateCharacterSheetParams,
         baseUrl: string | null = null,
-        options: object = {}
+        options: LLMApiConstructorOptions = {}
     ): LLMApiGenerateCharacterSheetResponse {
         try {
             // Resolve actual API key if encrypted

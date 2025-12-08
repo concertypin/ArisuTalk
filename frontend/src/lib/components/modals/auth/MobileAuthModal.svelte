@@ -19,6 +19,7 @@
         Loader2,
         AlertCircle,
     } from "lucide-svelte";
+    import type { ClerkInstance } from "../../../stores/auth";
 
     export let isOpen = false;
 
@@ -42,12 +43,27 @@
             return "";
         }
 
+        // Using type guards or simpler checks if possible, but the original logic relied on specific Clerk user object structure.
+        // The previous casts were likely due to Clerk types being loose or not imported correctly in the previous context.
+        // However, Clerk user object usually has these properties.
+        // Let's try to access them directly if 'user' is typed as 'ClerkUser' which is 'ClerkInstance["user"]'.
+        // If types are correct in 'auth.ts', we might not need casts if we accept optional chaining returns undefined.
+
+        // We can define a helper interface for expected user shape if we want to be explicit without 'as' everywhere,
+        // or just rely on 'any' if the Clerk types are not fully available in this context.
+        // But the goal is to avoid 'any'.
+        // Let's assume 'user' has these fields as optional.
+
+        const fullName = user.fullName;
+        const firstName = user.firstName;
+        const username = user.username;
+        const email = user.primaryEmailAddress?.emailAddress;
+
         const withFallback = [
-            (user as { fullName?: string }).fullName,
-            (user as { firstName?: string }).firstName,
-            (user as { username?: string }).username,
-            (user as { primaryEmailAddress?: { emailAddress?: string } })
-                .primaryEmailAddress?.emailAddress,
+            fullName,
+            firstName,
+            username,
+            email,
         ].find((value) => Boolean(value));
 
         return withFallback ?? "";

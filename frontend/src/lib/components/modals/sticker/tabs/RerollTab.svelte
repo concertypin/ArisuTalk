@@ -1,11 +1,12 @@
-<script>
+<script lang="ts">
     import { createEventDispatcher } from "svelte";
     import { t } from "$root/i18n";
     import { RefreshCw, ArrowLeft, ArrowRight } from "lucide-svelte";
+    import type { Sticker } from "$types/character";
 
-    export let rerollData = null;
-    export let sticker = null;
-    export let rerollResult = null;
+    export let rerollData: { prompt?: string; steps?: number; scale?: number } | null = null;
+    export let sticker: Sticker | null = null;
+    export let rerollResult: Sticker | null = null;
     export let rerolling = false;
 
     let rerollPrompt = rerollData?.prompt || "";
@@ -33,7 +34,7 @@
     }
 </script>
 
-{#if !rerollData}
+{#if !rerollData || !sticker}
     <div class="text-center py-8">
         <RefreshCw class="w-8 h-8 text-gray-400 mx-auto mb-2" />
         <p class="text-gray-400">{t("stickerPreview.noRerollData")}</p>

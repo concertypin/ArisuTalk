@@ -2,19 +2,25 @@
     import { t } from "$root/i18n";
     import { HelpCircle } from "lucide-svelte";
 
-    //    import { $effect } from "svelte";
+    interface Props {
+        title: string;
+        description: string;
+        value: string;
+    }
 
-    let { title, description, value }: Record<string, string> = $props();
+    let { title, description, value = $bindable() }: Props = $props();
     let tooltipVisible = $state(false);
     let tooltipX = $state(0);
     let tooltipY = $state(0);
     let tooltipEl = $state<HTMLElement | null>(null);
     let tooltipTop = $state(0);
 
-    function showTooltip(event) {
+    function showTooltip(event: Event) {
         tooltipVisible = true;
-        tooltipX = event.clientX;
-        tooltipY = event.clientY;
+        if (event instanceof MouseEvent) {
+            tooltipX = event.clientX;
+            tooltipY = event.clientY;
+        }
     }
 
     function hideTooltip() {
@@ -40,10 +46,10 @@
             class="relative"
             role="button"
             tabindex="0"
-            mouseenter={showTooltip}
-            mouseleave={hideTooltip}
-            focus={showTooltip}
-            blur={hideTooltip}
+            onmouseenter={showTooltip}
+            onmouseleave={hideTooltip}
+            onfocus={showTooltip}
+            onblur={hideTooltip}
         >
             <HelpCircle class="w-4 h-4 text-gray-400 cursor-pointer" />
         </div>

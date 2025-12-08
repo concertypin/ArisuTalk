@@ -1,17 +1,26 @@
 <script lang="ts">
-    import { onMount, onDestroy } from "svelte";
     import { t } from "$root/i18n";
-    import { isPromptModalVisible } from "../../../stores/ui";
-    import { prompts } from "../../../stores/prompts";
-    import PromptSection from "./PromptSection.svelte";
-    import HookManager from "../HookManager.svelte";
-    import { X, Download, Upload, RefreshCw } from "lucide-svelte";
-    import { fade } from "svelte/transition";
     import type { PromptStorageType } from "$types/Prompt";
+    import { Download, RefreshCw, Upload, X } from "lucide-svelte";
+    import { onDestroy, onMount } from "svelte";
+    import { fade } from "svelte/transition";
+
+    import { prompts } from "../../../stores/prompts";
+    import { isPromptModalVisible } from "../../../stores/ui";
+    import HookManager from "../HookManager.svelte";
+    import PromptSection from "./PromptSection.svelte";
 
     type TabType = "prompts" | "hooks";
 
-    let promptData: PromptStorageType = {};
+    let promptData: PromptStorageType = {
+        mainChat: "",
+        characterSheet: "",
+        profileCreation: "",
+        snsForce: "",
+        naiSticker: "",
+        groupChat: "",
+        openChat: "",
+    };
     let activeTab: TabType = "prompts";
 
     const promptSections = [
@@ -81,7 +90,7 @@
         }
     }
 
-    function handleKeydown(event) {
+    function handleKeydown(event: KeyboardEvent) {
         if (event.key === "Escape") {
             isPromptModalVisible.set(false);
         }
@@ -157,7 +166,7 @@
                         <PromptSection
                             title={section.title}
                             description={section.description}
-                            bind:value={promptData[section.key]}
+                            value={promptData[section.key]}
                         />
                     {/each}
                 {:else if activeTab === "hooks"}
