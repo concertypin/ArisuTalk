@@ -1,43 +1,43 @@
 <script lang="ts">
-import { t } from "$root/i18n";
-import { applyHooksByType } from "../services/replaceHookService";
+    import { t } from "$root/i18n";
+    import { applyHooksByType } from "../services/replaceHookService";
 
-export let hookType: "input" | "output" | "request" | "display" = "input";
+    export let hookType: "input" | "output" | "request" | "display" = "input";
 
-let testInput = "";
-let testOutput = "";
-let isLoading = false;
+    let testInput = "";
+    let testOutput = "";
+    let isLoading = false;
 
-async function testHook() {
-    if (!testInput.trim()) {
-        alert(t("modal.replaceHooks.previewInputRequired"));
-        return;
+    async function testHook() {
+        if (!testInput.trim()) {
+            alert(t("modal.replaceHooks.previewInputRequired"));
+            return;
+        }
+
+        isLoading = true;
+        try {
+            // Apply hooks
+            const result = await applyHooksByType(testInput, hookType);
+            testOutput = result.modified;
+        } catch (error) {
+            testOutput = `Error: ${error instanceof Error ? error.message : String(error)}`;
+        } finally {
+            isLoading = false;
+        }
     }
 
-    isLoading = true;
-    try {
-        // Apply hooks
-        const result = await applyHooksByType(testInput, hookType);
-        testOutput = result.modified;
-    } catch (error) {
-        testOutput = `Error: ${error instanceof Error ? error.message : String(error)}`;
-    } finally {
-        isLoading = false;
+    function clearTest() {
+        testInput = "";
+        testOutput = "";
     }
-}
 
-function clearTest() {
-    testInput = "";
-    testOutput = "";
-}
-
-function copyOutput() {
-    if (testOutput) {
-        navigator.clipboard.writeText(testOutput).then(() => {
-            alert(t("modal.replaceHooks.previewCopied"));
-        });
+    function copyOutput() {
+        if (testOutput) {
+            navigator.clipboard.writeText(testOutput).then(() => {
+                alert(t("modal.replaceHooks.previewCopied"));
+            });
+        }
     }
-}
 </script>
 
 <div class="hook-preview">

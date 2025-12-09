@@ -1,26 +1,26 @@
 <script lang="ts">
-import { t } from "$root/i18n";
-import type { Message } from "$types/chat";
+    import { t } from "$root/i18n";
+    import type { Message } from "$types/chat";
 
-import { expandedImages } from "../stores/ui";
+    import { expandedImages } from "../stores/ui";
 
-export let message: Message;
+    export let message: Message;
 
-function toggleImageSize() {
-    expandedImages.update((set) => {
-        if (set.has(message.id)) {
-            set.delete(message.id);
-        } else {
-            set.add(message.id);
-        }
-        return set;
-    });
-}
+    function toggleImageSize() {
+        expandedImages.update((set) => {
+            if (set.has(message.id)) {
+                set.delete(message.id);
+            } else {
+                set.add(message.id);
+            }
+            return set;
+        });
+    }
 
-$: isExpanded = $expandedImages.has(message.id);
-$: sizeStyle = isExpanded
-    ? "width: 400px; max-width: none; max-height: 720px;"
-    : "width: 200px; max-width: 200px; max-height: 320px;";
+    $: isExpanded = $expandedImages.has(message.id);
+    $: sizeStyle = isExpanded
+        ? "width: 400px; max-width: none; max-height: 720px;"
+        : "width: 200px; max-width: 200px; max-height: 320px;";
 </script>
 
 {#if message.type === "image"}

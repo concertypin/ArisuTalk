@@ -1,103 +1,95 @@
 <script lang="ts">
-import { t } from "$root/i18n";
-import { createEventDispatcher } from "svelte";
-import { fade } from "svelte/transition";
-import { X, Check, RefreshCw, AlertCircle, Clock } from "lucide-svelte";
-import type {
-    StickerGenerationProgress,
-    StickerEmotion,
-} from "$types/character";
+    import { t } from "$root/i18n";
+    import { createEventDispatcher } from "svelte";
+    import { fade } from "svelte/transition";
+    import { X, Check, RefreshCw, AlertCircle, Clock } from "lucide-svelte";
+    import type { StickerGenerationProgress, StickerEmotion } from "$types/character";
 
-export let progress: StickerGenerationProgress | null = null;
+    export let progress: StickerGenerationProgress | null = null;
 
-const dispatch = createEventDispatcher();
+    const dispatch = createEventDispatcher();
 
-function cancel() {
-    dispatch("cancel");
-}
-
-function close() {
-    dispatch("close");
-}
-
-function retry() {
-    dispatch("retry");
-}
-
-function getStatusBgColor(status: StickerGenerationProgress["status"]) {
-    switch (status) {
-        case "generating":
-            return "bg-blue-50";
-        case "completed":
-            return "bg-green-50";
-        case "error":
-            return "bg-red-50";
-        case "waiting":
-            return "bg-yellow-50";
-        default:
-            return "bg-gray-50";
+    function cancel() {
+        dispatch("cancel");
     }
-}
 
-function getStatusTextColor(status: StickerGenerationProgress["status"]) {
-    switch (status) {
-        case "generating":
-            return "text-blue-800";
-        case "completed":
-            return "text-green-800";
-        case "error":
-            return "text-red-800";
-        case "waiting":
-            return "text-yellow-800";
-        default:
-            return "text-gray-800";
+    function close() {
+        dispatch("close");
     }
-}
 
-function getStatusText(
-    status: StickerGenerationProgress["status"],
-    currentEmotion?: StickerEmotion,
-) {
-    switch (status) {
-        case "generating": {
-            let emotionKey, emotionDisplayName;
-            if (
-                typeof currentEmotion === "object" &&
-                currentEmotion !== null &&
-                "emotion" in currentEmotion
-            ) {
-                emotionKey = currentEmotion.emotion;
-                emotionDisplayName =
-                    currentEmotion.title || currentEmotion.emotion;
-            } else if (typeof currentEmotion === "string") {
-                emotionKey = currentEmotion;
-                emotionDisplayName = currentEmotion;
-            } else {
-                emotionKey = "unknown";
-                emotionDisplayName = "Unknown";
-            }
+    function retry() {
+        dispatch("retry");
+    }
 
-            const emotionTranslation =
-                typeof currentEmotion === "object" &&
-                currentEmotion !== null &&
-                currentEmotion.title
-                    ? emotionDisplayName
-                    : t(`stickerProgress.emotions.${emotionKey}`) ||
-                      emotionDisplayName;
-            return t("stickerProgress.statuses.generating", {
-                emotion: emotionTranslation,
-            });
+    function getStatusBgColor(status: StickerGenerationProgress['status']) {
+        switch (status) {
+            case "generating":
+                return "bg-blue-50";
+            case "completed":
+                return "bg-green-50";
+            case "error":
+                return "bg-red-50";
+            case "waiting":
+                return "bg-yellow-50";
+            default:
+                return "bg-gray-50";
         }
-        case "completed":
-            return t("stickerProgress.statuses.completed");
-        case "error":
-            return t("stickerProgress.statuses.error");
-        case "waiting":
-            return t("stickerProgress.statuses.waiting");
-        default:
-            return t("stickerProgress.statuses.preparing");
     }
-}
+
+    function getStatusTextColor(status: StickerGenerationProgress['status']) {
+        switch (status) {
+            case "generating":
+                return "text-blue-800";
+            case "completed":
+                return "text-green-800";
+            case "error":
+                return "text-red-800";
+            case "waiting":
+                return "text-yellow-800";
+            default:
+                return "text-gray-800";
+        }
+    }
+
+    function getStatusText(status: StickerGenerationProgress['status'], currentEmotion?: StickerEmotion) {
+        switch (status) {
+            case "generating": {
+                let emotionKey, emotionDisplayName;
+                if (
+                    typeof currentEmotion === "object" &&
+                    currentEmotion !== null &&
+                    'emotion' in currentEmotion
+                ) {
+                    emotionKey = currentEmotion.emotion;
+                    emotionDisplayName =
+                        currentEmotion.title || currentEmotion.emotion;
+                } else if (typeof currentEmotion === "string") {
+                    emotionKey = currentEmotion;
+                    emotionDisplayName = currentEmotion;
+                } else {
+                    emotionKey = "unknown";
+                    emotionDisplayName = "Unknown";
+                }
+
+                const emotionTranslation =
+                    typeof currentEmotion === "object" && currentEmotion !== null && currentEmotion.title
+                        ? emotionDisplayName
+                        : t(`stickerProgress.emotions.${emotionKey}`) ||
+                          emotionDisplayName;
+                return t("stickerProgress.statuses.generating", {
+                    emotion: emotionTranslation,
+                });
+            }
+            case "completed":
+                return t("stickerProgress.statuses.completed");
+            case "error":
+                return t("stickerProgress.statuses.error");
+            case "waiting":
+                return t("stickerProgress.statuses.waiting");
+            default:
+                return t("stickerProgress.statuses.preparing");
+        }
+    }
 </script>
 
 {#if progress && progress.isVisible}

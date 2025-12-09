@@ -1,35 +1,54 @@
 {
-    "include": [
-        //test
-        "tests/**/*.ts",
-        "tests/*.ts"
+  "include": [
+    //test
+    "tests/**/*.ts",
+    "tests/*.ts",
+  ],
+  "compilerOptions": {
+    "lib": [
+      "ESNext",
+      "DOM",
     ],
-    "compilerOptions": {
-        "lib": ["ESNext", "DOM"],
-        "baseUrl": "./tests",
-        "types": [
-            "vite/client"
-        ] /* Specify type package names to be included without being referenced in a source file. */,
-        "paths": {
-            "$lib/*": ["../src/lib/*"],
-            "$components/*": ["../src/lib/components/*"],
-            "$stores/*": ["../src/lib/stores/*"],
-            "$services/*": ["../src/lib/services/*"],
-            "$utils/*": ["../src/lib/utils/*"],
-            "$types/*": ["../src/types/*"],
-            "$constants/*": ["../src/constants/*"],
-            "$root/*": ["../src/*"]
-        },
-        "noEmit": false /* Disable emitting files from a compilation. */,
-        "allowImportingTsExtensions": false,
-        "outDir": "./dist" /* Specify an output folder for all emitted files. */,
-        /* Type Checking */
-        "noImplicitAny": true
+    "baseUrl": "./tests",
+    "types": [
+      "vite/client",
+    ], /* Specify type package names to be included without being referenced in a source file. */
+    "paths": {
+      "$lib/*": [
+        "../src/lib/*"
+      ],
+      "$components/*": [
+        "../src/lib/components/*"
+      ],
+      "$stores/*": [
+        "../src/lib/stores/*"
+      ],
+      "$services/*": [
+        "../src/lib/services/*"
+      ],
+      "$utils/*": [
+        "../src/lib/utils/*"
+      ],
+      "$types/*": [
+        "../src/types/*"
+      ],
+      "$constants/*": [
+        "../src/constants/*"
+      ],
+      "$root/*": [
+        "../src/*"
+      ]
     },
-    "extends": "./tsconfig.base.json",
-    "references": [
-        {
-            "path": "./tsconfig.app.json"
-        }
-    ]
+    "noEmit": false, /* Disable emitting files from a compilation. */
+    "allowImportingTsExtensions": false,
+    "outDir": "./dist", /* Specify an output folder for all emitted files. */
+    /* Type Checking */
+    "noImplicitAny": true
+  },
+  "extends": "./tsconfig.base.json",
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    }
+  ]
 }

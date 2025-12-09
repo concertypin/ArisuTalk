@@ -1,34 +1,34 @@
 <script lang="ts">
-import { t } from "$root/i18n";
-import { createEventDispatcher } from "svelte";
-import { ArrowLeft, ShieldAlert, Database } from "lucide-svelte";
-import { chatRooms, groupChats, openChats } from "../../../stores/chat";
-import { characters } from "../../../stores/character";
-import { isDataBrowserModalVisible } from "../../../stores/ui";
+    import { t } from "$root/i18n";
+    import { createEventDispatcher } from "svelte";
+    import { ArrowLeft, ShieldAlert, Database } from "lucide-svelte";
+    import { chatRooms, groupChats, openChats } from "../../../stores/chat";
+    import { characters } from "../../../stores/character";
+    import { isDataBrowserModalVisible } from "../../../stores/ui";
 
-const dispatch = createEventDispatcher();
+    const dispatch = createEventDispatcher();
 
-let localStorageStatus = "Checking...";
-let indexedDBStatus = "Checking...";
+    let localStorageStatus = "Checking...";
+    let indexedDBStatus = "Checking...";
 
-if (typeof window !== "undefined") {
-    localStorageStatus = window.localStorage ? "OK" : "Unavailable";
-    indexedDBStatus = window.indexedDB ? "OK" : "Unavailable";
-}
+    if (typeof window !== "undefined") {
+        localStorageStatus = window.localStorage ? "OK" : "Unavailable";
+        indexedDBStatus = window.indexedDB ? "OK" : "Unavailable";
+    }
 
-$: status = {
-    localStorage: localStorageStatus,
-    indexedDB: indexedDBStatus,
-    characterCount: $characters.length,
-    chatCount:
-        Object.values($chatRooms).flat().length +
-        Object.keys($groupChats).length +
-        Object.keys($openChats).length,
-};
+    $: status = {
+        localStorage: localStorageStatus,
+        indexedDB: indexedDBStatus,
+        characterCount: $characters.length,
+        chatCount:
+            Object.values($chatRooms).flat().length +
+            Object.keys($groupChats).length +
+            Object.keys($openChats).length,
+    };
 
-function openDataBrowser() {
-    isDataBrowserModalVisible.set(true);
-}
+    function openDataBrowser() {
+        isDataBrowserModalVisible.set(true);
+    }
 </script>
 
 <div class="flex flex-col h-full">

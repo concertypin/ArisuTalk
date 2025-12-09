@@ -1,26 +1,27 @@
 <script lang="ts">
-import { Bot } from "lucide-svelte";
-import type { DisplayCharacter } from "$types/chat";
+    import { Bot } from "lucide-svelte";
+    import type { DisplayCharacter } from "$types/chat";
 
-/**
- * @type {object} character - The character object.
- */
-export let character: DisplayCharacter;
+    /**
+     * @type {object} character - The character object.
+     */
+    export let character: DisplayCharacter;
 
-/**
- * @type {"sm" | "md" | "lg"} size - The size of the avatar.
- */
-export let size: "sm" | "md" | "lg" | "xs" = "md";
+    /**
+     * @type {"sm" | "md" | "lg"} size - The size of the avatar.
+     */
+    export let size: "sm" | "md" | "lg" | "xs" = "md";
 
-const sizeClasses = {
-    xs: "w-6 h-6 text-xs",
-    sm: "w-10 h-10 text-sm",
-    md: "w-12 h-12 text-base",
-    lg: "w-16 h-16 text-lg",
-};
+    const sizeClasses = {
+        xs: "w-6 h-6 text-xs",
+        sm: "w-10 h-10 text-sm",
+        md: "w-12 h-12 text-base",
+        lg: "w-16 h-16 text-lg",
+    };
 
-$: hasImage = character?.avatar && character.avatar.startsWith("data:image");
-$: initial = character?.name?.[0];
+    $: hasImage =
+        character?.avatar && character.avatar.startsWith("data:image");
+    $: initial = character?.name?.[0];
 </script>
 
 {#if hasImage}

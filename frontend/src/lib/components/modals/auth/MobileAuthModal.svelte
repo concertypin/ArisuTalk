@@ -1,127 +1,130 @@
 <script lang="ts">
-import { onMount } from "svelte";
-import { fade } from "svelte/transition";
-import { t } from "$root/i18n";
-import {
-    auth,
-    initializeAuth,
-    openSignIn,
-    openUserProfile,
-    signOut,
-    type AuthState,
-} from "../../../stores/auth";
-import { isMobileAuthModalVisible } from "../../../stores/ui";
-import {
-    X,
-    LogIn,
-    LogOut,
-    UserCircle2,
-    Loader2,
-    AlertCircle,
-} from "lucide-svelte";
-import type { ClerkInstance } from "../../../stores/auth";
+    import { onMount } from "svelte";
+    import { fade } from "svelte/transition";
+    import { t } from "$root/i18n";
+    import {
+        auth,
+        initializeAuth,
+        openSignIn,
+        openUserProfile,
+        signOut,
+        type AuthState,
+    } from "../../../stores/auth";
+    import { isMobileAuthModalVisible } from "../../../stores/ui";
+    import {
+        X,
+        LogIn,
+        LogOut,
+        UserCircle2,
+        Loader2,
+        AlertCircle,
+    } from "lucide-svelte";
+    import type { ClerkInstance } from "../../../stores/auth";
 
-export let isOpen = false;
+    export let isOpen = false;
 
-const defaultState: AuthState = {
-    status: "idle",
-    clerk: null,
-    user: null,
-    isSignedIn: false,
-    error: null,
-};
+    const defaultState: AuthState = {
+        status: "idle",
+        clerk: null,
+        user: null,
+        isSignedIn: false,
+        error: null,
+    };
 
-let state: AuthState = defaultState;
+    let state: AuthState = defaultState;
 
-const closeModal = (): void => {
-    isMobileAuthModalVisible.set(false);
-};
+    const closeModal = (): void => {
+        isMobileAuthModalVisible.set(false);
+    };
 
-const getUserDisplayName = (): string => {
-    const user = state.user;
-    if (!user || typeof user !== "object") {
-        return "";
-    }
+    const getUserDisplayName = (): string => {
+        const user = state.user;
+        if (!user || typeof user !== "object") {
+            return "";
+        }
 
-    // Using type guards or simpler checks if possible, but the original logic relied on specific Clerk user object structure.
-    // The previous casts were likely due to Clerk types being loose or not imported correctly in the previous context.
-    // However, Clerk user object usually has these properties.
-    // Let's try to access them directly if 'user' is typed as 'ClerkUser' which is 'ClerkInstance["user"]'.
-    // If types are correct in 'auth.ts', we might not need casts if we accept optional chaining returns undefined.
+        // Using type guards or simpler checks if possible, but the original logic relied on specific Clerk user object structure.
+        // The previous casts were likely due to Clerk types being loose or not imported correctly in the previous context.
+        // However, Clerk user object usually has these properties.
+        // Let's try to access them directly if 'user' is typed as 'ClerkUser' which is 'ClerkInstance["user"]'.
+        // If types are correct in 'auth.ts', we might not need casts if we accept optional chaining returns undefined.
 
-    // We can define a helper interface for expected user shape if we want to be explicit without 'as' everywhere,
-    // or just rely on 'any' if the Clerk types are not fully available in this context.
-    // But the goal is to avoid 'any'.
-    // Let's assume 'user' has these fields as optional.
+        // We can define a helper interface for expected user shape if we want to be explicit without 'as' everywhere,
+        // or just rely on 'any' if the Clerk types are not fully available in this context.
+        // But the goal is to avoid 'any'.
+        // Let's assume 'user' has these fields as optional.
 
-    const fullName = user.fullName;
-    const firstName = user.firstName;
-    const username = user.username;
-    const email = user.primaryEmailAddress?.emailAddress;
+        const fullName = user.fullName;
+        const firstName = user.firstName;
+        const username = user.username;
+        const email = user.primaryEmailAddress?.emailAddress;
 
-    const withFallback = [fullName, firstName, username, email].find((value) =>
-        Boolean(value),
-    );
+        const withFallback = [
+            fullName,
+            firstName,
+            username,
+            email,
+        ].find((value) => Boolean(value));
 
-    return withFallback ?? "";
-};
+        return withFallback ?? "";
+    };
 
-const handleSignIn = async (): Promise<void> => {
-    await openSignIn();
-};
+    const handleSignIn = async (): Promise<void> => {
+        await openSignIn();
+    };
 
-const handleOpenProfile = async (): Promise<void> => {
-    await openUserProfile();
-};
+    const handleOpenProfile = async (): Promise<void> => {
+        await openUserProfile();
+    };
 
-const handleSignOut = async (): Promise<void> => {
-    await signOut();
-};
+    const handleSignOut = async (): Promise<void> => {
+        await signOut();
+    };
 
-const handleRetry = async (): Promise<void> => {
-    await initializeAuth();
-};
+    const handleRetry = async (): Promise<void> => {
+        await initializeAuth();
+    };
 
-const handleKeydown = (event: KeyboardEvent): void => {
-    if (!isOpen) {
-        return;
-    }
-    if (event.key === "Escape") {
-        closeModal();
-    }
-};
+    const handleKeydown = (event: KeyboardEvent): void => {
+        if (!isOpen) {
+            return;
+        }
+        if (event.key === "Escape") {
+            closeModal();
+        }
+    };
 
-onMount(() => {
-    const unsubscribe = auth.subscribe((value) => {
-        state = value ?? defaultState;
+    onMount(() => {
+        const unsubscribe = auth.subscribe((value) => {
+            state = value ?? defaultState;
+        });
+
+        window.addEventListener("keydown", handleKeydown);
+
+        (async () => {
+            try {
+                await initializeAuth();
+            } catch (error) {
+                console.error(
+                    "Failed to initialize Clerk for mobile auth modal",
+                    error
+                );
+            }
+        })();
+
+        return () => {
+            unsubscribe();
+            window.removeEventListener("keydown", handleKeydown);
+        };
     });
 
-    window.addEventListener("keydown", handleKeydown);
-
-    (async () => {
-        try {
-            await initializeAuth();
-        } catch (error) {
-            console.error(
-                "Failed to initialize Clerk for mobile auth modal",
-                error,
-            );
-        }
-    })();
-
-    return () => {
-        unsubscribe();
-        window.removeEventListener("keydown", handleKeydown);
-    };
-});
-
-$: status = state.status;
-$: isDisabled = status === "disabled";
-$: isReady = status === "ready";
-$: isLoading = status === "loading";
-$: isError = status === "error";
-$: isSignedIn = state.isSignedIn;
-$: displayName = getUserDisplayName();
+    $: status = state.status;
+    $: isDisabled = status === "disabled";
+    $: isReady = status === "ready";
+    $: isLoading = status === "loading";
+    $: isError = status === "error";
+    $: isSignedIn = state.isSignedIn;
+    $: displayName = getUserDisplayName();
 </script>
 
 {#if isOpen}

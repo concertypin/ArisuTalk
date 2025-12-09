@@ -51,14 +51,7 @@ export class NovelAIClient {
     currentRequest: null | AbortController;
     lastGenerationTime: number;
 
-    constructor(
-        apiKey: string,
-        options: {
-            minDelay?: number;
-            maxAdditionalDelay?: number;
-            [key: string]: any;
-        } = {},
-    ) {
+    constructor(apiKey: string, options: { minDelay?: number; maxAdditionalDelay?: number; [key: string]: any } = {}) {
         this.apiKey = apiKey;
         this.baseUrl = "https://image.novelai.net";
         this.options = {
@@ -76,7 +69,7 @@ export class NovelAIClient {
      */
     calculateDelay(): number {
         const randomDelay = Math.floor(
-            Math.random() * this.options.maxAdditionalDelay,
+            Math.random() * this.options.maxAdditionalDelay
         );
         return this.options.minDelay + randomDelay;
     }
@@ -112,7 +105,7 @@ export class NovelAIClient {
                 throw new Error("unable to find valid image data in raw data");
             },
             // Method 4: Is it already image data?
-            async () => zipData,
+            async () => zipData
         )
             .fallback(zipData) // last resort
             .run(true);
@@ -143,7 +136,7 @@ export class NovelAIClient {
 
         if (eocdOffset === -1) {
             throw new Error(
-                "Cannot find End of Central Directory record in ZIP file",
+                "Cannot find End of Central Directory record in ZIP file"
             );
         }
 
@@ -159,7 +152,7 @@ export class NovelAIClient {
         // Read first file header in Central Directory
         const localHeaderOffset = dataView.getUint32(
             centralDirOffset + 42,
-            true,
+            true
         );
 
         if (localHeaderOffset + 30 > zipData.length) {
@@ -169,16 +162,16 @@ export class NovelAIClient {
         // Local Header information reading
         const localFileNameLength = dataView.getUint16(
             localHeaderOffset + 26,
-            true,
+            true
         );
         const localExtraFieldLength = dataView.getUint16(
             localHeaderOffset + 28,
-            true,
+            true
         );
         const compressedSize = dataView.getUint32(localHeaderOffset + 18, true);
         const compressionMethod = dataView.getUint16(
             localHeaderOffset + 8,
-            true,
+            true
         );
 
         // File data starting offset calculation
@@ -194,7 +187,7 @@ export class NovelAIClient {
 
         const fileData = zipData.slice(
             fileDataOffset,
-            fileDataOffset + compressedSize,
+            fileDataOffset + compressedSize
         );
 
         if (fileData.length === 0) {
@@ -210,7 +203,7 @@ export class NovelAIClient {
             return await this.decompressDeflate(fileData);
         } else {
             throw new Error(
-                `Unsupported compression method: ${compressionMethod}`,
+                `Unsupported compression method: ${compressionMethod}`
             );
         }
     }
@@ -396,7 +389,7 @@ export class NovelAIClient {
                 // 모든 방법 실패 시 원본 데이터 반환
                 console.warn(
                     "[NAI] Deflate 압축 해제 실패, 원본 데이터 사용:",
-                    String(fallbackError),
+                    String(fallbackError)
                 );
                 return compressedData;
             }
@@ -512,26 +505,24 @@ export class NovelAIClient {
             (key) => {
                 const model: NovelAIModel | undefined = NOVELAI_MODELS[key];
                 return (
-                    key
-                        .toLowerCase()
-                        .includes(modelName.toLowerCase()) || // Ignore case partial match
+                    key.toLowerCase().includes(modelName.toLowerCase()) || // Ignore case partial match
                     model?.name
                         .toLowerCase()
                         .includes(modelName.toLowerCase()) || // Name partial match
                     model?.version === modelName // Version exact match
                 );
-            },
+            }
         );
 
         if (modelKey) {
             console.warn(
-                `[NAI] Model name autofix: "${modelName}" → "${modelKey}"`,
+                `[NAI] Model name autofix: "${modelName}" → "${modelKey}"`
             );
             return modelKey;
         }
 
         console.error(
-            `[NAI] unrecognized model name: "${modelName}", fallback to default`,
+            `[NAI] unrecognized model name: "${modelName}", fallback to default`
         );
         return null;
     }
@@ -565,7 +556,7 @@ export class NovelAIClient {
     buildPrompt(
         character: Character,
         emotionData: string | NAIEmotion,
-        options: object = {},
+        options: object = {}
     ): {
         prompt: string;
         negative_prompt: string;
@@ -575,13 +566,7 @@ export class NovelAIClient {
         naiSettings: any;
     } {
         console.log("[NAI buildPrompt] emotionData:", emotionData);
-        const { naiSettings = {} } = options as {
-            naiSettings?: Partial<NaiSettings> & {
-                customPositivePrompt?: string;
-                customNegativePrompt?: string;
-                useCharacterPrompts?: boolean;
-            };
-        };
+        const { naiSettings = {} } = options as { naiSettings?: Partial<NaiSettings> & { customPositivePrompt?: string; customNegativePrompt?: string; useCharacterPrompts?: boolean; } };
 
         // 캐릭터의 외모 정보 사용
         const characterPrompt = character.appearance || "";
@@ -751,16 +736,9 @@ export class NovelAIClient {
                         caption: {
                             base_caption: prompt,
                             char_captions: (characterPrompts || []).map(
-                                (i) =>
-                                    ({
-                                        char_caption: i.prompt,
-                                    }) satisfies Defined<
-                                        Defined<
-                                            Defined<
-                                                NaiRawRequest["parameters"]["v4_prompt"]
-                                            >["caption"]
-                                        >["char_captions"]
-                                    >[number],
+                                i=>({
+                                    char_caption: i.prompt
+                                } satisfies Defined<Defined<Defined<NaiRawRequest["parameters"]["v4_prompt"]>["caption"]>["char_captions"]>[number])
                             ),
                         },
                     },
@@ -806,7 +784,7 @@ export class NovelAIClient {
                 this.lastGenerationTime = Date.now();
 
                 throw new Error(
-                    `NAI API 오류: ${response.status} ${response.statusText} - ${errorText}`,
+                    `NAI API 오류: ${response.status} ${response.statusText} - ${errorText}`
                 );
             }
 
@@ -872,11 +850,11 @@ export class NovelAIClient {
                         resolve(
                             typeof reader.result === "string"
                                 ? reader.result
-                                : null,
+                                : null
                         );
                     reader.onerror = () => reject(new Error("FileReader 오류"));
                     reader.readAsDataURL(blob);
-                },
+                }
             );
 
             // DataURL 검증 (더 관대하게)
@@ -949,13 +927,13 @@ export class NovelAIClient {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${this.apiKey}`,
                 },
-            },
+            }
         );
 
         if (!response.ok) {
             const errorText = await response.text();
             throw new Error(
-                `Failed to get NAI user subscription: ${response.status} ${response.statusText} - ${errorText}`,
+                `Failed to get NAI user subscription: ${response.status} ${response.statusText} - ${errorText}`
             );
         }
 
@@ -972,20 +950,9 @@ export class NovelAIClient {
     async generateSticker(
         character: Character,
         emotion: string | NAIEmotion,
-        options: object = {},
+        options: object = {}
     ): Promise<any> {
-        const { naiSettings = {}, ...generateOptions } = options as {
-            naiSettings?: Partial<NaiSettings> & {
-                imageSize?: string;
-                preferredSize?: string;
-                minDelay?: number;
-                maxAdditionalDelay?: number;
-                vibeTransferEnabled?: boolean;
-                vibeTransferStrength?: number;
-                vibeTransferInformationExtracted?: number;
-            };
-            [key: string]: any;
-        };
+        const { naiSettings = {}, ...generateOptions } = options as { naiSettings?: Partial<NaiSettings> & { imageSize?: string; preferredSize?: string; minDelay?: number; maxAdditionalDelay?: number; vibeTransferEnabled?: boolean; vibeTransferStrength?: number; vibeTransferInformationExtracted?: number; }; [key: string]: any; };
 
         // 캐릭터별 설정을 우선 사용, 없으면 전역 설정 사용
         const characterNaiSettings = character.naiSettings || {};
@@ -1170,7 +1137,7 @@ export class NovelAIClient {
     async generateStickerBatch(
         character: object,
         emotions: string[],
-        options: object = {},
+        options: object = {}
     ): Promise<object[]> {
         const results: {
             success: boolean;
@@ -1196,7 +1163,7 @@ export class NovelAIClient {
                 const sticker = await this.generateSticker(
                     character as Character,
                     emotion,
-                    options,
+                    options
                 );
                 results.push({ success: true, sticker, emotion });
 

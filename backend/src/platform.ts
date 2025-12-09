@@ -7,5 +7,5 @@
 import { RuntimeSecret, RuntimeVariable } from "@/types";
 
 export type Bindings = {
-	Bindings: RuntimeSecret & RuntimeVariable;
+    Bindings: RuntimeSecret & RuntimeVariable;
 };

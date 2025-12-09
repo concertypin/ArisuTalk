@@ -1,12 +1,4 @@
-export type AccessLevel =
-    | "main-public"
-    | "main-private"
-    | "secret-public"
-    | "secret-private"
-    | "public"
-    | "private"
-    | "secretPublic"
-    | "secretPrivate";
+export type AccessLevel = "main-public" | "main-private" | "secret-public" | "secret-private" | "public" | "private" | "secretPublic" | "secretPrivate";
 
 export interface Requirement {
     affection: number;
@@ -79,11 +71,7 @@ export interface SNSCharacterState {
     [key: string]: any;
 }
 
-export function checkSNSAccess(
-    character: SNSCharacter,
-    accessLevel: string,
-    characterState: SNSCharacterState | null,
-): boolean {
+export function checkSNSAccess(character: SNSCharacter, accessLevel: string, characterState: SNSCharacterState | null): boolean {
     const state = characterState || {
         affection: 0.2,
         intimacy: 0.2,

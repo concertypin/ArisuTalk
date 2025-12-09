@@ -1,292 +1,294 @@
 <script lang="ts">
-import { t } from "$root/i18n";
-import type { Character, Sticker } from "$types/character";
-import type { StickerGenerationProgress } from "$types/sticker";
-import {
-    Check,
-    CheckCircle,
-    CheckSquare,
-    Edit3,
-    Music,
-    Plus,
-    Sparkles,
-    Trash2,
-    X,
-} from "lucide-svelte";
-import { get } from "svelte/store";
+    import { t } from "$root/i18n";
+    import type { Character, Sticker } from "$types/character";
+    import type { StickerGenerationProgress } from "$types/sticker";
+    import {
+        Check,
+        CheckCircle,
+        CheckSquare,
+        Edit3,
+        Music,
+        Plus,
+        Sparkles,
+        Trash2,
+        X,
+    } from "lucide-svelte";
+    import { get } from "svelte/store";
 
-import { type StickerProgress } from "../../../services/stickerManager";
-import { editingCharacter } from "../../../stores/character";
-import { stickerManager } from "../../../stores/services";
-import { settings } from "../../../stores/settings";
-import StickerPreviewModal from "../sticker/StickerPreviewModal.svelte";
-import StickerProgressModal from "../sticker/StickerProgressModal.svelte";
+    import { type StickerProgress } from "../../../services/stickerManager";
+    import { editingCharacter } from "../../../stores/character";
+    import { stickerManager } from "../../../stores/services";
+    import { settings } from "../../../stores/settings";
+    import StickerPreviewModal from "../sticker/StickerPreviewModal.svelte";
+    import StickerProgressModal from "../sticker/StickerProgressModal.svelte";
 
-export let stickers: Sticker[] = [];
+    export let stickers: Sticker[] = [];
 
-let selectionMode = false;
-let selectedStickers: string[] = [];
-let stickerInput: HTMLInputElement;
-let showProgressModal = false;
-let progressData: StickerGenerationProgress | null = null;
-let showPreviewModal = false;
-let previewSticker: Sticker | null = null;
-let previewIndex: number | null = null;
+    let selectionMode = false;
+    let selectedStickers: string[] = [];
+    let stickerInput: HTMLInputElement;
+    let showProgressModal = false;
+    let progressData: StickerGenerationProgress | null = null;
+    let showPreviewModal = false;
+    let previewSticker: Sticker | null = null;
+    let previewIndex: number | null = null;
 
-// --- File Handling (from UserStickerPanel.svelte) ---
+    // --- File Handling (from UserStickerPanel.svelte) ---
 
-function addStickers() {
-    stickerInput.click();
-}
+    function addStickers() {
+        stickerInput.click();
+    }
 
-async function handleFileChange(event: Event) {
-    const target = event.target as HTMLInputElement;
-    const files = target.files ? Array.from(target.files) : [];
-    if (!files.length) return;
+    async function handleFileChange(event: Event) {
+        const target = event.target as HTMLInputElement;
+        const files = target.files ? Array.from(target.files) : [];
+        if (!files.length) return;
 
-    for (const file of files) {
-        const allowedTypes = [
-            "image/jpeg",
-            "image/jpg",
-            "image/gif",
-            "image/png",
-            "image/bmp",
-            "image/webp",
-            "video/webm",
-            "video/mp4",
-            "audio/mpeg",
-            "audio/mp3",
-        ];
-        if (!allowedTypes.includes(file.type)) {
-            alert(`${file.name}${t("modal.unsupportedFileType.message")}`);
-            continue;
-        }
-
-        if (file.size > 30 * 1024 * 1024) {
-            // 30MB limit
-            alert(`${file.name}${t("modal.fileTooLarge.message")}`);
-            continue;
-        }
-
-        try {
-            let dataUrl: string;
-            if (file.type.startsWith("image/")) {
-                dataUrl = await compressImage(file, 1024, 1024, 0.85);
-            } else {
-                dataUrl = await toBase64(file);
+        for (const file of files) {
+            const allowedTypes = [
+                "image/jpeg",
+                "image/jpg",
+                "image/gif",
+                "image/png",
+                "image/bmp",
+                "image/webp",
+                "video/webm",
+                "video/mp4",
+                "audio/mpeg",
+                "audio/mp3",
+            ];
+            if (!allowedTypes.includes(file.type)) {
+                alert(`${file.name}${t("modal.unsupportedFileType.message")}`);
+                continue;
             }
-            const stickerName =
-                file.name.split(".").slice(0, -1).join(".") || file.name;
-            const newSticker: Sticker = {
-                id: `sticker_${Date.now()}_${Math.random()}`,
-                name: stickerName,
-                data: dataUrl,
-                type: file.type,
-                createdAt: Date.now(),
-            };
-            stickers = [...stickers, newSticker];
-        } catch (error) {
-            console.error(t("ui.fileProcessingError"), error);
-            alert(t("ui.fileProcessingAlert"));
-        }
-    }
-    target.value = ""; // Reset file input
-}
 
-function toBase64(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = (error) => reject(error);
-    });
-}
-
-function compressImage(
-    file: File,
-    maxWidth: number,
-    maxHeight: number,
-    quality: number,
-): Promise<string> {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.src = URL.createObjectURL(file);
-        img.onload = () => {
-            const canvas = document.createElement("canvas");
-            let width = img.width;
-            let height = img.height;
-
-            if (width > height) {
-                if (width > maxWidth) {
-                    height = Math.round((height * maxWidth) / width);
-                    width = maxWidth;
-                }
-            } else {
-                if (height > maxHeight) {
-                    width = Math.round((width * maxHeight) / height);
-                    height = maxHeight;
-                }
+            if (file.size > 30 * 1024 * 1024) {
+                // 30MB limit
+                alert(`${file.name}${t("modal.fileTooLarge.message")}`);
+                continue;
             }
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext("2d");
-            if (!ctx) {
-                reject(new Error("Could not get canvas context"));
-                return;
-            }
-            ctx.drawImage(img, 0, 0, width, height);
-            resolve(canvas.toDataURL(file.type, quality));
-        };
-        img.onerror = (error) => reject(error);
-    });
-}
 
-// --- Sticker Management ---
-
-function openPreviewModal(sticker: Sticker, index: number) {
-    previewSticker = sticker;
-    previewIndex = index;
-    showPreviewModal = true;
-}
-
-function handleSaveSticker(event: CustomEvent) {
-    const { name } = event.detail;
-    if (previewIndex !== null) {
-        stickers[previewIndex].name = name;
-        stickers = stickers;
-    }
-    showPreviewModal = false;
-}
-
-function handleDeleteSticker() {
-    if (previewIndex !== null) {
-        stickers = stickers.filter((_, i) => i !== previewIndex);
-    }
-    showPreviewModal = false;
-}
-
-function handleCopySticker() {
-    if (previewSticker && previewSticker.data) {
-        navigator.clipboard.writeText(previewSticker.data);
-        alert("Copied to clipboard!");
-    }
-}
-
-function handleDownloadSticker() {
-    if (previewSticker && previewSticker.data) {
-        const link = document.createElement("a");
-        link.href = previewSticker.data;
-        link.download = previewSticker.name;
-        link.click();
-    }
-}
-
-async function handleRerollSticker(event: CustomEvent) {
-    // TODO: Implement reroll logic
-}
-
-// --- Selection Mode ---
-
-function toggleSelectionMode() {
-    selectionMode = !selectionMode;
-    if (!selectionMode) {
-        selectedStickers = [];
-    }
-}
-
-function selectAll() {
-    if (selectedStickers.length === stickers.length) {
-        selectedStickers = [];
-    } else {
-        selectedStickers = stickers.map((s) => s.id);
-    }
-}
-
-function deleteSelected() {
-    if (
-        confirm(
-            t("stickerPreview.confirmRemoveMultiple", {
-                count: String(selectedStickers.length),
-            }),
-        )
-    ) {
-        stickers = stickers.filter((s) => !selectedStickers.includes(s.id));
-        selectionMode = false;
-        selectedStickers = [];
-    }
-}
-
-function calculateSize() {
-    if (!stickers || stickers.length === 0) return "0 Bytes";
-    const totalBytes = stickers.reduce((acc, sticker) => {
-        if (sticker.data) {
-            const base64Length = sticker.data.split(",")[1]?.length || 0;
-            return acc + base64Length * 0.75;
-        }
-        return acc;
-    }, 0);
-
-    if (totalBytes < 1024) return `${totalBytes.toFixed(0)} Bytes`;
-    if (totalBytes < 1024 * 1024) return `${(totalBytes / 1024).toFixed(2)} KB`;
-    return `${(totalBytes / (1024 * 1024)).toFixed(2)} MB`;
-}
-
-async function generateStickers() {
-    const naiApiKey = get(settings).apiConfigs.novelai?.apiKey;
-    if (!naiApiKey) {
-        alert(
-            "NAI API 키가 설정되지 않았습니다. 설정에서 API 키를 입력해주세요.",
-        );
-        return;
-    }
-
-    showProgressModal = true;
-    progressData = {
-        isVisible: true,
-        status: "generating",
-        currentIndex: 0,
-        totalCount: get(settings).naiSettings.naiGenerationList?.length || 0,
-        currentEmotion: "",
-        error: undefined,
-        emotions: get(settings).naiSettings.naiGenerationList || [],
-        generatedStickers: [],
-        character: get(editingCharacter) || undefined,
-    };
-
-    const char = get(editingCharacter);
-    if (!char) return;
-
-    const sm = get(stickerManager);
-    if (sm && typeof sm.generateBasicStickerSet === "function") {
-        await sm.generateBasicStickerSet(char as Character, {
-            onProgress: (progress: StickerProgress) => {
-                if (progressData) {
-                    // Map StickerProgress to StickerGenerationProgress partial update
-                    // Map 'processing' status to 'generating' for compatibility
-                    const mappedStatus: StickerGenerationProgress["status"] =
-                        progress.status === "processing"
-                            ? "generating"
-                            : progress.status;
-                    const update: Partial<StickerGenerationProgress> = {
-                        currentIndex: progress.current,
-                        totalCount: progress.total,
-                        currentEmotion: progress.emotion,
-                        status: mappedStatus,
-                        error: progress.error,
-                    };
-                    if (progress.sticker) {
-                        // @ts-ignore: Assuming generatedStickers exists on StickerGenerationProgress
-                        update.generatedStickers = [
-                            ...(progressData.generatedStickers || []),
-                            progress.sticker,
-                        ];
-                    }
-                    progressData = { ...progressData, ...update };
+            try {
+                let dataUrl: string;
+                if (file.type.startsWith("image/")) {
+                    dataUrl = await compressImage(file, 1024, 1024, 0.85);
+                } else {
+                    dataUrl = await toBase64(file);
                 }
-            },
+                const stickerName =
+                    file.name.split(".").slice(0, -1).join(".") || file.name;
+                const newSticker: Sticker = {
+                    id: `sticker_${Date.now()}_${Math.random()}`,
+                    name: stickerName,
+                    data: dataUrl,
+                    type: file.type,
+                    createdAt: Date.now(),
+                };
+                stickers = [...stickers, newSticker];
+            } catch (error) {
+                console.error(t("ui.fileProcessingError"), error);
+                alert(t("ui.fileProcessingAlert"));
+            }
+        }
+        target.value = ""; // Reset file input
+    }
+
+    function toBase64(file: File): Promise<string> {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = (error) => reject(error);
         });
     }
-}
+
+    function compressImage(
+        file: File,
+        maxWidth: number,
+        maxHeight: number,
+        quality: number
+    ): Promise<string> {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.src = URL.createObjectURL(file);
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width = Math.round((width * maxHeight) / height);
+                        height = maxHeight;
+                    }
+                }
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext("2d");
+                if (!ctx) {
+                    reject(new Error("Could not get canvas context"));
+                    return;
+                }
+                ctx.drawImage(img, 0, 0, width, height);
+                resolve(canvas.toDataURL(file.type, quality));
+            };
+            img.onerror = (error) => reject(error);
+        });
+    }
+
+    // --- Sticker Management ---
+
+    function openPreviewModal(sticker: Sticker, index: number) {
+        previewSticker = sticker;
+        previewIndex = index;
+        showPreviewModal = true;
+    }
+
+    function handleSaveSticker(event: CustomEvent) {
+        const { name } = event.detail;
+        if (previewIndex !== null) {
+            stickers[previewIndex].name = name;
+            stickers = stickers;
+        }
+        showPreviewModal = false;
+    }
+
+    function handleDeleteSticker() {
+        if (previewIndex !== null) {
+            stickers = stickers.filter((_, i) => i !== previewIndex);
+        }
+        showPreviewModal = false;
+    }
+
+    function handleCopySticker() {
+        if (previewSticker && previewSticker.data) {
+            navigator.clipboard.writeText(previewSticker.data);
+            alert("Copied to clipboard!");
+        }
+    }
+
+    function handleDownloadSticker() {
+        if (previewSticker && previewSticker.data) {
+            const link = document.createElement("a");
+            link.href = previewSticker.data;
+            link.download = previewSticker.name;
+            link.click();
+        }
+    }
+
+    async function handleRerollSticker(event: CustomEvent) {
+        // TODO: Implement reroll logic
+    }
+
+    // --- Selection Mode ---
+
+    function toggleSelectionMode() {
+        selectionMode = !selectionMode;
+        if (!selectionMode) {
+            selectedStickers = [];
+        }
+    }
+
+    function selectAll() {
+        if (selectedStickers.length === stickers.length) {
+            selectedStickers = [];
+        } else {
+            selectedStickers = stickers.map((s) => s.id);
+        }
+    }
+
+    function deleteSelected() {
+        if (
+            confirm(
+                t("stickerPreview.confirmRemoveMultiple", {
+                    count: String(selectedStickers.length),
+                })
+            )
+        ) {
+            stickers = stickers.filter((s) => !selectedStickers.includes(s.id));
+            selectionMode = false;
+            selectedStickers = [];
+        }
+    }
+
+    function calculateSize() {
+        if (!stickers || stickers.length === 0) return "0 Bytes";
+        const totalBytes = stickers.reduce((acc, sticker) => {
+            if (sticker.data) {
+                const base64Length = sticker.data.split(",")[1]?.length || 0;
+                return acc + base64Length * 0.75;
+            }
+            return acc;
+        }, 0);
+
+        if (totalBytes < 1024) return `${totalBytes.toFixed(0)} Bytes`;
+        if (totalBytes < 1024 * 1024)
+            return `${(totalBytes / 1024).toFixed(2)} KB`;
+        return `${(totalBytes / (1024 * 1024)).toFixed(2)} MB`;
+    }
+
+    async function generateStickers() {
+        const naiApiKey = get(settings).apiConfigs.novelai?.apiKey;
+        if (!naiApiKey) {
+            alert(
+                "NAI API 키가 설정되지 않았습니다. 설정에서 API 키를 입력해주세요."
+            );
+            return;
+        }
+
+        showProgressModal = true;
+        progressData = {
+            isVisible: true,
+            status: "generating",
+            currentIndex: 0,
+            totalCount:
+                get(settings).naiSettings.naiGenerationList?.length || 0,
+            currentEmotion: "",
+            error: undefined,
+            emotions: get(settings).naiSettings.naiGenerationList || [],
+            generatedStickers: [],
+            character: get(editingCharacter) || undefined,
+        };
+
+        const char = get(editingCharacter);
+        if (!char) return;
+
+        const sm = get(stickerManager);
+        if (sm && typeof sm.generateBasicStickerSet === "function") {
+            await sm.generateBasicStickerSet(char as Character, {
+                onProgress: (progress: StickerProgress) => {
+                    if (progressData) {
+                        // Map StickerProgress to StickerGenerationProgress partial update
+                        // Map 'processing' status to 'generating' for compatibility
+                        const mappedStatus: StickerGenerationProgress["status"] =
+                            progress.status === "processing"
+                                ? "generating"
+                                : progress.status;
+                        const update: Partial<StickerGenerationProgress> = {
+                            currentIndex: progress.current,
+                            totalCount: progress.total,
+                            currentEmotion: progress.emotion,
+                            status: mappedStatus,
+                            error: progress.error,
+                        };
+                        if (progress.sticker) {
+                            // @ts-ignore: Assuming generatedStickers exists on StickerGenerationProgress
+                            update.generatedStickers = [
+                                ...(progressData.generatedStickers || []),
+                                progress.sticker,
+                            ];
+                        }
+                        progressData = { ...progressData, ...update };
+                    }
+                },
+            });
+        }
+    }
 </script>
 
 <details class="group border-t border-gray-700/50 pt-4">

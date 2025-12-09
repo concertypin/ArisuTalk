@@ -1,77 +1,78 @@
 <script lang="ts">
-import { onMount, onDestroy } from "svelte";
-import { t } from "$root/i18n";
-import { createEventDispatcher } from "svelte";
-import { fade } from "svelte/transition";
-import { X, Image, Plus } from "lucide-svelte";
-import { characters } from "../../../stores/character";
-import type { SNSPost, Character, Sticker } from "$types/character";
+    import { onMount, onDestroy } from "svelte";
+    import { t } from "$root/i18n";
+    import { createEventDispatcher } from "svelte";
+    import { fade } from "svelte/transition";
+    import { X, Image, Plus } from "lucide-svelte";
+    import { characters } from "../../../stores/character";
+    import type { SNSPost, Character, Sticker } from "$types/character";
 
-export let isOpen = false;
-export let editingPost: (SNSPost & { characterId?: string | number }) | null =
-    null;
+    export let isOpen = false;
+    export let editingPost: (SNSPost & { characterId?: string | number }) | null = null;
 
-const dispatch = createEventDispatcher();
+    const dispatch = createEventDispatcher();
 
-let character: Character | undefined | null = null;
-let postContent = "";
-let tags: string[] = [];
-let accessLevel = "main-public";
-let importance = 5;
-let stickerId: string | null = null;
-let showStickerPanel = false;
+    let character: Character | undefined | null = null;
+    let postContent = "";
+    let tags: string[] = [];
+    let accessLevel = "main-public";
+    let importance = 5;
+    let stickerId: string | null = null;
+    let showStickerPanel = false;
 
-$: {
-    if (editingPost) {
-        character = $characters.find((c) => c.id === editingPost?.characterId);
-        postContent = editingPost.content || "";
-        tags = editingPost.tags || [];
-        accessLevel =
-            editingPost.accessLevel ||
-            (editingPost.isSecret ? "secret-public" : "main-public");
-        importance = editingPost.importance || 5;
-        stickerId = editingPost.stickerId || null;
+    $: {
+        if (editingPost) {
+            character = $characters.find(
+                (c) => c.id === editingPost?.characterId
+            );
+            postContent = editingPost.content || "";
+            tags = editingPost.tags || [];
+            accessLevel =
+                editingPost.accessLevel ||
+                (editingPost.isSecret ? "secret-public" : "main-public");
+            importance = editingPost.importance || 5;
+            stickerId = editingPost.stickerId || null;
+        }
     }
-}
 
-function closeModal() {
-    dispatch("close");
-}
+    function closeModal() {
+        dispatch("close");
+    }
 
-function savePost() {
-    if (!editingPost) return;
-    const post = {
-        ...editingPost,
-        content: postContent,
-        tags,
-        accessLevel,
-        importance,
-        stickerId: stickerId || undefined,
-    };
-    dispatch("save", post);
-    closeModal();
-}
-
-function getStickerUrl(id: string) {
-    if (!character || !character.stickers) return "";
-    // eslint-disable-next-line eqeqeq
-    const sticker = character.stickers.find((s) => s.id == id);
-    return sticker ? sticker.data || sticker.dataUrl || "" : "";
-}
-
-function handleKeydown(event: KeyboardEvent) {
-    if (event.key === "Escape") {
+    function savePost() {
+        if (!editingPost) return;
+        const post = {
+            ...editingPost,
+            content: postContent,
+            tags,
+            accessLevel,
+            importance,
+            stickerId: stickerId || undefined,
+        };
+        dispatch("save", post);
         closeModal();
     }
-}
 
-onMount(() => {
-    window.addEventListener("keydown", handleKeydown);
-});
+    function getStickerUrl(id: string) {
+        if (!character || !character.stickers) return "";
+        // eslint-disable-next-line eqeqeq
+        const sticker = character.stickers.find((s) => s.id == id);
+        return sticker ? sticker.data || sticker.dataUrl || "" : "";
+    }
 
-onDestroy(() => {
-    window.removeEventListener("keydown", handleKeydown);
-});
+    function handleKeydown(event: KeyboardEvent) {
+        if (event.key === "Escape") {
+            closeModal();
+        }
+    }
+
+    onMount(() => {
+        window.addEventListener("keydown", handleKeydown);
+    });
+
+    onDestroy(() => {
+        window.removeEventListener("keydown", handleKeydown);
+    });
 </script>
 
 {#if isOpen && editingPost && character}

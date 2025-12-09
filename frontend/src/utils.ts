@@ -10,13 +10,16 @@ interface MessageGroup {
 
 export function debounce<T extends (...args: any[]) => any>(
     func: T,
-    delay: number,
+    delay: number
 ): T & { cancel: () => void } {
     let timeout: ReturnType<typeof setTimeout> | null = null;
     const debounced = function (this: any, ...args: Parameters<T>) {
         const context = this;
         if (timeout !== null) clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(context, args), delay);
+        timeout = setTimeout(
+            () => func.apply(context, args),
+            delay
+        );
     } as T;
 
     (debounced as T & { cancel?: () => void }).cancel = function () {
@@ -32,7 +35,7 @@ export function debounce<T extends (...args: any[]) => any>(
 export function findMessageGroup(
     messages: Message[],
     targetIndex: number,
-    characterName: string,
+    characterName: string
 ): MessageGroup | null {
     if (targetIndex < 0 || targetIndex >= messages.length) {
         return null;
@@ -86,7 +89,7 @@ export function formatDateSeparator(dateString: string): string {
 }
 
 export function formatTimestamp(
-    timestamp: string | number | Date | null | undefined,
+    timestamp: string | number | Date | null | undefined
 ): string {
     if (!timestamp) return "";
 
@@ -97,7 +100,7 @@ export function formatTimestamp(
     const dateDay = new Date(
         date.getFullYear(),
         date.getMonth(),
-        date.getDate(),
+        date.getDate()
     );
 
     const diffTime = nowDay.getTime() - dateDay.getTime();

@@ -15,7 +15,7 @@ export function showNotification(title: string, message: string) {
 export function showConfirmation(
     title: string,
     message: string,
-    onConfirm: () => void,
+    onConfirm: () => void
 ) {
     confirmationModalData.set({
         title,

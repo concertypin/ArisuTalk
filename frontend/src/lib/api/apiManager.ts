@@ -57,19 +57,15 @@ export class APIManager {
         apiKey: string,
         model: string,
         baseUrl: string | null = null,
-        options: LLMApiConstructorOptions = {},
+        options: LLMApiConstructorOptions = {}
     ): Promise<LLMApi> {
         // Map provider to client import
-        const providerMap: Record<
-            string,
-            () => Promise<{ default: LLMApiConstructor }>
-        > = {
+        const providerMap: Record<string, () => Promise<{ default: LLMApiConstructor }>> = {
             [PROVIDERS.GEMINI]: () => import("$root/lib/api/llm/gemini"),
             [PROVIDERS.CLAUDE]: () => import("$root/lib/api/llm/claude"),
             [PROVIDERS.OPENAI]: () => import("$root/lib/api/llm/openai"),
             [PROVIDERS.GROK]: () => import("$root/lib/api/llm/grok"),
-            [PROVIDERS.OPENROUTER]: () =>
-                import("$root/lib/api/llm/openrouter"),
+            [PROVIDERS.OPENROUTER]: () => import("$root/lib/api/llm/openrouter"),
             [PROVIDERS.CUSTOM_OPENAI]: () =>
                 import("$root/lib/api/llm/customopenai"),
         };
@@ -88,7 +84,7 @@ export class APIManager {
             apiKey,
             model,
             baseUrl || null,
-            options,
+            options
         );
         return this.clients[clientKey];
     }
@@ -109,7 +105,7 @@ export class APIManager {
         model: string,
         params: LLMApiGenerateContentParams,
         baseUrl: string | null = null,
-        options: LLMApiConstructorOptions = {},
+        options: LLMApiConstructorOptions = {}
     ): LLMApiGenerateContentResponse {
         try {
             // Resolve actual API key if encrypted
@@ -119,7 +115,7 @@ export class APIManager {
                 actualApiKey,
                 model,
                 baseUrl,
-                options,
+                options
             );
             const response = await client.generateContent(params);
             return response;
@@ -144,7 +140,7 @@ export class APIManager {
         model: string,
         params: LLMApiGenerateProfileParams,
         baseUrl: string | null = null,
-        options: LLMApiConstructorOptions = {},
+        options: LLMApiConstructorOptions = {}
     ): LLMApiGenerateProfileResponse {
         try {
             // Resolve actual API key if encrypted
@@ -154,7 +150,7 @@ export class APIManager {
                 actualApiKey,
                 model,
                 baseUrl,
-                options,
+                options
             );
             const response = await client.generateProfile(params);
             return response;
@@ -179,7 +175,7 @@ export class APIManager {
         model: string,
         params: LLMApiGenerateCharacterSheetParams,
         baseUrl: string | null = null,
-        options: LLMApiConstructorOptions = {},
+        options: LLMApiConstructorOptions = {}
     ): LLMApiGenerateCharacterSheetResponse {
         try {
             // Resolve actual API key if encrypted
@@ -189,7 +185,7 @@ export class APIManager {
                 actualApiKey,
                 model,
                 baseUrl,
-                options,
+                options
             );
             const response = await client.generateCharacterSheet(params);
             return response;

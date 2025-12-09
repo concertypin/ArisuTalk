@@ -7,8 +7,8 @@
 
 import { RuntimeSecret, RuntimeVariable } from "@/types";
 import {
-	BaseBlobStorageClient,
-	BaseDataDBClient,
+    BaseBlobStorageClient,
+    BaseDataDBClient,
 } from "@/adapters/StorageClientBase";
 
 /**
@@ -27,13 +27,15 @@ let cachedBlobClient: BaseBlobStorageClient | null = null;
  * It is created once and cached for subsequent calls.
  */
 export async function DataDBClient(env: DBEnv): Promise<BaseDataDBClient> {
-	if (cachedDBClient) return cachedDBClient;
-	if (env.SECRET_AZURE_COSMOSDB_CONNECTION_STRING) {
-		cachedDBClient = new (await import("./vendor/AzureCosmosDB")).default(env);
-	} else {
-		cachedDBClient = new (await import("./vendor/InMemoryDB")).default(env);
-	}
-	return cachedDBClient;
+    if (cachedDBClient) return cachedDBClient;
+    if (env.SECRET_AZURE_COSMOSDB_CONNECTION_STRING) {
+        cachedDBClient = new (await import("./vendor/AzureCosmosDB")).default(
+            env
+        );
+    } else {
+        cachedDBClient = new (await import("./vendor/InMemoryDB")).default(env);
+    }
+    return cachedDBClient;
 }
 
 /**
@@ -41,13 +43,13 @@ export async function DataDBClient(env: DBEnv): Promise<BaseDataDBClient> {
  * If S3 environment variables are set, it uses S3Storage.
  */
 export async function BlobClient(env: DBEnv): Promise<BaseBlobStorageClient> {
-	if (cachedBlobClient) return cachedBlobClient;
-	if (env.SECRET_S3_BUCKET_NAME) {
-		return (cachedBlobClient = new (
-			await import("./vendor/S3CompatibleBlob")
-		).default(env));
-	}
-	return (cachedBlobClient = new (
-		await import("./vendor/InMemoryBlob")
-	).default(env));
+    if (cachedBlobClient) return cachedBlobClient;
+    if (env.SECRET_S3_BUCKET_NAME) {
+        return (cachedBlobClient = new (
+            await import("./vendor/S3CompatibleBlob")
+        ).default(env));
+    }
+    return (cachedBlobClient = new (
+        await import("./vendor/InMemoryBlob")
+    ).default(env));
 }
