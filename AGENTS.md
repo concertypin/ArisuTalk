@@ -20,7 +20,6 @@ This project is an AI chat application with a modern, responsive interface built
 - **Multi-Provider AI Integration**: Supports multiple AI providers including Google Gemini, OpenAI, Claude, Grok, OpenRouter, and custom OpenAI-compatible APIs.
 - **Responsive Design**: Optimized for both desktop and mobile devices.
 - **PWA Support**: Progressive Web App capabilities with offline functionality.
-- **Secure Storage**: Encrypted storage for sensitive data like API keys.
 
 ## Security Considerations
 

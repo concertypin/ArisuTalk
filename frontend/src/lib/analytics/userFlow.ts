@@ -76,13 +76,13 @@ export type UserFlowEventPayload<Name extends UserFlowEventName> =
  * @returns {AnalyticsEventPayload} Sanitized payload without nullish entries.
  */
 function sanitizePayload(
-    payload: AnalyticsEventPayload
+    payload: AnalyticsEventPayload,
 ): AnalyticsEventPayload {
     return Object.fromEntries(
         Object.entries(payload).filter(
-            ([, value]) => value !== undefined && value !== null
-        )
-    ) 
+            ([, value]) => value !== undefined && value !== null,
+        ),
+    );
 }
 
 /**
@@ -94,8 +94,8 @@ function sanitizePayload(
  */
 export async function logUserFlowEvent<Name extends UserFlowEventName>(
     name: Name,
-    payload: UserFlowEventPayload<Name>
+    payload: UserFlowEventPayload<Name>,
 ): Promise<void> {
-    const sanitized = sanitizePayload(payload );
+    const sanitized = sanitizePayload(payload);
     await trackEvent(`flow_${name}`, sanitized);
 }

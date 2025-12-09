@@ -1,42 +1,42 @@
 <script lang="ts">
-    import { t } from "$root/i18n";
-    import { HelpCircle } from "lucide-svelte";
+import { t } from "$root/i18n";
+import { HelpCircle } from "lucide-svelte";
 
-    interface Props {
-        title: string;
-        description: string;
-        value: string;
+interface Props {
+    title: string;
+    description: string;
+    value: string;
+}
+
+let { title, description, value = $bindable() }: Props = $props();
+let tooltipVisible = $state(false);
+let tooltipX = $state(0);
+let tooltipY = $state(0);
+let tooltipEl = $state<HTMLElement | null>(null);
+let tooltipTop = $state(0);
+
+function showTooltip(event: Event) {
+    tooltipVisible = true;
+    if (event instanceof MouseEvent) {
+        tooltipX = event.clientX;
+        tooltipY = event.clientY;
     }
+}
 
-    let { title, description, value = $bindable() }: Props = $props();
-    let tooltipVisible = $state(false);
-    let tooltipX = $state(0);
-    let tooltipY = $state(0);
-    let tooltipEl = $state<HTMLElement | null>(null);
-    let tooltipTop = $state(0);
+function hideTooltip() {
+    tooltipVisible = false;
+}
 
-    function showTooltip(event: Event) {
-        tooltipVisible = true;
-        if (event instanceof MouseEvent) {
-            tooltipX = event.clientX;
-            tooltipY = event.clientY;
+$effect(() => {
+    if (tooltipVisible && tooltipEl) {
+        const tooltipHeight = tooltipEl.clientHeight;
+        if (tooltipY + tooltipHeight + 15 > window.innerHeight) {
+            tooltipTop = tooltipY - tooltipHeight - 15;
+        } else {
+            tooltipTop = tooltipY + 15;
         }
     }
-
-    function hideTooltip() {
-        tooltipVisible = false;
-    }
-
-    $effect(() => {
-        if (tooltipVisible && tooltipEl) {
-            const tooltipHeight = tooltipEl.clientHeight;
-            if (tooltipY + tooltipHeight + 15 > window.innerHeight) {
-                tooltipTop = tooltipY - tooltipHeight - 15;
-            } else {
-                tooltipTop = tooltipY + 15;
-            }
-        }
-    });
+});
 </script>
 
 <div class="bg-gray-900/50 rounded-lg p-4">

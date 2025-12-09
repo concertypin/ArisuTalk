@@ -23,7 +23,8 @@ const predefinedChunks: Record<string, string[]> = {
 export default defineConfig(async (ctx) => {
     const mode = ctx.mode;
     const env = loadEnv(mode, process.cwd(), "");
-    const defines: Record<string, any> = {
+    // It will be typed on vite-env.d.ts
+    const defines: Record<string, unknown> = {
         ...getEnvVar(ctx, env),
     };
 
@@ -31,7 +32,7 @@ export default defineConfig(async (ctx) => {
         Object.entries(defines).map(([k, v]) => [
             `import.meta.env.${k}`,
             JSON.stringify(v),
-        ])
+        ]),
     );
     const plugin: PluginOption[] = [
         tsconfigPaths(),
@@ -52,7 +53,7 @@ export default defineConfig(async (ctx) => {
         }),
         ...(mode === "production" ? prodOnlyPlugin : []),
     ];
-    let baseConfig: UserConfig = {
+    const baseConfig: UserConfig = {
         server: {
             open: "index.html",
         },
@@ -65,6 +66,9 @@ export default defineConfig(async (ctx) => {
             rollupOptions: {
                 output: {
                     manualChunks: predefinedChunks,
+                    sourcemapIgnoreList(relativePath) {
+                        return relativePath.includes("node_modules");
+                    },
                 },
             },
         },

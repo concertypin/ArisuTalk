@@ -15,7 +15,7 @@ import type { ChatRoom } from "$types/chat";
  */
 export function characterJoinOpenChat(
     chatId: string,
-    characterId: string
+    characterId: string,
 ): void {
     const character = get(characters).find((c) => c.id === characterId);
     if (!character) return;
@@ -28,7 +28,10 @@ export function characterJoinOpenChat(
 
             if (!chat.currentParticipants.includes(characterId)) {
                 chat.currentParticipants.push(characterId);
-                chat.participantHistory.push({ characterId, joinedAt: Date.now() });
+                chat.participantHistory.push({
+                    characterId,
+                    joinedAt: Date.now(),
+                });
             }
         }
         return chats;
@@ -42,10 +45,7 @@ export function characterJoinOpenChat(
         ],
     });
 
-    addSystemMessage(
-        chatId,
-        t("openChat.joined", { name: character.name })
-    );
+    addSystemMessage(chatId, t("openChat.joined", { name: character.name }));
 }
 
 /**
@@ -54,7 +54,7 @@ export function characterJoinOpenChat(
 export function characterLeaveOpenChat(
     chatId: string,
     characterId: string,
-    reason: string = "tired"
+    reason: string = "tired",
 ): void {
     const character = get(characters).find((c) => c.id === characterId);
     if (!character) return;
@@ -63,7 +63,7 @@ export function characterLeaveOpenChat(
         const chat = chats[chatId];
         if (chat && chat.currentParticipants) {
             chat.currentParticipants = chat.currentParticipants.filter(
-                (id: string) => id !== characterId
+                (id: string) => id !== characterId,
             );
         }
         return chats;
@@ -73,7 +73,7 @@ export function characterLeaveOpenChat(
     if (currentState) {
         updateCharacterState(characterId, {
             currentRooms: currentState.currentRooms.filter(
-                (id) => id !== chatId
+                (id) => id !== chatId,
             ),
         });
     }
@@ -90,7 +90,7 @@ export function initializeOpenChat(chatId: string): void {
     const shuffled = [...availableCharacters].sort(() => Math.random() - 0.5);
     const initialJoiners = shuffled.slice(
         0,
-        Math.min(joinCount, availableCharacters.length)
+        Math.min(joinCount, availableCharacters.length),
     );
 
     for (const character of initialJoiners) {
@@ -135,11 +135,15 @@ export function updateParticipantStates(chatId: string): void {
     // Possibility of a new participant joining
     const updatedChat = get(openChats)[chatId] as ChatRoom;
     const shouldAddNewParticipant =
-        Math.random() < 0.3 && (updatedChat.currentParticipants?.length || 0) < 6;
+        Math.random() < 0.3 &&
+        (updatedChat.currentParticipants?.length || 0) < 6;
 
     if (shouldAddNewParticipant) {
         const availableCharacters = get(characters).filter(
-            (c) => !(updatedChat.currentParticipants || []).includes(String(c.id)) && c.id
+            (c) =>
+                !(updatedChat.currentParticipants || []).includes(
+                    String(c.id),
+                ) && c.id,
         );
         if (availableCharacters.length > 0) {
             const newParticipant =

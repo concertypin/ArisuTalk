@@ -20,7 +20,7 @@ export async function getDisplayContent(message: Message): Promise<string> {
  * Useful for rendering entire chat histories
  */
 export async function getDisplayContents(
-    messages: Message[]
+    messages: Message[],
 ): Promise<Map<number | string, string>> {
     const displayMap = new Map<number | string, string>();
 
@@ -48,7 +48,7 @@ export async function createDisplayMessage(message: Message): Promise<Message> {
  * Create display versions of multiple messages
  */
 export async function createDisplayMessages(
-    messages: Message[]
+    messages: Message[],
 ): Promise<Message[]> {
     return Promise.all(messages.map((msg) => createDisplayMessage(msg)));
 }

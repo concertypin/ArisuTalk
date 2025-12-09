@@ -1,65 +1,71 @@
 <script lang="ts">
-    import { onMount, onDestroy } from "svelte";
-    import { t } from "$root/i18n";
-    import { createEventDispatcher } from "svelte";
-    import { fade } from "svelte/transition";
-    import { X, PlusCircle } from "lucide-svelte";
-    import {
-        chatRooms,
-        messages,
-        unreadCounts,
-        selectedChatId,
-    } from "../../../stores/chat";
-    import { characters } from "../../../stores/character";
-    import Avatar from "../../Avatar.svelte";
-    import type { Character } from "$types/character";
-    import type { ChatRoom } from "$types/chat";
+import { onMount, onDestroy } from "svelte";
+import { t } from "$root/i18n";
+import { createEventDispatcher } from "svelte";
+import { fade } from "svelte/transition";
+import { X, PlusCircle } from "lucide-svelte";
+import {
+    chatRooms,
+    messages,
+    unreadCounts,
+    selectedChatId,
+} from "../../../stores/chat";
+import { characters } from "../../../stores/character";
+import Avatar from "../../Avatar.svelte";
+import type { Character } from "$types/character";
+import type { ChatRoom } from "$types/chat";
 
-    export let isOpen = false;
-    export let character: Character | null = null;
+export let isOpen = false;
+export let character: Character | null = null;
 
-    const dispatch = createEventDispatcher();
+const dispatch = createEventDispatcher();
 
-    let characterChatRooms: ChatRoom[] = [];
+let characterChatRooms: ChatRoom[] = [];
 
-    $: {
-        if (character && $chatRooms[String(character.id)]) {
-            characterChatRooms = [...$chatRooms[String(character.id)]].sort((a, b) => {
+$: {
+    if (character && $chatRooms[String(character.id)]) {
+        characterChatRooms = [...$chatRooms[String(character.id)]].sort(
+            (a, b) => {
                 const lastMessageA = $messages[a.id]?.slice(-1)[0];
                 const lastMessageB = $messages[b.id]?.slice(-1)[0];
-                const timeA = lastMessageA ? lastMessageA.timestamp : a.createdAt || 0;
-                const timeB = lastMessageB ? lastMessageB.timestamp : b.createdAt || 0;
+                const timeA = lastMessageA
+                    ? lastMessageA.timestamp
+                    : a.createdAt || 0;
+                const timeB = lastMessageB
+                    ? lastMessageB.timestamp
+                    : b.createdAt || 0;
                 return timeB - timeA; // Newest first
-            });
-        }
+            },
+        );
     }
+}
 
-    function selectChat(chatRoomId: string) {
-        selectedChatId.set(chatRoomId);
-        dispatch("close");
+function selectChat(chatRoomId: string) {
+    selectedChatId.set(chatRoomId);
+    dispatch("close");
+}
+
+function createNewChat() {
+    dispatch("createNewChat");
+}
+
+function closeModal() {
+    dispatch("close");
+}
+
+function handleKeydown(event: KeyboardEvent) {
+    if (event.key === "Escape") {
+        closeModal();
     }
+}
 
-    function createNewChat() {
-        dispatch("createNewChat");
-    }
+onMount(() => {
+    window.addEventListener("keydown", handleKeydown);
+});
 
-    function closeModal() {
-        dispatch("close");
-    }
-
-    function handleKeydown(event: KeyboardEvent) {
-        if (event.key === "Escape") {
-            closeModal();
-        }
-    }
-
-    onMount(() => {
-        window.addEventListener("keydown", handleKeydown);
-    });
-
-    onDestroy(() => {
-        window.removeEventListener("keydown", handleKeydown);
-    });
+onDestroy(() => {
+    window.removeEventListener("keydown", handleKeydown);
+});
 </script>
 
 {#if isOpen && character}

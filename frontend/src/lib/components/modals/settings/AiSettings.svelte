@@ -1,44 +1,38 @@
 <script lang="ts">
-    import { t } from "$root/i18n";
-    import {
-        ArrowLeft,
-        Edit,
-        FilePenLine,
-        Globe,
-        Settings,
-    } from "lucide-svelte";
-    import { createEventDispatcher } from "svelte";
+import { t } from "$root/i18n";
+import { ArrowLeft, Edit, FilePenLine, Globe, Settings } from "lucide-svelte";
+import { createEventDispatcher } from "svelte";
 
-    import { settings } from "../../../stores/settings";
-    import ProviderSettings from "../../settings/ProviderSettings.svelte";
+import { settings } from "../../../stores/settings";
+import ProviderSettings from "../../settings/ProviderSettings.svelte";
 
-    const dispatch = createEventDispatcher();
+const dispatch = createEventDispatcher();
 
-    // @ts-ignore: provider is used in contexts requiring specific string literals
-    let provider:
-        | "gemini"
-        | "claude"
-        | "openai"
-        | "grok"
-        | "openrouter"
-        | "custom_openai" = ($settings.apiProvider as any) || "gemini";
+// @ts-ignore: provider is used in contexts requiring specific string literals
+let provider:
+    | "gemini"
+    | "claude"
+    | "openai"
+    | "grok"
+    | "openrouter"
+    | "custom_openai" = ($settings.apiProvider as any) || "gemini";
 
-    function handleProviderChange(e: Event) {
-        provider = (e.target as HTMLSelectElement).value as typeof provider;
-        settings.update((s) => ({ ...s, apiProvider: provider }));
-    }
+function handleProviderChange(e: Event) {
+    provider = (e.target as HTMLSelectElement).value as typeof provider;
+    settings.update((s) => ({ ...s, apiProvider: provider }));
+}
 
-    function getProviderDisplayName(p: string) {
-        const displayNames: Record<string, string> = {
-            gemini: "Google Gemini",
-            claude: "Anthropic Claude",
-            openai: "OpenAI ChatGPT",
-            grok: "xAI Grok",
-            openrouter: "OpenRouter",
-            custom_openai: "Custom OpenAI",
-        };
-        return displayNames[p] || p;
-    }
+function getProviderDisplayName(p: string) {
+    const displayNames: Record<string, string> = {
+        gemini: "Google Gemini",
+        claude: "Anthropic Claude",
+        openai: "OpenAI ChatGPT",
+        grok: "xAI Grok",
+        openrouter: "OpenRouter",
+        custom_openai: "Custom OpenAI",
+    };
+    return displayNames[p] || p;
+}
 </script>
 
 <div class="flex flex-col h-full">

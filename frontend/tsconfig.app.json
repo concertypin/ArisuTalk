@@ -1,56 +1,37 @@
 {
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.js",
-    "src/**/*.svelte",
-    "src/*.js",
-    "src/*.ts",
-    "src/*.svelte"
-  ],
-  "compilerOptions": {
-    "lib": [
-      "ESNext",
-      "DOM",
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.js",
+        "src/**/*.svelte",
+        "src/*.js",
+        "src/*.ts",
+        "src/*.svelte"
     ],
-    "baseUrl": "./src", /* Specify the base directory to resolve non-relative module names. */
-    "paths": {
-      "$components/*": [
-        "./lib/components/*"
-      ],
-      "$stores/*": [
-        "./lib/stores/*"
-      ],
-      "$services/*": [
-        "./lib/services/*"
-      ],
-      "$utils/*": [
-        "./lib/utils/*"
-      ],
-      "$types/*": [
-        "./types/*"
-      ],
-      "$constants/*": [
-        "./constants/*"
-      ],
-      "$root/*": [
-        "./*"
-      ],
-      "$lib/*": [
-        "./lib/*"
-      ]
+    "compilerOptions": {
+        "lib": ["ESNext", "DOM"],
+        "paths": {
+            "*": ["./src/*"],
+            "$components/*": ["./srsc/lib/components/*"],
+            "$stores/*": ["./srsc/lib/stores/*"],
+            "$services/*": ["./srsc/lib/services/*"],
+            "$utils/*": ["./srsc/lib/utils/*"],
+            "$types/*": ["./srsc/types/*"],
+            "$constants/*": ["./srsc/constants/*"],
+            "$root/*": ["./src/*"],
+            "$lib/*": ["./srsc/lib/*"]
+        },
+        "types": [
+            "vite/client",
+            "svelte/compiler",
+            "vite-plugin-comlink/client"
+        ],
+        /* Type Checking */
+        "noImplicitAny": true /* Enable error reporting for expressions and declarations with an implied 'any' type. */
     },
-    "types": [
-      "vite/client",
-      "svelte/compiler",
-      "vite-plugin-comlink/client"
-    ],
-    /* Type Checking */
-    "noImplicitAny": true, /* Enable error reporting for expressions and declarations with an implied 'any' type. */
-  },
-  "extends": "./tsconfig.base.json",
-  "references": [
-    {
-      "path": "./tsconfig.worker.json"
-    }
-  ]
+    "extends": "./tsconfig.base.json",
+    "references": [
+        {
+            "path": "./tsconfig.worker.json"
+        }
+    ]
 }

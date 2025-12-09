@@ -9,12 +9,12 @@ import { cors as corsHono } from "hono/cors";
  * Wildcards are not a regex
  */
 const allowedOrigins = [
-    "arisutalk.moe",
-    "spark.arisutalk.moe",
-    "localhost:5173",
-    "localhost:5174",
-    "127.0.0.1:5173",
-    "127.0.0.1:5174",
+	"arisutalk.moe",
+	"spark.arisutalk.moe",
+	"localhost:5173",
+	"localhost:5174",
+	"127.0.0.1:5173",
+	"127.0.0.1:5174",
 ];
 
 /**
@@ -25,9 +25,9 @@ const allowedOrigins = [
  * @returns Hono middleware that handles CORS with dynamic origin resolution
  */
 export async function cors<Ctx extends Context>(c: Ctx, next: Next) {
-    return corsHono({
-        origin: allowedOrigins.flatMap((i) => ["http://" + i, "https://" + i]),
-        credentials: true,
-        allowMethods: "GET,HEAD,PUT,POST,DELETE,PATCH,OPTIONS".split(","),
-    })(c, next);
+	return corsHono({
+		origin: allowedOrigins.flatMap((i) => ["http://" + i, "https://" + i]),
+		credentials: true,
+		allowMethods: "GET,HEAD,PUT,POST,DELETE,PATCH,OPTIONS".split(","),
+	})(c, next);
 }

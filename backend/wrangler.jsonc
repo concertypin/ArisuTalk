@@ -1,15 +1,15 @@
 {
-    "$schema": "node_modules/wrangler/config-schema.json",
-    "name": "arisutalk-backend-phonebook",
-    "compatibility_date": "2025-08-03",
-    "main": "./src/main.ts",
-    "upload_source_maps": true,
-    "placement": {
-        "mode": "smart"
-    },
-    "preview_urls": false,
-    "route": {
-        "custom_domain": true,
-        "pattern": "https://phonebook.back.arisutalk.moe",
-    }
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "arisutalk-backend-phonebook",
+	"compatibility_date": "2025-08-03",
+	"main": "./src/main.ts",
+	"upload_source_maps": true,
+	"placement": {
+		"mode": "smart"
+	},
+	"preview_urls": false,
+	"route": {
+		"custom_domain": true,
+		"pattern": "https://phonebook.back.arisutalk.moe"
+	}
 }

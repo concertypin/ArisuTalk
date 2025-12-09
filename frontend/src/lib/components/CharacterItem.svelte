@@ -1,50 +1,50 @@
 <script lang="ts">
-    import { t } from "$root/i18n";
-    import { createEventDispatcher } from "svelte";
-    import { chatRooms, messages, unreadCounts } from "../stores/chat";
-    import { formatTimestamp } from "../../utils";
-    import Avatar from "./Avatar.svelte";
-    import { Instagram, Settings } from "lucide-svelte";
-    import type { Character } from "$types/character";
-    import type { Message } from "$types/chat";
+import { t } from "$root/i18n";
+import { createEventDispatcher } from "svelte";
+import { chatRooms, messages, unreadCounts } from "../stores/chat";
+import { formatTimestamp } from "../../utils";
+import Avatar from "./Avatar.svelte";
+import { Instagram, Settings } from "lucide-svelte";
+import type { Character } from "$types/character";
+import type { Message } from "$types/chat";
 
-    export let character: Character | null = null;
+export let character: Character | null = null;
 
-    const dispatch = createEventDispatcher();
+const dispatch = createEventDispatcher();
 
-    let lastMessage: Message | null = null;
-    let totalUnreadCount = 0;
+let lastMessage: Message | null = null;
+let totalUnreadCount = 0;
 
-    $: {
-        if (character) {
-            const rooms = $chatRooms[String(character.id)] || [];
-            lastMessage = null;
-            totalUnreadCount = 0;
-            rooms.forEach((room) => {
-                const roomMessages = $messages[room.id] || [];
-                const roomLastMessage = roomMessages.slice(-1)[0];
-                if (
-                    roomLastMessage &&
-                    (!lastMessage || roomLastMessage.id > lastMessage.id)
-                ) {
-                    lastMessage = roomLastMessage;
-                }
-                totalUnreadCount += $unreadCounts[room.id] || 0;
-            });
-        }
+$: {
+    if (character) {
+        const rooms = $chatRooms[String(character.id)] || [];
+        lastMessage = null;
+        totalUnreadCount = 0;
+        rooms.forEach((room) => {
+            const roomMessages = $messages[room.id] || [];
+            const roomLastMessage = roomMessages.slice(-1)[0];
+            if (
+                roomLastMessage &&
+                (!lastMessage || roomLastMessage.id > lastMessage.id)
+            ) {
+                lastMessage = roomLastMessage;
+            }
+            totalUnreadCount += $unreadCounts[room.id] || 0;
+        });
     }
+}
 
-    function handleSelect() {
-        dispatch("select", character);
-    }
+function handleSelect() {
+    dispatch("select", character);
+}
 
-    function openSns() {
-        dispatch("sns", character);
-    }
+function openSns() {
+    dispatch("sns", character);
+}
 
-    function openSettings() {
-        dispatch("settings", character);
-    }
+function openSettings() {
+    dispatch("settings", character);
+}
 </script>
 
 {#if character}

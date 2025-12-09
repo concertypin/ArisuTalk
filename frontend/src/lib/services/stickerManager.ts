@@ -65,7 +65,7 @@ export class StickerManager {
         this.isGenerating = false;
         this.isCancelled = false;
         this.NAI_DELAYS = {
-             minDelay: 10000,
+            minDelay: 10000,
             maxAdditionalDelay: 5000,
             rateLimitDelay: 15000,
             serverErrorDelay: 5000,
@@ -118,16 +118,19 @@ export class StickerManager {
         return character.stickers.some(
             (sticker) =>
                 sticker.emotion === emotionKey ||
-                sticker.name.toLowerCase().includes(emotionKey.toLowerCase())
+                sticker.name.toLowerCase().includes(emotionKey.toLowerCase()),
         );
     }
 
     /**
      * 캐릭터에게 없는 감정 스티커 목록 반환
      */
-    getMissingEmotions(character: Character, emotionList: EmotionType[] = DEFAULT_EMOTIONS): EmotionType[] {
+    getMissingEmotions(
+        character: Character,
+        emotionList: EmotionType[] = DEFAULT_EMOTIONS,
+    ): EmotionType[] {
         return emotionList.filter(
-            (emotion) => !this.hasEmotionSticker(character, emotion)
+            (emotion) => !this.hasEmotionSticker(character, emotion),
         );
     }
 
@@ -252,7 +255,10 @@ export class StickerManager {
     /**
      * 캐릭터의 스티커를 자동 생성 (대화 중 감정 감지 시)
      */
-    async autoGenerateSticker(character: Character, emotion: string): Promise<Sticker | null> {
+    async autoGenerateSticker(
+        character: Character,
+        emotion: string,
+    ): Promise<Sticker | null> {
         if (!this.shouldGenerateSticker(character, emotion)) {
             return null;
         }
@@ -265,7 +271,7 @@ export class StickerManager {
                 emotion,
                 {
                     naiSettings: get(settings).naiSettings || {},
-                }
+                },
             );
 
             if (!character.stickers) {
@@ -275,7 +281,7 @@ export class StickerManager {
             character.stickers.push(sticker);
 
             characters.update((chars) =>
-                chars.map((c) => (c.id === character.id ? character : c))
+                chars.map((c) => (c.id === character.id ? character : c)),
             );
 
             return sticker;
@@ -295,7 +301,13 @@ export class StickerManager {
     /**
      * 캐릭터의 NAI 일괄 생성 목록 스티커 일괄 생성
      */
-    async generateBasicStickerSet(character: Character, options: { emotions?: EmotionType[], onProgress?: (data: StickerProgress) => void } = {}): Promise<GenerationSummary> {
+    async generateBasicStickerSet(
+        character: Character,
+        options: {
+            emotions?: EmotionType[];
+            onProgress?: (data: StickerProgress) => void;
+        } = {},
+    ): Promise<GenerationSummary> {
         this.isCancelled = false;
         if (!this.initializeNAI()) {
             throw new Error("NAI API 키가 설정되지 않았습니다.");
@@ -323,7 +335,8 @@ export class StickerManager {
                 }
 
                 const emotion = missingEmotions[i];
-                const emotionName = typeof emotion === 'string' ? emotion : emotion.emotion;
+                const emotionName =
+                    typeof emotion === "string" ? emotion : emotion.emotion;
 
                 try {
                     if (onProgress) {
@@ -344,7 +357,7 @@ export class StickerManager {
                                 get(settings).naiSettings?.preferredSize ||
                                 "square",
                             naiSettings: get(settings).naiSettings || {},
-                        }
+                        },
                     );
 
                     if (!character.stickers) {
@@ -354,11 +367,15 @@ export class StickerManager {
 
                     characters.update((chars) =>
                         chars.map((c) =>
-                            c.id === character.id ? character : c
-                        )
+                            c.id === character.id ? character : c,
+                        ),
                     );
 
-                    results.push({ success: true, sticker, emotion: emotionName });
+                    results.push({
+                        success: true,
+                        sticker,
+                        emotion: emotionName,
+                    });
 
                     if (onProgress) {
                         onProgress({
@@ -373,7 +390,7 @@ export class StickerManager {
                 } catch (error: any) {
                     console.error(
                         `[StickerManager] ${emotionName} 스티커 생성 실패:`,
-                        error
+                        error,
                     );
 
                     if (
@@ -381,7 +398,7 @@ export class StickerManager {
                         error.message.includes("Too Many Requests")
                     ) {
                         await new Promise((resolve) =>
-                            setTimeout(resolve, this.NAI_DELAYS.rateLimitDelay)
+                            setTimeout(resolve, this.NAI_DELAYS.rateLimitDelay),
                         );
                     } else if (
                         error.message.includes("500") ||
@@ -390,8 +407,8 @@ export class StickerManager {
                         await new Promise((resolve) =>
                             setTimeout(
                                 resolve,
-                                this.NAI_DELAYS.serverErrorDelay
-                            )
+                                this.NAI_DELAYS.serverErrorDelay,
+                            ),
                         );
                     }
 
@@ -427,7 +444,7 @@ export class StickerManager {
         } catch (error) {
             console.error(
                 `[StickerManager] 기본 스티커 세트 생성 실패:`,
-                error
+                error,
             );
             throw error;
         }
@@ -436,7 +453,12 @@ export class StickerManager {
     /**
      * 모든 캐릭터의 기본 스티커 일괄 생성
      */
-    async generateStickersForAllCharacters(options: { emotions?: EmotionType[], onProgress?: (data: StickerProgress) => void } = {}): Promise<GenerationSummary> {
+    async generateStickersForAllCharacters(
+        options: {
+            emotions?: EmotionType[];
+            onProgress?: (data: StickerProgress) => void;
+        } = {},
+    ): Promise<GenerationSummary> {
         if (!this.initializeNAI()) {
             throw new Error("NAI API 키가 설정되지 않았습니다.");
         }
@@ -502,7 +524,10 @@ export class StickerManager {
     /**
      * 캐릭터의 NAI 설정 업데이트
      */
-    updateCharacterNAISettings(character: Character, naiSettings: Record<string, any>): void {
+    updateCharacterNAISettings(
+        character: Character,
+        naiSettings: Record<string, any>,
+    ): void {
         if (!character.naiSettings) {
             character.naiSettings = {};
         }
@@ -528,7 +553,7 @@ export class StickerManager {
         allCharacters.forEach((character) => {
             if (character.stickers) {
                 const generatedStickers = character.stickers.filter(
-                    (s: any) => s.generated
+                    (s: any) => s.generated,
                 );
                 totalGenerated += generatedStickers.length;
                 if (generatedStickers.length > 0) {
@@ -571,7 +596,10 @@ export const EmotionAnalyzer = {
             excited: 0,
         };
 
-        const indicators: Record<string, { keywords: string[], emojis: string[], weight: number }> = {
+        const indicators: Record<
+            string,
+            { keywords: string[]; emojis: string[]; weight: number }
+        > = {
             happy: {
                 keywords: ["하하", "히히", "크크", "웃음"],
                 emojis: ["😊", "😄", "😂", "😆"],

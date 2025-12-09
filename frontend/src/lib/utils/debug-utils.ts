@@ -28,7 +28,7 @@ export async function clearAllBrowserData(): Promise<void> {
     request.onerror = (event: Event) => {
         console.error(
             `Error deleting IndexedDB database '${dbName}':`,
-            (event.target as IDBRequest).error
+            (event.target as IDBRequest).error,
         );
     };
     console.log("IndexedDB cleared.");
@@ -40,7 +40,7 @@ export async function clearAllBrowserData(): Promise<void> {
             .replace(/^ +/, "")
             .replace(
                 /=.*/,
-                "=;expires=" + new Date().toUTCString() + ";path=/"
+                "=;expires=" + new Date().toUTCString() + ";path=/",
             );
     });
     console.log("Attempted to clear cookies.");
@@ -58,8 +58,8 @@ export async function clearAllBrowserData(): Promise<void> {
                         console.error("Service worker unregistration failed.");
                     }
                     return success;
-                }
-            )
+                },
+            ),
         );
         console.log("Service workers unregistered.");
     }
@@ -73,7 +73,7 @@ export async function clearAllBrowserData(): Promise<void> {
  */
 export async function loadPreconfiguredData(
     localStoragePath: string,
-    indexedDBPath: string
+    indexedDBPath: string,
 ): Promise<void> {
     console.log("Loading pre-configured data...");
 
@@ -97,7 +97,7 @@ export async function loadPreconfiguredData(
         } else {
             console.warn(
                 `Could not load localStorage data from ${localStoragePath}:`,
-                localStorageResponse.statusText
+                localStorageResponse.statusText,
             );
         }
     } catch (error: unknown) {
@@ -122,7 +122,7 @@ export async function loadPreconfiguredData(
 
                 if (!dataToLoad || dataToLoad.length === 0) {
                     console.warn(
-                        `No data found for IndexedDB database '${dbName}'.`
+                        `No data found for IndexedDB database '${dbName}'.`,
                     );
                     continue;
                 }
@@ -141,7 +141,7 @@ export async function loadPreconfiguredData(
                     const db: IDBDatabase = (event.target as IDBRequest).result;
                     const transaction: IDBTransaction = db.transaction(
                         ["data"],
-                        "readwrite"
+                        "readwrite",
                     );
                     const objectStore: IDBObjectStore =
                         transaction.objectStore("data");
@@ -152,14 +152,14 @@ export async function loadPreconfiguredData(
 
                     transaction.oncomplete = () => {
                         console.log(
-                            `IndexedDB database '${dbName}' loaded with pre-configured data.`
+                            `IndexedDB database '${dbName}' loaded with pre-configured data.`,
                         );
                         db.close();
                     };
                     transaction.onerror = (transactionEvent: Event) => {
                         console.error(
                             `Transaction error for '${dbName}':`,
-                            (transactionEvent.target as IDBRequest).error
+                            (transactionEvent.target as IDBRequest).error,
                         );
                         db.close();
                     };
@@ -168,7 +168,7 @@ export async function loadPreconfiguredData(
                 request.onerror = (event: Event) => {
                     console.error(
                         `Error opening IndexedDB database '${dbName}':`,
-                        (event.target as IDBRequest).error
+                        (event.target as IDBRequest).error,
                     );
                 };
             }
@@ -177,7 +177,7 @@ export async function loadPreconfiguredData(
         } else {
             console.warn(
                 `Could not load IndexedDB data from ${indexedDBPath}:`,
-                indexedDBResponse.statusText
+                indexedDBResponse.statusText,
             );
         }
     } catch (error) {

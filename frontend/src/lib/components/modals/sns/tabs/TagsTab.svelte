@@ -1,82 +1,78 @@
 <script lang="ts">
-    import { t } from "$root/i18n";
-    import { Hash, Lock, EyeOff } from "lucide-svelte";
-    import type { Character } from "$types/character";
+import { t } from "$root/i18n";
+import { Hash, Lock, EyeOff } from "lucide-svelte";
+import type { Character } from "$types/character";
 
-    export let character: Character | null = null;
+export let character: Character | null = null;
 
-    interface TagData {
-        name: string;
-        count: number;
-        lastUsed: number;
-        isSecret: boolean;
+interface TagData {
+    name: string;
+    count: number;
+    lastUsed: number;
+    isSecret: boolean;
+}
+
+let allTags: TagData[] = [];
+
+$: {
+    if (character && character.snsPosts) {
+        const tagCounts: Record<string, number> = {};
+        const tagLastUsed: Record<string, number> = {};
+        const tagSecretStatus: Record<string, boolean> = {};
+
+        character.snsPosts.forEach((post) => {
+            if (post.tags && Array.isArray(post.tags)) {
+                post.tags.forEach((tag) => {
+                    tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+                    const postTimestamp = new Date(post.timestamp).getTime();
+                    if (!tagLastUsed[tag] || postTimestamp > tagLastUsed[tag]) {
+                        tagLastUsed[tag] = postTimestamp;
+                    }
+
+                    // Check access level (support both snake_case and camelCase)
+                    const accessLevel = post.accessLevel || post.access_level;
+                    if (accessLevel && accessLevel.includes("secret")) {
+                        tagSecretStatus[tag] = true;
+                    }
+                });
+            }
+        });
+
+        allTags = Object.keys(tagCounts)
+            .map((tagName) => ({
+                name: tagName,
+                count: tagCounts[tagName],
+                lastUsed: tagLastUsed[tagName] || Date.now(),
+                isSecret: tagSecretStatus[tagName] || false,
+            }))
+            .sort((a, b) => b.count - a.count);
     }
+}
 
-    let allTags: TagData[] = [];
+function formatTimeAgo(timestamp: number) {
+    const now = Date.now();
+    const diff = now - timestamp;
 
-    $: {
-        if (character && character.snsPosts) {
-            const tagCounts: Record<string, number> = {};
-            const tagLastUsed: Record<string, number> = {};
-            const tagSecretStatus: Record<string, boolean> = {};
+    if (diff < 60000) return t("sns.justNow");
+    if (diff < 3600000)
+        return t("sns.minutesAgo", {
+            minutes: String(Math.floor(diff / 60000)),
+        });
+    if (diff < 86400000)
+        return t("sns.hoursAgo", { hours: String(Math.floor(diff / 3600000)) });
+    if (diff < 604800000)
+        return t("sns.daysAgo", { days: String(Math.floor(diff / 86400000)) });
+    if (diff < 2592000000)
+        return t("sns.weeksAgo", {
+            weeks: String(Math.floor(diff / 604800000)),
+        });
+    if (diff < 31536000000)
+        return t("sns.monthsAgo", {
+            months: String(Math.floor(diff / 2592000000)),
+        });
 
-            character.snsPosts.forEach((post) => {
-                if (post.tags && Array.isArray(post.tags)) {
-                    post.tags.forEach((tag) => {
-                        tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-                        const postTimestamp = new Date(
-                            post.timestamp
-                        ).getTime();
-                        if (
-                            !tagLastUsed[tag] ||
-                            postTimestamp > tagLastUsed[tag]
-                        ) {
-                            tagLastUsed[tag] = postTimestamp;
-                        }
-
-                        // Check access level (support both snake_case and camelCase)
-                        const accessLevel = post.accessLevel || post.access_level;
-                        if (
-                            accessLevel &&
-                            accessLevel.includes("secret")
-                        ) {
-                            tagSecretStatus[tag] = true;
-                        }
-                    });
-                }
-            });
-
-            allTags = Object.keys(tagCounts)
-                .map((tagName) => ({
-                    name: tagName,
-                    count: tagCounts[tagName],
-                    lastUsed: tagLastUsed[tagName] || Date.now(),
-                    isSecret: tagSecretStatus[tagName] || false,
-                }))
-                .sort((a, b) => b.count - a.count);
-        }
-    }
-
-    function formatTimeAgo(timestamp: number) {
-        const now = Date.now();
-        const diff = now - timestamp;
-
-        if (diff < 60000) return t("sns.justNow");
-        if (diff < 3600000)
-            return t("sns.minutesAgo", { minutes: String(Math.floor(diff / 60000)) });
-        if (diff < 86400000)
-            return t("sns.hoursAgo", { hours: String(Math.floor(diff / 3600000)) });
-        if (diff < 604800000)
-            return t("sns.daysAgo", { days: String(Math.floor(diff / 86400000)) });
-        if (diff < 2592000000)
-            return t("sns.weeksAgo", { weeks: String(Math.floor(diff / 604800000)) });
-        if (diff < 31536000000)
-            return t("sns.monthsAgo", {
-                months: String(Math.floor(diff / 2592000000)),
-            });
-
-        return t("sns.yearsAgo", { years: String(Math.floor(diff / 31536000000)) });
-    }
+    return t("sns.yearsAgo", { years: String(Math.floor(diff / 31536000000)) });
+}
 </script>
 
 {#if allTags.length === 0}

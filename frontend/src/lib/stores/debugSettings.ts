@@ -3,7 +3,7 @@ import { writable } from "svelte/store";
 const RESET_ON_REFRESH_KEY = "debug-reset-on-refresh";
 
 export const isResetOnRefreshEnabled = writable(
-    localStorage.getItem(RESET_ON_REFRESH_KEY) === "true"
+    localStorage.getItem(RESET_ON_REFRESH_KEY) === "true",
 );
 
 export function toggleResetOnRefresh() {
