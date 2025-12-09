@@ -5,27 +5,27 @@
  * @returns The populated string.
  */
 export async function parseMagicPatterns(
-    template: string,
-    context: Record<string,any>
+	template: string,
+	context: Record<string, any>,
 ): Promise<string> {
-    if (!template) return "";
-    const pattern = /{\|([\s\S]*?)\|}/g;
+	if (!template) return "";
+	const pattern = /{\|([\s\S]*?)\|}/g;
 
-    const promises: Promise<string>[] = [];
-    const e = template.matchAll(pattern);
-    for (const i of e) {
-        const code = i.at(1);
-        if (code)
-            //Push valid code into queue
-            promises.push(runMagicPattern(code, context)); //Push empty for invalid code (it exists for ensureing order)
-        else promises.push(Promise.resolve(""));
-    }
-    const results = await Promise.all(promises);
+	const promises: Promise<string>[] = [];
+	const e = template.matchAll(pattern);
+	for (const i of e) {
+		const code = i.at(1);
+		if (code)
+			//Push valid code into queue
+			promises.push(runMagicPattern(code, context)); //Push empty for invalid code (it exists for ensureing order)
+		else promises.push(Promise.resolve(""));
+	}
+	const results = await Promise.all(promises);
 
-    //We can ensure that results size is always equal to the number of patterns found
-    //But typescript complains about it, so we use or-operator to supress the error
-    //ts-ignore is not cool, right?
-    return template.replace(pattern, () => results.shift() || "");
+	//We can ensure that results size is always equal to the number of patterns found
+	//But typescript complains about it, so we use or-operator to supress the error
+	//ts-ignore is not cool, right?
+	return template.replace(pattern, () => results.shift() || "");
 }
 
 /**
@@ -37,24 +37,26 @@ export async function parseMagicPatterns(
  * @param context - An object providing context variables for the sandbox execution.
  * @returns A promise that resolves to the result of the code execution as a string.
  */
-async function runMagicPattern(code: string, context: Record<string,any>): Promise<string> {
-    const Sandbox = (await import("@nyariv/sandboxjs")).default;
-    const sandbox = new Sandbox();
-    return new Promise<string>((resolve) => {
-        sandbox
-            .compileAsync(code)(context)
-            .run()
-            .then((i) => {
-                if (typeof i === "string") resolve(i);
-                else if (typeof i?.toString === "function")
-                    resolve(i.toString());
-                else if (!i)
-                    resolve(""); // Handle null/undefined/falses
-                else resolve(""); // Fallback to empty string if no toString method(it likely is error)
-            })
-            .catch((error) => {
-                console.error("Error executing magic pattern:", error);
-                resolve(""); // On error, replace with an empty string
-            });
-    });
+async function runMagicPattern(
+	code: string,
+	context: Record<string, any>,
+): Promise<string> {
+	const Sandbox = (await import("@nyariv/sandboxjs")).default;
+	const sandbox = new Sandbox();
+	return new Promise<string>((resolve) => {
+		sandbox
+			.compileAsync(code)(context)
+			.run()
+			.then((i) => {
+				if (typeof i === "string") resolve(i);
+				else if (typeof i?.toString === "function") resolve(i.toString());
+				else if (!i)
+					resolve(""); // Handle null/undefined/falses
+				else resolve(""); // Fallback to empty string if no toString method(it likely is error)
+			})
+			.catch((error) => {
+				console.error("Error executing magic pattern:", error);
+				resolve(""); // On error, replace with an empty string
+			});
+	});
 }

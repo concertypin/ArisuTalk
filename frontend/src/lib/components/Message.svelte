@@ -1,31 +1,29 @@
 <script lang="ts">
-    import { t } from "$root/i18n";
-    import type { DisplayCharacter, Message } from "$types/chat";
-    import { createEventDispatcher } from "svelte";
+import { t } from "$root/i18n";
+import type { DisplayCharacter, Message } from "$types/chat";
+import { createEventDispatcher } from "svelte";
 
-    import { imageZoomModalData, isImageZoomModalVisible } from "../stores/ui";
-    import Avatar from "./Avatar.svelte";
+import { imageZoomModalData, isImageZoomModalVisible } from "../stores/ui";
+import Avatar from "./Avatar.svelte";
 
-    export let message: Message;
-    export let senderCharacter: DisplayCharacter | null = null;
-    export let showSenderInfo = false;
+export let message: Message;
+export let senderCharacter: DisplayCharacter | null = null;
+export let showSenderInfo = false;
 
-    function openImageZoom() {
-        if (message.type === "image" || message.type === "sticker") {
-            const imageUrl =
-                message.type === "sticker"
-                    ? message.sticker?.data
-                    : message.imageUrl;
-            const title =
-                message.type === "sticker"
-                    ? message.sticker?.name
-                    : t("mainChat.uploadPhoto");
-            if (imageUrl) {
-                imageZoomModalData.set({ imageUrl, title: title || "" });
-                isImageZoomModalVisible.set(true);
-            }
-        }
-    }
+function openImageZoom() {
+	if (message.type === "image" || message.type === "sticker") {
+		const imageUrl =
+			message.type === "sticker" ? message.sticker?.data : message.imageUrl;
+		const title =
+			message.type === "sticker"
+				? message.sticker?.name
+				: t("mainChat.uploadPhoto");
+		if (imageUrl) {
+			imageZoomModalData.set({ imageUrl, title: title || "" });
+			isImageZoomModalVisible.set(true);
+		}
+	}
+}
 </script>
 
 <div class="flex items-start gap-3" class:justify-end={message.isMe}>

@@ -1,92 +1,88 @@
 <script lang="ts">
-    import { t } from "$root/i18n";
-    import { createEventDispatcher } from "svelte";
-    import {
-        Heart,
-        MessageCircle,
-        Star,
-        Lock,
-        Edit3,
-        Trash2,
-    } from "lucide-svelte";
-    import type { SNSPost, Character, Sticker } from "$types/character";
+import { t } from "$root/i18n";
+import { createEventDispatcher } from "svelte";
+import { Heart, MessageCircle, Star, Lock, Edit3, Trash2 } from "lucide-svelte";
+import type { SNSPost, Character, Sticker } from "$types/character";
 
-    export let post: SNSPost | null = null;
-    export let character: Character | null = null;
-    export let isSecretMode = false;
+export let post: SNSPost | null = null;
+export let character: Character | null = null;
+export let isSecretMode = false;
 
-    const dispatch = createEventDispatcher();
+const dispatch = createEventDispatcher();
 
-    function formatTimeAgo(timestamp: string | number) {
-        const now = new Date();
-        const past = new Date(timestamp);
-        const diff = now.getTime() - past.getTime();
+function formatTimeAgo(timestamp: string | number) {
+	const now = new Date();
+	const past = new Date(timestamp);
+	const diff = now.getTime() - past.getTime();
 
-        if (diff < 60000) return t("sns.justNow");
-        if (diff < 3600000)
-            return t("sns.minutesAgo", {
-                minutes: String(Math.floor(diff / 60000)),
-            });
-        if (diff < 86400000)
-            return t("sns.hoursAgo", {
-                hours: String(Math.floor(diff / 3600000)),
-            });
-        if (diff < 604800000)
-            return t("sns.daysAgo", {
-                days: String(Math.floor(diff / 86400000)),
-            });
-        if (diff < 2592000000)
-            return t("sns.weeksAgo", {
-                weeks: String(Math.floor(diff / 604800000)),
-            });
-        if (diff < 31536000000)
-            return t("sns.monthsAgo", {
-                months: String(Math.floor(diff / 2592000000)),
-            });
+	if (diff < 60000) return t("sns.justNow");
+	if (diff < 3600000)
+		return t("sns.minutesAgo", {
+			minutes: String(Math.floor(diff / 60000)),
+		});
+	if (diff < 86400000)
+		return t("sns.hoursAgo", {
+			hours: String(Math.floor(diff / 3600000)),
+		});
+	if (diff < 604800000)
+		return t("sns.daysAgo", {
+			days: String(Math.floor(diff / 86400000)),
+		});
+	if (diff < 2592000000)
+		return t("sns.weeksAgo", {
+			weeks: String(Math.floor(diff / 604800000)),
+		});
+	if (diff < 31536000000)
+		return t("sns.monthsAgo", {
+			months: String(Math.floor(diff / 2592000000)),
+		});
 
-        return t("sns.yearsAgo", {
-            years: String(Math.floor(diff / 31536000000)),
-        });
-    }
+	return t("sns.yearsAgo", {
+		years: String(Math.floor(diff / 31536000000)),
+	});
+}
 
-    function getStickerUrl(character: Character, stickerId: string | undefined): string {
-        if (!character || !character.stickers || !stickerId) {
-            return "";
-        }
+function getStickerUrl(
+	character: Character,
+	stickerId: string | undefined,
+): string {
+	if (!character || !character.stickers || !stickerId) {
+		return "";
+	}
 
-        // 문자열과 숫자 비교 모두 시도하여 스티커 찾기
-        let sticker = character.stickers.find((s) => s.id === stickerId);
-        if (!sticker) {
-            // 타입 변환해서 재시도
-            // eslint-disable-next-line eqeqeq
-            sticker = character.stickers.find((s) => s.id == stickerId); // == 사용 (타입 무시)
-        }
-        if (!sticker) {
-            // 문자열로 변환해서 재시도
-            sticker = character.stickers.find(
-                (s) => String(s.id) === String(stickerId)
-            );
-        }
+	// 문자열과 숫자 비교 모두 시도하여 스티커 찾기
+	let sticker = character.stickers.find((s) => s.id === stickerId);
+	if (!sticker) {
+		// 타입 변환해서 재시도
+		// eslint-disable-next-line eqeqeq
+		sticker = character.stickers.find((s) => s.id == stickerId); // == 사용 (타입 무시)
+	}
+	if (!sticker) {
+		// 문자열로 변환해서 재시도
+		sticker = character.stickers.find(
+			(s) => String(s.id) === String(stickerId),
+		);
+	}
 
-        if (!sticker) {
-            return "";
-        }
+	if (!sticker) {
+		return "";
+	}
 
-        // 메인 채팅과 동일한 방식으로 data 또는 dataUrl 사용
-        return sticker.data || sticker.dataUrl || "";
-    }
+	// 메인 채팅과 동일한 방식으로 data 또는 dataUrl 사용
+	return sticker.data || sticker.dataUrl || "";
+}
 
-    function handleEdit() {
-        if (character && post) {
-            dispatch("edit", { characterId: character.id, postId: post.id });
-        }
-    }
+function handleEdit() {
+	if (character && post) {
+		dispatch("edit", { characterId: character.id, postId: post.id });
+	}
+}
 
-    function handleDelete() {
-        if (character && post) {
-            dispatch("delete", { characterId: character.id, postId: post.id });
-        }
-    }
+function handleDelete() {
+	if (character && post) {
+		dispatch("delete", { characterId: character.id, postId: post.id });
+	}
+}
 </script>
 
 {#if post}

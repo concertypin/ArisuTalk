@@ -1,62 +1,62 @@
 <script lang="ts">
-    import { t } from "$root/i18n";
-    import type { ChatRoom } from "$types/chat";
-    import { Globe, Info, Users, X } from "lucide-svelte";
-    import { onDestroy, onMount } from "svelte";
-    import { get } from "svelte/store";
-    import { fade } from "svelte/transition";
+import { t } from "$root/i18n";
+import type { ChatRoom } from "$types/chat";
+import { Globe, Info, Users, X } from "lucide-svelte";
+import { onDestroy, onMount } from "svelte";
+import { get } from "svelte/store";
+import { fade } from "svelte/transition";
 
-    import { characters } from "../../../stores/character";
-    import { openChats, selectedChatId } from "../../../stores/chat";
-    import { isCreateOpenChatModalVisible } from "../../../stores/ui";
+import { characters } from "../../../stores/character";
+import { openChats, selectedChatId } from "../../../stores/chat";
+import { isCreateOpenChatModalVisible } from "../../../stores/ui";
 
-    let chatName = "";
+let chatName = "";
 
-    function closeModal() {
-        isCreateOpenChatModalVisible.set(false);
-        chatName = "";
-    }
+function closeModal() {
+	isCreateOpenChatModalVisible.set(false);
+	chatName = "";
+}
 
-    function createOpenChat() {
-        if (!chatName.trim()) {
-            alert(t("openChat.openChatNameRequiredMessage"));
-            return;
-        }
+function createOpenChat() {
+	if (!chatName.trim()) {
+		alert(t("openChat.openChatNameRequiredMessage"));
+		return;
+	}
 
-        const newChatId = `open_${Date.now()}`;
-        const newOpenChat: ChatRoom = {
-            id: newChatId,
-            name: chatName,
-            type: "open",
-            characterId: "",
-            createdAt: Date.now(),
-            lastActivity: Date.now(),
-            currentParticipants: [],
-            participantHistory: [],
-        };
+	const newChatId = `open_${Date.now()}`;
+	const newOpenChat: ChatRoom = {
+		id: newChatId,
+		name: chatName,
+		type: "open",
+		characterId: "",
+		createdAt: Date.now(),
+		lastActivity: Date.now(),
+		currentParticipants: [],
+		participantHistory: [],
+	};
 
-        openChats.update((chats) => {
-            chats[newChatId] = newOpenChat;
-            return chats;
-        });
+	openChats.update((chats) => {
+		chats[newChatId] = newOpenChat;
+		return chats;
+	});
 
-        selectedChatId.set(newChatId);
-        closeModal();
-    }
+	selectedChatId.set(newChatId);
+	closeModal();
+}
 
-    function handleKeydown(event: KeyboardEvent) {
-        if (event.key === "Escape") {
-            closeModal();
-        }
-    }
+function handleKeydown(event: KeyboardEvent) {
+	if (event.key === "Escape") {
+		closeModal();
+	}
+}
 
-    onMount(() => {
-        window.addEventListener("keydown", handleKeydown);
-    });
+onMount(() => {
+	window.addEventListener("keydown", handleKeydown);
+});
 
-    onDestroy(() => {
-        window.removeEventListener("keydown", handleKeydown);
-    });
+onDestroy(() => {
+	window.removeEventListener("keydown", handleKeydown);
+});
 </script>
 
 {#if $isCreateOpenChatModalVisible}

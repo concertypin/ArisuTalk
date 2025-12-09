@@ -1,39 +1,39 @@
 <script lang="ts">
-    import { t } from "$root/i18n";
-    import { createEventDispatcher } from "svelte";
-    import {
-        ArrowLeft,
-        HardDrive,
-        Download,
-        Upload,
-        Info,
-        FileText,
-        Camera,
-        History,
-        AlertTriangle,
-        Trash2,
-    } from "lucide-svelte";
-    import { settings, settingsSnapshots } from "../../../stores/settings";
-    import {
-        backupData,
-        restoreData,
-        resetAllData,
-    } from "../../../services/dataService";
-    import { prompts } from "../../../stores/prompts";
-    import SnapshotList from "./panels/SnapshotList.svelte";
+import { t } from "$root/i18n";
+import { createEventDispatcher } from "svelte";
+import {
+	ArrowLeft,
+	HardDrive,
+	Download,
+	Upload,
+	Info,
+	FileText,
+	Camera,
+	History,
+	AlertTriangle,
+	Trash2,
+} from "lucide-svelte";
+import { settings, settingsSnapshots } from "../../../stores/settings";
+import {
+	backupData,
+	restoreData,
+	resetAllData,
+} from "../../../services/dataService";
+import { prompts } from "../../../stores/prompts";
+import SnapshotList from "./panels/SnapshotList.svelte";
 
-    const dispatch = createEventDispatcher();
-    let restoreFileInput: HTMLInputElement;
+const dispatch = createEventDispatcher();
+let restoreFileInput: HTMLInputElement;
 
-    async function handleRestoreFile(event: Event) {
-        const target = event.target as HTMLInputElement;
-        const file = target.files?.[0];
-        if (!file) return;
+async function handleRestoreFile(event: Event) {
+	const target = event.target as HTMLInputElement;
+	const file = target.files?.[0];
+	if (!file) return;
 
-        const fileContent = await file.text();
-        restoreData(fileContent);
-        target.value = "";
-    }
+	const fileContent = await file.text();
+	restoreData(fileContent);
+	target.value = "";
+}
 </script>
 
 <div class="flex flex-col h-full">

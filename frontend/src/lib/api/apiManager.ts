@@ -1,18 +1,18 @@
 import {
-    PROVIDERS,
-    SUPPORTED_PROVIDERS,
-    isProviderSupported,
+	PROVIDERS,
+	SUPPORTED_PROVIDERS,
+	isProviderSupported,
 } from "$root/constants/providers";
 import type {
-    LLMApi,
-    LLMApiConstructor,
-    LLMApiConstructorOptions,
-    LLMApiGenerateCharacterSheetParams,
-    LLMApiGenerateCharacterSheetResponse,
-    LLMApiGenerateContentParams,
-    LLMApiGenerateContentResponse,
-    LLMApiGenerateProfileParams,
-    LLMApiGenerateProfileResponse,
+	LLMApi,
+	LLMApiConstructor,
+	LLMApiConstructorOptions,
+	LLMApiGenerateCharacterSheetParams,
+	LLMApiGenerateCharacterSheetResponse,
+	LLMApiGenerateContentParams,
+	LLMApiGenerateContentResponse,
+	LLMApiGenerateProfileParams,
+	LLMApiGenerateProfileResponse,
 } from "$root/lib/api/llm/llmApiProto";
 import { t } from "$root/i18n";
 
@@ -21,199 +21,201 @@ import { t } from "$root/i18n";
  * Provides a unified interface for all supported AI APIs
  */
 export class APIManager {
-    clients: Record<string, LLMApi> = {};
-    constructor() {
-        this.clients = {};
-    }
+	clients: Record<string, LLMApi> = {};
+	constructor() {
+		this.clients = {};
+	}
 
-    /**
-     * Resolve actual API key from potentially encrypted placeholder
-     * @param provider - The API provider
-     * @param apiKey - The API key (might be encrypted placeholder)
-     * @returns The actual API key
-     */
-    async resolveApiKey(provider: string, apiKey: string): Promise<string> {
-        // If it's an encrypted placeholder, get the real key from PersonaChatApp
-        if (apiKey === "***encrypted***" || !apiKey) {
-            if (window.personaApp) {
-                return await window.personaApp.getApiKey(provider);
-            }
-            throw new Error(t("api.apiKeyNotFound"));
-        }
-        return apiKey;
-    }
+	/**
+	 * Resolve actual API key from potentially encrypted placeholder
+	 * @param provider - The API provider
+	 * @param apiKey - The API key (might be encrypted placeholder)
+	 * @returns The actual API key
+	 */
+	async resolveApiKey(provider: string, apiKey: string): Promise<string> {
+		// If it's an encrypted placeholder, get the real key from PersonaChatApp
+		if (apiKey === "***encrypted***" || !apiKey) {
+			if (window.personaApp) {
+				return await window.personaApp.getApiKey(provider);
+			}
+			throw new Error(t("api.apiKeyNotFound"));
+		}
+		return apiKey;
+	}
 
-    /**
-     * Creates and returns the appropriate API client based on provider
-     * @param provider - The API provider (see PROVIDERS constants)
-     * @param apiKey - The API key for the provider
-     * @param model - The model to use
-     * @param baseUrl - Custom base URL (for custom_openai only)
-     * @param options - Additional options for the client (for custom_openai only)
-     * @returns The API client instance
-     */
-    async getClient(
-        provider: string,
-        apiKey: string,
-        model: string,
-        baseUrl: string | null = null,
-        options: LLMApiConstructorOptions = {}
-    ): Promise<LLMApi> {
-        // Map provider to client import
-        const providerMap: Record<string, () => Promise<{ default: LLMApiConstructor }>> = {
-            [PROVIDERS.GEMINI]: () => import("$root/lib/api/llm/gemini"),
-            [PROVIDERS.CLAUDE]: () => import("$root/lib/api/llm/claude"),
-            [PROVIDERS.OPENAI]: () => import("$root/lib/api/llm/openai"),
-            [PROVIDERS.GROK]: () => import("$root/lib/api/llm/grok"),
-            [PROVIDERS.OPENROUTER]: () => import("$root/lib/api/llm/openrouter"),
-            [PROVIDERS.CUSTOM_OPENAI]: () =>
-                import("$root/lib/api/llm/customopenai"),
-        };
-        const clientKey = `${provider}_${model}`;
+	/**
+	 * Creates and returns the appropriate API client based on provider
+	 * @param provider - The API provider (see PROVIDERS constants)
+	 * @param apiKey - The API key for the provider
+	 * @param model - The model to use
+	 * @param baseUrl - Custom base URL (for custom_openai only)
+	 * @param options - Additional options for the client (for custom_openai only)
+	 * @returns The API client instance
+	 */
+	async getClient(
+		provider: string,
+		apiKey: string,
+		model: string,
+		baseUrl: string | null = null,
+		options: LLMApiConstructorOptions = {},
+	): Promise<LLMApi> {
+		// Map provider to client import
+		const providerMap: Record<
+			string,
+			() => Promise<{ default: LLMApiConstructor }>
+		> = {
+			[PROVIDERS.GEMINI]: () => import("$root/lib/api/llm/gemini"),
+			[PROVIDERS.CLAUDE]: () => import("$root/lib/api/llm/claude"),
+			[PROVIDERS.OPENAI]: () => import("$root/lib/api/llm/openai"),
+			[PROVIDERS.GROK]: () => import("$root/lib/api/llm/grok"),
+			[PROVIDERS.OPENROUTER]: () => import("$root/lib/api/llm/openrouter"),
+			[PROVIDERS.CUSTOM_OPENAI]: () => import("$root/lib/api/llm/customopenai"),
+		};
+		const clientKey = `${provider}_${model}`;
 
-        // Return existing client if available
-        if (this.clients[clientKey]) {
-            return this.clients[clientKey];
-        }
-        if (!(provider in providerMap))
-            throw new Error(t("api.providerNotSupported", { provider }));
+		// Return existing client if available
+		if (this.clients[clientKey]) {
+			return this.clients[clientKey];
+		}
+		if (!(provider in providerMap))
+			throw new Error(t("api.providerNotSupported", { provider }));
 
-        const client = (await providerMap[provider]()).default;
+		const client = (await providerMap[provider]()).default;
 
-        this.clients[clientKey] = new client(
-            apiKey,
-            model,
-            baseUrl || null,
-            options
-        );
-        return this.clients[clientKey];
-    }
+		this.clients[clientKey] = new client(
+			apiKey,
+			model,
+			baseUrl || null,
+			options,
+		);
+		return this.clients[clientKey];
+	}
 
-    /**
-     * Generate content using the specified provider
-     * @param provider - The API provider
-     * @param apiKey - The API key
-     * @param model - The model to use
-     * @param params - Parameters for content generation
-     * @param baseUrl - Custom base URL (for custom_openai only)
-     * @param options - Additional options for the client (for custom_openai only)
-     * @returns The generated content response
-     */
-    async generateContent(
-        provider: string,
-        apiKey: string,
-        model: string,
-        params: LLMApiGenerateContentParams,
-        baseUrl: string | null = null,
-        options: LLMApiConstructorOptions = {}
-    ): LLMApiGenerateContentResponse {
-        try {
-            // Resolve actual API key if encrypted
-            const actualApiKey = await this.resolveApiKey(provider, apiKey);
-            const client = await this.getClient(
-                provider,
-                actualApiKey,
-                model,
-                baseUrl,
-                options
-            );
-            const response = await client.generateContent(params);
-            return response;
-        } catch (error) {
-            throw error; // Re-throw the error after logging
-        }
-    }
+	/**
+	 * Generate content using the specified provider
+	 * @param provider - The API provider
+	 * @param apiKey - The API key
+	 * @param model - The model to use
+	 * @param params - Parameters for content generation
+	 * @param baseUrl - Custom base URL (for custom_openai only)
+	 * @param options - Additional options for the client (for custom_openai only)
+	 * @returns The generated content response
+	 */
+	async generateContent(
+		provider: string,
+		apiKey: string,
+		model: string,
+		params: LLMApiGenerateContentParams,
+		baseUrl: string | null = null,
+		options: LLMApiConstructorOptions = {},
+	): LLMApiGenerateContentResponse {
+		try {
+			// Resolve actual API key if encrypted
+			const actualApiKey = await this.resolveApiKey(provider, apiKey);
+			const client = await this.getClient(
+				provider,
+				actualApiKey,
+				model,
+				baseUrl,
+				options,
+			);
+			const response = await client.generateContent(params);
+			return response;
+		} catch (error) {
+			throw error; // Re-throw the error after logging
+		}
+	}
 
-    /**
-     * Generate a character profile using the specified provider
-     * @param provider - The API provider
-     * @param apiKey - The API key
-     * @param model - The model to use
-     * @param params - Parameters for profile generation
-     * @param baseUrl - Custom base URL (for custom_openai only)
-     * @param options - Additional options for the client (for custom_openai only)
-     * @returns  The generated profile response
-     */
-    async generateProfile(
-        provider: string,
-        apiKey: string,
-        model: string,
-        params: LLMApiGenerateProfileParams,
-        baseUrl: string | null = null,
-        options: LLMApiConstructorOptions = {}
-    ): LLMApiGenerateProfileResponse {
-        try {
-            // Resolve actual API key if encrypted
-            const actualApiKey = await this.resolveApiKey(provider, apiKey);
-            const client = await this.getClient(
-                provider,
-                actualApiKey,
-                model,
-                baseUrl,
-                options
-            );
-            const response = await client.generateProfile(params);
-            return response;
-        } catch (error) {
-            throw error; // Re-throw the error after logging
-        }
-    }
+	/**
+	 * Generate a character profile using the specified provider
+	 * @param provider - The API provider
+	 * @param apiKey - The API key
+	 * @param model - The model to use
+	 * @param params - Parameters for profile generation
+	 * @param baseUrl - Custom base URL (for custom_openai only)
+	 * @param options - Additional options for the client (for custom_openai only)
+	 * @returns  The generated profile response
+	 */
+	async generateProfile(
+		provider: string,
+		apiKey: string,
+		model: string,
+		params: LLMApiGenerateProfileParams,
+		baseUrl: string | null = null,
+		options: LLMApiConstructorOptions = {},
+	): LLMApiGenerateProfileResponse {
+		try {
+			// Resolve actual API key if encrypted
+			const actualApiKey = await this.resolveApiKey(provider, apiKey);
+			const client = await this.getClient(
+				provider,
+				actualApiKey,
+				model,
+				baseUrl,
+				options,
+			);
+			const response = await client.generateProfile(params);
+			return response;
+		} catch (error) {
+			throw error; // Re-throw the error after logging
+		}
+	}
 
-    /**
-     * Generate a character sheet using the specified provider
-     * @param provider - The API provider
-     * @param apiKey - The API key
-     * @param model - The model to use
-     * @param params - Parameters for character sheet generation
-     * @param baseUrl - Custom base URL (for custom_openai only)
-     * @param options - Additional options for the client (for custom_openai only)
-     * @returns {Promise<Object>} The generated character sheet response
-     */
-    async generateCharacterSheet(
-        provider: string,
-        apiKey: string,
-        model: string,
-        params: LLMApiGenerateCharacterSheetParams,
-        baseUrl: string | null = null,
-        options: LLMApiConstructorOptions = {}
-    ): LLMApiGenerateCharacterSheetResponse {
-        try {
-            // Resolve actual API key if encrypted
-            const actualApiKey = await this.resolveApiKey(provider, apiKey);
-            const client = await this.getClient(
-                provider,
-                actualApiKey,
-                model,
-                baseUrl,
-                options
-            );
-            const response = await client.generateCharacterSheet(params);
-            return response;
-        } catch (error) {
-            throw error; // Re-throw the error after logging
-        }
-    }
+	/**
+	 * Generate a character sheet using the specified provider
+	 * @param provider - The API provider
+	 * @param apiKey - The API key
+	 * @param model - The model to use
+	 * @param params - Parameters for character sheet generation
+	 * @param baseUrl - Custom base URL (for custom_openai only)
+	 * @param options - Additional options for the client (for custom_openai only)
+	 * @returns {Promise<Object>} The generated character sheet response
+	 */
+	async generateCharacterSheet(
+		provider: string,
+		apiKey: string,
+		model: string,
+		params: LLMApiGenerateCharacterSheetParams,
+		baseUrl: string | null = null,
+		options: LLMApiConstructorOptions = {},
+	): LLMApiGenerateCharacterSheetResponse {
+		try {
+			// Resolve actual API key if encrypted
+			const actualApiKey = await this.resolveApiKey(provider, apiKey);
+			const client = await this.getClient(
+				provider,
+				actualApiKey,
+				model,
+				baseUrl,
+				options,
+			);
+			const response = await client.generateCharacterSheet(params);
+			return response;
+		} catch (error) {
+			throw error; // Re-throw the error after logging
+		}
+	}
 
-    /**
-     * Clear cached clients (useful when API keys change)
-     */
-    clearClients() {
-        this.clients = {};
-    }
+	/**
+	 * Clear cached clients (useful when API keys change)
+	 */
+	clearClients() {
+		this.clients = {};
+	}
 
-    /**
-     * Get list of supported providers
-     */
-    getSupportedProviders(): typeof SUPPORTED_PROVIDERS {
-        return SUPPORTED_PROVIDERS;
-    }
+	/**
+	 * Get list of supported providers
+	 */
+	getSupportedProviders(): typeof SUPPORTED_PROVIDERS {
+		return SUPPORTED_PROVIDERS;
+	}
 
-    /**
-     * Check if a provider is supported
-     * @param provider - The provider name to check
-     * @returns {boolean} Whether the provider is supported
-     */
-    isProviderSupported(provider: string): boolean {
-        return isProviderSupported(provider);
-    }
+	/**
+	 * Check if a provider is supported
+	 * @param provider - The provider name to check
+	 * @returns {boolean} Whether the provider is supported
+	 */
+	isProviderSupported(provider: string): boolean {
+		return isProviderSupported(provider);
+	}
 }

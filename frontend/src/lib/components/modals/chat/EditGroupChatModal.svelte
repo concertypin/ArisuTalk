@@ -1,96 +1,93 @@
 <script lang="ts">
-    import { t } from "$root/i18n";
-    import { characters } from "../../../stores/character";
-    import { groupChats, editingGroupChat } from "../../../stores/chat";
-    import { isEditGroupChatModalVisible } from "../../../stores/ui";
-    import { X, Users } from "lucide-svelte";
-    import { fade } from "svelte/transition";
-    import { onMount, onDestroy } from "svelte";
-    import Avatar from "../../Avatar.svelte";
-    import type { GroupChat, GroupChatParticipantSettings } from "$types/chat";
-    import type { Character } from "$types/character";
+import { t } from "$root/i18n";
+import { characters } from "../../../stores/character";
+import { groupChats, editingGroupChat } from "../../../stores/chat";
+import { isEditGroupChatModalVisible } from "../../../stores/ui";
+import { X, Users } from "lucide-svelte";
+import { fade } from "svelte/transition";
+import { onMount, onDestroy } from "svelte";
+import Avatar from "../../Avatar.svelte";
+import type { GroupChat, GroupChatParticipantSettings } from "$types/chat";
+import type { Character } from "$types/character";
 
-    let chatName = "";
-    let responseFrequency = 50;
-    let maxRespondingCharacters = 1;
-    let responseDelay = 3;
-    let participantSettings: Record<string, GroupChatParticipantSettings> = {};
+let chatName = "";
+let responseFrequency = 50;
+let maxRespondingCharacters = 1;
+let responseDelay = 3;
+let participantSettings: Record<string, GroupChatParticipantSettings> = {};
 
-    let participants: Character[] = [];
+let participants: Character[] = [];
 
-    editingGroupChat.subscribe((chat) => {
-        if (chat) {
-            participants = chat.participantIds
-                .map((id) => $characters.find((c) => String(c.id) === String(id)))
-                .filter((c): c is Character => !!c);
-            chatName = chat.name;
-            responseFrequency = Math.round(
-                (chat.settings.responseFrequency || 0.5) * 100
-            );
-            maxRespondingCharacters =
-                chat.settings.maxRespondingCharacters || 1;
-            responseDelay = Math.round(
-                (chat.settings.responseDelay || 3000) / 1000
-            );
+editingGroupChat.subscribe((chat) => {
+	if (chat) {
+		participants = chat.participantIds
+			.map((id) => $characters.find((c) => String(c.id) === String(id)))
+			.filter((c): c is Character => !!c);
+		chatName = chat.name;
+		responseFrequency = Math.round(
+			(chat.settings.responseFrequency || 0.5) * 100,
+		);
+		maxRespondingCharacters = chat.settings.maxRespondingCharacters || 1;
+		responseDelay = Math.round((chat.settings.responseDelay || 3000) / 1000);
 
-            // Deep copy participant settings to avoid direct store mutation
-            participantSettings = JSON.parse(
-                JSON.stringify(chat.settings.participantSettings || {})
-            );
+		// Deep copy participant settings to avoid direct store mutation
+		participantSettings = JSON.parse(
+			JSON.stringify(chat.settings.participantSettings || {}),
+		);
 
-            // Ensure all participants have a settings object
-            for (const p of participants) {
-                if (!participantSettings[String(p.id)]) {
-                    participantSettings[String(p.id)] = {
-                        isActive: true,
-                        responseProbability: 0.9,
-                        characterRole: "normal",
-                    };
-                }
-            }
-        }
-    });
+		// Ensure all participants have a settings object
+		for (const p of participants) {
+			if (!participantSettings[String(p.id)]) {
+				participantSettings[String(p.id)] = {
+					isActive: true,
+					responseProbability: 0.9,
+					characterRole: "normal",
+				};
+			}
+		}
+	}
+});
 
-    function closeModal() {
-        isEditGroupChatModalVisible.set(false);
-        editingGroupChat.set(null);
-    }
+function closeModal() {
+	isEditGroupChatModalVisible.set(false);
+	editingGroupChat.set(null);
+}
 
-    function saveChanges() {
-        if (!$editingGroupChat) return;
+function saveChanges() {
+	if (!$editingGroupChat) return;
 
-        const updatedSettings = {
-            responseFrequency: responseFrequency / 100,
-            maxRespondingCharacters: Number(maxRespondingCharacters), // Ensure number
-            responseDelay: responseDelay * 1000,
-            participantSettings: participantSettings,
-        };
+	const updatedSettings = {
+		responseFrequency: responseFrequency / 100,
+		maxRespondingCharacters: Number(maxRespondingCharacters), // Ensure number
+		responseDelay: responseDelay * 1000,
+		participantSettings: participantSettings,
+	};
 
-        groupChats.update((chats) => {
-            const chatToUpdate = chats[$editingGroupChat!.id];
-            if (chatToUpdate) {
-                chatToUpdate.name = chatName;
-                chatToUpdate.settings = updatedSettings;
-            }
-            return chats;
-        });
+	groupChats.update((chats) => {
+		const chatToUpdate = chats[$editingGroupChat!.id];
+		if (chatToUpdate) {
+			chatToUpdate.name = chatName;
+			chatToUpdate.settings = updatedSettings;
+		}
+		return chats;
+	});
 
-        closeModal();
-    }
+	closeModal();
+}
 
-    function handleKeydown(event: KeyboardEvent) {
-        if (event.key === "Escape") {
-            closeModal();
-        }
-    }
+function handleKeydown(event: KeyboardEvent) {
+	if (event.key === "Escape") {
+		closeModal();
+	}
+}
 
-    onMount(() => {
-        window.addEventListener("keydown", handleKeydown);
-    });
+onMount(() => {
+	window.addEventListener("keydown", handleKeydown);
+});
 
-    onDestroy(() => {
-        window.removeEventListener("keydown", handleKeydown);
-    });
+onDestroy(() => {
+	window.removeEventListener("keydown", handleKeydown);
+});
 </script>
 
 {#if $editingGroupChat}

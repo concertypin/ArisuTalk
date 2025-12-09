@@ -1,26 +1,27 @@
 {
-    "$schema": "https://biomejs.dev/schemas/2.3.8/schema.json",
-    "vcs": {
-        "root": ".."
-    },
-    "overrides": [
-        // https://biomejs.dev/internals/language-support/#linting-html-ish-languages
-        {
-            "includes": [
-                "**/*.svelte"
-            ],
-            "linter": {
-                "rules": {
-                    "style": {
-                        "useConst": "off",
-                        "useImportType": "off"
-                    },
-                    "correctness": {
-                        "noUnusedVariables": "off",
-                        "noUnusedImports": "off"
-                    }
-                }
-            }
-        }
-    ]
+	"$schema": "https://biomejs.dev/schemas/2.3.8/schema.json",
+	"vcs": {
+		"root": "..",
+		"enabled": true,
+		"clientKind": "git",
+		"useIgnoreFile": true
+	},
+	"overrides": [
+		// https://biomejs.dev/internals/language-support/#linting-html-ish-languages
+		{
+			"includes": ["**/*.svelte"],
+			"linter": {
+				"rules": {
+					"style": {
+						"useConst": "off",
+						"useImportType": "off"
+					},
+					"correctness": {
+						"noUnusedVariables": "off",
+						"noUnusedImports": "off"
+					}
+				}
+			}
+		}
+	]
 }

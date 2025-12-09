@@ -11,87 +11,85 @@ import vitePWA from "./script/pwa";
 // Since it distracts debugging via service worker, enable it only on production build
 const prodOnlyPlugin = [vitePWA];
 declare const process: {
-    cwd: () => string;
+	cwd: () => string;
 };
 
 const predefinedChunks: Record<string, string[]> = {
-    "vendor-core": ["svelte", "svelte/internal"],
-    "vendor-ui": ["lucide-svelte"],
-    "vendor-utils": ["jszip"],
+	"vendor-core": ["svelte", "svelte/internal"],
+	"vendor-ui": ["lucide-svelte"],
+	"vendor-utils": ["jszip"],
 };
 
 export default defineConfig(async (ctx) => {
-    const mode = ctx.mode;
-    const env = loadEnv(mode, process.cwd(), "");
-    const defines: Record<string, any> = {
-        ...getEnvVar(ctx, env),
-    };
+	const mode = ctx.mode;
+	const env = loadEnv(mode, process.cwd(), "");
+	const defines: Record<string, any> = {
+		...getEnvVar(ctx, env),
+	};
 
-    const defineConfigReady = Object.fromEntries(
-        Object.entries(defines).map(([k, v]) => [
-            `import.meta.env.${k}`,
-            JSON.stringify(v),
-        ])
-    );
-    const plugin: PluginOption[] = [
-        tsconfigPaths(),
+	const defineConfigReady = Object.fromEntries(
+		Object.entries(defines).map(([k, v]) => [
+			`import.meta.env.${k}`,
+			JSON.stringify(v),
+		]),
+	);
+	const plugin: PluginOption[] = [
+		tsconfigPaths(),
 
-        checker({
-            /**
-             * @todo The error should be fixed, since there's so many errors now. Disabled for now since it works anyway.
-             */
-            typescript: env.STRICT
-                ? { tsconfigPath: "./tsconfig.json" }
-                : false,
-        }),
-        comlink(),
-        svelte({
-            compilerOptions: {
-                dev: mode !== "production",
-            },
-        }),
-        ...(mode === "production" ? prodOnlyPlugin : []),
-    ];
-    let baseConfig: UserConfig = {
-        server: {
-            open: "index.html",
-        },
-        worker: {
-            plugins: () => [comlink()],
-        },
-        build: {
-            outDir: "dist",
-            sourcemap: "inline",
-            rollupOptions: {
-                output: {
-                    manualChunks: predefinedChunks,
-                },
-            },
-        },
-        clearScreen: false,
-        publicDir: "static",
-        plugins: plugin,
-        define: defineConfigReady,
-        test: {
-            globals: true,
-            environment: "happy-dom",
-            setupFiles: ["./tests/setup.ts"],
-            include: ["tests/**/*.{test,spec}.{js,ts}"],
-            exclude: ["node_modules", "dist"],
-            coverage: {
-                reporter: ["text", "json", "html"],
-                exclude: [
-                    "node_modules/",
-                    "dist/",
-                    "tests/",
-                    "**/*.d.ts",
-                    "**/*.config.*",
-                    "script/",
-                    "static/",
-                    "worker/",
-                ],
-            },
-        },
-    };
-    return baseConfig;
+		checker({
+			/**
+			 * @todo The error should be fixed, since there's so many errors now. Disabled for now since it works anyway.
+			 */
+			typescript: env.STRICT ? { tsconfigPath: "./tsconfig.json" } : false,
+		}),
+		comlink(),
+		svelte({
+			compilerOptions: {
+				dev: mode !== "production",
+			},
+		}),
+		...(mode === "production" ? prodOnlyPlugin : []),
+	];
+	let baseConfig: UserConfig = {
+		server: {
+			open: "index.html",
+		},
+		worker: {
+			plugins: () => [comlink()],
+		},
+		build: {
+			outDir: "dist",
+			sourcemap: "inline",
+			rollupOptions: {
+				output: {
+					manualChunks: predefinedChunks,
+				},
+			},
+		},
+		clearScreen: false,
+		publicDir: "static",
+		plugins: plugin,
+		define: defineConfigReady,
+		test: {
+			globals: true,
+			environment: "happy-dom",
+			setupFiles: ["./tests/setup.ts"],
+			include: ["tests/**/*.{test,spec}.{js,ts}"],
+			exclude: ["node_modules", "dist"],
+			coverage: {
+				reporter: ["text", "json", "html"],
+				exclude: [
+					"node_modules/",
+					"dist/",
+					"tests/",
+					"**/*.d.ts",
+					"**/*.config.*",
+					"script/",
+					"static/",
+					"worker/",
+				],
+			},
+		},
+	};
+	return baseConfig;
 });

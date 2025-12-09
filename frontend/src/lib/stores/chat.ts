@@ -7,28 +7,28 @@ import type { Sticker } from "../../types/character";
 export type { Message, GroupChat, ChatRoom };
 
 export interface MessagesStore {
-    [chatId: string]: Message[];
+	[chatId: string]: Message[];
 }
 
 export const chatRooms = persistentStore<Record<string, ChatRoom[]>>(
-    "personaChat_chatRooms_v16",
-    {}
+	"personaChat_chatRooms_v16",
+	{},
 );
 export const groupChats = persistentStore<Record<string, GroupChat>>(
-    "personaChat_groupChats_v16",
-    {}
+	"personaChat_groupChats_v16",
+	{},
 );
 export const openChats = persistentStore<Record<string, ChatRoom>>(
-    "personaChat_openChats_v16",
-    {}
+	"personaChat_openChats_v16",
+	{},
 );
 export const messages = persistentStore<MessagesStore>(
-    "personaChat_messages_v16",
-    {}
+	"personaChat_messages_v16",
+	{},
 );
 export const unreadCounts = persistentStore<Record<string, number>>(
-    "personaChat_unreadCounts_v16",
-    {}
+	"personaChat_unreadCounts_v16",
+	{},
 );
 
 // Forcing the landing page to be visible on refresh.
@@ -41,8 +41,8 @@ export const editingGroupChat = writable<GroupChat | null>(null);
 
 export const isWaitingForResponse = writable(false);
 export const typingCharacterId = writable<{
-    chatId: string;
-    characterId: string;
+	chatId: string;
+	characterId: string;
 } | null>(null);
 
 export const searchQuery = writable("");
@@ -51,37 +51,37 @@ export const stickerToSend = writable<Sticker | null>(null);
 export const currentMessage = writable("");
 
 export interface VirtualStreamState {
-    isStreaming: boolean;
-    chatId: string | null;
-    characterId: string | null;
-    messages: Message[];
-    isTyping: boolean;
+	isStreaming: boolean;
+	chatId: string | null;
+	characterId: string | null;
+	messages: Message[];
+	isTyping: boolean;
 }
 
 export const virtualStream = writable<VirtualStreamState>({
-    isStreaming: false,
-    chatId: null,
-    characterId: null,
-    messages: [],
-    isTyping: false,
+	isStreaming: false,
+	chatId: null,
+	characterId: null,
+	messages: [],
+	isTyping: false,
 });
 
 export function createNewChatRoom(characterId: string) {
-    const newChatRoomId = `${characterId}_${Date.now()}`;
-    const newChatRoom = {
-        id: newChatRoomId,
-        characterId: characterId,
-        name: t("ui.newChatName"),
-        createdAt: Date.now(),
-        lastActivity: Date.now(),
-    };
+	const newChatRoomId = `${characterId}_${Date.now()}`;
+	const newChatRoom = {
+		id: newChatRoomId,
+		characterId: characterId,
+		name: t("ui.newChatName"),
+		createdAt: Date.now(),
+		lastActivity: Date.now(),
+	};
 
-    chatRooms.update((rooms) => {
-        const characterChatRooms = [...(rooms[characterId] || []), newChatRoom];
-        return { ...rooms, [characterId]: characterChatRooms };
-    });
+	chatRooms.update((rooms) => {
+		const characterChatRooms = [...(rooms[characterId] || []), newChatRoom];
+		return { ...rooms, [characterId]: characterChatRooms };
+	});
 
-    messages.update((msgs) => ({ ...msgs, [newChatRoomId]: [] }));
+	messages.update((msgs) => ({ ...msgs, [newChatRoomId]: [] }));
 
-    return newChatRoomId;
+	return newChatRoomId;
 }

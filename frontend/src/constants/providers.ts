@@ -5,24 +5,24 @@
 
 // Supported AI providers
 export const PROVIDERS = {
-    GEMINI: "gemini",
-    CLAUDE: "claude",
-    OPENAI: "openai",
-    GROK: "grok",
-    OPENROUTER: "openrouter",
-    CUSTOM_OPENAI: "custom_openai",
+	GEMINI: "gemini",
+	CLAUDE: "claude",
+	OPENAI: "openai",
+	GROK: "grok",
+	OPENROUTER: "openrouter",
+	CUSTOM_OPENAI: "custom_openai",
 } as const;
 
 export type Provider = (typeof PROVIDERS)[keyof typeof PROVIDERS];
 
 // Array of all supported providers
 export const SUPPORTED_PROVIDERS: Provider[] = [
-    PROVIDERS.GEMINI,
-    PROVIDERS.CLAUDE,
-    PROVIDERS.OPENAI,
-    PROVIDERS.GROK,
-    PROVIDERS.OPENROUTER,
-    PROVIDERS.CUSTOM_OPENAI,
+	PROVIDERS.GEMINI,
+	PROVIDERS.CLAUDE,
+	PROVIDERS.OPENAI,
+	PROVIDERS.GROK,
+	PROVIDERS.OPENROUTER,
+	PROVIDERS.CUSTOM_OPENAI,
 ];
 
 // Default provider
@@ -30,49 +30,49 @@ export const DEFAULT_PROVIDER: Provider = PROVIDERS.GEMINI;
 
 // Provider display names
 export const PROVIDER_NAMES: { [key in Provider]: string } = {
-    [PROVIDERS.GEMINI]: "Gemini",
-    [PROVIDERS.CLAUDE]: "Claude",
-    [PROVIDERS.OPENAI]: "OpenAI",
-    [PROVIDERS.GROK]: "Grok",
-    [PROVIDERS.OPENROUTER]: "OpenRouter",
-    [PROVIDERS.CUSTOM_OPENAI]: "Custom OpenAI",
+	[PROVIDERS.GEMINI]: "Gemini",
+	[PROVIDERS.CLAUDE]: "Claude",
+	[PROVIDERS.OPENAI]: "OpenAI",
+	[PROVIDERS.GROK]: "Grok",
+	[PROVIDERS.OPENROUTER]: "OpenRouter",
+	[PROVIDERS.CUSTOM_OPENAI]: "Custom OpenAI",
 };
 
 // Default models for each provider
 export const PROVIDER_MODELS: { [key in Provider]: string[] } = {
-    [PROVIDERS.GEMINI]: ["gemini-2.5-pro", "gemini-2.5-flash"],
-    [PROVIDERS.CLAUDE]: [
-        "claude-opus-4-1-20250805",
-        "claude-opus-4-20250514",
-        "claude-sonnet-4-20250514",
-        "claude-3-7-sonnet-20250219",
-        "claude-3-5-haiku-20241022",
-        "claude-3-haiku-20240307",
-    ],
-    [PROVIDERS.OPENAI]: [
-        "gpt-5",
-        "gpt-5-mini",
-        "gpt-5-nano",
-        "o3",
-        "o4-mini",
-        "o3-pro",
-        "gpt-4o",
-        "gpt-4o-mini",
-        "gpt-4.1",
-    ],
-    [PROVIDERS.GROK]: ["grok-4", "grok-3", "grok-3-mini"],
-    [PROVIDERS.OPENROUTER]: [], // 커스텀 모델만 지원
-    [PROVIDERS.CUSTOM_OPENAI]: [], // 커스텀 모델만 지원
+	[PROVIDERS.GEMINI]: ["gemini-2.5-pro", "gemini-2.5-flash"],
+	[PROVIDERS.CLAUDE]: [
+		"claude-opus-4-1-20250805",
+		"claude-opus-4-20250514",
+		"claude-sonnet-4-20250514",
+		"claude-3-7-sonnet-20250219",
+		"claude-3-5-haiku-20241022",
+		"claude-3-haiku-20240307",
+	],
+	[PROVIDERS.OPENAI]: [
+		"gpt-5",
+		"gpt-5-mini",
+		"gpt-5-nano",
+		"o3",
+		"o4-mini",
+		"o3-pro",
+		"gpt-4o",
+		"gpt-4o-mini",
+		"gpt-4.1",
+	],
+	[PROVIDERS.GROK]: ["grok-4", "grok-3", "grok-3-mini"],
+	[PROVIDERS.OPENROUTER]: [], // 커스텀 모델만 지원
+	[PROVIDERS.CUSTOM_OPENAI]: [], // 커스텀 모델만 지원
 };
 
 // Default models for each provider
 export const DEFAULT_MODELS: { [key in Provider]: string } = {
-    [PROVIDERS.GEMINI]: "gemini-2.5-flash",
-    [PROVIDERS.CLAUDE]: "claude-sonnet-4-20250514",
-    [PROVIDERS.OPENAI]: "gpt-4o",
-    [PROVIDERS.GROK]: "grok-3",
-    [PROVIDERS.OPENROUTER]: "",
-    [PROVIDERS.CUSTOM_OPENAI]: "",
+	[PROVIDERS.GEMINI]: "gemini-2.5-flash",
+	[PROVIDERS.CLAUDE]: "claude-sonnet-4-20250514",
+	[PROVIDERS.OPENAI]: "gpt-4o",
+	[PROVIDERS.GROK]: "grok-3",
+	[PROVIDERS.OPENROUTER]: "",
+	[PROVIDERS.CUSTOM_OPENAI]: "",
 };
 
 /**
@@ -81,7 +81,7 @@ export const DEFAULT_MODELS: { [key in Provider]: string } = {
  * @returns {boolean} Whether the provider is supported
  */
 export function isProviderSupported(provider: string): provider is Provider {
-    return SUPPORTED_PROVIDERS.includes(provider as Provider);
+	return SUPPORTED_PROVIDERS.includes(provider as Provider);
 }
 
 /**
@@ -90,7 +90,7 @@ export function isProviderSupported(provider: string): provider is Provider {
  * @returns {string} The display name
  */
 export function getProviderDisplayName(provider: Provider): string {
-    return PROVIDER_NAMES[provider] || provider;
+	return PROVIDER_NAMES[provider] || provider;
 }
 
 /**
@@ -99,7 +99,7 @@ export function getProviderDisplayName(provider: Provider): string {
  * @returns {Array<string>} Array of model names
  */
 export function getProviderModels(provider: Provider): string[] {
-    return PROVIDER_MODELS[provider] || [];
+	return PROVIDER_MODELS[provider] || [];
 }
 
 /**
@@ -108,5 +108,5 @@ export function getProviderModels(provider: Provider): string[] {
  * @returns {string} Default model name
  */
 export function getDefaultModel(provider: Provider): string {
-    return DEFAULT_MODELS[provider] || "";
+	return DEFAULT_MODELS[provider] || "";
 }

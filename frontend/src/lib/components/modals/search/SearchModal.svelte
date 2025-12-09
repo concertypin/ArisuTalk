@@ -1,84 +1,81 @@
 <script lang="ts">
-    import { t } from "$root/i18n";
-    import type { Character } from "$types/character";
-    import { Search, SearchX, X } from "lucide-svelte";
-    import { afterUpdate, beforeUpdate, createEventDispatcher } from "svelte";
-    import { fade } from "svelte/transition";
+import { t } from "$root/i18n";
+import type { Character } from "$types/character";
+import { Search, SearchX, X } from "lucide-svelte";
+import { afterUpdate, beforeUpdate, createEventDispatcher } from "svelte";
+import { fade } from "svelte/transition";
 
-    import { characters } from "../../../stores/character";
-    import { searchQuery } from "../../../stores/chat";
-    import CharacterItem from "../../CharacterItem.svelte";
+import { characters } from "../../../stores/character";
+import { searchQuery } from "../../../stores/chat";
+import CharacterItem from "../../CharacterItem.svelte";
 
-    export let isOpen = false;
+export let isOpen = false;
 
-    const dispatch = createEventDispatcher();
+const dispatch = createEventDispatcher();
 
-    let filteredCharacters: Character[] = [];
-    let modalContentEl: HTMLElement | null = null;
-    let oldHeight: number | undefined;
-    let inputEl: HTMLInputElement | null = null;
+let filteredCharacters: Character[] = [];
+let modalContentEl: HTMLElement | null = null;
+let oldHeight: number | undefined;
+let inputEl: HTMLInputElement | null = null;
 
-    beforeUpdate(() => {
-        if (!modalContentEl) return;
-        oldHeight = modalContentEl.offsetHeight;
-    });
+beforeUpdate(() => {
+	if (!modalContentEl) return;
+	oldHeight = modalContentEl.offsetHeight;
+});
 
-    afterUpdate(() => {
-        if (!modalContentEl || oldHeight === undefined) return;
+afterUpdate(() => {
+	if (!modalContentEl || oldHeight === undefined) return;
 
-        const scrollHeight = modalContentEl.scrollHeight;
-        const vh85 = window.innerHeight * 0.85;
-        const newHeight = Math.min(scrollHeight, vh85);
+	const scrollHeight = modalContentEl.scrollHeight;
+	const vh85 = window.innerHeight * 0.85;
+	const newHeight = Math.min(scrollHeight, vh85);
 
-        if (Math.abs(oldHeight - newHeight) < 5) {
-            return;
-        }
+	if (Math.abs(oldHeight - newHeight) < 5) {
+		return;
+	}
 
-        modalContentEl.style.height = `${oldHeight}px`;
-        modalContentEl.style.overflow = "hidden"; // Prevent scrollbar flicker during animation
+	modalContentEl.style.height = `${oldHeight}px`;
+	modalContentEl.style.overflow = "hidden"; // Prevent scrollbar flicker during animation
 
-        requestAnimationFrame(() => {
-            if (!modalContentEl) return;
-            modalContentEl.style.transition = `height 0.4s cubic-bezier(0.4, 0, 0.2, 1)`;
-            modalContentEl.style.height = `${newHeight}px`;
+	requestAnimationFrame(() => {
+		if (!modalContentEl) return;
+		modalContentEl.style.transition = `height 0.4s cubic-bezier(0.4, 0, 0.2, 1)`;
+		modalContentEl.style.height = `${newHeight}px`;
 
-            const onTransitionEnd = () => {
-                if (!modalContentEl) return;
-                modalContentEl.removeEventListener(
-                    "transitionend",
-                    onTransitionEnd
-                );
-                modalContentEl.style.transition = "";
-                modalContentEl.style.height = "";
-                modalContentEl.style.overflow = "";
-            };
-            modalContentEl.addEventListener("transitionend", onTransitionEnd);
-        });
-    });
+		const onTransitionEnd = () => {
+			if (!modalContentEl) return;
+			modalContentEl.removeEventListener("transitionend", onTransitionEnd);
+			modalContentEl.style.transition = "";
+			modalContentEl.style.height = "";
+			modalContentEl.style.overflow = "";
+		};
+		modalContentEl.addEventListener("transitionend", onTransitionEnd);
+	});
+});
 
-    $: if (isOpen && inputEl) {
-        setTimeout(() => inputEl?.focus(), 100);
-    }
+$: if (isOpen && inputEl) {
+	setTimeout(() => inputEl?.focus(), 100);
+}
 
-    $: {
-        const query = $searchQuery.toLowerCase().trim();
-        if (query) {
-            filteredCharacters = $characters.filter((char) =>
-                char.name.toLowerCase().includes(query)
-            );
-        } else {
-            filteredCharacters = [];
-        }
-    }
+$: {
+	const query = $searchQuery.toLowerCase().trim();
+	if (query) {
+		filteredCharacters = $characters.filter((char) =>
+			char.name.toLowerCase().includes(query),
+		);
+	} else {
+		filteredCharacters = [];
+	}
+}
 
-    function closeModal() {
-        dispatch("close");
-    }
+function closeModal() {
+	dispatch("close");
+}
 
-    function handleSelect(event: CustomEvent) {
-        dispatch("select", event.detail);
-        closeModal();
-    }
+function handleSelect(event: CustomEvent) {
+	dispatch("select", event.detail);
+	closeModal();
+}
 </script>
 
 {#if isOpen}

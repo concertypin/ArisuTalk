@@ -1,6 +1,6 @@
 //Just export it, vite handles the rest
 export function hello(to: string | undefined = undefined): string {
-    return "Howdy from worker" + (to ? `, ${to}!` : "!");
+	return "Howdy from worker" + (to ? `, ${to}!` : "!");
 }
 
 export let theAnswer = 42;

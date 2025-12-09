@@ -1,59 +1,58 @@
 <script lang="ts">
-    import { t } from "$root/i18n";
-    import type { Character } from "$types/character";
-    import { ChevronRight, Lock, Search, X } from "lucide-svelte";
-    import { onDestroy, onMount } from "svelte";
-    import { createEventDispatcher } from "svelte";
-    import { fade } from "svelte/transition";
+import { t } from "$root/i18n";
+import type { Character } from "$types/character";
+import { ChevronRight, Lock, Search, X } from "lucide-svelte";
+import { onDestroy, onMount } from "svelte";
+import { createEventDispatcher } from "svelte";
+import { fade } from "svelte/transition";
 
-    import { characterStateStore, characters } from "../../../stores/character";
-    import { checkSNSAccess } from "../../../utils/sns";
+import { characterStateStore, characters } from "../../../stores/character";
+import { checkSNSAccess } from "../../../utils/sns";
 
-    export let isOpen = false;
+export let isOpen = false;
 
-    let searchTerm = "";
-    let accessibleCharacters: Character[] = [];
-    let inaccessibleCharacters: Character[] = [];
+let searchTerm = "";
+let accessibleCharacters: Character[] = [];
+let inaccessibleCharacters: Character[] = [];
 
-    const dispatch = createEventDispatcher();
+const dispatch = createEventDispatcher();
 
-    $: {
-        const filtered = $characters.filter(
-            (char) =>
-                char.id !== 0 &&
-                char.name.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-        accessibleCharacters = filtered.filter((char) =>
-            checkSNSAccess(char, "public", $characterStateStore[char.id])
-        );
-        inaccessibleCharacters = filtered.filter(
-            (char) =>
-                !checkSNSAccess(char, "public", $characterStateStore[char.id])
-        );
-    }
+$: {
+	const filtered = $characters.filter(
+		(char) =>
+			char.id !== 0 &&
+			char.name.toLowerCase().includes(searchTerm.toLowerCase()),
+	);
+	accessibleCharacters = filtered.filter((char) =>
+		checkSNSAccess(char, "public", $characterStateStore[char.id]),
+	);
+	inaccessibleCharacters = filtered.filter(
+		(char) => !checkSNSAccess(char, "public", $characterStateStore[char.id]),
+	);
+}
 
-    function closeModal() {
-        dispatch("close");
-    }
+function closeModal() {
+	dispatch("close");
+}
 
-    function openSns(character: Character) {
-        dispatch("openSns", character);
-        closeModal();
-    }
+function openSns(character: Character) {
+	dispatch("openSns", character);
+	closeModal();
+}
 
-    function handleKeydown(event: KeyboardEvent) {
-        if (event.key === "Escape") {
-            closeModal();
-        }
-    }
+function handleKeydown(event: KeyboardEvent) {
+	if (event.key === "Escape") {
+		closeModal();
+	}
+}
 
-    onMount(() => {
-        window.addEventListener("keydown", handleKeydown);
-    });
+onMount(() => {
+	window.addEventListener("keydown", handleKeydown);
+});
 
-    onDestroy(() => {
-        window.removeEventListener("keydown", handleKeydown);
-    });
+onDestroy(() => {
+	window.removeEventListener("keydown", handleKeydown);
+});
 </script>
 
 {#if isOpen}

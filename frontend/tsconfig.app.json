@@ -1,55 +1,32 @@
 {
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.js",
-    "src/**/*.svelte",
-    "src/*.js",
-    "src/*.ts",
-    "src/*.svelte"
-  ],
-  "compilerOptions": {
-    "lib": [
-      "ESNext",
-      "DOM",
-    ],
-    "paths": {
-      "$components/*": [
-        "./src/lib/components/*"
-      ],
-      "$stores/*": [
-        "./src/lib/stores/*"
-      ],
-      "$services/*": [
-        "./src/lib/services/*"
-      ],
-      "$utils/*": [
-        "./src/lib/utils/*"
-      ],
-      "$types/*": [
-        "./src/types/*"
-      ],
-      "$constants/*": [
-        "./src/constants/*"
-      ],
-      "$root/*": [
-        "./src/*"
-      ],
-      "$lib/*": [
-        "./src/lib/*"
-      ]
-    },
-    "types": [
-      "vite/client",
-      "svelte/compiler",
-      "vite-plugin-comlink/client"
-    ],
-    /* Type Checking */
-    "noImplicitAny": true, /* Enable error reporting for expressions and declarations with an implied 'any' type. */
-  },
-  "extends": "./tsconfig.base.json",
-  "references": [
-    {
-      "path": "./tsconfig.worker.json"
-    }
-  ]
+	"include": [
+		"src/**/*.ts",
+		"src/**/*.js",
+		"src/**/*.svelte",
+		"src/*.js",
+		"src/*.ts",
+		"src/*.svelte"
+	],
+	"compilerOptions": {
+		"lib": ["ESNext", "DOM"],
+		"paths": {
+			"$components/*": ["./src/lib/components/*"],
+			"$stores/*": ["./src/lib/stores/*"],
+			"$services/*": ["./src/lib/services/*"],
+			"$utils/*": ["./src/lib/utils/*"],
+			"$types/*": ["./src/types/*"],
+			"$constants/*": ["./src/constants/*"],
+			"$root/*": ["./src/*"],
+			"$lib/*": ["./src/lib/*"]
+		},
+		"types": ["vite/client", "svelte/compiler", "vite-plugin-comlink/client"],
+		/* Type Checking */
+		"noImplicitAny": true /* Enable error reporting for expressions and declarations with an implied 'any' type. */
+	},
+	"extends": "./tsconfig.base.json",
+	"references": [
+		{
+			"path": "./tsconfig.worker.json"
+		}
+	]
 }

@@ -6,99 +6,99 @@
 type NotUndefined<T> = T extends undefined ? never : T;
 
 abstract class FallbackChainBase<T> {
-    protected funcs: (() => T)[];
-    protected fallbackValue: T | undefined;
-    constructor(...funcs: (() => T)[]) {
-        this.funcs = funcs;
-    }
-    add(...funcs: (() => T)[]): this {
-        this.funcs.push(...funcs);
-        return this;
-    }
-    fallback(value: NotUndefined<T>): this {
-        if (value === undefined) {
-            throw new Error(
-                "Fallback value cannot be undefined, as it is treated as failure."
-            );
-        }
+	protected funcs: (() => T)[];
+	protected fallbackValue: T | undefined;
+	constructor(...funcs: (() => T)[]) {
+		this.funcs = funcs;
+	}
+	add(...funcs: (() => T)[]): this {
+		this.funcs.push(...funcs);
+		return this;
+	}
+	fallback(value: NotUndefined<T>): this {
+		if (value === undefined) {
+			throw new Error(
+				"Fallback value cannot be undefined, as it is treated as failure.",
+			);
+		}
 
-        this.fallbackValue = value;
-        return this;
-    }
+		this.fallbackValue = value;
+		return this;
+	}
 }
 
 class FallbackChainImpl<T> extends FallbackChainBase<T> {
-    /**
-     * Run the fallback chain.
-     * @param fallback Optional fallback value to return if all functions fail.
-     * @returns The result of the first successful function or the fallback value.
-     * @throws Error if all functions fail and no fallback is provided.
-     */
-    run(printError: boolean = true): T {
-        for (let i = 0; i < this.funcs.length; i++) {
-            const func = this.funcs[i];
-            try {
-                const result = func();
-                if (result !== undefined) return result;
-                else {
-                    if (printError) {
-                        console.error(
-                            `FallbackChain Error(depth ${i}): returned undefined`
-                        );
-                    }
-                }
-            } catch (e) {
-                if (printError) {
-                    console.error(`FallbackChain Error(depth ${i}):`, e);
-                }
-            }
-        }
-        if (this.fallbackValue !== undefined) {
-            return this.fallbackValue;
-        }
-        throw new Error("All functions in FallbackChain failed");
-    }
+	/**
+	 * Run the fallback chain.
+	 * @param fallback Optional fallback value to return if all functions fail.
+	 * @returns The result of the first successful function or the fallback value.
+	 * @throws Error if all functions fail and no fallback is provided.
+	 */
+	run(printError: boolean = true): T {
+		for (let i = 0; i < this.funcs.length; i++) {
+			const func = this.funcs[i];
+			try {
+				const result = func();
+				if (result !== undefined) return result;
+				else {
+					if (printError) {
+						console.error(
+							`FallbackChain Error(depth ${i}): returned undefined`,
+						);
+					}
+				}
+			} catch (e) {
+				if (printError) {
+					console.error(`FallbackChain Error(depth ${i}):`, e);
+				}
+			}
+		}
+		if (this.fallbackValue !== undefined) {
+			return this.fallbackValue;
+		}
+		throw new Error("All functions in FallbackChain failed");
+	}
 }
 
 class FallbackChainAsyncImpl<T> extends FallbackChainBase<Promise<T> | T> {
-    /**
-     * Run the asynchronous fallback chain.
-     * @param fallback Optional fallback value to return if all functions fail.
-     * @returns A promise that resolves to the result of the first successful function or the fallback value.
-     * @throws Error if all functions fail and no fallback is provided.
-     */
-    async run(
-        printError: boolean = true
-    ): Promise<T | (typeof this.fallbackValue extends T ? T : never)> {
-        for (let i = 0; i < this.funcs.length; i++) {
-            const func = this.funcs[i];
-            try {
-                const result = await func();
-                if (result !== undefined) return result;
-                else {
-                    if (printError) {
-                        console.error(
-                            `FallbackChainAsync Error(depth ${i}): returned undefined`
-                        );
-                    }
-                }
-            } catch (e) {
-                if (printError) {
-                    console.error(`FallbackChainAsync Error(depth ${i}):`, e);
-                }
-            }
-        }
-        if (this.fallbackValue !== undefined) {
-            return this.fallbackValue;
-        }
-        throw new Error("All functions in FallbackChainAsync failed");
-    }
-    fallback(value: NotUndefined<T>): this {
-        if (value instanceof Promise) {
-            throw new Error("Fallback value cannot be a Promise.");
-        }
-        return super.fallback(value);
-    }
+	/**
+	 * Run the asynchronous fallback chain.
+	 * @param fallback Optional fallback value to return if all functions fail.
+	 * @returns A promise that resolves to the result of the first successful function or the fallback value.
+	 * @throws Error if all functions fail and no fallback is provided.
+	 */
+	async run(
+		printError: boolean = true,
+	): Promise<T | (typeof this.fallbackValue extends T ? T : never)> {
+		for (let i = 0; i < this.funcs.length; i++) {
+			const func = this.funcs[i];
+			try {
+				const result = await func();
+				if (result !== undefined) return result;
+				else {
+					if (printError) {
+						console.error(
+							`FallbackChainAsync Error(depth ${i}): returned undefined`,
+						);
+					}
+				}
+			} catch (e) {
+				if (printError) {
+					console.error(`FallbackChainAsync Error(depth ${i}):`, e);
+				}
+			}
+		}
+		if (this.fallbackValue !== undefined) {
+			return this.fallbackValue;
+		}
+		throw new Error("All functions in FallbackChainAsync failed");
+	}
+	fallback(value: NotUndefined<T>): this {
+		if (value instanceof Promise) {
+			throw new Error("Fallback value cannot be a Promise.");
+		}
+		return super.fallback(value);
+	}
 }
 /**
  * Create a synchronous fallback chain.
@@ -107,7 +107,7 @@ class FallbackChainAsyncImpl<T> extends FallbackChainBase<Promise<T> | T> {
  * @see FallbackChainImpl
  */
 export function fallbackChain<T>(...funcs: (() => T)[]): FallbackChainImpl<T> {
-    return new FallbackChainImpl(...funcs);
+	return new FallbackChainImpl(...funcs);
 }
 
 /**
@@ -117,9 +117,9 @@ export function fallbackChain<T>(...funcs: (() => T)[]): FallbackChainImpl<T> {
  * @see FallbackChainAsyncImpl
  */
 export function fallbackChainAsync<T>(
-    ...funcs: (() => Promise<T>)[]
+	...funcs: (() => Promise<T>)[]
 ): FallbackChainAsyncImpl<T> {
-    return new FallbackChainAsyncImpl(...funcs);
+	return new FallbackChainAsyncImpl(...funcs);
 }
 
 // Type aliases for backward compatibility if needed
