@@ -9,7 +9,6 @@
       "ESNext",
       "DOM",
     ],
-    "baseUrl": "./tests",
     "types": [
       "vite/client",
     ], /* Specify type package names to be included without being referenced in a source file. */

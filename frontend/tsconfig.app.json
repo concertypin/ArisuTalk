@@ -12,31 +12,30 @@
       "ESNext",
       "DOM",
     ],
-    "baseUrl": "./src", /* Specify the base directory to resolve non-relative module names. */
     "paths": {
       "$components/*": [
-        "./lib/components/*"
+        "./src/lib/components/*"
       ],
       "$stores/*": [
-        "./lib/stores/*"
+        "./src/lib/stores/*"
       ],
       "$services/*": [
-        "./lib/services/*"
+        "./src/lib/services/*"
       ],
       "$utils/*": [
-        "./lib/utils/*"
+        "./src/lib/utils/*"
       ],
       "$types/*": [
-        "./types/*"
+        "./src/types/*"
       ],
       "$constants/*": [
-        "./constants/*"
+        "./src/constants/*"
       ],
       "$root/*": [
-        "./*"
+        "./src/*"
       ],
       "$lib/*": [
-        "./lib/*"
+        "./src/lib/*"
       ]
     },
     "types": [
