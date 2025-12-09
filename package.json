@@ -1,35 +1,35 @@
 {
-  "name": "ArisuTalk",
-  "version": "1.0.0",
-  "description": "",
-  "private": true,
-  "repository": "github:concertypin/ArisuTalk",
-  "main": "index.js",
-  "scripts": {
-    "dev:fe": "pnpm --filter frontend run dev",
-    "preview:fe": "pnpm --filter frontend run preview",
-    "build:fe": "pnpm --filter frontend run build",
-    "format:fe": "pnpm --filter frontend run format",
-    "serve:fe": "pnpm --filter frontend run serve",
-    "dev:be": "pnpm --filter backend run dev",
-    "build:be": "pnpm --filter backend run build",
-    "format:be": "pnpm --filter backend run format",
-    "deploy:be": "pnpm --filter backend run deploy",
-    "postinstall": "pnpm exec simple-git-hooks"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "(Apache-2.0 OR CC-BY-NC-4.0)",
-  "packageManager": "pnpm@10.17.1",
-  "engines": {
-    "node": ">20"
-  },
-  "devDependencies": {
-    "cross-env": "^10.1.0",
-    "frontend": "2.0.0-alpha.4",
-    "lint-staged": "^16.2.3",
-    "prettier": "^3.6.2",
-    "simple-git-hooks": "^2.13.1",
-    "vite-tsconfig-paths": "^5.1.4"
-  }
+    "name": "ArisuTalk",
+    "version": "1.0.0",
+    "description": "",
+    "private": true,
+    "repository": "github:concertypin/ArisuTalk",
+    "main": "index.js",
+    "scripts": {
+        "dev:fe": "pnpm --filter frontend run dev",
+        "preview:fe": "pnpm --filter frontend run preview",
+        "build:fe": "pnpm --filter frontend run build",
+        "format:fe": "pnpm --filter frontend run format",
+        "serve:fe": "pnpm --filter frontend run serve",
+        "dev:be": "pnpm --filter backend run dev",
+        "build:be": "pnpm --filter backend run build",
+        "format:be": "pnpm --filter backend run format",
+        "deploy:be": "pnpm --filter backend run deploy",
+        "check": "pnpm --filter frontend run check && pnpm --filter backend run check",
+        "postinstall": "pnpm exec simple-git-hooks"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "(Apache-2.0 OR CC-BY-NC-4.0)",
+    "packageManager": "pnpm@10.17.1",
+    "engines": {
+        "node": ">20"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "^2.3.8",
+        "cross-env": "^10.1.0",
+        "lint-staged": "^16.2.3",
+        "simple-git-hooks": "^2.13.1",
+        "vite-tsconfig-paths": "^5.1.4"
+    }
 }
