@@ -1,0 +1,14 @@
+{
+	"references": [
+		{
+			"path": "./tsconfig.app.json"
+		},
+		{
+			"path": "./tsconfig.worker.json"
+		},
+		{
+			"path": "./tsconfig.test.json"
+		}
+	],
+	"files": [] //Empty cause child config handles that
+}

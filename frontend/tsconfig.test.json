@@ -1,0 +1,35 @@
+{
+	"include": [
+		//test
+		"test/**/*.ts",
+		"test/*.ts"
+	],
+	"compilerOptions": {
+		"lib": [
+			"ESNext",
+			"DOM"
+		],
+		"types": [
+			"vite/client"
+		] /* Specify type package names to be included without being referenced in a source file. */,
+		"paths": {
+			"$/*": [
+				"./src/*"
+			],
+			"$test/*": [
+				"./test/*"
+			]
+		},
+		"noEmit": false /* Disable emitting files from a compilation. */,
+		"allowImportingTsExtensions": false,
+		"outDir": "./dist" /* Specify an output folder for all emitted files. */,
+		/* Type Checking */
+		"noImplicitAny": true
+	},
+	"extends": "./tsconfig.base.json",
+	"references": [
+		{
+			"path": "./tsconfig.app.json"
+		}
+	]
+}

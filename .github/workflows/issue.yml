@@ -1,0 +1,140 @@
+name: AI Issue Labeler
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  auto-label:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+
+    steps:
+      - name: Get all repository labels
+        id: get-labels
+        run: |
+          LABELS_JSON=$(curl -sf -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/labels")
+          {
+            echo 'LABELS<<EOF'
+            echo "$LABELS_JSON"
+            echo 'EOF'
+          } >> $GITHUB_ENV
+
+      - name: Prepare Gemini API Payload
+        id: prepare-payload
+        run: |
+          cat <<'EOF' > prepare_payload.py
+          import os
+          import json
+
+          # Ensure that the issue body is properly escaped for JSON
+          issue_body = os.environ.get("ISSUE_BODY", "")
+
+          class Label:
+              def __init__(self, name: str, description: str):
+                  self.name = name
+                  self.description = description if description else "No description"
+
+          LABELS = sorted(
+              [Label(i["name"], i["description"]) for i in json.loads(os.environ["LABELS"])],
+              key=lambda x: x.name,
+          )
+
+          SYSPROMPT = f"""You are a helpful assistant that helps to label GitHub issues.
+          # Instruction
+          You will be given the title and body of a GitHub issue.
+          Input schema:
+          ```
+          <title>issue title here, in plaintext</title>
+          <body>issue body here, in markdown</body>
+          ```
+          You need to analyze the title and body, and assign appropriate labels to the issue based on the following available labels:
+
+          {'\n'.join([f"- {i.name}: {i.description}" for i in LABELS])}
+
+          You should respond in JSON format with a single field "labels". Its type is an array of strings, each string is a label name from the above list.
+
+          # Labeling Rules
+          - You can assign multiple labels to an issue.
+          - Labels starting with "c:" are "category labels". It indicates where the issue belongs to.
+          - Labels starting with "t:" are "type labels". It indicates what type of issue it is.
+          - Labels starting with "s:" are "status labels". It indicates the current status of the issue.
+          - Labels starting with "i:" are "information labels". It indicates additional information about the issue.
+          - You should always assign at least one "c:" label and one "t:" label to the issue.
+          """
+
+          body = {
+              "contents": [
+                  {
+                      "role": "user",
+                      "parts": [
+                          {"text": f"<title>{os.environ['ISSUE_TITLE']}</title>\n<body>{issue_body}</body>"}
+                      ],
+                  },
+              ],
+              "system_instruction": {"parts": [{"text": SYSPROMPT}]},
+              "generationConfig": {
+                  "responseMimeType": "application/json",
+                  "responseSchema": {
+                      "type": "object",
+                      "properties": {
+                          "labels": {
+                              "type": "array",
+                              "items": {
+                                  "type": "string",
+                                  "enum": [i.name for i in LABELS],
+                              },
+                          }
+                      },
+                      "required": ["labels"],
+                  },
+              },
+              "safetySettings": [],
+          }
+          print(json.dumps(body))
+          EOF
+
+          python prepare_payload.py > payload.json
+        env:
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          LABELS: ${{ env.LABELS }}
+
+      - name: Call Gemini API and Extract Labels
+        id: get-labels-from-gemini
+        run: |
+          # CORRECTION: Use single quotes around the environment variable to prevent
+          # the shell from interpreting special characters like '<' and '>'.
+
+          GEMINI_RESPONSE=$(curl -sf -H "Content-Type: application/json" \
+            -d @payload.json \
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${{ secrets.GEMINI_API_KEY }}")
+
+          # A more robust python script to handle potential errors in the JSON response.
+          LABELS_TO_APPLY=$(echo "$GEMINI_RESPONSE" | python -c '
+          import json, sys
+          try:
+              response = json.load(sys.stdin)
+              print(response.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", ""))
+          except (json.JSONDecodeError, IndexError):
+              print("")
+          ')
+          {
+            echo 'LABELS_TO_APPLY<<EOF'
+            echo "$LABELS_TO_APPLY"
+            echo 'EOF'
+          } >> $GITHUB_ENV
+
+      - name: Apply labels to the issue
+        if: success() && env.LABELS_TO_APPLY != '' && env.LABELS_TO_APPLY != 'null'
+        run: |
+          curl -sf -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -d '${{ env.LABELS_TO_APPLY }}' \
+            "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/labels"
+
+          echo "Successfully applied labels."

@@ -1,0 +1,24 @@
+{
+    "name": "ArisuTalk",
+    "version": "1.0.0",
+    "description": "",
+    "private": true,
+    "repository": "github:concertypin/ArisuTalk",
+    "main": "index.js",
+    "scripts": {
+        "postinstall": "pnpm exec simple-git-hooks"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "Apache-2.0",
+    "packageManager": "pnpm@10.17.1",
+    "engines": {
+        "node": ">20"
+    },
+    "devDependencies": {
+        "cross-env": "^10.1.0",
+        "lint-staged": "^16.2.3",
+        "simple-git-hooks": "^2.13.1",
+        "vite-tsconfig-paths": "^5.1.4"
+    }
+}
