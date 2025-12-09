@@ -8,9 +8,8 @@
         "lib": ["ESNext", "WebWorker"],
         "types": ["vite/client"],
         "paths": {
-            "@/*": ["./*"]
+            "@/*": ["./src/*"]
         },
-        "baseUrl": "./src",
         "outDir": "dist"
     },
     "include": ["src"]

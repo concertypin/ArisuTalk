@@ -30,7 +30,7 @@ export async function DataDBClient(env: DBEnv): Promise<BaseDataDBClient> {
     if (cachedDBClient) return cachedDBClient;
     if (env.SECRET_AZURE_COSMOSDB_CONNECTION_STRING) {
         cachedDBClient = new (await import("./vendor/AzureCosmosDB")).default(
-            env
+            env,
         );
     } else {
         cachedDBClient = new (await import("./vendor/InMemoryDB")).default(env);

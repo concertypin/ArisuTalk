@@ -1,7 +1,7 @@
 import {
-    type AnalyticsEventPayload,
-    type ExperimentAssignments,
-    type FirebaseAnalyticsContext,
+	type AnalyticsEventPayload,
+	type ExperimentAssignments,
+	type FirebaseAnalyticsContext,
 } from "$root/lib/services/firebaseAnalytics";
 import { derived, get, writable } from "svelte/store";
 
@@ -9,23 +9,23 @@ import { addLog } from "../services/logService";
 import { settings } from "./settings";
 
 export type FirebaseAnalyticsStatus =
-    | "idle"
-    | "initializing"
-    | "ready"
-    | "error";
+	| "idle"
+	| "initializing"
+	| "ready"
+	| "error";
 
 export interface FirebaseAnalyticsState {
-    status: FirebaseAnalyticsStatus;
-    context: FirebaseAnalyticsContext | null;
-    assignments: ExperimentAssignments;
-    error: string | null;
+	status: FirebaseAnalyticsStatus;
+	context: FirebaseAnalyticsContext | null;
+	assignments: ExperimentAssignments;
+	error: string | null;
 }
 
 const initialState: FirebaseAnalyticsState = {
-    status: "idle",
-    context: null,
-    assignments: {},
-    error: null,
+	status: "idle",
+	context: null,
+	assignments: {},
+	error: null,
 };
 
 const state = writable<FirebaseAnalyticsState>(initialState);
@@ -34,52 +34,52 @@ let isAnalyticsOptInInitialized = false;
 
 // Subscribe to settings and initialize analyticsOptIn after the first value is emitted
 settings.subscribe((value) => {
-    const isTracingEnabled = Boolean(value?.experimentalTracingEnabled);
+	const isTracingEnabled = Boolean(value?.experimentalTracingEnabled);
 
-    // Initialize analyticsOptIn on first run with an explicit flag so the
-    // initial `false` value is not ambiguous.
-    if (!isAnalyticsOptInInitialized) {
-        isAnalyticsOptInInitialized = true;
-        analyticsOptIn = isTracingEnabled;
-        if (isTracingEnabled) {
-            void loadFirebaseAnalytics();
-        }
-        return;
-    }
+	// Initialize analyticsOptIn on first run with an explicit flag so the
+	// initial `false` value is not ambiguous.
+	if (!isAnalyticsOptInInitialized) {
+		isAnalyticsOptInInitialized = true;
+		analyticsOptIn = isTracingEnabled;
+		if (isTracingEnabled) {
+			void loadFirebaseAnalytics();
+		}
+		return;
+	}
 
-    if (isTracingEnabled === analyticsOptIn) return;
+	if (isTracingEnabled === analyticsOptIn) return;
 
-    analyticsOptIn = isTracingEnabled;
+	analyticsOptIn = isTracingEnabled;
 
-    if (!isTracingEnabled) {
-        state.set({ ...initialState });
-        return;
-    }
+	if (!isTracingEnabled) {
+		state.set({ ...initialState });
+		return;
+	}
 
-    void loadFirebaseAnalytics();
+	void loadFirebaseAnalytics();
 });
 
 /**
  * Read-only store exposing the Firebase analytics state for the app.
  */
 export const firebaseAnalyticsState = {
-    subscribe: state.subscribe,
+	subscribe: state.subscribe,
 };
 
 /**
  * Derived store that yields true when analytics are ready.
  */
 export const isFirebaseAnalyticsReady = derived(
-    state,
-    (value) => value.status === "ready" && value.context !== null
+	state,
+	(value) => value.status === "ready" && value.context !== null,
 );
 
 /**
  * Derived store providing experiment assignments when available.
  */
 export const experimentAssignments = derived(
-    state,
-    (value) => value.assignments
+	state,
+	(value) => value.assignments,
 );
 
 /**
@@ -88,61 +88,61 @@ export const experimentAssignments = derived(
  * @returns {Promise<void>} Resolves when initialization is completed.
  */
 export async function loadFirebaseAnalytics(): Promise<void> {
-    if (!analyticsOptIn) {
-        state.set({ ...initialState });
-        return;
-    }
+	if (!analyticsOptIn) {
+		state.set({ ...initialState });
+		return;
+	}
 
-    state.update((current) => ({
-        ...current,
-        status: "initializing",
-        error: null,
-    }));
+	state.update((current) => ({
+		...current,
+		status: "initializing",
+		error: null,
+	}));
 
-    try {
-        const {
-            initFirebaseAnalytics,
-            fetchExperimentAssignments,
-            setFirebaseUserProperties,
-        } = await import("$root/lib/services/firebaseAnalytics");
-        const context = await initFirebaseAnalytics();
-        const assignments = await fetchExperimentAssignments();
+	try {
+		const {
+			initFirebaseAnalytics,
+			fetchExperimentAssignments,
+			setFirebaseUserProperties,
+		} = await import("$root/lib/services/firebaseAnalytics");
+		const context = await initFirebaseAnalytics();
+		const assignments = await fetchExperimentAssignments();
 
-        if (Object.keys(assignments).length > 0) {
-            await setFirebaseUserProperties(assignments);
-        }
+		if (Object.keys(assignments).length > 0) {
+			await setFirebaseUserProperties(assignments);
+		}
 
-        state.set({
-            status: "ready",
-            context,
-            assignments,
-            error: null,
-        });
+		state.set({
+			status: "ready",
+			context,
+			assignments,
+			error: null,
+		});
 
-        addLog({
-            type: "simple",
-            level: "Info",
-            message: `[firebase] Analytics initialized with ${Object.keys(assignments).length} experiments`,
-        });
-    } catch (error) {
-        const message =
-            error instanceof Error
-                ? error.message
-                : "Failed to initialize Firebase analytics.";
+		addLog({
+			type: "simple",
+			level: "Info",
+			message: `[firebase] Analytics initialized with ${Object.keys(assignments).length} experiments`,
+		});
+	} catch (error) {
+		const message =
+			error instanceof Error
+				? error.message
+				: "Failed to initialize Firebase analytics.";
 
-        state.set({
-            status: "error",
-            context: null,
-            assignments: {},
-            error: message,
-        });
+		state.set({
+			status: "error",
+			context: null,
+			assignments: {},
+			error: message,
+		});
 
-        addLog({
-            type: "simple",
-            level: "Error",
-            message: `[firebase] Analytics initialization failed: ${message}`,
-        });
-    }
+		addLog({
+			type: "simple",
+			level: "Error",
+			message: `[firebase] Analytics initialization failed: ${message}`,
+		});
+	}
 }
 
 /**
@@ -151,16 +151,16 @@ export async function loadFirebaseAnalytics(): Promise<void> {
  * @returns {Promise<ExperimentAssignments>} Latest assignments map.
  */
 export async function refreshExperimentAssignments(): Promise<ExperimentAssignments> {
-    if (!analyticsOptIn) {
-        state.set({ ...initialState });
-        return {};
-    }
-    const { fetchExperimentAssignments } = await import(
-        "$root/lib/services/firebaseAnalytics"
-    );
-    const assignments = await fetchExperimentAssignments();
-    state.update((current) => ({ ...current, assignments }));
-    return assignments;
+	if (!analyticsOptIn) {
+		state.set({ ...initialState });
+		return {};
+	}
+	const { fetchExperimentAssignments } = await import(
+		"$root/lib/services/firebaseAnalytics"
+	);
+	const assignments = await fetchExperimentAssignments();
+	state.update((current) => ({ ...current, assignments }));
+	return assignments;
 }
 
 /**
@@ -170,8 +170,8 @@ export async function refreshExperimentAssignments(): Promise<ExperimentAssignme
  * @returns {string | null} Variant string when available, null otherwise.
  */
 export function getAssignment(key: string): string | null {
-    const current = get(state);
-    return current.assignments[key] ?? null;
+	const current = get(state);
+	return current.assignments[key] ?? null;
 }
 
 /**
@@ -182,21 +182,21 @@ export function getAssignment(key: string): string | null {
  * @returns {Promise<void>} Resolves when logging is complete.
  */
 export async function trackEvent(
-    eventName: string,
-    payload: AnalyticsEventPayload = {}
+	eventName: string,
+	payload: AnalyticsEventPayload = {},
 ): Promise<void> {
-    if (!analyticsOptIn) {
-        return;
-    }
+	if (!analyticsOptIn) {
+		return;
+	}
 
-    const assignments = get(state).assignments;
-    const experimentPayload: AnalyticsEventPayload = Object.fromEntries(
-        Object.entries(assignments).map(([key, value]) => [`exp_${key}`, value])
-    );
-    const { logFirebaseEvent } = await import(
-        "$root/lib/services/firebaseAnalytics"
-    );
-    await logFirebaseEvent(eventName, { ...experimentPayload, ...payload });
+	const assignments = get(state).assignments;
+	const experimentPayload: AnalyticsEventPayload = Object.fromEntries(
+		Object.entries(assignments).map(([key, value]) => [`exp_${key}`, value]),
+	);
+	const { logFirebaseEvent } = await import(
+		"$root/lib/services/firebaseAnalytics"
+	);
+	await logFirebaseEvent(eventName, { ...experimentPayload, ...payload });
 }
 
 /**
@@ -206,20 +206,20 @@ export async function trackEvent(
  * @returns {Promise<string | null>} Latest variant value.
  */
 export async function fetchAssignment(key: string): Promise<string | null> {
-    if (!analyticsOptIn) {
-        return null;
-    }
-    const { getExperimentVariant } = await import(
-        "$root/lib/services/firebaseAnalytics"
-    );
-    const variant = await getExperimentVariant(key);
+	if (!analyticsOptIn) {
+		return null;
+	}
+	const { getExperimentVariant } = await import(
+		"$root/lib/services/firebaseAnalytics"
+	);
+	const variant = await getExperimentVariant(key);
 
-    if (variant !== null) {
-        state.update((current) => ({
-            ...current,
-            assignments: { ...current.assignments, [key]: variant },
-        }));
-    }
+	if (variant !== null) {
+		state.update((current) => ({
+			...current,
+			assignments: { ...current.assignments, [key]: variant },
+		}));
+	}
 
-    return variant;
+	return variant;
 }

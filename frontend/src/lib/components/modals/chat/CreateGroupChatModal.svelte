@@ -1,96 +1,92 @@
 <script lang="ts">
-    import { t } from "$root/i18n";
-    import { Users, X } from "lucide-svelte";
-    import { onDestroy, onMount } from "svelte";
-    import { fade } from "svelte/transition";
+import { t } from "$root/i18n";
+import { Users, X } from "lucide-svelte";
+import { onDestroy, onMount } from "svelte";
+import { fade } from "svelte/transition";
 
-    import { characters } from "../../../stores/character";
-    import { groupChats, selectedChatId } from "../../../stores/chat";
-    import { isCreateGroupChatModalVisible } from "../../../stores/ui";
-    import Avatar from "../../Avatar.svelte";
+import { characters } from "../../../stores/character";
+import { groupChats, selectedChatId } from "../../../stores/chat";
+import { isCreateGroupChatModalVisible } from "../../../stores/ui";
+import Avatar from "../../Avatar.svelte";
 
-    let groupName = "";
-    let selectedParticipantIds: string[] = [];
+let groupName = "";
+let selectedParticipantIds: string[] = [];
 
-    function closeModal() {
-        isCreateGroupChatModalVisible.set(false);
-        // Reset state
-        groupName = "";
-        selectedParticipantIds = [];
-    }
+function closeModal() {
+	isCreateGroupChatModalVisible.set(false);
+	// Reset state
+	groupName = "";
+	selectedParticipantIds = [];
+}
 
-    function createGroupChat() {
-        if (!groupName.trim()) {
-            alert(t("groupChat.groupChatNameRequiredMessage"));
-            return;
-        }
-        if (selectedParticipantIds.length < 2) {
-            alert(t("groupChat.participantsRequiredMessage"));
-            return;
-        }
+function createGroupChat() {
+	if (!groupName.trim()) {
+		alert(t("groupChat.groupChatNameRequiredMessage"));
+		return;
+	}
+	if (selectedParticipantIds.length < 2) {
+		alert(t("groupChat.participantsRequiredMessage"));
+		return;
+	}
 
-        const newChatId = `group_${Date.now()}`;
-        const newGroupChat = {
-            id: newChatId,
-            name: groupName,
-            participantIds: selectedParticipantIds,
-            type: "group", // To distinguish from other chat types
-            createdAt: Date.now(),
-            // Default settings from GroupChat.js logic
-            settings: {
-                responseFrequency: 0.5,
-                maxRespondingCharacters: 1,
-                responseDelay: 3000,
-                participantSettings: selectedParticipantIds.reduce(
-                    (
-                        acc: Record<
-                            string,
-                            {
-                                isActive: boolean;
-                                responseProbability: number;
-                                characterRole:
-                                    | "normal"
-                                    | "leader"
-                                    | "quiet"
-                                    | "active";
-                            }
-                        >,
-                        id
-                    ) => {
-                        acc[id] = {
-                            isActive: true,
-                            responseProbability: 0.9,
-                            characterRole: "normal",
-                        };
-                        return acc;
-                    },
-                    {}
-                ),
-            },
-        };
+	const newChatId = `group_${Date.now()}`;
+	const newGroupChat = {
+		id: newChatId,
+		name: groupName,
+		participantIds: selectedParticipantIds,
+		type: "group", // To distinguish from other chat types
+		createdAt: Date.now(),
+		// Default settings from GroupChat.js logic
+		settings: {
+			responseFrequency: 0.5,
+			maxRespondingCharacters: 1,
+			responseDelay: 3000,
+			participantSettings: selectedParticipantIds.reduce(
+				(
+					acc: Record<
+						string,
+						{
+							isActive: boolean;
+							responseProbability: number;
+							characterRole: "normal" | "leader" | "quiet" | "active";
+						}
+					>,
+					id,
+				) => {
+					acc[id] = {
+						isActive: true,
+						responseProbability: 0.9,
+						characterRole: "normal",
+					};
+					return acc;
+				},
+				{},
+			),
+		},
+	};
 
-        groupChats.update((chats) => {
-            chats[newChatId] = newGroupChat;
-            return chats;
-        });
+	groupChats.update((chats) => {
+		chats[newChatId] = newGroupChat;
+		return chats;
+	});
 
-        selectedChatId.set(newChatId);
-        closeModal();
-    }
+	selectedChatId.set(newChatId);
+	closeModal();
+}
 
-    function handleKeydown(event: KeyboardEvent) {
-        if (event.key === "Escape") {
-            closeModal();
-        }
-    }
+function handleKeydown(event: KeyboardEvent) {
+	if (event.key === "Escape") {
+		closeModal();
+	}
+}
 
-    onMount(() => {
-        window.addEventListener("keydown", handleKeydown);
-    });
+onMount(() => {
+	window.addEventListener("keydown", handleKeydown);
+});
 
-    onDestroy(() => {
-        window.removeEventListener("keydown", handleKeydown);
-    });
+onDestroy(() => {
+	window.removeEventListener("keydown", handleKeydown);
+});
 </script>
 
 {#if $isCreateGroupChatModalVisible}

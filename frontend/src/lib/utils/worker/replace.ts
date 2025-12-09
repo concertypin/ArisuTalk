@@ -1,7 +1,7 @@
 import RegexWorkerURL from "$root/../worker/regex/main?worker&url";
 
 type WorkerType = InstanceType<
-    typeof ComlinkWorker<typeof import("$root/../worker/regex/main")>
+	typeof ComlinkWorker<typeof import("$root/../worker/regex/main")>
 >;
 
 let replaceWorker: null | WorkerType;
@@ -15,22 +15,22 @@ let replaceWorker: null | WorkerType;
  * @returns Replaced string.
  */
 export async function replace(
-    input: string,
-    ...pattern: {
-        pattern: RegExp | string;
-        replace: string;
-        caseSensitive?: boolean;
-    }[]
+	input: string,
+	...pattern: {
+		pattern: RegExp | string;
+		replace: string;
+		caseSensitive?: boolean;
+	}[]
 ): Promise<string> {
-    try {
-        if (!replaceWorker) {
-            replaceWorker = new ComlinkWorker(new URL(RegexWorkerURL), {
-                name: "ReplaceWorker",
-            });
-        }
-        return replaceWorker.replace(input, ...pattern);
-    } catch (e) {
-        console.error("Error in replace worker:", e);
-        return input;
-    }
+	try {
+		if (!replaceWorker) {
+			replaceWorker = new ComlinkWorker(new URL(RegexWorkerURL), {
+				name: "ReplaceWorker",
+			});
+		}
+		return replaceWorker.replace(input, ...pattern);
+	} catch (e) {
+		console.error("Error in replace worker:", e);
+		return input;
+	}
 }

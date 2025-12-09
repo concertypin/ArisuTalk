@@ -9,10 +9,6 @@ node_modules/
 package-lock.json
 **/*.log
 
-# Build outputs
-dist/
-build/
-
 # IDE files which might contain secret
 .vscode/mcp.json
 .qoder/*

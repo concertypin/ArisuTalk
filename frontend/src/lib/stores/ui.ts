@@ -14,20 +14,28 @@ export const isDataBrowserModalVisible = writable(false);
 export const isConfirmationModalVisible = writable(false);
 export const isMasterPasswordModalVisible = writable(false);
 export const confirmationModalData = writable<{
-    title: string;
-    message: string;
-    onConfirm: (() => void) | null;
+	title: string;
+	message: string;
+	onConfirm: (() => void) | null;
 }>({
-    title: "",
-    message: "",
-    onConfirm: null,
+	title: "",
+	message: "",
+	onConfirm: null,
 });
 export const isSearchModalVisible = writable(false);
 export const isSNSCharacterListModalVisible = writable(false);
 export const isSNSFeedModalVisible = writable(false);
 export const snsFeedCharacter = writable<Character | null>(null);
 export const isSNSPostModalVisible = writable(false);
-export const editingSNSPost = writable<(SNSPost & { characterId?: string | number, isNew?: boolean, isSecret?: boolean }) | { characterId: string | number; isNew: boolean; isSecret: boolean } | null>(null);
+export const editingSNSPost = writable<
+	| (SNSPost & {
+			characterId?: string | number;
+			isNew?: boolean;
+			isSecret?: boolean;
+	  })
+	| { characterId: string | number; isNew: boolean; isSecret: boolean }
+	| null
+>(null);
 export const isPhonebookModalVisible = writable(false);
 export const isMobileAuthModalVisible = writable(false);
 
@@ -52,15 +60,18 @@ export const isUserStickerPanelVisible = writable(false);
 
 // Image Zoom Modal
 export const isImageZoomModalVisible = writable(false);
-export const imageZoomModalData = writable<{ imageUrl: string | null; title: string | null }>({ imageUrl: null, title: null });
+export const imageZoomModalData = writable<{
+	imageUrl: string | null;
+	title: string | null;
+}>({ imageUrl: null, title: null });
 
 // Expanded images/stickers in chat
 export const expandedImages = writable<Set<number | string>>(new Set());
 
 // Desktop UI states
 export const desktopSettings = writable({
-    activePanel: "api", // 'api' | 'appearance' | 'character' | 'data' | 'advanced'
-    isVisible: false,
+	activePanel: "api", // 'api' | 'appearance' | 'character' | 'data' | 'advanced'
+	isVisible: false,
 });
 
 // Generic UI states
@@ -72,9 +83,9 @@ export const isDevModeActive = writable(false);
 
 // 개발 환경 확인을 위한 유틸리티 함수
 export const isDevelopment = () => {
-    // 동적으로 개발 환경 확인 (dev-init.ts에서 설정된 값 사용)
-    const { subscribe } = isDevModeActive;
-    let currentValue = false;
-    subscribe((value) => (currentValue = value))();
-    return currentValue;
+	// 동적으로 개발 환경 확인 (dev-init.ts에서 설정된 값 사용)
+	const { subscribe } = isDevModeActive;
+	let currentValue = false;
+	subscribe((value) => (currentValue = value))();
+	return currentValue;
 };

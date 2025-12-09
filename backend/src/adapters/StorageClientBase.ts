@@ -15,7 +15,7 @@ export interface BaseBlobStorageClient {
      */
     upload(
         buffer: ArrayBuffer | Uint8Array,
-        contentType?: string
+        contentType?: string,
     ): Promise<string>;
 
     /**

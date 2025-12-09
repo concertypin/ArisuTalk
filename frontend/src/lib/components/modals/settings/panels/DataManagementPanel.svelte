@@ -1,38 +1,38 @@
 <script lang="ts">
-    import { t } from "$root/i18n";
-    import { settings, settingsSnapshots } from "../../../../stores/settings";
-    import {
-        HardDrive,
-        Download,
-        Upload,
-        Info,
-        FileText,
-        FilePenLine,
-        Camera,
-        History,
-        Mouse,
-        AlertTriangle,
-        Trash2,
-    } from "lucide-svelte";
-    import SnapshotList from "./SnapshotList.svelte";
-    import {
-        backupData,
-        restoreData,
-        resetAllData,
-    } from "../../../../services/dataService";
-    import { prompts } from "../../../../stores/prompts";
+import { t } from "$root/i18n";
+import { settings, settingsSnapshots } from "../../../../stores/settings";
+import {
+	HardDrive,
+	Download,
+	Upload,
+	Info,
+	FileText,
+	FilePenLine,
+	Camera,
+	History,
+	Mouse,
+	AlertTriangle,
+	Trash2,
+} from "lucide-svelte";
+import SnapshotList from "./SnapshotList.svelte";
+import {
+	backupData,
+	restoreData,
+	resetAllData,
+} from "../../../../services/dataService";
+import { prompts } from "../../../../stores/prompts";
 
-    let restoreFileInput: HTMLInputElement;
+let restoreFileInput: HTMLInputElement;
 
-    async function handleRestoreFile(event: Event) {
-        const target = event.target as HTMLInputElement;
-        const file = target.files?.[0];
-        if (!file) return;
+async function handleRestoreFile(event: Event) {
+	const target = event.target as HTMLInputElement;
+	const file = target.files?.[0];
+	if (!file) return;
 
-        const fileContent = await file.text();
-        restoreData(fileContent);
-        target.value = ""; // Reset file input
-    }
+	const fileContent = await file.text();
+	restoreData(fileContent);
+	target.value = ""; // Reset file input
+}
 </script>
 
 <div class="space-y-6">

@@ -11,36 +11,36 @@ import { getStorageKey } from "../utils/storageKey";
  * @returns A Svelte store.
  */
 export function persistentStore<T>(
-    key: string,
-    initialValue: T,
-    debounceMs = 500
+	key: string,
+	initialValue: T,
+	debounceMs = 500,
 ): Writable<T> {
-    const prefixedKey = getStorageKey(key);
-    const store = writable(initialValue);
-    let loaded = false;
+	const prefixedKey = getStorageKey(key);
+	const store = writable(initialValue);
+	let loaded = false;
 
-    // Load the initial value from storage asynchronously.
-    loadFromBrowserStorage(prefixedKey, initialValue).then((value) => {
-        if (value && typeof value === "object" && !Array.isArray(value)) {
-            const merged = { ...initialValue, ...value };
-            store.set(merged);
-        } else {
-            store.set(value);
-        }
-        loaded = true;
-    });
+	// Load the initial value from storage asynchronously.
+	loadFromBrowserStorage(prefixedKey, initialValue).then((value) => {
+		if (value && typeof value === "object" && !Array.isArray(value)) {
+			const merged = { ...initialValue, ...value };
+			store.set(merged);
+		} else {
+			store.set(value);
+		}
+		loaded = true;
+	});
 
-    const debouncedSave = debounce((value) => {
-        saveToBrowserStorage(prefixedKey, value);
-    }, debounceMs);
+	const debouncedSave = debounce((value) => {
+		saveToBrowserStorage(prefixedKey, value);
+	}, debounceMs);
 
-    // Subscribe to changes and save to storage.
-    store.subscribe((currentValue) => {
-        // Only save to storage after the initial value has been loaded.
-        if (loaded) {
-            debouncedSave(currentValue);
-        }
-    });
+	// Subscribe to changes and save to storage.
+	store.subscribe((currentValue) => {
+		// Only save to storage after the initial value has been loaded.
+		if (loaded) {
+			debouncedSave(currentValue);
+		}
+	});
 
-    return store;
+	return store;
 }

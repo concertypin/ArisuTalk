@@ -2,28 +2,28 @@
  * Firebase Analytics service helpers for experiment-aware tracking.
  */
 import {
-    initializeApp,
-    getApps,
-    getApp,
-    type FirebaseApp,
-    type FirebaseOptions,
+	initializeApp,
+	getApps,
+	getApp,
+	type FirebaseApp,
+	type FirebaseOptions,
 } from "firebase/app";
 import {
-    getAnalytics,
-    isSupported,
-    type Analytics,
-    logEvent,
-    setUserProperties,
-    type CustomParams,
+	getAnalytics,
+	isSupported,
+	type Analytics,
+	logEvent,
+	setUserProperties,
+	type CustomParams,
 } from "firebase/analytics";
 import {
-    getRemoteConfig,
-    type RemoteConfig,
-    type RemoteConfigSettings,
-    fetchAndActivate,
-    getAll,
-    getValue,
-    type Value,
+	getRemoteConfig,
+	type RemoteConfig,
+	type RemoteConfigSettings,
+	fetchAndActivate,
+	getAll,
+	getValue,
+	type Value,
 } from "firebase/remote-config";
 
 const isBrowser = typeof window !== "undefined";
@@ -39,9 +39,9 @@ export type AnalyticsEventPayload = Record<string, AnalyticsEventValue>;
 export type ExperimentAssignments = Record<string, string>;
 
 export interface FirebaseAnalyticsContext {
-    app: FirebaseApp;
-    analytics: Analytics | null;
-    remoteConfig: RemoteConfig | null;
+	app: FirebaseApp;
+	analytics: Analytics | null;
+	remoteConfig: RemoteConfig | null;
 }
 
 /**
@@ -50,17 +50,17 @@ export interface FirebaseAnalyticsContext {
  * @returns {FirebaseOptions} Fully-typed Firebase configuration.
  */
 function readFirebaseConfig(): FirebaseOptions {
-    const rawConfig = import.meta.env.VITE_FIREBASE_AUTH;
+	const rawConfig = import.meta.env.VITE_FIREBASE_AUTH;
 
-    if (!rawConfig) {
-        throw new Error("Missing VITE_FIREBASE_AUTH environment variable.");
-    }
+	if (!rawConfig) {
+		throw new Error("Missing VITE_FIREBASE_AUTH environment variable.");
+	}
 
-    try {
-        return JSON.parse(rawConfig) as FirebaseOptions;
-    } catch (error) {
-        throw new Error("Malformed VITE_FIREBASE_AUTH environment variable.");
-    }
+	try {
+		return JSON.parse(rawConfig) as FirebaseOptions;
+	} catch (error) {
+		throw new Error("Malformed VITE_FIREBASE_AUTH environment variable.");
+	}
 }
 
 /**
@@ -69,14 +69,14 @@ function readFirebaseConfig(): FirebaseOptions {
  * @returns {FirebaseApp} Singleton Firebase application instance.
  */
 function ensureFirebaseApp(): FirebaseApp {
-    if (firebaseApp) {
-        return firebaseApp;
-    }
+	if (firebaseApp) {
+		return firebaseApp;
+	}
 
-    const config = readFirebaseConfig();
-    firebaseApp = getApps().length > 0 ? getApp() : initializeApp(config);
+	const config = readFirebaseConfig();
+	firebaseApp = getApps().length > 0 ? getApp() : initializeApp(config);
 
-    return firebaseApp;
+	return firebaseApp;
 }
 
 /**
@@ -85,24 +85,24 @@ function ensureFirebaseApp(): FirebaseApp {
  * @returns {Promise<Analytics | null>} Analytics instance or null when unsupported.
  */
 async function ensureAnalytics(): Promise<Analytics | null> {
-    if (!isBrowser) {
-        return null;
-    }
+	if (!isBrowser) {
+		return null;
+	}
 
-    if (!analyticsInstance) {
-        analyticsInstance = (async () => {
-            const supported = await isSupported();
+	if (!analyticsInstance) {
+		analyticsInstance = (async () => {
+			const supported = await isSupported();
 
-            if (!supported) {
-                return null;
-            }
+			if (!supported) {
+				return null;
+			}
 
-            const app = ensureFirebaseApp();
-            return getAnalytics(app);
-        })();
-    }
+			const app = ensureFirebaseApp();
+			return getAnalytics(app);
+		})();
+	}
 
-    return analyticsInstance;
+	return analyticsInstance;
 }
 
 /**
@@ -111,32 +111,32 @@ async function ensureAnalytics(): Promise<Analytics | null> {
  * @returns {Promise<RemoteConfig | null>} Remote Config instance when available.
  */
 async function ensureRemoteConfig(): Promise<RemoteConfig | null> {
-    if (!isBrowser) {
-        return null;
-    }
+	if (!isBrowser) {
+		return null;
+	}
 
-    if (!remoteConfigInstance) {
-        remoteConfigInstance = (async () => {
-            const app = ensureFirebaseApp();
-            const remoteConfig = getRemoteConfig(app);
-            const settings: RemoteConfigSettings = {
-                minimumFetchIntervalMillis: 60_000,
-                fetchTimeoutMillis: 10_000,
-            };
+	if (!remoteConfigInstance) {
+		remoteConfigInstance = (async () => {
+			const app = ensureFirebaseApp();
+			const remoteConfig = getRemoteConfig(app);
+			const settings: RemoteConfigSettings = {
+				minimumFetchIntervalMillis: 60_000,
+				fetchTimeoutMillis: 10_000,
+			};
 
-            remoteConfig.settings = settings;
+			remoteConfig.settings = settings;
 
-            try {
-                await fetchAndActivate(remoteConfig);
-            } catch (error) {
-                console.error("[firebase] Remote Config fetch failed", error);
-            }
+			try {
+				await fetchAndActivate(remoteConfig);
+			} catch (error) {
+				console.error("[firebase] Remote Config fetch failed", error);
+			}
 
-            return remoteConfig;
-        })();
-    }
+			return remoteConfig;
+		})();
+	}
 
-    return remoteConfigInstance;
+	return remoteConfigInstance;
 }
 
 /**
@@ -145,13 +145,13 @@ async function ensureRemoteConfig(): Promise<RemoteConfig | null> {
  * @returns {Promise<FirebaseAnalyticsContext>} Initialized Firebase context.
  */
 export async function initFirebaseAnalytics(): Promise<FirebaseAnalyticsContext> {
-    const app = ensureFirebaseApp();
-    const [analytics, remoteConfig] = await Promise.all([
-        ensureAnalytics(),
-        ensureRemoteConfig(),
-    ]);
+	const app = ensureFirebaseApp();
+	const [analytics, remoteConfig] = await Promise.all([
+		ensureAnalytics(),
+		ensureRemoteConfig(),
+	]);
 
-    return { app, analytics, remoteConfig };
+	return { app, analytics, remoteConfig };
 }
 
 /**
@@ -160,21 +160,21 @@ export async function initFirebaseAnalytics(): Promise<FirebaseAnalyticsContext>
  * @returns {Promise<ExperimentAssignments>} Key-value pairs for experiment variants.
  */
 export async function fetchExperimentAssignments(): Promise<ExperimentAssignments> {
-    const remoteConfig = await ensureRemoteConfig();
+	const remoteConfig = await ensureRemoteConfig();
 
-    if (!remoteConfig) {
-        return {};
-    }
+	if (!remoteConfig) {
+		return {};
+	}
 
-    const values = getAll(remoteConfig);
-    const assignments: ExperimentAssignments = {};
-    const entries = Object.entries(values) as Array<[string, Value]>;
+	const values = getAll(remoteConfig);
+	const assignments: ExperimentAssignments = {};
+	const entries = Object.entries(values) as Array<[string, Value]>;
 
-    for (const [key, value] of entries) {
-        assignments[key] = value.asString();
-    }
+	for (const [key, value] of entries) {
+		assignments[key] = value.asString();
+	}
 
-    return assignments;
+	return assignments;
 }
 
 /**
@@ -184,18 +184,18 @@ export async function fetchExperimentAssignments(): Promise<ExperimentAssignment
  * @returns {Promise<string | null>} Variant string or null when absent.
  */
 export async function getExperimentVariant(
-    key: string
+	key: string,
 ): Promise<string | null> {
-    const remoteConfig = await ensureRemoteConfig();
+	const remoteConfig = await ensureRemoteConfig();
 
-    if (!remoteConfig) {
-        return null;
-    }
+	if (!remoteConfig) {
+		return null;
+	}
 
-    const value = getValue(remoteConfig, key);
-    const variant = value.asString();
+	const value = getValue(remoteConfig, key);
+	const variant = value.asString();
 
-    return variant.length > 0 ? variant : null;
+	return variant.length > 0 ? variant : null;
 }
 
 /**
@@ -206,16 +206,16 @@ export async function getExperimentVariant(
  * @returns {Promise<void>} Resolves when the event is sent or skipped.
  */
 export async function logFirebaseEvent(
-    eventName: string,
-    parameters?: AnalyticsEventPayload
+	eventName: string,
+	parameters?: AnalyticsEventPayload,
 ): Promise<void> {
-    const analytics = await ensureAnalytics();
+	const analytics = await ensureAnalytics();
 
-    if (!analytics) {
-        return;
-    }
+	if (!analytics) {
+		return;
+	}
 
-    logEvent(analytics, eventName, parameters);
+	logEvent(analytics, eventName, parameters);
 }
 
 /**
@@ -225,13 +225,13 @@ export async function logFirebaseEvent(
  * @returns {Promise<void>} Resolves when properties are stored or skipped when unsupported.
  */
 export async function setFirebaseUserProperties(
-    properties: CustomParams
+	properties: CustomParams,
 ): Promise<void> {
-    const analytics = await ensureAnalytics();
+	const analytics = await ensureAnalytics();
 
-    if (!analytics) {
-        return;
-    }
+	if (!analytics) {
+		return;
+	}
 
-    setUserProperties(analytics, properties);
+	setUserProperties(analytics, properties);
 }

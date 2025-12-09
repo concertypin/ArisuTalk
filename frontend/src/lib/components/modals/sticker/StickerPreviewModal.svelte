@@ -1,58 +1,58 @@
 <script lang="ts">
-    import { t } from "$root/i18n";
-    import type { Sticker } from "$types/character";
-    import { Copy, Download, Hash, Image, RefreshCw, X } from "lucide-svelte";
-    import { createEventDispatcher, onDestroy, onMount } from "svelte";
-    import { fade } from "svelte/transition";
+import { t } from "$root/i18n";
+import type { Sticker } from "$types/character";
+import { Copy, Download, Hash, Image, RefreshCw, X } from "lucide-svelte";
+import { createEventDispatcher, onDestroy, onMount } from "svelte";
+import { fade } from "svelte/transition";
 
-    import ActionsTab from "./tabs/ActionsTab.svelte";
-    import PreviewTab from "./tabs/PreviewTab.svelte";
-    import RerollTab from "./tabs/RerollTab.svelte";
+import ActionsTab from "./tabs/ActionsTab.svelte";
+import PreviewTab from "./tabs/PreviewTab.svelte";
+import RerollTab from "./tabs/RerollTab.svelte";
 
-    export let isOpen = false;
-    export let sticker: Sticker | null = null;
+export let isOpen = false;
+export let sticker: Sticker | null = null;
 
-    let activeTab = "preview";
+let activeTab = "preview";
 
-    const dispatch = createEventDispatcher();
+const dispatch = createEventDispatcher();
 
-    function closeModal() {
-        dispatch("close");
-    }
+function closeModal() {
+	dispatch("close");
+}
 
-    function handleSave(event: CustomEvent) {
-        dispatch("save", event.detail);
-    }
+function handleSave(event: CustomEvent) {
+	dispatch("save", event.detail);
+}
 
-    function handleDelete() {
-        dispatch("delete");
-    }
+function handleDelete() {
+	dispatch("delete");
+}
 
-    function handleCopy() {
-        dispatch("copy");
-    }
+function handleCopy() {
+	dispatch("copy");
+}
 
-    function handleDownload() {
-        dispatch("download");
-    }
+function handleDownload() {
+	dispatch("download");
+}
 
-    function handleReroll(event: CustomEvent) {
-        dispatch("reroll", event.detail);
-    }
+function handleReroll(event: CustomEvent) {
+	dispatch("reroll", event.detail);
+}
 
-    function handleKeydown(event: KeyboardEvent) {
-        if (event.key === "Escape") {
-            closeModal();
-        }
-    }
+function handleKeydown(event: KeyboardEvent) {
+	if (event.key === "Escape") {
+		closeModal();
+	}
+}
 
-    onMount(() => {
-        window.addEventListener("keydown", handleKeydown);
-    });
+onMount(() => {
+	window.addEventListener("keydown", handleKeydown);
+});
 
-    onDestroy(() => {
-        window.removeEventListener("keydown", handleKeydown);
-    });
+onDestroy(() => {
+	window.removeEventListener("keydown", handleKeydown);
+});
 </script>
 
 {#if isOpen && sticker}

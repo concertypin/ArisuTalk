@@ -1,6 +1,6 @@
 import { persistentStore } from "./persistentStore";
 
 export const characterStates = persistentStore(
-    "personaChat_characterStates_v16",
-    {}
+	"personaChat_characterStates_v16",
+	{},
 );

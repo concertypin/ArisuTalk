@@ -1,43 +1,43 @@
 <script lang="ts">
-    import { t } from "$root/i18n";
-    import { Plus, Search, Settings, UserCircle2, X } from "lucide-svelte";
-    import { createEventDispatcher } from "svelte";
+import { t } from "$root/i18n";
+import { Plus, Search, Settings, UserCircle2, X } from "lucide-svelte";
+import { createEventDispatcher } from "svelte";
 
-    import { auth } from "../../stores/auth";
-    import { characters } from "../../stores/character";
-    import {
-        isFabMenuVisible,
-        isMobileAuthModalVisible,
-        isMobileSettingsPageVisible,
-        isSearchModalVisible,
-    } from "../../stores/ui";
-    import CharacterItem from "../CharacterItem.svelte";
+import { auth } from "../../stores/auth";
+import { characters } from "../../stores/character";
+import {
+	isFabMenuVisible,
+	isMobileAuthModalVisible,
+	isMobileSettingsPageVisible,
+	isSearchModalVisible,
+} from "../../stores/ui";
+import CharacterItem from "../CharacterItem.svelte";
 
-    const dispatch = createEventDispatcher();
+const dispatch = createEventDispatcher();
 
-    function openSearchModal() {
-        isSearchModalVisible.set(true);
-    }
+function openSearchModal() {
+	isSearchModalVisible.set(true);
+}
 
-    function openSettingsModal() {
-        isMobileSettingsPageVisible.set(true);
-    }
+function openSettingsModal() {
+	isMobileSettingsPageVisible.set(true);
+}
 
-    function openAuthModal() {
-        isMobileAuthModalVisible.set(true);
-    }
+function openAuthModal() {
+	isMobileAuthModalVisible.set(true);
+}
 
-    function toggleFabMenu() {
-        isFabMenuVisible.update((v) => !v);
-    }
+function toggleFabMenu() {
+	isFabMenuVisible.update((v) => !v);
+}
 
-    function openNewCharacterModal() {
-        dispatch("newcharacter");
-    }
+function openNewCharacterModal() {
+	dispatch("newcharacter");
+}
 
-    function handleCharacterSelect(event: CustomEvent) {
-        dispatch("characterselect", event.detail);
-    }
+function handleCharacterSelect(event: CustomEvent) {
+	dispatch("characterselect", event.detail);
+}
 </script>
 
 <div class="flex flex-col h-full relative w-full">
