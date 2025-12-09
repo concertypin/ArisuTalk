@@ -1,7 +1,11 @@
 {
 	"compilerOptions": {
+		"tsBuildInfoFile": "./node_modules/.cache/worker.tsbuildinfo",
 		"composite": true,
-		"lib": ["WebWorker", "ESNext"],
+		"lib": [
+			"WebWorker",
+			"ESNext"
+		],
 		"paths": {} /* Specify a set of entries that re-map imports to additional lookup locations. */,
 		"types": [],
 		"allowImportingTsExtensions": false /* Allow imports to include TypeScript file extensions. Requires '--moduleResolution bundler' and either '--noEmit' or '--emitDeclarationOnly' to be set. */,
@@ -9,5 +13,7 @@
 		"noEmit": false
 	},
 	"extends": "./tsconfig.base.json",
-	"include": ["worker/**/*.ts"]
+	"include": [
+		"worker/**/*.ts"
+	]
 }

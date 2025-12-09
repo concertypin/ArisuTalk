@@ -3,15 +3,25 @@
  * Wraps fetch with common configuration and error handling.
  */
 
-/** API response wrapper */
-export type ApiResponse<T> ={
-    data: T | null;
-    error: string;
-    status: number;
-}| {
-    data: T;
-    status: number;
-}
+/**
+ * Standard API response wrapper.
+ * Unifies successful and error responses into a single type.
+ */
+export type ApiResponse<T> =
+    | {
+          /** The data returned by the API (null if error). */
+          data: T | null;
+          /** Error message if the request failed. */
+          error: string;
+          /** HTTP status code. */
+          status: number;
+      }
+    | {
+          /** The data returned by the API. */
+          data: T;
+          /** HTTP status code. */
+          status: number;
+      };
 
 /** Base API configuration */
 
@@ -20,21 +30,21 @@ export type ApiResponse<T> ={
  * Fetch API should not be used directly, since it can't handle CORS.
  */
 export async function apiRequest<T>(
-    endpoint: string,
-    options: RequestInit = {}
+    _endpoint: string,
+    _options?: RequestInit
 ): Promise<ApiResponse<T>> {
-    throw new Error('Not implemented');
+    throw new Error("Not implemented");
 }
 
 /** GET request shorthand */
 export async function get<T>(endpoint: string): Promise<ApiResponse<T>> {
-    return apiRequest<T>(endpoint, { method: 'GET' });
+    return apiRequest<T>(endpoint, { method: "GET" });
 }
 
 /** POST request shorthand */
 export async function post<T>(endpoint: string, body?: unknown): Promise<ApiResponse<T>> {
     return apiRequest<T>(endpoint, {
-        method: 'POST',
+        method: "POST",
         body: body ? JSON.stringify(body) : undefined,
     });
 }
@@ -42,12 +52,12 @@ export async function post<T>(endpoint: string, body?: unknown): Promise<ApiResp
 /** PATCH request shorthand */
 export async function patch<T>(endpoint: string, body?: unknown): Promise<ApiResponse<T>> {
     return apiRequest<T>(endpoint, {
-        method: 'PATCH',
+        method: "PATCH",
         body: body ? JSON.stringify(body) : undefined,
     });
 }
 
 /** DELETE request shorthand */
 export async function del<T>(endpoint: string): Promise<ApiResponse<T>> {
-    return apiRequest<T>(endpoint, { method: 'DELETE' });
+    return apiRequest<T>(endpoint, { method: "DELETE" });
 }

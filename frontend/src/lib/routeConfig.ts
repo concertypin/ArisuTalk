@@ -3,8 +3,12 @@
  * Centralizes all route definitions to keep App.svelte clean.
  */
 
-import type { Component } from 'svelte';
+import type { Component } from "svelte";
 
+/**
+ * Type definition for a lazy-loaded route component.
+ * Returns a promise resolving to a module with a default export (the Svelte component).
+ */
 export type RouteLoader = () => Promise<{ default: Component }>;
 
 /**
@@ -13,6 +17,6 @@ export type RouteLoader = () => Promise<{ default: Component }>;
  * Values are lazy-load functions for components.
  */
 export const routes: Record<string, RouteLoader> = {
-    '/': () => import('../routes/Home.svelte'),
+    "/": () => import("../routes/Home.svelte"),
     // Add new routes here as the app grows
 };

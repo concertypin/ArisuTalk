@@ -8,12 +8,13 @@
 		"src/*.svelte"
 	],
 	"compilerOptions": {
+		"tsBuildInfoFile": "./node_modules/.cache/app.tsbuildinfo",
 		"lib": [
 			"ESNext",
 			"DOM"
 		],
 		"paths": {
-			"$": [
+			"@/*": [
 				"./src/*"
 			]
 		},
