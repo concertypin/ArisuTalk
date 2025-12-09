@@ -10,10 +10,7 @@ export function dataUrlToUint8Array(dataUrl: string): Uint8Array {
     return bytes;
 }
 
-export function uint8ArrayToDataUrl(
-    uint8Array: Uint8Array,
-    mimeType: string = "image/png",
-): string {
+export function uint8ArrayToDataUrl(uint8Array: Uint8Array, mimeType: string = "image/png"): string {
     const binaryString = Array.from(uint8Array)
         .map((byte) => String.fromCharCode(byte))
         .join("");
@@ -21,11 +18,7 @@ export function uint8ArrayToDataUrl(
     return `data:${mimeType};base64,${base64}`;
 }
 
-export function addPngChunk(
-    pngData: Uint8Array,
-    chunkType: string,
-    data: Uint8Array,
-): Uint8Array {
+export function addPngChunk(pngData: Uint8Array, chunkType: string, data: Uint8Array): Uint8Array {
     // Find IEND chunk
     let iendIndex = -1;
     for (let i = 0; i < pngData.length - 7; i++) {
@@ -120,10 +113,7 @@ export function calculateCRC32(data: Uint8Array): number {
     return (crc ^ 0xffffffff) >>> 0;
 }
 
-export function extractPngChunk(
-    pngData: Uint8Array,
-    chunkType: string,
-): Uint8Array | null {
+export function extractPngChunk(pngData: Uint8Array, chunkType: string): Uint8Array | null {
     const chunkTypeBytes = new TextEncoder().encode(chunkType);
 
     let index = 8; // Skip PNG header
@@ -174,7 +164,7 @@ export async function compressData(data: Uint8Array): Promise<Uint8Array> {
 
         const totalLength = chunks.reduce(
             (sum, chunk) => sum + chunk.length,
-            0,
+            0
         );
         const result = new Uint8Array(totalLength);
         let offset = 0;
@@ -189,9 +179,7 @@ export async function compressData(data: Uint8Array): Promise<Uint8Array> {
     }
 }
 
-export async function decompressData(
-    compressedData: Uint8Array,
-): Promise<Uint8Array> {
+export async function decompressData(compressedData: Uint8Array): Promise<Uint8Array> {
     if (!window.DecompressionStream) {
         return compressedData;
     }
@@ -216,7 +204,7 @@ export async function decompressData(
 
         const totalLength = chunks.reduce(
             (sum, chunk) => sum + chunk.length,
-            0,
+            0
         );
         const result = new Uint8Array(totalLength);
         let offset = 0;

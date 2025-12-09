@@ -1,86 +1,83 @@
 <script lang="ts">
-import { t } from "$root/i18n";
-import { onMount } from "svelte";
-import { ChevronRight } from "lucide-svelte";
-import type { LogEntry } from "$types/log";
+    import { t } from "$root/i18n";
+    import { onMount } from "svelte";
+    import { ChevronRight } from "lucide-svelte";
+    import type { LogEntry } from "$types/log";
 
-export let log: LogEntry;
+    export let log: LogEntry;
 
-let promptContent = "";
+    let promptContent = "";
 
-const getLogTypeColor = (
-    type: string,
-    data: Record<string, any> | undefined,
-) => {
-    if (type === "structured") {
-        const chatType = data?.metadata?.chatType || "normal";
-        switch (chatType) {
-            case "group":
-                return "text-green-400";
-            case "open":
-                return "text-purple-400";
-            case "nai_generation":
-                return "text-pink-400";
-            case "sns_generation":
-                return "text-pink-400";
-            default:
-                return "text-blue-400";
+    const getLogTypeColor = (type: string, data: Record<string, any> | undefined) => {
+        if (type === "structured") {
+            const chatType = data?.metadata?.chatType || "normal";
+            switch (chatType) {
+                case "group":
+                    return "text-green-400";
+                case "open":
+                    return "text-purple-400";
+                case "nai_generation":
+                    return "text-pink-400";
+                case "sns_generation":
+                    return "text-pink-400";
+                default:
+                    return "text-blue-400";
+            }
         }
-    }
-    return "text-gray-400";
-};
-
-const typeColor = getLogTypeColor(log.type, log.data);
-const chatType = log.data?.metadata?.chatType || "normal";
-const chatTypeLabel =
-    {
-        normal: t("debugLogs.normalChatType"),
-        group: t("debugLogs.groupChatType"),
-        open: t("debugLogs.openChatType"),
-        nai_generation: t("debugLogs.naiGeneration"),
-        sns_generation: t("debugLogs.snsPostType"),
-    }[chatType as string] || t("debugLogs.normalChatType");
-
-function formatTimestamp(timestamp: string | number | undefined) {
-    if (!timestamp) return t("debugLogs.invalidDate");
-    const date =
-        typeof timestamp === "number"
-            ? new Date(timestamp)
-            : new Date(timestamp);
-    if (isNaN(date.getTime())) {
-        return t("debugLogs.invalidDate");
-    }
-    return date.toLocaleString();
-}
-
-async function getChatPromptContent(chatType: string) {
-    const promptFileMap: Record<string, string> = {
-        general: "/src/texts/mainChatMLPrompt.txt",
-        normal: "/src/texts/mainChatMLPrompt.txt",
-        group: "/src/texts/groupChatMLPrompt.txt",
-        open: "/src/texts/openChatMLPrompt.txt",
-        nai: "/src/texts/naiStickerPrompt.txt",
-        sns: "/src/texts/snsForcePrompt.txt",
-        character_generation: "/src/texts/profileCreationChatMLPrompt.txt",
+        return "text-gray-400";
     };
-    const promptFile = promptFileMap[chatType] || promptFileMap["general"];
-    try {
-        const response = await fetch(promptFile);
-        if (response.ok) {
-            return await response.text();
-        }
-    } catch (error) {
-        console.warn(
-            `Failed to load prompt file for chat type: ${chatType}`,
-            error,
-        );
-    }
-    return t("debugLogs.promptLoadError", { chatType });
-}
 
-onMount(async () => {
-    promptContent = await getChatPromptContent(chatType);
-});
+    const typeColor = getLogTypeColor(log.type, log.data);
+    const chatType = log.data?.metadata?.chatType || "normal";
+    const chatTypeLabel =
+        {
+            normal: t("debugLogs.normalChatType"),
+            group: t("debugLogs.groupChatType"),
+            open: t("debugLogs.openChatType"),
+            nai_generation: t("debugLogs.naiGeneration"),
+            sns_generation: t("debugLogs.snsPostType"),
+        }[chatType as string] || t("debugLogs.normalChatType");
+
+    function formatTimestamp(timestamp: string | number | undefined) {
+        if (!timestamp) return t("debugLogs.invalidDate");
+        const date =
+            typeof timestamp === "number"
+                ? new Date(timestamp)
+                : new Date(timestamp);
+        if (isNaN(date.getTime())) {
+            return t("debugLogs.invalidDate");
+        }
+        return date.toLocaleString();
+    }
+
+    async function getChatPromptContent(chatType: string) {
+        const promptFileMap: Record<string, string> = {
+            general: "/src/texts/mainChatMLPrompt.txt",
+            normal: "/src/texts/mainChatMLPrompt.txt",
+            group: "/src/texts/groupChatMLPrompt.txt",
+            open: "/src/texts/openChatMLPrompt.txt",
+            nai: "/src/texts/naiStickerPrompt.txt",
+            sns: "/src/texts/snsForcePrompt.txt",
+            character_generation: "/src/texts/profileCreationChatMLPrompt.txt",
+        };
+        const promptFile = promptFileMap[chatType] || promptFileMap["general"];
+        try {
+            const response = await fetch(promptFile);
+            if (response.ok) {
+                return await response.text();
+            }
+        } catch (error) {
+            console.warn(
+                `Failed to load prompt file for chat type: ${chatType}`,
+                error
+            );
+        }
+        return t("debugLogs.promptLoadError", { chatType });
+    }
+
+    onMount(async () => {
+        promptContent = await getChatPromptContent(chatType);
+    });
 </script>
 
 <div class="border border-gray-600 rounded-lg bg-gray-750">

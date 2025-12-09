@@ -1,77 +1,77 @@
 <script lang="ts">
-import { t } from "$root/i18n";
-import {
-    Activity,
-    ArrowLeft,
-    BookUser,
-    BrainCircuit,
-    Bug,
-    Camera,
-    Check,
-    ChevronDown,
-    ChevronRight,
-    Database,
-    FileArchive,
-    Image,
-    Info,
-    MessageSquarePlus,
-    Palette,
-    Settings,
-    Shuffle,
-    SlidersHorizontal,
-    Type,
-    User,
-} from "lucide-svelte";
-import { createEventDispatcher } from "svelte";
-import { fly } from "svelte/transition";
+    import { t } from "$root/i18n";
+    import {
+        Activity,
+        ArrowLeft,
+        BookUser,
+        BrainCircuit,
+        Bug,
+        Camera,
+        Check,
+        ChevronDown,
+        ChevronRight,
+        Database,
+        FileArchive,
+        Image,
+        Info,
+        MessageSquarePlus,
+        Palette,
+        Settings,
+        Shuffle,
+        SlidersHorizontal,
+        Type,
+        User,
+    } from "lucide-svelte";
+    import { createEventDispatcher } from "svelte";
+    import { fly } from "svelte/transition";
 
-import { isMobileSettingsPageVisible } from "../../../stores/ui";
-import CharacterDefaults from "../character/CharacterDefaults.svelte";
-import AdvancedSettings from "./AdvancedSettings.svelte";
-import AiSettings from "./AiSettings.svelte";
-import AppearanceSettings from "./AppearanceSettings.svelte";
-import DataManagement from "./DataManagement.svelte";
-import DebugSettings from "./DebugSettings.svelte";
-import NaiSettings from "./NaiSettings.svelte";
-import PromptSettings from "./PromptSettings.svelte";
+    import { isMobileSettingsPageVisible } from "../../../stores/ui";
+    import CharacterDefaults from "../character/CharacterDefaults.svelte";
+    import AdvancedSettings from "./AdvancedSettings.svelte";
+    import AiSettings from "./AiSettings.svelte";
+    import AppearanceSettings from "./AppearanceSettings.svelte";
+    import DataManagement from "./DataManagement.svelte";
+    import DebugSettings from "./DebugSettings.svelte";
+    import NaiSettings from "./NaiSettings.svelte";
+    import PromptSettings from "./PromptSettings.svelte";
 
-export let isOpen = false;
+    export let isOpen = false;
 
-let activePage = "main";
-let previousPage = "main";
+    let activePage = "main";
+    let previousPage = "main";
 
-const dispatch = createEventDispatcher();
+    const dispatch = createEventDispatcher();
 
-function closeModal() {
-    isMobileSettingsPageVisible.set(false);
-}
+    function closeModal() {
+        isMobileSettingsPageVisible.set(false);
+    }
 
-function navigateTo(page: string) {
-    previousPage = activePage;
-    activePage = page;
-}
+    function navigateTo(page: string) {
+        previousPage = activePage;
+        activePage = page;
+    }
 
-const menuItems = [
-    { id: "ai", icon: BrainCircuit, label: t("settings.aiSettings") },
-    { id: "nai", icon: Image, label: t("settings.naiSettings") },
-    {
-        id: "appearance",
-        icon: Palette,
-        label: t("settings.appearanceSettings"),
-    },
-    {
-        id: "characterDefaults",
-        icon: BookUser,
-        label: t("settings.yourPersona"),
-    },
-    { id: "data", icon: FileArchive, label: t("settings.dataManagement") },
-    {
-        id: "advanced",
-        icon: SlidersHorizontal,
-        label: t("settings.advancedSettings"),
-    },
-    { id: "debug", icon: Bug, label: t("settings.debug") },
-];
+    const menuItems = [
+        { id: "ai", icon: BrainCircuit, label: t("settings.aiSettings") },
+        { id: "nai", icon: Image, label: t("settings.naiSettings") },
+        {
+            id: "appearance",
+            icon: Palette,
+            label: t("settings.appearanceSettings"),
+        },
+        {
+            id: "characterDefaults",
+            icon: BookUser,
+            label: t("settings.yourPersona"),
+        },
+        { id: "data", icon: FileArchive, label: t("settings.dataManagement") },
+        {
+            id: "advanced",
+            icon: SlidersHorizontal,
+            label: t("settings.advancedSettings"),
+        },
+        { id: "debug", icon: Bug, label: t("settings.debug") },
+    ];
 </script>
 
 {#if isOpen}

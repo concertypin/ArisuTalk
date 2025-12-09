@@ -26,7 +26,7 @@ export class GrokClient implements LLMApi {
         apiKey: string,
         model: string,
         baseUrl: string | null,
-        options: LLMApiConstructorOptions | undefined = {},
+        options: LLMApiConstructorOptions | undefined = {}
     ) {
         this.client = new ChatGroq({
             apiKey: apiKey,
@@ -70,17 +70,9 @@ export class GrokClient implements LLMApi {
         }
         for (const msg of contents) {
             if (msg.role === "user") {
-                messages.push(
-                    new HumanMessage(
-                        "text" in msg.parts[0] ? msg.parts[0].text : "",
-                    ),
-                );
+                messages.push(new HumanMessage(('text' in msg.parts[0] ? msg.parts[0].text : "")));
             } else if (msg.role === "assistant") {
-                messages.push(
-                    new AIMessage(
-                        "text" in msg.parts[0] ? msg.parts[0].text : "",
-                    ),
-                );
+                messages.push(new AIMessage(('text' in msg.parts[0] ? msg.parts[0].text : "")));
             }
         }
 
@@ -126,17 +118,9 @@ export class GrokClient implements LLMApi {
         }
         for (const msg of contents) {
             if (msg.role === "user") {
-                messages.push(
-                    new HumanMessage(
-                        "text" in msg.parts[0] ? msg.parts[0].text : "",
-                    ),
-                );
+                messages.push(new HumanMessage(('text' in msg.parts[0] ? msg.parts[0].text : "")));
             } else if (msg.role === "assistant") {
-                messages.push(
-                    new AIMessage(
-                        "text" in msg.parts[0] ? msg.parts[0].text : "",
-                    ),
-                );
+                messages.push(new AIMessage(('text' in msg.parts[0] ? msg.parts[0].text : "")));
             }
         }
 
@@ -151,7 +135,7 @@ export class GrokClient implements LLMApi {
         } catch (error) {
             console.error(
                 t("api.profileGenerationError", { provider: "Grok" }),
-                error,
+                error
             );
             return { error: String(error) };
         }
@@ -173,17 +157,9 @@ export class GrokClient implements LLMApi {
         }
         for (const msg of contents) {
             if (msg.role === "user") {
-                messages.push(
-                    new HumanMessage(
-                        "text" in msg.parts[0] ? msg.parts[0].text : "",
-                    ),
-                );
+                messages.push(new HumanMessage(('text' in msg.parts[0] ? msg.parts[0].text : "")));
             } else if (msg.role === "assistant") {
-                messages.push(
-                    new AIMessage(
-                        "text" in msg.parts[0] ? msg.parts[0].text : "",
-                    ),
-                );
+                messages.push(new AIMessage(('text' in msg.parts[0] ? msg.parts[0].text : "")));
             }
         }
 
@@ -198,7 +174,7 @@ export class GrokClient implements LLMApi {
             console.error(
                 t("api.profileGenerationError", { provider: "Grok" }) +
                     " (Character Sheet)",
-                error,
+                error
             );
             return { error: String(error) };
         }

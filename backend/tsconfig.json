@@ -1,17 +1,17 @@
 {
-	"compilerOptions": {
-		"target": "ESNext",
-		"module": "ESNext",
-		"moduleResolution": "Bundler",
-		"strict": true,
-		"skipLibCheck": true,
-		"lib": ["ESNext", "WebWorker"],
-		"types": ["vite/client"],
-		"paths": {
-			"@/*": ["./*"]
-		},
-		"baseUrl": "./src",
-		"outDir": "dist"
-	},
-	"include": ["src"]
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
+        "strict": true,
+        "skipLibCheck": true,
+        "lib": ["ESNext", "WebWorker"],
+        "types": ["vite/client"],
+        "paths": {
+            "@/*": ["./*"]
+        },
+        "baseUrl": "./src",
+        "outDir": "dist"
+    },
+    "include": ["src"]
 }

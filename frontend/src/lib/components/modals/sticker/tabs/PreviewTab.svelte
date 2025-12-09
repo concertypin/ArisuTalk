@@ -1,26 +1,26 @@
 <script lang="ts">
-import { createEventDispatcher } from "svelte";
-import { t } from "$root/i18n";
-import { Music } from "lucide-svelte";
-import type { Sticker } from "$types/character";
+    import { createEventDispatcher } from "svelte";
+    import { t } from "$root/i18n";
+    import { Music } from "lucide-svelte";
+    import type { Sticker } from "$types/character";
 
-export let sticker: Sticker | null = null;
+    export let sticker: Sticker | null = null;
 
-let stickerName = sticker?.name || "";
+    let stickerName = sticker?.name || "";
 
-const dispatch = createEventDispatcher();
+    const dispatch = createEventDispatcher();
 
-function save() {
-    dispatch("save", { name: stickerName });
-}
+    function save() {
+        dispatch("save", { name: stickerName });
+    }
 
-function formatStickerSize(bytes: number) {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-}
+    function formatStickerSize(bytes: number) {
+        if (bytes === 0) return "0 Bytes";
+        const k = 1024;
+        const sizes = ["Bytes", "KB", "MB", "GB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+    }
 </script>
 
 {#if sticker}

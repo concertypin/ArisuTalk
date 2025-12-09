@@ -1,1 +1,1 @@
-declare module "pako";
+declare module 'pako';

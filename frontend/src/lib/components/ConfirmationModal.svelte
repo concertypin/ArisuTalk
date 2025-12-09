@@ -1,38 +1,38 @@
 <script lang="ts">
-import { t } from "$root/i18n";
-import { AlertTriangle } from "lucide-svelte";
-import { onDestroy, onMount } from "svelte";
+    import { t } from "$root/i18n";
+    import { AlertTriangle } from "lucide-svelte";
+    import { onDestroy, onMount } from "svelte";
 
-import {
-    confirmationModalData,
-    isConfirmationModalVisible,
-} from "../stores/ui";
+    import {
+        confirmationModalData,
+        isConfirmationModalVisible,
+    } from "../stores/ui";
 
-function handleCancel() {
-    isConfirmationModalVisible.set(false);
-    confirmationModalData.set({ title: "", message: "", onConfirm: null });
-}
-
-function handleConfirm() {
-    if ($confirmationModalData.onConfirm) {
-        $confirmationModalData.onConfirm();
+    function handleCancel() {
+        isConfirmationModalVisible.set(false);
+        confirmationModalData.set({ title: "", message: "", onConfirm: null });
     }
-    handleCancel(); // Close modal after confirm
-}
 
-function handleKeydown(event: KeyboardEvent) {
-    if (event.key === "Escape") {
-        handleCancel();
+    function handleConfirm() {
+        if ($confirmationModalData.onConfirm) {
+            $confirmationModalData.onConfirm();
+        }
+        handleCancel(); // Close modal after confirm
     }
-}
 
-onMount(() => {
-    window.addEventListener("keydown", handleKeydown);
-});
+    function handleKeydown(event: KeyboardEvent) {
+        if (event.key === "Escape") {
+            handleCancel();
+        }
+    }
 
-onDestroy(() => {
-    window.removeEventListener("keydown", handleKeydown);
-});
+    onMount(() => {
+        window.addEventListener("keydown", handleKeydown);
+    });
+
+    onDestroy(() => {
+        window.removeEventListener("keydown", handleKeydown);
+    });
 </script>
 
 {#if $isConfirmationModalVisible}

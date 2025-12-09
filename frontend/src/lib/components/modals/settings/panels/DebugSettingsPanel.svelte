@@ -1,30 +1,30 @@
 <script lang="ts">
-import { ShieldAlert, Database } from "lucide-svelte";
-import { chatRooms, groupChats, openChats } from "../../../../stores/chat";
-import { characters } from "../../../../stores/character";
-import { isDataBrowserModalVisible } from "../../../../stores/ui";
+    import { ShieldAlert, Database } from "lucide-svelte";
+    import { chatRooms, groupChats, openChats } from "../../../../stores/chat";
+    import { characters } from "../../../../stores/character";
+    import { isDataBrowserModalVisible } from "../../../../stores/ui";
 
-let localStorageStatus = "Checking...";
-let indexedDBStatus = "Checking...";
+    let localStorageStatus = "Checking...";
+    let indexedDBStatus = "Checking...";
 
-if (typeof window !== "undefined") {
-    localStorageStatus = window.localStorage ? "OK" : "Unavailable";
-    indexedDBStatus = window.indexedDB ? "OK" : "Unavailable";
-}
+    if (typeof window !== "undefined") {
+        localStorageStatus = window.localStorage ? "OK" : "Unavailable";
+        indexedDBStatus = window.indexedDB ? "OK" : "Unavailable";
+    }
 
-$: status = {
-    localStorage: localStorageStatus,
-    indexedDB: indexedDBStatus,
-    characterCount: $characters.length,
-    chatCount:
-        Object.values($chatRooms).flat().length +
-        Object.keys($groupChats).length +
-        Object.keys($openChats).length,
-};
+    $: status = {
+        localStorage: localStorageStatus,
+        indexedDB: indexedDBStatus,
+        characterCount: $characters.length,
+        chatCount:
+            Object.values($chatRooms).flat().length +
+            Object.keys($groupChats).length +
+            Object.keys($openChats).length,
+    };
 
-function openDataBrowser() {
-    isDataBrowserModalVisible.set(true);
-}
+    function openDataBrowser() {
+        isDataBrowserModalVisible.set(true);
+    }
 </script>
 
 <div class="space-y-6">

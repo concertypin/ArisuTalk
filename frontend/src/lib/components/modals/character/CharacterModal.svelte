@@ -1,445 +1,454 @@
 <script lang="ts">
-import { t } from "$root/i18n";
-import type { Character } from "$types/character";
-import {
-    ChevronDown,
-    Download,
-    Image,
-    Instagram,
-    MessageSquarePlus,
-    Sparkles,
-    Upload,
-    X,
-} from "lucide-svelte";
-import { onDestroy, onMount } from "svelte";
-import { createEventDispatcher } from "svelte";
-import { get } from "svelte/store";
-import type { Unsubscriber } from "svelte/store";
-import { fade } from "svelte/transition";
+    import { t } from "$root/i18n";
+    import type { Character } from "$types/character";
+    import {
+        ChevronDown,
+        Download,
+        Image,
+        Instagram,
+        MessageSquarePlus,
+        Sparkles,
+        Upload,
+        X,
+    } from "lucide-svelte";
+    import { onDestroy, onMount } from "svelte";
+    import { createEventDispatcher } from "svelte";
+    import { get } from "svelte/store";
+    import type { Unsubscriber } from "svelte/store";
+    import { fade } from "svelte/transition";
 
-import { APIManager } from "../../../api/apiManager";
-import { auth } from "../../../stores/auth";
-import {
-    characters,
-    editingCharacter,
-    phonebookImportResult,
-} from "../../../stores/character";
-import { experimentalTracingOptIn, settings } from "../../../stores/settings";
-import {
-    isCharacterModalVisible,
-    isPhonebookModalVisible,
-    isSNSCharacterListModalVisible,
-    phonebookAccessState,
-} from "../../../stores/ui";
-import {
-    addPngChunk,
-    compressData,
-    dataUrlToUint8Array,
-    decompressData,
-    extractPngChunk,
-    uint8ArrayToDataUrl,
-} from "../../../utils/png-utils";
-import CharacterAISettings from "./CharacterAISettings.svelte";
-import CharacterHypnosis from "./CharacterHypnosis.svelte";
-import CharacterMemory from "./CharacterMemory.svelte";
-import CharacterStickers from "./CharacterStickers.svelte";
+    import { APIManager } from "../../../api/apiManager";
+    import { auth } from "../../../stores/auth";
+    import {
+        characters,
+        editingCharacter,
+        phonebookImportResult,
+    } from "../../../stores/character";
+    import {
+        experimentalTracingOptIn,
+        settings,
+    } from "../../../stores/settings";
+    import {
+        isCharacterModalVisible,
+        isPhonebookModalVisible,
+        isSNSCharacterListModalVisible,
+        phonebookAccessState,
+    } from "../../../stores/ui";
+    import {
+        addPngChunk,
+        compressData,
+        dataUrlToUint8Array,
+        decompressData,
+        extractPngChunk,
+        uint8ArrayToDataUrl,
+    } from "../../../utils/png-utils";
+    import CharacterAISettings from "./CharacterAISettings.svelte";
+    import CharacterHypnosis from "./CharacterHypnosis.svelte";
+    import CharacterMemory from "./CharacterMemory.svelte";
+    import CharacterStickers from "./CharacterStickers.svelte";
 
-const dispatch = createEventDispatcher();
+    const dispatch = createEventDispatcher();
 
-let isNew = false;
-let characterData: Partial<Character> = {};
-let avatarInput: HTMLInputElement;
-let cardInput: HTMLInputElement;
-let isGeneratingPersona = false;
-const apiManager = new APIManager();
-let phonebookUnsubscribe: Unsubscriber;
-let isCheckingPhonebook = false;
+    let isNew = false;
+    let characterData: Partial<Character> = {};
+    let avatarInput: HTMLInputElement;
+    let cardInput: HTMLInputElement;
+    let isGeneratingPersona = false;
+    const apiManager = new APIManager();
+    let phonebookUnsubscribe: Unsubscriber;
+    let isCheckingPhonebook = false;
 
-const defaultHypnosis = {
-    enabled: false,
-    affection: 0.5,
-    intimacy: 0.5,
-    trust: 0.5,
-    romantic_interest: 0,
-    force_love_unlock: false,
-    sns_full_access: false,
-    secret_account_access: false,
-    sns_edit_access: false,
-    affection_override: false,
-};
-
-editingCharacter.subscribe((char) => {
-    if (char) {
-        isNew = false;
-        characterData = JSON.parse(JSON.stringify(char)); // Deep copy
-        if (!characterData.memories) characterData.memories = [];
-        if (!characterData.stickers) characterData.stickers = [];
-        if (!characterData.naiSettings)
-            characterData.naiSettings = {
-                qualityPrompt: "masterpiece, best quality",
-                autoGenerate: false,
-            };
-        if (!characterData.hypnosis)
-            characterData.hypnosis = { ...defaultHypnosis };
-    } else {
-        isNew = true;
-        characterData = {
-            name: "",
-            prompt: "",
-            avatar: null,
-            appearance: "",
-            proactiveEnabled: true,
-            responseTime: 5,
-            thinkingTime: 5,
-            reactivity: 5,
-            tone: 5,
-            memories: [],
-            stickers: [],
-            naiSettings: {
-                qualityPrompt: "masterpiece, best quality",
-                autoGenerate: false,
-            },
-            hypnosis: { ...defaultHypnosis },
-        }; // Default new character
-    }
-});
-
-function closeModal() {
-    isCharacterModalVisible.set(false);
-    editingCharacter.set(null);
-}
-
-function saveCharacter() {
-    if (isNew) {
-        characters.update((chars) => {
-            const newChar = {
-                ...characterData,
-                id: `char_${Date.now()}`,
-            } as Character;
-            return [...chars, newChar];
-        });
-    } else {
-        characters.update((chars) => {
-            const index = chars.findIndex((c) => c.id === characterData.id);
-            if (index !== -1) {
-                chars[index] = characterData as Character;
-            }
-            return chars;
-        });
-    }
-    closeModal();
-}
-
-function selectAvatar() {
-    avatarInput.click();
-}
-
-function handleAvatarChange(event: Event) {
-    const target = event.target as HTMLInputElement;
-    const file = target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        characterData.avatar = e.target?.result as string;
-        // Force reactivity
-        characterData = characterData;
+    const defaultHypnosis = {
+        enabled: false,
+        affection: 0.5,
+        intimacy: 0.5,
+        trust: 0.5,
+        romantic_interest: 0,
+        force_love_unlock: false,
+        sns_full_access: false,
+        secret_account_access: false,
+        sns_edit_access: false,
+        affection_override: false,
     };
-    reader.readAsDataURL(file);
-}
 
-async function generatePersona() {
-    if (!characterData.name?.trim()) {
-        alert(t("modal.characterNameRequiredMessage"));
-        return;
-    }
-
-    isGeneratingPersona = true;
-    try {
-        const provider = $settings.apiProvider;
-        const config = $settings.apiConfigs[provider] || {};
-        const response = await apiManager.generateCharacterSheet(
-            provider,
-            config.apiKey,
-            config.model,
-            {
-                characterName: characterData.name,
-                characterDescription: "", // Not used by current prompt builder but required by type
-                characterSheetPrompt: $settings.prompts.characterSheet,
-            },
-            config.baseUrl,
-        );
-
-        if ("error" in response) {
-            throw new Error(response.error);
-        }
-
-        if (response.messages && response.messages.length > 0) {
-            characterData.prompt = response.messages[0].content;
-        }
-    } catch (error) {
-        console.error("Error generating character prompt:", error);
-        if (error instanceof Error) {
-            alert(`${t("modal.generationFailed.title")}: ${error.message}`);
+    editingCharacter.subscribe((char) => {
+        if (char) {
+            isNew = false;
+            characterData = JSON.parse(JSON.stringify(char)); // Deep copy
+            if (!characterData.memories) characterData.memories = [];
+            if (!characterData.stickers) characterData.stickers = [];
+            if (!characterData.naiSettings)
+                characterData.naiSettings = {
+                    qualityPrompt: "masterpiece, best quality",
+                    autoGenerate: false,
+                };
+            if (!characterData.hypnosis)
+                characterData.hypnosis = { ...defaultHypnosis };
         } else {
-            alert(`${t("modal.generationFailed.title")}: ${String(error)}`);
+            isNew = true;
+            characterData = {
+                name: "",
+                prompt: "",
+                avatar: null,
+                appearance: "",
+                proactiveEnabled: true,
+                responseTime: 5,
+                thinkingTime: 5,
+                reactivity: 5,
+                tone: 5,
+                memories: [],
+                stickers: [],
+                naiSettings: {
+                    qualityPrompt: "masterpiece, best quality",
+                    autoGenerate: false,
+                },
+                hypnosis: { ...defaultHypnosis },
+            }; // Default new character
         }
-    } finally {
-        isGeneratingPersona = false;
-    }
-}
-
-function importCard() {
-    cardInput.click();
-}
-
-async function handleCardChange(event: Event) {
-    const target = event.target as HTMLInputElement;
-    const file = target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const imageSrc = e.target?.result as string;
-        const image = new globalThis.Image();
-        image.onload = async () => {
-            try {
-                const pngData = dataUrlToUint8Array(imageSrc);
-
-                let chunkData = extractPngChunk(pngData, "cChr");
-                let jsonString: string | undefined;
-
-                if (chunkData) {
-                    const decompressedData = await compressData(chunkData);
-                    jsonString = new TextDecoder().decode(decompressedData);
-                } else {
-                    chunkData = extractPngChunk(pngData, "chAr");
-                    if (chunkData) {
-                        jsonString = new TextDecoder().decode(chunkData);
-                    }
-                }
-
-                if (jsonString) {
-                    const data = JSON.parse(jsonString);
-                    if (data.source === "PersonaChatAppCharacterCard") {
-                        characterData = {
-                            ...characterData,
-                            ...data,
-                            avatar: imageSrc,
-                        };
-                        alert(t("modal.avatarLoadSuccess.message"));
-                        return;
-                    }
-                }
-            } catch (err) {
-                console.error(
-                    "Failed to parse character data from image:",
-                    err,
-                );
-            }
-
-            alert(t("modal.characterCardNoAvatarImageInfo.message"));
-            characterData.avatar = imageSrc;
-            characterData = characterData;
-        };
-        image.src = imageSrc;
-    };
-    reader.readAsDataURL(file);
-}
-
-async function exportCard() {
-    if (!characterData.name) {
-        alert(t("modal.characterCardNoNameError.message"));
-        return;
-    }
-    if (!characterData.avatar) {
-        alert(t("modal.characterCardNoAvatarImageError.message"));
-        return;
-    }
-
-    const dataToSave = {
-        name: characterData.name,
-        prompt: characterData.prompt,
-        responseTime: characterData.responseTime,
-        thinkingTime: characterData.thinkingTime,
-        reactivity: characterData.reactivity,
-        tone: characterData.tone,
-        source: "PersonaChatAppCharacterCard",
-        memories: characterData.memories,
-        proactiveEnabled: characterData.proactiveEnabled,
-        stickers: characterData.stickers,
-    };
-
-    const image = new globalThis.Image();
-    image.crossOrigin = "Anonymous";
-    image.onload = async () => {
-        try {
-            const canvas = document.createElement("canvas");
-            canvas.width = 1024;
-            canvas.height = 1024;
-            const ctx = canvas.getContext("2d");
-            if (!ctx) return;
-            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-
-            const jsonString = JSON.stringify(dataToSave);
-            const dataUrl = canvas.toDataURL("image/png");
-            const pngData = dataUrlToUint8Array(dataUrl);
-            const characterDataBytes = new TextEncoder().encode(jsonString);
-            const compressedData = await compressData(characterDataBytes);
-            const newPngData = addPngChunk(pngData, "cChr", compressedData);
-            const newDataUrl = uint8ArrayToDataUrl(newPngData);
-
-            const link = document.createElement("a");
-            link.href = newDataUrl;
-            link.download = `${characterData.name}_card.png`;
-            link.click();
-        } catch (error) {
-            console.error("Character card save failed:", error);
-            alert(t("modal.characterCardSaveError.message"));
-        }
-    };
-    image.onerror = () => alert(t("modal.avatarImageLoadError.message"));
-    image.src = characterData.avatar;
-}
-
-function handleKeydown(event: KeyboardEvent) {
-    if (event.key === "Escape") {
-        closeModal();
-    }
-}
-
-onMount(() => {
-    window.addEventListener("keydown", handleKeydown);
-
-    phonebookUnsubscribe = phonebookImportResult.subscribe((result) => {
-        if (!result) {
-            return;
-        }
-
-        const imported = result.character;
-        const mergedData = {
-            ...characterData,
-            ...imported,
-        };
-
-        if (imported.avatar !== undefined) {
-            mergedData.avatar = imported.avatar;
-        }
-
-        // Ensure memories is string[]
-        if (!mergedData.memories || !Array.isArray(mergedData.memories)) {
-            mergedData.memories = [];
-        } else {
-            mergedData.memories = mergedData.memories.map((m) => String(m));
-        }
-
-        if (!mergedData.stickers) {
-            mergedData.stickers = [];
-        }
-        if (!mergedData.naiSettings) {
-            mergedData.naiSettings = {
-                qualityPrompt: "masterpiece, best quality",
-                autoGenerate: false,
-            };
-        }
-        if (!mergedData.hypnosis) {
-            mergedData.hypnosis = { ...defaultHypnosis };
-        }
-
-        characterData = mergedData as Partial<Character>;
-        isNew = true;
-        phonebookImportResult.set(null);
     });
 
-    // Auto-verify phonebook access when modal mounts so button is only shown when enabled.
-    (async () => {
-        if (!$experimentalTracingOptIn) {
-            phonebookAccessState.set("disabled");
+    function closeModal() {
+        isCharacterModalVisible.set(false);
+        editingCharacter.set(null);
+    }
+
+    function saveCharacter() {
+        if (isNew) {
+            characters.update((chars) => {
+                const newChar = {
+                    ...characterData,
+                    id: `char_${Date.now()}`,
+                } as Character;
+                return [...chars, newChar];
+            });
+        } else {
+            characters.update((chars) => {
+                const index = chars.findIndex((c) => c.id === characterData.id);
+                if (index !== -1) {
+                    chars[index] = characterData as Character;
+                }
+                return chars;
+            });
+        }
+        closeModal();
+    }
+
+    function selectAvatar() {
+        avatarInput.click();
+    }
+
+    function handleAvatarChange(event: Event) {
+        const target = event.target as HTMLInputElement;
+        const file = target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            characterData.avatar = e.target?.result as string;
+            // Force reactivity
+            characterData = characterData;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async function generatePersona() {
+        if (!characterData.name?.trim()) {
+            alert(t("modal.characterNameRequiredMessage"));
             return;
         }
 
-        if (!$auth.isSignedIn) return;
-        const access = get(phonebookAccessState);
-        if (access !== "unknown") return;
-
-        isCheckingPhonebook = true;
+        isGeneratingPersona = true;
         try {
-            const service = await import("../../../services/phonebookService");
-            if (!$auth.clerk) {
+            const provider = $settings.apiProvider;
+            const config = $settings.apiConfigs[provider] || {};
+            const response = await apiManager.generateCharacterSheet(
+                provider,
+                config.apiKey,
+                config.model,
+                {
+                    characterName: characterData.name,
+                    characterDescription: "", // Not used by current prompt builder but required by type
+                    characterSheetPrompt: $settings.prompts.characterSheet,
+                },
+                config.baseUrl
+            );
+
+            if ("error" in response) {
+                throw new Error(response.error);
+            }
+
+            if (response.messages && response.messages.length > 0) {
+                characterData.prompt = response.messages[0].content;
+            }
+        } catch (error) {
+            console.error("Error generating character prompt:", error);
+            if (error instanceof Error) {
+                alert(`${t("modal.generationFailed.title")}: ${error.message}`);
+            } else {
+                alert(`${t("modal.generationFailed.title")}: ${String(error)}`);
+            }
+        } finally {
+            isGeneratingPersona = false;
+        }
+    }
+
+    function importCard() {
+        cardInput.click();
+    }
+
+    async function handleCardChange(event: Event) {
+        const target = event.target as HTMLInputElement;
+        const file = target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const imageSrc = e.target?.result as string;
+            const image = new globalThis.Image();
+            image.onload = async () => {
+                try {
+                    const pngData = dataUrlToUint8Array(imageSrc);
+
+                    let chunkData = extractPngChunk(pngData, "cChr");
+                    let jsonString: string | undefined;
+
+                    if (chunkData) {
+                        const decompressedData = await compressData(chunkData);
+                        jsonString = new TextDecoder().decode(decompressedData);
+                    } else {
+                        chunkData = extractPngChunk(pngData, "chAr");
+                        if (chunkData) {
+                            jsonString = new TextDecoder().decode(chunkData);
+                        }
+                    }
+
+                    if (jsonString) {
+                        const data = JSON.parse(jsonString);
+                        if (data.source === "PersonaChatAppCharacterCard") {
+                            characterData = {
+                                ...characterData,
+                                ...data,
+                                avatar: imageSrc,
+                            };
+                            alert(t("modal.avatarLoadSuccess.message"));
+                            return;
+                        }
+                    }
+                } catch (err) {
+                    console.error(
+                        "Failed to parse character data from image:",
+                        err
+                    );
+                }
+
+                alert(t("modal.characterCardNoAvatarImageInfo.message"));
+                characterData.avatar = imageSrc;
+                characterData = characterData;
+            };
+            image.src = imageSrc;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async function exportCard() {
+        if (!characterData.name) {
+            alert(t("modal.characterCardNoNameError.message"));
+            return;
+        }
+        if (!characterData.avatar) {
+            alert(t("modal.characterCardNoAvatarImageError.message"));
+            return;
+        }
+
+        const dataToSave = {
+            name: characterData.name,
+            prompt: characterData.prompt,
+            responseTime: characterData.responseTime,
+            thinkingTime: characterData.thinkingTime,
+            reactivity: characterData.reactivity,
+            tone: characterData.tone,
+            source: "PersonaChatAppCharacterCard",
+            memories: characterData.memories,
+            proactiveEnabled: characterData.proactiveEnabled,
+            stickers: characterData.stickers,
+        };
+
+        const image = new globalThis.Image();
+        image.crossOrigin = "Anonymous";
+        image.onload = async () => {
+            try {
+                const canvas = document.createElement("canvas");
+                canvas.width = 1024;
+                canvas.height = 1024;
+                const ctx = canvas.getContext("2d");
+                if (!ctx) return;
+                ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+                const jsonString = JSON.stringify(dataToSave);
+                const dataUrl = canvas.toDataURL("image/png");
+                const pngData = dataUrlToUint8Array(dataUrl);
+                const characterDataBytes = new TextEncoder().encode(jsonString);
+                const compressedData = await compressData(characterDataBytes);
+                const newPngData = addPngChunk(pngData, "cChr", compressedData);
+                const newDataUrl = uint8ArrayToDataUrl(newPngData);
+
+                const link = document.createElement("a");
+                link.href = newDataUrl;
+                link.download = `${characterData.name}_card.png`;
+                link.click();
+            } catch (error) {
+                console.error("Character card save failed:", error);
+                alert(t("modal.characterCardSaveError.message"));
+            }
+        };
+        image.onerror = () => alert(t("modal.avatarImageLoadError.message"));
+        image.src = characterData.avatar;
+    }
+
+    function handleKeydown(event: KeyboardEvent) {
+        if (event.key === "Escape") {
+            closeModal();
+        }
+    }
+
+    onMount(() => {
+        window.addEventListener("keydown", handleKeydown);
+
+        phonebookUnsubscribe = phonebookImportResult.subscribe((result) => {
+            if (!result) {
+                return;
+            }
+
+            const imported = result.character;
+            const mergedData = {
+                ...characterData,
+                ...imported,
+            };
+
+            if (imported.avatar !== undefined) {
+                mergedData.avatar = imported.avatar;
+            }
+
+            // Ensure memories is string[]
+            if (!mergedData.memories || !Array.isArray(mergedData.memories)) {
+                mergedData.memories = [];
+            } else {
+                mergedData.memories = mergedData.memories.map((m) => String(m));
+            }
+
+            if (!mergedData.stickers) {
+                mergedData.stickers = [];
+            }
+            if (!mergedData.naiSettings) {
+                mergedData.naiSettings = {
+                    qualityPrompt: "masterpiece, best quality",
+                    autoGenerate: false,
+                };
+            }
+            if (!mergedData.hypnosis) {
+                mergedData.hypnosis = { ...defaultHypnosis };
+            }
+
+            characterData = mergedData as Partial<Character>;
+            isNew = true;
+            phonebookImportResult.set(null);
+        });
+
+        // Auto-verify phonebook access when modal mounts so button is only shown when enabled.
+        (async () => {
+            if (!$experimentalTracingOptIn) {
                 phonebookAccessState.set("disabled");
                 return;
             }
-            const allowed = await service.verifyPhonebookAccess($auth.clerk);
-            phonebookAccessState.set(allowed ? "enabled" : "disabled");
-        } catch (error) {
-            console.error("Phonebook auto verification failed", error);
-            phonebookAccessState.set("disabled");
-        } finally {
-            isCheckingPhonebook = false;
-        }
-    })();
-});
 
-onDestroy(() => {
-    window.removeEventListener("keydown", handleKeydown);
-    phonebookUnsubscribe?.();
-});
+            if (!$auth.isSignedIn) return;
+            const access = get(phonebookAccessState);
+            if (access !== "unknown") return;
 
-/**
- * Attempt to open the shared phonebook modal for importing characters.
- * Ensures the feature flag check passes before revealing the modal.
- */
-async function openPhonebook() {
-    if (!$experimentalTracingOptIn) {
-        alert(t("phonebook.experimentalRequired"));
-        return;
-    }
-
-    if (!$auth.isSignedIn) {
-        alert(t("phonebook.signInRequired"));
-        return;
-    }
-
-    let access = get(phonebookAccessState);
-    if (access === "disabled") {
-        return;
-    }
-
-    let verificationFailed = false;
-
-    if (access === "unknown") {
-        isCheckingPhonebook = true;
-        try {
-            const service = await import("../../../services/phonebookService");
-            if (!$auth.clerk) {
-                phonebookAccessState.set("disabled");
-                verificationFailed = true;
-            } else {
+            isCheckingPhonebook = true;
+            try {
+                const service = await import(
+                    "../../../services/phonebookService"
+                );
+                if (!$auth.clerk) {
+                    phonebookAccessState.set("disabled");
+                    return;
+                }
                 const allowed = await service.verifyPhonebookAccess(
-                    $auth.clerk,
+                    $auth.clerk
                 );
                 phonebookAccessState.set(allowed ? "enabled" : "disabled");
-                verificationFailed = !allowed;
+            } catch (error) {
+                console.error("Phonebook auto verification failed", error);
+                phonebookAccessState.set("disabled");
+            } finally {
+                isCheckingPhonebook = false;
             }
-        } catch (error) {
-            console.error("Phonebook availability check failed", error);
-            phonebookAccessState.set("disabled");
-            verificationFailed = true;
-        } finally {
-            isCheckingPhonebook = false;
-        }
-        access = get(phonebookAccessState);
-    }
+        })();
+    });
 
-    if (access !== "enabled") {
-        if (verificationFailed) {
-            alert(t("phonebook.checkFailed"));
-        }
-        return;
-    }
+    onDestroy(() => {
+        window.removeEventListener("keydown", handleKeydown);
+        phonebookUnsubscribe?.();
+    });
 
-    isPhonebookModalVisible.set(true);
-}
+    /**
+     * Attempt to open the shared phonebook modal for importing characters.
+     * Ensures the feature flag check passes before revealing the modal.
+     */
+    async function openPhonebook() {
+        if (!$experimentalTracingOptIn) {
+            alert(t("phonebook.experimentalRequired"));
+            return;
+        }
+
+        if (!$auth.isSignedIn) {
+            alert(t("phonebook.signInRequired"));
+            return;
+        }
+
+        let access = get(phonebookAccessState);
+        if (access === "disabled") {
+            return;
+        }
+
+        let verificationFailed = false;
+
+        if (access === "unknown") {
+            isCheckingPhonebook = true;
+            try {
+                const service = await import(
+                    "../../../services/phonebookService"
+                );
+                if (!$auth.clerk) {
+                    phonebookAccessState.set("disabled");
+                    verificationFailed = true;
+                } else {
+                    const allowed = await service.verifyPhonebookAccess(
+                        $auth.clerk
+                    );
+                    phonebookAccessState.set(allowed ? "enabled" : "disabled");
+                    verificationFailed = !allowed;
+                }
+            } catch (error) {
+                console.error("Phonebook availability check failed", error);
+                phonebookAccessState.set("disabled");
+                verificationFailed = true;
+            } finally {
+                isCheckingPhonebook = false;
+            }
+            access = get(phonebookAccessState);
+        }
+
+        if (access !== "enabled") {
+            if (verificationFailed) {
+                alert(t("phonebook.checkFailed"));
+            }
+            return;
+        }
+
+        isPhonebookModalVisible.set(true);
+    }
 </script>
 
 {#if $isCharacterModalVisible}

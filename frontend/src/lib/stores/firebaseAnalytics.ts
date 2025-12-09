@@ -71,7 +71,7 @@ export const firebaseAnalyticsState = {
  */
 export const isFirebaseAnalyticsReady = derived(
     state,
-    (value) => value.status === "ready" && value.context !== null,
+    (value) => value.status === "ready" && value.context !== null
 );
 
 /**
@@ -79,7 +79,7 @@ export const isFirebaseAnalyticsReady = derived(
  */
 export const experimentAssignments = derived(
     state,
-    (value) => value.assignments,
+    (value) => value.assignments
 );
 
 /**
@@ -183,7 +183,7 @@ export function getAssignment(key: string): string | null {
  */
 export async function trackEvent(
     eventName: string,
-    payload: AnalyticsEventPayload = {},
+    payload: AnalyticsEventPayload = {}
 ): Promise<void> {
     if (!analyticsOptIn) {
         return;
@@ -191,10 +191,7 @@ export async function trackEvent(
 
     const assignments = get(state).assignments;
     const experimentPayload: AnalyticsEventPayload = Object.fromEntries(
-        Object.entries(assignments).map(([key, value]) => [
-            `exp_${key}`,
-            value,
-        ]),
+        Object.entries(assignments).map(([key, value]) => [`exp_${key}`, value])
     );
     const { logFirebaseEvent } = await import(
         "$root/lib/services/firebaseAnalytics"

@@ -1,19 +1,19 @@
 <script lang="ts">
-import { t } from "$root/i18n";
-import {
-    Badge,
-    BrainCircuit,
-    MessageSquarePlus,
-    Shuffle,
-    User,
-    Users,
-} from "lucide-svelte";
+    import { t } from "$root/i18n";
+    import {
+        Badge,
+        BrainCircuit,
+        MessageSquarePlus,
+        Shuffle,
+        User,
+        Users,
+    } from "lucide-svelte";
 
-import { settings } from "../../../../stores/settings";
+    import { settings } from "../../../../stores/settings";
 
-function handleSettingChange(key: string, value: unknown) {
-    settings.update((s) => ({ ...s, [key]: value }));
-}
+    function handleSettingChange(key: string, value: unknown) {
+        settings.update((s) => ({ ...s, [key]: value }));
+    }
 </script>
 
 <div class="space-y-6">

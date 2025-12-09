@@ -50,7 +50,7 @@ const teardownClerkListener = (): void => {
 };
 
 const markAuthDisabled = (
-    phonebookState: PhonebookAccessState = "unknown",
+    phonebookState: PhonebookAccessState = "unknown"
 ): void => {
     authState.set({
         status: "disabled",
@@ -70,7 +70,7 @@ const performSignOutIfNeeded = async (): Promise<void> => {
         } catch (error) {
             console.error(
                 "Failed to sign out during experimental opt-out",
-                error,
+                error
             );
         }
     }
@@ -88,17 +88,17 @@ const cleanupAuthForOptOut = async (): Promise<void> => {
                         () =>
                             reject(
                                 new Error(
-                                    "Auth initialization timeout during opt-out cleanup",
-                                ),
+                                    "Auth initialization timeout during opt-out cleanup"
+                                )
                             ),
-                        AUTH_INIT_TIMEOUT_MS,
-                    ),
+                        AUTH_INIT_TIMEOUT_MS
+                    )
                 ),
             ]);
         } catch (error) {
             console.error(
                 "Auth initialization failed before opt-out cleanup",
-                error,
+                error
             );
         }
     }

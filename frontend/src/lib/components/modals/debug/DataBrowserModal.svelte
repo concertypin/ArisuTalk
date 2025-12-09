@@ -1,119 +1,119 @@
 <script lang="ts">
-import { t } from "$root/i18n";
-import {
-    Database,
-    Download,
-    Filter,
-    RefreshCw,
-    Search,
-    X,
-} from "lucide-svelte";
-import { onDestroy, onMount } from "svelte";
-import { fade } from "svelte/transition";
+    import { t } from "$root/i18n";
+    import {
+        Database,
+        Download,
+        Filter,
+        RefreshCw,
+        Search,
+        X,
+    } from "lucide-svelte";
+    import { onDestroy, onMount } from "svelte";
+    import { fade } from "svelte/transition";
 
-import { characterStateStore, characters } from "../../../stores/character";
-import { chatRooms, groupChats, openChats } from "../../../stores/chat";
-import { prompts } from "../../../stores/prompts";
-import { settings } from "../../../stores/settings";
-import { isDataBrowserModalVisible } from "../../../stores/ui";
+    import { characterStateStore, characters } from "../../../stores/character";
+    import { chatRooms, groupChats, openChats } from "../../../stores/chat";
+    import { prompts } from "../../../stores/prompts";
+    import { settings } from "../../../stores/settings";
+    import { isDataBrowserModalVisible } from "../../../stores/ui";
 
-let selectedStore = "characters";
-let searchQuery = "";
-let filteredData: any[] = [];
-let isLoading = false;
+    let selectedStore = "characters";
+    let searchQuery = "";
+    let filteredData: any[] = [];
+    let isLoading = false;
 
-const stores = [
-    { id: "characters", name: "Characters", icon: "👤", data: $characters },
-    {
-        id: "characterStates",
-        name: "Character States",
-        icon: "🔋",
-        data: $characterStateStore,
-    },
-    { id: "chatRooms", name: "Chat Rooms", icon: "💬", data: $chatRooms },
-    {
-        id: "groupChats",
-        name: "Group Chats",
-        icon: "👥",
-        data: $groupChats,
-    },
-    { id: "openChats", name: "Open Chats", icon: "🌐", data: $openChats },
-    { id: "settings", name: "Settings", icon: "⚙️", data: $settings },
-    { id: "prompts", name: "Prompts", icon: "📝", data: $prompts },
-];
+    const stores = [
+        { id: "characters", name: "Characters", icon: "👤", data: $characters },
+        {
+            id: "characterStates",
+            name: "Character States",
+            icon: "🔋",
+            data: $characterStateStore,
+        },
+        { id: "chatRooms", name: "Chat Rooms", icon: "💬", data: $chatRooms },
+        {
+            id: "groupChats",
+            name: "Group Chats",
+            icon: "👥",
+            data: $groupChats,
+        },
+        { id: "openChats", name: "Open Chats", icon: "🌐", data: $openChats },
+        { id: "settings", name: "Settings", icon: "⚙️", data: $settings },
+        { id: "prompts", name: "Prompts", icon: "📝", data: $prompts },
+    ];
 
-function handleKeydown(event: KeyboardEvent) {
-    if (event.key === "Escape") {
-        isDataBrowserModalVisible.set(false);
+    function handleKeydown(event: KeyboardEvent) {
+        if (event.key === "Escape") {
+            isDataBrowserModalVisible.set(false);
+        }
     }
-}
 
-function refreshData() {
-    isLoading = true;
-    // 데이터 새로고침 (간단한 딜레이로 시뮬레이션)
-    setTimeout(() => {
-        filteredData = filterData();
-        isLoading = false;
-    }, 300);
-}
+    function refreshData() {
+        isLoading = true;
+        // 데이터 새로고침 (간단한 딜레이로 시뮬레이션)
+        setTimeout(() => {
+            filteredData = filterData();
+            isLoading = false;
+        }, 300);
+    }
 
-function filterData() {
-    const store = stores.find((s) => s.id === selectedStore);
-    if (!store || !store.data) return [];
+    function filterData() {
+        const store = stores.find((s) => s.id === selectedStore);
+        if (!store || !store.data) return [];
 
-    let data: any[] = Array.isArray(store.data)
-        ? [...store.data]
-        : Object.entries(store.data).map(([key, value]) => ({
-              key,
-              value,
-          }));
+        let data: any[] = Array.isArray(store.data)
+            ? [...store.data]
+            : Object.entries(store.data).map(([key, value]) => ({
+                  key,
+                  value,
+              }));
 
-    if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase();
-        data = data.filter((item) => {
-            const itemString = JSON.stringify(item).toLowerCase();
-            return itemString.includes(query);
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase();
+            data = data.filter((item) => {
+                const itemString = JSON.stringify(item).toLowerCase();
+                return itemString.includes(query);
+            });
+        }
+
+        return data;
+    }
+
+    function exportData() {
+        const store = stores.find((s) => s.id === selectedStore);
+        if (!store) return;
+
+        const data = {
+            store: store.name,
+            timestamp: new Date().toISOString(),
+            data: store.data,
+        };
+
+        const blob = new Blob([JSON.stringify(data, null, 2)], {
+            type: "application/json",
         });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `data-browser-${selectedStore}-${new Date().toISOString().split("T")[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
 
-    return data;
-}
+    $: if (selectedStore && searchQuery !== undefined) {
+        filteredData = filterData();
+    }
 
-function exportData() {
-    const store = stores.find((s) => s.id === selectedStore);
-    if (!store) return;
-
-    const data = {
-        store: store.name,
-        timestamp: new Date().toISOString(),
-        data: store.data,
-    };
-
-    const blob = new Blob([JSON.stringify(data, null, 2)], {
-        type: "application/json",
+    onMount(() => {
+        window.addEventListener("keydown", handleKeydown);
+        refreshData();
     });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `data-browser-${selectedStore}-${new Date().toISOString().split("T")[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
 
-$: if (selectedStore && searchQuery !== undefined) {
-    filteredData = filterData();
-}
-
-onMount(() => {
-    window.addEventListener("keydown", handleKeydown);
-    refreshData();
-});
-
-onDestroy(() => {
-    window.removeEventListener("keydown", handleKeydown);
-});
+    onDestroy(() => {
+        window.removeEventListener("keydown", handleKeydown);
+    });
 </script>
 
 {#if $isDataBrowserModalVisible}

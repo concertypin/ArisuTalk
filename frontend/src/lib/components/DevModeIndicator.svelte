@@ -1,6 +1,6 @@
 <script lang="ts">
-import { isDevModeActive } from "../stores/ui";
-import { get } from "svelte/store";
+    import { isDevModeActive } from "../stores/ui";
+    import { get } from "svelte/store";
 </script>
 
 {#if import.meta.env.DEV || get(isDevModeActive)}

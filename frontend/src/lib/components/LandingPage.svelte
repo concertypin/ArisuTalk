@@ -1,19 +1,19 @@
 <script lang="ts">
-import { t } from "$root/i18n";
-import { MessageCircle, RefreshCw, Wrench } from "lucide-svelte";
-import { get } from "svelte/store";
+    import { t } from "$root/i18n";
+    import { MessageCircle, RefreshCw, Wrench } from "lucide-svelte";
+    import { get } from "svelte/store";
 
-import {
-    isResetOnRefreshEnabled,
-    toggleResetOnRefresh,
-} from "../stores/debugSettings";
+    import {
+        isResetOnRefreshEnabled,
+        toggleResetOnRefresh,
+    } from "../stores/debugSettings";
 
-let isEnabled = get(isResetOnRefreshEnabled);
+    let isEnabled = get(isResetOnRefreshEnabled);
 
-function handleToggle() {
-    toggleResetOnRefresh();
-    isEnabled = get(isResetOnRefreshEnabled);
-}
+    function handleToggle() {
+        toggleResetOnRefresh();
+        isEnabled = get(isResetOnRefreshEnabled);
+    }
 </script>
 
 <div

@@ -24,13 +24,13 @@ export const selectedChat = derived(
 
         for (const characterId in $chatRooms) {
             const room = $chatRooms[characterId].find(
-                (r) => r.id === $selectedChatId,
+                (r) => r.id === $selectedChatId
             );
             if (room) return room;
         }
 
         return null;
-    },
+    }
 );
 
 export const selectedCharacter = derived(
@@ -46,5 +46,5 @@ export const selectedCharacter = derived(
         return (
             $characters.find((c) => c.id === $selectedChat.characterId) || null
         );
-    },
+    }
 );

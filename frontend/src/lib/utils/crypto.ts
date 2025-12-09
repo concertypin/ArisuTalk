@@ -12,29 +12,26 @@ const IV_LENGTH = 12; // 96 bits for AES-GCM
 /**
  * Generate a cryptographic key from a password
  */
-async function deriveKey(
-    password: string,
-    salt: Uint8Array,
-): Promise<CryptoKey> {
+async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey> {
     const encoder = new TextEncoder();
     const keyMaterial = await crypto.subtle.importKey(
         "raw",
         encoder.encode(password),
         { name: "PBKDF2" },
         false,
-        ["deriveKey"],
+        ["deriveKey"]
     );
     return await crypto.subtle.deriveKey(
         {
             name: "PBKDF2",
-            salt: Uint8Array.from(salt),
+            salt:Uint8Array.from(salt),
             iterations: 100000, // 높은 보안을 위한 반복 횟수
             hash: "SHA-256",
         } satisfies Pbkdf2Params,
         keyMaterial,
         { name: ALGORITHM, length: KEY_LENGTH },
         false,
-        ["encrypt", "decrypt"],
+        ["encrypt", "decrypt"]
     );
 }
 
@@ -62,10 +59,7 @@ function uint8ArrayToArrayBuffer(uint8Array: Uint8Array): ArrayBuffer {
 /**
  * Encrypt text using AES-GCM
  */
-export async function encryptText(
-    text: string,
-    password: string,
-): Promise<string> {
+export async function encryptText(text: string, password: string): Promise<string> {
     if (!text || !password) {
         throw new Error("Text and password are required");
     }
@@ -81,19 +75,16 @@ export async function encryptText(
         const encryptedData = await crypto.subtle.encrypt(
             { name: ALGORITHM, iv: uint8ArrayToArrayBuffer(iv) },
             key,
-            data,
+            data
         );
 
         // Combine salt + iv + encrypted data
         const combined = new Uint8Array(
-            salt.length + iv.byteLength + encryptedData.byteLength,
+            salt.length + iv.byteLength + encryptedData.byteLength
         );
         combined.set(salt);
         combined.set(iv, salt.length);
-        combined.set(
-            new Uint8Array(encryptedData),
-            salt.length + iv.byteLength,
-        );
+        combined.set(new Uint8Array(encryptedData), salt.length + iv.byteLength);
 
         return btoa(String.fromCharCode(...combined));
     } catch (error) {
@@ -105,10 +96,7 @@ export async function encryptText(
 /**
  * Decrypt text using AES-GCM
  */
-export async function decryptText(
-    encryptedText: string,
-    password: string,
-): Promise<string> {
+export async function decryptText(encryptedText: string, password: string): Promise<string> {
     if (!encryptedText || !password) {
         throw new Error("Encrypted text and password are required");
     }
@@ -117,7 +105,7 @@ export async function decryptText(
         const combined = new Uint8Array(
             atob(encryptedText)
                 .split("")
-                .map((c) => c.charCodeAt(0)),
+                .map((c) => c.charCodeAt(0))
         );
 
         // Extract salt, iv, and encrypted data
@@ -130,7 +118,7 @@ export async function decryptText(
         const decryptedData = await crypto.subtle.decrypt(
             { name: ALGORITHM, iv: iv },
             key,
-            encryptedData,
+            encryptedData
         );
 
         const decoder = new TextDecoder();
@@ -172,7 +160,7 @@ export function validatePassword(password: string): ValidationResult {
     const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
     const strength = [hasUpper, hasLower, hasNumber, hasSpecial].filter(
-        Boolean,
+        Boolean
     ).length;
 
     return {
@@ -181,9 +169,7 @@ export function validatePassword(password: string): ValidationResult {
         strength: strength,
         message:
             password.length < minLength
-                ? t("security.passwordTooShort", {
-                      minLength: minLength.toString(),
-                  })
+                ? t("security.passwordTooShort", { minLength: minLength.toString() })
                 : strength < 3
                   ? t("security.passwordNotComplex")
                   : t("security.passwordStrong"),

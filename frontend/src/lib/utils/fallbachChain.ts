@@ -18,7 +18,7 @@ abstract class FallbackChainBase<T> {
     fallback(value: NotUndefined<T>): this {
         if (value === undefined) {
             throw new Error(
-                "Fallback value cannot be undefined, as it is treated as failure.",
+                "Fallback value cannot be undefined, as it is treated as failure."
             );
         }
 
@@ -43,7 +43,7 @@ class FallbackChainImpl<T> extends FallbackChainBase<T> {
                 else {
                     if (printError) {
                         console.error(
-                            `FallbackChain Error(depth ${i}): returned undefined`,
+                            `FallbackChain Error(depth ${i}): returned undefined`
                         );
                     }
                 }
@@ -68,7 +68,7 @@ class FallbackChainAsyncImpl<T> extends FallbackChainBase<Promise<T> | T> {
      * @throws Error if all functions fail and no fallback is provided.
      */
     async run(
-        printError: boolean = true,
+        printError: boolean = true
     ): Promise<T | (typeof this.fallbackValue extends T ? T : never)> {
         for (let i = 0; i < this.funcs.length; i++) {
             const func = this.funcs[i];
@@ -78,7 +78,7 @@ class FallbackChainAsyncImpl<T> extends FallbackChainBase<Promise<T> | T> {
                 else {
                     if (printError) {
                         console.error(
-                            `FallbackChainAsync Error(depth ${i}): returned undefined`,
+                            `FallbackChainAsync Error(depth ${i}): returned undefined`
                         );
                     }
                 }

@@ -17,9 +17,7 @@
         "deploy": "wrangler deploy",
         "cf-typegen": "wrangler types --env-interface CloudflareBindings",
         "postinstall": "pnpm run cf-typegen",
-        "format": "biome format --write .",
-        "lint": "biome lint .",
-        "check": "biome check .",
+        "format": "node --experimental-strip-types ../node_modules/prettier/bin/prettier.cjs --write .",
         "auth": "pnpx http-server -p 5000 -c-1 tools/"
     },
     "engines": {

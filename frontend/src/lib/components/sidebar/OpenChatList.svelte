@@ -1,43 +1,43 @@
 <script lang="ts">
-import { t } from "$root/i18n";
-import { formatTimestamp } from "$root/utils";
-import {
-    type ChatRoom,
-    messages,
-    openChats,
-    selectedChatId,
-    unreadCounts,
-} from "$stores/chat";
-import {
-    confirmationModalData,
-    isConfirmationModalVisible,
-    isCreateOpenChatModalVisible,
-} from "$stores/ui";
-import { Globe, Plus, Trash2 } from "lucide-svelte";
-import { stopPropagation } from "svelte/legacy";
+    import { t } from "$root/i18n";
+    import { formatTimestamp } from "$root/utils";
+    import {
+        type ChatRoom,
+        messages,
+        openChats,
+        selectedChatId,
+        unreadCounts,
+    } from "$stores/chat";
+    import {
+        confirmationModalData,
+        isConfirmationModalVisible,
+        isCreateOpenChatModalVisible,
+    } from "$stores/ui";
+    import { Globe, Plus, Trash2 } from "lucide-svelte";
+    import { stopPropagation } from "svelte/legacy";
 
-function openCreateOpenChatModal() {
-    isCreateOpenChatModalVisible.set(true);
-}
+    function openCreateOpenChatModal() {
+        isCreateOpenChatModalVisible.set(true);
+    }
 
-function selectChat(chatId: string) {
-    selectedChatId.set(chatId);
-}
+    function selectChat(chatId: string) {
+        selectedChatId.set(chatId);
+    }
 
-function deleteOpenChat(chat: ChatRoom) {
-    confirmationModalData.set({
-        title: t("openChat.deleteOpenChatTitle"),
-        message: t("openChat.deleteOpenChatConfirm", { name: chat.name }),
-        onConfirm: () => {
-            openChats.update((chats) => {
-                delete chats[chat.id];
-                return chats;
-            });
-            // TODO: also delete messages
-        },
-    });
-    isConfirmationModalVisible.set(true);
-}
+    function deleteOpenChat(chat: ChatRoom) {
+        confirmationModalData.set({
+            title: t("openChat.deleteOpenChatTitle"),
+            message: t("openChat.deleteOpenChatConfirm", { name: chat.name }),
+            onConfirm: () => {
+                openChats.update((chats) => {
+                    delete chats[chat.id];
+                    return chats;
+                });
+                // TODO: also delete messages
+            },
+        });
+        isConfirmationModalVisible.set(true);
+    }
 </script>
 
 <div class="border-t border-gray-800 pt-6">

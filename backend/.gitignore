@@ -3,13 +3,18 @@ dist/
 dist-server/
 
 # dev
+.yarn/
+!.yarn/releases
 .vscode/*
 .idea/workspace.xml
 .idea/usage.statistics.xml
 .idea/shelf
 
 # ...But except project config files
-!.vscode/
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/*.code-snippets
 
 # deps
 node_modules/

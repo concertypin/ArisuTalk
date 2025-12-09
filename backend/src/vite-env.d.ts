@@ -1,9 +1,9 @@
 interface ImportMetaEnv extends CloudflareBindings {}
 
 interface ViteTypeOptions {
-	strictImportEnv: unknown;
+    strictImportEnv: unknown;
 }
 
 interface ImportMeta {
-	readonly env: ImportMetaEnv;
+    readonly env: ImportMetaEnv;
 }

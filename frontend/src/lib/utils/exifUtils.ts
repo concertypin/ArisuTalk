@@ -56,9 +56,7 @@ export interface RerollInfo {
 /**
  * 이미지에서 EXIF 데이터 추출
  */
-export async function extractExifData(
-    imageData: File | string,
-): Promise<ExifData> {
+export async function extractExifData(imageData: File | string): Promise<ExifData> {
     try {
         let arrayBuffer: ArrayBuffer;
 
@@ -131,7 +129,7 @@ function parsePngMetadata(uint8Array: Uint8Array): ExifData {
             uint8Array[offset],
             uint8Array[offset + 1],
             uint8Array[offset + 2],
-            uint8Array[offset + 3],
+            uint8Array[offset + 3]
         );
         offset += 4;
 
@@ -156,10 +154,7 @@ function parsePngMetadata(uint8Array: Uint8Array): ExifData {
 /**
  * PNG 텍스트 청크 파싱
  */
-function parsePngTextChunk(
-    chunkData: Uint8Array,
-    isCompressed: boolean,
-): ExifData {
+function parsePngTextChunk(chunkData: Uint8Array, isCompressed: boolean): ExifData {
     const textData: ExifData = {};
 
     try {
@@ -231,7 +226,7 @@ function parseJpegExif(uint8Array: Uint8Array): ExifData {
                 (uint8Array[offset + 2] << 8) | uint8Array[offset + 3];
             const segmentData = uint8Array.slice(
                 offset + 4,
-                offset + 4 + segmentLength - 2,
+                offset + 4 + segmentLength - 2
             );
 
             // "Exif\0\0" 헤더 확인
@@ -270,7 +265,7 @@ function parseTiffData(data: Uint8Array, offset: number): ExifData {
         const numEntries = readUint16(
             data,
             offset + ifd0Offset,
-            isLittleEndian,
+            isLittleEndian
         );
 
         // 각 엔트리 파싱
@@ -282,7 +277,7 @@ function parseTiffData(data: Uint8Array, offset: number): ExifData {
             const valueOffset = readUint32(
                 data,
                 entryOffset + 8,
-                isLittleEndian,
+                isLittleEndian
             );
 
             // 특정 태그들만 처리
@@ -297,14 +292,14 @@ function parseTiffData(data: Uint8Array, offset: number): ExifData {
                     tags.software = readString(
                         data,
                         offset + valueOffset,
-                        count,
+                        count
                     );
                     break;
                 case 0x9286: // UserComment
                     tags.userComment = readUserComment(
                         data,
                         offset + valueOffset,
-                        count,
+                        count
                     );
                     break;
             }
@@ -363,11 +358,7 @@ function extractNAIPromptInfo(tags: ExifData): void {
 /**
  * UserComment 필드 읽기 (특수 형식 처리)
  */
-function readUserComment(
-    data: Uint8Array,
-    offset: number,
-    count: number,
-): string {
+function readUserComment(data: Uint8Array, offset: number, count: number): string {
     // UserComment는 보통 8바이트 헤더 + 실제 데이터
     const headerSize = 8;
     if (count <= headerSize) return "";
@@ -387,11 +378,7 @@ function readString(data: Uint8Array, offset: number, count: number): string {
 /**
  * Little/Big Endian 처리하여 16비트 정수 읽기
  */
-function readUint16(
-    data: Uint8Array,
-    offset: number,
-    isLittleEndian: boolean,
-): number {
+function readUint16(data: Uint8Array, offset: number, isLittleEndian: boolean): number {
     if (isLittleEndian) {
         return data[offset] | (data[offset + 1] << 8);
     } else {
@@ -402,11 +389,7 @@ function readUint16(
 /**
  * Little/Big Endian 처리하여 32비트 정수 읽기
  */
-function readUint32(
-    data: Uint8Array,
-    offset: number,
-    isLittleEndian: boolean,
-): number {
+function readUint32(data: Uint8Array, offset: number, isLittleEndian: boolean): number {
     if (isLittleEndian) {
         return (
             data[offset] |
@@ -457,8 +440,7 @@ export function formatExifInfo(exifData: ExifData): FormattedExifInfo {
         formatted.nai.negativePrompt = exifData.naiNegativePrompt;
     if (exifData.naiSteps) formatted.nai.steps = exifData.naiSteps as number;
     if (exifData.naiScale) formatted.nai.scale = exifData.naiScale as number;
-    if (exifData.naiCfgScale)
-        formatted.nai.cfgScale = exifData.naiCfgScale as number;
+    if (exifData.naiCfgScale) formatted.nai.cfgScale = exifData.naiCfgScale as number;
     if (exifData.naiSeed) formatted.nai.seed = exifData.naiSeed as number;
     if (exifData.naiSampler) formatted.nai.sampler = exifData.naiSampler;
     if (exifData.naiModel) formatted.nai.model = exifData.naiModel;

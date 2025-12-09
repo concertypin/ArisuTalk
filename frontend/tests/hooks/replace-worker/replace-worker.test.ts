@@ -13,7 +13,7 @@ vi.mock("$root/lib/utils/worker/replace", () => ({
                     // Simple string replacement for testing
                     const regex = new RegExp(
                         pattern.pattern.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
-                        "g",
+                        "g"
                     );
                     result = result.replace(regex, pattern.replace);
                 }
@@ -49,7 +49,7 @@ describe("replace worker", () => {
                 {
                     pattern: "world",
                     replace: "universe",
-                },
+                }
             );
 
             expect(result).toBe("hi universe");
@@ -126,7 +126,7 @@ describe("replace worker", () => {
                     // But I'm lacking inspiration today. Sorry!
                     pattern: / w(\w+)/g,
                     replace: " $1",
-                },
+                }
             );
             expect(result).toBe("The quick brown fox jumps over the lazy dog");
         });
@@ -150,7 +150,7 @@ describe("replace worker", () => {
                 {
                     pattern: /[a-z]+/g,
                     replace: "TEXT",
-                },
+                }
             );
 
             expect(result).toBe("TEXTNUMTEXTNUM");
@@ -170,7 +170,7 @@ describe("replace worker", () => {
                 {
                     pattern: "world",
                     replace: "universe",
-                },
+                }
             );
 
             expect(result).toBe("hiNUMuniverseNUM");
@@ -302,7 +302,7 @@ describe("replace worker", () => {
                 );
 
                 await expect(
-                    realReplace("test-text", { pattern: "test", replace: "x" }),
+                    realReplace("test-text", { pattern: "test", replace: "x" })
                 ).rejects.toThrow("Worker error");
             });
 
@@ -320,7 +320,7 @@ describe("replace worker", () => {
                                     callCount++;
                                     if (callCount === 1) {
                                         throw new Error(
-                                            "Transient worker failure",
+                                            "Transient worker failure"
                                         );
                                     }
                                     // Simple deterministic replacement as the worker would do
@@ -330,24 +330,24 @@ describe("replace worker", () => {
                                         if (pattern.pattern instanceof RegExp) {
                                             result = result.replace(
                                                 pattern.pattern,
-                                                pattern.replace,
+                                                pattern.replace
                                             );
                                         } else if (pattern.pattern) {
                                             const regex = new RegExp(
                                                 pattern.pattern.replace(
                                                     /[.*+?^${}()|[\]\\]/g,
-                                                    "\\$&",
+                                                    "\\$&"
                                                 ),
-                                                "g",
+                                                "g"
                                             );
                                             result = result.replace(
                                                 regex,
-                                                pattern.replace,
+                                                pattern.replace
                                             );
                                         }
                                     }
                                     return result;
-                                },
+                                }
                             ),
                     })),
                 }));
@@ -361,7 +361,7 @@ describe("replace worker", () => {
                     realReplace("hello world", {
                         pattern: "hello",
                         replace: "hi",
-                    }),
+                    })
                 ).rejects.toThrow("Transient worker failure");
 
                 // Second call should succeed (worker recovered in our mock)
@@ -369,7 +369,7 @@ describe("replace worker", () => {
                     realReplace("hello world", {
                         pattern: "hello",
                         replace: "hi",
-                    }),
+                    })
                 ).resolves.toBe("hi world");
             });
 
@@ -389,16 +389,16 @@ describe("replace worker", () => {
                                     if (idx % 3 === 0) {
                                         // every 3rd call fails
                                         await new Promise((r) =>
-                                            setTimeout(r, 10),
+                                            setTimeout(r, 10)
                                         );
                                         throw new Error(
-                                            `Worker failed on call ${idx}`,
+                                            `Worker failed on call ${idx}`
                                         );
                                     }
                                     if (idx % 2 === 0) {
                                         // every 2nd call delayed but succeeds
                                         await new Promise((r) =>
-                                            setTimeout(r, 5),
+                                            setTimeout(r, 5)
                                         );
                                     }
                                     // simple replacement
@@ -410,15 +410,15 @@ describe("replace worker", () => {
                                             : new RegExp(
                                                   patternObj.pattern.replace(
                                                       /[.*+?^${}()|[\]\\]/g,
-                                                      "\\$&",
+                                                      "\\$&"
                                                   ),
-                                                  "g",
+                                                  "g"
                                               );
                                     return input.replace(
                                         pattern,
-                                        patternObj.replace,
+                                        patternObj.replace
                                     );
-                                },
+                                }
                             ),
                     })),
                 }));
@@ -434,8 +434,8 @@ describe("replace worker", () => {
                         replace: `done${i}`,
                     }).then(
                         (r) => ({ ok: true, r }) as const,
-                        (e) => ({ ok: false, e }) as const,
-                    ),
+                        (e) => ({ ok: false, e }) as const
+                    )
                 );
                 const results = await Promise.all(promises);
 
@@ -443,7 +443,7 @@ describe("replace worker", () => {
                 results.forEach((res, i) => {
                     if (!res.ok) {
                         expect((res.e satisfies Error).message).toMatch(
-                            /Worker failed on call \d+/,
+                            /Worker failed on call \d+/
                         );
                     } else {
                         expect(res.r).toBe(`done${i}`);
@@ -476,7 +476,7 @@ describe("replace worker", () => {
                 text,
                 { pattern: "hello", replace: "hi" },
                 { pattern: "world", replace: "universe" },
-                { pattern: "test", replace: "example" },
+                { pattern: "test", replace: "example" }
             );
 
             expect(result3).toBe(resultBatched);
@@ -487,7 +487,7 @@ describe("replace worker", () => {
                 replace(`text${i}`, {
                     pattern: "text",
                     replace: "processed",
-                }),
+                })
             );
 
             const results = await Promise.all(promises);

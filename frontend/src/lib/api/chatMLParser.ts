@@ -11,10 +11,7 @@ export interface ChatMLMessage {
 
 export interface InternalContent {
     role: string;
-    parts: (
-        | { text: string }
-        | { inlineData: { mimeType: string; data: string } }
-    )[];
+    parts: ({ text: string } | { inlineData: { mimeType: string; data: string } })[];
     content?: string;
 }
 
@@ -98,7 +95,7 @@ export function chatMLToPromptStructure(
     character: Character | null,
     userName: string = "",
     userDescription: string = "",
-    includeConversation: boolean = false,
+    includeConversation: boolean = false
 ): PromptStructure {
     let systemPrompt = "";
     const contents: InternalContent[] = [];
@@ -117,7 +114,7 @@ export function chatMLToPromptStructure(
         for (const key in replacements) {
             result = result.replace(
                 new RegExp(`{${key}}`, "g"),
-                replacements[key],
+                replacements[key]
             );
         }
         return result;
@@ -157,10 +154,7 @@ export function chatMLToPromptStructure(
 /**
  * Converts internal prompt structure back to ChatML format
  */
-export function promptStructureToChatML(
-    systemPrompt: string,
-    contents: InternalContent[],
-): string {
+export function promptStructureToChatML(systemPrompt: string, contents: InternalContent[]): string {
     let chatML = "";
 
     // Add system message if present
@@ -172,10 +166,7 @@ export function promptStructureToChatML(
     for (const content of contents) {
         const role = content.role === "model" ? "assistant" : content.role;
         const part = content.parts?.[0];
-        const text =
-            part && "text" in part
-                ? (part as { text: string }).text
-                : content.content || "";
+        const text = (part && 'text' in part) ? (part as { text: string }).text : (content.content || "");
 
         if (text) {
             chatML += "<|im_start|>" + role + "\n" + text + "\n<|im_end|>\n";
@@ -211,9 +202,7 @@ export function isValidChatML(text: string): boolean {
 /**
  * Creates a default ChatML template for users to start with
  */
-export function getDefaultChatMLTemplate(
-    character: Character | null = null,
-): string {
+export function getDefaultChatMLTemplate(character: Character | null = null): string {
     const characterName = character?.name || "Assistant";
     const characterPrompt =
         character?.prompt || "You are a helpful AI assistant.";
@@ -239,7 +228,7 @@ export function buildChatMLFromTraditionalPrompts(
     character: Character | null,
     userName: string = "",
     userDescription: string = "",
-    context: Record<string, string> = {},
+    context: Record<string, string> = {}
 ): string {
     // Combine all the traditional prompt sections into a comprehensive system message
     const mainPrompts = prompts.main || {};
@@ -259,7 +248,7 @@ export function buildChatMLFromTraditionalPrompts(
         if (key === "sticker_usage") {
             processedValue = processedValue.replace(
                 "{availableStickers}",
-                context.availableStickers || "none",
+                context.availableStickers || "none"
             );
         }
 

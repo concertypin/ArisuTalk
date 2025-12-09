@@ -184,7 +184,7 @@ export async function fetchExperimentAssignments(): Promise<ExperimentAssignment
  * @returns {Promise<string | null>} Variant string or null when absent.
  */
 export async function getExperimentVariant(
-    key: string,
+    key: string
 ): Promise<string | null> {
     const remoteConfig = await ensureRemoteConfig();
 
@@ -207,7 +207,7 @@ export async function getExperimentVariant(
  */
 export async function logFirebaseEvent(
     eventName: string,
-    parameters?: AnalyticsEventPayload,
+    parameters?: AnalyticsEventPayload
 ): Promise<void> {
     const analytics = await ensureAnalytics();
 
@@ -225,7 +225,7 @@ export async function logFirebaseEvent(
  * @returns {Promise<void>} Resolves when properties are stored or skipped when unsupported.
  */
 export async function setFirebaseUserProperties(
-    properties: CustomParams,
+    properties: CustomParams
 ): Promise<void> {
     const analytics = await ensureAnalytics();
 

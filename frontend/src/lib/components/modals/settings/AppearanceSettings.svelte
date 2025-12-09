@@ -1,29 +1,29 @@
 <script lang="ts">
-import { getLanguage, setLanguage, t } from "$root/i18n";
-import {
-    ArrowLeft,
-    Check,
-    Clock,
-    Globe,
-    Info,
-    Moon,
-    Palette,
-    Type,
-    Zap,
-} from "lucide-svelte";
-import { createEventDispatcher } from "svelte";
+    import { getLanguage, setLanguage, t } from "$root/i18n";
+    import {
+        ArrowLeft,
+        Check,
+        Clock,
+        Globe,
+        Info,
+        Moon,
+        Palette,
+        Type,
+        Zap,
+    } from "lucide-svelte";
+    import { createEventDispatcher } from "svelte";
 
-import { settings } from "../../../stores/settings";
+    import { settings } from "../../../stores/settings";
 
-const dispatch = createEventDispatcher();
-let currentLanguage = getLanguage();
+    const dispatch = createEventDispatcher();
+    let currentLanguage = getLanguage();
 
-function handleLanguageChange(lang: string) {
-    if (currentLanguage === lang) return;
-    setLanguage(lang as "en" | "ko");
-    alert(t("system.languageChangeMessage"));
-    setTimeout(() => window.location.reload(), 300);
-}
+    function handleLanguageChange(lang: string) {
+        if (currentLanguage === lang) return;
+        setLanguage(lang as "en" | "ko");
+        alert(t("system.languageChangeMessage"));
+        setTimeout(() => window.location.reload(), 300);
+    }
 </script>
 
 <div class="flex flex-col h-full">

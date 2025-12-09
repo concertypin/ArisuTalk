@@ -53,18 +53,14 @@ export function handleGroupChatClick(e: MouseEvent, app: Application): void {
     }
 
     // 단톡방 편집/삭제 버튼
-    const editGroupChatBtn = e.target.closest<HTMLElement>(
-        ".edit-group-chat-btn",
-    );
+    const editGroupChatBtn = e.target.closest<HTMLElement>(".edit-group-chat-btn") ;
     if (editGroupChatBtn) {
         const groupId = editGroupChatBtn.dataset.groupId;
         if (groupId) app.openEditGroupChatModal(groupId);
         return;
     }
 
-    const deleteGroupChatBtn = e.target.closest<HTMLElement>(
-        ".delete-group-chat-btn",
-    );
+    const deleteGroupChatBtn = e.target.closest<HTMLElement>(".delete-group-chat-btn");
     if (deleteGroupChatBtn) {
         const groupId = deleteGroupChatBtn.dataset.groupId;
         if (groupId) app.handleDeleteGroupChat(groupId);
@@ -72,9 +68,7 @@ export function handleGroupChatClick(e: MouseEvent, app: Application): void {
     }
 
     // 오픈톡방 삭제 버튼
-    const deleteOpenChatBtn = e.target.closest<HTMLElement>(
-        ".delete-open-chat-btn",
-    );
+    const deleteOpenChatBtn = e.target.closest<HTMLElement>(".delete-open-chat-btn");
     if (deleteOpenChatBtn) {
         const openId = deleteOpenChatBtn.dataset.openId;
         if (openId) app.handleDeleteOpenChat(openId);

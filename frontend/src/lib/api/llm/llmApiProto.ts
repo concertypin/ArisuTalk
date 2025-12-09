@@ -156,7 +156,7 @@ export interface LLMApiConstructor {
         apiKey: string,
         model: string,
         baseUrl: string | null,
-        options?: LLMApiConstructorOptions,
+        options?: LLMApiConstructorOptions
     ): LLMApi;
 }
 /**
@@ -177,7 +177,7 @@ export interface LLMApi {
      * @throws {Error} When API call fails or JSON parsing error occurs
      */
     generateContent(
-        params: LLMApiGenerateContentParams,
+        params: LLMApiGenerateContentParams
     ): LLMApiGenerateContentResponse;
 
     /**
@@ -191,7 +191,7 @@ export interface LLMApi {
      * @throws {Error} When API call fails or JSON parsing error occurs
      */
     generateProfile(
-        params: LLMApiGenerateProfileParams,
+        params: LLMApiGenerateProfileParams
     ): LLMApiGenerateProfileResponse;
     /**
      * Generates a character sheet using a generic LLM API.
@@ -202,6 +202,6 @@ export interface LLMApi {
      * @throws {Error} When API call fails or response processing error occurs
      */
     generateCharacterSheet(
-        params: LLMApiGenerateCharacterSheetParams,
+        params: LLMApiGenerateCharacterSheetParams
     ): LLMApiGenerateCharacterSheetResponse;
 }

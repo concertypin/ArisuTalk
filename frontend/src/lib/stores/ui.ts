@@ -27,15 +27,7 @@ export const isSNSCharacterListModalVisible = writable(false);
 export const isSNSFeedModalVisible = writable(false);
 export const snsFeedCharacter = writable<Character | null>(null);
 export const isSNSPostModalVisible = writable(false);
-export const editingSNSPost = writable<
-    | (SNSPost & {
-          characterId?: string | number;
-          isNew?: boolean;
-          isSecret?: boolean;
-      })
-    | { characterId: string | number; isNew: boolean; isSecret: boolean }
-    | null
->(null);
+export const editingSNSPost = writable<(SNSPost & { characterId?: string | number, isNew?: boolean, isSecret?: boolean }) | { characterId: string | number; isNew: boolean; isSecret: boolean } | null>(null);
 export const isPhonebookModalVisible = writable(false);
 export const isMobileAuthModalVisible = writable(false);
 
@@ -60,10 +52,7 @@ export const isUserStickerPanelVisible = writable(false);
 
 // Image Zoom Modal
 export const isImageZoomModalVisible = writable(false);
-export const imageZoomModalData = writable<{
-    imageUrl: string | null;
-    title: string | null;
-}>({ imageUrl: null, title: null });
+export const imageZoomModalData = writable<{ imageUrl: string | null; title: string | null }>({ imageUrl: null, title: null });
 
 // Expanded images/stickers in chat
 export const expandedImages = writable<Set<number | string>>(new Set());
