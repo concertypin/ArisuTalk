@@ -1,0 +1,24 @@
+{
+    "[javascript]": {
+        "editor.defaultFormatter": "prettier.prettier-vscode",
+        "editor.tabSize": 4
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "prettier.prettier-vscode",
+        "editor.tabSize": 4
+    },
+    "[svelte]": {
+        "editor.tabSize": 4,
+        "editor.defaultFormatter": "prettier.prettier-vscode"
+    },
+    "[json]": {
+        "editor.defaultFormatter": "prettier.prettier-vscode",
+        "editor.tabSize": 4
+    },
+    "typescript.preferences.preferTypeOnlyAutoImports": true,
+    "js/ts.implicitProjectConfig.target": "ESNext",
+    "typescript.preferences.importModuleSpecifier": "non-relative",
+    "javascript.preferences.importModuleSpecifier": "non-relative",
+    "javascript.preferences.importModuleSpecifierEnding": "minimal",
+    "typescript.preferences.importModuleSpecifierEnding": "minimal"
+}

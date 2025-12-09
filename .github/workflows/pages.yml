@@ -1,0 +1,120 @@
+# Simple workflow for deploying static content
+name: Deploy static content
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/pages.yml"
+      - "pnpm*"
+      - "package.json"
+    tags:
+      - "v*" # production
+      - "dev*" # development
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: frontend
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: "package.json"
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: "package.json"
+          cache: "pnpm"
+          cache-dependency-path: "pnpm-lock.yaml"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build page
+        timeout-minutes: 5 # It usually takes less than 30 seconds, but just in case
+        run: pnpm run build:fe
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pages-artifact
+          path: frontend/dist/
+
+  # Spark deployment (all main branch and tags)
+  publish-spark:
+    needs: build
+    concurrency:
+      group: "deploy-spark"
+      cancel-in-progress: false
+
+    # Check if we should publish to spark (main branch or tags starting with v or dev)
+    # It includes both prod and dev deployments
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v') || startsWith(github.ref, 'refs/tags/dev')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: pages-artifact
+
+      - name: Deploy to Cloudflare (spark)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy . --project-name=arisutalk-spark
+
+  publish-dev:
+    needs: [build]
+    concurrency:
+      group: "deploy-dev"
+      cancel-in-progress: false
+    if: startsWith(github.ref, 'refs/tags/dev')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: pages-artifact
+
+      - name: Deploy to Cloudflare (dev)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy . --project-name=arisutalk-dev
+
+  publish-prod:
+    needs: [build]
+    if: startsWith(github.ref, 'refs/tags/v')
+    concurrency:
+      group: "deploy-prod"
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: pages-artifact
+
+      - name: Deploy to Cloudflare (prod)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy . --project-name=arisutalk-prod

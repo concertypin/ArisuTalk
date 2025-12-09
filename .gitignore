@@ -1,0 +1,53 @@
+# macOS system files
+.DS_Store
+**/.DS_Store
+
+
+# Node.js
+node_modules/
+**/node_modules/
+package-lock.json
+**/*.log
+
+# IDE files which might contain secret
+.vscode/mcp.json
+.qoder/*
+
+# Temporary files
+*.tmp
+*.temp
+
+# Local files
+TODO.md
+frontend/local/
+
+# Backup files
+*.backup
+*.bak
+*~
+*_backup.js
+*_bak.js
+backup/
+backups/
+.backup/
+.backups/
+
+# AI Agent development files(except AGENTS.md)
+.claude/
+CLAUDE.MD
+CLAUDE.md
+claude.md
+.github/chatmodes/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+# It is used to store environment variables for development(no sensitive info)
+!backend/.env
+!frontend/.env
+
+# lockfiles should be ignored except for the root one
+frontend/pnpm-lock.yaml
+backend/pnpm-lock.yaml
+frontend/.vscode/mcp.json
