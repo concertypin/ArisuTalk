@@ -10,6 +10,6 @@
     "preview_urls": false,
     "route": {
         "custom_domain": true,
-        "pattern": "https://phonebook.back.arisutalk.moe",
+        "pattern": "https://phonebook.back.arisutalk.moe"
     }
 }

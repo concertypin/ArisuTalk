@@ -33,7 +33,7 @@ router = router.get(
     async (c) => {
         // If we reach here, the user is authenticated
         return c.status(204); // No Content
-    }
+    },
 );
 // Create
 router = router.post(
@@ -88,7 +88,7 @@ router = router.post(
 
         const db = await DataDBClient(c.env);
         return c.json(await db.put(validated), 201);
-    }
+    },
 );
 
 // Read list / query
@@ -128,7 +128,7 @@ router = router.get(
             const validatedAll = all.map((r: any) => DataSchema.parse(r));
             return c.json(validatedAll);
         }
-    }
+    },
 );
 
 // Read single
@@ -169,7 +169,7 @@ router = router.get(
 
         const validated = DataSchema.parse(item);
         return c.json(validated);
-    }
+    },
 );
 
 // Update
@@ -229,7 +229,7 @@ router.patch(
 
         await db.update(validated);
         return c.json(validated);
-    }
+    },
 );
 
 // Delete
@@ -274,14 +274,14 @@ router = router.delete(
                 // Log deletion failure to help troubleshoot orphaned blobs
                 console.error(
                     `Failed to delete blob ${validated.additionalData} for data item ${id}:`,
-                    e
+                    e,
                 );
             }
         }
 
         await db.delete(id);
         return c.json({ ok: true });
-    }
+    },
 );
 
 // Upload blob
@@ -337,7 +337,7 @@ router = router.post(
         });
 
         return c.json({ url });
-    }
+    },
 );
 
 router = router.get(
@@ -390,6 +390,6 @@ router = router.get(
         await db.bumpDownloadCount(id);
 
         return c.redirect(url, 307);
-    }
+    },
 );
 export default router;

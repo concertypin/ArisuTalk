@@ -98,7 +98,7 @@ export default class InMemoryDataDBClient implements BaseDataDBClient {
         this.store.delete(id);
     }
     async update(
-        item: Partial<DataType> & { id: DataType["id"] }
+        item: Partial<DataType> & { id: DataType["id"] },
     ): Promise<DataType> {
         if (!item?.id) throw new Error("Missing id for update");
         if (!this.store.has(item.id)) throw new Error("Item not found");

@@ -56,13 +56,13 @@ app = app.get(
                     "API for managing Data items in ArisuTalk Phonebook",
             },
         },
-    })
+    }),
 );
 app = app.get(
     "/docs",
     Scalar({
         title: "ArisuTalk Phonebook API",
         url: "/openapi.json",
-    })
+    }),
 );
 export default app;

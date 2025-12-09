@@ -17,14 +17,14 @@ export default class AzureCosmosDB implements BaseDataDBClient {
     constructor(env: DBEnv) {
         if (!env.SECRET_AZURE_COSMOSDB_CONNECTION_STRING) {
             throw new Error(
-                "Azure Cosmos DB environment variables are not properly set"
+                "Azure Cosmos DB environment variables are not properly set",
             );
         }
         this.client = new CosmosClient(
-            env.SECRET_AZURE_COSMOSDB_CONNECTION_STRING
+            env.SECRET_AZURE_COSMOSDB_CONNECTION_STRING,
         );
         this.database = this.client.database(
-            env.SECRET_AZURE_COSMOSDB_DATABASE_NAME
+            env.SECRET_AZURE_COSMOSDB_DATABASE_NAME,
         );
         this.containerName = env.SECRET_AZURE_COSMOSDB_CONTAINER_NAME;
         this.container = this.database.container(this.containerName);
@@ -101,7 +101,7 @@ export default class AzureCosmosDB implements BaseDataDBClient {
         throw new Error("Failed to create item in Cosmos DB");
     }
     async update(
-        item: Partial<DataType> & { id: DataType["id"] }
+        item: Partial<DataType> & { id: DataType["id"] },
     ): Promise<DataType> {
         // Replace the existing item with the provided one
         const id = item.id;
