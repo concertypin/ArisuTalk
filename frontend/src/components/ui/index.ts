@@ -2,4 +2,4 @@
  * @fileoverview UI component exports.
  */
 
-export { default as Button } from './Button.svelte';
+export { default as Button } from "@/components/ui/Button.svelte";

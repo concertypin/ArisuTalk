@@ -3,8 +3,8 @@
   Landing/chat page placeholder.
 -->
 <script lang="ts">
-    import Sidebar from '../components/Sidebar.svelte';
-    import ChatArea from '../components/ChatArea.svelte';
+    import Sidebar from "@/components/Sidebar.svelte";
+    import ChatArea from "@/components/ChatArea.svelte";
 
     let sidebarCollapsed = $state(false);
 

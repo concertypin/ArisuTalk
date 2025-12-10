@@ -5,6 +5,7 @@
 		"test/*.ts"
 	],
 	"compilerOptions": {
+		"tsBuildInfoFile": "./node_modules/.cache/test.tsbuildinfo",
 		"lib": [
 			"ESNext",
 			"DOM"
@@ -13,10 +14,10 @@
 			"vite/client"
 		] /* Specify type package names to be included without being referenced in a source file. */,
 		"paths": {
-			"$/*": [
+			"@/*": [
 				"./src/*"
 			],
-			"$test/*": [
+			"@test/*": [
 				"./test/*"
 			]
 		},

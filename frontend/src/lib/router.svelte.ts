@@ -3,7 +3,7 @@
  * Supports lazy loading via dynamic imports.
  */
 
-import type { Component } from 'svelte';
+import type { Component } from "svelte";
 
 /** Route definition with lazy component loading */
 export interface Route {
@@ -21,14 +21,14 @@ let currentPath = $state(getHashPath());
  */
 function getHashPath(): string {
     const hash = window.location.hash.slice(1); // Remove #
-    return hash || '/';
+    return hash || "/";
 }
 
 /**
  * Initialize router listeners
  */
 export function initRouter(): void {
-    window.addEventListener('hashchange', () => {
+    window.addEventListener("hashchange", () => {
         currentPath = getHashPath();
     });
 }

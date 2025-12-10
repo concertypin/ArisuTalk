@@ -3,15 +3,15 @@
   Reusable button component with variants.
 -->
 <script lang="ts">
-    import type { Snippet } from 'svelte';
+    import type { Snippet } from "svelte";
 
     interface Props {
         /** Button variant */
-        variant?: 'primary' | 'secondary' | 'ghost';
+        variant?: "primary" | "secondary" | "ghost";
         /** Disabled state */
         disabled?: boolean;
         /** Button type */
-        type?: 'button' | 'submit' | 'reset';
+        type?: "button" | "submit" | "reset";
         /** Click handler */
         onclick?: () => void;
         /** Button content */
@@ -19,9 +19,9 @@
     }
 
     let {
-        variant = 'primary',
+        variant = "primary",
         disabled = false,
-        type = 'button',
+        type = "button",
         onclick,
         children,
     }: Props = $props();

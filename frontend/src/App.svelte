@@ -3,9 +3,9 @@
   Root Svelte 5 component with hash-based router.
 -->
 <script lang="ts">
-    import { initRouter, getCurrentPath } from './lib/router.svelte';
-    import { routes } from './lib/routeConfig';
-    import type { Component } from 'svelte';
+    import { initRouter, getCurrentPath } from "@/lib/router.svelte";
+    import { routes } from "@/lib/routeConfig";
+    import type { Component } from "svelte";
 
     // Initialize router on mount
     $effect(() => {
@@ -21,7 +21,7 @@
 
     // Load component when path changes
     $effect(() => {
-        const loader = routes[currentPath] ?? routes['/'];
+        const loader = routes[currentPath] ?? routes["/"];
         isLoading = true;
 
         loader().then((module) => {

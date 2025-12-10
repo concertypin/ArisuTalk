@@ -15,10 +15,10 @@
         "test:run": "vitest run",
         "test:ui": "vitest --ui",
         "check:types": "svelte-check --tsconfig tsconfig.app.json --fail-on-warnings",
-        "lint": "eslint src/",
-        "lint:fix": "eslint src/ --fix",
-        "format": "prettier --write src/",
-        "format:check": "prettier --check src/"
+        "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint/ src/ test/",
+        "lint:fix": "eslint --cache --fix --cache-location ./node_modules/.cache/eslint/ src/ test/",
+        "format": "prettier --write --cache --cache-location ./node_modules/.cache/prettier/ src/ test/",
+        "format:check": "prettier --check --cache --cache-location ./node_modules/.cache/prettier/ src/ test/"
     },
     "author": "",
     "license": "Apache-2.0",
@@ -27,6 +27,7 @@
         "node": ">20"
     },
     "dependencies": {
+        "@langchain/core": "^1.1.4",
         "svelte": "^5.39.3"
     },
     "devDependencies": {

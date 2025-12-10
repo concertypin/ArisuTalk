@@ -17,9 +17,9 @@
         id="desktop-sidebar-toggle"
         class="sidebar-toggle"
         onclick={onToggle}
-        aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
     >
-        <span class="toggle-icon">{collapsed ? '▶' : '◀'}</span>
+        <span class="toggle-icon">{collapsed ? "▶" : "◀"}</span>
     </button>
 
     <div id="sidebar-content" class="sidebar-content">
