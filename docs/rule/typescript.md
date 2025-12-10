@@ -31,9 +31,11 @@ People don't want to read poorly written text.
 </a>
 
 Better than above, right?
+
 <a href="https://en.wikipedia.org/wiki/File:Kfontview.png">
 <img src="https://upload.wikimedia.org/wikipedia/commons/6/65/Kfontview.png" alt="Well typed 'The quick brown fox jumps over the(stripped)'">
 </a>
+
 Same goes for code documentation. It helps others (and future you) understand the code better. All parameters, methods, classes, functions, etc... should have proper JSDoc comments, which can accessible on IDE hover.
 
 ```ts
