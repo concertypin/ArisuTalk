@@ -25,57 +25,21 @@
         onclick,
         children,
     }: Props = $props();
+
+    const variants = {
+        primary: "bg-indigo-600 text-white hover:bg-indigo-500",
+        secondary: "bg-gray-800 border border-gray-700 text-white hover:bg-gray-700",
+        ghost: "bg-transparent text-gray-400 hover:bg-gray-800 hover:text-white",
+    };
 </script>
 
-<button class="btn btn-{variant}" class:disabled {type} {disabled} {onclick}>
+<button
+    class="inline-flex items-center justify-center gap-1 px-4 py-2 rounded text-sm font-medium transition-all duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed {variants[
+        variant
+    ]}"
+    {type}
+    {disabled}
+    {onclick}
+>
     {@render children()}
 </button>
-
-<style>
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: var(--spacing-xs);
-        padding: var(--spacing-sm) var(--spacing-md);
-        border-radius: var(--radius-md);
-        font-size: var(--font-size-sm);
-        font-weight: 500;
-        transition: all var(--transition-fast);
-        cursor: pointer;
-    }
-
-    .btn-primary {
-        background-color: var(--color-accent);
-        color: var(--color-text-primary);
-    }
-
-    .btn-primary:hover:not(.disabled) {
-        background-color: var(--color-accent-hover);
-    }
-
-    .btn-secondary {
-        background-color: var(--color-bg-tertiary);
-        border: 1px solid var(--color-border);
-        color: var(--color-text-primary);
-    }
-
-    .btn-secondary:hover:not(.disabled) {
-        background-color: var(--color-border);
-    }
-
-    .btn-ghost {
-        background-color: transparent;
-        color: var(--color-text-secondary);
-    }
-
-    .btn-ghost:hover:not(.disabled) {
-        background-color: var(--color-bg-tertiary);
-        color: var(--color-text-primary);
-    }
-
-    .disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-</style>

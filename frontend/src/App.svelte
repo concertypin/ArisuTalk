@@ -5,6 +5,7 @@
 <script lang="ts">
     import { initRouter, getCurrentPath } from "@/lib/router.svelte";
     import { routes } from "@/lib/routeConfig";
+    import { uiState } from "@/lib/stores/ui.svelte";
     import type { Component } from "svelte";
 
     // Initialize router on mount
@@ -36,18 +37,13 @@
 </svelte:head>
 
 {#if isLoading}
-    <div class="loading">Loading...</div>
+    <div class="flex items-center justify-center w-full h-full text-gray-500">Loading...</div>
 {:else if CurrentComponent}
     <CurrentComponent />
 {/if}
 
-<style>
-    .loading {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        height: 100%;
-        color: var(--color-text-muted);
-    }
-</style>
+{#if uiState.settingsModalOpen}
+    {#await import("@/components/SettingsModal.svelte") then { default: SettingsModal }}
+        <SettingsModal />
+    {/await}
+{/if}

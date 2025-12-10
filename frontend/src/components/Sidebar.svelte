@@ -1,111 +1,65 @@
 <!--
   @component Sidebar
   Character list sidebar with toggle functionality.
-  Based on legacy ArisuTalk design.
 -->
 <script lang="ts">
+    import { uiState } from "@/lib/stores/ui.svelte";
+
     interface Props {
         collapsed?: boolean;
         onToggle?: () => void;
     }
 
     let { collapsed = false, onToggle }: Props = $props();
+
+    // Mock chats
+    const chats = [
+        { id: 1, name: "Alice" },
+        { id: 2, name: "Bob" },
+        { id: 3, name: "Charlie" },
+    ];
 </script>
 
-<aside id="sidebar" class="sidebar" class:collapsed>
+<aside
+    class="flex flex-col h-full bg-gray-900 border-r border-gray-700 transition-all duration-300 {collapsed
+        ? 'w-0'
+        : 'w-80'} relative"
+>
+    <!-- Toggle Button -->
     <button
-        id="desktop-sidebar-toggle"
-        class="sidebar-toggle"
+        class="absolute top-1/2 -right-4 z-20 flex items-center justify-center w-8 h-8 bg-gray-800 border border-gray-600 rounded-full hover:bg-gray-600 transition-colors"
         onclick={onToggle}
         aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
     >
-        <span class="toggle-icon">{collapsed ? "▶" : "◀"}</span>
+        <span class="text-xs">{collapsed ? "▶" : "◀"}</span>
     </button>
 
-    <div id="sidebar-content" class="sidebar-content">
-        <header class="sidebar-header">
-            <h1 class="app-title">ArisuTalk</h1>
+    <div
+        class="flex flex-col h-full overflow-hidden transition-opacity duration-300 {collapsed
+            ? 'opacity-0 pointer-events-none'
+            : 'opacity-100'}"
+    >
+        <header class="p-4 border-b border-gray-700">
+            <h1 class="text-lg font-semibold">ArisuTalk</h1>
         </header>
 
-        <nav class="character-list">
-            <p class="placeholder-text">Character list will appear here</p>
+        <nav class="flex-1 overflow-y-auto p-4 space-y-2">
+            {#each chats as chat (chat.id)}
+                <button
+                    class="w-full text-left p-3 rounded hover:bg-gray-800 transition-colors block"
+                >
+                    {chat.name}
+                </button>
+            {/each}
         </nav>
+
+        <div class="p-4 border-t border-gray-700">
+            <button
+                class="w-full p-2 text-sm text-gray-400 hover:text-white transition-colors flex items-center gap-2"
+                onclick={() => uiState.openSettingsModal()}
+            >
+                <span>⚙️ Settings</span>
+            </button>
+        </div>
     </div>
 </aside>
-
-<style>
-    .sidebar {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        width: var(--sidebar-width);
-        height: 100%;
-        background-color: var(--color-bg-secondary);
-        border-right: 1px solid var(--color-border);
-        transition: width var(--transition-normal);
-    }
-
-    .sidebar.collapsed {
-        width: 0;
-        border-right: none;
-    }
-
-    .sidebar.collapsed .sidebar-content {
-        opacity: 0;
-        pointer-events: none;
-    }
-
-    .sidebar-toggle {
-        position: absolute;
-        top: 50%;
-        right: -1rem;
-        transform: translateY(-50%);
-        z-index: 20;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 2rem;
-        height: 2rem;
-        background-color: var(--color-bg-tertiary);
-        border: 1px solid var(--color-border-light);
-        border-radius: var(--radius-full);
-        transition: background-color var(--transition-fast);
-    }
-
-    .sidebar-toggle:hover {
-        background-color: var(--color-border-light);
-    }
-
-    .toggle-icon {
-        font-size: var(--font-size-xs);
-    }
-
-    .sidebar-content {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        overflow: hidden;
-        transition: opacity var(--transition-normal);
-    }
-
-    .sidebar-header {
-        padding: var(--spacing-md);
-        border-bottom: 1px solid var(--color-border);
-    }
-
-    .app-title {
-        font-size: var(--font-size-lg);
-        font-weight: 600;
-    }
-
-    .character-list {
-        flex: 1;
-        overflow-y: auto;
-        padding: var(--spacing-md);
-    }
-
-    .placeholder-text {
-        color: var(--color-text-muted);
-        font-size: var(--font-size-sm);
-    }
-</style>
