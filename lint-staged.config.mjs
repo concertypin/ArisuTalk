@@ -1,21 +1,21 @@
 //@ts-check
-const pnpmExecFrontend = `pnpm --filter ./frontend exec `;
-const pnpmExecBackend = `pnpm --filter ./backend exec `;
-const typescriptNodeOptions = `cross-env NODE_OPTIONS=--experimental-strip-types `;
-const prettierWrite = "prettier --write --config ./prettier.config.ts ";
+const pnpmExecFrontend = `pnpm --filter ./frontend `;
+const pnpmExecBackend = `pnpm --filter ./backend `;
+const prettierWrite = "exec prettier --write ";
+const prettierCache =
+  " --cache --cache-location ./node_modules/.cache/prettier ";
 /**
  * @type {import("lint-staged").Configuration}
  */
 export default {
-    "frontend/src/**/*.{js,json,md}": pnpmExecFrontend + prettierWrite,
-    "frontend/src/**/*.ts":
-        pnpmExecFrontend + typescriptNodeOptions + prettierWrite,
-    "frontend/src/**/*.svelte":
-        pnpmExecFrontend +
-        typescriptNodeOptions +
-        prettierWrite +
-        "--plugin prettier-plugin-svelte",
-    "backend/src/**/*.ts":
-        pnpmExecBackend + typescriptNodeOptions + "prettier --write",
-    "backend/src/**/*.{js,json,md}": pnpmExecBackend + "prettier --write",
+  "frontend/src/**/*.{js,json,md}":
+    pnpmExecFrontend + prettierWrite + prettierCache,
+  "frontend/src/**/*.ts": pnpmExecFrontend + prettierWrite + prettierCache,
+  "frontend/src/**/*.svelte":
+    pnpmExecFrontend +
+    prettierWrite +
+    "--plugin prettier-plugin-svelte" +
+    prettierCache,
+  "backend/src/**/*.{js,json,md,ts}":
+    pnpmExecBackend + prettierWrite + prettierCache,
 };
