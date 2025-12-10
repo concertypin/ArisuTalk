@@ -27,13 +27,13 @@ It describes TypeScript rules for the project for readability.
 ### Write Essay for Code
 
 People don't want to read poorly written text.
-<a href="https://www.reddit.com/r/Handwriting/comments/i6gie3/wrote_this_for_an_example_but_this_is_my_normal/"><img src="https://preview.redd.it/orblc7pv2yf51.jpg?width=1080&crop=smart&auto=webp&s=1ce00792cfcc1e15650b3a271ee29d8053786907" alt="Poorly handwritten text">
+<a href="https://www.reddit.com/r/Handwriting/comments/i6gie3/wrote_this_for_an_example_but_this_is_my_normal/"><img src="https://preview.redd.it/orblc7pv2yf51.jpg?width=1080&crop=smart&auto=webp&s=1ce00792cfcc1e15650b3a271ee29d8053786907" alt="Poorly handwritten text" width="300">
 </a>
 
 Better than above, right?
 
 <a href="https://en.wikipedia.org/wiki/File:Kfontview.png">
-<img src="https://upload.wikimedia.org/wikipedia/commons/6/65/Kfontview.png" alt="Well typed 'The quick brown fox jumps over the(stripped)'">
+<img src="https://upload.wikimedia.org/wikipedia/commons/6/65/Kfontview.png" alt="Well typed 'The quick brown fox jumps over the(stripped)'" width="300">
 </a>
 
 Same goes for code documentation. It helps others (and future you) understand the code better. All parameters, methods, classes, functions, etc... should have proper JSDoc comments, which can accessible on IDE hover.
@@ -101,7 +101,7 @@ type User = {
 };
 ```
 
-### Anyone Dislikes `Any` as Much `as unknown`one
+### Anyone Dislikes `Any` as Much `as any`one
 
 Who knows what it really is? It's a mystery! Using `any` defeats the purpose of TypeScript, which is to provide type safety. Instead of `any`, use `unknown` when the type is not known at compile time. This forces you to perform type checks before using the value, enhancing code safety.
 Also, `as` defeats the purpose of TypeScript's type safety. Use `satisfies` instead, which ensures that the value conforms to the specified type without losing type information.
