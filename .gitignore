@@ -12,6 +12,8 @@ package-lock.json
 # IDE files which might contain secret
 .vscode/mcp.json
 .qoder/*
+**/.vscode/mcp.json
+
 
 # Temporary files
 *.tmp
@@ -38,11 +40,13 @@ CLAUDE.MD
 CLAUDE.md
 claude.md
 .github/chatmodes/
+**/.agent/
 
-# Environment variables
+# Environment variables & secrets
 .env
 .env.local
 .env.*.local
+
 # It is used to store environment variables for development(no sensitive info)
 !backend/.env
 !frontend/.env
@@ -50,4 +54,3 @@ claude.md
 # lockfiles should be ignored except for the root one
 frontend/pnpm-lock.yaml
 backend/pnpm-lock.yaml
-frontend/.vscode/mcp.json
