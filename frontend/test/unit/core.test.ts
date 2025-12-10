@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { Chat, Character, Message, Settings } from "@/lib/types/IDataModel";
-import { ChatProvider } from "@/lib/interfaces/IChatProvider";
+import { ChatProvider, type ProviderSettings } from "@/lib/interfaces/IChatProvider";
 import { BaseMessage, HumanMessage } from "@langchain/core/messages";
 
 describe("Data Models", () => {
@@ -39,24 +39,24 @@ describe("IChatProvider (Mock)", () => {
         description = "For testing";
 
         // Private constructor to enforce static connect usage
-        private constructor(_settings: {}) {
+        private constructor(_settings: ProviderSettings["MOCK"]) {
             super();
         }
 
         // Static factory method
-        static async connect(settings: {}): Promise<MockProvider> {
+        static async connect(settings: ProviderSettings["MOCK"]): Promise<MockProvider> {
             // Simulate async initialization if needed
             return new MockProvider(settings);
         }
 
         async disconnect() {}
 
-        async generate(_messages: BaseMessage[], _settings?: {}) {
+        async generate(_messages: BaseMessage[], _settings?: ProviderSettings["MOCK"]) {
             // In a real provider, we would merge _settings with this.settings
             return "Mock response";
         }
 
-        async *stream(_messages: BaseMessage[], _settings?: {}) {
+        async *stream(_messages: BaseMessage[], _settings?: ProviderSettings["MOCK"]) {
             yield "Mock";
             yield " ";
             yield "stream";

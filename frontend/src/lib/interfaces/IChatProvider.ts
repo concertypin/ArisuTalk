@@ -34,7 +34,10 @@ export interface IChatProviderFactory<T extends keyof ProviderSettings> {
  * Abstraction layer for interacting with different LLM providers (e.g., OpenAI, Anthropic, Ollama).
  * Users must use the static `connect` factory method from the implementation to get an instance.
  */
-export abstract class ChatProvider<T extends keyof ProviderSettings> {
+export abstract class ChatProvider<
+    T extends keyof ProviderSettings,
+    SETTING extends ProviderSettings[T] = ProviderSettings[T],
+> {
     /** Unique identifier for the provider. */
     abstract id: string;
     /** Display name of the provider. */
@@ -58,7 +61,7 @@ export abstract class ChatProvider<T extends keyof ProviderSettings> {
      * @param settings - Optional query-specific settings (overrides connection config).
      * @returns Promise resolving to the generated text.
      */
-    abstract generate(messages: BaseMessage[], settings?: ProviderSettings[T]): Promise<string>;
+    abstract generate(messages: BaseMessage[], settings?: SETTING): Promise<string>;
 
     /**
      * Streams the response for the given messages.
@@ -68,7 +71,7 @@ export abstract class ChatProvider<T extends keyof ProviderSettings> {
      */
     abstract stream(
         messages: BaseMessage[],
-        settings?: ProviderSettings[T]
+        settings?: SETTING
     ): AsyncGenerator<string, void, unknown>;
 
     /**

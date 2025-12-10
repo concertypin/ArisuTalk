@@ -1,8 +1,9 @@
 /**
- * Context object passed to hooks.
- * Allows plugins/scripts to access and modify application state.
+ * Context object passed to scripts.
+ * It will contain character object, settings, etc... to be used by scripts.
+ * Since it allows dynamic properties(even added by scripts), we can't define a strict interface.
  */
-export interface HookContext {
+export interface ScriptContext {
     // Script can access properties dynamically
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
@@ -14,8 +15,8 @@ export interface HookContext {
  * @returns Optional modified context or promise resolving to it.
  */
 export type HookHandler = (
-    context: HookContext
-) => Promise<HookContext | void> | HookContext | void;
+    context: ScriptContext
+) => Promise<ScriptContext | void> | ScriptContext | void;
 
 /**
  * Interface for the extensibility/hook system.
@@ -43,5 +44,5 @@ export interface IHookSystem {
      * @param context - The initial context to pass to the handlers.
      * @returns Promise resolving to the final modified context.
      */
-    trigger(hookName: string, context: HookContext): Promise<HookContext>;
+    trigger(hookName: string, context: ScriptContext): Promise<ScriptContext>;
 }
