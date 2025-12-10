@@ -53,7 +53,7 @@
                 timestamp: Date.now(),
             };
             messages = [...messages, botMsg];
-            isTyping = pendingTimeoutIds.size === 0;
+            isTyping = pendingTimeoutIds.size > 0;
             pendingTimeoutIds.delete(timeoutId);
             scrollToBottom();
         }, 1000);

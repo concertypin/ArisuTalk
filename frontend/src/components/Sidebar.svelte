@@ -4,6 +4,7 @@
 -->
 <script lang="ts">
     import { uiState } from "@/lib/stores/ui.svelte";
+    import { Settings } from "@lucide/svelte";
 
     interface Props {
         collapsed?: boolean;
@@ -58,7 +59,7 @@
                 class="w-full p-2 text-sm text-gray-400 hover:text-white transition-colors flex items-center gap-2"
                 onclick={() => uiState.openSettingsModal()}
             >
-                <span>⚙️ Settings</span>
+                <Settings class="w-4 h-4" /><span>Settings</span>
             </button>
         </div>
     </div>
