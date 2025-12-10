@@ -1,7 +1,7 @@
 It describes Svelte rules for the project.
 
 > [!NOTE]
-> This is not absolute rule! If you have a good reason to break the rule, feel free to do it with proper justification in code review.
+> This is not an absolute rule! If you have a good reason to break the rule, feel free to do it with proper justification in code review.
 
 - [TL;DR](#tldr)
 - [Detail](#detail)
@@ -11,7 +11,7 @@ It describes Svelte rules for the project.
 ## TL;DR
 
 - Use `<script lang="ts">` for all Svelte components.
-- [This is Svelte 5 project! Don't use Svelte 4's syntax. No more `export let`!](#svelte-5-is-alive)
+- [This is a Svelte 5 project! Don't use Svelte 4's syntax. No more `export let`!](#svelte-5-is-alive)
 - [Avoid using `$:` reactive statements. It's not used anymore in Svelte 5.](#svelte-5-is-alive)
 - [If the components which doesn't need to be rendered immediately(e.g., modals, dropdowns, etc...), use dynamic imports with `import()` to reduce initial bundle size.](#dont-ship-elephant-on-bicycle)
 
@@ -78,14 +78,14 @@ Check out the TypeScript's rules [here](./typescript.md#lazy-dog-than-the-quick-
 </button>
 
 {#if loadPromise}
-    {#await import("./HeavyModal.svelte")}
+    {#await loadPromise}
         <p>Loading...</p>
     {:then { default: HeavyModal }}
         <HeavyModal
             onclose={() => loadPromise = null}
         />
     {:catch error}
-        <p>Error: {error.message}</p>
+        <p>Error loading component: {error.message}</p>
     {/await}
 {/if}
 

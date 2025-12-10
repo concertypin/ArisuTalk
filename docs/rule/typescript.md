@@ -1,13 +1,13 @@
 It describes TypeScript rules for the project for readability.
 
 > [!NOTE]
-> This is not absolute rule! If you have a good reason to break the rule, feel free to do it with proper justification in code review.
+> This is not an absolute rule! If you have a good reason to break the rule, feel free to do it with proper justification in code review.
 
 - [TL;DR](#tldr)
 - [Detail](#detail)
   - [Write Essay for Code](#write-essay-for-code)
   - [Interface is not interface but interface](#interface-is-not-interface-but-interface)
-  - [Anyone Dislikes `Any` as Much `as unknown`one](#anyone-dislikes-any-as-much-as-unknownone)
+  - [Anyone Dislikes `Any` as Much `as any`one](#anyone-dislikes-any-as-much-as-anyone)
   - [Lazy Dog Than The Quick Brown Fox](#lazy-dog-than-the-quick-brown-fox)
   - [Brain Can StackOverflow](#brain-can-stackoverflow)
 
@@ -16,8 +16,8 @@ It describes TypeScript rules for the project for readability.
 - Use `import type` when importing only types. [^1]
 - Use absolute path imports starting from `src/` folder. [^1] "../../../some.ts" is hard to read.
 - [Use `type` instead of `interface` where possible. `type` means type, `interface` means sometimes interface and sometimes type.](#interface-is-not-interface-but-interface)
-- [Avoid using `any` type.](#anyone-dislikes-any-as-much-as-unknownone)
-- [Use `satisfies` instead of `as` for type assertions where possible.](#anyone-dislikes-any-as-much-as-unknownone)
+- [Avoid using `any` type.](#anyone-dislikes-any-as-much-as-anyone)
+- [Use `satisfies` instead of `as` for type assertions where possible.](#anyone-dislikes-any-as-much-as-anyone)
 - [Write JSDoc comments for all exported functions and classes!](#write-essay-for-code)
 - [Use named types instead of inline types on destructured parameters.](#brain-can-stackoverflow)
 - [Use `await import()`](#lazy-dog-than-the-quick-brown-fox) to lazy-load large modules.
@@ -36,7 +36,7 @@ Better than above, right?
 <img src="https://upload.wikimedia.org/wikipedia/commons/6/65/Kfontview.png" alt="Well typed 'The quick brown fox jumps over the(stripped)'" width="300">
 </a>
 
-Same goes for code documentation. It helps others (and future you) understand the code better. All parameters, methods, classes, functions, etc... should have proper JSDoc comments, which can accessible on IDE hover.
+Same goes for code documentation. It helps others (and future you) understand the code better. All parameters, methods, classes, functions, etc... should have proper JSDoc comments, which are accessible on IDE hover.
 
 ```ts
 // Don't(No JSDoc, long function signature)
