@@ -1,7 +1,7 @@
 <script lang="ts">
     import { uiState } from "@/lib/stores/ui.svelte";
     import Button from "@/components/ui/Button.svelte";
-
+    import { X } from "@lucide/svelte";
     let dialog: HTMLDialogElement;
 
     $effect(() => {
@@ -44,7 +44,7 @@
             type="button"
             aria-label="Close settings"
         >
-            ✕
+            <X />
         </button>
     </header>
 

@@ -28,6 +28,7 @@
     },
     "dependencies": {
         "@langchain/core": "^1.1.4",
+        "@lucide/svelte": "^0.559.0",
         "svelte": "^5.39.3"
     },
     "devDependencies": {

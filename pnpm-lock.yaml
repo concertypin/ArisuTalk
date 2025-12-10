@@ -75,6 +75,9 @@ importers:
       '@langchain/core':
         specifier: ^1.1.4
         version: 1.1.4
+      '@lucide/svelte':
+        specifier: ^0.559.0
+        version: 0.559.0(svelte@5.43.4)
       svelte:
         specifier: ^5.39.3
         version: 5.43.4
@@ -1021,6 +1024,11 @@ packages:
   '@langchain/core@1.1.4':
     resolution: {integrity: sha512-AZVHVoLJzhHU/jsjeNto1pvfHaPxGT+V3PcVyvUw0kCiWftdu1bxfwhwSsZJ9B9iJeXJdCIUe089+NYd3FsEuw==}
     engines: {node: '>=20'}
+
+  '@lucide/svelte@0.559.0':
+    resolution: {integrity: sha512-ZIGuYvrayrbPR/GhNlhvFXesH45LyEz38WphtkIu6UEyKZsFnGHFQD7CAXDOoum6JiqN2PSIxilVRcHwWLBmoQ==}
+    peerDependencies:
+      svelte: ^5
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -4441,6 +4449,10 @@ snapshots:
       - '@opentelemetry/exporter-trace-otlp-proto'
       - '@opentelemetry/sdk-trace-base'
       - openai
+
+  '@lucide/svelte@0.559.0(svelte@5.43.4)':
+    dependencies:
+      svelte: 5.43.4
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
