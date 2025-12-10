@@ -17,6 +17,15 @@
     let inputValue = $state("");
     let isTyping = $state(false);
     let messagesContainer = $state<HTMLElement | null>(null);
+    let pendingTimeoutIds: Set<number> = new Set();
+
+    // Cleanup pending timeouts on unmount
+    $effect(() => {
+        return () => {
+            pendingTimeoutIds.forEach((id) => clearTimeout(id));
+            pendingTimeoutIds.clear();
+        };
+    });
 
     async function sendMessage() {
         if (!inputValue.trim()) return;
@@ -36,7 +45,7 @@
         isTyping = true;
 
         // Mock response delay
-        setTimeout(async () => {
+        const timeoutId = setTimeout(async () => {
             const botMsg: Message = {
                 id: crypto.randomUUID(),
                 text: "This is a mock response from the system.",
@@ -44,9 +53,12 @@
                 timestamp: Date.now(),
             };
             messages = [...messages, botMsg];
-            isTyping = false;
+            isTyping = pendingTimeoutIds.size === 0;
+            pendingTimeoutIds.delete(timeoutId);
             scrollToBottom();
         }, 1000);
+
+        pendingTimeoutIds.add(timeoutId);
     }
 
     async function scrollToBottom() {
