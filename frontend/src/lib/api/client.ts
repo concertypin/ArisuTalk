@@ -10,7 +10,7 @@
 export type ApiResponse<T> =
     | {
           /** The data returned by the API (null if error). */
-          data: T | null;
+          data: null;
           /** Error message if the request failed. */
           error: string;
           /** HTTP status code. */
