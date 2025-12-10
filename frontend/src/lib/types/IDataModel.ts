@@ -35,10 +35,10 @@ export class Message {
      * @param params - The initialization parameters.
      */
     constructor({ id, role, content, timestamp }: MessageParams) {
-        this.id = id || crypto.randomUUID();
+        this.id = id ?? crypto.randomUUID();
         this.role = role;
         this.content = content;
-        this.timestamp = timestamp || Date.now();
+        this.timestamp = timestamp ?? Date.now();
     }
 }
 
@@ -78,7 +78,7 @@ export class Character {
      * @param params - The initialization parameters.
      */
     constructor({ id, name, description, persona, avatarUrl }: CharacterParams) {
-        this.id = id || crypto.randomUUID();
+        this.id = id ?? crypto.randomUUID();
         this.name = name;
         this.description = description;
         this.persona = persona;
@@ -126,12 +126,12 @@ export class Chat {
      * @param params - The initialization parameters.
      */
     constructor({ id, characterId, messages, title, createdAt, updatedAt }: ChatParams) {
-        this.id = id || crypto.randomUUID();
+        this.id = id ?? crypto.randomUUID();
         this.characterId = characterId;
-        this.messages = messages || [];
+        this.messages = messages ?? [];
         this.title = title;
-        this.createdAt = createdAt || Date.now();
-        this.updatedAt = updatedAt || Date.now();
+        this.createdAt = createdAt ?? Date.now();
+        this.updatedAt = updatedAt ?? Date.now();
     }
 
     /**
