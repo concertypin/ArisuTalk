@@ -9,7 +9,6 @@ This project is a monorepo with a frontend and a backend. Please refer to the `A
 
 ## Project Overview
 
-
 ## What's going on here?
 
 Currently, there is ongoing work called "Project Kei" to remake the entire application from scratch. The goal is to create a more modular and maintainable architecture.
@@ -20,6 +19,10 @@ This includes:
 - Performance optimizations via unspaghettiing the codebase
 - ...and more!
 
-Keep in mind that Project Kei is not applied to the backend. It is well-structured already. The focus is solely on the frontend.
+Keep in mind that Project Kei is not applied to the backend. It is well-structured already and only minor improvements are needed.
 
 Check out [GitHub Projects](https://github.com/users/concertypin/projects/5) for backlog.
+
+## Guidelines for AI Agents
+
+There are some code conventions and best practices to follow [here](./docs/rule/README.md) to ensure code readability and maintainability.
