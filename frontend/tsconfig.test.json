@@ -15,14 +15,8 @@
 			"vite/client"
 		] /* Specify type package names to be included without being referenced in a source file. */,
 		"paths": {
-			"@/*": [
-				"./src/*"
-			],
 			"@test/*": [
 				"./test/*"
-			],
-			"@worker/*": [
-				"./worker/*"
 			]
 		},
 		"noEmit": false /* Disable emitting files from a compilation. */,

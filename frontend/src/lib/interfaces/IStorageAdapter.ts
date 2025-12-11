@@ -1,4 +1,5 @@
-import type { Chat, Character, Settings } from "@/lib/types/IDataModel";
+import type { Chat, Settings } from "@/lib/types/IDataModel";
+import type { Character } from "../types/Character";
 
 /**
  * Interface for the storage adapter.

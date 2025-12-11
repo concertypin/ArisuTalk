@@ -31,7 +31,8 @@
         "@lucide/svelte": "^0.559.0",
         "cbor-x": "^1.6.0",
         "comlink": "^4.4.2",
-        "svelte": "^5.39.3"
+        "svelte": "^5.39.3",
+        "zod": "^4.1.12"
     },
     "devDependencies": {
         "@eslint/js": "^9.39.1",

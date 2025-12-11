@@ -13,14 +13,6 @@
 			"ESNext",
 			"DOM"
 		],
-		"paths": {
-			"@/*": [
-				"./src/*"
-			],
-			"@worker/*": [
-				"./worker/*"
-			]
-		},
 		"types": [
 			"vite/client",
 			"svelte/compiler",
