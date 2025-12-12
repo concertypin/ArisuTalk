@@ -2,7 +2,7 @@ It describes how to validate data, and how to add your data schema.
 
 ## TL;DR
 - Zod is used for data validation.
-- Schemas and infered types are defined in `src/lib/types`.
+- Schemas and inferred types are defined in `src/lib/types`.
 - JSDoc is used on schemas too.
 
 
@@ -23,7 +23,7 @@ It describes how to validate data, and how to add your data schema.
 ```ts
 
 /**
- * @see {@link Character} - Since we will wrote JSDoc on type(not schema), we'll use `see` only.
+ * @see {@link Character} - Since we will write JSDoc on type(not schema), we'll use `see` only.
  */
 export const CharacterSchema = z.object({
     /**
