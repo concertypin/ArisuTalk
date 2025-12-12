@@ -14,26 +14,10 @@ type ParseResult<T> =
     | {
           success: false;
       };
-async function readAll(stream: ReadableStream<Uint8Array>): Promise<Uint8Array> {
-    const chunks: Uint8Array[] = [];
-    let totalLength = 0;
-    const reader = stream.getReader();
-    while (true) {
-        const { done, value } = await reader.read();
-        if (done) {
-            break;
-        }
-        chunks.push(value);
-        totalLength += value.length;
-    }
 
-    const decompressedData = new Uint8Array(totalLength);
-    let offset = 0;
-    for (const chunk of chunks) {
-        decompressedData.set(chunk, offset);
-        offset += chunk.length;
-    }
-    return decompressedData;
+async function readAll(stream: ReadableStream<Uint8Array>): Promise<Uint8Array> {
+    const buffer = await new Response(stream).arrayBuffer();
+    return new Uint8Array(buffer);
 }
 
 async function parseCharacter(rawData: ArrayBuffer): Promise<ParseResult<Character>> {
