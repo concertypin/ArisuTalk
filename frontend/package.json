@@ -15,10 +15,10 @@
         "test:run": "vitest run",
         "test:ui": "vitest --ui",
         "check:types": "svelte-check --tsconfig tsconfig.app.json --fail-on-warnings",
-        "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint/ src/ test/",
-        "lint:fix": "eslint --cache --fix --cache-location ./node_modules/.cache/eslint/ src/ test/",
-        "format": "prettier --write --cache --cache-location ./node_modules/.cache/prettier/ src/ test/",
-        "format:check": "prettier --check --cache --cache-location ./node_modules/.cache/prettier/ src/ test/"
+        "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint/ src/ test/ worker/",
+        "lint:fix": "eslint --cache --fix --cache-location ./node_modules/.cache/eslint/ src/ test/ worker/",
+        "format": "prettier --write --cache --cache-location ./node_modules/.cache/prettier/ src/ test/ worker/",
+        "format:check": "prettier --check --cache --cache-location ./node_modules/.cache/prettier/ src/ test/ worker/"
     },
     "author": "",
     "license": "Apache-2.0",
@@ -27,9 +27,13 @@
         "node": ">20"
     },
     "dependencies": {
+        "@arisutalk/character-spec": "^0.0.1",
         "@langchain/core": "^1.1.4",
         "@lucide/svelte": "^0.559.0",
-        "svelte": "^5.39.3"
+        "cbor-x": "^1.6.0",
+        "comlink": "^4.4.2",
+        "svelte": "^5.39.3",
+        "zod": "^4.1.12"
     },
     "devDependencies": {
         "@eslint/js": "^9.39.1",

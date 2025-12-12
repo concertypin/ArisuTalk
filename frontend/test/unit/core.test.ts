@@ -1,28 +1,82 @@
-import { describe, it, expect } from "vitest";
-import { Chat, Character, Message, Settings } from "@/lib/types/IDataModel";
+import { describe, it, expect, expectTypeOf } from "vitest";
+import { Chat, Character, Message } from "@arisutalk/character-spec/v0/Character";
+import { Settings } from "@/lib/types/IDataModel";
 import { ChatProvider, type ProviderSettings } from "@/lib/interfaces/IChatProvider";
 import { BaseMessage, HumanMessage } from "@langchain/core/messages";
 
 describe("Data Models", () => {
     it("should generate valid IDs for new instances", () => {
-        const msg = new Message({ role: "user", content: "Hello" });
+        const msg = {
+            role: "user",
+            content: {
+                type: "string",
+                data: "Hello",
+            },
+            id: "test",
+            timestamp: Date.now(),
+        } satisfies Message;
+        expectTypeOf(msg).toExtend<Message>();
         expect(msg.id).toBeDefined();
         expect(typeof msg.id).toBe("string");
         expect(msg.timestamp).toBeDefined();
     });
 
     it("should correctly structure a Chat", () => {
-        const char = new Character({
+        const char = {
             name: "Arisu",
             description: "A cute AI",
-            persona: "Be helpful",
-        });
-        const chat = new Chat({ characterId: char.id, title: "New Chat" });
+            specVersion: 0,
+            id: "test",
+            prompt: {
+                description: "",
+                authorsNote: "",
+                lorebook: {
+                    config: {
+                        tokenLimit: 0,
+                    },
+                    data: [],
+                },
+            },
+            executables: {
+                runtimeSetting: {
+                    mem: undefined,
+                },
+                replaceHooks: {
+                    display: [],
+                    input: [],
+                    output: [],
+                    request: [],
+                },
+            },
+            metadata: {
+                author: undefined,
+                license: "",
+                version: undefined,
+                distributedOn: undefined,
+                additionalInfo: undefined,
+            },
+        } satisfies Character;
+        const chat = {
+            id: "test",
+            characterId: char.id,
+            title: "New Chat",
+            messages: [] as Message[],
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+            lorebook: [],
+        } satisfies Chat;
         expect(chat.id).toBeDefined();
         expect(chat.characterId).toBe(char.id);
         expect(chat.messages).toHaveLength(0);
 
-        chat.addMessage(new Message({ role: "user", content: "Hi" }));
+        chat.messages.push({
+            role: "user",
+            content: {
+                type: "string",
+                data: "Hello",
+            },
+            id: "test",
+        });
         expect(chat.messages).toHaveLength(1);
     });
 

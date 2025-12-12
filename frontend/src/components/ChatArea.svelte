@@ -5,6 +5,7 @@
 <script lang="ts">
     import { tick } from "svelte";
     import Button from "@/components/ui/Button.svelte";
+    import { SvelteSet } from "svelte/reactivity";
 
     type Message = {
         id: string;
@@ -17,7 +18,7 @@
     let inputValue = $state("");
     let isTyping = $state(false);
     let messagesContainer = $state<HTMLElement | null>(null);
-    let pendingTimeoutIds: Set<number> = new Set();
+    let pendingTimeoutIds: SvelteSet<number> = new SvelteSet();
 
     // Cleanup pending timeouts on unmount
     $effect(() => {

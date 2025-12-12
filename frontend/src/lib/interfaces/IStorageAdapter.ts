@@ -1,5 +1,5 @@
-import type { Chat, Character, Settings } from "@/lib/types/IDataModel";
-
+import type { Chat, Character } from "@arisutalk/character-spec/v0/Character";
+import type { Settings } from "@/lib/types/IDataModel";
 /**
  * Interface for the storage adapter.
  * Handles persistence of chats, characters, and settings using local storage mechanisms (IndexedDB/OpFS).

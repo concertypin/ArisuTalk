@@ -30,6 +30,9 @@ export default defineConfig(async (ctx) => {
                 },
             },
         },
+        worker: {
+            format: "es", // Force ES module workers
+        },
         clearScreen: false,
         publicDir: "static",
         plugins: plugin,
