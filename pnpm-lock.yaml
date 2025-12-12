@@ -72,6 +72,9 @@ importers:
 
   frontend:
     dependencies:
+      '@arisutalk/character-spec':
+        specifier: ^0.0.1
+        version: 0.0.1(zod@4.1.12)
       '@langchain/core':
         specifier: ^1.1.4
         version: 1.1.4
@@ -157,6 +160,12 @@ packages:
   '@alloc/quick-lru@5.2.0':
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
+
+  '@arisutalk/character-spec@0.0.1':
+    resolution: {integrity: sha512-MzW0ArKA4+gTozyRj/2s2rUPltWYOqjeSKv4W7T0GG13EfT6yakAZZAyNjoQ1ySuq8WjC+z0Ygeh9KoJdD3Pzg==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      zod: ^4.1.13
 
   '@asamuzakjp/css-color@4.0.5':
     resolution: {integrity: sha512-lMrXidNhPGsDjytDy11Vwlb6OIGrT3CmLg3VWNFyWkLWtijKl7xjvForlh8vuj0SHGjgl4qZEQzUmYTeQA2JFQ==}
@@ -3396,6 +3405,10 @@ snapshots:
     optional: true
 
   '@alloc/quick-lru@5.2.0': {}
+
+  '@arisutalk/character-spec@0.0.1(zod@4.1.12)':
+    dependencies:
+      zod: 4.1.12
 
   '@asamuzakjp/css-color@4.0.5':
     dependencies:
