@@ -39,7 +39,9 @@ async function readAll(stream: ReadableStream<Uint8Array>): Promise<Uint8Array> 
 async function parseCharacter(rawData: ArrayBuffer): Promise<ParseResult<Character>> {
     //decompress
     const decompressed = new DecompressionStream("deflate-raw");
-    decompressed.writable.getWriter().write(rawData);
+    const writer = decompressed.writable.getWriter();
+    writer.write(rawData);
+    writer.close();
 
     //cbor decode
     const data = await readAll(decompressed.readable);
@@ -49,7 +51,9 @@ async function parseCharacter(rawData: ArrayBuffer): Promise<ParseResult<Charact
 async function exportCharacter(character: Character): Promise<ArrayBufferLike> {
     const cbor = encode(character);
     const compressed = new CompressionStream("deflate-raw");
-    compressed.writable.getWriter().write(cbor);
+    const writer = compressed.writable.getWriter();
+    writer.write(cbor);
+    writer.close();
     const data = await readAll(compressed.readable);
     return transfer(data.buffer, [data.buffer]);
 }

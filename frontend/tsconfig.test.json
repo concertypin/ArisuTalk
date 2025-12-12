@@ -3,7 +3,6 @@
 		//test
 		"test/**/*.ts",
 		"test/*.ts",
-		"worker/**/*.ts"
 	],
 	"compilerOptions": {
 		"tsBuildInfoFile": "./node_modules/.cache/test.tsbuildinfo",
@@ -14,11 +13,6 @@
 		"types": [
 			"vite/client"
 		] /* Specify type package names to be included without being referenced in a source file. */,
-		"paths": {
-			"@test/*": [
-				"./test/*"
-			]
-		},
 		"noEmit": false /* Disable emitting files from a compilation. */,
 		"allowImportingTsExtensions": false,
 		"outDir": "./dist" /* Specify an output folder for all emitted files. */,
@@ -29,6 +23,9 @@
 	"references": [
 		{
 			"path": "./tsconfig.app.json"
+		},
+		{
+			"path": "./tsconfig.worker.json"
 		}
 	]
 }
