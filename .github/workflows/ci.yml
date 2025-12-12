@@ -6,9 +6,11 @@ on:
     branches:
       - dev-*
       - dev/*
+      - kei-dev/*
   pull_request:
     branches:
       - main
+      - kei
   workflow_dispatch:
 permissions:
   contents: read
@@ -66,3 +68,6 @@ jobs:
       - name: Check type errors
         timeout-minutes: 10 # It takes long time due to svelte type checking
         run: pnpm run --filter frontend check:types
+
+      - name: Check linting 
+        run: pnpm run --filter frontend lint
