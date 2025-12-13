@@ -1,5 +1,6 @@
 import { IfNotExistBehavior } from "@/lib/interfaces/IAssetStorageAdapter";
 import type IAssetStorageAdapter from "@/lib/interfaces/IAssetStorageAdapter";
+import { ca, fi } from "zod/locales";
 
 const FORBIDDEN_CHARS = new Set(["<", ">", ":", '"', "/", "\\", "|", "?", "*"]);
 const RESERVED_NAMES = new Set([
@@ -85,9 +86,20 @@ export class OpFSAssetStorageAdapter implements IAssetStorageAdapter {
     }
     async saveAsset(name: string, data: File, overwrite?: boolean): Promise<URL> {
         const root = await this.root;
+        const filename = sanitizeFileName(name);
+        let fileExists: boolean;
+        try {
+            root.getFileHandle(filename, { create: false });
+            fileExists = true;
+        } catch (e) {
+            fileExists = false;
+        }
+        if (fileExists && !overwrite) {
+            throw new Error("File already exists");
+        }
+
         // Simple mapping: Store directly in root with name as filename.
-        // if create is false, throws if not exists. (NotFoundError on DOMException)
-        const fileHandle = await root.getFileHandle(sanitizeFileName(name), { create: overwrite });
+        const fileHandle = await root.getFileHandle(filename, { create: overwrite });
         const writable = await fileHandle.createWritable();
         await writable.write(data);
         await writable.close();
