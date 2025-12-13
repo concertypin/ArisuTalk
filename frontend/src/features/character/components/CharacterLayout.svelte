@@ -1,6 +1,9 @@
 <script lang="ts">
     import CharacterSidebar from "./CharacterSidebar.svelte";
     import CharacterForm from "./CharacterForm.svelte";
+    import PersonaList from "../../persona/components/PersonaList.svelte";
+    import PersonaForm from "../../persona/components/PersonaForm.svelte";
+    import type { Persona } from "../../persona/schema";
 
     interface Props {
         children?: import("svelte").Snippet;
@@ -8,46 +11,41 @@
 
     let { children }: Props = $props();
 
-    // Ideally this state should probably be in the store or a higher level component
-    // to persist selection across navigations if needed.
-    // For now, local state here or in the store.
-    // Let's assume the URL tracks the character, but for "Basic" implementation,
-    // I might just track it here.
-    // However, the requested plan kept "Character Manager" separate.
-    // But the feedback said "discord's server-chat system", which implies
-    // selecting a character changes the view.
-
-    // I'll add a selectedCharacterId state to the store or manage it here.
-    // Making it local state for now as a layout.
-    // But wait, if I select a character, the "children" (Main Content) should update.
-
     let selectedCharacterId = $state<string | null>(null);
     let dialog = $state<HTMLDialogElement>();
+    let personaDialog = $state<HTMLDialogElement>();
+
+    // Persona UI State
+    let editingPersona = $state<Persona | undefined>(undefined);
+    let isPersonaFormOpen = $state(false);
 
     function handleSelect(id: string) {
         selectedCharacterId = id;
-        // Navigate or update context?
-        // If we are using slot/snippet, the parent (Home.svelte) controls the content.
-        // So I should probably expose the selection to the parent via binding or callback?
-        // But `Home.svelte` will use this layout.
-
-        // Actually, looking at the goal: "Character Management".
-        // Maybe I should add `selectedCharacterId` to `characterStore`?
-        // That seems globally relevant.
-        //todo
-        throw new Error("Not implemented yet");
     }
 
     function handleAdd() {
-        // Trigger Add Modal
-        // We'll need a way to open the modal.
-        // Maybe export a function or use a store for UI state.
-        // I'll emit an event or use a callback prop if possible, strict props in Svelte 5.
-        // But `CharacterLayout` wraps the app.
-        // Let's dispatch a custom event or expect a prop.
-        // Simplest: bind selectedCharacterId.
-        //todo
-        throw new Error("Not implemented yet");
+        dialog?.showModal();
+    }
+
+    function handlePersona() {
+        personaDialog?.showModal();
+        isPersonaFormOpen = false;
+        editingPersona = undefined;
+    }
+
+    function handleEditPersona(persona: Persona) {
+        editingPersona = persona;
+        isPersonaFormOpen = true;
+    }
+
+    function handleCreatePersona() {
+        editingPersona = undefined;
+        isPersonaFormOpen = true;
+    }
+
+    function handlePersonaSave() {
+        isPersonaFormOpen = false;
+        editingPersona = undefined;
     }
 </script>
 
@@ -57,17 +55,14 @@
         <CharacterSidebar
             {selectedCharacterId}
             onSelect={handleSelect}
-            onAdd={() => dialog?.showModal()}
+            onAdd={handleAdd}
+            onPersona={handlePersona}
         />
-        <!-- Note: accessing DOM directly for modal is basic HTML dialog usage -->
     </nav>
 
     <!-- Main Content -->
     <main class="flex-1 flex flex-col min-w-0 bg-base-200 relative">
         {#if selectedCharacterId}
-            <!-- Pass context to children? -->
-            <!-- In Svelte 5, we can use context API setContext. -->
-            <!-- But here we just render children. Home.svelte will likely decide what to show based on store/selection. -->
             {@render children?.()}
         {:else}
             <div class="flex items-center justify-center h-full text-base-content/30">
@@ -76,9 +71,47 @@
         {/if}
     </main>
 
+    <!-- Character Modal -->
     <dialog bind:this={dialog} id="character_form_modal" class="modal">
-        <div class="modal-box p-0">
+        <div class="modal-box p-0 border border-base-300 shadow-2xl">
             <CharacterForm onSave={() => dialog?.close()} onCancel={() => dialog?.close()} />
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    </dialog>
+
+    <!-- Persona Modal -->
+    <dialog bind:this={personaDialog} id="persona_modal" class="modal">
+        <div
+            class="modal-box w-11/12 max-w-2xl min-h-[500px] flex flex-col border border-base-300 shadow-2xl"
+        >
+            <h3 class="font-bold text-lg mb-4">Manage Personas</h3>
+
+            <div class="flex-1 overflow-y-auto">
+                {#if isPersonaFormOpen}
+                    <PersonaForm
+                        persona={editingPersona}
+                        onSave={handlePersonaSave}
+                        onCancel={() => (isPersonaFormOpen = false)}
+                    />
+                {:else}
+                    <div class="mb-4 flex justify-end">
+                        <button class="btn btn-sm btn-primary w-full" onclick={handleCreatePersona}>
+                            Create New Persona
+                        </button>
+                    </div>
+                    <PersonaList onEdit={handleEditPersona} />
+                {/if}
+            </div>
+
+            {#if !isPersonaFormOpen}
+                <div class="modal-action">
+                    <form method="dialog">
+                        <button class="btn">Close</button>
+                    </form>
+                </div>
+            {/if}
         </div>
         <form method="dialog" class="modal-backdrop">
             <button>close</button>

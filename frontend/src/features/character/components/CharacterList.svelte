@@ -2,6 +2,7 @@
     import { characterStore } from "../stores/characterStore.svelte";
     import CharacterCard from "./CharacterCard.svelte";
     import { getCardParseWorker } from "@/lib/workers/workerClient";
+    import OpFSAssetStorageAdapter from "../adapters/assetStorage/OpFSAssetStorageAdapter";
     import type {} from "@arisutalk/character-spec/v0/Character";
     import type IAssetStorageAdapter from "@/lib/interfaces/IAssetStorageAdapter";
     interface Props {
@@ -67,12 +68,8 @@
             } else {
                 // Local file, read as base64
                 try {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    const assetStorage: IAssetStorageAdapter = null as any;
-                    //if-statement to suppress IDE's not-reachable-code warning.
-                    //actually, it is always not reachable.
-                    // todo
-                    if (!assetStorage) throw new Error("Not implemented");
+                    const assetStorage = new OpFSAssetStorageAdapter();
+                    await assetStorage.init();
 
                     const blob = await assetStorage.getAssetBlob(i.url);
                     const base64 = await blobsToBase64DataUrl(blob, i.mimeType);

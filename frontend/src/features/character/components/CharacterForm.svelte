@@ -31,7 +31,7 @@
         const newCharacter: Character = {
             assets: { assets: [], inlays: [] },
             specVersion: 0,
-            id: crypto.randomUUID(),
+            id: character?.id || crypto.randomUUID(),
             name: name,
             description: description,
             prompt: {
@@ -59,14 +59,8 @@
                 additionalInfo: undefined,
             },
         };
-        if (character) {
-            // Update logic... wait, we need index or ID.
-            // Form doesn't know ID.
-            // We probably should pass ID or handle update in parent.
-            // But for "Add", we just store.add().
-        } else {
-            await characterStore.add(newCharacter);
-        }
+
+        await characterStore.add(newCharacter);
 
         onSave?.();
         reset();
@@ -104,64 +98,92 @@
         </div>
     {/if}
 
-    <div class="tabs tabs-boxed mb-4">
-        <input type="radio" name="create_mode" class="tab" aria-label="Create" checked />
-        <div
-            role="tabpanel"
-            class="tab-content p-4 bg-base-100 border-base-300 rounded-box border mt-2"
-        >
-            <form onsubmit={handleSubmit} class="space-y-4">
-                <div class="form-control">
-                    <label class="label" for="char_name">
-                        <span class="label-text">Name</span>
-                    </label>
-                    <input
-                        type="text"
-                        id="char_name"
-                        bind:value={name}
-                        placeholder="e.g. Arisu"
-                        class="input input-bordered w-full"
-                    />
-                </div>
+    <div class="mt-2">
+        <div role="tablist" class="tabs tabs-lifted">
+            <input type="radio" name="create_mode" class="tab" aria-label="Create New" checked />
+            <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-6">
+                <form onsubmit={handleSubmit} class="space-y-4">
+                    <fieldset class="fieldset w-full">
+                        <legend class="fieldset-legend">Name</legend>
+                        <input
+                            type="text"
+                            id="char_name"
+                            bind:value={name}
+                            placeholder="e.g. Arisu"
+                            class="input w-full"
+                        />
+                    </fieldset>
 
-                <div class="form-control">
-                    <label class="label" for="char_desc">
-                        <span class="label-text">Description</span>
-                    </label>
-                    <textarea
-                        id="char_desc"
-                        bind:value={description}
-                        class="textarea textarea-bordered h-24"
-                        placeholder="Character description..."
-                    ></textarea>
-                </div>
+                    <fieldset class="fieldset w-full">
+                        <legend class="fieldset-legend">Description</legend>
+                        <textarea
+                            id="char_desc"
+                            bind:value={description}
+                            class="textarea h-32 w-full"
+                            placeholder="Character description..."
+                        ></textarea>
+                    </fieldset>
 
-                <div class="modal-action">
-                    <button type="button" class="btn" onclick={onCancel}>Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save</button>
-                </div>
-            </form>
-        </div>
-
-        <input type="radio" name="create_mode" class="tab" aria-label="Import" />
-        <div
-            role="tabpanel"
-            class="tab-content p-4 bg-base-100 border-base-300 rounded-box border mt-2"
-        >
-            <div class="flex flex-col items-center gap-4 py-8">
-                <p class="text-sm opacity-70">Upload a Character Card (PNG/JSON)</p>
-                <input
-                    type="file"
-                    onchange={handleFileChange}
-                    class="file-input file-input-bordered w-full max-w-xs"
-                    accept=".png,.json"
-                />
-                {#if isImporting}
-                    <span class="loading loading-spinner loading-md"></span>
-                {/if}
+                    <div class="modal-action mt-6">
+                        <button type="button" class="btn btn-neutral" onclick={onCancel}
+                            >Cancel</button
+                        >
+                        <button type="submit" class="btn btn-primary px-8">Save Character</button>
+                    </div>
+                </form>
             </div>
-            <div class="modal-action">
-                <button type="button" class="btn" onclick={onCancel}>Cancel</button>
+
+            <input type="radio" name="create_mode" class="tab" aria-label="Import Card" />
+            <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-6">
+                <div class="flex flex-col items-center gap-6 py-8">
+                    <div
+                        class="w-full max-w-sm border-2 border-dashed border-base-300 rounded-xl bg-base-100 hover:bg-base-200 transition-colors cursor-pointer relative flex flex-col items-center justify-center p-8 text-center group"
+                    >
+                        <input
+                            type="file"
+                            onchange={handleFileChange}
+                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                            accept=".png,.json"
+                        />
+                        <div
+                            class="mb-3 p-4 bg-primary/10 rounded-full text-primary group-hover:scale-110 transition-transform"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="32"
+                                height="32"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="lucide lucide-upload-cloud"
+                                ><path
+                                    d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"
+                                /><path d="M12 12v9" /><path d="m16 16-4-4-4 4" /></svg
+                            >
+                        </div>
+                        <h4 class="font-bold text-lg mb-1">Click to Upload</h4>
+                        <p class="text-sm opacity-60">or drag and drop Character Card (PNG/JSON)</p>
+                    </div>
+
+                    {#if isImporting}
+                        <div class="flex items-center gap-2 text-primary">
+                            <span class="loading loading-spinner loading-md"></span>
+                            <span class="text-sm font-medium">Importing character...</span>
+                        </div>
+                    {/if}
+
+                    {#if error}
+                        <div class="alert alert-error text-sm py-2 w-full max-w-sm mt-2">
+                            {error}
+                        </div>
+                    {/if}
+                </div>
+                <div class="modal-action">
+                    <button type="button" class="btn btn-neutral" onclick={onCancel}>Cancel</button>
+                </div>
             </div>
         </div>
     </div>

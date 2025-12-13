@@ -20,7 +20,7 @@ describe("LocalStorageAdapter", () => {
     it("should save and retrieve a chat", async () => {
         const chat: Chat = structuredClone(exampleChatData);
         await adapter.saveChat(chat);
-        const retrieved = await adapter.getChat("chat1");
+        const retrieved = await adapter.getChat(chat.id);
         expect(retrieved).toEqual(chat);
     });
 
@@ -28,7 +28,7 @@ describe("LocalStorageAdapter", () => {
         const character: Character = structuredClone(exampleCharacter);
         await adapter.saveCharacter(character);
 
-        const retrieved = await adapter.getCharacter("Arisu");
+        const retrieved = await adapter.getCharacter(character.id);
         expect(retrieved).toEqual(character);
     });
 

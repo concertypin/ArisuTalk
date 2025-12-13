@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Plus } from "@lucide/svelte";
+    import { Plus, User } from "@lucide/svelte";
     import CharacterSidebarItem from "./CharacterSidebarItem.svelte";
     import { characterStore } from "../stores/characterStore.svelte";
 
@@ -7,13 +7,14 @@
         selectedCharacterId: string | null;
         onSelect: (id: string) => void;
         onAdd: () => void;
+        onPersona: () => void;
     }
 
-    let { selectedCharacterId, onSelect, onAdd }: Props = $props();
+    let { selectedCharacterId, onSelect, onAdd, onPersona }: Props = $props();
 </script>
 
 <div
-    class="flex flex-col items-center w-[72px] bg-base-300 py-3 overflow-y-auto h-full scrollbar-none"
+    class="flex flex-col items-center w-[72px] bg-base-300 py-3 overflow-y-auto overflow-x-hidden h-full scrollbar-none"
 >
     {#each characterStore.characters as character (character.id || character.name)}
         <CharacterSidebarItem
@@ -33,5 +34,17 @@
         >
             <Plus size={24} />
         </button>
+    </div>
+
+    <div class="mt-auto pb-4">
+        <div class="tooltip tooltip-right z-50" data-tip="Personas">
+            <button
+                class="group flex items-center justify-center w-12 h-12 rounded-3xl hover:rounded-xl bg-base-200 hover:bg-primary text-primary hover:text-white transition-all duration-200"
+                onclick={onPersona}
+                aria-label="Manage Personas"
+            >
+                <User size={24} />
+            </button>
+        </div>
     </div>
 </div>

@@ -29,7 +29,7 @@ pnpm install
 ### Development Server
 
 ```bash
-pnpm dev:fe
+pnpm run -F frontend dev
 ```
 
 The development server will start at `http://localhost:5173` with hot reload enabled.
@@ -37,7 +37,7 @@ The development server will start at `http://localhost:5173` with hot reload ena
 ### Build for Production
 
 ```bash
-pnpm build:fe
+pnpm run -F frontend build
 ```
 
 The production-ready files will be in the `ArisuTalk/frontend/dist` directory.
@@ -45,7 +45,7 @@ The production-ready files will be in the `ArisuTalk/frontend/dist` directory.
 ### Testing
 
 ```bash
-pnpm test
+pnpm run -F frontend test
 ```
 
 ## Authentication Setup
@@ -87,6 +87,11 @@ Worker logic should be tested via unit tests in `test/workers/`. Note that real 
     - Fix: Remove `.ts` from import statements.
 - Using `lucide-svelte` instead of `@lucide/svelte`.
     - Fix: Replace `lucide-svelte` with `@lucide/svelte`.
+
+### Documentation of Other Libraries
+
+- DaisyUI: https://daisyui.com/llms.txt
+- Svelte: https://svelte.dev/llms.txt
 
 ## Contributing
 

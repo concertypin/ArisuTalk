@@ -29,6 +29,7 @@ export default defineConfig(async (ctx) => {
     const baseConfig: UserConfig = {
         server: {
             open: "index.html",
+            allowedHosts: true,
         },
         build: {
             outDir: "dist",
