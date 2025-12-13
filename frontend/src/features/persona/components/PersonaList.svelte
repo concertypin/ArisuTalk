@@ -1,7 +1,7 @@
 <script lang="ts">
     import { personaStore } from "../stores/personaStore.svelte";
     import type { Persona } from "../schema";
-    import { Trash2, Edit, Plus, User } from "@lucide/svelte";
+    import { Trash2, SquarePen } from "@lucide/svelte";
 
     interface Props {
         onEdit: (persona: Persona) => void;
@@ -45,7 +45,7 @@
 
             <div class="flex gap-1" role="group" onclick={(e) => e.stopPropagation()}>
                 <button class="btn btn-ghost btn-xs btn-square" onclick={() => onEdit(persona)}>
-                    <Edit size={14} />
+                    <SquarePen size={14} />
                 </button>
                 <button
                     class="btn btn-ghost btn-xs btn-square text-error"

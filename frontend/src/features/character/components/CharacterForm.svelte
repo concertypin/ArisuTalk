@@ -6,9 +6,10 @@
         character?: Character;
         onSave?: () => void;
         onCancel?: () => void;
+        onSubmit?: (character: Character) => void;
     }
 
-    let { character = undefined, onSave, onCancel }: Props = $props();
+    let { character = undefined, onSave, onCancel, onSubmit }: Props = $props();
 
     let name = $state("");
     let description = $state("");
@@ -29,12 +30,13 @@
         }
 
         const newCharacter: Character = {
-            assets: { assets: [], inlays: [] },
+            ...character, // Keep existing fields if editing
+            assets: character?.assets || { assets: [], inlays: [] },
             specVersion: 0,
             id: character?.id || crypto.randomUUID(),
             name: name,
             description: description,
-            prompt: {
+            prompt: character?.prompt || {
                 description: "",
                 authorsNote: "",
                 lorebook: {
@@ -42,7 +44,7 @@
                     data: [],
                 },
             },
-            executables: {
+            executables: character?.executables || {
                 runtimeSetting: { mem: undefined },
                 replaceHooks: {
                     display: [],
@@ -51,7 +53,7 @@
                     request: [],
                 },
             },
-            metadata: {
+            metadata: character?.metadata || {
                 author: undefined,
                 license: "",
                 version: undefined,
@@ -60,7 +62,7 @@
             },
         };
 
-        await characterStore.add(newCharacter);
+        onSubmit?.(newCharacter);
 
         onSave?.();
         reset();

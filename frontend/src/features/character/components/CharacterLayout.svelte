@@ -1,9 +1,13 @@
 <script lang="ts">
     import CharacterSidebar from "./CharacterSidebar.svelte";
     import CharacterForm from "./CharacterForm.svelte";
+    import CharacterList from "./CharacterList.svelte";
+    import ChatList from "../../chat/components/ChatList.svelte";
     import PersonaList from "../../persona/components/PersonaList.svelte";
     import PersonaForm from "../../persona/components/PersonaForm.svelte";
     import type { Persona } from "../../persona/schema";
+    import { characterStore } from "../stores/characterStore.svelte";
+    import type { Character } from "@arisutalk/character-spec/v0/Character";
 
     interface Props {
         children?: import("svelte").Snippet;
@@ -15,6 +19,12 @@
     let dialog = $state<HTMLDialogElement>();
     let personaDialog = $state<HTMLDialogElement>();
 
+    // Character UI State
+    let editingIndex = $state<number | null>(null);
+    let editingCharacter = $derived(
+        editingIndex !== null ? characterStore.characters[editingIndex] : undefined
+    );
+
     // Persona UI State
     let editingPersona = $state<Persona | undefined>(undefined);
     let isPersonaFormOpen = $state(false);
@@ -24,7 +34,22 @@
     }
 
     function handleAdd() {
+        editingIndex = null;
         dialog?.showModal();
+    }
+
+    function handleEdit(index: number) {
+        editingIndex = index;
+        dialog?.showModal();
+    }
+
+    async function handleFormSubmit(char: Character) {
+        if (editingIndex !== null) {
+            await characterStore.update(editingIndex, char);
+        } else {
+            await characterStore.add(char);
+        }
+        dialog?.close();
     }
 
     function handlePersona() {
@@ -51,13 +76,16 @@
 
 <div class="flex h-screen w-full overflow-hidden bg-base-100">
     <!-- Sidebar -->
-    <nav class="flex-none z-20">
+    <nav class="flex-none z-20 flex h-full">
         <CharacterSidebar
             {selectedCharacterId}
             onSelect={handleSelect}
             onAdd={handleAdd}
             onPersona={handlePersona}
         />
+        {#if selectedCharacterId}
+            <ChatList characterId={selectedCharacterId} />
+        {/if}
     </nav>
 
     <!-- Main Content -->
@@ -65,8 +93,16 @@
         {#if selectedCharacterId}
             {@render children?.()}
         {:else}
-            <div class="flex items-center justify-center h-full text-base-content/30">
-                Select a character to start chatting
+            <div class="h-full overflow-y-auto w-full">
+                <div class="container mx-auto p-6 md:p-8 max-w-7xl">
+                    <div class="mb-8">
+                        <h1 class="text-3xl font-bold mb-2">My Characters</h1>
+                        <p class="text-base-content/60">
+                            Manage your AI characters, import cards, or create new ones.
+                        </p>
+                    </div>
+                    <CharacterList onEdit={handleEdit} />
+                </div>
             </div>
         {/if}
     </main>
@@ -74,7 +110,12 @@
     <!-- Character Modal -->
     <dialog bind:this={dialog} id="character_form_modal" class="modal">
         <div class="modal-box p-0 border border-base-300 shadow-2xl">
-            <CharacterForm onSave={() => dialog?.close()} onCancel={() => dialog?.close()} />
+            <CharacterForm
+                character={editingCharacter}
+                onSubmit={handleFormSubmit}
+                onSave={() => dialog?.close()}
+                onCancel={() => dialog?.close()}
+            />
         </div>
         <form method="dialog" class="modal-backdrop">
             <button>close</button>

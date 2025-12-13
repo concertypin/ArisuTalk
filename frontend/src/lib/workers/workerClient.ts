@@ -6,11 +6,12 @@ type WorkerApi<T> = Comlink.Remote<T> & { terminate: () => void };
 
 function createWorkerApi<T>(worker: Worker): WorkerApi<T> {
     const api = Comlink.wrap<T>(worker);
-    return Object.assign(api, {
+    return {
+        ...api,
         terminate: () => {
             worker.terminate();
         },
-    });
+    };
 }
 
 /**

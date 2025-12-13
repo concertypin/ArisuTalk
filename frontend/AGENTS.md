@@ -6,6 +6,7 @@
 
 - **JSDoc Documentation**: Use JSDoc for all exported functions and complex logic.
 - HTML Separation: Avoid HTML strings in JS files. Who does that with Svelte?
+- Use DaisyUI: We have libraries, use them!
 
 ### Event Handling
 

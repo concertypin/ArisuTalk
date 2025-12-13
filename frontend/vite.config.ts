@@ -16,6 +16,9 @@ const browserTestConfig: Presence<UserConfig["test"]>["browser"] = {
         },
     ],
 };
+const runBrowserTest =
+    process.env.npm_lifecycle_event?.includes("browser") ||
+    process.env.npm_lifecycle_event?.includes("ui");
 export default defineConfig(async (ctx) => {
     const mode = ctx.mode;
     const plugin: PluginOption[] = [
@@ -54,13 +57,13 @@ export default defineConfig(async (ctx) => {
             globals: true,
             environment: "happy-dom",
             setupFiles: ["./test/setup.ts"],
-            include: ["test/**/*.{test,spec}.{js,ts}"],
-            exclude: ["node_modules", "dist"],
-            browser:
-                process.env.npm_lifecycle_event?.includes("browser") ||
-                process.env.npm_lifecycle_event?.includes("ui")
-                    ? browserTestConfig
-                    : undefined,
+            include: ["test/**/*.{test,spec}.{js,ts}"].concat(
+                runBrowserTest ? [] : ["!test/browser/**/*.{test,spec}.{js,ts}"]
+            ),
+            exclude: ["node_modules", "dist", ".git"].concat(
+                runBrowserTest ? ["test/browser"] : []
+            ),
+            browser: runBrowserTest ? browserTestConfig : undefined,
             coverage: {
                 reporter: ["text", "json", "html"],
                 exclude: [

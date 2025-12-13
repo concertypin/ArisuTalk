@@ -12,9 +12,15 @@
     // Generate initials from name
     let initials = $derived(character.name.substring(0, 2).toUpperCase());
 
-    // Todo: Handle character avatar image if available in spec (currently spec is minimal)
-    // Assuming character has 'avatar' property or similar in future, for now placeholder.
-    let avatarUrl = $derived(character.avatarUrl || "");
+    // Check for avatar in this order: top-level property -> assets 'portrait-default' -> any image asset
+    let avatarUrl = $derived.by(() => {
+        if (character.avatarUrl) return character.avatarUrl;
+        const assets = character.assets?.assets || [];
+        const portrait =
+            assets.find((a) => a.name === "portrait-default") ||
+            assets.find((a) => a.mimeType.startsWith("image/"));
+        return portrait?.url || "";
+    });
 </script>
 
 <div class="tooltip tooltip-right z-50" data-tip={character.name}>

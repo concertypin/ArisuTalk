@@ -1,8 +1,5 @@
 import { z } from "zod";
-import {
-    AssetsSettingSchema,
-    type AssetsSetting,
-} from "@arisutalk/character-spec/v0/Character/Assets";
+import { AssetsSettingSchema } from "@arisutalk/character-spec/v0/Character/Assets";
 
 /**
  * Persona schema for user identity in chat.
@@ -18,7 +15,7 @@ export const PersonaSchema = z.object({
     /** Human readable note, not used for AI */
     note: z.string().optional(),
     /** Public/Private assets, similar to Character */
-    assets: AssetsSettingSchema,
+    assets: AssetsSettingSchema.optional(),
     /** ID or Name of the asset to use as the profile picture */
     profileAsset: z.string().optional(),
 });

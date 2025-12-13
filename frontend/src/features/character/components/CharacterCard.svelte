@@ -8,13 +8,36 @@
         onDelete: () => void;
         onExport: () => void;
     }
-
     let { character, onEdit, onDelete, onExport }: Props = $props();
+
+    let avatarUrl = $derived.by(() => {
+        if (character.avatarUrl) return character.avatarUrl;
+        const assets = character.assets?.assets || [];
+        const portrait =
+            assets.find((a) => a.name === "portrait-default") ||
+            assets.find((a) => a.mimeType.startsWith("image/"));
+        return portrait?.url || "";
+    });
 </script>
 
 <div
-    class="card bg-base-100 shadow-xl compact border border-base-content/10 group hover:border-primary transition-all duration-300"
+    class="card bg-base-100 shadow-xl compact border border-base-content/10 group hover:border-primary transition-all duration-300 h-full"
 >
+    {#if avatarUrl}
+        <figure class="px-4 pt-4">
+            <div class="avatar w-full h-48 rounded-xl overflow-hidden bg-base-200">
+                <img src={avatarUrl} alt={character.name} class="w-full h-full object-cover" />
+            </div>
+        </figure>
+    {:else}
+        <figure class="px-4 pt-4">
+            <div
+                class="w-full h-48 rounded-xl bg-neutral text-neutral-content flex items-center justify-center text-4xl font-bold"
+            >
+                {character.name.substring(0, 2).toUpperCase()}
+            </div>
+        </figure>
+    {/if}
     <div class="card-body">
         <h2 class="card-title text-primary">
             {character.name}

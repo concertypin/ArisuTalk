@@ -5,19 +5,16 @@
 <script lang="ts">
     import { tick } from "svelte";
     import { SvelteSet } from "svelte/reactivity";
+    import { chatStore } from "@/features/chat/stores/chatStore.svelte";
+    import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
 
-    type Message = {
-        id: string;
-        text: string;
-        sender: "user" | "bot";
-        timestamp: number;
-    };
-
-    let messages = $state<Message[]>([]);
     let inputValue = $state("");
-    let isTyping = $state(false);
     let messagesContainer = $state<HTMLElement | null>(null);
     let pendingTimeoutIds: SvelteSet<number> = new SvelteSet();
+    let isTyping = $derived(pendingTimeoutIds.size > 0);
+
+    let activeChat = $derived(chatStore.chats.find((c) => c.id === chatStore.activeChatId));
+    let messages = $derived(activeChat?.messages || []);
 
     // Cleanup pending timeouts on unmount
     $effect(() => {
@@ -27,35 +24,39 @@
         };
     });
 
+    // Auto-scroll when messages change
+    $effect(() => {
+        if (messages.length) {
+            scrollToBottom();
+        }
+    });
+
     async function sendMessage() {
-        if (!inputValue.trim()) return;
+        if (!inputValue.trim() || !activeChat) return;
 
         const userMsg: Message = {
             id: crypto.randomUUID(),
-            text: inputValue,
-            sender: "user",
+            content: { type: "string", data: inputValue },
+            role: "user",
             timestamp: Date.now(),
         };
 
-        messages = [...messages, userMsg];
+        chatStore.addMessage(activeChat.id, userMsg);
         inputValue = "";
-
-        scrollToBottom();
-
-        isTyping = true;
 
         // Mock response delay
         const timeoutId = setTimeout(async () => {
+            if (!activeChat) return;
             const botMsg: Message = {
                 id: crypto.randomUUID(),
-                text: "This is a mock response from the system.",
-                sender: "bot",
+                content: { type: "string", data: "This is a mock response from the system." },
+                role: "assistant",
                 timestamp: Date.now(),
             };
-            messages = [...messages, botMsg];
-            isTyping = pendingTimeoutIds.size > 0;
+
+            chatStore.addMessage(activeChat.id, botMsg);
+
             pendingTimeoutIds.delete(timeoutId);
-            scrollToBottom();
         }, 1000);
 
         pendingTimeoutIds.add(timeoutId);
@@ -78,30 +79,34 @@
 
 <main class="flex flex-col flex-1 h-full bg-base-100">
     <header class="flex items-center p-4 border-b border-base-300 bg-base-200">
-        <h2 class="text-lg font-medium">Chat</h2>
+        <h2 class="text-lg font-medium">{activeChat?.name || "Chat"}</h2>
     </header>
 
     <section class="flex-1 overflow-y-auto p-6 space-y-4" bind:this={messagesContainer}>
-        {#if messages.length === 0}
+        {#if !activeChat}
+            <div class="flex items-center justify-center h-full text-base-content/50">
+                <p>Select a chat or create a new one to start messaging.</p>
+            </div>
+        {:else if messages.length === 0}
             <div class="flex items-center justify-center h-full text-base-content/50">
                 <p>No messages yet. Say hello!</p>
             </div>
-        {/if}
-
-        {#each messages as msg (msg.id)}
-            <div class="chat {msg.sender === 'user' ? 'chat-end' : 'chat-start'}">
-                <div
-                    class="chat-bubble {msg.sender === 'user'
-                        ? 'chat-bubble-primary'
-                        : 'chat-bubble-neutral'}"
-                >
-                    <p>{msg.text}</p>
-                    <span class="text-xs opacity-70 mt-1 block">
-                        {new Date(msg.timestamp).toLocaleTimeString()}
-                    </span>
+        {:else}
+            {#each messages as msg (msg.id)}
+                <div class="chat {msg.role === 'user' ? 'chat-end' : 'chat-start'}">
+                    <div
+                        class="chat-bubble {msg.role === 'user'
+                            ? 'chat-bubble-primary'
+                            : 'chat-bubble-neutral'}"
+                    >
+                        <p>{msg.content.data}</p>
+                        <span class="text-xs opacity-70 mt-1 block">
+                            {new Date(msg.timestamp || Date.now()).toLocaleTimeString()}
+                        </span>
+                    </div>
                 </div>
-            </div>
-        {/each}
+            {/each}
+        {/if}
 
         {#if isTyping}
             <div class="chat chat-start">
@@ -120,9 +125,12 @@
                 placeholder="Type a message..."
                 bind:value={inputValue}
                 onkeydown={handleKeydown}
+                disabled={!activeChat}
             />
-            <button class="btn btn-primary" onclick={sendMessage} disabled={!inputValue.trim()}
-                >Send</button
+            <button
+                class="btn btn-primary"
+                onclick={sendMessage}
+                disabled={!inputValue.trim() || !activeChat}>Send</button
             >
         </div>
     </footer>

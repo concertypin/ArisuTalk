@@ -4,7 +4,7 @@
     import { getCardParseWorker } from "@/lib/workers/workerClient";
     import OpFSAssetStorageAdapter from "../adapters/assetStorage/OpFSAssetStorageAdapter";
     import type {} from "@arisutalk/character-spec/v0/Character";
-    import type IAssetStorageAdapter from "@/lib/interfaces/IAssetStorageAdapter";
+
     interface Props {
         onEdit: (index: number) => void;
     }
@@ -71,7 +71,7 @@
                     const assetStorage = new OpFSAssetStorageAdapter();
                     await assetStorage.init();
 
-                    const blob = await assetStorage.getAssetBlob(i.url);
+                    const blob = await assetStorage.getAssetBlob(new URL(i.url));
                     const base64 = await blobsToBase64DataUrl(blob, i.mimeType);
                     return { ...i, url: base64 };
                 } catch (e) {

@@ -46,11 +46,12 @@
                 personaStore.add(validated);
             }
             onSave();
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
-            if (err.errors) {
-                error = err.errors[0]?.message || "Validation failed";
+            if (err.errors instanceof Array) {
+                error = err.errors[0]?.message ?? "Validation failed";
             } else {
-                error = err.message;
+                error = err.message ?? "Unknown error";
             }
         }
     }
