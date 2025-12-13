@@ -74,11 +74,11 @@ describe("PersonaStore", () => {
         expect(store.activePersona).toEqual(validPersona);
     });
 
-    it("should load from localStorage", () => {
+    it("should load from localStorage", async () => {
         localStorageMock.setItem("arisutalk_personas", JSON.stringify([validPersona]));
         const newStore = new PersonaStore();
-        newStore.load(); // Constructor calls load, but just to be explicit if needed.
-        // Actually constructor calls load, so we need to mock BEFORE instantiation.
+        await newStore.initPromise; // wait for async load
+        expect(newStore.personas).toHaveLength(1);
     });
 
     it("should correctly load state on initialization", () => {
