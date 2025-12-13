@@ -11,12 +11,7 @@
     let { character, onEdit, onDelete, onExport }: Props = $props();
 
     let avatarUrl = $derived.by(() => {
-        if (character.avatarUrl) return character.avatarUrl;
-        const assets = character.assets?.assets || [];
-        const portrait =
-            assets.find((a) => a.name === "portrait-default") ||
-            assets.find((a) => a.mimeType.startsWith("image/"));
-        return portrait?.url || "";
+        return character.avatarUrl || "";
     });
 </script>
 
