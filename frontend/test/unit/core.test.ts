@@ -1,5 +1,5 @@
 import { describe, it, expect, expectTypeOf } from "vitest";
-import { Chat, Character, Message } from "@arisutalk/character-spec/v0/Character";
+import { Character, Message } from "@arisutalk/character-spec/v0/Character";
 import { Settings } from "@/lib/types/IDataModel";
 import { ChatProvider, type ProviderSettings } from "@/lib/interfaces";
 import { BaseMessage, HumanMessage } from "@langchain/core/messages";

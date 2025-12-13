@@ -3,7 +3,6 @@
     import CharacterCard from "./CharacterCard.svelte";
     import { getCardParseWorker } from "@/lib/workers/workerClient";
     import { OpFSAssetStorageAdapter } from "../adapters/assetStorage/OpFSAssetStorageAdapter";
-    import type {} from "@arisutalk/character-spec/v0/Character";
 
     interface Props {
         onEdit: (index: number) => void;
