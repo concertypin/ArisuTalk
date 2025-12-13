@@ -58,34 +58,7 @@ export class LocalStorageAdapter implements IStorageAdapter {
 
     async saveCharacter(character: Character): Promise<void> {
         const characters = this.getStored<Character>(this.KEYS.CHARACTERS);
-        // Assuming Character has an id. If not, we might need a different strategy.
-        // The spec implies name might be unique or there's an internal ID.
-        // For now, let's assume we might need to handle it by index/name if ID is missing,
-        // but robust systems usually have IDs.
-        // Checking the spec... wait, I don't have the spec loaded.
-        // Let's assume unique name for now if ID is missing, but ideally it should have ID.
-        // Actually, looking at previous context, `Character` types were imported.
-        // Let's assume standard behavior:
-
-        // Use name as ID if no explicit ID field (temporary fallback)
-        // But better to check if 'id' or 'name' is the key.
-        // The provided CharacterStore used index.
-        // Let's just use the array.replace logic if we can match object identity or similar?
-        // No, persistence needs a key.
-        // Let's assume character.name is the key for now as per "simple" requirements, or generate a UUID if needed.
-        // But wait, the interface uses `id`.
-
-        // Fallback: If character doesn't have an ID, we can't reliably update it in this pattern without an ID.
-        // I'll check the Character type definition in a moment.
-        // For this implementation, I will assume `name` is unique enough for "Basic" or `id` exists.
-
-        // Actually, I should probably check the Character type definition.
-        // But to proceed, I will write generic logic.
-        // todo
-
-        const index = characters.findIndex(
-            (c) => c.id === character.id || c.name === character.name
-        );
+        const index = characters.findIndex((c) => c.id === character.id);
 
         if (index >= 0) {
             characters[index] = character;
