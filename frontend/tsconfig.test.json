@@ -1,8 +1,10 @@
 {
 	"include": [
-		//test
 		"test/**/*.ts",
 		"test/*.ts",
+		"test/**/*.svelte",
+		"src/**/*.ts",
+		"src/**/*.svelte"
 	],
 	"compilerOptions": {
 		"tsBuildInfoFile": "./node_modules/.cache/test.tsbuildinfo",
@@ -14,7 +16,6 @@
 			"vite/client"
 		] /* Specify type package names to be included without being referenced in a source file. */,
 		"noEmit": false /* Disable emitting files from a compilation. */,
-		"allowImportingTsExtensions": false,
 		"outDir": "./dist" /* Specify an output folder for all emitted files. */,
 		/* Type Checking */
 		"noImplicitAny": true

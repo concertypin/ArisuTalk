@@ -37,7 +37,9 @@
 </svelte:head>
 
 {#if isLoading}
-    <div class="flex items-center justify-center w-full h-full text-gray-500">Loading...</div>
+    <div class="flex items-center justify-center w-full h-full text-base-content/50">
+        Loading...
+    </div>
 {:else if CurrentComponent}
     <CurrentComponent />
 {/if}

@@ -6,6 +6,7 @@
 
 - **JSDoc Documentation**: Use JSDoc for all exported functions and complex logic.
 - HTML Separation: Avoid HTML strings in JS files. Who does that with Svelte?
+- Use DaisyUI: We have libraries, use them!
 
 ### Event Handling
 
@@ -29,7 +30,7 @@ pnpm install
 ### Development Server
 
 ```bash
-pnpm dev:fe
+pnpm run -F frontend dev
 ```
 
 The development server will start at `http://localhost:5173` with hot reload enabled.
@@ -37,7 +38,7 @@ The development server will start at `http://localhost:5173` with hot reload ena
 ### Build for Production
 
 ```bash
-pnpm build:fe
+pnpm run -F frontend build
 ```
 
 The production-ready files will be in the `ArisuTalk/frontend/dist` directory.
@@ -45,7 +46,7 @@ The production-ready files will be in the `ArisuTalk/frontend/dist` directory.
 ### Testing
 
 ```bash
-pnpm test
+pnpm run -F frontend test
 ```
 
 ## Authentication Setup
@@ -80,6 +81,18 @@ const api = Comlink.wrap<MyWorkerApi>(worker);
 ### Testing
 
 Worker logic should be tested via unit tests in `test/workers/`. Note that real Workers don't run in Vitest's default environment, so we mock the Worker construction and Comlink wrapping for unit tests.
+
+### Common Mistakes
+
+- Putting `.ts` on import statements.
+    - Fix: Remove `.ts` from import statements.
+- Using `lucide-svelte` instead of `@lucide/svelte`.
+    - Fix: Replace `lucide-svelte` with `@lucide/svelte`.
+
+### Documentation of Other Libraries
+
+- DaisyUI: https://daisyui.com/llms.txt
+- Svelte: https://svelte.dev/llms.txt
 
 ## Contributing
 
