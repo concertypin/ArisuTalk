@@ -146,7 +146,7 @@
                             type="file"
                             onchange={handleFileChange}
                             class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                            accept=".png,.json"
+                            accept=".arisc,.arisp"
                         />
                         <div
                             class="mb-3 p-4 bg-primary/10 rounded-full text-primary group-hover:scale-110 transition-transform"

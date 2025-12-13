@@ -119,25 +119,9 @@ export class LocalStorageAdapter implements IStorageAdapter {
     }
 
     async importData(stream: ReadableStream<Uint8Array>): Promise<void> {
-        const reader = stream.getReader();
-        const chunks: Uint8Array[] = [];
-
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            if (value) chunks.push(value);
-        }
-
-        const combined = new Uint8Array(chunks.reduce((acc, c) => acc + c.length, 0));
-        let offset = 0;
-        for (const chunk of chunks) {
-            combined.set(chunk, offset);
-            offset += chunk.length;
-        }
-
-        const decoder = new TextDecoder();
-        const json = decoder.decode(combined);
         try {
+            const buffer = await new Response(stream).arrayBuffer();
+            const json = new TextDecoder().decode(buffer);
             const data = JSON.parse(json);
             if (data.chats) this.setStored(this.KEYS.CHATS, data.chats);
             if (data.characters) this.setStored(this.KEYS.CHARACTERS, data.characters);
