@@ -43,6 +43,9 @@
                 </div>
             </div>
 
+            <!-- This is not interactive trigger, but bubble stopper. -->
+            <!-- svelte-ignore a11y_click_events_have_key_events -->
+            <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
             <div class="flex gap-1" role="group" onclick={(e) => e.stopPropagation()}>
                 <button class="btn btn-ghost btn-xs btn-square" onclick={() => onEdit(persona)}>
                     <SquarePen size={14} />
