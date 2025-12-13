@@ -13,9 +13,7 @@
     let initials = $derived(character.name.substring(0, 2).toUpperCase());
 
     // Check for avatar in this order: top-level property -> assets 'portrait-default' -> any image asset
-    let avatarUrl = $derived.by(() => {
-        return character.avatarUrl || "";
-    });
+    let avatarUrl = $derived(character.avatarUrl || "");
 </script>
 
 <div class="tooltip tooltip-right z-50" data-tip={character.name}>

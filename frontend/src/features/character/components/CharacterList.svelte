@@ -100,17 +100,13 @@
                 }
             }
         }
-        await Promise.all(
-            [
-                // Remap assets and inlays, asynchronously.
-                async () => {
-                    char.assets.assets = await Promise.all(char.assets.assets.map(remapAsBase64));
-                },
-                async () => {
-                    char.assets.inlays = await Promise.all(char.assets.inlays.map(remapAsBase64));
-                },
-            ].map((f) => f())
-        );
+        const [newAssets, newInlays] = await Promise.all([
+            Promise.all(char.assets.assets.map(remapAsBase64)),
+            Promise.all(char.assets.inlays.map(remapAsBase64)),
+        ]);
+        char.assets.assets = newAssets;
+        char.assets.inlays = newInlays;
+
         const result = await (await worker).exportCharacter(char);
         // this is now ready to download or save.
         // ensure we have a Blob for createObjectURL; worker may return an ArrayBuffer/SharedArrayBuffer

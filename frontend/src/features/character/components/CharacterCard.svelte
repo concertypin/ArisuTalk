@@ -10,9 +10,7 @@
     }
     let { character, onEdit, onDelete, onExport }: Props = $props();
 
-    let avatarUrl = $derived.by(() => {
-        return character.avatarUrl || "";
-    });
+    let avatarUrl = $derived(character.avatarUrl || "");
 </script>
 
 <div

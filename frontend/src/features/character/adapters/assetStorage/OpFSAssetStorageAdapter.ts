@@ -133,7 +133,7 @@ export class OpFSAssetStorageAdapter implements IAssetStorageAdapter {
 
         try {
             // Strip scheme if present
-            const filename = id.pathname.replace("/", "");
+            const filename = id.pathname.startsWith("/") ? id.pathname.slice(1) : id.pathname;
             const fileHandle = await root.getFileHandle(filename, { create: false });
             const file = await fileHandle.getFile();
             return file;
