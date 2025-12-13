@@ -22,19 +22,51 @@ describe("Data Models", () => {
     });
 
     it("should correctly structure a Chat", () => {
-        const char = {
+        const char: Character = {
+            assets: {
+                assets: [
+                    {
+                        url: "https://c.tenor.com/x8v1oNUOmg4AAAAd/tenor.gif",
+                        mimeType: "image/gif",
+                        name: "neverGonnaGiveYouUp.gif",
+                    },
+                ],
+                inlays: [
+                    {
+                        url: "https://media.tenor.com/I8ZX_XGKSrAAAAAi/blue-archive-alisu.gif",
+                        mimeType: "image/gif",
+                        name: "alisuDancing.gif",
+                    },
+                ],
+            },
             name: "Arisu",
             description: "A cute AI",
             specVersion: 0,
-            id: "test",
+            id: "test-1db482ab-aefa-4d96-aa95-3544c8f04b80",
             prompt: {
-                description: "",
-                authorsNote: "",
+                description: "Tendou Arisu from Blue Archive.",
+                authorsNote: "(OOC: Respond with cute and energetic personality.)",
                 lorebook: {
                     config: {
-                        tokenLimit: 0,
+                        tokenLimit: 3000,
                     },
-                    data: [],
+                    data: [
+                        {
+                            id: "test-c629f091-78e3-4c2b-bbb4-1f9c63637890",
+                            condition: [
+                                {
+                                    type: "always",
+                                },
+                                {
+                                    type: "plain_text_match",
+                                    text: "요괴",
+                                },
+                            ],
+                            content: "",
+                            name: "Hayase Yuuka",
+                            multipleConditionResolveStrategy: "any",
+                        },
+                    ],
                 },
             },
             executables: {
@@ -55,7 +87,7 @@ describe("Data Models", () => {
                 distributedOn: undefined,
                 additionalInfo: undefined,
             },
-        } satisfies Character;
+        };
         const chat = {
             id: "test",
             characterId: char.id,

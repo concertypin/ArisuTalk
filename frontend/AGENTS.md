@@ -81,6 +81,13 @@ const api = Comlink.wrap<MyWorkerApi>(worker);
 
 Worker logic should be tested via unit tests in `test/workers/`. Note that real Workers don't run in Vitest's default environment, so we mock the Worker construction and Comlink wrapping for unit tests.
 
+### Common Mistakes
+
+- Putting `.ts` on import statements.
+    - Fix: Remove `.ts` from import statements.
+- Using `lucide-svelte` instead of `@lucide/svelte`.
+    - Fix: Replace `lucide-svelte` with `@lucide/svelte`.
+
 ## Contributing
 
 Contributions are welcome! Please see [CONTRIBUTING.md](../CONTRIBUTING.md) for guidelines.
