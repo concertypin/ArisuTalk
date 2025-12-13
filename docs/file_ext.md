@@ -13,7 +13,7 @@ This is actually same as [Character Dump File](#arisp-character-dump-file), and 
 
 ### .arisp: Character Dump File
 
-This is a custom file format used by ArisuTalk to store character data for backup purposes. Check out [character contract file](#arisc-character-contact-file) for more details about the inner schema.
+This is a custom file format used by ArisuTalk to store character data for backup purposes. Check out [character contact file](#arisc-character-contact-file) for more details about the inner schema.
 Its main purpose is "describe as-is" dump of a character, so when exporting a character, ArisuTalk will reference local assets as file paths instead of embedding them as base64-encoded data URLs. Also, chat history and inlay data are included by default.
 
 ### .arisi: Instruction Preset

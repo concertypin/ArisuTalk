@@ -23,12 +23,12 @@ The following variables/functions are available in the context of magic patterns
 - `char`: Alias for `character.name`.
 - `persona`: The user's persona object.
 - `user`: Alias for `persona.name`.
-- `chat(a, b)`: Function to access current chatting log from `a`-th to `b`-th. (0-indexed, inclusive, inclusive)
+- `chat(a, b)`: Function to access current chatting log from `a`-th to `b`-th. (0-indexed, start and end are inclusive)
   - 0 means the newest element, 1 means second newest element, and so on.
   - negative index is allowed, like python. -1 means oldest element, -2 means second oldest element, and so on.
   - `a` can be greater than `b`, in that case, it means reverse order.
   - if `a` or `b` is out of range, it will be clamped to the valid range.
-- `sessionStorage`: `Record<string,string>` typed temporary storage, saved on [`window.sessionStorage`](https://developer.mozilla.org/ko/docs/Web/API/Window/sessionStorage).
+- `sessionStorage`: `Record<string,string>` typed temporary storage, saved on [`window.sessionStorage`](https://developer.mozilla.org/docs/Web/API/Window/sessionStorage).
   - Doesn't provide any collision protection, so use unique keys.
     - This is intended to be used for communicating with other magic patterns in the same prompt, or even other prompts in the same session.
   - Data is cleared when the browser tab is closed.

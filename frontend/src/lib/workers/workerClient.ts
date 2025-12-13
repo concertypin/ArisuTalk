@@ -24,8 +24,14 @@ export async function getExampleWorker(): Promise<WorkerApi<ExampleWorkerApi>> {
     const worker = new WorkerClass();
     return createWorkerApi<ExampleWorkerApi>(worker);
 }
+
+let cardParseWorkerInstance: WorkerApi<typeof CardParseWorkerApi> | null = null;
+
 export async function getCardParseWorker(): Promise<WorkerApi<typeof CardParseWorkerApi>> {
+    if (cardParseWorkerInstance) {
+        return cardParseWorkerInstance;
+    }
     const WorkerClass = (await import("@worker/cardparse/main?worker")).default;
     const worker = new WorkerClass();
-    return createWorkerApi<typeof CardParseWorkerApi>(worker);
+    return (cardParseWorkerInstance = createWorkerApi<typeof CardParseWorkerApi>(worker));
 }

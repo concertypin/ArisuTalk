@@ -11,10 +11,30 @@
 
     let { onEdit }: Props = $props();
     let worker = getCardParseWorker();
-    function handleDelete(index: number) {
-        if (confirm("Are you sure you want to delete this character?")) {
-            characterStore.remove(index);
+
+    async function handleDelete(index: number) {
+        const modal = document.getElementById("delete-confirm-modal") as HTMLDialogElement;
+        if (!modal) {
+            console.error("Delete confirmation modal not found");
+            return;
         }
+
+        // Store the index to be deleted
+        modal.dataset.deleteIndex = index.toString();
+
+        // Show the modal
+        modal.showModal();
+    }
+
+    async function confirmDelete() {
+        const modal = document.getElementById("delete-confirm-modal") as HTMLDialogElement;
+        if (!modal) return;
+
+        const index = parseInt(modal.dataset.deleteIndex || "0");
+        characterStore.remove(index);
+
+        // Close the modal
+        modal.close();
     }
     /**
      * Converts a Blob to a Base64 Data URL.
@@ -82,12 +102,12 @@
         }
         await Promise.allSettled([
             // Remap assets and inlays, asynchronously.
-            async () => {
+            (async () => {
                 char.assets.assets = await Promise.all(char.assets.assets.map(remapAsBase64));
-            },
-            async () => {
+            })(),
+            (async () => {
                 char.assets.inlays = await Promise.all(char.assets.inlays.map(remapAsBase64));
-            },
+            })(),
         ]);
         const result = await (await worker).exportCharacter(char);
         // this is now ready to download or save.
@@ -99,13 +119,33 @@
         //download as file
         const a = document.createElement("a");
         a.href = url;
-        a.download = `${char.name || "character"}.asisc`; // Browser will handle invalid filename chars
+        a.download = `${char.name || "character"}.arisc`; // Browser will handle invalid filename chars
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 </script>
+
+<!-- DaisyUI Modal for Delete Confirmation -->
+<dialog id="delete-confirm-modal" class="modal">
+    <div class="modal-box">
+        <h3 class="font-bold text-lg">Delete Character</h3>
+        <p class="py-4">
+            Are you sure you want to delete this character? This action cannot be undone.
+        </p>
+        <div class="modal-action">
+            <form method="dialog">
+                <!-- if there is a button in form, it will close the modal -->
+                <button class="btn btn-ghost">Cancel</button>
+                <button class="btn btn-error" onclick={confirmDelete}>Delete</button>
+            </form>
+        </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
     {#each characterStore.characters as character, index (character.id || character.name)}

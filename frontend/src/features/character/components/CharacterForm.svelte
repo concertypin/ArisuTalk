@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { CloudUpload } from "@lucide/svelte";
     import { characterStore } from "../stores/characterStore.svelte";
     import { type Character } from "@arisutalk/character-spec/v0/Character";
 
@@ -150,24 +151,12 @@
                         <div
                             class="mb-3 p-4 bg-primary/10 rounded-full text-primary group-hover:scale-110 transition-transform"
                         >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="32"
-                                height="32"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                class="lucide lucide-upload-cloud"
-                                ><path
-                                    d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"
-                                /><path d="M12 12v9" /><path d="m16 16-4-4-4 4" /></svg
-                            >
+                            <CloudUpload />
                         </div>
                         <h4 class="font-bold text-lg mb-1">Click to Upload</h4>
-                        <p class="text-sm opacity-60">or drag and drop Character Card (PNG/JSON)</p>
+                        <p class="text-sm opacity-60">
+                            or drag and drop Character Card (.arisc/.arisp)
+                        </p>
                     </div>
 
                     {#if isImporting}

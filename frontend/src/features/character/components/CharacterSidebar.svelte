@@ -19,8 +19,8 @@
     {#each characterStore.characters as character (character.id || character.name)}
         <CharacterSidebarItem
             {character}
-            active={selectedCharacterId === (character.id || character.name)}
-            onClick={() => onSelect(character.id || character.name)}
+            active={selectedCharacterId === character.id}
+            onClick={() => onSelect(character.id)}
         />
     {/each}
 

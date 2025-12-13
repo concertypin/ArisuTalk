@@ -95,10 +95,7 @@ export class LocalStorageAdapter implements IStorageAdapter {
             return {
                 userId: "user",
                 theme: "system",
-                language: "en",
-                general: {},
-                appearance: {},
-            } as Settings;
+            };
         }
         return JSON.parse(item) as Settings;
     }
