@@ -4,7 +4,6 @@
 -->
 <script lang="ts">
     import { tick } from "svelte";
-    import Button from "@/components/ui/Button.svelte";
     import { SvelteSet } from "svelte/reactivity";
 
     type Message = {
@@ -77,24 +76,24 @@
     }
 </script>
 
-<main class="flex flex-col flex-1 h-full bg-gray-950">
-    <header class="flex items-center p-4 border-b border-gray-800 bg-gray-900">
+<main class="flex flex-col flex-1 h-full bg-base-100">
+    <header class="flex items-center p-4 border-b border-base-300 bg-base-200">
         <h2 class="text-lg font-medium">Chat</h2>
     </header>
 
     <section class="flex-1 overflow-y-auto p-6 space-y-4" bind:this={messagesContainer}>
         {#if messages.length === 0}
-            <div class="flex items-center justify-center h-full text-gray-500">
+            <div class="flex items-center justify-center h-full text-base-content/50">
                 <p>No messages yet. Say hello!</p>
             </div>
         {/if}
 
         {#each messages as msg (msg.id)}
-            <div class="flex {msg.sender === 'user' ? 'justify-end' : 'justify-start'}">
+            <div class="chat {msg.sender === 'user' ? 'chat-end' : 'chat-start'}">
                 <div
-                    class="max-w-[70%] p-3 rounded-lg {msg.sender === 'user'
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-gray-800 text-gray-200'}"
+                    class="chat-bubble {msg.sender === 'user'
+                        ? 'chat-bubble-primary'
+                        : 'chat-bubble-neutral'}"
                 >
                     <p>{msg.text}</p>
                     <span class="text-xs opacity-70 mt-1 block">
@@ -105,22 +104,26 @@
         {/each}
 
         {#if isTyping}
-            <div class="flex justify-start">
-                <div class="bg-gray-800 p-3 rounded-lg text-gray-400 text-sm">Typing...</div>
+            <div class="chat chat-start">
+                <div class="chat-bubble chat-bubble-neutral">
+                    <span class="loading loading-dots loading-sm"></span>
+                </div>
             </div>
         {/if}
     </section>
 
-    <footer class="p-4 border-t border-gray-800 bg-gray-900">
+    <footer class="p-4 border-t border-base-300 bg-base-200">
         <div class="flex gap-2">
             <input
                 type="text"
-                class="flex-1 p-2 bg-gray-800 border border-gray-700 rounded text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                class="input flex-1"
                 placeholder="Type a message..."
                 bind:value={inputValue}
                 onkeydown={handleKeydown}
             />
-            <Button onclick={sendMessage} disabled={!inputValue.trim()}>Send</Button>
+            <button class="btn btn-primary" onclick={sendMessage} disabled={!inputValue.trim()}
+                >Send</button
+            >
         </div>
     </footer>
 </main>
