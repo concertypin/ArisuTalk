@@ -48,16 +48,13 @@ export class ChatStore {
             id: crypto.randomUUID(),
             characterId,
             messages: [],
-            // Add other required fields from spec if any, standard 'Chat' usually has these.
-            // If strict schema compliance is needed, we would use Zod default or similar.
-            // Assuming minimal shape for now based on typical usage.
-            // Spec might require more fields?
-            // Based on context7 output:
-            // "Manage ArisuTalk Chat Sessions ... using ChatSchema ... messages, lorebook..."
-            created: Date.now(),
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+            title,
+            lorebook: [],
             lastMessage: Date.now(),
             name: title,
-        } as unknown as LocalChat; // Cast to Chat to avoid strict checks if I missed optional fields, will refine.
+        }; // Cast to Chat to avoid strict checks if I missed optional fields, will refine.
 
         this.chats.push(newChat);
         this.save();

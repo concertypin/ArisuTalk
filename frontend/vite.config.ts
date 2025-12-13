@@ -18,7 +18,9 @@ const browserTestConfig: Presence<UserConfig["test"]>["browser"] = {
 };
 const runBrowserTest =
     process.env.npm_lifecycle_event?.includes("browser") ||
-    process.env.npm_lifecycle_event?.includes("ui");
+    process.env.npm_lifecycle_event?.includes("ui")
+        ? true
+        : false;
 export default defineConfig(async (ctx) => {
     const mode = ctx.mode;
     const plugin: PluginOption[] = [
@@ -32,7 +34,7 @@ export default defineConfig(async (ctx) => {
     const baseConfig: UserConfig = {
         server: {
             open: "index.html",
-            allowedHosts: true,
+            allowedHosts: process.env.npm_lifecycle_event?.includes("dev") ? true : undefined,
         },
         build: {
             outDir: "dist",

@@ -9,7 +9,7 @@ All patterns are interpreted, executed on sandboxed JavaScript engine, which mea
 
 After you write the pattern, you MUST use `return` statement to make the pattern return something! If you don't, it will return empty string.
 
-There are no escape mechanism, and all `{|` and `|}` patterns will be treated as magic patterns.
+There is no escape mechanism, and all `{|` and `|}` patterns will be treated as magic patterns. It can be escaped by using `{| return "{"+"|"; |}` or similar, using JavaScript string concatenation.
 
 All properties are read-only, and you can't modify them. Use given functions to store outer data if exists.
 

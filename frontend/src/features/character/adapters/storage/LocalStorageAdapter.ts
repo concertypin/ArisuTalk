@@ -70,7 +70,7 @@ export class LocalStorageAdapter implements IStorageAdapter {
 
     async getCharacter(id: string): Promise<Character | undefined> {
         const characters = this.getStored<Character>(this.KEYS.CHARACTERS);
-        // Matching by ID or Name
+        // Matching by ID
         return characters.find((c) => c.id === id);
     }
 
@@ -80,7 +80,7 @@ export class LocalStorageAdapter implements IStorageAdapter {
 
     async deleteCharacter(id: string): Promise<void> {
         const characters = this.getStored<Character>(this.KEYS.CHARACTERS);
-        const filtered = characters.filter((c) => c.id !== id && c.name !== id);
+        const filtered = characters.filter((c) => c.id !== id);
         this.setStored(this.KEYS.CHARACTERS, filtered);
     }
 

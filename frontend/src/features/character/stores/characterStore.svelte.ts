@@ -33,7 +33,6 @@ export class CharacterStore {
         if (char) {
             // Using name as ID for now based on LocalStorageAdapter implementation
             // Ideally Character has an ID.
-            // todo
             const id = char.id;
             await this.adapter.deleteCharacter(id);
             this.characters.splice(index, 1);
