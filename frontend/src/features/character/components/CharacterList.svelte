@@ -100,15 +100,17 @@
                 }
             }
         }
-        await Promise.allSettled([
-            // Remap assets and inlays, asynchronously.
-            (async () => {
-                char.assets.assets = await Promise.all(char.assets.assets.map(remapAsBase64));
-            })(),
-            (async () => {
-                char.assets.inlays = await Promise.all(char.assets.inlays.map(remapAsBase64));
-            })(),
-        ]);
+        await Promise.all(
+            [
+                // Remap assets and inlays, asynchronously.
+                async () => {
+                    char.assets.assets = await Promise.all(char.assets.assets.map(remapAsBase64));
+                },
+                async () => {
+                    char.assets.inlays = await Promise.all(char.assets.inlays.map(remapAsBase64));
+                },
+            ].map((f) => f())
+        );
         const result = await (await worker).exportCharacter(char);
         // this is now ready to download or save.
         // ensure we have a Blob for createObjectURL; worker may return an ArrayBuffer/SharedArrayBuffer
@@ -148,7 +150,7 @@
 </dialog>
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
-    {#each characterStore.characters as character, index (character.id || character.name)}
+    {#each characterStore.characters as character, index (character.id)}
         <CharacterCard
             {character}
             onEdit={() => onEdit(index)}

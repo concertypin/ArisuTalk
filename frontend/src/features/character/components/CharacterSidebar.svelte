@@ -16,7 +16,7 @@
 <div
     class="flex flex-col items-center w-[72px] bg-base-300 py-3 overflow-y-auto overflow-x-hidden h-full scrollbar-none"
 >
-    {#each characterStore.characters as character (character.id || character.name)}
+    {#each characterStore.characters as character (character.id)}
         <CharacterSidebarItem
             {character}
             active={selectedCharacterId === character.id}

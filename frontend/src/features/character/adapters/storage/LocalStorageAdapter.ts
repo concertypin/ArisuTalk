@@ -71,7 +71,7 @@ export class LocalStorageAdapter implements IStorageAdapter {
     async getCharacter(id: string): Promise<Character | undefined> {
         const characters = this.getStored<Character>(this.KEYS.CHARACTERS);
         // Matching by ID or Name
-        return characters.find((c) => c.id === id || c.name === id);
+        return characters.find((c) => c.id === id);
     }
 
     async getAllCharacters(): Promise<Character[]> {
