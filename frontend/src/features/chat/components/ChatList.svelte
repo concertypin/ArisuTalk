@@ -11,8 +11,8 @@
     let chats = $derived(chatStore.chats.filter((c) => c.characterId === characterId));
     let activeChatId = $derived(chatStore.activeChatId);
 
-    function handleNewChat() {
-        const id = chatStore.createChat(characterId, `Chat ${chats.length + 1}`);
+    async function handleNewChat() {
+        const id = await chatStore.createChat(characterId, `Chat ${chats.length + 1}`);
         chatStore.setActiveChat(id);
     }
 
@@ -20,10 +20,10 @@
         chatStore.setActiveChat(id);
     }
 
-    function handleDelete(e: Event, id: string) {
+    async function handleDelete(e: Event, id: string) {
         e.stopPropagation();
         if (confirm("Delete this chat?")) {
-            chatStore.deleteChat(id);
+            await chatStore.deleteChat(id);
         }
     }
 </script>

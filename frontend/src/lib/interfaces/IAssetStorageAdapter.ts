@@ -75,4 +75,3 @@ export interface IAssetStorageAdapter {
         ifNotExist?: T
     ): Promise<Blob | (T extends IfNotExistBehavior.RETURN_NULL ? null : never)>;
 }
-export default IAssetStorageAdapter;

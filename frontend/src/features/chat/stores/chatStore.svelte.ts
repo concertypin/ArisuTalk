@@ -1,88 +1,64 @@
-// import { LocalStorageAdapter } from "@/features/character/adapters/storage/LocalStorageAdapter"; // Reusing for now or creating new one?
-// We need a separate adapter key.
-// Let's assume we can pass a key to LocalStorageAdapter or create a GenericStorageAdapter.
-// For now, I'll inline a simple storage logic or extend the adapter pattern later.
-// To keep it simple and effective:
-
-import type { Chat } from "@arisutalk/character-spec/v0/Character/Chat";
+import type { LocalChat, IChatStorageAdapter } from "@/lib/interfaces";
 import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
-
-export type LocalChat = Chat & {
-    name: string;
-    lastMessage: number;
-    characterId: string; // Ensure this is explicit if Chat doesn't have it (likely does, but safe to add)
-};
+import { LocalStorageChatAdapter } from "@/features/chat/adapters/storage/LocalStorageChatAdapter";
 
 export class ChatStore {
     chats = $state<LocalChat[]>([]);
     activeChatId = $state<string | null>(null);
+    private adapter: IChatStorageAdapter;
+    public readonly initPromise: Promise<void>;
 
-    private storageKey = "arisutalk_chats_v1";
-
-    constructor() {
-        this.load();
+    constructor(adapter?: IChatStorageAdapter) {
+        this.adapter = adapter || new LocalStorageChatAdapter();
+        this.initPromise = this.load();
     }
 
-    private load() {
+    private async load() {
         try {
-            const raw = localStorage.getItem(this.storageKey);
-            if (raw) {
-                this.chats = JSON.parse(raw);
-            }
+            await this.adapter.init();
+            this.chats = await this.adapter.getAllChats();
         } catch (e) {
             console.error("Failed to load chats", e);
             this.chats = [];
         }
     }
 
-    private save() {
-        try {
-            localStorage.setItem(this.storageKey, JSON.stringify(this.chats));
-        } catch (e) {
-            console.error("Failed to save chats", e);
+    async createChat(characterId: string, title: string = "New Chat") {
+        const chatId = await this.adapter.createChat(characterId, title);
+        const newChat = await this.adapter.getChat(chatId);
+
+        if (newChat) {
+            this.chats.push(newChat);
         }
+
+        return chatId;
     }
 
-    createChat(characterId: string, title: string = "New Chat") {
-        const newChat: LocalChat = {
-            id: crypto.randomUUID(),
-            characterId,
-            messages: [],
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-            title,
-            lorebook: [],
-            lastMessage: Date.now(),
-            name: title,
-        }; // Cast to Chat to avoid strict checks if I missed optional fields, will refine.
-
-        this.chats.push(newChat);
-        this.save();
-        return newChat.id;
+    async getChats(characterId: string) {
+        return await this.adapter.getChatsByCharacter(characterId);
     }
 
-    getChats(characterId: string) {
-        return this.chats.filter((c) => c.characterId === characterId);
+    async getChat(chatId: string) {
+        return await this.adapter.getChat(chatId);
     }
 
-    getChat(chatId: string) {
-        return this.chats.find((c) => c.id === chatId);
-    }
-
-    addMessage(chatId: string, message: Message) {
+    async addMessage(chatId: string, message: Message) {
+        await this.adapter.addMessage(chatId, message);
         const chat = this.chats.find((c) => c.id === chatId);
+
         if (chat) {
             chat.messages.push(message);
             chat.lastMessage = Date.now();
-            this.save();
+            chat.updatedAt = Date.now();
         }
     }
 
-    deleteChat(chatId: string) {
+    async deleteChat(chatId: string) {
+        await this.adapter.deleteChat(chatId);
         const index = this.chats.findIndex((c) => c.id === chatId);
+
         if (index !== -1) {
             this.chats.splice(index, 1);
-            this.save();
             if (this.activeChatId === chatId) {
                 this.activeChatId = null;
             }

@@ -1,9 +1,6 @@
 <script lang="ts">
     import { personaStore } from "../stores/personaStore.svelte";
-    import {
-        IAssetStorageAdapter,
-        IfNotExistBehavior,
-    } from "@/lib/interfaces/IAssetStorageAdapter";
+    import { type IAssetStorageAdapter, IfNotExistBehavior } from "@/lib/interfaces";
     import { OpFSAssetStorageAdapter } from "@/features/character/adapters/assetStorage/OpFSAssetStorageAdapter";
     import type { Persona } from "../schema";
     import { Trash2, SquarePen } from "@lucide/svelte";
@@ -14,9 +11,9 @@
 
     let { onEdit }: Props = $props();
 
-    function handleDelete(id: string) {
+    async function handleDelete(id: string) {
         if (confirm("Delete this persona?")) {
-            personaStore.remove(id);
+            await personaStore.remove(id);
         }
     }
     let personas = $derived(personaStore.personas);

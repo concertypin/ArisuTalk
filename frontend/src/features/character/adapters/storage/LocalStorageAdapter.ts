@@ -1,4 +1,4 @@
-import type { IStorageAdapter } from "@/lib/interfaces/IStorageAdapter";
+import type { IStorageAdapter } from "@/lib/interfaces";
 import type { Chat, Character } from "@arisutalk/character-spec/v0/Character";
 import type { Settings } from "@/lib/types/IDataModel";
 

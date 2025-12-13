@@ -41,7 +41,7 @@
             timestamp: Date.now(),
         };
 
-        chatStore.addMessage(activeChat.id, userMsg);
+        await chatStore.addMessage(activeChat.id, userMsg);
         inputValue = "";
 
         // Mock response delay
@@ -54,7 +54,7 @@
                 timestamp: Date.now(),
             };
 
-            chatStore.addMessage(activeChat.id, botMsg);
+            await chatStore.addMessage(activeChat.id, botMsg);
 
             pendingTimeoutIds.delete(timeoutId);
         }, 1000);

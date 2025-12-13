@@ -28,7 +28,7 @@
         }
     });
 
-    function handleSubmit(e: Event) {
+    async function handleSubmit(e: Event) {
         e.preventDefault();
         try {
             const newPersona = {
@@ -41,9 +41,9 @@
 
             const validated = PersonaSchema.parse(newPersona);
             if (persona) {
-                personaStore.update(persona.id, validated);
+                await personaStore.update(persona.id, validated);
             } else {
-                personaStore.add(validated);
+                await personaStore.add(validated);
             }
             onSave();
             // eslint-disable-next-line @typescript-eslint/no-explicit-any

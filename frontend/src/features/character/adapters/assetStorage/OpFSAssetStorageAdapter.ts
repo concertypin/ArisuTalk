@@ -1,5 +1,4 @@
-import { IfNotExistBehavior } from "@/lib/interfaces/IAssetStorageAdapter";
-import type IAssetStorageAdapter from "@/lib/interfaces/IAssetStorageAdapter";
+import { IfNotExistBehavior, type IAssetStorageAdapter } from "@/lib/interfaces";
 import { ca, fi } from "zod/locales";
 
 const FORBIDDEN_CHARS = new Set(["<", ">", ":", '"', "/", "\\", "|", "?", "*"]);
@@ -145,4 +144,3 @@ export class OpFSAssetStorageAdapter implements IAssetStorageAdapter {
         }
     }
 }
-export default OpFSAssetStorageAdapter;

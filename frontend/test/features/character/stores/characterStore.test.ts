@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { CharacterStore } from "@/features/character/stores/characterStore.svelte";
-import type { IStorageAdapter } from "@/lib/interfaces/IStorageAdapter";
+import type { IStorageAdapter } from "@/lib/interfaces";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
 
 const mockAdapter: IStorageAdapter = {

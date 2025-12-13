@@ -1,66 +1,58 @@
 import { type Persona, PersonaSchema } from "../schema";
+import type { IPersonaStorageAdapter } from "@/lib/interfaces";
+import { LocalStoragePersonaAdapter } from "@/features/persona/adapters/storage/LocalStoragePersonaAdapter";
 
 export class PersonaStore {
     personas = $state<Persona[]>([]);
     activePersonaId = $state<string | null>(null);
+    private adapter: IPersonaStorageAdapter;
+    public readonly initPromise: Promise<void>;
 
-    private readonly STORAGE_KEY = "arisutalk_personas";
-    private readonly ACTIVE_KEY = "arisutalk_active_persona";
-
-    constructor() {
-        this.load();
+    constructor(adapter?: IPersonaStorageAdapter) {
+        this.adapter = adapter || new LocalStoragePersonaAdapter();
+        this.initPromise = this.load();
     }
 
-    load() {
+    private async load() {
         try {
-            const stored = localStorage.getItem(this.STORAGE_KEY);
-            if (stored) {
-                this.personas = JSON.parse(stored);
-            }
-            this.activePersonaId = localStorage.getItem(this.ACTIVE_KEY);
+            await this.adapter.init();
+            this.personas = await this.adapter.getAllPersonas();
+            this.activePersonaId = await this.adapter.getActivePersonaId();
         } catch (e) {
             console.error("Failed to load personas", e);
         }
     }
 
-    save() {
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.personas));
-        if (this.activePersonaId) {
-            localStorage.setItem(this.ACTIVE_KEY, this.activePersonaId);
-        } else {
-            localStorage.removeItem(this.ACTIVE_KEY);
-        }
-    }
-
-    add(persona: Persona) {
+    async add(persona: Persona) {
         // Validate?
         const result = PersonaSchema.safeParse(persona);
         if (!result.success) {
             throw new Error(result.error.message);
         }
+
+        await this.adapter.savePersona(persona);
         this.personas.push(persona);
-        this.save();
     }
 
-    update(id: string, updated: Persona) {
+    async update(id: string, updated: Persona) {
         const index = this.personas.findIndex((p) => p.id === id);
         if (index !== -1) {
+            await this.adapter.updatePersona(id, updated);
             this.personas[index] = updated;
-            this.save();
         }
     }
 
-    remove(id: string) {
+    async remove(id: string) {
+        await this.adapter.deletePersona(id);
         this.personas = this.personas.filter((p) => p.id !== id);
         if (this.activePersonaId === id) {
             this.activePersonaId = null;
         }
-        this.save();
     }
 
-    select(id: string | null) {
+    async select(id: string | null) {
+        await this.adapter.setActivePersonaId(id);
         this.activePersonaId = id;
-        this.save();
     }
 
     get activePersona() {
