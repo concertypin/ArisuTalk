@@ -62,8 +62,6 @@ export class CharacterStore {
         } catch (e) {
             console.error(e);
             return { success: false, error: String(e) };
-        } finally {
-            worker.terminate();
         }
     }
 }
