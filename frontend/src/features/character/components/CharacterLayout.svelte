@@ -34,6 +34,8 @@
         // Actually, looking at the goal: "Character Management".
         // Maybe I should add `selectedCharacterId` to `characterStore`?
         // That seems globally relevant.
+        //todo
+        throw new Error("Not implemented yet");
     }
 
     function handleAdd() {
@@ -44,6 +46,8 @@
         // But `CharacterLayout` wraps the app.
         // Let's dispatch a custom event or expect a prop.
         // Simplest: bind selectedCharacterId.
+        //todo
+        throw new Error("Not implemented yet");
     }
 </script>
 

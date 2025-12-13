@@ -1,5 +1,7 @@
-import type { Character } from "@arisutalk/character-spec/v0/Character";
+import type { Character, Chat, Message } from "@arisutalk/character-spec/v0/Character";
 
+const profileImageUrl =
+    "https://realm.risuai.net/character/8afaf5416c56343af3223becb70e2f4d0be5fef9abb547efdea8af1758bc5137";
 /**
  * Metadata for the example character.
  * It is used for documentation and copyright purposes.
@@ -12,8 +14,7 @@ const metadata: Character["metadata"] = {
     author: "avesta from arca.live, https://arca.live/u/@avesta",
     license: "CC BY-NC 4.0",
     version: "0.0.0.0",
-    distributedOn:
-        "https://realm.risuai.net/character/8afaf5416c56343af3223becb70e2f4d0be5fef9abb547efdea8af1758bc5137",
+    distributedOn: profileImageUrl,
     additionalInfo:
         "This is an example character for testing and demonstration purposes.\n" +
         "Some content is modified from original, in order to port it to ArisuTalk, by concertypin.",
@@ -53,7 +54,7 @@ export const exampleCharacter: Character = {
     assets: {
         assets: [
             {
-                url: "https://sv.risuai.xyz/resource/4cbc7905f4673e66905c6e68e2eeed7cf310a697137fd65175feca98fd8aa7a7",
+                url: profileImageUrl,
                 mimeType: "image/png",
                 name: "profile.png",
             },
@@ -138,5 +139,29 @@ export const exampleCharacter: Character = {
             ],
         },
     },
+    avatarUrl: profileImageUrl,
     metadata: metadata,
+};
+
+export const exampleMessageData: Message[] = [
+    {
+        id: "msg-1",
+        role: "user",
+        content: { type: "string", data: "안녕, 아넬라! 만나서 반가워!" },
+        timestamp: Date.now() - 60000,
+    },
+    {
+        id: "msg-2",
+        role: "assistant",
+        content: { type: "string", data: "(대충 귀여운 소리)" },
+        timestamp: Date.now() - 30000,
+    },
+];
+export const exampleChatData: Chat = {
+    id: "example-chat-1",
+    characterId: exampleCharacter.id,
+    title: "Chat with Anella",
+    messages: exampleMessageData,
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
 };

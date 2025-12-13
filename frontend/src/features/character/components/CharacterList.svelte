@@ -1,5 +1,4 @@
 <script lang="ts">
-    import type { IStorageAdapter } from "@/lib/interfaces/IStorageAdapter";
     import { characterStore } from "../stores/characterStore.svelte";
     import CharacterCard from "./CharacterCard.svelte";
     import { getCardParseWorker } from "@/lib/workers/workerClient";
@@ -68,6 +67,7 @@
             } else {
                 // Local file, read as base64
                 try {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     const assetStorage: IAssetStorageAdapter = null as any;
                     //if-statement to suppress IDE's not-reachable-code warning.
                     //actually, it is always not reachable.

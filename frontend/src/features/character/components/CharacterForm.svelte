@@ -29,6 +29,7 @@
         }
 
         const newCharacter: Character = {
+            assets: { assets: [], inlays: [] },
             specVersion: 0,
             id: crypto.randomUUID(),
             name: name,

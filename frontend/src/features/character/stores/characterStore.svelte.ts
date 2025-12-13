@@ -2,14 +2,13 @@ import { getCardParseWorker } from "@/lib/workers/workerClient";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
 import { LocalStorageAdapter } from "@/features/character/adapters/storage/LocalStorageAdapter";
 import type { IStorageAdapter } from "@/lib/interfaces/IStorageAdapter";
-import type IAssetStorageAdapter from "@/lib/interfaces/IAssetStorageAdapter";
 
 export class CharacterStore {
     characters = $state<Character[]>([]);
     private adapter: IStorageAdapter;
     public readonly initPromise: Promise<void>;
 
-    constructor(adapter?: IStorageAdapter, assetsAdapter?: IAssetStorageAdapter) {
+    constructor(adapter?: IStorageAdapter) {
         this.adapter = adapter || new LocalStorageAdapter();
         this.initPromise = this.load();
     }

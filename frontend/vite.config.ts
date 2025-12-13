@@ -4,9 +4,9 @@ import { type PluginOption, UserConfig, defineConfig, loadEnv } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { playwright } from "@vitest/browser-playwright";
 
-type Exist<T> = T extends undefined ? never : T;
+type Presence<T> = T extends undefined ? never : T;
 
-const browserTestConfig: Exist<UserConfig["test"]>["browser"] = {
+const browserTestConfig: Presence<UserConfig["test"]>["browser"] = {
     enabled: true,
     provider: playwright(),
     instances: [

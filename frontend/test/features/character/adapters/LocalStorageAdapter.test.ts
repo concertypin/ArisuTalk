@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { LocalStorageAdapter } from "@/features/character/adapters/LocalStorageAdapter";
 import type { Character, Chat } from "@arisutalk/character-spec/v0/Character";
 import type { Settings } from "@/lib/types/IDataModel";
+import { exampleCharacter, exampleChatData } from "@/const/example_data";
+import { LocalStorageAdapter } from "@/features/character/adapters/storage/LocalStorageAdapter";
 
 describe("LocalStorageAdapter", () => {
     let adapter: LocalStorageAdapter;
@@ -17,14 +18,14 @@ describe("LocalStorageAdapter", () => {
     });
 
     it("should save and retrieve a chat", async () => {
-        const chat: Chat = { id: "chat1", messages: [] };
+        const chat: Chat = structuredClone(exampleChatData);
         await adapter.saveChat(chat);
         const retrieved = await adapter.getChat("chat1");
         expect(retrieved).toEqual(chat);
     });
 
     it("should save and retrieve a character", async () => {
-        const character: Character = { name: "Arisu", description: "Hero" };
+        const character: Character = structuredClone(exampleCharacter);
         await adapter.saveCharacter(character);
 
         const retrieved = await adapter.getCharacter("Arisu");
@@ -32,27 +33,27 @@ describe("LocalStorageAdapter", () => {
     });
 
     it("should update existing character", async () => {
-        const character: Character = { name: "Arisu", description: "Hero" };
+        const character: Character = structuredClone(exampleCharacter);
         await adapter.saveCharacter(character);
 
-        const updated: Character = { name: "Arisu", description: "Maid" };
+        const updated: Character = { ...character, description: "Maid" };
         await adapter.saveCharacter(updated);
 
-        const retrieved = await adapter.getCharacter("Arisu");
-        expect(retrieved?.description).toBe("Maid");
+        const retrieved = await adapter.getCharacter(character.id);
+        expect(retrieved?.description).toBe(updated.description);
     });
 
     it("should delete a character", async () => {
-        const character: Character = { name: "Arisu" };
+        const character: Character = structuredClone(exampleCharacter);
         await adapter.saveCharacter(character);
-        await adapter.deleteCharacter("Arisu");
+        await adapter.deleteCharacter(character.id);
 
-        const retrieved = await adapter.getCharacter("Arisu");
+        const retrieved = await adapter.getCharacter(character.id);
         expect(retrieved).toBeUndefined();
     });
 
     it("should save and get settings", async () => {
-        const settings: Settings = { theme: "dark" };
+        const settings: Settings = { theme: "dark", userId: "test-user-id" };
         await adapter.saveSettings(settings);
         const retrieved = await adapter.getSettings();
         expect(retrieved).toEqual(settings);
