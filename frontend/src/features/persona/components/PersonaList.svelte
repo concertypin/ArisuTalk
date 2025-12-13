@@ -1,5 +1,10 @@
 <script lang="ts">
     import { personaStore } from "../stores/personaStore.svelte";
+    import {
+        IAssetStorageAdapter,
+        IfNotExistBehavior,
+    } from "@/lib/interfaces/IAssetStorageAdapter";
+    import { OpFSAssetStorageAdapter } from "@/features/character/adapters/assetStorage/OpFSAssetStorageAdapter";
     import type { Persona } from "../schema";
     import { Trash2, SquarePen } from "@lucide/svelte";
 
@@ -14,10 +19,37 @@
             personaStore.remove(id);
         }
     }
+    let personas = $derived(personaStore.personas);
+    $effect(() => {
+        // Auto-select first persona if none selected
+        if (!personaStore.activePersonaId && personaStore.personas.length > 0) {
+            personaStore.select(personaStore.personas[0].id);
+        }
+    });
+    $effect(() => {
+        // Deselect persona if it was deleted
+        if (
+            personaStore.activePersonaId &&
+            !personaStore.personas.find((p) => p.id === personaStore.activePersonaId)
+        ) {
+            personaStore.select(null);
+        }
+    });
+
+    const assetAdapter: IAssetStorageAdapter = new OpFSAssetStorageAdapter();
+    async function getProfileAssetUrl(persona: Persona): Promise<string | null> {
+        if (persona.profileAsset) {
+            return assetAdapter.getAssetUrl(
+                new URL(persona.profileAsset),
+                IfNotExistBehavior.RETURN_NULL
+            );
+        }
+        return null;
+    }
 </script>
 
 <div class="flex flex-col gap-2">
-    {#each personaStore.personas as persona (persona.id)}
+    {#each personas as persona (persona.id)}
         <div
             class="flex items-center justify-between p-3 bg-base-100 rounded-lg border border-base-200 hover:border-primary transition-colors cursor-pointer"
             class:border-primary={personaStore.activePersonaId === persona.id}
@@ -29,12 +61,22 @@
             <div class="flex items-center gap-3">
                 <div class="avatar placeholder">
                     <div class="bg-neutral text-neutral-content rounded-full w-10">
-                        {#if persona.profileAsset}
-                            <!-- todo: resolve asset url -->
-                            <span class="text-xs">IMG</span>
-                        {:else}
+                        {#await getProfileAssetUrl(persona)}
                             <span class="text-xs">{persona.name.slice(0, 2).toUpperCase()}</span>
-                        {/if}
+                        {:then url}
+                            {#if url}
+                                <img
+                                    src={url}
+                                    alt={persona.name}
+                                    class="w-full h-full object-cover"
+                                />
+                            {:else}
+                                <span class="text-xs">{persona.name.slice(0, 2).toUpperCase()}</span
+                                >
+                            {/if}
+                        {:catch}
+                            <span class="text-xs">{persona.name.slice(0, 2).toUpperCase()}</span>
+                        {/await}
                     </div>
                 </div>
                 <div>

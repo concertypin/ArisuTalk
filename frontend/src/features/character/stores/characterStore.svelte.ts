@@ -31,8 +31,6 @@ export class CharacterStore {
     async remove(index: number) {
         const char = this.characters[index];
         if (char) {
-            // Using name as ID for now based on LocalStorageAdapter implementation
-            // Ideally Character has an ID.
             const id = char.id;
             await this.adapter.deleteCharacter(id);
             this.characters.splice(index, 1);
