@@ -1,11 +1,13 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { PersonaStore } from "@/features/persona/stores/personaStore.svelte";
 import type { Persona } from "@/features/persona/schema";
+import type { IPersonaStorageAdapter } from "@/lib/interfaces";
 
 describe("PersonaStore", () => {
     let store: PersonaStore;
+    let mockAdapter: IPersonaStorageAdapter;
 
-    // Mock localStorage
+    // Mock localStorage for sync loading
     const localStorageMock = (() => {
         let store: Record<string, string> = {};
         return {
@@ -25,7 +27,19 @@ describe("PersonaStore", () => {
     beforeEach(() => {
         vi.stubGlobal("localStorage", localStorageMock);
         localStorageMock.clear();
-        store = new PersonaStore();
+
+        // Create mock adapter
+        mockAdapter = {
+            init: vi.fn().mockResolvedValue(undefined),
+            getAllPersonas: vi.fn().mockResolvedValue([]),
+            savePersona: vi.fn().mockResolvedValue(undefined),
+            updatePersona: vi.fn().mockResolvedValue(undefined),
+            deletePersona: vi.fn().mockResolvedValue(undefined),
+            getActivePersonaId: vi.fn().mockResolvedValue(null),
+            setActivePersonaId: vi.fn().mockResolvedValue(undefined),
+        };
+
+        store = new PersonaStore(mockAdapter);
     });
 
     const validPersona: Persona = {
@@ -45,7 +59,7 @@ describe("PersonaStore", () => {
         store.add(validPersona);
         expect(store.personas).toHaveLength(1);
         expect(store.personas[0]).toEqual(validPersona);
-        expect(localStorageMock.setItem).toHaveBeenCalled();
+        expect(mockAdapter.savePersona).toHaveBeenCalledWith(validPersona);
     });
 
     it("should throw error when adding invalid persona", () => {

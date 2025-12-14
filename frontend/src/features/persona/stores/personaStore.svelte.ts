@@ -1,6 +1,6 @@
 import { type Persona, PersonaSchema } from "../schema";
 import type { IPersonaStorageAdapter } from "@/lib/interfaces";
-import { LocalStoragePersonaAdapter } from "@/features/persona/adapters/storage/LocalStoragePersonaAdapter";
+import { StorageResolver } from "@/lib/adapters/storage/storageResolver";
 
 export class PersonaStore {
     personas = $state<Persona[]>([]);
@@ -9,7 +9,7 @@ export class PersonaStore {
     public readonly initPromise: Promise<void>;
 
     constructor(adapter?: IPersonaStorageAdapter) {
-        this.adapter = adapter || new LocalStoragePersonaAdapter();
+        this.adapter = adapter || StorageResolver.getPersonaAdapter();
         // Synchronously populate from localStorage for backward compatibility (tests and sync callers).
         this.syncLoadFromLocalStorage();
         // Continue async initialization with adapter in background.

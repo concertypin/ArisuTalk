@@ -1,6 +1,6 @@
 import { getCardParseWorker } from "@/lib/workers/workerClient";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
-import { LocalStorageAdapter } from "@/features/character/adapters/storage/LocalStorageAdapter";
+import { StorageResolver } from "@/lib/adapters/storage/storageResolver";
 import type { ICharacterStorageAdapter } from "@/lib/interfaces";
 
 export class CharacterStore {
@@ -9,7 +9,7 @@ export class CharacterStore {
     public readonly initPromise: Promise<void>;
 
     constructor(adapter?: ICharacterStorageAdapter) {
-        this.adapter = adapter || new LocalStorageAdapter();
+        this.adapter = adapter || StorageResolver.getCharacterAdapter();
         this.initPromise = this.load();
     }
 

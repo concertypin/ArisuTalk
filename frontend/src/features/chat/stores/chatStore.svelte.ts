@@ -1,6 +1,6 @@
 import type { LocalChat, IChatStorageAdapter } from "@/lib/interfaces";
 import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
-import { LocalStorageChatAdapter } from "@/features/chat/adapters/storage/LocalStorageChatAdapter";
+import { StorageResolver } from "@/lib/adapters/storage/storageResolver";
 
 export class ChatStore {
     chats = $state<LocalChat[]>([]);
@@ -11,7 +11,7 @@ export class ChatStore {
     public readonly initPromise: Promise<void>;
 
     constructor(adapter?: IChatStorageAdapter) {
-        this.adapter = adapter || new LocalStorageChatAdapter();
+        this.adapter = adapter || StorageResolver.getChatAdapter();
         this.initPromise = this.load();
     }
 
