@@ -6,7 +6,7 @@ export class DexiePersonaAdapter implements IPersonaStorageAdapter {
     private db = getArisuDB();
 
     async init(): Promise<void> {
-        await this.db.ready();
+        await this.db.open();
     }
 
     async getAllPersonas(): Promise<Persona[]> {
@@ -26,14 +26,17 @@ export class DexiePersonaAdapter implements IPersonaStorageAdapter {
     }
 
     async getActivePersonaId(): Promise<string | null> {
-        const rec = (await this.db.settings.get("active_persona")) as
-            | { value?: string; activePersonaId?: string }
-            | undefined;
-        return rec?.value ?? rec?.activePersonaId ?? null;
+        const rec = await this.db.settings.get("singleton");
+        return rec?.activePersonaId ?? null;
     }
 
     async setActivePersonaId(id: string | null): Promise<void> {
-        if (id === null) await this.db.settings.delete("active_persona");
-        else await this.db.settings.put({ id: "active_persona", value: id, activePersonaId: id });
+        const existing = await this.db.settings.get("singleton");
+        await this.db.settings.put({
+            theme: existing?.theme ?? "system",
+            userId: existing?.userId ?? "",
+            activePersonaId: id,
+            id: "singleton",
+        });
     }
 }

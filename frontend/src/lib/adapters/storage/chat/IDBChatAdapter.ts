@@ -6,7 +6,7 @@ export class DexieChatAdapter implements IChatStorageAdapter {
     private db = getArisuDB();
 
     async init(): Promise<void> {
-        await this.db.ready();
+        await this.db.open();
     }
 
     async saveChat(chat: Chat): Promise<void> {

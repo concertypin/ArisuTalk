@@ -6,7 +6,7 @@ export class DexieCharacterAdapter implements ICharacterStorageAdapter {
     private db = getArisuDB();
 
     async init(): Promise<void> {
-        await this.db.ready();
+        await this.db.open();
     }
 
     async saveCharacter(character: Character): Promise<void> {

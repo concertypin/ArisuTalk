@@ -6,7 +6,7 @@ export class DexieSettingsAdapter implements ISettingsStorageAdapter {
     private db = getArisuDB();
 
     async init(): Promise<void> {
-        await this.db.ready();
+        await this.db.open();
     }
 
     async saveSettings(settings: Settings): Promise<void> {

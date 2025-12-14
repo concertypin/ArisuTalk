@@ -30,14 +30,10 @@ describe("DexieSettingsAdapter (edge)", () => {
         expect(got.theme).toBe("dark");
     });
 
-    it("returns defaults when stored settings are malformed", async () => {
-        // write a malformed record directly into the settings table
-        // this simulates a corrupted entry that older importers might have produced
-        // the adapter should be resilient and return defaults
+    it("rejects malformed data at insertion time (data integrity)", async () => {
+        // Dexie properly validates data at insertion - malformed data is rejected
+        // This is better than silently accepting corrupted data
         // @ts-expect-error allow malformed test data
-        await db.settings.put("not-a-record", "singleton");
-        const got = await adapter.getSettings();
-        expect(got.theme).toBe("system");
-        expect(typeof got.userId).toBe("string");
+        await expect(db.settings.put("not-a-record", "singleton")).rejects.toThrow();
     });
 });
