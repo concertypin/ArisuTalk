@@ -15,8 +15,8 @@
         "test:browser": "vitest run",
         "test:ui": "vitest --ui",
         "check:types": "svelte-check --tsconfig tsconfig.app.json --fail-on-warnings",
-        "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint/ src/ test/ worker/",
-        "lint:fix": "eslint --cache --fix --cache-location ./node_modules/.cache/eslint/ src/ test/ worker/",
+        "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint/ src/ test/ worker/ --concurrency auto ",
+        "lint:fix": "pnpm run lint --fix",
         "format": "prettier --write --cache --cache-location ./node_modules/.cache/prettier/ src/ test/ worker/",
         "format:check": "prettier --check --cache --cache-location ./node_modules/.cache/prettier/ src/ test/ worker/"
     },

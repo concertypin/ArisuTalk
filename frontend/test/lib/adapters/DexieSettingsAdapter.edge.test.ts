@@ -1,7 +1,6 @@
 import "fake-indexeddb/auto";
 import { describe, it, expect, beforeEach } from "vitest";
 import { DexieSettingsAdapter } from "@/lib/adapters/storage/settings/DexieSettingsAdapter";
-import { DexieStorageAdapter } from "@/features/character/adapters/storage/DexieStorageAdapter";
 import { getArisuDB } from "@/lib/adapters/storage/DexieDB";
 import { SettingsSchema } from "@/lib/types/IDataModel";
 
@@ -31,17 +30,14 @@ describe("DexieSettingsAdapter (edge)", () => {
         expect(got.theme).toBe("dark");
     });
 
-    it("corrupted import stream throws (legacy combined import)", async () => {
-        const legacy = new DexieStorageAdapter();
-        await legacy.init();
-        const enc = new TextEncoder().encode("not-json");
-        const stream = new ReadableStream<Uint8Array>({
-            start(ctrl) {
-                ctrl.enqueue(enc);
-                ctrl.close();
-            },
-        });
-
-        await expect(legacy.importData(stream)).rejects.toBeInstanceOf(Error);
+    it("returns defaults when stored settings are malformed", async () => {
+        // write a malformed record directly into the settings table
+        // this simulates a corrupted entry that older importers might have produced
+        // the adapter should be resilient and return defaults
+        // @ts-expect-error allow malformed test data
+        await db.settings.put("not-a-record", "singleton");
+        const got = await adapter.getSettings();
+        expect(got.theme).toBe("system");
+        expect(typeof got.userId).toBe("string");
     });
 });

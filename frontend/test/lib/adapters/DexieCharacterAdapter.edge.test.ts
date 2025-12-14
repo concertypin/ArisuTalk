@@ -1,7 +1,7 @@
 import "fake-indexeddb/auto";
 import { describe, it, expect, beforeEach } from "vitest";
 import { DexieCharacterAdapter } from "@/lib/adapters/storage/character/DexieCharacterAdapter";
-import { DexieStorageAdapter } from "@/features/character/adapters/storage/DexieStorageAdapter";
+import { DexieChatAdapter } from "@/lib/adapters/storage/chat/DexieChatAdapter";
 import { getArisuDB } from "@/lib/adapters/storage/DexieDB";
 import { exampleCharacter } from "@/const/example_data";
 
@@ -40,9 +40,8 @@ describe("DexieCharacterAdapter (edge)", () => {
         expect(all.length).toBe(10);
     });
 
-    it("importData with corrupted stream throws (legacy combined import)", async () => {
-        // Use legacy combined adapter that supports importData for characters/settings
-        const legacy = new DexieStorageAdapter();
+    it("importData with corrupted stream throws (chat adapter import)", async () => {
+        const legacy = new DexieChatAdapter();
         await legacy.init();
         // Create a stream of invalid JSON
         const enc = new TextEncoder().encode("{ invalid json\n");
