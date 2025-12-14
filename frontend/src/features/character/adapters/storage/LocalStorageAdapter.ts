@@ -1,5 +1,5 @@
 import type { Chat, Character } from "@arisutalk/character-spec/v0/Character";
-import { Settings } from "@/lib/types/IDataModel";
+import { Settings, SettingsSchema } from "@/lib/types/IDataModel";
 
 export class LocalStorageAdapter {
     private readonly KEYS = {
@@ -19,7 +19,7 @@ export class LocalStorageAdapter {
         const item = localStorage.getItem(key);
         if (!item) return [];
         try {
-            return JSON.parse(item) as T[];
+            return JSON.parse(item) satisfies T[];
         } catch {
             return [];
         }
@@ -91,9 +91,9 @@ export class LocalStorageAdapter {
         const item = localStorage.getItem(this.KEYS.SETTINGS);
         if (!item) {
             // Return default settings using the Settings class (ensures userId uses crypto.randomUUID())
-            return new Settings();
+            return SettingsSchema.parse({});
         }
-        return JSON.parse(item) as Settings;
+        return SettingsSchema.parse(JSON.parse(item));
     }
 
     async exportData(): Promise<ReadableStream<Uint8Array>> {

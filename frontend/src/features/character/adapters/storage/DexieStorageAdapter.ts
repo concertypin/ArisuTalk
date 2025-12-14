@@ -1,7 +1,12 @@
 import Dexie, { Table } from "dexie";
 // Legacy combined adapter migrated from previous codebase (see: [original/path/to/LegacyDexieAdapter.ts], migrated as part of storage refactor 2024-06). Prefer using hierarchical adapters under lib/adapters/storage/* for new code.
-import type { Chat, Character } from "@arisutalk/character-spec/v0/Character";
-import { Settings } from "@/lib/types/IDataModel";
+import {
+    type Chat,
+    type Character,
+    CharacterSchema,
+    ChatSchema,
+} from "@arisutalk/character-spec/v0/Character";
+import { Settings, SettingsSchema } from "@/lib/types/IDataModel";
 import type { Persona } from "@/features/persona/schema";
 
 /**
@@ -95,8 +100,8 @@ export class DexieStorageAdapter {
     async getSettings(): Promise<Settings> {
         const db = await this.ensureDb();
         const stored = await db.settings.get("singleton");
-        if (!stored) return new Settings();
-        const inst = new Settings();
+        const inst = SettingsSchema.parse({});
+        if (!stored) return inst;
         Object.assign(inst, stored);
         return inst;
     }
@@ -132,16 +137,21 @@ export class DexieStorageAdapter {
             await db.transaction("rw", db.chats, db.characters, db.settings, async () => {
                 if (Array.isArray(data.chats)) {
                     await db.chats.clear();
-                    if (data.chats.length) await db.chats.bulkPut(data.chats);
+                    if (data.chats.length)
+                        await db.chats.bulkPut(ChatSchema.array().parse(data.chats));
                 }
 
                 if (Array.isArray(data.characters)) {
                     await db.characters.clear();
-                    if (data.characters.length) await db.characters.bulkPut(data.characters);
+                    if (data.characters.length)
+                        await db.characters.bulkPut(CharacterSchema.array().parse(data.characters));
                 }
 
                 if (data.settings) {
-                    await db.settings.put({ ...(data.settings as Settings), id: "singleton" });
+                    await db.settings.put({
+                        ...SettingsSchema.parse(data.settings),
+                        id: "singleton",
+                    });
                 }
             });
         } catch (e) {

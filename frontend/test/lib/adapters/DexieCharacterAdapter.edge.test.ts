@@ -18,7 +18,7 @@ describe("DexieCharacterAdapter (edge)", () => {
     it("saves and retrieves a character with very large prompt.description", async () => {
         const big = "x".repeat(100_000);
         const c = structuredClone(exampleCharacter);
-        c.prompt = { ...(c.prompt || {}), description: big } as any;
+        c.prompt = { ...(c.prompt || {}), description: big };
         await adapter.saveCharacter(c);
         const got = await adapter.getCharacter(c.id);
         expect(got).toBeDefined();
@@ -53,6 +53,6 @@ describe("DexieCharacterAdapter (edge)", () => {
             },
         });
 
-        await expect(legacy.importData(stream as any)).rejects.toBeInstanceOf(Error);
+        await expect(legacy.importData(stream)).rejects.toBeInstanceOf(Error);
     });
 });

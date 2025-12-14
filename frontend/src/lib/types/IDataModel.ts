@@ -1,17 +1,10 @@
+import * as z from "zod";
 /**
  * Represents application settings.
  */
-export class Settings {
-    /** application theme preference. */
-    theme: "light" | "dark" | "system";
-    /** Unique identifier for the user (device-specific). */
-    userId: string;
+export type Settings = z.infer<typeof SettingsSchema>;
 
-    /**
-     * Creates new Settings with defaults.
-     */
-    constructor() {
-        this.theme = "system";
-        this.userId = crypto.randomUUID();
-    }
-}
+export const SettingsSchema = z.object({
+    theme: z.enum(["light", "dark", "system"]).default("system"),
+    userId: z.string().default(() => crypto.randomUUID()),
+});

@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { DexieSettingsAdapter } from "@/lib/adapters/storage/settings/DexieSettingsAdapter";
 import { DexieStorageAdapter } from "@/features/character/adapters/storage/DexieStorageAdapter";
 import { getArisuDB } from "@/lib/adapters/storage/DexieDB";
-import { Settings } from "@/lib/types/IDataModel";
+import { SettingsSchema } from "@/lib/types/IDataModel";
 
 describe("DexieSettingsAdapter (edge)", () => {
     let adapter: DexieSettingsAdapter;
@@ -22,7 +22,7 @@ describe("DexieSettingsAdapter (edge)", () => {
     });
 
     it("saves and retrieves settings with unusual values", async () => {
-        const s = new Settings();
+        const s = SettingsSchema.parse({});
         s.userId = "u-" + "a".repeat(5000);
         s.theme = "dark";
         await adapter.saveSettings(s);
@@ -42,6 +42,6 @@ describe("DexieSettingsAdapter (edge)", () => {
             },
         });
 
-        await expect(legacy.importData(stream as any)).rejects.toBeInstanceOf(Error);
+        await expect(legacy.importData(stream)).rejects.toBeInstanceOf(Error);
     });
 });

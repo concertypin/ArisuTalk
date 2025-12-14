@@ -2,7 +2,7 @@ import "fake-indexeddb/auto";
 import { describe, it, expect, beforeEach } from "vitest";
 import { DexieSettingsAdapter } from "@/lib/adapters/storage/settings/DexieSettingsAdapter";
 import { getArisuDB } from "@/lib/adapters/storage/DexieDB";
-import { Settings } from "@/lib/types/IDataModel";
+import { SettingsSchema } from "@/lib/types/IDataModel";
 
 describe("DexieSettingsAdapter", () => {
     let adapter: DexieSettingsAdapter;
@@ -18,7 +18,7 @@ describe("DexieSettingsAdapter", () => {
         expect(adapter).toBeDefined();
     });
     it("should save and retrieve settings", async () => {
-        const settings = new Settings();
+        const settings = SettingsSchema.parse({});
         settings.theme = "dark";
         settings.userId = "test-uid";
         await adapter.saveSettings(settings);

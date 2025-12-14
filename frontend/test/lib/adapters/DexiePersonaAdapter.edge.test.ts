@@ -21,12 +21,12 @@ describe("DexiePersonaAdapter (edge)", () => {
     });
 
     it("deleting active persona keeps active id (adapter does not clear it)", async () => {
-        const p1: Persona = { id: "p-1", name: "One", data: [] } as any;
-        const p2: Persona = { id: "p-2", name: "Two", data: [] } as any;
+        const p1: Persona = { id: "p-1", name: "One", description: "First" };
+        const p2: Persona = { id: "p-2", name: "Two", description: "Second" };
         await adapter.savePersona(p1);
         await adapter.savePersona(p2);
         await adapter.setActivePersonaId(p1.id);
-        let active = await adapter.getActivePersonaId();
+        const active = await adapter.getActivePersonaId();
         expect(active).toBe(p1.id);
         // delete active
         await adapter.deletePersona(p1.id);

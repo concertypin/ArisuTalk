@@ -19,9 +19,8 @@ describe("DexieChatAdapter (edge)", () => {
         await adapter.saveChat(chat);
         const msg = { ...exampleMessageData[0] };
         // remove timestamp
-        // @ts-ignore
         delete msg.timestamp;
-        await adapter.addMessage(chat.id, msg as any);
+        await adapter.addMessage(chat.id, msg);
         const got = await adapter.getChat(chat.id);
         expect(got).toBeDefined();
         expect(got?.messages?.length).toBe(chat.messages.length + 1);
@@ -40,7 +39,7 @@ describe("DexieChatAdapter (edge)", () => {
         // Clear DB
         const dbinst = getArisuDB();
         await dbinst.chats.clear();
-        let empty = await adapter.getAllChats();
+        const empty = await adapter.getAllChats();
         expect(empty.length).toBe(0);
 
         // Import

@@ -25,7 +25,7 @@ export class DexieChatAdapter implements IChatStorageAdapter {
             name: chat.title || "",
             lastMessage,
             characterId: chat.characterId,
-        } as LocalChat;
+        };
     }
 
     async getChat(id: string): Promise<LocalChat | undefined> {
@@ -52,7 +52,7 @@ export class DexieChatAdapter implements IChatStorageAdapter {
             messages: [],
             createdAt: now,
             updatedAt: now,
-        } as Chat;
+        };
         await this.db.chats.put(chat);
         return id;
     }

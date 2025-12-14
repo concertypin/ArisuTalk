@@ -1,6 +1,6 @@
 import { getArisuDB } from "../DexieDB";
 import type { ISettingsStorageAdapter } from "@/lib/interfaces";
-import { Settings } from "@/lib/types/IDataModel";
+import { Settings, SettingsSchema } from "@/lib/types/IDataModel";
 
 export class DexieSettingsAdapter implements ISettingsStorageAdapter {
     private db = getArisuDB();
@@ -15,8 +15,8 @@ export class DexieSettingsAdapter implements ISettingsStorageAdapter {
 
     async getSettings(): Promise<Settings> {
         const stored = await this.db.settings.get("singleton");
-        if (!stored) return new Settings();
-        const inst = new Settings();
+        const inst = SettingsSchema.parse({});
+        if (!stored) return inst;
         Object.assign(inst, stored);
         return inst;
     }
