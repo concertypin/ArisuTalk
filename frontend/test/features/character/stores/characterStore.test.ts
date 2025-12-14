@@ -1,22 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { CharacterStore } from "@/features/character/stores/characterStore.svelte";
-import type { IStorageAdapter } from "@/lib/interfaces";
+import type { ICharacterStorageAdapter } from "@/lib/interfaces";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
 
-const mockAdapter: IStorageAdapter = {
+const mockAdapter: ICharacterStorageAdapter = {
     init: vi.fn().mockResolvedValue(undefined),
     getAllCharacters: vi.fn().mockResolvedValue([]),
     saveCharacter: vi.fn().mockResolvedValue(undefined),
     deleteCharacter: vi.fn().mockResolvedValue(undefined),
     getCharacter: vi.fn().mockResolvedValue(undefined),
-    saveChat: vi.fn().mockResolvedValue(undefined),
-    getAllChats: vi.fn().mockResolvedValue([]),
-    getChat: vi.fn().mockResolvedValue(undefined),
-    deleteChat: vi.fn().mockResolvedValue(undefined),
-    saveSettings: vi.fn().mockResolvedValue(undefined),
-    getSettings: vi.fn().mockResolvedValue({ userId: "mock", theme: "system" }),
-    exportData: vi.fn(), // stream not needed for these tests
-    importData: vi.fn().mockResolvedValue(undefined),
 };
 
 const defaultChar: Character = {

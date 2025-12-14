@@ -1,8 +1,7 @@
-import type { IStorageAdapter } from "@/lib/interfaces";
 import type { Chat, Character } from "@arisutalk/character-spec/v0/Character";
 import { Settings } from "@/lib/types/IDataModel";
 
-export class LocalStorageAdapter implements IStorageAdapter {
+export class LocalStorageAdapter {
     private readonly KEYS = {
         CHATS: "arisutalk_chats",
         CHARACTERS: "arisutalk_characters",
