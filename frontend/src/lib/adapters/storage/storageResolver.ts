@@ -4,13 +4,10 @@ import type {
     IPersonaStorageAdapter,
     ISettingsStorageAdapter,
 } from "@/lib/interfaces";
-import { DexieCharacterAdapter } from "./character/IDBCharacterAdapter";
-import { DexieChatAdapter } from "./chat/IDBChatAdapter";
-import { DexiePersonaAdapter } from "./persona/IDBPersonaAdapter";
-import { DexieSettingsAdapter } from "./settings/IDBSettingsAdapter";
 
 /**
  * Storage resolver that provides the appropriate storage adapters.
+ * Uses dynamic imports for tree-shaking and code splitting.
  * Defaults to IndexedDB (Dexie) for production use.
  */
 export class StorageResolver {
@@ -21,9 +18,11 @@ export class StorageResolver {
 
     /**
      * Get the character storage adapter (singleton).
+     * Uses dynamic import for code splitting.
      */
-    static getCharacterAdapter(): ICharacterStorageAdapter {
+    static async getCharacterAdapter(): Promise<ICharacterStorageAdapter> {
         if (!this.characterAdapter) {
+            const { DexieCharacterAdapter } = await import("./character/IDBCharacterAdapter");
             this.characterAdapter = new DexieCharacterAdapter();
         }
         return this.characterAdapter;
@@ -31,9 +30,11 @@ export class StorageResolver {
 
     /**
      * Get the chat storage adapter (singleton).
+     * Uses dynamic import for code splitting.
      */
-    static getChatAdapter(): IChatStorageAdapter {
+    static async getChatAdapter(): Promise<IChatStorageAdapter> {
         if (!this.chatAdapter) {
+            const { DexieChatAdapter } = await import("./chat/IDBChatAdapter");
             this.chatAdapter = new DexieChatAdapter();
         }
         return this.chatAdapter;
@@ -41,9 +42,11 @@ export class StorageResolver {
 
     /**
      * Get the persona storage adapter (singleton).
+     * Uses dynamic import for code splitting.
      */
-    static getPersonaAdapter(): IPersonaStorageAdapter {
+    static async getPersonaAdapter(): Promise<IPersonaStorageAdapter> {
         if (!this.personaAdapter) {
+            const { DexiePersonaAdapter } = await import("./persona/IDBPersonaAdapter");
             this.personaAdapter = new DexiePersonaAdapter();
         }
         return this.personaAdapter;
@@ -51,9 +54,11 @@ export class StorageResolver {
 
     /**
      * Get the settings storage adapter (singleton).
+     * Uses dynamic import for code splitting.
      */
-    static getSettingsAdapter(): ISettingsStorageAdapter {
+    static async getSettingsAdapter(): Promise<ISettingsStorageAdapter> {
         if (!this.settingsAdapter) {
+            const { DexieSettingsAdapter } = await import("./settings/IDBSettingsAdapter");
             this.settingsAdapter = new DexieSettingsAdapter();
         }
         return this.settingsAdapter;

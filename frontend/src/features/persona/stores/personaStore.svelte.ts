@@ -5,15 +5,19 @@ import { StorageResolver } from "@/lib/adapters/storage/storageResolver";
 export class PersonaStore {
     personas = $state<Persona[]>([]);
     activePersonaId = $state<string | null>(null);
-    private adapter: IPersonaStorageAdapter;
+    private adapter!: IPersonaStorageAdapter;
     public readonly initPromise: Promise<void>;
 
     constructor(adapter?: IPersonaStorageAdapter) {
-        this.adapter = adapter || StorageResolver.getPersonaAdapter();
         // Synchronously populate from localStorage for backward compatibility (tests and sync callers).
         this.syncLoadFromLocalStorage();
         // Continue async initialization with adapter in background.
-        this.initPromise = this.load();
+        this.initPromise = this.initialize(adapter);
+    }
+
+    private async initialize(adapter?: IPersonaStorageAdapter) {
+        this.adapter = adapter || (await StorageResolver.getPersonaAdapter());
+        await this.load();
     }
 
     private async load() {

@@ -7,12 +7,16 @@ export class ChatStore {
     activeChatId = $state<string | null>(null);
     /** Messages for the currently active chat */
     activeMessages = $state<Message[]>([]);
-    private adapter: IChatStorageAdapter;
+    private adapter!: IChatStorageAdapter;
     public readonly initPromise: Promise<void>;
 
     constructor(adapter?: IChatStorageAdapter) {
-        this.adapter = adapter || StorageResolver.getChatAdapter();
-        this.initPromise = this.load();
+        this.initPromise = this.initialize(adapter);
+    }
+
+    private async initialize(adapter?: IChatStorageAdapter) {
+        this.adapter = adapter || (await StorageResolver.getChatAdapter());
+        await this.load();
     }
 
     private async load() {

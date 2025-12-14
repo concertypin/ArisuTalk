@@ -5,12 +5,16 @@ import type { ICharacterStorageAdapter } from "@/lib/interfaces";
 
 export class CharacterStore {
     characters = $state<Character[]>([]);
-    private adapter: ICharacterStorageAdapter;
+    private adapter!: ICharacterStorageAdapter;
     public readonly initPromise: Promise<void>;
 
     constructor(adapter?: ICharacterStorageAdapter) {
-        this.adapter = adapter || StorageResolver.getCharacterAdapter();
-        this.initPromise = this.load();
+        this.initPromise = this.initialize(adapter);
+    }
+
+    private async initialize(adapter?: ICharacterStorageAdapter) {
+        this.adapter = adapter || (await StorageResolver.getCharacterAdapter());
+        await this.load();
     }
 
     async load() {
