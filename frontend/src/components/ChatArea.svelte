@@ -10,8 +10,8 @@
 
     let inputValue = $state("");
     let messagesContainer = $state<HTMLElement | null>(null);
-    let pendingTimeoutIds: SvelteSet<number> = new SvelteSet();
-    let isTyping = $derived(pendingTimeoutIds.size > 0);
+    let botResponseTimeouts: SvelteSet<number> = new SvelteSet();
+    let isTyping = $derived(botResponseTimeouts.size > 0);
 
     let activeChat = $derived(chatStore.chats.find((c) => c.id === chatStore.activeChatId));
     let messages = $derived(activeChat?.messages || []);
@@ -19,8 +19,8 @@
     // Cleanup pending timeouts on unmount
     $effect(() => {
         return () => {
-            pendingTimeoutIds.forEach((id) => clearTimeout(id));
-            pendingTimeoutIds.clear();
+            botResponseTimeouts.forEach((id) => clearTimeout(id));
+            botResponseTimeouts.clear();
         };
     });
 
@@ -56,10 +56,10 @@
 
             await chatStore.addMessage(activeChat.id, botMsg);
 
-            pendingTimeoutIds.delete(timeoutId);
+            botResponseTimeouts.delete(timeoutId);
         }, 1000);
 
-        pendingTimeoutIds.add(timeoutId);
+        botResponseTimeouts.add(timeoutId);
     }
 
     async function scrollToBottom() {
