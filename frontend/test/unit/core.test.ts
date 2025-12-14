@@ -1,8 +1,9 @@
 import { describe, it, expect, expectTypeOf } from "vitest";
-import { Chat, Character, Message } from "@arisutalk/character-spec/v0/Character";
+import { Character, Message } from "@arisutalk/character-spec/v0/Character";
 import { Settings } from "@/lib/types/IDataModel";
-import { ChatProvider, type ProviderSettings } from "@/lib/interfaces/IChatProvider";
+import { ChatProvider, type ProviderSettings } from "@/lib/interfaces";
 import { BaseMessage, HumanMessage } from "@langchain/core/messages";
+import { exampleCharacter, exampleChatData } from "@/const/example_data";
 
 describe("Data Models", () => {
     it("should generate valid IDs for new instances", () => {
@@ -22,49 +23,9 @@ describe("Data Models", () => {
     });
 
     it("should correctly structure a Chat", () => {
-        const char = {
-            name: "Arisu",
-            description: "A cute AI",
-            specVersion: 0,
-            id: "test",
-            prompt: {
-                description: "",
-                authorsNote: "",
-                lorebook: {
-                    config: {
-                        tokenLimit: 0,
-                    },
-                    data: [],
-                },
-            },
-            executables: {
-                runtimeSetting: {
-                    mem: undefined,
-                },
-                replaceHooks: {
-                    display: [],
-                    input: [],
-                    output: [],
-                    request: [],
-                },
-            },
-            metadata: {
-                author: undefined,
-                license: "",
-                version: undefined,
-                distributedOn: undefined,
-                additionalInfo: undefined,
-            },
-        } satisfies Character;
-        const chat = {
-            id: "test",
-            characterId: char.id,
-            title: "New Chat",
-            messages: [] as Message[],
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-            lorebook: [],
-        } satisfies Chat;
+        const char: Character = structuredClone(exampleCharacter);
+        const chat = structuredClone(exampleChatData);
+        chat.messages = []; // Start with empty messages
         expect(chat.id).toBeDefined();
         expect(chat.characterId).toBe(char.id);
         expect(chat.messages).toHaveLength(0);

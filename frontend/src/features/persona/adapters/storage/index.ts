@@ -1,0 +1,1 @@
+export { LocalStoragePersonaAdapter } from "./LocalStoragePersonaAdapter";
