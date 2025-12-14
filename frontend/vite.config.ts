@@ -16,11 +16,13 @@ const browserTestConfig: Presence<UserConfig["test"]>["browser"] = {
         },
     ],
 };
+
 const runBrowserTest =
     process.env.npm_lifecycle_event?.includes("browser") ||
     process.env.npm_lifecycle_event?.includes("ui")
         ? true
         : false;
+
 export default defineConfig(async (ctx) => {
     const mode = ctx.mode;
     const plugin: PluginOption[] = [
@@ -33,6 +35,12 @@ export default defineConfig(async (ctx) => {
     ];
     const baseConfig: UserConfig = {
         server: {
+            sourcemapIgnoreList(absSourcePath) {
+                if (absSourcePath.includes("node_modules")) return true;
+                if (absSourcePath.includes(".pnpm")) return true;
+                if (absSourcePath.includes("@vite")) return true;
+                return false;
+            },
             open: "index.html",
             allowedHosts: process.env.npm_lifecycle_event?.includes("dev") ? true : undefined,
         },
@@ -63,7 +71,7 @@ export default defineConfig(async (ctx) => {
                 runBrowserTest ? [] : ["!test/browser/**/*.{test,spec}.{js,ts}"]
             ),
             exclude: ["node_modules", "dist", ".git"].concat(
-                runBrowserTest ? ["test/browser"] : []
+                runBrowserTest ? [] : ["test/browser"]
             ),
             browser: runBrowserTest ? browserTestConfig : undefined,
             coverage: {
