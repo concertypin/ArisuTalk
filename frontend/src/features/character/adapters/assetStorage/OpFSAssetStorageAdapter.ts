@@ -101,11 +101,12 @@ export class OpFSAssetStorageAdapter implements IAssetStorageAdapter {
         }
 
         // Simple mapping: Store directly in root with name as filename.
-        const fileHandle = await root.getFileHandle(filename, { create: overwrite });
+        // Use { create: true } to ensure the file handle is returned/created.
+        const fileHandle = await root.getFileHandle(filename, { create: true });
         const writable = await fileHandle.createWritable();
         await writable.write(data);
         await writable.close();
-        return new URL(name, "local://opfs/");
+        return new URL(filename, "local://opfs/");
     }
 
     async getAssetUrl<T extends IfNotExistBehavior | undefined>(

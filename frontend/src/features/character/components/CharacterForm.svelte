@@ -80,13 +80,22 @@
         if (input.files && input.files.length > 0) {
             isImporting = true;
             error = "";
-            const result = await characterStore.importCharacter(input.files[0]);
-            isImporting = false;
-            if (result.success) {
-                onSave?.();
-                reset();
-            } else {
-                error = result.error || "Import failed";
+            try {
+                const result = await characterStore.importCharacter(input.files[0]);
+                if (result.success) {
+                    onSave?.();
+                    reset();
+                } else {
+                    error = result.error || "Import failed";
+                }
+            } finally {
+                isImporting = false;
+                // Reset the file input so the same file can be re-imported
+                try {
+                    input.value = "";
+                } catch {
+                    // ignore
+                }
             }
         }
     }

@@ -29,8 +29,19 @@
         const modal = document.getElementById("delete-confirm-modal") as HTMLDialogElement;
         if (!modal) return;
 
-        const index = parseInt(modal.dataset.deleteIndex || "0");
-        characterStore.remove(index);
+        const idxStr = modal.dataset.deleteIndex;
+        if (!idxStr) {
+            console.error("No delete index set on modal");
+            modal.close();
+            return;
+        }
+        const index = Number(idxStr);
+        if (!Number.isFinite(index)) {
+            console.error("Invalid delete index on modal:", idxStr);
+            modal.close();
+            return;
+        }
+        await characterStore.remove(index);
 
         // Close the modal
         modal.close();
@@ -44,16 +55,12 @@
         bytes: Blob,
         type: string = "application/octet-stream"
     ): Promise<string> {
-        const { resolve, reject, promise } = Promise.withResolvers<string>();
-
-        const reader = Object.assign(new FileReader(), {
-            // it is string of data url
-            // enforced by .readAsDataURL, so no type check needed
-            onload: () => resolve(reader.result as string),
-            onerror: () => reject(reader.error),
+        return await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = () => reject(reader.error);
+            reader.readAsDataURL(new File([bytes], "", { type }));
         });
-        reader.readAsDataURL(new File([bytes], "", { type }));
-        return promise;
     }
 
     async function arrayBufferLikeToBlob(

@@ -43,17 +43,25 @@ type WorkerImport = typeof import("@worker/example/main?worker");
  */
 function createCachedWorkerFactory<T>(workerImport: () => Promise<WorkerImport>) {
     let workerInstance: WorkerApi<T> | null = null;
+    let initPromise: Promise<WorkerApi<T>> | null = null;
 
     return async (): Promise<WorkerApi<T>> => {
-        if (workerInstance) {
-            if (workerInstance.disabled) {
-                workerInstance = null;
-            } else return workerInstance;
-        }
+        // If already have a usable instance, return it
+        if (workerInstance && !workerInstance.disabled) return workerInstance;
 
-        const WorkerClass = (await workerImport()).default;
-        const worker = new WorkerClass();
-        return (workerInstance = createWorkerApi<T>(worker));
+        // If creation is in progress, wait for it (prevents races creating multiple workers)
+        if (initPromise) return initPromise;
+
+        initPromise = (async () => {
+            const WorkerClass = (await workerImport()).default;
+            const worker = new WorkerClass();
+            const api = createWorkerApi<T>(worker);
+            workerInstance = api;
+            initPromise = null;
+            return api;
+        })();
+
+        return initPromise;
     };
 }
 

@@ -1,6 +1,6 @@
 import type { IStorageAdapter } from "@/lib/interfaces";
 import type { Chat, Character } from "@arisutalk/character-spec/v0/Character";
-import type { Settings } from "@/lib/types/IDataModel";
+import { Settings } from "@/lib/types/IDataModel";
 
 export class LocalStorageAdapter implements IStorageAdapter {
     private readonly KEYS = {
@@ -91,11 +91,8 @@ export class LocalStorageAdapter implements IStorageAdapter {
     async getSettings(): Promise<Settings> {
         const item = localStorage.getItem(this.KEYS.SETTINGS);
         if (!item) {
-            // Return default settings
-            return {
-                userId: "user",
-                theme: "system",
-            };
+            // Return default settings using the Settings class (ensures userId uses crypto.randomUUID())
+            return new Settings();
         }
         return JSON.parse(item) as Settings;
     }
