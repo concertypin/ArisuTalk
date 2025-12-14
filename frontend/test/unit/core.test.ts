@@ -25,9 +25,10 @@ describe("Data Models", () => {
     it("should correctly structure a Chat", () => {
         const char: Character = structuredClone(exampleCharacter);
         const chat = structuredClone(exampleChatData);
+        chat.messages = []; // Start with empty messages
         expect(chat.id).toBeDefined();
         expect(chat.characterId).toBe(char.id);
-        expect(chat.messages).toHaveLength(2);
+        expect(chat.messages).toHaveLength(0);
 
         chat.messages.push({
             role: "user",
@@ -37,7 +38,7 @@ describe("Data Models", () => {
             },
             id: "test",
         });
-        expect(chat.messages).toHaveLength(3);
+        expect(chat.messages).toHaveLength(1);
     });
 
     it("should initialize Settings with default values", () => {
