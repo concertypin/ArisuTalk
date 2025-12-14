@@ -14,31 +14,26 @@ describe("Data Models", () => {
                 data: "Hello",
             },
             id: "test",
+            chatId: "chat-1",
             timestamp: Date.now(),
+            inlays: [],
         } satisfies Message;
         expectTypeOf(msg).toExtend<Message>();
         expect(msg.id).toBeDefined();
         expect(typeof msg.id).toBe("string");
         expect(msg.timestamp).toBeDefined();
+        expect(msg.chatId).toBe("chat-1");
+        expect(msg.inlays).toEqual([]);
     });
 
     it("should correctly structure a Chat", () => {
         const char: Character = structuredClone(exampleCharacter);
         const chat = structuredClone(exampleChatData);
-        chat.messages = []; // Start with empty messages
+        // Messages are now stored separately, not in the Chat object
         expect(chat.id).toBeDefined();
         expect(chat.characterId).toBe(char.id);
-        expect(chat.messages).toHaveLength(0);
-
-        chat.messages.push({
-            role: "user",
-            content: {
-                type: "string",
-                data: "Hello",
-            },
-            id: "test",
-        });
-        expect(chat.messages).toHaveLength(1);
+        expect(chat.title).toBeDefined();
+        expect(chat.createdAt).toBeDefined();
     });
 
     it("should initialize Settings with default values", () => {

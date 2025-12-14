@@ -16,6 +16,7 @@ const defaultChar: Character = {
     specVersion: 0,
     id: "",
     description: "",
+    assets: { assets: [] },
     prompt: {
         description: "",
         authorsNote: "",
