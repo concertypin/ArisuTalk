@@ -1,23 +1,24 @@
 import type { Chat, Message } from "@arisutalk/character-spec/v0/Character";
-import { getArisuDB } from "./DexieDB";
+import { getArisuDB } from "../IndexedDBHelper";
 import type { IChatStorageAdapter, LocalChat } from "@/lib/interfaces";
 
 export class DexieChatAdapter implements IChatStorageAdapter {
     private db = getArisuDB();
 
     async init(): Promise<void> {
-        // ensures DB is initialized
-        return Promise.resolve();
+        await this.db.ready();
     }
 
     async saveChat(chat: Chat): Promise<void> {
         await this.db.chats.put(chat);
     }
 
-    private toLocalChat(chat: Chat): LocalChat {
+    private async toLocalChat(chat: Chat): Promise<LocalChat> {
+        // Get messages for this chat to find the last message timestamp
+        const messages = await this.db.messages.where("chatId").equals(chat.id).toArray();
         const lastMessage =
-            chat.messages && chat.messages.length
-                ? chat.messages[chat.messages.length - 1].timestamp || chat.updatedAt || 0
+            messages.length > 0
+                ? messages[messages.length - 1].timestamp || chat.updatedAt || 0
                 : chat.updatedAt || chat.createdAt || 0;
 
         return {
@@ -35,10 +36,15 @@ export class DexieChatAdapter implements IChatStorageAdapter {
 
     async getAllChats(): Promise<LocalChat[]> {
         const arr = await this.db.chats.toArray();
-        return arr.map((c) => this.toLocalChat(c));
+        return Promise.all(arr.map((c) => this.toLocalChat(c)));
     }
 
     async deleteChat(id: string): Promise<void> {
+        // Delete all messages for this chat first
+        const messages = await this.db.messages.where("chatId").equals(id).toArray();
+        for (const msg of messages) {
+            await this.db.messages.delete(msg.id);
+        }
         await this.db.chats.delete(id);
     }
 
@@ -49,7 +55,6 @@ export class DexieChatAdapter implements IChatStorageAdapter {
             id,
             characterId,
             title: title || "",
-            messages: [],
             createdAt: now,
             updatedAt: now,
         };
@@ -59,22 +64,35 @@ export class DexieChatAdapter implements IChatStorageAdapter {
 
     async getChatsByCharacter(characterId: string): Promise<LocalChat[]> {
         const arr = await this.db.chats.where("characterId").equals(characterId).toArray();
-        return arr.map((c) => this.toLocalChat(c));
+        return Promise.all(arr.map((c) => this.toLocalChat(c)));
     }
 
     async addMessage(chatId: string, message: Message): Promise<void> {
         const chat = await this.db.chats.get(chatId);
         if (!chat) throw new Error(`Chat not found: ${chatId}`);
-        chat.messages = chat.messages || [];
-        chat.messages.push(message);
+
+        // Store message separately with chatId reference
+        const messageWithChatId: Message = {
+            ...message,
+            chatId,
+            inlays: message.inlays || [],
+        };
+        await this.db.messages.put(messageWithChatId);
+
+        // Update chat's updatedAt timestamp
         chat.updatedAt = message.timestamp || Date.now();
         await this.db.chats.put(chat);
     }
 
+    async getMessages(chatId: string): Promise<Message[]> {
+        return this.db.messages.where("chatId").equals(chatId).toArray();
+    }
+
     // Provide export/import on chat adapter for convenience
     async exportData(): Promise<ReadableStream<Uint8Array>> {
-        const chats = await this.getAllChats();
-        const json = JSON.stringify({ chats });
+        const chats = await this.db.chats.toArray();
+        const messages = await this.db.messages.toArray();
+        const json = JSON.stringify({ chats, messages });
         const enc = new TextEncoder().encode(json);
         return new ReadableStream({
             start(ctrl) {
@@ -91,6 +109,10 @@ export class DexieChatAdapter implements IChatStorageAdapter {
         if (Array.isArray(data.chats)) {
             await this.db.chats.clear();
             if (data.chats.length) await this.db.chats.bulkPut(data.chats);
+        }
+        if (Array.isArray(data.messages)) {
+            await this.db.messages.clear();
+            if (data.messages.length) await this.db.messages.bulkPut(data.messages);
         }
     }
 }

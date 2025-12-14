@@ -73,8 +73,8 @@ importers:
   frontend:
     dependencies:
       '@arisutalk/character-spec':
-        specifier: 0.0.2
-        version: 0.0.2(zod@4.1.13)
+        specifier: 0.0.4
+        version: 0.0.4(zod@4.1.13)
       '@langchain/core':
         specifier: ^1.1.4
         version: 1.1.4
@@ -87,12 +87,12 @@ importers:
       comlink:
         specifier: ^4.4.2
         version: 4.4.2
-      dexie:
-        specifier: ^4.2.1
-        version: 4.2.1
       svelte:
         specifier: ^5.39.3
         version: 5.45.10
+      tinybase:
+        specifier: ^7.2.0
+        version: 7.2.0(react@19.2.3)(ws@8.18.3)(zod@4.1.13)
       zod:
         specifier: ^4.1.12
         version: 4.1.13
@@ -188,8 +188,8 @@ packages:
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
 
-  '@arisutalk/character-spec@0.0.2':
-    resolution: {integrity: sha512-LqnkTDyuv/o7eW14QFBz6CJ0UJVUtLSG+8rJcoOJBnpudCW4y1AQdtIZsM1fEtMCuNhTxInQ6CDyrBglTUt8nA==}
+  '@arisutalk/character-spec@0.0.4':
+    resolution: {integrity: sha512-bjHa8jTZjTIlK07f2qnDKdx/xqOBNM+vubrjCEUKTR66WPd01ZtO4M3ITCW6lKoNN3ZkpZZWaszAVnVVZkb5FQ==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^4.1.13
@@ -2024,9 +2024,6 @@ packages:
   devalue@5.6.1:
     resolution: {integrity: sha512-jDwizj+IlEZBunHcOuuFVBnIMPAEHvTsJj0BcIp94xYguLRVBcXO853px/MyIJvbVzWdsGvrRweIUWJw8hBP7A==}
 
-  dexie@4.2.1:
-    resolution: {integrity: sha512-Ckej0NS6jxQ4Po3OrSQBFddayRhTCic2DoCAG5zacOfOVB9P2Q5Xc5uL/nVa7ZVs+HdMnvUPzLFCB/JwpB6Csg==}
-
   dom-accessibility-api@0.5.16:
     resolution: {integrity: sha512-X7BJ2yElsnOJ30pZF4uIIDfBEVgF4XEBxL9Bxhy6dnrm5hkzqmsWHGTiHqRiITNhMyFLyAiWndIJP7Z1NTteDg==}
 
@@ -2886,6 +2883,89 @@ packages:
     resolution: {integrity: sha512-g9ljZiwki/LfxmQADO3dEY1CbpmXT5Hm2fJ+QaGKwSXUylMybePR7/67YW7jOrrvjEgL1Fmz5kzyAjWVWLlucg==}
     engines: {node: '>=6'}
 
+  tinybase@7.2.0:
+    resolution: {integrity: sha512-SngEZdeUspmjNimKl99pza524Q5Tc65DXKoOCnh5Pl9sTLmop16Q7YRumYwxIONzLuh0QT7kQN3XBPLvnc+rig==}
+    peerDependencies:
+      '@automerge/automerge-repo': ^2.5.1
+      '@cloudflare/workers-types': ^4.20251212.0
+      '@electric-sql/pglite': ^0.3.14
+      '@libsql/client': ^0.15.15
+      '@powersync/common': ^1.44.0
+      '@sinclair/typebox': ^0.34.41
+      '@sqlite.org/sqlite-wasm': ^3.50.4-build1
+      '@vlcn.io/crsqlite-wasm': ^0.16.0
+      arktype: ^2.1.28
+      bun: ^1.3.3
+      effect: ^3.19.11
+      electric-sql: ^0.12.1
+      expo: ^54.0.10
+      expo-sqlite: ^16.0.10
+      partykit: ^0.0.115
+      partysocket: ^1.1.6
+      postgres: ^3.4.7
+      react: ^19.0.0
+      react-dom: ^19.0.0
+      react-native-mmkv: 4.1.0
+      react-native-sqlite-storage: ^6.0.1
+      sqlite3: ^5.1.7
+      valibot: ^1.2.0
+      ws: ^8.18.3
+      yjs: ^13.6.27
+      zod: ^4.1.13
+    peerDependenciesMeta:
+      '@automerge/automerge-repo':
+        optional: true
+      '@cloudflare/workers-types':
+        optional: true
+      '@electric-sql/pglite':
+        optional: true
+      '@libsql/client':
+        optional: true
+      '@powersync/common':
+        optional: true
+      '@sinclair/typebox':
+        optional: true
+      '@sqlite.org/sqlite-wasm':
+        optional: true
+      '@vlcn.io/crsqlite-wasm':
+        optional: true
+      arktype:
+        optional: true
+      bun:
+        optional: true
+      effect:
+        optional: true
+      electric-sql:
+        optional: true
+      expo:
+        optional: true
+      expo-sqlite:
+        optional: true
+      partykit:
+        optional: true
+      partysocket:
+        optional: true
+      postgres:
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+      react-native-mmkv:
+        optional: true
+      react-native-sqlite-storage:
+        optional: true
+      sqlite3:
+        optional: true
+      valibot:
+        optional: true
+      ws:
+        optional: true
+      yjs:
+        optional: true
+      zod:
+        optional: true
+
   tinybench@2.9.0:
     resolution: {integrity: sha512-0+DUvqWMValLmha6lr4kD8iAMK1HzV0/aKnCtWb9v9641TnP/MFb7Pc2bxoxQjTXAErryXVgUOfv2YqNllqGeg==}
 
@@ -3208,7 +3288,7 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@arisutalk/character-spec@0.0.2(zod@4.1.13)':
+  '@arisutalk/character-spec@0.0.4(zod@4.1.13)':
     dependencies:
       zod: 4.1.13
 
@@ -5316,8 +5396,6 @@ snapshots:
 
   devalue@5.6.1: {}
 
-  dexie@4.2.1: {}
-
   dom-accessibility-api@0.5.16: {}
 
   electron-to-chromium@1.5.267: {}
@@ -6182,6 +6260,12 @@ snapshots:
   tailwindcss@4.1.18: {}
 
   tapable@2.3.0: {}
+
+  tinybase@7.2.0(react@19.2.3)(ws@8.18.3)(zod@4.1.13):
+    optionalDependencies:
+      react: 19.2.3
+      ws: 8.18.3
+      zod: 4.1.13
 
   tinybench@2.9.0: {}
 

@@ -1,4 +1,4 @@
-import { getArisuDB } from "../DexieDB";
+import { getArisuDB } from "../IndexedDBHelper";
 import type { IPersonaStorageAdapter } from "@/lib/interfaces";
 import type { Persona } from "@/features/persona/schema";
 
@@ -6,7 +6,7 @@ export class DexiePersonaAdapter implements IPersonaStorageAdapter {
     private db = getArisuDB();
 
     async init(): Promise<void> {
-        return Promise.resolve();
+        await this.db.ready();
     }
 
     async getAllPersonas(): Promise<Persona[]> {
@@ -27,13 +27,13 @@ export class DexiePersonaAdapter implements IPersonaStorageAdapter {
 
     async getActivePersonaId(): Promise<string | null> {
         const rec = (await this.db.settings.get("active_persona")) as
-            | { id: string; value?: string }
+            | { value?: string; activePersonaId?: string }
             | undefined;
-        return rec?.value ?? null;
+        return rec?.value ?? rec?.activePersonaId ?? null;
     }
 
     async setActivePersonaId(id: string | null): Promise<void> {
         if (id === null) await this.db.settings.delete("active_persona");
-        else await this.db.settings.put({ id: "active_persona", value: id });
+        else await this.db.settings.put({ id: "active_persona", value: id, activePersonaId: id });
     }
 }

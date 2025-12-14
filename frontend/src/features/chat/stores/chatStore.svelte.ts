@@ -5,6 +5,8 @@ import { LocalStorageChatAdapter } from "@/features/chat/adapters/storage/LocalS
 export class ChatStore {
     chats = $state<LocalChat[]>([]);
     activeChatId = $state<string | null>(null);
+    /** Messages for the currently active chat */
+    activeMessages = $state<Message[]>([]);
     private adapter: IChatStorageAdapter;
     public readonly initPromise: Promise<void>;
 
@@ -47,9 +49,18 @@ export class ChatStore {
         const chat = this.chats.find((c) => c.id === chatId);
 
         if (chat) {
-            chat.messages.push(message);
             chat.lastMessage = Date.now();
             chat.updatedAt = Date.now();
+        }
+
+        // Update activeMessages if this is the active chat
+        if (chatId === this.activeChatId) {
+            const messageWithChatId: Message = {
+                ...message,
+                chatId,
+                inlays: message.inlays || [],
+            };
+            this.activeMessages.push(messageWithChatId);
         }
     }
 
@@ -61,12 +72,22 @@ export class ChatStore {
             this.chats.splice(index, 1);
             if (this.activeChatId === chatId) {
                 this.activeChatId = null;
+                this.activeMessages = [];
             }
         }
     }
 
-    setActiveChat(chatId: string | null) {
+    async setActiveChat(chatId: string | null) {
         this.activeChatId = chatId;
+        if (chatId && "getMessages" in this.adapter) {
+            this.activeMessages = await (
+                this.adapter as IChatStorageAdapter & {
+                    getMessages: (id: string) => Promise<Message[]>;
+                }
+            ).getMessages(chatId);
+        } else {
+            this.activeMessages = [];
+        }
     }
 }
 

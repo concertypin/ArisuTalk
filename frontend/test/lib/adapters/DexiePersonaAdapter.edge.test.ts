@@ -1,7 +1,7 @@
 import "fake-indexeddb/auto";
 import { describe, it, expect, beforeEach } from "vitest";
-import { DexiePersonaAdapter } from "@/lib/adapters/storage/persona/DexiePersonaAdapter";
-import { getArisuDB } from "@/lib/adapters/storage/DexieDB";
+import { DexiePersonaAdapter } from "@/lib/adapters/storage/persona/IDBPersonaAdapter";
+import { getArisuDB } from "@/lib/adapters/storage/IndexedDBHelper";
 import type { Persona } from "@/features/persona/schema";
 
 describe("DexiePersonaAdapter (edge)", () => {

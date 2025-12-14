@@ -1,4 +1,4 @@
-import { getArisuDB } from "./DexieDB";
+import { getArisuDB } from "../IndexedDBHelper";
 import type { ISettingsStorageAdapter } from "@/lib/interfaces";
 import { Settings, SettingsSchema } from "@/lib/types/IDataModel";
 
@@ -6,7 +6,7 @@ export class DexieSettingsAdapter implements ISettingsStorageAdapter {
     private db = getArisuDB();
 
     async init(): Promise<void> {
-        return Promise.resolve();
+        await this.db.ready();
     }
 
     async saveSettings(settings: Settings): Promise<void> {

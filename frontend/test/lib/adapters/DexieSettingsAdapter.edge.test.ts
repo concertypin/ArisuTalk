@@ -1,7 +1,7 @@
 import "fake-indexeddb/auto";
 import { describe, it, expect, beforeEach } from "vitest";
-import { DexieSettingsAdapter } from "@/lib/adapters/storage/settings/DexieSettingsAdapter";
-import { getArisuDB } from "@/lib/adapters/storage/DexieDB";
+import { DexieSettingsAdapter } from "@/lib/adapters/storage/settings/IDBSettingsAdapter";
+import { getArisuDB } from "@/lib/adapters/storage/IndexedDBHelper";
 import { SettingsSchema } from "@/lib/types/IDataModel";
 
 describe("DexieSettingsAdapter (edge)", () => {

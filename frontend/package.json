@@ -27,13 +27,13 @@
         "node": ">20"
     },
     "dependencies": {
-        "@arisutalk/character-spec": "0.0.2",
+        "@arisutalk/character-spec": "0.0.4",
         "@langchain/core": "^1.1.4",
         "@lucide/svelte": "^0.559.0",
         "cbor-x": "^1.6.0",
         "comlink": "^4.4.2",
-        "dexie": "^4.2.1",
         "svelte": "^5.39.3",
+        "tinybase": "^7.2.0",
         "zod": "^4.1.12"
     },
     "devDependencies": {

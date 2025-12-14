@@ -32,7 +32,7 @@
 
         const newCharacter: Character = {
             ...character, // Keep existing fields if editing
-            assets: character?.assets || { assets: [], inlays: [] },
+            assets: character?.assets || { assets: [] },
             specVersion: 0,
             id: character?.id || crypto.randomUUID(),
             name: name,

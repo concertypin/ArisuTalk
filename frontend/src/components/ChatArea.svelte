@@ -14,7 +14,7 @@
     let isTyping = $derived(botResponseTimeouts.size > 0);
 
     let activeChat = $derived(chatStore.chats.find((c) => c.id === chatStore.activeChatId));
-    let messages = $derived(activeChat?.messages || []);
+    let messages = $derived(chatStore.activeMessages);
 
     // Cleanup pending timeouts on unmount
     $effect(() => {
@@ -36,9 +36,11 @@
 
         const userMsg: Message = {
             id: crypto.randomUUID(),
+            chatId: activeChat.id,
             content: { type: "string", data: inputValue },
             role: "user",
             timestamp: Date.now(),
+            inlays: [],
         };
 
         await chatStore.addMessage(activeChat.id, userMsg);
@@ -49,9 +51,11 @@
             if (!activeChat) return;
             const botMsg: Message = {
                 id: crypto.randomUUID(),
+                chatId: activeChat.id,
                 content: { type: "string", data: "This is a mock response from the system." },
                 role: "assistant",
                 timestamp: Date.now(),
+                inlays: [],
             };
 
             await chatStore.addMessage(activeChat.id, botMsg);

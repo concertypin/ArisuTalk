@@ -1,12 +1,12 @@
 import type { Character } from "@arisutalk/character-spec/v0/Character";
-import { getArisuDB } from "./DexieDB";
+import { getArisuDB } from "../IndexedDBHelper";
 import type { ICharacterStorageAdapter } from "@/lib/interfaces";
 
 export class DexieCharacterAdapter implements ICharacterStorageAdapter {
     private db = getArisuDB();
 
     async init(): Promise<void> {
-        return Promise.resolve();
+        await this.db.ready();
     }
 
     async saveCharacter(character: Character): Promise<void> {

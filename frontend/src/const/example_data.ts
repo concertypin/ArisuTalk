@@ -59,7 +59,6 @@ export const exampleCharacter: Character = {
                 name: "profile.png",
             },
         ],
-        inlays: [],
     },
     name: "Anella Sweet",
     description: "Cute tiny little ghost who lives with you. Isn't she cute?",
@@ -146,22 +145,26 @@ export const exampleCharacter: Character = {
 export const exampleMessageData: Message[] = [
     {
         id: "msg-1",
+
+        chatId: "example-chat-1",
         role: "user",
         content: { type: "string", data: "안녕, 아넬라! 만나서 반가워!" },
         timestamp: Date.now() - 60000,
+        inlays: [],
     },
     {
         id: "msg-2",
+        chatId: "example-chat-1",
         role: "assistant",
         content: { type: "string", data: "(대충 귀여운 소리)" },
         timestamp: Date.now() - 30000,
+        inlays: [],
     },
 ];
 export const exampleChatData: Chat = {
     id: "example-chat-1",
     characterId: exampleCharacter.id,
     title: "Chat with Anella",
-    messages: exampleMessageData,
     createdAt: Date.now(),
     updatedAt: Date.now(),
 };

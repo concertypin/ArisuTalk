@@ -1,7 +1,7 @@
 import "fake-indexeddb/auto";
 import { describe, it, expect, beforeEach } from "vitest";
-import { DexieCharacterAdapter } from "@/lib/adapters/storage/character/DexieCharacterAdapter";
-import { getArisuDB } from "@/lib/adapters/storage/DexieDB";
+import { DexieCharacterAdapter } from "@/lib/adapters/storage/character/IDBCharacterAdapter";
+import { getArisuDB } from "@/lib/adapters/storage/IndexedDBHelper";
 import { exampleCharacter } from "@/const/example_data";
 
 describe("DexieCharacterAdapter", () => {

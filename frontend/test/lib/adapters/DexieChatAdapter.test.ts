@@ -1,7 +1,7 @@
 import "fake-indexeddb/auto";
 import { describe, it, expect, beforeEach } from "vitest";
-import { DexieChatAdapter } from "@/lib/adapters/storage/chat/DexieChatAdapter";
-import { getArisuDB } from "@/lib/adapters/storage/DexieDB";
+import { DexieChatAdapter } from "@/lib/adapters/storage/chat/IDBChatAdapter";
+import { getArisuDB } from "@/lib/adapters/storage/IndexedDBHelper";
 import { exampleChatData } from "@/const/example_data";
 
 describe("DexieChatAdapter", () => {
