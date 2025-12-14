@@ -33,7 +33,7 @@ describe("PersonaStore", () => {
         name: "Test User",
         description: "A test description",
         note: "Secret note",
-        assets: { assets: [], inlays: [] },
+        assets: { assets: [] },
     };
 
     it("should initialize with empty state", () => {
