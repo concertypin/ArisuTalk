@@ -2,7 +2,7 @@ import { getArisuDB } from "../IndexedDBHelper";
 import type { ISettingsStorageAdapter } from "@/lib/interfaces";
 import { Settings, SettingsSchema } from "@/lib/types/IDataModel";
 
-export class DexieSettingsAdapter implements ISettingsStorageAdapter {
+export class IDBSettingsAdapter implements ISettingsStorageAdapter {
     private db = getArisuDB();
 
     async init(): Promise<void> {

@@ -1,11 +1,11 @@
 import "fake-indexeddb/auto";
 import { describe, it, expect, beforeEach } from "vitest";
-import { DexiePersonaAdapter } from "@/lib/adapters/storage/persona/IDBPersonaAdapter";
+import { IDBPersonaAdapter } from "@/lib/adapters/storage/persona/IDBPersonaAdapter";
 import { getArisuDB } from "@/lib/adapters/storage/IndexedDBHelper";
 import type { Persona } from "@/features/persona/schema";
 
 describe("DexiePersonaAdapter (comprehensive)", () => {
-    let adapter: DexiePersonaAdapter;
+    let adapter: IDBPersonaAdapter;
     const db = getArisuDB();
 
     const testPersona: Persona = {
@@ -18,7 +18,7 @@ describe("DexiePersonaAdapter (comprehensive)", () => {
     beforeEach(async () => {
         await db.personas.clear();
         await db.settings.clear();
-        adapter = new DexiePersonaAdapter();
+        adapter = new IDBPersonaAdapter();
         await adapter.init();
     });
 
@@ -74,7 +74,7 @@ describe("DexiePersonaAdapter (comprehensive)", () => {
 
         it("persists active persona across adapter instances", async () => {
             await adapter.setActivePersonaId("persona-1");
-            const newAdapter = new DexiePersonaAdapter();
+            const newAdapter = new IDBPersonaAdapter();
             await newAdapter.init();
             const id = await newAdapter.getActivePersonaId();
             expect(id).toBe("persona-1");

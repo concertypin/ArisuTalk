@@ -1,16 +1,16 @@
 import "fake-indexeddb/auto";
 import { describe, it, expect, beforeEach } from "vitest";
-import { DexieChatAdapter } from "@/lib/adapters/storage/chat/IDBChatAdapter";
+import { IDBChatAdapter } from "@/lib/adapters/storage/chat/IDBChatAdapter";
 import { getArisuDB } from "@/lib/adapters/storage/IndexedDBHelper";
 import { exampleChatData, exampleMessageData } from "@/const/example_data";
 
 describe("DexieChatAdapter (edge)", () => {
-    let adapter: DexieChatAdapter;
+    let adapter: IDBChatAdapter;
     const db = getArisuDB();
 
     beforeEach(async () => {
         await db.delete();
-        adapter = new DexieChatAdapter();
+        adapter = new IDBChatAdapter();
         await adapter.init();
     });
 

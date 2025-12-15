@@ -2,7 +2,7 @@ import { getArisuDB } from "../IndexedDBHelper";
 import type { IPersonaStorageAdapter } from "@/lib/interfaces";
 import type { Persona } from "@/features/persona/schema";
 
-export class DexiePersonaAdapter implements IPersonaStorageAdapter {
+export class IDBPersonaAdapter implements IPersonaStorageAdapter {
     private db = getArisuDB();
 
     async init(): Promise<void> {

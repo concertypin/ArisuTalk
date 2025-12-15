@@ -6,7 +6,7 @@ import { BaseMessage, HumanMessage } from "@langchain/core/messages";
 import { exampleCharacter, exampleChatData } from "@/const/example_data";
 
 describe("Data Models", () => {
-    it("should generate valid IDs for new instances", () => {
+    it.concurrent("should generate valid IDs for new instances", async () => {
         const msg = {
             role: "user",
             content: {
@@ -26,7 +26,7 @@ describe("Data Models", () => {
         expect(msg.inlays).toEqual([]);
     });
 
-    it("should correctly structure a Chat", () => {
+    it.concurrent("should correctly structure a Chat", async () => {
         const char: Character = structuredClone(exampleCharacter);
         const chat = structuredClone(exampleChatData);
         // Messages are now stored separately, not in the Chat object
@@ -36,7 +36,7 @@ describe("Data Models", () => {
         expect(chat.createdAt).toBeDefined();
     });
 
-    it("should initialize Settings with default values", () => {
+    it.concurrent("should initialize Settings with default values", async () => {
         const settings = SettingsSchema.parse({});
         expect(settings).toBeDefined();
     });
@@ -77,7 +77,7 @@ describe("IChatProvider (Mock)", () => {
         }
     }
 
-    it("should implement generate correctly", async () => {
+    it.concurrent("should implement generate correctly", async () => {
         // Use static connect
         const provider = await MockProvider.connect({});
 
@@ -85,7 +85,7 @@ describe("IChatProvider (Mock)", () => {
         expect(response).toBe("Mock response");
     });
 
-    it("should implement stream correctly", async () => {
+    it.concurrent("should implement stream correctly", async () => {
         const provider = await MockProvider.connect({});
         const generator = provider.stream([new HumanMessage("Hi")]);
         let content = "";

@@ -22,7 +22,8 @@ export class StorageResolver {
      */
     static async getCharacterAdapter(): Promise<ICharacterStorageAdapter> {
         if (!this.characterAdapter) {
-            const { DexieCharacterAdapter } = await import("./character/IDBCharacterAdapter");
+            const { DexieCharacterAdapter: IDBCharacterAdapter } =
+                await import("./character/IDBCharacterAdapter");
             this.characterAdapter = new DexieCharacterAdapter();
         }
         return this.characterAdapter;
@@ -34,7 +35,7 @@ export class StorageResolver {
      */
     static async getChatAdapter(): Promise<IChatStorageAdapter> {
         if (!this.chatAdapter) {
-            const { DexieChatAdapter } = await import("./chat/IDBChatAdapter");
+            const { DexieChatAdapter: IDBChatAdapter } = await import("./chat/IDBChatAdapter");
             this.chatAdapter = new DexieChatAdapter();
         }
         return this.chatAdapter;
@@ -46,7 +47,8 @@ export class StorageResolver {
      */
     static async getPersonaAdapter(): Promise<IPersonaStorageAdapter> {
         if (!this.personaAdapter) {
-            const { DexiePersonaAdapter } = await import("./persona/IDBPersonaAdapter");
+            const { DexiePersonaAdapter: IDBPersonaAdapter } =
+                await import("./persona/IDBPersonaAdapter");
             this.personaAdapter = new DexiePersonaAdapter();
         }
         return this.personaAdapter;
@@ -58,7 +60,8 @@ export class StorageResolver {
      */
     static async getSettingsAdapter(): Promise<ISettingsStorageAdapter> {
         if (!this.settingsAdapter) {
-            const { DexieSettingsAdapter } = await import("./settings/IDBSettingsAdapter");
+            const { DexieSettingsAdapter: IDBSettingsAdapter } =
+                await import("./settings/IDBSettingsAdapter");
             this.settingsAdapter = new DexieSettingsAdapter();
         }
         return this.settingsAdapter;

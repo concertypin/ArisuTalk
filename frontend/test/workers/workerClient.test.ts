@@ -32,20 +32,20 @@ vi.mock("comlink", () => {
 });
 
 describe("Worker Client", () => {
-    it("should create a worker instance", async () => {
+    it.concurrent("should create a worker instance", async () => {
         const worker = await getExampleWorker();
         expect(worker).toBeDefined();
         expect(worker.terminate).toBeDefined();
         expect(worker.greet).toBeDefined();
     });
 
-    it("should call worker methods", async () => {
+    it.concurrent("should call worker methods", async () => {
         const worker = await getExampleWorker();
         const result = await worker.greet("World");
         expect(result).toBe("Hello, World!");
     });
 
-    it("should terminate worker", async () => {
+    it.concurrent("should terminate worker", async () => {
         const worker = await getExampleWorker();
         // Just checking it doesn't throw
         worker.terminate();

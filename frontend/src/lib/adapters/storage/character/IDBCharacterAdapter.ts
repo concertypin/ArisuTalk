@@ -2,7 +2,7 @@ import type { Character } from "@arisutalk/character-spec/v0/Character";
 import { getArisuDB } from "../IndexedDBHelper";
 import type { ICharacterStorageAdapter } from "@/lib/interfaces";
 
-export class DexieCharacterAdapter implements ICharacterStorageAdapter {
+export class IDBCharacterAdapter implements ICharacterStorageAdapter {
     private db = getArisuDB();
 
     async init(): Promise<void> {

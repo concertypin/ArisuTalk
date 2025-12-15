@@ -1,16 +1,16 @@
 import "fake-indexeddb/auto";
 import { describe, it, expect, beforeEach } from "vitest";
-import { DexieCharacterAdapter } from "@/lib/adapters/storage/character/IDBCharacterAdapter";
+import { IDBCharacterAdapter } from "@/lib/adapters/storage/character/IDBCharacterAdapter";
 import { getArisuDB } from "@/lib/adapters/storage/IndexedDBHelper";
 import { exampleCharacter } from "@/const/example_data";
 
 describe("DexieCharacterAdapter", () => {
-    let adapter: DexieCharacterAdapter;
+    let adapter: IDBCharacterAdapter;
     const db = getArisuDB();
 
     beforeEach(async () => {
         await db.delete();
-        adapter = new DexieCharacterAdapter();
+        adapter = new IDBCharacterAdapter();
         await adapter.init();
     });
 

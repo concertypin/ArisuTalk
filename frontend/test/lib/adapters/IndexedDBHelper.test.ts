@@ -1,6 +1,8 @@
 import "fake-indexeddb/auto";
 import { describe, it, expect, beforeEach } from "vitest";
 import { getArisuDB } from "@/lib/adapters/storage/IndexedDBHelper";
+import type { Character } from "@arisutalk/character-spec/v0/Character";
+import type { Settings } from "@/lib/types/IDataModel";
 
 describe("IndexedDBHelper (ArisuDB)", () => {
     const db = getArisuDB();
@@ -28,10 +30,10 @@ describe("IndexedDBHelper (ArisuDB)", () => {
     });
 
     describe("Characters table", () => {
-        const testCharacter = {
+        const testCharacter: Character = {
             id: "char-1",
             name: "Test Character",
-            specVersion: 0 as const,
+            specVersion: 0,
             description: "A test character",
             assets: { assets: [] },
             prompt: {
@@ -171,7 +173,7 @@ describe("IndexedDBHelper (ArisuDB)", () => {
     });
 
     describe("Settings table", () => {
-        const testSettings = {
+        const testSettings: Settings & { id: string } = {
             id: "singleton",
             theme: "dark" as const,
             userId: "user-123",

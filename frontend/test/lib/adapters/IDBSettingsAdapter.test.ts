@@ -1,16 +1,16 @@
 import "fake-indexeddb/auto";
 import { describe, it, expect, beforeEach } from "vitest";
-import { DexieSettingsAdapter } from "@/lib/adapters/storage/settings/IDBSettingsAdapter";
+import { IDBSettingsAdapter } from "@/lib/adapters/storage/settings/IDBSettingsAdapter";
 import { getArisuDB } from "@/lib/adapters/storage/IndexedDBHelper";
 import { SettingsSchema } from "@/lib/types/IDataModel";
 
 describe("DexieSettingsAdapter", () => {
-    let adapter: DexieSettingsAdapter;
+    let adapter: IDBSettingsAdapter;
     const db = getArisuDB();
 
     beforeEach(async () => {
         await db.delete();
-        adapter = new DexieSettingsAdapter();
+        adapter = new IDBSettingsAdapter();
         await adapter.init();
     });
     it("initializes adapter without throwing", () => {

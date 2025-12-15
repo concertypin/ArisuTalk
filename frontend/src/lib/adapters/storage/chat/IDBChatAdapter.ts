@@ -2,7 +2,7 @@ import type { Chat, Message } from "@arisutalk/character-spec/v0/Character";
 import { getArisuDB } from "../IndexedDBHelper";
 import type { IChatStorageAdapter, LocalChat } from "@/lib/interfaces";
 
-export class DexieChatAdapter implements IChatStorageAdapter {
+export class IDBChatAdapter implements IChatStorageAdapter {
     private db = getArisuDB();
 
     async init(): Promise<void> {

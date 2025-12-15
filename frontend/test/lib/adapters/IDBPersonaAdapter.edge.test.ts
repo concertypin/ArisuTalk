@@ -1,16 +1,16 @@
 import "fake-indexeddb/auto";
 import { describe, it, expect, beforeEach } from "vitest";
-import { DexiePersonaAdapter } from "@/lib/adapters/storage/persona/IDBPersonaAdapter";
+import { IDBPersonaAdapter } from "@/lib/adapters/storage/persona/IDBPersonaAdapter";
 import { getArisuDB } from "@/lib/adapters/storage/IndexedDBHelper";
 import type { Persona } from "@/features/persona/schema";
 
 describe("DexiePersonaAdapter (edge)", () => {
-    let adapter: DexiePersonaAdapter;
+    let adapter: IDBPersonaAdapter;
     const db = getArisuDB();
 
     beforeEach(async () => {
         await db.delete();
-        adapter = new DexiePersonaAdapter();
+        adapter = new IDBPersonaAdapter();
         await adapter.init();
     });
 
