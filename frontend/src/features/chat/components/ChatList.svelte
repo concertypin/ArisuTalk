@@ -13,11 +13,11 @@
 
     async function handleNewChat() {
         const id = await chatStore.createChat(characterId, `Chat ${chats.length + 1}`);
-        chatStore.setActiveChat(id);
+        void chatStore.setActiveChat(id);
     }
 
     function handleSelect(id: string) {
-        chatStore.setActiveChat(id);
+        void chatStore.setActiveChat(id);
     }
 
     async function handleDelete(e: Event, id: string) {
@@ -33,7 +33,7 @@
         <h3 class="font-bold text-base-content/70 uppercase text-xs tracking-wider">Chats</h3>
         <button
             class="btn btn-ghost btn-xs btn-square"
-            onclick={handleNewChat}
+            onclick={() => void handleNewChat()}
             aria-label="New Chat"
         >
             <Plus size={16} />
@@ -57,8 +57,12 @@
                         role="button"
                         tabindex="0"
                         class="p-1 hover:text-error rounded"
-                        onclick={(e) => handleDelete(e, chat.id)}
-                        onkeydown={(e) => e.key === "Enter" && handleDelete(e, chat.id)}
+                        onclick={(e) => void handleDelete(e, chat.id)}
+                        onkeydown={(e) => {
+                            if (e.key === "Enter") {
+                                void handleDelete(e, chat.id);
+                            }
+                        }}
                     >
                         <Trash2 size={14} />
                     </div>
@@ -69,7 +73,9 @@
         {#if chats.length === 0}
             <div class="text-center p-4 opacity-70 text-sm">
                 No chats yet.
-                <button class="link link-info" onclick={handleNewChat}>Create one?</button>
+                <button class="link link-info" onclick={() => void handleNewChat()}>
+                    Create one?
+                </button>
             </div>
         {/if}
     </div>

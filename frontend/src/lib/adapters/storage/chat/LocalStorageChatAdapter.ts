@@ -9,6 +9,44 @@ export class LocalStorageChatAdapter implements IChatStorageAdapter {
     private readonly CHATS_KEY = "arisutalk_chats_v1";
     private readonly MESSAGES_KEY = "arisutalk_messages_v1";
 
+    private isRecord(value: unknown): value is Record<string, unknown> {
+        return typeof value === "object" && value !== null;
+    }
+
+    private isLocalChat(value: unknown): value is LocalChat {
+        return (
+            this.isRecord(value) &&
+            typeof value.id === "string" &&
+            typeof value.characterId === "string" &&
+            typeof value.name === "string" &&
+            typeof value.lastMessage === "number"
+        );
+    }
+
+    private isMessage(value: unknown): value is Message {
+        return (
+            this.isRecord(value) &&
+            typeof value.id === "string" &&
+            typeof value.chatId === "string" &&
+            typeof value.role === "string" &&
+            this.isRecord(value.content) &&
+            typeof value.content.type === "string" &&
+            "data" in value.content
+        );
+    }
+
+    private parseArray<T>(raw: string, predicate: (value: unknown) => value is T): T[] {
+        try {
+            const parsed = JSON.parse(raw) as unknown;
+            if (!Array.isArray(parsed)) return [];
+            const parsedArray: unknown[] = parsed;
+            return parsedArray.filter(predicate);
+        } catch (e) {
+            console.error("Failed to parse stored data", e);
+            return [];
+        }
+    }
+
     async init(): Promise<void> {
         if (!import.meta.env.DEV) {
             console.warn("LocalStorageChatAdapter is for development/testing only.");
@@ -19,7 +57,8 @@ export class LocalStorageChatAdapter implements IChatStorageAdapter {
     private getStoredChats(): LocalChat[] {
         try {
             const raw = localStorage.getItem(this.CHATS_KEY);
-            return raw ? JSON.parse(raw) : [];
+            if (!raw) return [];
+            return this.parseArray<LocalChat>(raw, this.isLocalChat.bind(this));
         } catch (e) {
             console.error("Failed to load chats", e);
             return [];
@@ -37,7 +76,8 @@ export class LocalStorageChatAdapter implements IChatStorageAdapter {
     private getStoredMessages(): Message[] {
         try {
             const raw = localStorage.getItem(this.MESSAGES_KEY);
-            return raw ? JSON.parse(raw) : [];
+            if (!raw) return [];
+            return this.parseArray<Message>(raw, this.isMessage.bind(this));
         } catch (e) {
             console.error("Failed to load messages", e);
             return [];
@@ -150,9 +190,22 @@ export class LocalStorageChatAdapter implements IChatStorageAdapter {
         try {
             const buffer = await new Response(stream).arrayBuffer();
             const json = new TextDecoder().decode(buffer);
-            const data = JSON.parse(json);
-            if (data.chats) this.saveStoredChats(data.chats);
-            if (data.messages) this.saveStoredMessages(data.messages);
+            const data: unknown = JSON.parse(json);
+            if (!this.isRecord(data)) return;
+
+            const chats = Array.isArray(data.chats)
+                ? data.chats.filter((c): c is LocalChat => this.isLocalChat(c))
+                : [];
+            if (chats.length) {
+                this.saveStoredChats(chats);
+            }
+
+            const messages = Array.isArray(data.messages)
+                ? data.messages.filter((m): m is Message => this.isMessage(m))
+                : [];
+            if (messages.length) {
+                this.saveStoredMessages(messages);
+            }
         } catch (e) {
             console.error("Failed to import data", e);
             throw new Error("Invalid data format");

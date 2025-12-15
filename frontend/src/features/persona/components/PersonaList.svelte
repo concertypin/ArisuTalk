@@ -11,9 +11,9 @@
 
     let { onEdit }: Props = $props();
 
-    async function handleDelete(id: string) {
+    function handleDelete(id: string) {
         if (confirm("Delete this persona?")) {
-            await personaStore.remove(id);
+            personaStore.remove(id);
         }
     }
     let personas = $derived(personaStore.personas);

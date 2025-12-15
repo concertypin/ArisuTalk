@@ -31,12 +31,17 @@ export class IDBPersonaAdapter implements IPersonaStorageAdapter {
     }
 
     async setActivePersonaId(id: string | null): Promise<void> {
-        const existing = await this.db.settings.get("singleton");
-        await this.db.settings.put({
-            theme: existing?.theme ?? "system",
-            userId: existing?.userId ?? "",
+        const updatedCount = await this.db.settings.update("singleton", {
             activePersonaId: id,
-            id: "singleton",
         });
+        if (updatedCount === 0) {
+            // If no settings record existed, create one with defaults
+            await this.db.settings.put({
+                id: "singleton",
+                activePersonaId: id,
+                theme: "system",
+                userId: crypto.randomUUID(),
+            });
+        }
     }
 }

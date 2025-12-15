@@ -3,7 +3,7 @@ import "fake-indexeddb/auto";
 // Now, do the rest
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { PersonaStore } from "@/features/persona/stores/personaStore.svelte";
-import { type Persona } from "@/features/persona/schema";
+import { PersonaSchema, type Persona } from "@/features/persona/schema";
 import type { IPersonaStorageAdapter } from "@/lib/interfaces";
 import { createLocalStorageMock } from "@test/utils/localStorageMock";
 
@@ -84,7 +84,10 @@ describe("PersonaStore", () => {
             init: vi.fn().mockResolvedValue(undefined),
             getAllPersonas: vi.fn().mockImplementation(async () => {
                 const stored = localStorage.getItem("arisutalk_personas");
-                return stored ? JSON.parse(stored) : [];
+                if (!stored) return [];
+                const parsed: unknown = JSON.parse(stored);
+                const result = PersonaSchema.array().safeParse(parsed);
+                return result.success ? result.data : [];
             }),
             savePersona: vi.fn().mockResolvedValue(undefined),
             updatePersona: vi.fn().mockResolvedValue(undefined),

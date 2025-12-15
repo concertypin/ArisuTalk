@@ -83,12 +83,8 @@ export class ChatStore {
 
     async setActiveChat(chatId: string | null) {
         this.activeChatId = chatId;
-        if (chatId && "getMessages" in this.adapter) {
-            this.activeMessages = await (
-                this.adapter as IChatStorageAdapter & {
-                    getMessages: (id: string) => Promise<Message[]>;
-                }
-            ).getMessages(chatId);
+        if (chatId) {
+            this.activeMessages = await this.adapter.getMessages(chatId);
         } else {
             this.activeMessages = [];
         }

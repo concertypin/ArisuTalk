@@ -1,5 +1,5 @@
 import type { IPersonaStorageAdapter } from "@/lib/interfaces";
-import type { Persona } from "@/features/persona/schema";
+import { PersonaSchema, type Persona } from "@/features/persona/schema";
 
 /**
  * LocalStorage-based persona storage adapter.
@@ -8,6 +8,10 @@ import type { Persona } from "@/features/persona/schema";
 export class LocalStoragePersonaAdapter implements IPersonaStorageAdapter {
     private readonly PERSONAS_KEY = "arisutalk_personas";
     private readonly ACTIVE_KEY = "arisutalk_active_persona";
+
+    private isRecord(value: unknown): value is Record<string, unknown> {
+        return typeof value === "object" && value !== null;
+    }
 
     async init(): Promise<void> {
         if (!import.meta.env.DEV) {
@@ -20,7 +24,9 @@ export class LocalStoragePersonaAdapter implements IPersonaStorageAdapter {
         const item = localStorage.getItem(this.PERSONAS_KEY);
         if (!item) return [];
         try {
-            return JSON.parse(item);
+            const parsed = JSON.parse(item) as unknown;
+            const result = PersonaSchema.array().safeParse(parsed);
+            return result.success ? result.data : [];
         } catch {
             return [];
         }
@@ -57,7 +63,8 @@ export class LocalStoragePersonaAdapter implements IPersonaStorageAdapter {
     }
 
     async getActivePersonaId(): Promise<string | null> {
-        return localStorage.getItem(this.ACTIVE_KEY);
+        const active = localStorage.getItem(this.ACTIVE_KEY);
+        return typeof active === "string" ? active : null;
     }
 
     async setActivePersonaId(id: string | null): Promise<void> {

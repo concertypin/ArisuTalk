@@ -137,9 +137,15 @@ describe("DexieChatAdapter (comprehensive)", () => {
         it("handles empty export", async () => {
             const stream = await adapter.exportData();
             const text = await new Response(stream).text();
-            const data = JSON.parse(text);
-            expect(data.chats).toEqual([]);
-            expect(data.messages).toEqual([]);
+            const parsed: unknown = JSON.parse(text);
+            const chats: unknown[] = Array.isArray((parsed as { chats?: unknown }).chats)
+                ? (parsed as { chats: unknown[] }).chats
+                : [];
+            const messages: unknown[] = Array.isArray((parsed as { messages?: unknown }).messages)
+                ? (parsed as { messages: unknown[] }).messages
+                : [];
+            expect(chats).toEqual([]);
+            expect(messages).toEqual([]);
         });
     });
 });

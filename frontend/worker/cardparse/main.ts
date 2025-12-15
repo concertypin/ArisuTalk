@@ -33,13 +33,19 @@ async function parseCharacter(rawData: ArrayBuffer): Promise<ParseResult<Charact
     //decompress
     const decompressed = new DecompressionStream("deflate-raw");
     const writer = decompressed.writable.getWriter();
-    writer.write(rawData);
-    writer.close();
+    await writer.write(rawData);
+    await writer.close();
 
     //cbor decode
     const data = await readAll(decompressed.readable);
-    const cbor = decoder.decode(data);
-    return (await CharacterSchema.safeParseAsync(cbor)) satisfies ParseResult<Character>;
+    const decoded = decoder.decode(data) as unknown;
+    const result = await CharacterSchema.safeParseAsync(decoded);
+
+    if (result.success) {
+        return { success: true, data: result.data } satisfies ParseResult<Character>;
+    }
+
+    return { success: false } satisfies ParseResult<Character>;
 }
 async function exportCharacter(character: Character): Promise<ArrayBufferLike> {
     const cbor = encoder.encode(character);

@@ -58,7 +58,10 @@
         return await new Promise<string>((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = () => resolve(reader.result as string);
-            reader.onerror = () => reject(reader.error);
+            reader.onerror = () => {
+                const reason = reader.error ?? new Error("FileReader failed");
+                reject(reason instanceof Error ? reason : new Error(String(reason)));
+            };
             reader.readAsDataURL(new File([bytes], "", { type }));
         });
     }
@@ -102,7 +105,7 @@
                     return { ...i, url: base64 };
                 } catch (e) {
                     console.error("Failed to fetch local file for export:", i.url, e);
-                    throw e;
+                    throw e instanceof Error ? e : new Error(String(e));
                 }
             }
         }

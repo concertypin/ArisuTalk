@@ -1,7 +1,6 @@
-import { test, expect, describe, beforeAll, beforeEach } from "vitest";
+import { test, expect, describe } from "vitest";
 import { render } from "vitest-browser-svelte";
 import CharacterLayoutTestWrapper from "./CharacterLayoutTestWrapper.svelte";
-import { createLocalStorageMock } from "@test/utils/localStorageMock";
 
 function setInputValue(el: HTMLInputElement | HTMLTextAreaElement, value: string) {
     el.value = value;
@@ -31,10 +30,10 @@ describe("Persona and Chat interactions", () => {
         await addBtn.click();
 
         // Fill character form (input has id `char_name`)
-        const nameInput = container.querySelector("#char_name") as HTMLInputElement | null;
+        const nameInput = container.querySelector("#char_name");
         if (!nameInput) throw new Error("Name input not found");
         await expect.element(nameInput).toBeVisible();
-        setInputValue(nameInput as HTMLInputElement, "TestBot");
+        setInputValue(nameInput, "TestBot");
 
         const saveBtn = getByText("Save Character");
         await saveBtn.click();
@@ -50,12 +49,10 @@ describe("Persona and Chat interactions", () => {
         await newChatBtn.click();
 
         // Send a user message (chat input uses placeholder)
-        const input = container.querySelector(
-            'input[placeholder="Type a message..."]'
-        ) as HTMLInputElement | null;
+        const input = container.querySelector('input[placeholder="Type a message..."]');
         if (!input) throw new Error("Chat input not found");
         await expect.element(input).toBeVisible();
-        setInputValue(input as HTMLInputElement, "Hello there");
+        setInputValue(input, "Hello there");
         const sendBtn = getByText("Send");
         await sendBtn.click();
 

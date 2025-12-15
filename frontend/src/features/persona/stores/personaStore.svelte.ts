@@ -34,7 +34,11 @@ export class PersonaStore {
         try {
             const stored = localStorage.getItem("arisutalk_personas");
             if (stored) {
-                this.personas = JSON.parse(stored);
+                const parsed: unknown = JSON.parse(stored);
+                const result = PersonaSchema.array().safeParse(parsed);
+                if (result.success) {
+                    this.personas = result.data;
+                }
             }
             const active = localStorage.getItem("arisutalk_active_persona");
             this.activePersonaId = active;

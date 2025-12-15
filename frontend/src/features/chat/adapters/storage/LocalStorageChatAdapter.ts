@@ -10,14 +10,48 @@ export class LocalStorageChatAdapter implements IChatStorageAdapter {
         return Promise.resolve();
     }
 
-    private getStoredChats(): LocalChat[] {
+    private isRecord(value: unknown): value is Record<string, unknown> {
+        return typeof value === "object" && value !== null;
+    }
+
+    private isLocalChat(value: unknown): value is LocalChat {
+        return (
+            this.isRecord(value) &&
+            typeof value.id === "string" &&
+            typeof value.characterId === "string" &&
+            typeof value.name === "string" &&
+            typeof value.lastMessage === "number"
+        );
+    }
+
+    private isMessage(value: unknown): value is Message {
+        return (
+            this.isRecord(value) &&
+            typeof value.id === "string" &&
+            typeof value.role === "string" &&
+            this.isRecord(value.content) &&
+            typeof value.content.type === "string" &&
+            "data" in value.content
+        );
+    }
+
+    private parseArray<T>(raw: string, predicate: (value: unknown) => value is T): T[] {
         try {
-            const raw = localStorage.getItem(this.CHATS_KEY);
-            return raw ? JSON.parse(raw) : [];
+            const parsed = JSON.parse(raw) as unknown;
+            if (!Array.isArray(parsed)) return [];
+            const parsedArray: unknown[] = parsed;
+            return parsedArray.filter(predicate);
         } catch (e) {
-            console.error("Failed to load chats", e);
+            console.error("Failed to parse stored data", e);
             return [];
         }
+    }
+
+    private getStoredChats(): LocalChat[] {
+        const raw = localStorage.getItem(this.CHATS_KEY);
+        if (!raw) return [];
+        const chats = this.parseArray<LocalChat>(raw, this.isLocalChat.bind(this));
+        return chats;
     }
 
     private saveStoredChats(chats: LocalChat[]): void {
@@ -29,13 +63,10 @@ export class LocalStorageChatAdapter implements IChatStorageAdapter {
     }
 
     private getStoredMessages(): Message[] {
-        try {
-            const raw = localStorage.getItem(this.MESSAGES_KEY);
-            return raw ? JSON.parse(raw) : [];
-        } catch (e) {
-            console.error("Failed to load messages", e);
-            return [];
-        }
+        const raw = localStorage.getItem(this.MESSAGES_KEY);
+        if (!raw) return [];
+        const messages = this.parseArray<Message>(raw, this.isMessage.bind(this));
+        return messages;
     }
 
     private saveStoredMessages(messages: Message[]): void {

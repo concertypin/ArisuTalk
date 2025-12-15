@@ -8,6 +8,16 @@ import type { Character } from "@arisutalk/character-spec/v0/Character";
 export class LocalStorageCharacterAdapter implements ICharacterStorageAdapter {
     private readonly KEY = "arisutalk_characters";
 
+    private isRecord(value: unknown): value is Record<string, unknown> {
+        return typeof value === "object" && value !== null;
+    }
+
+    private isCharacter(value: unknown): value is Character {
+        return (
+            this.isRecord(value) && typeof value.id === "string" && typeof value.name === "string"
+        );
+    }
+
     async init(): Promise<void> {
         if (!import.meta.env.DEV) {
             console.warn("LocalStorageCharacterAdapter is for development/testing only.");
@@ -19,7 +29,10 @@ export class LocalStorageCharacterAdapter implements ICharacterStorageAdapter {
         const item = localStorage.getItem(this.KEY);
         if (!item) return [];
         try {
-            return JSON.parse(item);
+            const parsed = JSON.parse(item) as unknown;
+            if (!Array.isArray(parsed)) return [];
+            const parsedArray: unknown[] = parsed;
+            return parsedArray.filter((c): c is Character => this.isCharacter(c));
         } catch {
             return [];
         }

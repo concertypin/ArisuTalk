@@ -22,9 +22,8 @@ export class StorageResolver {
      */
     static async getCharacterAdapter(): Promise<ICharacterStorageAdapter> {
         if (!this.characterAdapter) {
-            const { DexieCharacterAdapter: IDBCharacterAdapter } =
-                await import("./character/IDBCharacterAdapter");
-            this.characterAdapter = new DexieCharacterAdapter();
+            const { IDBCharacterAdapter } = await import("./character/IDBCharacterAdapter");
+            this.characterAdapter = new IDBCharacterAdapter();
         }
         return this.characterAdapter;
     }
@@ -35,8 +34,8 @@ export class StorageResolver {
      */
     static async getChatAdapter(): Promise<IChatStorageAdapter> {
         if (!this.chatAdapter) {
-            const { DexieChatAdapter: IDBChatAdapter } = await import("./chat/IDBChatAdapter");
-            this.chatAdapter = new DexieChatAdapter();
+            const { IDBChatAdapter } = await import("./chat/IDBChatAdapter");
+            this.chatAdapter = new IDBChatAdapter();
         }
         return this.chatAdapter;
     }
@@ -47,9 +46,8 @@ export class StorageResolver {
      */
     static async getPersonaAdapter(): Promise<IPersonaStorageAdapter> {
         if (!this.personaAdapter) {
-            const { DexiePersonaAdapter: IDBPersonaAdapter } =
-                await import("./persona/IDBPersonaAdapter");
-            this.personaAdapter = new DexiePersonaAdapter();
+            const { IDBPersonaAdapter } = await import("./persona/IDBPersonaAdapter");
+            this.personaAdapter = new IDBPersonaAdapter();
         }
         return this.personaAdapter;
     }
@@ -60,9 +58,8 @@ export class StorageResolver {
      */
     static async getSettingsAdapter(): Promise<ISettingsStorageAdapter> {
         if (!this.settingsAdapter) {
-            const { DexieSettingsAdapter: IDBSettingsAdapter } =
-                await import("./settings/IDBSettingsAdapter");
-            this.settingsAdapter = new DexieSettingsAdapter();
+            const { IDBSettingsAdapter } = await import("./settings/IDBSettingsAdapter");
+            this.settingsAdapter = new IDBSettingsAdapter();
         }
         return this.settingsAdapter;
     }

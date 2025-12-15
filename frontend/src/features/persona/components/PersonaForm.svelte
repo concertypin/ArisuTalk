@@ -2,6 +2,7 @@
     import { personaStore } from "../stores/personaStore.svelte";
     import { PersonaSchema, type Persona } from "../schema";
     import { Plus, User, FileText, StickyNote, SquarePen } from "@lucide/svelte";
+    import { ZodError } from "zod";
 
     interface Props {
         persona?: Persona;
@@ -41,17 +42,19 @@
 
             const validated = PersonaSchema.parse(newPersona);
             if (persona) {
-                await personaStore.update(persona.id, validated);
+                personaStore.update(persona.id, validated);
             } else {
-                await personaStore.add(validated);
+                personaStore.add(validated);
             }
             onSave();
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (err: any) {
-            if (err.errors instanceof Array) {
-                error = err.errors[0]?.message ?? "Validation failed";
-            } else {
+        } catch (err: unknown) {
+            if (err instanceof ZodError) {
+                const firstIssue = err.issues[0];
+                error = firstIssue?.message ?? "Validation failed";
+            } else if (err instanceof Error) {
                 error = err.message ?? "Unknown error";
+            } else {
+                error = "Unknown error";
             }
         }
     }

@@ -22,13 +22,17 @@
 
     // Load component when path changes
     $effect(() => {
-        const loader = routes[currentPath] ?? routes["/"];
-        isLoading = true;
+        void (async () => {
+            const loader = routes[currentPath] ?? routes["/"];
+            isLoading = true;
 
-        loader().then((module) => {
-            CurrentComponent = module.default;
-            isLoading = false;
-        });
+            try {
+                const module = await loader();
+                CurrentComponent = module.default;
+            } finally {
+                isLoading = false;
+            }
+        })().catch((err) => console.error("Failed to load route", err));
     });
 </script>
 

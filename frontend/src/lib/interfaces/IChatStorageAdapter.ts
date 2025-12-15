@@ -57,4 +57,11 @@ export interface IChatStorageAdapter {
      * @param id - The ID of the chat to delete.
      */
     deleteChat(id: string): Promise<void>;
+
+    /**
+     * Retrieves all messages for a specific chat.
+     * @param chatId - The ID of the chat.
+     * @returns Promise resolving to an array of messages.
+     */
+    getMessages(chatId: string): Promise<Message[]>;
 }

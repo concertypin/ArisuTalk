@@ -5,6 +5,24 @@ import type { IChatStorageAdapter, LocalChat } from "@/lib/interfaces";
 export class IDBChatAdapter implements IChatStorageAdapter {
     private db = getArisuDB();
 
+    private isRecord(value: unknown): value is Record<string, unknown> {
+        return typeof value === "object" && value !== null;
+    }
+
+    private isChat(value: unknown): value is Chat {
+        return (
+            this.isRecord(value) &&
+            typeof value.id === "string" &&
+            typeof value.characterId === "string"
+        );
+    }
+
+    private isMessage(value: unknown): value is Message {
+        return (
+            this.isRecord(value) && typeof value.id === "string" && typeof value.chatId === "string"
+        );
+    }
+
     async init(): Promise<void> {
         await this.db.open();
     }
@@ -13,18 +31,11 @@ export class IDBChatAdapter implements IChatStorageAdapter {
         await this.db.chats.put(chat);
     }
 
-    private async toLocalChat(chat: Chat): Promise<LocalChat> {
-        // Get messages for this chat to find the last message timestamp
-        const messages = await this.db.messages.where("chatId").equals(chat.id).toArray();
-        const lastMessage =
-            messages.length > 0
-                ? messages[messages.length - 1].timestamp || chat.updatedAt || 0
-                : chat.updatedAt || chat.createdAt || 0;
-
+    private toLocalChat(chat: Chat): LocalChat {
         return {
             ...chat,
             name: chat.title || "",
-            lastMessage,
+            lastMessage: chat.updatedAt || chat.createdAt || 0,
             characterId: chat.characterId,
         };
     }
@@ -36,16 +47,16 @@ export class IDBChatAdapter implements IChatStorageAdapter {
 
     async getAllChats(): Promise<LocalChat[]> {
         const arr = await this.db.chats.toArray();
-        return Promise.all(arr.map((c) => this.toLocalChat(c)));
+        return arr.map((c) => this.toLocalChat(c));
     }
 
     async deleteChat(id: string): Promise<void> {
-        // Delete all messages for this chat first
-        const messages = await this.db.messages.where("chatId").equals(id).toArray();
-        for (const msg of messages) {
-            await this.db.messages.delete(msg.id);
-        }
-        await this.db.chats.delete(id);
+        await Promise.all([
+            // Delete all messages for this chat
+            this.db.messages.where("chatId").equals(id).delete(),
+            // and delete the chat itself
+            this.db.chats.delete(id),
+        ]);
     }
 
     async createChat(characterId: string, title?: string): Promise<string> {
@@ -64,7 +75,7 @@ export class IDBChatAdapter implements IChatStorageAdapter {
 
     async getChatsByCharacter(characterId: string): Promise<LocalChat[]> {
         const arr = await this.db.chats.where("characterId").equals(characterId).toArray();
-        return Promise.all(arr.map((c) => this.toLocalChat(c)));
+        return arr.map((c) => this.toLocalChat(c));
     }
 
     async addMessage(chatId: string, message: Message): Promise<void> {
@@ -105,14 +116,24 @@ export class IDBChatAdapter implements IChatStorageAdapter {
     async importData(stream: ReadableStream<Uint8Array>): Promise<void> {
         const buf = await new Response(stream).arrayBuffer();
         const json = new TextDecoder().decode(buf);
-        const data = JSON.parse(json);
-        if (Array.isArray(data.chats)) {
-            await this.db.chats.clear();
-            if (data.chats.length) await this.db.chats.bulkPut(data.chats);
-        }
-        if (Array.isArray(data.messages)) {
-            await this.db.messages.clear();
-            if (data.messages.length) await this.db.messages.bulkPut(data.messages);
-        }
+        const data = JSON.parse(json) as unknown;
+
+        if (!this.isRecord(data)) return;
+
+        const chatsRaw = data.chats;
+        const chats = Array.isArray(chatsRaw)
+            ? chatsRaw.filter((c): c is Chat => this.isChat(c))
+            : [];
+
+        const messagesRaw = data.messages;
+        const messages = Array.isArray(messagesRaw)
+            ? messagesRaw.filter((m): m is Message => this.isMessage(m))
+            : [];
+
+        await this.db.chats.clear();
+        await this.db.messages.clear();
+
+        if (chats.length) await this.db.chats.bulkPut(chats);
+        if (messages.length) await this.db.messages.bulkPut(messages);
     }
 }
