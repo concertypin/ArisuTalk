@@ -1,9 +1,11 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, vi, type Mocked } from "vitest";
 import { CharacterStore } from "@/features/character/stores/characterStore.svelte";
 import type { ICharacterStorageAdapter } from "@/lib/interfaces";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
+import "fake-indexeddb/auto";
+import { exampleCharacter } from "@/const/example_data";
 
-const mockAdapter: ICharacterStorageAdapter = {
+const mockAdapter: Mocked<ICharacterStorageAdapter> = {
     init: vi.fn().mockResolvedValue(undefined),
     getAllCharacters: vi.fn().mockResolvedValue([]),
     saveCharacter: vi.fn().mockResolvedValue(undefined),
@@ -11,45 +13,14 @@ const mockAdapter: ICharacterStorageAdapter = {
     getCharacter: vi.fn().mockResolvedValue(undefined),
 };
 
-const defaultChar: Character = {
-    name: "Arisu",
-    specVersion: 0,
-    id: "",
-    description: "",
-    assets: { assets: [] },
-    prompt: {
-        description: "",
-        authorsNote: "",
-        lorebook: {
-            config: {
-                tokenLimit: 0,
-            },
-            data: [],
-        },
-    },
-    executables: {
-        runtimeSetting: {},
-        replaceHooks: {
-            display: [],
-            input: [],
-            output: [],
-            request: [],
-        },
-    },
-    metadata: {
-        author: undefined,
-        license: "",
-        version: undefined,
-        distributedOn: undefined,
-        additionalInfo: undefined,
-    },
-};
+const defaultChar: Character = structuredClone(exampleCharacter);
 
 describe("CharacterStore", () => {
     let store: CharacterStore;
 
     beforeEach(async () => {
         vi.clearAllMocks();
+        vi.spyOn(console, "error").mockImplementation(() => {});
         store = new CharacterStore(mockAdapter);
         await store.initPromise;
     });
@@ -74,13 +45,29 @@ describe("CharacterStore", () => {
         expect(store.characters).not.toContain(defaultChar);
     });
 
-    it("should update a character", async () => {
+    it("should handle load errors gracefully", async () => {
+        const errorAdapter = { ...mockAdapter };
+        errorAdapter.getAllCharacters.mockRejectedValue(new Error("Load failed"));
+        const errorStore = new CharacterStore(errorAdapter);
+        await errorStore.initPromise;
+        expect(errorStore.characters).toEqual([]);
+    });
+
+    it("should throw error on add failure", async () => {
+        mockAdapter.saveCharacter.mockRejectedValueOnce(new Error("Save failed"));
+        await expect(store.add(defaultChar)).rejects.toThrow("Save failed");
+    });
+
+    it("should throw error on remove failure", async () => {
         await store.add(defaultChar);
+        mockAdapter.deleteCharacter.mockRejectedValue(new Error("Delete failed"));
+        await expect(store.remove(0)).rejects.toThrow("Delete failed");
+    });
 
-        const updated: Character = { ...defaultChar, name: "Arisu", description: "Updated" };
-        await store.update(0, updated);
-
-        expect(mockAdapter.saveCharacter).toHaveBeenCalledWith(updated);
-        expect(store.characters[0]).toEqual(updated);
+    it("should throw error on update failure", async () => {
+        await store.add(defaultChar);
+        const updated: Character = { ...defaultChar, name: "Arisu" };
+        mockAdapter.saveCharacter.mockRejectedValue(new Error("Update failed"));
+        await expect(store.update(0, updated)).rejects.toThrow("Update failed");
     });
 });

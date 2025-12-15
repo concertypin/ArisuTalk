@@ -1,6 +1,6 @@
 /// <reference types="vitest/config" />
 import { svelte } from "@sveltejs/vite-plugin-svelte";
-import { type PluginOption, UserConfig, defineConfig, loadEnv } from "vite";
+import { type PluginOption, UserConfig, defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { playwright } from "@vitest/browser-playwright";
 
@@ -12,16 +12,36 @@ const browserTestConfig: Presence<UserConfig["test"]>["browser"] = {
     instances: [
         {
             browser: "chromium",
-            headless: true,
+        },
+        {
+            browser: "firefox",
         },
     ],
 };
 
-const runBrowserTest =
-    process.env.npm_lifecycle_event?.includes("browser") ||
-    process.env.npm_lifecycle_event?.includes("ui")
-        ? true
-        : false;
+const runBrowserTest = process.env.npm_lifecycle_event?.includes("browser") ? true : false;
+const browserTestFiles = runBrowserTest ? ["test/browser/**/*.{test,spec}.{js,ts}"] : [];
+const nonBrowserTestFiles = runBrowserTest ? [] : ["test/**/*.{test,spec}.{js,ts}"];
+
+const testConfig: UserConfig["test"] = {
+    globals: true,
+    environment: "happy-dom",
+    setupFiles: ["./test/setup.ts"],
+    include: [...browserTestFiles, ...nonBrowserTestFiles],
+    exclude: [
+        "node_modules",
+        "dist",
+        ".git",
+        ...(runBrowserTest
+            ? nonBrowserTestFiles.concat(`!${browserTestFiles[0]}`)
+            : browserTestFiles),
+    ],
+    browser: runBrowserTest ? browserTestConfig : undefined,
+    coverage: {
+        reporter: ["text", "json", "html"],
+        exclude: ["node_modules/", "dist/", "test/", "**/*.d.ts", "**/*.config.*", "static/"],
+    },
+};
 
 export default defineConfig(async (ctx) => {
     const mode = ctx.mode;
@@ -63,29 +83,7 @@ export default defineConfig(async (ctx) => {
         clearScreen: false,
         publicDir: "static",
         plugins: plugin,
-        test: {
-            globals: true,
-            environment: "happy-dom",
-            setupFiles: ["./test/setup.ts"],
-            include: ["test/**/*.{test,spec}.{js,ts}"].concat(
-                runBrowserTest ? [] : ["!test/browser/**/*.{test,spec}.{js,ts}"]
-            ),
-            exclude: ["node_modules", "dist", ".git"].concat(
-                runBrowserTest ? [] : ["test/browser"]
-            ),
-            browser: runBrowserTest ? browserTestConfig : undefined,
-            coverage: {
-                reporter: ["text", "json", "html"],
-                exclude: [
-                    "node_modules/",
-                    "dist/",
-                    "test/",
-                    "**/*.d.ts",
-                    "**/*.config.*",
-                    "static/",
-                ],
-            },
-        },
+        test: testConfig,
     };
     return baseConfig;
 });

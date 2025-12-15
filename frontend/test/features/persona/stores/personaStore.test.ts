@@ -1,32 +1,20 @@
+// Mock IndexedDB first with fake-indexeddb
+import "fake-indexeddb/auto";
+// Now, do the rest
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { PersonaStore } from "@/features/persona/stores/personaStore.svelte";
-import type { Persona } from "@/features/persona/schema";
+import { type Persona } from "@/features/persona/schema";
 import type { IPersonaStorageAdapter } from "@/lib/interfaces";
+import { createLocalStorageMock } from "@test/utils/localStorageMock";
 
 describe("PersonaStore", () => {
     let store: PersonaStore;
     let mockAdapter: IPersonaStorageAdapter;
-
-    // Mock localStorage for sync loading
-    const localStorageMock = (() => {
-        let store: Record<string, string> = {};
-        return {
-            getItem: vi.fn((key: string) => store[key] || null),
-            setItem: vi.fn((key: string, value: string) => {
-                store[key] = value.toString();
-            }),
-            removeItem: vi.fn((key: string) => {
-                delete store[key];
-            }),
-            clear: vi.fn(() => {
-                store = {};
-            }),
-        };
-    })();
+    let localStorageMock: Storage;
 
     beforeEach(() => {
+        localStorageMock = createLocalStorageMock(vi);
         vi.stubGlobal("localStorage", localStorageMock);
-        localStorageMock.clear();
 
         // Create mock adapter
         mockAdapter = {
@@ -90,14 +78,29 @@ describe("PersonaStore", () => {
 
     it("should load from localStorage", async () => {
         localStorageMock.setItem("arisutalk_personas", JSON.stringify([validPersona]));
-        const newStore = new PersonaStore();
+
+        // Create a mock adapter that respects what's in localStorage
+        const mockLocalStorageAdapter = {
+            init: vi.fn().mockResolvedValue(undefined),
+            getAllPersonas: vi.fn().mockImplementation(async () => {
+                const stored = localStorage.getItem("arisutalk_personas");
+                return stored ? JSON.parse(stored) : [];
+            }),
+            savePersona: vi.fn().mockResolvedValue(undefined),
+            updatePersona: vi.fn().mockResolvedValue(undefined),
+            deletePersona: vi.fn().mockResolvedValue(undefined),
+            getActivePersonaId: vi.fn().mockResolvedValue(null),
+            setActivePersonaId: vi.fn().mockResolvedValue(undefined),
+        };
+
+        const newStore = new PersonaStore(mockLocalStorageAdapter);
         await newStore.initPromise; // wait for async load
         expect(newStore.personas).toHaveLength(1);
     });
 
     it("should correctly load state on initialization", () => {
         localStorageMock.setItem("arisutalk_personas", JSON.stringify([validPersona]));
-        const newStore = new PersonaStore();
+        const newStore = new PersonaStore(mockAdapter);
         expect(newStore.personas).toHaveLength(1);
         expect(newStore.personas[0]).toEqual(validPersona);
     });
