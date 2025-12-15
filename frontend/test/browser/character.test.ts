@@ -1,4 +1,3 @@
-// @vitest-environment
 import { test, expect, describe } from "vitest";
 import { render } from "vitest-browser-svelte";
 import CharacterLayoutTestWrapper from "./CharacterLayoutTestWrapper.svelte";

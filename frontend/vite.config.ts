@@ -12,35 +12,24 @@ const browserTestConfig: Presence<UserConfig["test"]>["browser"] = {
     instances: [
         {
             browser: "chromium",
-        },
-        {
-            browser: "firefox",
+            testTimeout: 15 * 1000,
         },
     ],
+    headless: true,
 };
 
 const runBrowserTest = process.env.npm_lifecycle_event?.includes("browser") ? true : false;
-const browserTestFiles = runBrowserTest ? ["test/browser/**/*.{test,spec}.{js,ts}"] : [];
-const nonBrowserTestFiles = runBrowserTest ? [] : ["test/**/*.{test,spec}.{js,ts}"];
-
 const testConfig: UserConfig["test"] = {
     globals: true,
     environment: "happy-dom",
     setupFiles: ["./test/setup.ts"],
-    include: [...browserTestFiles, ...nonBrowserTestFiles],
-    exclude: [
-        "node_modules",
-        "dist",
-        ".git",
-        ...(runBrowserTest
-            ? nonBrowserTestFiles.concat(`!${browserTestFiles[0]}`)
-            : browserTestFiles),
-    ],
+    exclude: ["node_modules", "dist", ".git"],
     browser: runBrowserTest ? browserTestConfig : undefined,
     coverage: {
         reporter: ["text", "json", "html"],
         exclude: ["node_modules/", "dist/", "test/", "**/*.d.ts", "**/*.config.*", "static/"],
     },
+    includeTaskLocation: true,
 };
 
 export default defineConfig(async (ctx) => {

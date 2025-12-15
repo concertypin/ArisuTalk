@@ -1,8 +1,8 @@
+import "fake-indexeddb/auto";
 import { describe, it, expect, beforeEach, vi, type Mocked } from "vitest";
 import { CharacterStore } from "@/features/character/stores/characterStore.svelte";
 import type { ICharacterStorageAdapter } from "@/lib/interfaces";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
-import "fake-indexeddb/auto";
 import { exampleCharacter } from "@/const/example_data";
 
 const mockAdapter: Mocked<ICharacterStorageAdapter> = {

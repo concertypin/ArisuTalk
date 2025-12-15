@@ -55,3 +55,4 @@ claude.md
 frontend/pnpm-lock.yaml
 backend/pnpm-lock.yaml
 */coverage
+**/browser/__screenshots__
