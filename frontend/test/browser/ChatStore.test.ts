@@ -78,19 +78,13 @@ describe("ChatStore Streaming", () => {
 
     test("error in provider resets isGenerating", async () => {
         await chatStore.initPromise;
-        // Set up a provider that throws error
-        // We can't easily mock inner helper function error, but we can force disconnect then send
-        // Or we can mock the provider implementation if we could access it.
-        // For component test, simplest might be to set invalid provider settings if validated,
-        // OR rely on MockChatProvider eventually supporting a failure mode.
-        // For now, let's skip complex mock injection and rely on simple checks.
-
-        // Actually, we can just switch to a provider that fails or mock the activeProvider directly after set.
         await chatStore.setProvider("MOCK", { responses: [] });
         // @ts-expect-error - injecting malicious mock for failure testing
         chatStore["activeProvider"] = {
             stream: async function* () {
-                if (false) yield ""; // Dummy yield to satisfy generator requirement
+                // Dummy yield to satisfy generator requirement
+                // eslint-disable-next-line no-constant-condition
+                if (false) yield "";
                 throw new Error("Simulated failure");
             },
             abort: () => {},
