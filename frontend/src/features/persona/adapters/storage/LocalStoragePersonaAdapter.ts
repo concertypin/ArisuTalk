@@ -1,5 +1,5 @@
 import type { IPersonaStorageAdapter } from "@/lib/interfaces";
-import type { Persona } from "@/features/persona/schema";
+import { PersonaSchema, type Persona } from "@/features/persona/schema";
 
 export class LocalStoragePersonaAdapter implements IPersonaStorageAdapter {
     private readonly PERSONAS_KEY = "arisutalk_personas";
@@ -13,7 +13,10 @@ export class LocalStoragePersonaAdapter implements IPersonaStorageAdapter {
     private getStoredPersonas(): Persona[] {
         try {
             const stored = localStorage.getItem(this.PERSONAS_KEY);
-            return stored ? JSON.parse(stored) : [];
+            if (!stored) return [];
+            const parsed: unknown = JSON.parse(stored);
+            const result = PersonaSchema.array().safeParse(parsed);
+            return result.success ? result.data : [];
         } catch (e) {
             console.error("Failed to load personas", e);
             return [];

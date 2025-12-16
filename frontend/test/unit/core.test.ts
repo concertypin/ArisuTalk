@@ -1,12 +1,12 @@
 import { describe, it, expect, expectTypeOf } from "vitest";
 import { Character, Message } from "@arisutalk/character-spec/v0/Character";
-import { Settings } from "@/lib/types/IDataModel";
+import { SettingsSchema } from "@/lib/types/IDataModel";
 import { ChatProvider, type ProviderSettings } from "@/lib/interfaces";
 import { BaseMessage, HumanMessage } from "@langchain/core/messages";
 import { exampleCharacter, exampleChatData } from "@/const/example_data";
 
 describe("Data Models", () => {
-    it("should generate valid IDs for new instances", () => {
+    it.concurrent("should generate valid IDs for new instances", async () => {
         const msg = {
             role: "user",
             content: {
@@ -14,35 +14,30 @@ describe("Data Models", () => {
                 data: "Hello",
             },
             id: "test",
+            chatId: "chat-1",
             timestamp: Date.now(),
+            inlays: [],
         } satisfies Message;
         expectTypeOf(msg).toExtend<Message>();
         expect(msg.id).toBeDefined();
         expect(typeof msg.id).toBe("string");
         expect(msg.timestamp).toBeDefined();
+        expect(msg.chatId).toBe("chat-1");
+        expect(msg.inlays).toEqual([]);
     });
 
-    it("should correctly structure a Chat", () => {
+    it.concurrent("should correctly structure a Chat", async () => {
         const char: Character = structuredClone(exampleCharacter);
         const chat = structuredClone(exampleChatData);
-        chat.messages = []; // Start with empty messages
+        // Messages are now stored separately, not in the Chat object
         expect(chat.id).toBeDefined();
         expect(chat.characterId).toBe(char.id);
-        expect(chat.messages).toHaveLength(0);
-
-        chat.messages.push({
-            role: "user",
-            content: {
-                type: "string",
-                data: "Hello",
-            },
-            id: "test",
-        });
-        expect(chat.messages).toHaveLength(1);
+        expect(chat.title).toBeDefined();
+        expect(chat.createdAt).toBeDefined();
     });
 
-    it("should initialize Settings with default values", () => {
-        const settings = new Settings();
+    it.concurrent("should initialize Settings with default values", async () => {
+        const settings = SettingsSchema.parse({});
         expect(settings).toBeDefined();
     });
 });
@@ -82,7 +77,7 @@ describe("IChatProvider (Mock)", () => {
         }
     }
 
-    it("should implement generate correctly", async () => {
+    it.concurrent("should implement generate correctly", async () => {
         // Use static connect
         const provider = await MockProvider.connect({});
 
@@ -90,7 +85,7 @@ describe("IChatProvider (Mock)", () => {
         expect(response).toBe("Mock response");
     });
 
-    it("should implement stream correctly", async () => {
+    it.concurrent("should implement stream correctly", async () => {
         const provider = await MockProvider.connect({});
         const generator = provider.stream([new HumanMessage("Hi")]);
         let content = "";

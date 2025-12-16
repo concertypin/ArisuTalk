@@ -1,7 +1,7 @@
 // worker.ts
 import { type Character, CharacterSchema } from "@arisutalk/character-spec/v0/Character";
 import { expose, transfer } from "comlink";
-import { decode, encode } from "cbor-x";
+import { Decoder, Encoder, FLOAT32_OPTIONS } from "cbor-x";
 // For not using Node.js Buffer, override global Buffer type
 declare global {
     type Buffer = never;
@@ -14,6 +14,15 @@ type ParseResult<T> =
     | {
           success: false;
       };
+const cborOptions = {
+    useFloat32: FLOAT32_OPTIONS.DECIMAL_FIT,
+    bundleStrings: true,
+    pack: true,
+    variableMapSize: true,
+    structures: [],
+} satisfies ConstructorParameters<typeof Encoder>["0"];
+const encoder = new Encoder(cborOptions);
+const decoder = new Decoder(cborOptions);
 
 async function readAll(stream: ReadableStream<Uint8Array>): Promise<Uint8Array> {
     const buffer = await new Response(stream).arrayBuffer();
@@ -24,20 +33,26 @@ async function parseCharacter(rawData: ArrayBuffer): Promise<ParseResult<Charact
     //decompress
     const decompressed = new DecompressionStream("deflate-raw");
     const writer = decompressed.writable.getWriter();
-    writer.write(rawData);
-    writer.close();
+    await writer.write(rawData);
+    await writer.close();
 
     //cbor decode
     const data = await readAll(decompressed.readable);
-    const cbor = decode(data);
-    return (await CharacterSchema.safeParseAsync(cbor)) satisfies ParseResult<Character>;
+    const decoded = decoder.decode(data) as unknown;
+    const result = await CharacterSchema.safeParseAsync(decoded);
+
+    if (result.success) {
+        return { success: true, data: result.data } satisfies ParseResult<Character>;
+    }
+
+    return { success: false } satisfies ParseResult<Character>;
 }
 async function exportCharacter(character: Character): Promise<ArrayBufferLike> {
-    const cbor = encode(character);
+    const cbor = encoder.encode(character);
     const compressed = new CompressionStream("deflate-raw");
     const writer = compressed.writable.getWriter();
-    writer.write(cbor);
-    writer.close();
+    await writer.write(cbor);
+    await writer.close();
     const data = await readAll(compressed.readable);
     return transfer(data.buffer, [data.buffer]);
 }

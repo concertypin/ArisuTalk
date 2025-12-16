@@ -1,19 +1,23 @@
 import { type Persona, PersonaSchema } from "../schema";
 import type { IPersonaStorageAdapter } from "@/lib/interfaces";
-import { LocalStoragePersonaAdapter } from "@/features/persona/adapters/storage/LocalStoragePersonaAdapter";
+import { StorageResolver } from "@/lib/adapters/storage/storageResolver";
 
 export class PersonaStore {
     personas = $state<Persona[]>([]);
     activePersonaId = $state<string | null>(null);
-    private adapter: IPersonaStorageAdapter;
+    private adapter!: IPersonaStorageAdapter;
     public readonly initPromise: Promise<void>;
 
     constructor(adapter?: IPersonaStorageAdapter) {
-        this.adapter = adapter || new LocalStoragePersonaAdapter();
         // Synchronously populate from localStorage for backward compatibility (tests and sync callers).
         this.syncLoadFromLocalStorage();
         // Continue async initialization with adapter in background.
-        this.initPromise = this.load();
+        this.initPromise = this.initialize(adapter);
+    }
+
+    private async initialize(adapter?: IPersonaStorageAdapter) {
+        this.adapter = adapter || (await StorageResolver.getPersonaAdapter());
+        await this.load();
     }
 
     private async load() {
@@ -30,7 +34,11 @@ export class PersonaStore {
         try {
             const stored = localStorage.getItem("arisutalk_personas");
             if (stored) {
-                this.personas = JSON.parse(stored);
+                const parsed: unknown = JSON.parse(stored);
+                const result = PersonaSchema.array().safeParse(parsed);
+                if (result.success) {
+                    this.personas = result.data;
+                }
             }
             const active = localStorage.getItem("arisutalk_active_persona");
             this.activePersonaId = active;

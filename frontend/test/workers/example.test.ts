@@ -12,14 +12,14 @@ import { api } from "@worker/example/main";
 
 describe("Example Worker Logic", () => {
     describe("greet", () => {
-        it("should return a greeting message", async () => {
+        it.concurrent("should return a greeting message", async () => {
             const result = await api.greet("TestUser");
             expect(result).toBe("Hello, TestUser! This message is from a Web Worker.");
         });
     });
 
     describe("fibonacci", () => {
-        it("should calculate fibonacci for small numbers", async () => {
+        it.concurrent("should calculate fibonacci for small numbers", async () => {
             expect(await api.fibonacci(0)).toBe(0);
             expect(await api.fibonacci(1)).toBe(1);
             expect(await api.fibonacci(2)).toBe(1);
@@ -28,7 +28,7 @@ describe("Example Worker Logic", () => {
             expect(await api.fibonacci(5)).toBe(5);
         });
 
-        it("should handle negative calculations (base case)", async () => {
+        it.concurrent("should handle negative calculations (base case)", async () => {
             // Our implementation returns n for n <= 1
             expect(await api.fibonacci(-1)).toBe(-1);
         });

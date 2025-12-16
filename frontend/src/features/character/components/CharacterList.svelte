@@ -58,7 +58,10 @@
         return await new Promise<string>((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = () => resolve(reader.result as string);
-            reader.onerror = () => reject(reader.error);
+            reader.onerror = () => {
+                const reason = reader.error ?? new Error("FileReader failed");
+                reject(reason instanceof Error ? reason : new Error(String(reason)));
+            };
             reader.readAsDataURL(new File([bytes], "", { type }));
         });
     }
@@ -102,16 +105,12 @@
                     return { ...i, url: base64 };
                 } catch (e) {
                     console.error("Failed to fetch local file for export:", i.url, e);
-                    throw e;
+                    throw e instanceof Error ? e : new Error(String(e));
                 }
             }
         }
-        const [newAssets, newInlays] = await Promise.all([
-            Promise.all(char.assets.assets.map(remapAsBase64)),
-            Promise.all(char.assets.inlays.map(remapAsBase64)),
-        ]);
+        const newAssets = await Promise.all(char.assets.assets.map(remapAsBase64));
         char.assets.assets = newAssets;
-        char.assets.inlays = newInlays;
 
         const result = await (await worker).exportCharacter(char);
         // this is now ready to download or save.

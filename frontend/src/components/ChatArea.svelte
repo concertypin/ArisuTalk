@@ -14,7 +14,7 @@
     let isTyping = $derived(botResponseTimeouts.size > 0);
 
     let activeChat = $derived(chatStore.chats.find((c) => c.id === chatStore.activeChatId));
-    let messages = $derived(activeChat?.messages || []);
+    let messages = $derived(chatStore.activeMessages);
 
     // Cleanup pending timeouts on unmount
     $effect(() => {
@@ -27,7 +27,7 @@
     // Auto-scroll when messages change
     $effect(() => {
         if (messages.length) {
-            scrollToBottom();
+            void scrollToBottom().catch((err) => console.error("Scroll failed", err));
         }
     });
 
@@ -36,27 +36,33 @@
 
         const userMsg: Message = {
             id: crypto.randomUUID(),
+            chatId: activeChat.id,
             content: { type: "string", data: inputValue },
             role: "user",
             timestamp: Date.now(),
+            inlays: [],
         };
 
         await chatStore.addMessage(activeChat.id, userMsg);
         inputValue = "";
 
         // Mock response delay
-        const timeoutId = setTimeout(async () => {
-            if (!activeChat) return;
-            const botMsg: Message = {
-                id: crypto.randomUUID(),
-                content: { type: "string", data: "This is a mock response from the system." },
-                role: "assistant",
-                timestamp: Date.now(),
-            };
+        const timeoutId = window.setTimeout(() => {
+            void (async () => {
+                if (!activeChat) return;
+                const botMsg: Message = {
+                    id: crypto.randomUUID(),
+                    chatId: activeChat.id,
+                    content: { type: "string", data: "This is a mock response from the system." },
+                    role: "assistant",
+                    timestamp: Date.now(),
+                    inlays: [],
+                };
 
-            await chatStore.addMessage(activeChat.id, botMsg);
+                await chatStore.addMessage(activeChat.id, botMsg);
 
-            botResponseTimeouts.delete(timeoutId);
+                botResponseTimeouts.delete(timeoutId);
+            })().catch((err) => console.error("Bot message failed", err));
         }, 1000);
 
         botResponseTimeouts.add(timeoutId);
@@ -72,7 +78,7 @@
     function handleKeydown(e: KeyboardEvent) {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
-            sendMessage();
+            void sendMessage();
         }
     }
 </script>
@@ -129,7 +135,7 @@
             />
             <button
                 class="btn btn-primary"
-                onclick={sendMessage}
+                onclick={() => void sendMessage()}
                 disabled={!inputValue.trim() || !activeChat}>Send</button
             >
         </div>

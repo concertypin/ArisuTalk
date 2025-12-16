@@ -1,16 +1,22 @@
 import type { LocalChat, IChatStorageAdapter } from "@/lib/interfaces";
 import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
-import { LocalStorageChatAdapter } from "@/features/chat/adapters/storage/LocalStorageChatAdapter";
+import { StorageResolver } from "@/lib/adapters/storage/storageResolver";
 
 export class ChatStore {
     chats = $state<LocalChat[]>([]);
     activeChatId = $state<string | null>(null);
-    private adapter: IChatStorageAdapter;
+    /** Messages for the currently active chat */
+    activeMessages = $state<Message[]>([]);
+    private adapter!: IChatStorageAdapter;
     public readonly initPromise: Promise<void>;
 
     constructor(adapter?: IChatStorageAdapter) {
-        this.adapter = adapter || new LocalStorageChatAdapter();
-        this.initPromise = this.load();
+        this.initPromise = this.initialize(adapter);
+    }
+
+    private async initialize(adapter?: IChatStorageAdapter) {
+        this.adapter = adapter || (await StorageResolver.getChatAdapter());
+        await this.load();
     }
 
     private async load() {
@@ -47,9 +53,18 @@ export class ChatStore {
         const chat = this.chats.find((c) => c.id === chatId);
 
         if (chat) {
-            chat.messages.push(message);
             chat.lastMessage = Date.now();
             chat.updatedAt = Date.now();
+        }
+
+        // Update activeMessages if this is the active chat
+        if (chatId === this.activeChatId) {
+            const messageWithChatId: Message = {
+                ...message,
+                chatId,
+                inlays: message.inlays || [],
+            };
+            this.activeMessages.push(messageWithChatId);
         }
     }
 
@@ -61,12 +76,18 @@ export class ChatStore {
             this.chats.splice(index, 1);
             if (this.activeChatId === chatId) {
                 this.activeChatId = null;
+                this.activeMessages = [];
             }
         }
     }
 
-    setActiveChat(chatId: string | null) {
+    async setActiveChat(chatId: string | null) {
         this.activeChatId = chatId;
+        if (chatId) {
+            this.activeMessages = await this.adapter.getMessages(chatId);
+        } else {
+            this.activeMessages = [];
+        }
     }
 }
 

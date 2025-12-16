@@ -1,8 +1,7 @@
-import type { IStorageAdapter } from "@/lib/interfaces";
 import type { Chat, Character } from "@arisutalk/character-spec/v0/Character";
-import { Settings } from "@/lib/types/IDataModel";
+import { Settings, SettingsSchema } from "@/lib/types/IDataModel";
 
-export class LocalStorageAdapter implements IStorageAdapter {
+export class LocalStorageAdapter {
     private readonly KEYS = {
         CHATS: "arisutalk_chats",
         CHARACTERS: "arisutalk_characters",
@@ -16,11 +15,21 @@ export class LocalStorageAdapter implements IStorageAdapter {
         return Promise.resolve();
     }
 
-    private getStored<T>(key: string): T[] {
+    private hasId(value: unknown): value is { id: string } {
+        return this.isRecord(value) && typeof value.id === "string";
+    }
+
+    private isRecord(value: unknown): value is Record<string, unknown> {
+        return typeof value === "object" && value !== null;
+    }
+
+    private getStored<T extends { id: string }>(key: string): T[] {
         const item = localStorage.getItem(key);
         if (!item) return [];
         try {
-            return JSON.parse(item) as T[];
+            const parsed = JSON.parse(item) as unknown;
+            if (!Array.isArray(parsed)) return [];
+            return parsed.filter((entry): entry is T => this.hasId(entry));
         } catch {
             return [];
         }
@@ -92,9 +101,10 @@ export class LocalStorageAdapter implements IStorageAdapter {
         const item = localStorage.getItem(this.KEYS.SETTINGS);
         if (!item) {
             // Return default settings using the Settings class (ensures userId uses crypto.randomUUID())
-            return new Settings();
+            return SettingsSchema.parse({});
         }
-        return JSON.parse(item) as Settings;
+        const parsed: unknown = JSON.parse(item);
+        return SettingsSchema.parse(parsed);
     }
 
     async exportData(): Promise<ReadableStream<Uint8Array>> {
@@ -119,10 +129,28 @@ export class LocalStorageAdapter implements IStorageAdapter {
         try {
             const buffer = await new Response(stream).arrayBuffer();
             const json = new TextDecoder().decode(buffer);
-            const data = JSON.parse(json);
-            if (data.chats) this.setStored(this.KEYS.CHATS, data.chats);
-            if (data.characters) this.setStored(this.KEYS.CHARACTERS, data.characters);
-            if (data.settings) await this.saveSettings(data.settings);
+            const parsed = JSON.parse(json) as unknown;
+            if (!this.isRecord(parsed)) {
+                throw new Error("Invalid data format");
+            }
+
+            const maybeChats = parsed.chats;
+            if (Array.isArray(maybeChats)) {
+                const chats = maybeChats.filter((c): c is Chat => this.hasId(c));
+                this.setStored(this.KEYS.CHATS, chats);
+            }
+
+            const maybeCharacters = parsed.characters;
+            if (Array.isArray(maybeCharacters)) {
+                const characters = maybeCharacters.filter((c): c is Character => this.hasId(c));
+                this.setStored(this.KEYS.CHARACTERS, characters);
+            }
+
+            const maybeSettings = parsed.settings;
+            if (maybeSettings !== undefined) {
+                const result = SettingsSchema.safeParse(maybeSettings);
+                if (result.success) await this.saveSettings(result.data);
+            }
         } catch (e) {
             console.error("Failed to import data", e);
             throw new Error("Invalid data format");

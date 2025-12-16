@@ -53,7 +53,7 @@ describe("LocalStorageAdapter", () => {
     });
 
     it("should save and get settings", async () => {
-        const settings: Settings = { theme: "dark", userId: "test-user-id" };
+        const settings: Settings = { theme: "dark", userId: "test-user-id", activePersonaId: null };
         await adapter.saveSettings(settings);
         const retrieved = await adapter.getSettings();
         expect(retrieved).toEqual(settings);

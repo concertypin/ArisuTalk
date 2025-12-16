@@ -54,3 +54,5 @@ claude.md
 # lockfiles should be ignored except for the root one
 frontend/pnpm-lock.yaml
 backend/pnpm-lock.yaml
+*/coverage
+**/browser/__screenshots__
