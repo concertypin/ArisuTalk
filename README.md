@@ -2,7 +2,12 @@
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/concertypin/ArisuTalk)
 [![Deploy static content](https://github.com/concertypin/ArisuTalk/actions/workflows/pages.yml/badge.svg)](https://github.com/concertypin/ArisuTalk/actions/workflows/pages.yml)
 
-We're up and running at here!
+> [!NOTE]
+> ✨ Frontend Refactor: Project Kei Underway!
+>
+> We are currently remaking the entire frontend as part of **Project Kei**. The goal is a **modular, maintainable, and super readable UI architecture**.
+> Check the [GitHub Projects board](https://github.com/users/concertypin/projects/5) for the latest backlog and progress on this effort (Issue [#84](https://github.com/concertypin/ArisuTalk/issues/84)). Stay tuned!
+
 - [arisutalk.moe](https://arisutalk.moe): Production
 - [dev.arisutalk.moe](https://dev.arisutalk.moe): Dev builds for early testers
 - [spark.arisutalk.moe](https://spark.arisutalk.moe): Spark builds for super-earlybird testers
