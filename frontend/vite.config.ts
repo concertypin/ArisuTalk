@@ -1,6 +1,6 @@
 /// <reference types="vitest/config" />
 import { svelte } from "@sveltejs/vite-plugin-svelte";
-import { type PluginOption, UserConfig, defineConfig } from "vite";
+import { type PluginOption, UserConfig, defineConfig, loadEnv } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { playwright } from "@vitest/browser-playwright";
 
@@ -19,18 +19,6 @@ const browserTestConfig: Presence<UserConfig["test"]>["browser"] = {
 };
 
 const runBrowserTest = process.env.npm_lifecycle_event?.includes("browser") ? true : false;
-const testConfig: UserConfig["test"] = {
-    globals: true,
-    environment: "happy-dom",
-    setupFiles: ["./test/setup.ts"],
-    exclude: ["node_modules", "dist", ".git"],
-    browser: runBrowserTest ? browserTestConfig : undefined,
-    coverage: {
-        reporter: ["text", "json", "html"],
-        exclude: ["node_modules/", "dist/", "test/", "**/*.d.ts", "**/*.config.*", "static/"],
-    },
-    includeTaskLocation: true,
-};
 
 export default defineConfig(async (ctx) => {
     const mode = ctx.mode;
@@ -42,6 +30,19 @@ export default defineConfig(async (ctx) => {
             },
         }),
     ];
+    let testConfig: UserConfig["test"] = {
+        globals: true,
+        environment: "happy-dom",
+        setupFiles: ["./test/setup.ts"],
+        exclude: ["node_modules", "dist", ".git"],
+        browser: runBrowserTest ? browserTestConfig : undefined,
+        coverage: {
+            reporter: ["text", "json", "html"],
+            exclude: ["node_modules/", "dist/", "test/", "**/*.d.ts", "**/*.config.*", "static/"],
+        },
+        includeTaskLocation: true,
+        env: loadEnv(mode, process.cwd(), ""),
+    };
     const baseConfig: UserConfig = {
         server: {
             sourcemapIgnoreList(absSourcePath) {

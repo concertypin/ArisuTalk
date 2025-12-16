@@ -1,0 +1,95 @@
+
+> frontend@1.0.0 test C:\Users\PC\Projects\etc\ArisuTalk\frontend
+> vitest run --exclude test/browser "test/unit/providers/GeminiChatProvider.test.ts"
+
+
+[1m[46m RUN [49m[22m [36mv4.0.15 [39m[90mC:/Users/PC/Projects/etc/ArisuTalk/frontend[39m
+
+[90mstderr[2m | test/unit/providers/GeminiChatProvider.test.ts[2m:31:5[22m[2m[2m > [22m[2mGeminiChatProvider[2m > [22m[2mconnects and creates instance
+[22m[39m[vitest] The vi.fn() mock did not use 'function' or 'class' in its implementation, see https://vitest.dev/api/vi#vi-spyon for examples.
+
+[90mstderr[2m | test/unit/providers/GeminiChatProvider.test.ts[2m:31:5[22m[2m[2m > [22m[2mGeminiChatProvider[2m > [22m[2mconnects and creates instance
+[22m[39mConnect failed: TypeError: () => ({
+      invoke: __vite_ssr_import_0__.vi.fn().mockResolvedValue({ content: "Mocked response" }),
+      s...<omitted>...}) is not a constructor
+    at new Mock (file:///C:/Users/PC/Projects/etc/ArisuTalk/node_modules/[4m.pnpm[24m/@vitest+spy@4.0.15/node_modules/[4m@vitest[24m/spy/dist/index.js:262:27)
+    at Object.connect (C:/Users/PC/Projects/etc/ArisuTalk/frontend/src/lib/providers/chat/GeminiChatProvider.ts:28:27)
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at C:/Users/PC/Projects/etc/ArisuTalk/frontend/test/unit/providers/GeminiChatProvider.test.ts:33:30
+    at file:///C:/Users/PC/Projects/etc/ArisuTalk/node_modules/[4m.pnpm[24m/@vitest+runner@4.0.15/node_modules/[4m@vitest[24m/runner/dist/index.js:915:20
+
+[90mstderr[2m | test/unit/providers/GeminiChatProvider.test.ts[2m:44:5[22m[2m[2m > [22m[2mGeminiChatProvider[2m > [22m[2mgenerates response
+[22m[39m[vitest] The vi.fn() mock did not use 'function' or 'class' in its implementation, see https://vitest.dev/api/vi#vi-spyon for examples.
+
+[90mstderr[2m | test/unit/providers/GeminiChatProvider.test.ts[2m:44:5[22m[2m[2m > [22m[2mGeminiChatProvider[2m > [22m[2mgenerates response
+[22m[39mGenerate failed: TypeError: () => ({
+      invoke: __vite_ssr_import_0__.vi.fn().mockResolvedValue({ content: "Mocked response" }),
+      s...<omitted>...}) is not a constructor
+    at new Mock (file:///C:/Users/PC/Projects/etc/ArisuTalk/node_modules/[4m.pnpm[24m/@vitest+spy@4.0.15/node_modules/[4m@vitest[24m/spy/dist/index.js:262:27)
+    at Object.connect (C:/Users/PC/Projects/etc/ArisuTalk/frontend/src/lib/providers/chat/GeminiChatProvider.ts:28:27)
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at C:/Users/PC/Projects/etc/ArisuTalk/frontend/test/unit/providers/GeminiChatProvider.test.ts:46:30
+    at file:///C:/Users/PC/Projects/etc/ArisuTalk/node_modules/[4m.pnpm[24m/@vitest+runner@4.0.15/node_modules/[4m@vitest[24m/runner/dist/index.js:915:20
+
+[90mstderr[2m | test/unit/providers/GeminiChatProvider.test.ts[2m:59:5[22m[2m[2m > [22m[2mGeminiChatProvider[2m > [22m[2mstreams response
+[22m[39m[vitest] The vi.fn() mock did not use 'function' or 'class' in its implementation, see https://vitest.dev/api/vi#vi-spyon for examples.
+
+ [31m❯[39m test/unit/providers/GeminiChatProvider.test.ts [2m([22m[2m3 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 14[2mms[22m[39m
+[31m     [31m×[31m connects and creates instance[39m[32m 11[2mms[22m[39m
+[31m     [31m×[31m generates response[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m streams response[39m[32m 1[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m test/unit/providers/GeminiChatProvider.test.ts[2m:31:5[22m[2m > [22mGeminiChatProvider[2m > [22mconnects and creates instance
+[31m[1mTypeError[22m: () => ({
+      invoke: __vite_ssr_import_0__.vi.fn().mockResolvedValue({ content: "Mocked response" }),
+      s...<omitted>...}) is not a constructor[39m
+[36m [2m❯[22m Object.connect src/lib/providers/chat/GeminiChatProvider.ts:[2m28:27[22m[39m
+    [90m 26| [39m        connect[33m:[39m [35masync[39m (settings[33m:[39m [33mGeminiSettings[39m) [33m=>[39m {
+    [90m 27| [39m            const { ChatGoogleGenerativeAI } = await import("@langchai…
+    [90m 28| [39m            [35mconst[39m model [33m=[39m [35mnew[39m [33mChatGoogleGenerativeAI[39m({
+    [90m   | [39m                          [31m^[39m
+    [90m 29| [39m                apiKey[33m:[39m settings[33m.[39mapiKey[33m,[39m
+    [90m 30| [39m                model[33m:[39m settings[33m.[39mmodel [33m||[39m [32m"gemini-pro"[39m[33m,[39m
+[90m [2m❯[22m test/unit/providers/GeminiChatProvider.test.ts:[2m33:30[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/unit/providers/GeminiChatProvider.test.ts[2m:44:5[22m[2m > [22mGeminiChatProvider[2m > [22mgenerates response
+[31m[1mTypeError[22m: () => ({
+      invoke: __vite_ssr_import_0__.vi.fn().mockResolvedValue({ content: "Mocked response" }),
+      s...<omitted>...}) is not a constructor[39m
+[36m [2m❯[22m Object.connect src/lib/providers/chat/GeminiChatProvider.ts:[2m28:27[22m[39m
+    [90m 26| [39m        connect[33m:[39m [35masync[39m (settings[33m:[39m [33mGeminiSettings[39m) [33m=>[39m {
+    [90m 27| [39m            const { ChatGoogleGenerativeAI } = await import("@langchai…
+    [90m 28| [39m            [35mconst[39m model [33m=[39m [35mnew[39m [33mChatGoogleGenerativeAI[39m({
+    [90m   | [39m                          [31m^[39m
+    [90m 29| [39m                apiKey[33m:[39m settings[33m.[39mapiKey[33m,[39m
+    [90m 30| [39m                model[33m:[39m settings[33m.[39mmodel [33m||[39m [32m"gemini-pro"[39m[33m,[39m
+[90m [2m❯[22m test/unit/providers/GeminiChatProvider.test.ts:[2m46:30[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/unit/providers/GeminiChatProvider.test.ts[2m:59:5[22m[2m > [22mGeminiChatProvider[2m > [22mstreams response
+[31m[1mTypeError[22m: () => ({
+      invoke: __vite_ssr_import_0__.vi.fn().mockResolvedValue({ content: "Mocked response" }),
+      s...<omitted>...}) is not a constructor[39m
+[36m [2m❯[22m Object.connect src/lib/providers/chat/GeminiChatProvider.ts:[2m28:27[22m[39m
+    [90m 26| [39m        connect[33m:[39m [35masync[39m (settings[33m:[39m [33mGeminiSettings[39m) [33m=>[39m {
+    [90m 27| [39m            const { ChatGoogleGenerativeAI } = await import("@langchai…
+    [90m 28| [39m            [35mconst[39m model [33m=[39m [35mnew[39m [33mChatGoogleGenerativeAI[39m({
+    [90m   | [39m                          [31m^[39m
+    [90m 29| [39m                apiKey[33m:[39m settings[33m.[39mapiKey[33m,[39m
+    [90m 30| [39m                model[33m:[39m settings[33m.[39mmodel [33m||[39m [32m"gemini-pro"[39m[33m,[39m
+[90m [2m❯[22m test/unit/providers/GeminiChatProvider.test.ts:[2m60:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[90m (3)[39m
+[2m   Start at [22m 17:34:56
+[2m   Duration [22m 1.30s[2m (transform 100ms, setup 71ms, import 387ms, tests 14ms, environment 514ms)[22m
+
+ ELIFECYCLE  Test failed. See above for more details.

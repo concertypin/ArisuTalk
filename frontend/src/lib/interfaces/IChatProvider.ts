@@ -1,32 +1,46 @@
 import type { BaseMessage } from "@langchain/core/messages";
 
 /**
- * Settings configuration for a chat provider.
- * Key-value pairs allowing flexibility for different provider requirements (api keys, models, etc).
+ * Common settings shared across all chat providers.
+ */
+export interface CommonChatSettings {
+    apiKey?: string;
+    model?: string;
+    temperature?: number;
+    maxTokens?: number;
+    maxOutputTokens?: number;
+}
+
+/**
+ * Provider-specific settings.
  */
 export interface ProviderSettings {
     GEMINI: {
-        apiKey: string;
-        model: string;
-        temperature: number;
-        maxTokens: number;
-        maxOutputTokens: number;
+        safetySettings?: Array<{
+            category: string;
+            threshold: string;
+        }>;
     };
     /** Mock provider settings for testing */
-    MOCK: Record<string, never>;
+    MOCK: {
+        mockDelay?: number;
+        responses?: string[];
+    };
 }
+
+export type ProviderType = keyof ProviderSettings;
 
 /**
  * Interface for the static side of a Chat Provider (Factory).
  * Enforces the static connect method pattern.
  */
-export interface IChatProviderFactory<T extends keyof ProviderSettings> {
+export interface IChatProviderFactory<T extends ProviderType> {
     /**
      * static factory method to create and initialize the provider.
-     * @param settings - The initial settings for the provider.
+     * @param settings - The initial settings for the provider (common + specific).
      * @returns Promise resolving to an initialized instance.
      */
-    connect(settings: ProviderSettings[T]): Promise<ChatProvider<T>>;
+    connect(settings: CommonChatSettings & ProviderSettings[T]): Promise<ChatProvider<T>>;
 }
 
 /**
@@ -35,8 +49,9 @@ export interface IChatProviderFactory<T extends keyof ProviderSettings> {
  * Users must use the static `connect` factory method from the implementation to get an instance.
  */
 export abstract class ChatProvider<
-    T extends keyof ProviderSettings,
-    SETTING extends ProviderSettings[T] = ProviderSettings[T],
+    T extends ProviderType,
+    SETTING extends CommonChatSettings & ProviderSettings[T] = CommonChatSettings &
+        ProviderSettings[T],
 > {
     /** Unique identifier for the provider. */
     abstract id: string;
@@ -61,7 +76,7 @@ export abstract class ChatProvider<
      * @param settings - Optional query-specific settings (overrides connection config).
      * @returns Promise resolving to the generated text.
      */
-    abstract generate(messages: BaseMessage[], settings?: SETTING): Promise<string>;
+    abstract generate(messages: BaseMessage[], settings?: Partial<SETTING>): Promise<string>;
 
     /**
      * Streams the response for the given messages.
@@ -71,7 +86,7 @@ export abstract class ChatProvider<
      */
     abstract stream(
         messages: BaseMessage[],
-        settings?: SETTING
+        settings?: Partial<SETTING>
     ): AsyncGenerator<string, void, unknown>;
 
     /**

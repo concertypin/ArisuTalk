@@ -62,7 +62,7 @@ describe("Persona and Chat interactions", () => {
 
         // Wait for the mocked bot response (the app uses a 1s delay)
         await new Promise((r) => setTimeout(r, 1200));
-        const botMsg = getByText("This is a mock response from the system.");
+        const botMsg = getByText("Response 1");
         await expect.element(botMsg).toBeVisible();
     });
 });
