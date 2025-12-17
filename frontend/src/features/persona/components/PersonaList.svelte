@@ -3,7 +3,7 @@
     import { type IAssetStorageAdapter, IfNotExistBehavior } from "@/lib/interfaces";
     import { OpFSAssetStorageAdapter } from "@/features/character/adapters/assetStorage/OpFSAssetStorageAdapter";
     import type { Persona } from "../schema";
-    import { Trash2, SquarePen } from "@lucide/svelte";
+    import { Trash2, SquarePen, ChevronUp, ChevronDown } from "@lucide/svelte";
 
     interface Props {
         onEdit: (persona: Persona) => void;
@@ -46,7 +46,7 @@
 </script>
 
 <div class="flex flex-col gap-2">
-    {#each personas as persona (persona.id)}
+    {#each personas as persona, index (persona.id)}
         <div
             class="flex items-center justify-between p-3 bg-base-100 rounded-lg border border-base-200 hover:border-primary transition-colors cursor-pointer"
             class:border-primary={personaStore.activePersonaId === persona.id}
@@ -86,6 +86,22 @@
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
             <div class="flex gap-1" role="group" onclick={(e) => e.stopPropagation()}>
+                <button
+                    class="btn btn-ghost btn-xs btn-square"
+                    disabled={index === 0}
+                    onclick={() => personaStore.reorder(index, index - 1)}
+                    aria-label="Move Up"
+                >
+                    <ChevronUp size={14} />
+                </button>
+                <button
+                    class="btn btn-ghost btn-xs btn-square"
+                    disabled={index === personas.length - 1}
+                    onclick={() => personaStore.reorder(index, index + 1)}
+                    aria-label="Move Down"
+                >
+                    <ChevronDown size={14} />
+                </button>
                 <button class="btn btn-ghost btn-xs btn-square" onclick={() => onEdit(persona)}>
                     <SquarePen size={14} />
                 </button>

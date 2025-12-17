@@ -157,6 +157,9 @@
             onEdit={() => onEdit(index)}
             onDelete={() => handleDelete(index)}
             onExport={() => handleExport(index)}
+            onMove={(dir: number) => characterStore.reorder(index, index + dir)}
+            isFirst={index === 0}
+            isLast={index === characterStore.characters.length - 1}
         />
     {/each}
 </div>

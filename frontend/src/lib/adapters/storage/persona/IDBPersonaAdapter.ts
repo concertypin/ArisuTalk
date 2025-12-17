@@ -1,6 +1,7 @@
 import { getArisuDB } from "../IndexedDBHelper";
 import type { IPersonaStorageAdapter } from "@/lib/interfaces";
 import type { Persona } from "@/features/persona/schema";
+import { SettingsSchema } from "@/lib/types/IDataModel";
 
 export class IDBPersonaAdapter implements IPersonaStorageAdapter {
     private db = getArisuDB();
@@ -36,11 +37,12 @@ export class IDBPersonaAdapter implements IPersonaStorageAdapter {
         });
         if (updatedCount === 0) {
             // If no settings record existed, create one with defaults
-            await this.db.settings.put({
-                id: "singleton",
+            const defaults = SettingsSchema.parse({
                 activePersonaId: id,
-                theme: "system",
-                userId: crypto.randomUUID(),
+            });
+            await this.db.settings.put({
+                ...defaults,
+                id: "singleton",
             });
         }
     }

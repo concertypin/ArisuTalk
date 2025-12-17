@@ -92,6 +92,39 @@ export class PersonaStore {
     get activePersona() {
         return this.personas.find((p) => p.id === this.activePersonaId);
     }
+
+    // --- Reorder Support ---
+    private readonly ORDER_KEY = "arisutalk_persona_order";
+
+    private getOrder(): string[] {
+        try {
+            const stored = localStorage.getItem(this.ORDER_KEY);
+            if (!stored) return [];
+            return JSON.parse(stored) as string[];
+        } catch {
+            return [];
+        }
+    }
+
+    private saveOrder() {
+        const ids = this.personas.map((p) => p.id);
+        localStorage.setItem(this.ORDER_KEY, JSON.stringify(ids));
+    }
+
+    reorder(fromIndex: number, toIndex: number) {
+        if (
+            fromIndex < 0 ||
+            fromIndex >= this.personas.length ||
+            toIndex < 0 ||
+            toIndex >= this.personas.length
+        ) {
+            return;
+        }
+
+        const item = this.personas.splice(fromIndex, 1)[0];
+        this.personas.splice(toIndex, 0, item);
+        this.saveOrder();
+    }
 }
 
 export const personaStore = new PersonaStore();
