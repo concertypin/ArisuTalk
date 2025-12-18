@@ -10,6 +10,7 @@ export const LLMProviderSchema = z.enum([
 /**
  * Parameters for controlling LLM text generation behavior.
  * All parameters are optional and can be adjusted based on the specific use case.
+ * Refer to the documentation of the specific LLM provider for details on supported parameters.
  */
 export const LLMGenerationParametersSchema = z.object({
     /**
@@ -32,7 +33,7 @@ export const LLMGenerationParametersSchema = z.object({
      */
     frequencyPenalty: z.number().min(-2).max(2).optional(),
     /**
-     *
+     * Controls presence of new topics in the generated text.
      */
     presencePenalty: z.number().min(-2).max(2).optional(),
     /**
