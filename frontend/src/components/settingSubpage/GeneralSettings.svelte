@@ -5,15 +5,6 @@
 <div class="space-y-6">
     <h3 class="text-lg font-semibold">General Settings</h3>
     <fieldset class="fieldset w-full max-w-md">
-        <legend class="fieldset-legend">Username</legend>
-        <input
-            id="general-username"
-            type="text"
-            class="input w-full"
-            bind:value={settings.value.username}
-        />
-    </fieldset>
-    <fieldset class="fieldset w-full max-w-md">
         <legend class="fieldset-legend">Theme</legend>
         <select id="general-theme" class="select w-full" bind:value={settings.value.theme}>
             <option value="system">System</option>
