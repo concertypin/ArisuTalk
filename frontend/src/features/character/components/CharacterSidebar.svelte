@@ -1,7 +1,8 @@
 <script lang="ts">
-    import { Plus, User } from "@lucide/svelte";
+    import { Plus, User, Settings } from "@lucide/svelte";
     import CharacterSidebarItem from "./CharacterSidebarItem.svelte";
     import { characterStore } from "../stores/characterStore.svelte";
+    import { uiState } from "@/lib/stores/ui.svelte";
 
     interface Props {
         selectedCharacterId: string | null;
@@ -36,7 +37,16 @@
         </button>
     </div>
 
-    <div class="mt-auto pb-4">
+    <div class="mt-auto pb-4 flex flex-col gap-2">
+        <div class="tooltip tooltip-right z-50" data-tip="Settings">
+            <button
+                class="group flex items-center justify-center w-12 h-12 rounded-3xl hover:rounded-xl bg-base-200 hover:bg-secondary text-secondary hover:text-white transition-all duration-200"
+                onclick={() => uiState.openSettingsModal()}
+                aria-label="Settings"
+            >
+                <Settings size={24} />
+            </button>
+        </div>
         <div class="tooltip tooltip-right z-50" data-tip="Personas">
             <button
                 class="group flex items-center justify-center w-12 h-12 rounded-3xl hover:rounded-xl bg-base-200 hover:bg-primary text-primary hover:text-white transition-all duration-200"

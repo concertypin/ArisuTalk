@@ -6,11 +6,13 @@
     import { initRouter, getCurrentPath } from "@/lib/router.svelte";
     import { routes } from "@/lib/routeConfig";
     import { uiState } from "@/lib/stores/ui.svelte";
+    import { settings } from "@/lib/stores/settings.svelte";
     import type { Component } from "svelte";
 
-    // Initialize router on mount
+    // Initialize router and settings on mount
     $effect(() => {
         initRouter();
+        void settings.init();
     });
 
     // Current route path (reactive)
@@ -49,7 +51,17 @@
 {/if}
 
 {#if uiState.settingsModalOpen}
-    {#await import("@/components/SettingsModal.svelte") then { default: SettingsModal }}
-        <SettingsModal />
+    {#await import("@/components/SettingsModal.svelte")}
+        <div class="flex items-center justify-center w-full h-full text-base-content/50">
+            Loading settings...
+        </div>
+    {:then { default: Component }}
+        <Component />
+    {:catch error}
+        <div
+            class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white"
+        >
+            Failed to load settings modal: {String(error)}
+        </div>
     {/await}
 {/if}

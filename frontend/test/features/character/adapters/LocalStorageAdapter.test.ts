@@ -53,10 +53,25 @@ describe("LocalStorageAdapter", () => {
     });
 
     it("should save and get settings", async () => {
-        const settings: Settings = { theme: "dark", userId: "test-user-id", activePersonaId: null };
+        const settings: Settings = {
+            theme: "dark",
+            advanced: { debug: false, experimental: false },
+            llmConfigs: [],
+            prompt: { generationPrompt: "You are a helpful assistant." },
+            activePersonaId: null,
+        };
         await adapter.saveSettings(settings);
         const retrieved = await adapter.getSettings();
-        expect(retrieved).toEqual(settings);
+        // Settings schema has defaults, so we check that our values were saved correctly
+        expect(retrieved).toEqual(
+            expect.objectContaining({
+                theme: "dark",
+                advanced: { debug: false, experimental: false },
+                llmConfigs: [],
+                prompt: { generationPrompt: "You are a helpful assistant." },
+                activePersonaId: null,
+            })
+        );
     });
 
     it("should return default settings if none stored", async () => {

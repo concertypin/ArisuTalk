@@ -71,10 +71,22 @@ export class OpFSAssetStorageAdapter implements IAssetStorageAdapter {
      * Promise of the root directory handle of OpFS.
      * When accessing it, just await it. It will be initialized on class creation and (mostly) already fulfilled.
      */
-    private readonly root: Promise<FileSystemDirectoryHandle> = navigator.storage.getDirectory();
+    private rootPromise: Promise<FileSystemDirectoryHandle> | null = null;
+
+    private get root(): Promise<FileSystemDirectoryHandle> {
+        if (!this.rootPromise) {
+            if (typeof navigator === "undefined" || !navigator.storage) {
+                // Return a rejected promise or handle appropriately for tests
+                return Promise.reject(new Error("OpFS not supported"));
+            }
+            this.rootPromise = navigator.storage.getDirectory();
+        }
+        return this.rootPromise;
+    }
 
     async init(): Promise<void> {
-        //no-op, already initialized on class creation
+        // Ensure root is accessible
+        await this.root;
     }
 
     private checkValidId(id: URL): asserts id is ValidID {
@@ -148,3 +160,8 @@ export class OpFSAssetStorageAdapter implements IAssetStorageAdapter {
         }
     }
 }
+
+/**
+ * Singleton instance for convenient import.
+ */
+export const opfsAdapter = new OpFSAssetStorageAdapter();

@@ -1,11 +1,7 @@
+/// <reference types="vitest/browser" />
 import { test, expect, describe } from "vitest";
 import { render } from "vitest-browser-svelte";
 import CharacterLayoutTestWrapper from "./CharacterLayoutTestWrapper.svelte";
-
-function setInputValue(el: HTMLInputElement | HTMLTextAreaElement, value: string) {
-    el.value = value;
-    el.dispatchEvent(new Event("input", { bubbles: true }));
-}
 
 describe("Persona and Chat interactions", () => {
     test("Manage Personas opens persona modal", async () => {
@@ -20,9 +16,7 @@ describe("Persona and Chat interactions", () => {
     });
 
     test("Create character and send chat message", async () => {
-        const { container, getByLabelText, getByText, getByRole } = render(
-            CharacterLayoutTestWrapper
-        );
+        const { getByLabelText, getByText, getByRole } = render(CharacterLayoutTestWrapper);
 
         // Open Add Character modal
         const addBtn = getByLabelText("Add Character");
@@ -30,10 +24,10 @@ describe("Persona and Chat interactions", () => {
         await addBtn.click();
 
         // Fill character form (input has id `char_name`)
-        const nameInput = container.querySelector("#char_name");
-        if (!nameInput) throw new Error("Name input not found");
+
+        const nameInput = getByRole("textbox", { name: "e.g. Arisu" });
         await expect.element(nameInput).toBeVisible();
-        setInputValue(nameInput, "TestBot");
+        await nameInput.fill("TestBot");
 
         const saveBtn = getByText("Save Character");
         await saveBtn.click();
@@ -49,10 +43,10 @@ describe("Persona and Chat interactions", () => {
         await newChatBtn.click();
 
         // Send a user message (chat input uses placeholder)
-        const input = container.querySelector('input[placeholder="Type a message..."]');
-        if (!input) throw new Error("Chat input not found");
+        const input = getByRole("textbox", { name: "Type a message..." });
         await expect.element(input).toBeVisible();
-        setInputValue(input, "Hello there");
+        await input.fill("Hello there");
+
         const sendBtn = getByText("Send");
         await sendBtn.click();
 

@@ -6,7 +6,6 @@ export default {
     preprocess: vitePreprocess(),
     vitePlugin: {
         inspector: {
-            toggleKeyCombo: "ctrl-]",
             showToggleButton: "always",
             toggleButtonPos: "bottom-right",
         },

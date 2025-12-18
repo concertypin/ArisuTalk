@@ -137,3 +137,5 @@ export class IDBChatAdapter implements IChatStorageAdapter {
         if (messages.length) await this.db.messages.bulkPut(messages);
     }
 }
+
+export default IDBChatAdapter;

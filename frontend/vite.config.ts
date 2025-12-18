@@ -3,7 +3,6 @@ import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { type PluginOption, UserConfig, defineConfig, loadEnv } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { playwright } from "@vitest/browser-playwright";
-
 type Presence<T> = T extends undefined ? never : T;
 
 const browserTestConfig: Presence<UserConfig["test"]>["browser"] = {
@@ -30,6 +29,7 @@ export default defineConfig(async (ctx) => {
             },
         }),
     ];
+    const env = loadEnv(mode, process.cwd(), "");
     let testConfig: UserConfig["test"] = {
         globals: true,
         environment: "happy-dom",
@@ -41,8 +41,9 @@ export default defineConfig(async (ctx) => {
             exclude: ["node_modules/", "dist/", "test/", "**/*.d.ts", "**/*.config.*", "static/"],
         },
         includeTaskLocation: true,
-        env: loadEnv(mode, process.cwd(), ""),
+        env,
     };
+    const define: Record<string, string> = {};
     const baseConfig: UserConfig = {
         server: {
             sourcemapIgnoreList(absSourcePath) {
@@ -54,6 +55,7 @@ export default defineConfig(async (ctx) => {
             open: "index.html",
             allowedHosts: process.env.npm_lifecycle_event?.includes("dev") ? true : undefined,
         },
+        define: define,
         build: {
             outDir: "dist",
             sourcemap: true,

@@ -21,3 +21,4 @@ export class IDBSettingsAdapter implements ISettingsStorageAdapter {
         return inst;
     }
 }
+export default IDBSettingsAdapter;
