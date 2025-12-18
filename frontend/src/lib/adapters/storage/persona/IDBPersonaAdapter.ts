@@ -47,3 +47,5 @@ export class IDBPersonaAdapter implements IPersonaStorageAdapter {
         }
     }
 }
+
+export default IDBPersonaAdapter;

@@ -9,6 +9,7 @@ import type {
  * Storage resolver that provides the appropriate storage adapters.
  * Uses dynamic imports for tree-shaking and code splitting.
  * Defaults to IndexedDB (Dexie) for production use.
+ * Uses localStorage for testing environments.
  */
 export class StorageResolver {
     private static characterAdapter: ICharacterStorageAdapter | null = null;
@@ -21,10 +22,17 @@ export class StorageResolver {
      * Uses dynamic import for code splitting.
      */
     static async getCharacterAdapter(): Promise<ICharacterStorageAdapter> {
-        if (!this.characterAdapter) {
-            const { IDBCharacterAdapter } = await import("./character/IDBCharacterAdapter");
-            this.characterAdapter = new IDBCharacterAdapter();
+        if (this.characterAdapter) {
+            return this.characterAdapter;
         }
+        let adapterPromise: Promise<{ default: new () => ICharacterStorageAdapter }>;
+        if (import.meta.env.VITEST) {
+            // Use localStorage adapter in testing environment
+            adapterPromise = import("./character/LocalStorageCharacterAdapter");
+        } else {
+            adapterPromise = import("./character/IDBCharacterAdapter");
+        }
+        this.characterAdapter = new (await adapterPromise).default();
         return this.characterAdapter;
     }
 
@@ -33,10 +41,17 @@ export class StorageResolver {
      * Uses dynamic import for code splitting.
      */
     static async getChatAdapter(): Promise<IChatStorageAdapter> {
-        if (!this.chatAdapter) {
-            const { IDBChatAdapter } = await import("./chat/IDBChatAdapter");
-            this.chatAdapter = new IDBChatAdapter();
+        if (this.chatAdapter) {
+            return this.chatAdapter;
         }
+        let adapterPromise: Promise<{ default: new () => IChatStorageAdapter }>;
+        if (import.meta.env.VITEST) {
+            // Use localStorage adapter in testing environment
+            adapterPromise = import("./chat/LocalStorageChatAdapter");
+        } else {
+            adapterPromise = import("./chat/IDBChatAdapter");
+        }
+        this.chatAdapter = new (await adapterPromise).default();
         return this.chatAdapter;
     }
 
@@ -45,10 +60,18 @@ export class StorageResolver {
      * Uses dynamic import for code splitting.
      */
     static async getPersonaAdapter(): Promise<IPersonaStorageAdapter> {
-        if (!this.personaAdapter) {
-            const { IDBPersonaAdapter } = await import("./persona/IDBPersonaAdapter");
-            this.personaAdapter = new IDBPersonaAdapter();
+        if (this.personaAdapter) {
+            return this.personaAdapter;
         }
+
+        let adapterPromise: Promise<{ default: new () => IPersonaStorageAdapter }>;
+        if (import.meta.env.VITEST) {
+            // Use localStorage adapter in testing environment
+            adapterPromise = import("./persona/LocalStoragePersonaAdapter");
+        } else {
+            adapterPromise = import("./persona/IDBPersonaAdapter");
+        }
+        this.personaAdapter = new (await adapterPromise).default();
         return this.personaAdapter;
     }
 
@@ -57,10 +80,18 @@ export class StorageResolver {
      * Uses dynamic import for code splitting.
      */
     static async getSettingsAdapter(): Promise<ISettingsStorageAdapter> {
-        if (!this.settingsAdapter) {
-            const { IDBSettingsAdapter } = await import("./settings/IDBSettingsAdapter");
-            this.settingsAdapter = new IDBSettingsAdapter();
+        if (this.settingsAdapter) {
+            return this.settingsAdapter;
         }
+
+        let adapterPromise: Promise<{ default: new () => ISettingsStorageAdapter }>;
+        if (import.meta.env.VITEST) {
+            // Use localStorage adapter in testing environment
+            adapterPromise = import("./settings/LocalStorageSettingsAdapter");
+        } else {
+            adapterPromise = import("./settings/IDBSettingsAdapter");
+        }
+        this.settingsAdapter = new (await adapterPromise).default();
         return this.settingsAdapter;
     }
 

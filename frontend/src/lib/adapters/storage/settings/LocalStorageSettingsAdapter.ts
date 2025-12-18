@@ -27,3 +27,5 @@ export class LocalStorageSettingsAdapter implements ISettingsStorageAdapter {
         return SettingsSchema.parse(JSON.parse(item));
     }
 }
+
+export default LocalStorageSettingsAdapter;

@@ -79,3 +79,4 @@ export class LocalStorageCharacterAdapter implements ICharacterStorageAdapter {
         this.setStored(filtered);
     }
 }
+export default LocalStorageCharacterAdapter;

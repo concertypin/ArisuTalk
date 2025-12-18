@@ -56,3 +56,4 @@ export class IDBCharacterAdapter implements ICharacterStorageAdapter {
         await this.db.characters.delete(id);
     }
 }
+export default IDBCharacterAdapter;

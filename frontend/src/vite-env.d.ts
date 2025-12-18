@@ -17,6 +17,12 @@ interface ImportMetaEnv {
      * The version url of the app.
      */
     readonly VITE_VERSION_URL: string;
+
+    // Vitest environment variable
+    /**
+     * Indicates if the code is running in a Vitest testing environment.
+     */
+    readonly VITEST?: boolean;
 }
 
 interface ImportMeta {
