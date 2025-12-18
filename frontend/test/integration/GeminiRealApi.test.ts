@@ -3,15 +3,10 @@ import { GeminiChatProvider } from "@/lib/providers/chat/GeminiChatProvider";
 import { CommonChatSettings } from "@/lib/interfaces";
 import { HumanMessage } from "@langchain/core/messages";
 
-const API_KEY = import.meta.env.GEMINI_API_KEY as string | undefined;
+// If exists, run the test
+const API_KEY = import.meta.env.GEMINI_API_KEY;
 
-describe("Gemini Real API Integration", () => {
-    // Skip if no API key
-    if (!API_KEY) {
-        it.skip("skips real API test because GEMINI_API_KEY is missing", () => {});
-        return;
-    }
-
+describe.runIf(API_KEY)("Gemini Real API Integration", () => {
     const commonSettings: CommonChatSettings = {
         apiKey: API_KEY,
         model: "gemini-flash-lite-latest",

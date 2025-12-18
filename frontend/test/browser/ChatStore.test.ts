@@ -79,7 +79,8 @@ describe("ChatStore Streaming", () => {
     test("error in provider resets isGenerating", async () => {
         await chatStore.initPromise;
         await chatStore.setProvider("MOCK", { responses: [] });
-        // @ts-expect-error - injecting malicious mock for failure testing
+        // injecting malicious mock for failure testing
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         chatStore["activeProvider"] = {
             stream: async function* () {
                 // Dummy yield to satisfy generator requirement
@@ -88,7 +89,8 @@ describe("ChatStore Streaming", () => {
                 throw new Error("Simulated failure");
             },
             abort: () => {},
-        };
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any;
 
         const chatId = await chatStore.createChat("test-fail", "Test Fail");
         await chatStore.setActiveChat(chatId);

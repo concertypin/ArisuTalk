@@ -23,6 +23,12 @@ interface ImportMetaEnv {
      * Indicates if the code is running in a Vitest testing environment.
      */
     readonly VITEST?: boolean;
+    /**
+     * API key for Gemini LLM access.
+     * If exists, enables integration tests with the real Gemini API.
+     * Optional.
+     */
+    readonly GEMINI_API_KEY?: string;
 }
 
 interface ImportMeta {

@@ -1,9 +1,13 @@
 /// <reference types="vitest/browser" />
-import { test, expect, describe } from "vitest";
+import { test, expect, describe, vi, afterEach } from "vitest";
 import { render } from "vitest-browser-svelte";
 import CharacterLayoutTestWrapper from "./CharacterLayoutTestWrapper.svelte";
 
 describe("Persona and Chat interactions", () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
     test("Manage Personas opens persona modal", async () => {
         const { getByLabelText, getByText } = render(CharacterLayoutTestWrapper);
 
@@ -16,6 +20,7 @@ describe("Persona and Chat interactions", () => {
     });
 
     test("Create character and send chat message", async () => {
+        vi.useFakeTimers();
         const { getByLabelText, getByText, getByRole } = render(CharacterLayoutTestWrapper);
 
         // Open Add Character modal
@@ -55,7 +60,7 @@ describe("Persona and Chat interactions", () => {
         await expect.element(userMsg).toBeVisible();
 
         // Wait for the mocked bot response (the app uses a 1s delay)
-        await new Promise((r) => setTimeout(r, 1200));
+        await vi.advanceTimersByTimeAsync(1200);
         const botMsg = getByText("Response 1");
         await expect.element(botMsg).toBeVisible();
     });
