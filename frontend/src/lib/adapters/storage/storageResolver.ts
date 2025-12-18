@@ -5,6 +5,7 @@ import type {
     ISettingsStorageAdapter,
 } from "@/lib/interfaces";
 
+type AdapterPromise<T> = Promise<{ default: new () => T }>;
 /**
  * Storage resolver that provides the appropriate storage adapters.
  * Uses dynamic imports for tree-shaking and code splitting.
@@ -25,7 +26,7 @@ export class StorageResolver {
         if (this.characterAdapter) {
             return this.characterAdapter;
         }
-        let adapterPromise: Promise<{ default: new () => ICharacterStorageAdapter }>;
+        let adapterPromise: AdapterPromise<ICharacterStorageAdapter>;
         if (import.meta.env.VITEST) {
             // Use localStorage adapter in testing environment
             adapterPromise = import("./character/LocalStorageCharacterAdapter");
@@ -44,7 +45,7 @@ export class StorageResolver {
         if (this.chatAdapter) {
             return this.chatAdapter;
         }
-        let adapterPromise: Promise<{ default: new () => IChatStorageAdapter }>;
+        let adapterPromise: AdapterPromise<IChatStorageAdapter>;
         if (import.meta.env.VITEST) {
             // Use localStorage adapter in testing environment
             adapterPromise = import("./chat/LocalStorageChatAdapter");
@@ -64,7 +65,7 @@ export class StorageResolver {
             return this.personaAdapter;
         }
 
-        let adapterPromise: Promise<{ default: new () => IPersonaStorageAdapter }>;
+        let adapterPromise: AdapterPromise<IPersonaStorageAdapter>;
         if (import.meta.env.VITEST) {
             // Use localStorage adapter in testing environment
             adapterPromise = import("./persona/LocalStoragePersonaAdapter");
@@ -84,7 +85,7 @@ export class StorageResolver {
             return this.settingsAdapter;
         }
 
-        let adapterPromise: Promise<{ default: new () => ISettingsStorageAdapter }>;
+        let adapterPromise: AdapterPromise<ISettingsStorageAdapter>;
         if (import.meta.env.VITEST) {
             // Use localStorage adapter in testing environment
             adapterPromise = import("./settings/LocalStorageSettingsAdapter");
