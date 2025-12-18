@@ -23,7 +23,28 @@ export class PersonaStore {
     private async load() {
         try {
             await this.adapter.init();
-            this.personas = await this.adapter.getAllPersonas();
+            const loaded = await this.adapter.getAllPersonas();
+            // Apply saved order if present
+            const order = this.getOrder();
+            if (order && order.length) {
+                const map: Record<string, Persona> = {};
+                for (const p of loaded) map[p.id] = p;
+                const ordered: Persona[] = [];
+                for (const id of order) {
+                    const p = map[id];
+                    if (p) {
+                        ordered.push(p);
+                        delete map[id];
+                    }
+                }
+                // append any personas not present in the stored order
+                for (const p of loaded) {
+                    if (map[p.id]) ordered.push(p);
+                }
+                this.personas = ordered;
+            } else {
+                this.personas = loaded;
+            }
             this.activePersonaId = await this.adapter.getActivePersonaId();
         } catch (e) {
             console.error("Failed to load personas", e);
@@ -56,6 +77,8 @@ export class PersonaStore {
 
         // Update in-memory state immediately for sync callers/tests.
         this.personas.push(persona);
+        // Persist order immediately so new persona is reflected on reload.
+        this.saveOrder();
         // Persist in background.
         void this.adapter
             .savePersona(persona)
@@ -80,6 +103,8 @@ export class PersonaStore {
         if (this.activePersonaId === id) {
             this.activePersonaId = null;
         }
+        // Persist order immediately so removal is reflected on reload.
+        this.saveOrder();
     }
 
     select(id: string | null) {
