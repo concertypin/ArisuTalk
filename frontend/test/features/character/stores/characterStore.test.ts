@@ -7,6 +7,7 @@ import { exampleCharacter } from "@/const/example_data";
 
 const mockAdapter: Mocked<ICharacterStorageAdapter> = {
     init: vi.fn().mockResolvedValue(undefined),
+    getCharactersMetadata: vi.fn().mockResolvedValue([]),
     getAllCharacters: vi.fn().mockResolvedValue([]),
     saveCharacter: vi.fn().mockResolvedValue(undefined),
     deleteCharacter: vi.fn().mockResolvedValue(undefined),

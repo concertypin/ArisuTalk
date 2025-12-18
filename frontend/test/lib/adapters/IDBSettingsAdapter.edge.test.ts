@@ -17,16 +17,18 @@ describe("DexieSettingsAdapter (edge)", () => {
     it("returns defaults when none stored", async () => {
         const got = await adapter.getSettings();
         expect(got.theme).toBe("system");
-        expect(typeof got.userId).toBe("string");
+        expect(got.activePersonaId).toBeNull();
+        expect(got.advanced).toEqual({ debug: false, experimental: false });
+        expect(got.llmConfigs).toEqual([]);
+        expect(got.prompt).toEqual({ generationPrompt: "You are a helpful assistant." });
     });
 
     it("saves and retrieves settings with unusual values", async () => {
-        const s = SettingsSchema.parse({});
-        s.userId = "u-" + "a".repeat(5000);
-        s.theme = "dark";
-        await adapter.saveSettings(s);
+        const setting = SettingsSchema.parse({});
+        setting.activePersonaId = "persona-123".repeat(50); // very long string
+        setting.theme = "dark";
+        await adapter.saveSettings(setting);
         const got = await adapter.getSettings();
-        expect(got.userId.length).toBe(s.userId.length);
         expect(got.theme).toBe("dark");
     });
 

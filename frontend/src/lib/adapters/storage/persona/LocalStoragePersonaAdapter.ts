@@ -75,3 +75,4 @@ export class LocalStoragePersonaAdapter implements IPersonaStorageAdapter {
         }
     }
 }
+export default LocalStoragePersonaAdapter;

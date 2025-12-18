@@ -212,3 +212,4 @@ export class LocalStorageChatAdapter implements IChatStorageAdapter {
         }
     }
 }
+export default LocalStorageChatAdapter;

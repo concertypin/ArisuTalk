@@ -104,7 +104,7 @@ describe("IndexedDBHelper (ArisuDB)", () => {
             expect(results[0].id).toBe("chat-1");
         });
 
-        it("orders by createdAt", async () => {
+        it.concurrent("orders by createdAt", async () => {
             const now = Date.now();
             await db.chats.put({ ...testChat, id: "chat-old", createdAt: now - 1000 });
             await db.chats.put({ ...testChat, id: "chat-new", createdAt: now });

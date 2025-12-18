@@ -20,16 +20,25 @@ describe("DexieSettingsAdapter", () => {
     it("should save and retrieve settings", async () => {
         const settings = SettingsSchema.parse({});
         settings.theme = "dark";
-        settings.userId = "test-uid";
+        settings.activePersonaId = "test-persona-id";
+        settings.advanced = { debug: false, experimental: false };
+        settings.llmConfigs = [];
+        settings.prompt = { generationPrompt: "You are a helpful assistant." };
         await adapter.saveSettings(settings);
         const got = await adapter.getSettings();
         expect(got.theme).toBe("dark");
-        expect(got.userId).toBe("test-uid");
+        expect(got.activePersonaId).toBe("test-persona-id");
+        expect(got.advanced).toEqual({ debug: false, experimental: false });
+        expect(got.llmConfigs).toEqual([]);
+        expect(got.prompt).toEqual({ generationPrompt: "You are a helpful assistant." });
     });
 
     it("should return default settings if none", async () => {
         const got = await adapter.getSettings();
         expect(got.theme).toBe("system");
-        expect(typeof got.userId).toBe("string");
+        expect(got.activePersonaId).toBeNull();
+        expect(got.advanced).toEqual({ debug: false, experimental: false });
+        expect(got.llmConfigs).toEqual([]);
+        expect(got.prompt).toEqual({ generationPrompt: "You are a helpful assistant." });
     });
 });

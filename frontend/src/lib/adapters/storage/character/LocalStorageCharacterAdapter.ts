@@ -1,4 +1,4 @@
-import type { ICharacterStorageAdapter } from "@/lib/interfaces";
+import type { ICharacterStorageAdapter, CharacterMetadata } from "@/lib/interfaces";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
 
 /**
@@ -63,9 +63,20 @@ export class LocalStorageCharacterAdapter implements ICharacterStorageAdapter {
         return this.getStored();
     }
 
+    async getCharactersMetadata(): Promise<CharacterMetadata[]> {
+        const characters = this.getStored();
+        return characters.map((c) => ({
+            id: c.id,
+            name: c.name,
+            description: c.description,
+            avatarUrl: c.avatarUrl,
+        }));
+    }
+
     async deleteCharacter(id: string): Promise<void> {
         const characters = this.getStored();
         const filtered = characters.filter((c) => c.id !== id);
         this.setStored(filtered);
     }
 }
+export default LocalStorageCharacterAdapter;
