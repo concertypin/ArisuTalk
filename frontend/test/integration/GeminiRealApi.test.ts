@@ -17,8 +17,6 @@ describe.runIf(API_KEY)("Gemini Real API Integration", () => {
     };
 
     it("connects with real API key and generating response", async () => {
-        console.log("Running real API test with model:", commonSettings.model);
-
         try {
             const provider = await GeminiChatProvider.factory.connect({
                 ...commonSettings,

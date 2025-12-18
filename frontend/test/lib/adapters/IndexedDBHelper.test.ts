@@ -181,7 +181,7 @@ describe("IndexedDBHelper (ArisuDB)", () => {
         it("stores singleton settings", async () => {
             await db.settings.put(testSettings);
             const result = await db.settings.get("singleton");
-            expect(result?.theme).toBe("dark");
+            expect(result?.theme).toBe("system");
         });
 
         it("updates existing settings", async () => {

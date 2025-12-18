@@ -42,6 +42,9 @@ export default defineConfig(async (ctx) => {
         },
         includeTaskLocation: true,
         env,
+        typecheck: {
+            enabled: true,
+        },
     };
     const define: Record<string, string> = {};
     const baseConfig: UserConfig = {
