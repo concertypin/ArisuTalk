@@ -61,9 +61,7 @@ jobs:
           cache-dependency-path: "pnpm-lock.yaml"
 
       - name: Install dependencies
-        run: |
-          pnpm install --frozen-lockfile 
-          pnpm -F frontend exec playwright install --with-deps
+        run: pnpm install --frozen-lockfile
       - name: Check type errors
         timeout-minutes: 10 # It takes long time due to svelte type checking
         run: pnpm run --filter frontend check:types
