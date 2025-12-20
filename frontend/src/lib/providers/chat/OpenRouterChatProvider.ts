@@ -5,7 +5,7 @@ import {
     type IChatProviderFactory,
 } from "@/lib/interfaces/IChatProvider";
 import { type BaseMessage } from "@langchain/core/messages";
-import { ChatOpenAI } from "@langchain/openai";
+import type { ChatOpenAI } from "@langchain/openai";
 
 type OpenRouterSettings = CommonChatSettings & ProviderSettings["OPENROUTER"];
 
@@ -27,13 +27,16 @@ export class OpenRouterChatProvider extends ChatProvider<"OPENROUTER"> {
     private abortController: AbortController | null = null;
     private client: ChatOpenAI;
 
-    private constructor(settings: OpenRouterSettings) {
+    private constructor(
+        settings: OpenRouterSettings,
+        ChatOpenAICtor: typeof import("@langchain/openai").ChatOpenAI
+    ) {
         super();
         this.apiKey = settings.apiKey || "";
         this.baseUrl = settings.baseUrl || "https://api.openrouter.ai/v1";
         // Defaults to no-training free model
         this.modelName = settings.model || "mistralai/devstral-2512:free";
-        this.client = new ChatOpenAI({
+        this.client = new ChatOpenAICtor({
             model: this.modelName,
             temperature: settings.generationParameters?.temperature,
             streaming: true,
@@ -53,11 +56,9 @@ export class OpenRouterChatProvider extends ChatProvider<"OPENROUTER"> {
 
     static factory: IChatProviderFactory<"OPENROUTER"> = {
         connect: async (settings: OpenRouterSettings) => {
-            // No external LangChain-specific model is required here; we implement
-            // a thin wrapper compatible with the project's ChatProvider API.
-            // If users prefer a LangChain-specific adapter, they can wrap this
-            // provider or install a LangChain OpenRouter integration and adapt.
-            return new OpenRouterChatProvider(settings);
+            // Dynamically import to allow chunk-splitting and smaller initial bundles.
+            const { ChatOpenAI } = await import("@langchain/openai");
+            return new OpenRouterChatProvider(settings, ChatOpenAI);
         },
     };
 
