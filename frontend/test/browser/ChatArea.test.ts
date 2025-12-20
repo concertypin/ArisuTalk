@@ -1,0 +1,87 @@
+import { test, expect, describe, vi, beforeEach } from "vitest";
+import { render } from "vitest-browser-svelte";
+import ChatArea from "@/components/ChatArea.svelte";
+import { chatStore } from "@/features/chat/stores/chatStore.svelte";
+
+// Mock the chat store module
+vi.mock("@/features/chat/stores/chatStore.svelte", () => {
+    const mockStore = {
+        isGenerating: false,
+        chats: [],
+        activeChatId: null,
+        activeMessages: [],
+        sendMessage: vi.fn(),
+    };
+    return {
+        chatStore: mockStore,
+    };
+});
+
+describe("ChatArea Component", () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        // Reset state
+        chatStore.isGenerating = false;
+        chatStore.chats = [];
+        chatStore.activeChatId = null;
+        chatStore.activeMessages = [];
+    });
+
+    test("renders select chat prompt when no chat is active", async () => {
+        chatStore.activeChatId = null;
+        const { getByText } = render(ChatArea);
+        await expect.element(getByText("Select a chat or create a new one to start messaging.")).toBeVisible();
+    });
+
+    test("renders empty messages prompt when chat is empty", async () => {
+        chatStore.activeChatId = "chat-1";
+        chatStore.chats = [{ id: "chat-1", name: "Test Chat" } as any];
+        chatStore.activeMessages = [];
+
+        const { getByText, getByRole } = render(ChatArea);
+
+        await expect.element(getByRole("heading", { name: "Test Chat" })).toBeVisible();
+        await expect.element(getByText("No messages yet. Say hello!")).toBeVisible();
+    });
+
+    test("renders messages correctly", async () => {
+        chatStore.activeChatId = "chat-1";
+        chatStore.chats = [{ id: "chat-1", name: "Test Chat" } as any];
+        chatStore.activeMessages = [
+            { id: "1", role: "user", content: { type: "text", data: "Hello" }, chatId: "chat-1" },
+            { id: "2", role: "assistant", content: { type: "text", data: "Hi there!" }, chatId: "chat-1" },
+        ] as any;
+
+        const { getByText } = render(ChatArea);
+
+        await expect.element(getByText("Hello")).toBeVisible();
+        await expect.element(getByText("Hi there!")).toBeVisible();
+    });
+
+    test("sends message when clicking send button", async () => {
+        chatStore.activeChatId = "chat-1";
+        chatStore.chats = [{ id: "chat-1", name: "Test Chat" } as any];
+
+        const { getByRole } = render(ChatArea);
+
+        const input = getByRole("textbox");
+        await input.fill("Hello World");
+
+        const sendBtn = getByRole("button", { name: "Send" });
+        await sendBtn.click();
+
+        expect(chatStore.sendMessage).toHaveBeenCalledWith("Hello World");
+    });
+
+    test("shows typing indicator when generating", async () => {
+        chatStore.activeChatId = "chat-1";
+        chatStore.chats = [{ id: "chat-1", name: "Test Chat" } as any];
+        chatStore.isGenerating = true;
+
+        const { container } = render(ChatArea);
+
+        // DaisyUI loading-dots class
+        const loader = container.querySelector(".loading-dots");
+        expect(loader).not.toBeNull();
+    });
+});
