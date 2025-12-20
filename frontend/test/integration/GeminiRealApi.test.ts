@@ -10,6 +10,9 @@ describe.runIf(API_KEY)("Gemini Real API Integration", () => {
     const commonSettings: CommonChatSettings = {
         apiKey: API_KEY,
         model: "gemini-flash-lite-latest",
+        generationParameters: {
+            maxOutputTokens: 1,
+        },
     };
 
     const geminiSettings = {

@@ -9,9 +9,9 @@ vi.mock("@langchain/google-genai", async () => {
         constructor() {}
         invoke = vi.fn().mockResolvedValue({ content: "Mocked response" });
         stream = vi.fn().mockImplementation(async function* () {
-            yield { content: "Mocked" };
-            yield { content: " " };
-            yield { content: "stream" };
+            yield { content: "Mocked", text: "Mocked" };
+            yield { content: " ", text: " " };
+            yield { content: "stream", text: "stream" };
         });
     }
     return {
