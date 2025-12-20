@@ -23,16 +23,46 @@ export class GeminiChatProvider extends ChatProvider<"GEMINI"> {
     }
 
     static factory: IChatProviderFactory<"GEMINI"> = {
-        connect: async (settings: GeminiSettings) => {
+        async connect(settings: GeminiSettings) {
             const { ChatGoogleGenerativeAI } = await import("@langchain/google-genai");
-            const model = new ChatGoogleGenerativeAI({
+            type ClientOption = ConstructorParameters<typeof ChatGoogleGenerativeAI>["0"];
+            type SafetySetting = Required<ClientOption>["safetySettings"][number];
+            if (!settings.model) {
+                throw new Error("Model must be specified for GeminiChatProvider.");
+            }
+            const modelConfig: ClientOption = {
                 apiKey: settings.apiKey,
-                model: settings.model || "gemini-pro",
-                temperature: settings.temperature,
-                maxOutputTokens: settings.maxOutputTokens,
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-                safetySettings: settings.safetySettings as any,
-            });
+                model: settings.model,
+                temperature: settings.generationParameters?.temperature,
+                maxOutputTokens: settings.generationParameters?.maxOutputTokens,
+                safetySettings: settings.safetySettings?.map((i) => ({
+                    // Q: Is it safe?
+                    // A: Check here: https://tsplay.dev/w2qDbW
+                    category: i.category as SafetySetting["category"],
+                    threshold: i.threshold as SafetySetting["threshold"],
+                })),
+                thinkingConfig: {
+                    includeThoughts: true,
+                },
+            };
+            if (typeof settings.generationParameters?.thinkingLevel === "string") {
+                modelConfig.thinkingConfig = {
+                    ...modelConfig.thinkingConfig,
+                    thinkingLevel: settings.generationParameters
+                        .thinkingLevel as Required<ClientOption>["thinkingConfig"]["thinkingLevel"],
+                };
+            } else if (typeof settings.generationParameters?.thinkingLevel === "number") {
+                modelConfig.thinkingConfig = {
+                    ...modelConfig.thinkingConfig,
+                    thinkingBudget: settings.generationParameters.thinkingLevel,
+                };
+            } else if (settings.generationParameters?.thinkingLevel === undefined) {
+                // Do nothing, use default
+            } else {
+                // Fallback, should not reach here due to prior check
+                throw new Error("Invalid thinkingLevel for GeminiChatProvider.");
+            }
+            const model = new ChatGoogleGenerativeAI(modelConfig);
             return new GeminiChatProvider(model);
         },
     };
@@ -63,10 +93,10 @@ export class GeminiChatProvider extends ChatProvider<"GEMINI"> {
 
         try {
             for await (const chunk of stream) {
-                yield chunk.content as string;
+                yield chunk.text;
             }
         } catch (error: unknown) {
-            if (error instanceof Error && error.name === "AbortError") {
+            if (error instanceof DOMException && error.name === "AbortError") {
                 // Ignore abort error
                 return;
             }

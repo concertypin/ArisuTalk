@@ -1,25 +1,47 @@
 import type { BaseMessage } from "@langchain/core/messages";
+import type { LLMConfig } from "../types/IDataModel";
 
 /**
  * Common settings shared across all chat providers.
  */
-export interface CommonChatSettings {
-    apiKey?: string;
-    model?: string;
-    temperature?: number;
-    maxTokens?: number;
-    maxOutputTokens?: number;
-}
+export type CommonChatSettings = Pick<
+    Partial<LLMConfig>,
+    "apiKey" | "baseURL" | "generationParameters" | "model"
+>;
+type GeminiSafetySetting =
+    | "HARM_CATEGORY_UNSPECIFIED"
+    | "HARM_CATEGORY_HATE_SPEECH"
+    | "HARM_CATEGORY_SEXUALLY_EXPLICIT"
+    | "HARM_CATEGORY_HARASSMENT"
+    | "HARM_CATEGORY_DANGEROUS_CONTENT"
+    | "HARM_CATEGORY_CIVIC_INTEGRITY";
 
+type GeminiHarmBlockThreshold =
+    | "HARM_BLOCK_THRESHOLD_UNSPECIFIED"
+    | "BLOCK_LOW_AND_ABOVE"
+    | "BLOCK_MEDIUM_AND_ABOVE"
+    | "BLOCK_ONLY_HIGH"
+    | "BLOCK_NONE";
 /**
  * Provider-specific settings.
  */
 export interface ProviderSettings {
+    /**
+     * Gemini settings
+     */
     GEMINI: {
-        safetySettings?: Array<{
-            category: string;
-            threshold: string;
-        }>;
+        safetySettings?: {
+            category: GeminiSafetySetting;
+            threshold: GeminiHarmBlockThreshold;
+        }[];
+    };
+    /**
+     * Anthropic settings
+     */
+    ANTHROPIC: {};
+    /** OpenRouter settings */
+    OPENROUTER: {
+        baseUrl?: string;
     };
     /** Mock provider settings for testing */
     MOCK: {

@@ -11,6 +11,7 @@ import { StorageResolver } from "@/lib/adapters/storage/storageResolver";
 import { MockChatProvider } from "@/lib/providers/chat/MockChatProvider";
 import { GeminiChatProvider } from "@/lib/providers/chat/GeminiChatProvider";
 import { HumanMessage } from "@langchain/core/messages";
+import { OpenRouterChatProvider } from "@/lib/providers/chat/OpenRouterChatProvider";
 
 export class ChatStore {
     chats = $state<LocalChat[]>([]);
@@ -56,15 +57,25 @@ export class ChatStore {
         if (this.activeProvider) {
             await this.activeProvider.disconnect();
         }
-
-        if (type === "MOCK") {
-            this.activeProvider = await MockChatProvider.factory.connect(
-                settings as CommonChatSettings & ProviderSettings["MOCK"]
-            );
-        } else if (type === "GEMINI") {
-            this.activeProvider = await GeminiChatProvider.factory.connect(
-                settings as CommonChatSettings & ProviderSettings["GEMINI"]
-            );
+        switch (type) {
+            case "ANTHROPIC": {
+                throw new Error("Not implemented yet");
+            }
+            case "GEMINI": {
+                this.activeProvider = await GeminiChatProvider.factory.connect(settings);
+                break;
+            }
+            case "MOCK": {
+                this.activeProvider = await MockChatProvider.factory.connect(settings);
+                break;
+            }
+            case "OPENROUTER": {
+                this.activeProvider = await OpenRouterChatProvider.factory.connect(settings);
+                break;
+            }
+            default: {
+                const _exhaustiveCheck: never = type;
+            }
         }
     }
 
@@ -144,12 +155,12 @@ export class ChatStore {
             const stream = this.activeProvider.stream(messages);
             let fullContent = "";
 
+            const msgIndex = this.activeMessages.findIndex((m) => m.id === assistantMessageId);
+            const assistantMessageRef = msgIndex !== -1 ? this.activeMessages[msgIndex] : null;
             for await (const chunk of stream) {
                 fullContent += chunk;
-                // Update specific message in place
-                const msgIndex = this.activeMessages.findIndex((m) => m.id === assistantMessageId);
-                if (msgIndex !== -1) {
-                    this.activeMessages[msgIndex].content = {
+                if (assistantMessageRef) {
+                    assistantMessageRef.content = {
                         type: "string",
                         data: fullContent,
                     };

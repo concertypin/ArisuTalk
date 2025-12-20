@@ -18,7 +18,6 @@ describe("ChatStore Streaming", () => {
         const chatId = await chatStore.createChat("test-char", "Test Chat");
         await chatStore.setActiveChat(chatId);
 
-        console.log("Active Chat ID:", chatStore.activeChatId);
         // console.log("Active Provider:", chatStore["activeProvider"]); // accessing private if need be, or assume it's set
 
         // Send message

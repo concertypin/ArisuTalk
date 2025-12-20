@@ -5,6 +5,7 @@ export const LLMProviderSchema = z.enum([
     "Anthropic",
     "Gemini",
     "OpenAI-compatible",
+    "OpenRouter",
     "Mock",
 ]);
 /**

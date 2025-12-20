@@ -10,7 +10,7 @@ describe("MockChatProvider", () => {
     };
 
     const mockSettings = {
-        mockDelay: 10,
+        mockDelay: 2,
         responses: ["Mock response 1", "Mock response 2"],
     };
 
