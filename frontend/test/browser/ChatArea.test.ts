@@ -32,20 +32,24 @@ describe("ChatArea Component", () => {
     test("renders select chat prompt when no chat is active", async () => {
         chatStore.activeChatId = null;
         const { getByText } = render(ChatArea);
-        await expect.element(getByText("Select a chat or create a new one to start messaging.")).toBeVisible();
+        await expect
+            .element(getByText("Select a chat or create a new one to start messaging."))
+            .toBeVisible();
     });
 
     test("renders empty messages prompt when chat is empty", async () => {
         chatStore.activeChatId = "chat-1";
-        chatStore.chats = [{
-            id: "chat-1",
-            name: "Test Chat",
-            characterId: "char-1",
-            createdAt: 0,
-            updatedAt: 0,
-            lastMessage: 0,
-            title: "Test Chat"
-        } satisfies LocalChat[] as LocalChat[]];
+        chatStore.chats = [
+            {
+                id: "chat-1",
+                name: "Test Chat",
+                characterId: "char-1",
+                createdAt: 0,
+                updatedAt: 0,
+                lastMessage: 0,
+                title: "Test Chat",
+            },
+        ] satisfies LocalChat[];
         chatStore.activeMessages = [];
 
         const { getByText, getByRole } = render(ChatArea);
@@ -56,18 +60,25 @@ describe("ChatArea Component", () => {
 
     test("renders messages correctly", async () => {
         chatStore.activeChatId = "chat-1";
-        chatStore.chats = [{
-            id: "chat-1",
-            name: "Test Chat",
-            characterId: "char-1",
-            createdAt: 0,
-            updatedAt: 0,
-            lastMessage: 0,
-            title: "Test Chat"
-        } satisfies LocalChat[] as LocalChat[]];
+        chatStore.chats = [
+            {
+                id: "chat-1",
+                name: "Test Chat",
+                characterId: "char-1",
+                createdAt: 0,
+                updatedAt: 0,
+                lastMessage: 0,
+                title: "Test Chat",
+            },
+        ] satisfies LocalChat[];
         chatStore.activeMessages = [
             { id: "1", role: "user", content: { type: "text", data: "Hello" }, chatId: "chat-1" },
-            { id: "2", role: "assistant", content: { type: "text", data: "Hi there!" }, chatId: "chat-1" },
+            {
+                id: "2",
+                role: "assistant",
+                content: { type: "text", data: "Hi there!" },
+                chatId: "chat-1",
+            },
         ] as unknown as Message[]; // Casting partially correct objects
 
         const { getByText } = render(ChatArea);
@@ -78,15 +89,17 @@ describe("ChatArea Component", () => {
 
     test("sends message when clicking send button", async () => {
         chatStore.activeChatId = "chat-1";
-        chatStore.chats = [{
-            id: "chat-1",
-            name: "Test Chat",
-            characterId: "char-1",
-            createdAt: 0,
-            updatedAt: 0,
-            lastMessage: 0,
-            title: "Test Chat"
-        } satisfies LocalChat[] as LocalChat[]];
+        chatStore.chats = [
+            {
+                id: "chat-1",
+                name: "Test Chat",
+                characterId: "char-1",
+                createdAt: 0,
+                updatedAt: 0,
+                lastMessage: 0,
+                title: "Test Chat",
+            } satisfies LocalChat,
+        ];
 
         const { getByRole } = render(ChatArea);
 
@@ -101,15 +114,17 @@ describe("ChatArea Component", () => {
 
     test("shows typing indicator when generating", async () => {
         chatStore.activeChatId = "chat-1";
-        chatStore.chats = [{
-            id: "chat-1",
-            name: "Test Chat",
-            characterId: "char-1",
-            createdAt: 0,
-            updatedAt: 0,
-            lastMessage: 0,
-            title: "Test Chat"
-        } satisfies LocalChat[] as LocalChat[]];
+        chatStore.chats = [
+            {
+                id: "chat-1",
+                name: "Test Chat",
+                characterId: "char-1",
+                createdAt: 0,
+                updatedAt: 0,
+                lastMessage: 0,
+                title: "Test Chat",
+            } satisfies LocalChat,
+        ];
         chatStore.isGenerating = true;
 
         const { container } = render(ChatArea);
