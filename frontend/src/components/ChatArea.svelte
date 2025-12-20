@@ -4,25 +4,15 @@
 -->
 <script lang="ts">
     import { tick } from "svelte";
-    import { SvelteSet } from "svelte/reactivity";
+
     import { chatStore } from "@/features/chat/stores/chatStore.svelte";
-    import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
 
     let inputValue = $state("");
     let messagesContainer = $state<HTMLElement | null>(null);
-    let botResponseTimeouts: SvelteSet<number> = new SvelteSet();
-    let isTyping = $derived(botResponseTimeouts.size > 0);
+    let isTyping = $derived(chatStore.isGenerating);
 
     let activeChat = $derived(chatStore.chats.find((c) => c.id === chatStore.activeChatId));
     let messages = $derived(chatStore.activeMessages);
-
-    // Cleanup pending timeouts on unmount
-    $effect(() => {
-        return () => {
-            botResponseTimeouts.forEach((id) => clearTimeout(id));
-            botResponseTimeouts.clear();
-        };
-    });
 
     // Auto-scroll when messages change
     $effect(() => {
@@ -34,38 +24,10 @@
     async function sendMessage() {
         if (!inputValue.trim() || !activeChat) return;
 
-        const userMsg: Message = {
-            id: crypto.randomUUID(),
-            chatId: activeChat.id,
-            content: { type: "string", data: inputValue },
-            role: "user",
-            timestamp: Date.now(),
-            inlays: [],
-        };
+        const content = inputValue;
+        inputValue = ""; // Clear input immediately for better UX
 
-        await chatStore.addMessage(activeChat.id, userMsg);
-        inputValue = "";
-
-        // Mock response delay
-        const timeoutId = window.setTimeout(() => {
-            void (async () => {
-                if (!activeChat) return;
-                const botMsg: Message = {
-                    id: crypto.randomUUID(),
-                    chatId: activeChat.id,
-                    content: { type: "string", data: "This is a mock response from the system." },
-                    role: "assistant",
-                    timestamp: Date.now(),
-                    inlays: [],
-                };
-
-                await chatStore.addMessage(activeChat.id, botMsg);
-
-                botResponseTimeouts.delete(timeoutId);
-            })().catch((err) => console.error("Bot message failed", err));
-        }, 1000);
-
-        botResponseTimeouts.add(timeoutId);
+        await chatStore.sendMessage(content);
     }
 
     async function scrollToBottom() {

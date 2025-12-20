@@ -18,18 +18,6 @@ const browserTestConfig: Presence<UserConfig["test"]>["browser"] = {
 };
 
 const runBrowserTest = process.env.npm_lifecycle_event?.includes("browser") ? true : false;
-const testConfig: UserConfig["test"] = {
-    globals: true,
-    environment: "happy-dom",
-    setupFiles: ["./test/setup.ts"],
-    exclude: ["node_modules", "dist", ".git"],
-    browser: runBrowserTest ? browserTestConfig : undefined,
-    coverage: {
-        reporter: ["text", "json", "html"],
-        exclude: ["node_modules/", "dist/", "test/", "**/*.d.ts", "**/*.config.*", "static/"],
-    },
-    includeTaskLocation: true,
-};
 
 export default defineConfig(async (ctx) => {
     const mode = ctx.mode;
@@ -42,6 +30,22 @@ export default defineConfig(async (ctx) => {
         }),
     ];
     const env = loadEnv(mode, process.cwd(), "");
+    let testConfig: UserConfig["test"] = {
+        globals: true,
+        environment: "happy-dom",
+        setupFiles: ["./test/setup.ts"],
+        exclude: ["node_modules", "dist", ".git"],
+        browser: runBrowserTest ? browserTestConfig : undefined,
+        coverage: {
+            reporter: ["text", "json", "html"],
+            exclude: ["node_modules/", "dist/", "test/", "**/*.d.ts", "**/*.config.*", "static/"],
+        },
+        includeTaskLocation: true,
+        env,
+        typecheck: {
+            enabled: true,
+        },
+    };
     const define: Record<string, string> = {};
     const baseConfig: UserConfig = {
         server: {

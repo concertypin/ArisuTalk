@@ -40,6 +40,9 @@ jobs:
   ci:
     timeout-minutes: 15
     runs-on: ubuntu-latest
+    container: 
+      image: mcr.microsoft.com/playwright:v1.57.0
+      options: --user 1001
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -59,10 +62,14 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
       - name: Check type errors
         timeout-minutes: 10 # It takes long time due to svelte type checking
         run: pnpm run --filter frontend check:types
-
+      - name: Run unit tests
+        run: pnpm run --filter frontend test --reporter=dot
+        timeout-minutes: 5
+      - name: Run browser tests
+        run: pnpm run --filter frontend test:browser --reporter=dot
+        timeout-minutes: 10 # Browser is slow
       - name: Check linting
         run: pnpm run --filter frontend lint

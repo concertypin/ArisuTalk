@@ -3,15 +3,25 @@
   Landing/chat page placeholder.
 -->
 <script lang="ts">
-    import CharacterLayout from "@/features/character/components/CharacterLayout.svelte";
-    import ChatArea from "@/components/ChatArea.svelte";
+    const characterLayoutPromise = import("@/features/character/components/CharacterLayout.svelte");
+    const chatAreaPromise = import("@/components/ChatArea.svelte");
 </script>
 
-<div class="home-layout">
-    <CharacterLayout>
-        <ChatArea />
-    </CharacterLayout>
-</div>
+{#await Promise.all([characterLayoutPromise, chatAreaPromise])}
+    <div class="home-layout flex items-center justify-center text-base-content/50">
+        Loading chat experience...
+    </div>
+{:then [{ default: CharacterLayout }, { default: ChatArea }]}
+    <div class="home-layout">
+        <CharacterLayout>
+            <ChatArea />
+        </CharacterLayout>
+    </div>
+{:catch error}
+    <div class="home-layout flex items-center justify-center text-error">
+        Failed to load: {String(error)}
+    </div>
+{/await}
 
 <style>
     .home-layout {

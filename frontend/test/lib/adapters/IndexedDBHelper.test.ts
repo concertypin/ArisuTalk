@@ -2,7 +2,7 @@ import "fake-indexeddb/auto";
 import { describe, it, expect, beforeEach } from "vitest";
 import { getArisuDB } from "@/lib/adapters/storage/IndexedDBHelper";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
-import type { Settings } from "@/lib/types/IDataModel";
+import { SettingsSchema, type Settings } from "@/lib/types/IDataModel";
 
 describe("IndexedDBHelper (ArisuDB)", () => {
     const db = getArisuDB();
@@ -174,16 +174,14 @@ describe("IndexedDBHelper (ArisuDB)", () => {
 
     describe("Settings table", () => {
         const testSettings: Settings & { id: string } = {
+            ...SettingsSchema.parse({}),
             id: "singleton",
-            theme: "dark" as const,
-            userId: "user-123",
-            activePersonaId: null,
         };
 
         it("stores singleton settings", async () => {
             await db.settings.put(testSettings);
             const result = await db.settings.get("singleton");
-            expect(result?.theme).toBe("dark");
+            expect(result?.theme).toBe("system");
         });
 
         it("updates existing settings", async () => {

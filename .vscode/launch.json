@@ -1,0 +1,29 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node-terminal",
+            "name": "Run Browser Test",
+            "request": "launch",
+            "command": "pnpm run test:browser",
+            "cwd": "${workspaceFolder}/frontend"
+        },
+        {
+            "type": "node-terminal",
+            "name": "Run Type check",
+            "request": "launch",
+            "command": "pnpm run check:types",
+            "cwd": "${workspaceFolder}/frontend"
+        },
+        {
+            "type": "node-terminal",
+            "name": "Run Test",
+            "request": "launch",
+            "command": "pnpm run test",
+            "cwd": "${workspaceFolder}/frontend"
+        }
+    ]
+}
