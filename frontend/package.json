@@ -36,6 +36,7 @@
         "comlink": "^4.4.2",
         "dexie": "^4.2.1",
         "svelte": "^5.39.3",
+        "svelte-markdown": "^0.4.1",
         "tinybase": "^7.2.0",
         "zod": "^4.1.12"
     },

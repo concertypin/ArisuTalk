@@ -7,11 +7,28 @@ import type {
     CommonChatSettings,
 } from "@/lib/interfaces";
 import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
+import type { LLMConfig, LLMProvider } from "@/lib/types/IDataModel";
 import { StorageResolver } from "@/lib/adapters/storage/storageResolver";
 import { MockChatProvider } from "@/lib/providers/chat/MockChatProvider";
 import { GeminiChatProvider } from "@/lib/providers/chat/GeminiChatProvider";
-import { HumanMessage } from "@langchain/core/messages";
+import { HumanMessage, AIMessage } from "@langchain/core/messages";
 import { OpenRouterChatProvider } from "@/lib/providers/chat/OpenRouterChatProvider";
+import { settings } from "@/lib/stores/settings.svelte";
+
+/**
+ * Maps LLMProvider from settings to ProviderType used by chatStore.
+ * Returns null if provider is not supported.
+ */
+function mapProviderType(provider: LLMProvider): ProviderType | null {
+    const mapping: Partial<Record<LLMProvider, ProviderType>> = {
+        Gemini: "GEMINI",
+        OpenRouter: "OPENROUTER",
+        Mock: "MOCK",
+        // Anthropic not yet implemented
+        // OpenAI and OpenAI-compatible not yet implemented
+    };
+    return mapping[provider] ?? null;
+}
 
 export class ChatStore {
     chats = $state<LocalChat[]>([]);
@@ -24,6 +41,9 @@ export class ChatStore {
     private activeProvider: ChatProvider<ProviderType> | null = null;
     public readonly initPromise: Promise<void>;
 
+    /** Currently active LLM config ID from settings */
+    private activeConfigId: string | null = null;
+
     constructor(adapter?: IChatStorageAdapter) {
         this.initPromise = this.initialize(adapter);
     }
@@ -32,12 +52,83 @@ export class ChatStore {
         this.adapter = adapter || (await StorageResolver.getChatAdapter());
         await this.load();
 
-        // Initialize with default provider (MOCK for now, can be configured)
-        // In real app, load from persistence
-        await this.setProvider("MOCK", {
-            mockDelay: 50,
-            responses: ["Response 1", "Response 2"],
-        });
+        // Wait for settings to load
+        await this.waitForSettings();
+
+        // Load provider from settings (first enabled config)
+        await this.loadProviderFromSettings();
+    }
+
+    /**
+     * Waits for settings to finish loading.
+     */
+    private async waitForSettings(): Promise<void> {
+        // Poll until settings are loaded (max 5 seconds)
+        for (let i = 0; i < 50; i++) {
+            if (settings.isLoaded) return;
+            await new Promise((r) => setTimeout(r, 100));
+        }
+        console.warn("ChatStore: Settings did not load in time, using defaults");
+    }
+
+    /**
+     * Loads provider from the first enabled LLM config in settings.
+     * If no config exists, falls back to Mock provider.
+     */
+    async loadProviderFromSettings(): Promise<void> {
+        const configs = settings.value.llmConfigs;
+        const enabledConfig = configs.find((c) => c.enabled);
+
+        if (!enabledConfig) {
+            console.info("ChatStore: No LLM config found, using Mock provider");
+            await this.setProvider("MOCK", {
+                mockDelay: 50,
+                responses: ["Please configure an LLM in Settings → LLM Configuration."],
+            });
+            this.activeConfigId = null;
+            return;
+        }
+
+        await this.applyConfig(enabledConfig);
+    }
+
+    /**
+     * Applies an LLM config to create the appropriate provider.
+     */
+    async applyConfig(config: LLMConfig): Promise<void> {
+        const providerType = mapProviderType(config.provider);
+
+        if (!providerType) {
+            console.warn(
+                `ChatStore: Provider "${config.provider}" not supported yet, falling back to Mock`
+            );
+            await this.setProvider("MOCK", {
+                mockDelay: 50,
+                responses: [`Provider "${config.provider}" is not implemented yet.`],
+            });
+            return;
+        }
+
+        const commonSettings: CommonChatSettings = {
+            apiKey: config.apiKey,
+            baseURL: config.baseURL,
+            model: config.model,
+            generationParameters: config.generationParameters,
+        };
+
+        await this.setProvider(
+            providerType,
+            commonSettings as Parameters<typeof this.setProvider>[1]
+        );
+        this.activeConfigId = config.id;
+    }
+
+    /**
+     * Refreshes the provider when settings change.
+     * Call this when user modifies LLM configuration.
+     */
+    async refreshProvider(): Promise<void> {
+        await this.loadProviderFromSettings();
     }
 
     private async load() {
@@ -135,9 +226,11 @@ export class ChatStore {
 
             await this.addMessage(chatId, userMessage);
 
-            // Prepare LangChain messages
-            // TODO: Load history properly
-            const messages = [new HumanMessage(content)];
+            // Prepare LangChain messages from history
+            const langChainMessages = this.activeMessages.map((m) => {
+                const text = typeof m.content.data === "string" ? m.content.data : "";
+                return m.role === "user" ? new HumanMessage(text) : new AIMessage(text);
+            });
 
             // Placeholder for assistant message
             const assistantMessageId = crypto.randomUUID();
@@ -152,7 +245,7 @@ export class ChatStore {
             // Optimistically add to UI
             this.activeMessages.push(assistantMessage);
 
-            const stream = this.activeProvider.stream(messages);
+            const stream = this.activeProvider.stream(langChainMessages);
             let fullContent = "";
 
             const msgIndex = this.activeMessages.findIndex((m) => m.id === assistantMessageId);

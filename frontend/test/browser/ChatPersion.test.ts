@@ -20,7 +20,18 @@ describe("Persona and Chat interactions", () => {
     });
 
     test("Create character and send chat message", async () => {
+        // Import and configure chatStore with Mock provider for testing
+        // Must happen BEFORE fake timers are enabled
+        const { chatStore } = await import("@/features/chat/stores/chatStore.svelte");
+        await chatStore.initPromise;
+        await chatStore.setProvider("MOCK", {
+            mockDelay: 50,
+            responses: ["Response 1", "Response 2"],
+        });
+
+        // Enable fake timers AFTER async initialization completes
         vi.useFakeTimers();
+
         const { getByLabelText, getByText, getByRole } = render(CharacterLayoutTestWrapper);
 
         // Open Add Character modal
