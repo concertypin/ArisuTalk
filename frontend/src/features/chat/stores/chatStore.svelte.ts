@@ -46,6 +46,22 @@ export class ChatStore {
 
     constructor(adapter?: IChatStorageAdapter) {
         this.initPromise = this.initialize(adapter);
+
+        // Watch for settings changes and reload provider
+        // Use $effect.root() to create effect context in class
+        $effect.root(() => {
+            $effect(() => {
+                // Track dependencies (prefixed with _ to indicate intentional for reactivity)
+                const _activeId = settings.value.activeLLMConfigId;
+                const _configs = settings.value.llmConfigs;
+
+                // Skip if not initialized yet
+                if (!settings.isLoaded) return;
+
+                // Reload provider when active config or configs change
+                void this.loadProviderFromSettings();
+            });
+        });
     }
 
     private async initialize(adapter?: IChatStorageAdapter) {
@@ -64,22 +80,33 @@ export class ChatStore {
      */
     private async waitForSettings(): Promise<void> {
         // Poll until settings are loaded (max 5 seconds)
-        for (let i = 0; i < 50; i++) {
+        const SETTINGS_POLL_TIMEOUT_MS = 5000;
+        const SETTINGS_POLL_INTERVAL_MS = 100;
+        for (let i = 0; i < SETTINGS_POLL_TIMEOUT_MS / SETTINGS_POLL_INTERVAL_MS; i++) {
             if (settings.isLoaded) return;
-            await new Promise((r) => setTimeout(r, 100));
+            await new Promise((r) => setTimeout(r, SETTINGS_POLL_INTERVAL_MS));
         }
         console.warn("ChatStore: Settings did not load in time, using defaults");
     }
 
     /**
-     * Loads provider from the first enabled LLM config in settings.
+     * Loads provider from the active LLM config in settings.
+     * Falls back to first enabled config if active not found.
      * If no config exists, falls back to Mock provider.
      */
     async loadProviderFromSettings(): Promise<void> {
         const configs = settings.value.llmConfigs;
-        const enabledConfig = configs.find((c) => c.enabled);
+        const activeId = settings.value.activeLLMConfigId;
 
-        if (!enabledConfig) {
+        // Try to find the active config by ID
+        let targetConfig = activeId ? configs.find((c) => c.id === activeId && c.enabled) : null;
+
+        // Fall back to first enabled config
+        if (!targetConfig) {
+            targetConfig = configs.find((c) => c.enabled);
+        }
+
+        if (!targetConfig) {
             console.info("ChatStore: No LLM config found, using Mock provider");
             await this.setProvider("MOCK", {
                 mockDelay: 50,
@@ -89,7 +116,7 @@ export class ChatStore {
             return;
         }
 
-        await this.applyConfig(enabledConfig);
+        await this.applyConfig(targetConfig);
     }
 
     /**

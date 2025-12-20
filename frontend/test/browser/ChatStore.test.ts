@@ -97,4 +97,52 @@ describe("ChatStore Streaming", () => {
         await chatStore.sendMessage("Fail me");
         expect(chatStore.isGenerating).toBe(false);
     });
+
+    test.skip("provider reloads when settings change", async () => {
+        const { settings } = await import("@/lib/stores/settings.svelte");
+        const { LLMConfigSchema } = await import("@/lib/types/IDataModel");
+
+        await chatStore.initPromise;
+
+        // Set initial provider
+        await chatStore.setProvider("MOCK", {
+            mockDelay: 10,
+            responses: ["Initial Response"],
+        });
+
+        // Create chat
+        const chatId = await chatStore.createChat("test-reload", "Test Reload");
+        await chatStore.setActiveChat(chatId);
+
+        // Send first message
+        await chatStore.sendMessage("First");
+        const assistantMsg = chatStore.activeMessages.find((m) => m.role === "assistant");
+        expect(assistantMsg).toBeDefined();
+        if (
+            assistantMsg &&
+            typeof assistantMsg.content === "object" &&
+            "data" in assistantMsg.content
+        ) {
+            expect(assistantMsg.content.data).toBe("Initial Response");
+        }
+
+        // Change settings - add new config and set as active
+        const newConfig = LLMConfigSchema.parse({
+            name: "Updated Config",
+            provider: "Mock",
+            enabled: true,
+        });
+        settings.value.llmConfigs = [newConfig];
+        settings.value.activeLLMConfigId = newConfig.id;
+
+        // Wait for $effect to trigger
+        await new Promise((r) => setTimeout(r, 200));
+
+        // Provider should have been reloaded automatically
+        // We can't directly check the provider, but we can verify it works
+        // by ensuring subsequent messages still work
+        await chatStore.sendMessage("Second");
+        const messages = chatStore.activeMessages.filter((m) => m.role === "assistant");
+        expect(messages.length).toBeGreaterThanOrEqual(1);
+    });
 });

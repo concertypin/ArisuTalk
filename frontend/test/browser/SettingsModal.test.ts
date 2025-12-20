@@ -46,11 +46,14 @@ describe("SettingsModal Component", () => {
 
         await getByText("Models (LLM)").click();
 
+        // Before: no configs
+        expect(settings.value.llmConfigs.length).toBe(0);
+
         // Click Add Model
         await getByText("Add Model").click();
 
-        // The config name should be visible - input value "Model 1"
-        // Actually it's an input field, not text. Check for the label "Config Name" being visible
-        await expect.element(getByText("Config Name")).toBeVisible();
+        // After: one config added
+        expect(settings.value.llmConfigs.length).toBe(1);
+        expect(settings.value.llmConfigs[0].name).toBe("Model 1");
     });
 });

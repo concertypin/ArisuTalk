@@ -139,6 +139,12 @@ export const SettingsSchema = z.object({
      */
     llmConfigs: z.array(LLMConfigSchema).default([]),
     /**
+     * ID of the currently active LLM configuration.
+     * Used by chatStore to determine which provider to use.
+     * Nullable means no config is active.
+     */
+    activeLLMConfigId: z.string().nullable().default(null),
+    /**
      * Prompt configuration to guide assistant behavior.
      */
     prompt: PromptConfigSchema,
