@@ -2,6 +2,8 @@ import { test, expect, describe, vi, beforeEach } from "vitest";
 import { render } from "vitest-browser-svelte";
 import ChatArea from "@/components/ChatArea.svelte";
 import { chatStore } from "@/features/chat/stores/chatStore.svelte";
+import type { LocalChat } from "@/lib/interfaces";
+import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
 
 // Mock the chat store module
 vi.mock("@/features/chat/stores/chatStore.svelte", () => {
@@ -35,7 +37,15 @@ describe("ChatArea Component", () => {
 
     test("renders empty messages prompt when chat is empty", async () => {
         chatStore.activeChatId = "chat-1";
-        chatStore.chats = [{ id: "chat-1", name: "Test Chat" } as any];
+        chatStore.chats = [{
+            id: "chat-1",
+            name: "Test Chat",
+            characterId: "char-1",
+            createdAt: 0,
+            updatedAt: 0,
+            lastMessage: 0,
+            title: "Test Chat"
+        } satisfies LocalChat[] as LocalChat[]];
         chatStore.activeMessages = [];
 
         const { getByText, getByRole } = render(ChatArea);
@@ -46,11 +56,19 @@ describe("ChatArea Component", () => {
 
     test("renders messages correctly", async () => {
         chatStore.activeChatId = "chat-1";
-        chatStore.chats = [{ id: "chat-1", name: "Test Chat" } as any];
+        chatStore.chats = [{
+            id: "chat-1",
+            name: "Test Chat",
+            characterId: "char-1",
+            createdAt: 0,
+            updatedAt: 0,
+            lastMessage: 0,
+            title: "Test Chat"
+        } satisfies LocalChat[] as LocalChat[]];
         chatStore.activeMessages = [
             { id: "1", role: "user", content: { type: "text", data: "Hello" }, chatId: "chat-1" },
             { id: "2", role: "assistant", content: { type: "text", data: "Hi there!" }, chatId: "chat-1" },
-        ] as any;
+        ] as unknown as Message[]; // Casting partially correct objects
 
         const { getByText } = render(ChatArea);
 
@@ -60,7 +78,15 @@ describe("ChatArea Component", () => {
 
     test("sends message when clicking send button", async () => {
         chatStore.activeChatId = "chat-1";
-        chatStore.chats = [{ id: "chat-1", name: "Test Chat" } as any];
+        chatStore.chats = [{
+            id: "chat-1",
+            name: "Test Chat",
+            characterId: "char-1",
+            createdAt: 0,
+            updatedAt: 0,
+            lastMessage: 0,
+            title: "Test Chat"
+        } satisfies LocalChat[] as LocalChat[]];
 
         const { getByRole } = render(ChatArea);
 
@@ -75,7 +101,15 @@ describe("ChatArea Component", () => {
 
     test("shows typing indicator when generating", async () => {
         chatStore.activeChatId = "chat-1";
-        chatStore.chats = [{ id: "chat-1", name: "Test Chat" } as any];
+        chatStore.chats = [{
+            id: "chat-1",
+            name: "Test Chat",
+            characterId: "char-1",
+            createdAt: 0,
+            updatedAt: 0,
+            lastMessage: 0,
+            title: "Test Chat"
+        } satisfies LocalChat[] as LocalChat[]];
         chatStore.isGenerating = true;
 
         const { container } = render(ChatArea);

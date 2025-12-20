@@ -106,7 +106,7 @@ describe("LocalStorageChatAdapter", () => {
         // Clear storage to ensure import works
         localStorage.clear();
 
-        const importStream = new ReadableStream({
+        const importStream = new ReadableStream<Uint8Array>({
             start(controller) {
                 controller.enqueue(uint8Array);
                 controller.close();
