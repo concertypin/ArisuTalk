@@ -38,7 +38,7 @@ export default defineConfig(async (ctx) => {
         browser: runBrowserTest ? browserTestConfig : undefined,
         coverage: {
             reporter: ["text", "json", "html"],
-            include: ["src/**/*", "test/**/*"],
+            include: ["src/**/*"],
             exclude: ["node_modules/", "dist/", "test/", "**/*.d.ts", "**/*.config.*", "static/"],
         },
         includeTaskLocation: true,
