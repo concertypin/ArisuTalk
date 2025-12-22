@@ -54,7 +54,7 @@ export const exampleCharacter: Character = {
     assets: {
         assets: [
             {
-                url: profileImageUrl,
+                data: profileImageUrl,
                 mimeType: "image/png",
                 name: "profile.png",
             },
@@ -93,6 +93,7 @@ export const exampleCharacter: Character = {
     executables: {
         runtimeSetting: {
             mem: 100,
+            timeout: 30000,
         },
         replaceHooks: {
             display: [
@@ -148,7 +149,7 @@ export const exampleMessageData: Message[] = [
 
         chatId: "example-chat-1",
         role: "user",
-        content: { type: "string", data: "안녕, 아넬라! 만나서 반가워!" },
+        content: { type: "text", data: "안녕, 아넬라! 만나서 반가워!" },
         timestamp: Date.now() - 60000,
         inlays: [],
     },
@@ -156,7 +157,7 @@ export const exampleMessageData: Message[] = [
         id: "msg-2",
         chatId: "example-chat-1",
         role: "assistant",
-        content: { type: "string", data: "(대충 귀여운 소리)" },
+        content: { type: "text", data: "(대충 귀여운 소리)" },
         timestamp: Date.now() - 30000,
         inlays: [],
     },

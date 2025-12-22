@@ -90,23 +90,26 @@
         type AssetsType = (typeof char.assets.assets)[number];
 
         async function remapAsBase64(i: AssetsType): Promise<AssetsType> {
-            if (i.url.startsWith("data:")) {
+            const dataStr = typeof i.data === "string" ? i.data : "";
+            if (dataStr.startsWith("data:")) {
                 return i; // Already base64
-            } else if (i.url.startsWith("http://") || i.url.startsWith("https://")) {
+            } else if (dataStr.startsWith("http://") || dataStr.startsWith("https://")) {
                 return i; // Remote URL, leave as is.
-            } else {
+            } else if (typeof i.data === "string") {
                 // Local file, read as base64
                 try {
                     const assetStorage = new OpFSAssetStorageAdapter();
                     await assetStorage.init();
 
-                    const blob = await assetStorage.getAssetBlob(new URL(i.url));
+                    const blob = await assetStorage.getAssetBlob(new URL(i.data));
                     const base64 = await blobsToBase64DataUrl(blob, i.mimeType);
-                    return { ...i, url: base64 };
+                    return { ...i, data: base64 };
                 } catch (e) {
-                    console.error("Failed to fetch local file for export:", i.url, e);
+                    console.error("Failed to fetch local file for export:", dataStr, e);
                     throw e instanceof Error ? e : new Error(String(e));
                 }
+            } else {
+                return i; // Binary data, leave as is
             }
         }
         const newAssets = await Promise.all(char.assets.assets.map(remapAsBase64));

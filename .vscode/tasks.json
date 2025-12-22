@@ -1,0 +1,35 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "build frontend",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"-F",
+				"frontend",
+				"run",
+				"build"
+			],
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "check:types frontend",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"-F",
+				"frontend",
+				"run",
+				"check:types"
+			],
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
+		},
+	]
+}
