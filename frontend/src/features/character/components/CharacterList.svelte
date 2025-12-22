@@ -3,6 +3,7 @@
     import CharacterCard from "./CharacterCard.svelte";
     import { getCardParseWorker } from "@/lib/workers/workerClient";
     import { OpFSAssetStorageAdapter } from "../adapters/assetStorage/OpFSAssetStorageAdapter";
+    import { transfer } from "comlink";
 
     interface Props {
         onEdit: (index: number) => void;
@@ -47,23 +48,11 @@
         modal.close();
     }
     /**
-     * Converts a Blob to a Base64 Data URL.
-     * @license https://developer.mozilla.org/ko/docs/MDN/Writing_guidelines/Attrib_copyright_license
-     * @copyright {@link https://developer.mozilla.org/ko/docs/Glossary/Base64} by MDN contributors
+     * Converts a Blob to a Uint8Array.
      */
-    async function blobsToBase64DataUrl(
-        bytes: Blob,
-        type: string = "application/octet-stream"
-    ): Promise<string> {
-        return await new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = () => {
-                const reason = reader.error ?? new Error("FileReader failed");
-                reject(reason instanceof Error ? reason : new Error(String(reason)));
-            };
-            reader.readAsDataURL(new File([bytes], "", { type }));
-        });
+    async function blobToUint8Array(blob: Blob): Promise<Uint8Array> {
+        const buffer = await blob.arrayBuffer();
+        return new Uint8Array(buffer);
     }
 
     async function arrayBufferLikeToBlob(
@@ -89,33 +78,51 @@
         // since others can't access our local files.
         type AssetsType = (typeof char.assets.assets)[number];
 
-        async function remapAsBase64(i: AssetsType): Promise<AssetsType> {
-            const dataStr = typeof i.data === "string" ? i.data : "";
-            if (dataStr.startsWith("data:")) {
-                return i; // Already base64
-            } else if (dataStr.startsWith("http://") || dataStr.startsWith("https://")) {
-                return i; // Remote URL, leave as is.
-            } else if (typeof i.data === "string") {
-                // Local file, read as base64
+        async function remapAsUint8Array(i: AssetsType): Promise<AssetsType> {
+            // Already Uint8Array, leave as is
+            if (i.data instanceof Uint8Array) {
+                return i;
+            }
+            // Remote URL, leave as is
+            if (i.data.startsWith("http:") || i.data.startsWith("https:")) {
+                return i;
+            }
+            // Local file, read as Uint8Array
+            if (i.data.startsWith("local:")) {
                 try {
                     const assetStorage = new OpFSAssetStorageAdapter();
                     await assetStorage.init();
 
                     const blob = await assetStorage.getAssetBlob(new URL(i.data));
-                    const base64 = await blobsToBase64DataUrl(blob, i.mimeType);
-                    return { ...i, data: base64 };
+                    const uint8Array = await blobToUint8Array(blob);
+                    return { ...i, data: uint8Array };
                 } catch (e) {
-                    console.error("Failed to fetch local file for export:", dataStr, e);
+                    console.error("Failed to fetch local file for export:", i.data, e);
                     throw e instanceof Error ? e : new Error(String(e));
                 }
-            } else {
-                return i; // Binary data, leave as is
             }
+            // data: URL (base64), convert to Uint8Array
+            if (i.data.startsWith("data:")) {
+                const [, base64] = i.data.split(",");
+                const binaryString = atob(base64);
+                const bytes = new Uint8Array(binaryString.length);
+                for (let j = 0; j < binaryString.length; j++) {
+                    bytes[j] = binaryString.charCodeAt(j);
+                }
+                return { ...i, data: bytes };
+            }
+            // Unknown format, leave as is
+            return i;
         }
-        const newAssets = await Promise.all(char.assets.assets.map(remapAsBase64));
+        const newAssets = await Promise.all(char.assets.assets.map(remapAsUint8Array));
         char.assets.assets = newAssets;
 
-        const result = await (await worker).exportCharacter(char);
+        // Collect all ArrayBuffers from Uint8Array assets for transfer (zero-copy)
+        const transferables: ArrayBufferLike[] = newAssets
+            .filter((a): a is typeof a & { data: Uint8Array } => a.data instanceof Uint8Array)
+            .map((a) => a.data.buffer);
+
+        const result = await (await worker).exportCharacter(transfer(char, transferables));
         // this is now ready to download or save.
         // ensure we have a Blob for createObjectURL; worker may return an ArrayBuffer/SharedArrayBuffer
 
