@@ -72,14 +72,21 @@ describe("ChatArea Component", () => {
             },
         ] satisfies LocalChat[];
         chatStore.activeMessages = [
-            { id: "1", role: "user", content: { type: "text", data: "Hello" }, chatId: "chat-1" },
+            {
+                id: "1",
+                role: "user",
+                content: { type: "string", data: "Hello" },
+                chatId: "chat-1",
+                inlays: [],
+            },
             {
                 id: "2",
                 role: "assistant",
-                content: { type: "text", data: "Hi there!" },
+                content: { type: "string", data: "Hi there!" },
                 chatId: "chat-1",
+                inlays: [],
             },
-        ] as unknown as Message[]; // Casting partially correct objects
+        ] satisfies Message[]; // Casting partially correct objects
 
         const { getByText } = render(ChatArea);
 

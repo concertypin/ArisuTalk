@@ -44,8 +44,9 @@ describe("LocalStorageChatAdapter", () => {
             id: "msg-1",
             chatId, // Adapter overwrites this anyway
             role: "user",
-            content: { type: "text", data: "Hello" },
-            createdAt: new Date().toISOString(),
+            content: { type: "string", data: "Hello" },
+            timestamp: Date.now(),
+            inlays: [],
         };
 
         await adapter.addMessage(chatId, message);
@@ -61,8 +62,9 @@ describe("LocalStorageChatAdapter", () => {
             id: "msg-1",
             chatId,
             role: "user",
-            content: { type: "text", data: "Hello" },
-            createdAt: new Date().toISOString(),
+            content: { type: "string", data: "Hello" },
+            timestamp: Date.now(),
+            inlays: [],
         };
         await adapter.addMessage(chatId, message);
 
@@ -110,7 +112,7 @@ describe("LocalStorageChatAdapter", () => {
             start(controller) {
                 controller.enqueue(uint8Array);
                 controller.close();
-            }
+            },
         });
 
         await newAdapter.importData(importStream);

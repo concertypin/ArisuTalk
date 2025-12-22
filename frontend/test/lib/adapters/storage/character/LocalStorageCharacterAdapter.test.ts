@@ -7,9 +7,24 @@ describe("LocalStorageCharacterAdapter", () => {
     const testChar: Character = {
         id: "char-1",
         name: "Test Character",
+        assets: {
+            assets: [],
+        },
+        executables: {
+            replaceHooks: { display: [], input: [], output: [], request: [] },
+            runtimeSetting: {},
+        },
+        metadata: {
+            version: "0.0.1",
+            license: "UNLICENSED",
+        },
+        prompt: {
+            authorsNote: "",
+            description: "Be helpful",
+            lorebook: { config: { tokenLimit: 1000 }, data: [] },
+        },
+        specVersion: 0,
         description: "A test character",
-        version: "0.0.1",
-        instructions: "Be helpful",
     };
 
     beforeEach(() => {
