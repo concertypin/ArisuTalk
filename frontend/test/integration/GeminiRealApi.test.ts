@@ -19,25 +19,29 @@ describe.runIf(API_KEY)("Gemini Real API Integration", () => {
         safetySettings: [],
     };
 
-    it("connects with real API key and generating response", async () => {
-        try {
-            const provider = await GeminiChatProvider.factory.connect({
-                ...commonSettings,
-                ...geminiSettings,
-            });
-            expect(provider).toBeInstanceOf(GeminiChatProvider);
+    it.concurrent(
+        "connects with real API key and generating response",
+        async () => {
+            try {
+                const provider = await GeminiChatProvider.factory.connect({
+                    ...commonSettings,
+                    ...geminiSettings,
+                });
+                expect(provider).toBeInstanceOf(GeminiChatProvider);
 
-            const response = await provider.generate([
-                new HumanMessage("Say 'Hello Integration Test'"),
-            ]);
+                const response = await provider.generate([
+                    new HumanMessage("Say 'Hello Integration Test'"),
+                ]);
 
-            console.log("Real API Response:", response);
-            expect(response).toBeTruthy();
-            expect(typeof response).toBe("string");
-            expect(response.length).toBeGreaterThan(0);
-        } catch (error) {
-            console.error("Real API Test Failed:", error);
-            throw error; // Fail the test
-        }
-    }, 30000); // Increased timeout for real network request
+                console.log("Real API Response:", response);
+                expect(response).toBeTruthy();
+                expect(typeof response).toBe("string");
+                expect(response.length).toBeGreaterThan(0);
+            } catch (error) {
+                console.error("Real API Test Failed:", error);
+                throw error; // Fail the test
+            }
+        },
+        30000
+    ); // Increased timeout for real network request
 });

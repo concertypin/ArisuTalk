@@ -3,6 +3,8 @@
     import CharacterCard from "./CharacterCard.svelte";
     import { getCardParseWorker } from "@/lib/workers/workerClient";
     import { OpFSAssetStorageAdapter } from "../adapters/assetStorage/OpFSAssetStorageAdapter";
+    import { transfer } from "comlink";
+    import { remapAssetToUint8Array, collectTransferableBuffers } from "../utils/assetEncoding";
 
     interface Props {
         onEdit: (index: number) => void;
@@ -46,25 +48,6 @@
         // Close the modal
         modal.close();
     }
-    /**
-     * Converts a Blob to a Base64 Data URL.
-     * @license https://developer.mozilla.org/ko/docs/MDN/Writing_guidelines/Attrib_copyright_license
-     * @copyright {@link https://developer.mozilla.org/ko/docs/Glossary/Base64} by MDN contributors
-     */
-    async function blobsToBase64DataUrl(
-        bytes: Blob,
-        type: string = "application/octet-stream"
-    ): Promise<string> {
-        return await new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = () => {
-                const reason = reader.error ?? new Error("FileReader failed");
-                reject(reason instanceof Error ? reason : new Error(String(reason)));
-            };
-            reader.readAsDataURL(new File([bytes], "", { type }));
-        });
-    }
 
     async function arrayBufferLikeToBlob(
         data: ArrayBufferLike | Blob,
@@ -81,38 +64,20 @@
 
     async function handleExport(index: number) {
         // Export character at index
-        // Since we need to remap local files to base64 urls,
-        // cloning first to avoid mutating store data.
+        // Cloning first to avoid mutating store data.
         const char = structuredClone(characterStore.characters[index]);
 
-        // All of assets should be replaced with base64 url,
-        // since others can't access our local files.
-        type AssetsType = (typeof char.assets.assets)[number];
-
-        async function remapAsBase64(i: AssetsType): Promise<AssetsType> {
-            if (i.url.startsWith("data:")) {
-                return i; // Already base64
-            } else if (i.url.startsWith("http://") || i.url.startsWith("https://")) {
-                return i; // Remote URL, leave as is.
-            } else {
-                // Local file, read as base64
-                try {
-                    const assetStorage = new OpFSAssetStorageAdapter();
-                    await assetStorage.init();
-
-                    const blob = await assetStorage.getAssetBlob(new URL(i.url));
-                    const base64 = await blobsToBase64DataUrl(blob, i.mimeType);
-                    return { ...i, url: base64 };
-                } catch (e) {
-                    console.error("Failed to fetch local file for export:", i.url, e);
-                    throw e instanceof Error ? e : new Error(String(e));
-                }
-            }
-        }
-        const newAssets = await Promise.all(char.assets.assets.map(remapAsBase64));
+        // Remap all assets to use Uint8Array for binary data
+        const assetStorage = new OpFSAssetStorageAdapter();
+        const newAssets = await Promise.all(
+            char.assets.assets.map((asset) => remapAssetToUint8Array(asset, assetStorage))
+        );
         char.assets.assets = newAssets;
 
-        const result = await (await worker).exportCharacter(char);
+        // Collect all ArrayBuffers from Uint8Array assets for transfer (zero-copy)
+        const transferables = collectTransferableBuffers(newAssets);
+
+        const result = await (await worker).exportCharacter(transfer(char, transferables));
         // this is now ready to download or save.
         // ensure we have a Blob for createObjectURL; worker may return an ArrayBuffer/SharedArrayBuffer
 
