@@ -34,9 +34,6 @@ vi.mock("@/lib/providers/chat/OpenRouterChatProvider", () => {
     };
 });
 
-// Helper type for accessing private properties in tests
-type TestChatStore = ChatStore & { activeProvider: unknown };
-
 describe("ChatStore", () => {
     let store: ChatStore;
     let mockAdapter: IChatStorageAdapter;
@@ -51,12 +48,9 @@ describe("ChatStore", () => {
             getAllChats: vi.fn().mockResolvedValue([]),
             getChatsByCharacter: vi.fn().mockResolvedValue([]),
             createChat: vi.fn(),
-            saveChat: vi.fn(),
             deleteChat: vi.fn(),
             addMessage: vi.fn(),
             getMessages: vi.fn().mockResolvedValue([]),
-            exportData: vi.fn(),
-            importData: vi.fn(),
         };
 
         // Mock default provider connection
@@ -84,7 +78,7 @@ describe("ChatStore", () => {
             createdAt: Date.now(),
             updatedAt: Date.now(),
             lastMessage: Date.now(),
-            title: "New Chat"
+            title: "New Chat",
         };
 
         (mockAdapter.createChat as Mock).mockResolvedValue(newChatId);
@@ -99,7 +93,16 @@ describe("ChatStore", () => {
 
     it("should set active chat", async () => {
         const chatId = "chat-1";
-        const messages = [{ id: "m1", role: "user", content: { type: "text", data: "hi" } }];
+        const messages = [
+            {
+                id: "m1",
+                chatId: "chat-1",
+                role: "user",
+                content: { type: "text", data: "hi" },
+                timestamp: Date.now(),
+                inlays: [],
+            },
+        ];
 
         (mockAdapter.getMessages as Mock).mockResolvedValue(messages);
 
@@ -113,18 +116,17 @@ describe("ChatStore", () => {
     it("should send message", async () => {
         // Setup active chat
         store.activeChatId = "chat-1";
-        const mockProvider = {
-            disconnect: vi.fn(),
-            stream: vi.fn().mockImplementation(async function* () {
-                yield "Response";
-            }),
-            abort: vi.fn(),
-        };
-        // Inject active provider directly or via setProvider
-        (store as unknown as TestChatStore).activeProvider = mockProvider;
 
-        // Mock addMessage to update store state if needed (component logic relies on store array)
-        // The store pushes optimistically, so we don't need adapter to return anything
+        // Configure provider via setProvider (type-safe)
+        const streamMock = vi.fn().mockImplementation(async function* () {
+            yield "Response";
+        });
+        (MockChatProvider.factory.connect as Mock).mockResolvedValue({
+            disconnect: vi.fn(),
+            stream: streamMock,
+            abort: vi.fn(),
+        });
+        await store.setProvider("MOCK", { responses: [] });
 
         await store.sendMessage("Hello");
 
@@ -135,21 +137,40 @@ describe("ChatStore", () => {
     });
 
     it("should handle provider switch", async () => {
+        // First provider setup
         const disconnectSpy = vi.fn();
-        (store as unknown as TestChatStore).activeProvider = { disconnect: disconnectSpy };
-
-        const newProviderMock = { disconnect: vi.fn() };
-        (MockChatProvider.factory.connect as Mock).mockResolvedValue(newProviderMock);
-
+        (MockChatProvider.factory.connect as Mock).mockResolvedValue({
+            disconnect: disconnectSpy,
+            stream: vi.fn(),
+            abort: vi.fn(),
+        });
         await store.setProvider("MOCK", { responses: [] });
 
+        // Switch to new provider
+        const newDisconnectSpy = vi.fn();
+        (MockChatProvider.factory.connect as Mock).mockResolvedValue({
+            disconnect: newDisconnectSpy,
+            stream: vi.fn(),
+            abort: vi.fn(),
+        });
+        await store.setProvider("MOCK", { responses: ["new"] });
+
+        // Verify old provider was disconnected
         expect(disconnectSpy).toHaveBeenCalled();
-        expect(MockChatProvider.factory.connect).toHaveBeenCalled();
-        expect((store as unknown as TestChatStore).activeProvider).toBe(newProviderMock);
+        // Verify new provider was connected
+        expect(MockChatProvider.factory.connect).toHaveBeenCalledTimes(3); // init + 2 switches
     });
 
     it("should delete chat", async () => {
-        const chat = { id: "chat-1", name: "Delete Me" } as LocalChat;
+        const chat: LocalChat = {
+            id: "chat-1",
+            name: "Delete Me",
+            characterId: "char-1",
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+            lastMessage: Date.now(),
+            title: "Delete Me",
+        };
         store.chats.push(chat);
         store.activeChatId = "chat-1";
 
