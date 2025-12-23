@@ -46,7 +46,7 @@
                 },
             },
             executables: character?.executables || {
-                runtimeSetting: { mem: undefined },
+                runtimeSetting: { mem: undefined, timeout: 30000 },
                 replaceHooks: {
                     display: [],
                     input: [],
