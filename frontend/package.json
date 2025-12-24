@@ -28,7 +28,7 @@
         "node": ">20"
     },
     "dependencies": {
-        "@arisutalk/character-spec": "0.0.6",
+        "@arisutalk/character-spec": "0.0.9",
         "@langchain/core": "^1.1.4",
         "@langchain/google-genai": "^2.1.0",
         "@langchain/openai": "^1.2.0",

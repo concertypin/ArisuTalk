@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { LocalStorageChatAdapter } from "@/lib/adapters/storage/chat/LocalStorageChatAdapter";
 import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
+import { apply } from "@arisutalk/character-spec/utils";
+import { MessageSchema } from "@arisutalk/character-spec/v0";
 
 describe("LocalStorageChatAdapter", () => {
     let adapter: LocalStorageChatAdapter;
@@ -42,9 +44,9 @@ describe("LocalStorageChatAdapter", () => {
         const chatId = await adapter.createChat("char-1");
         const message: Message = {
             id: "msg-1",
-            chatId, // Adapter overwrites this anyway
+            chatId,
             role: "user",
-            content: { type: "string", data: "Hello" },
+            content: { type: "text", data: "Hello" },
             timestamp: Date.now(),
             inlays: [],
         };
@@ -62,7 +64,7 @@ describe("LocalStorageChatAdapter", () => {
             id: "msg-1",
             chatId,
             role: "user",
-            content: { type: "string", data: "Hello" },
+            content: { type: "text", data: "Hello" },
             timestamp: Date.now(),
             inlays: [],
         };
@@ -80,13 +82,13 @@ describe("LocalStorageChatAdapter", () => {
     it("should export and import data", async () => {
         const charId = "char-export";
         const chatId = await adapter.createChat(charId, "Export Chat");
-        const message: Message = {
+
+        const message: Message = apply(MessageSchema, {
             id: "msg-export",
             chatId,
             role: "user",
             content: { type: "text", data: "Export Me" },
-            createdAt: new Date().toISOString(),
-        };
+        });
         await adapter.addMessage(chatId, message);
 
         const stream = await adapter.exportData();
@@ -99,9 +101,7 @@ describe("LocalStorageChatAdapter", () => {
             chunks.push(value);
         }
 
-        const blob = new Blob(chunks);
-        const arrayBuffer = await blob.arrayBuffer();
-        const uint8Array = new Uint8Array(arrayBuffer);
+        const uint8Array = Uint8Array.from(chunks);
 
         // Create new adapter instance (simulating another session or device)
         const newAdapter = new LocalStorageChatAdapter();
