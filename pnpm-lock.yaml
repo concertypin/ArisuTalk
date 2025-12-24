@@ -76,8 +76,8 @@ importers:
   frontend:
     dependencies:
       '@arisutalk/character-spec':
-        specifier: 0.0.9
-        version: 0.0.9(zod@4.1.13)
+        specifier: 0.0.11
+        version: 0.0.11(zod@4.1.13)
       '@langchain/core':
         specifier: ^1.1.4
         version: 1.1.4(openai@6.14.0(ws@8.18.3)(zod@4.1.13))
@@ -194,8 +194,8 @@ packages:
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
 
-  '@arisutalk/character-spec@0.0.9':
-    resolution: {integrity: sha512-dWo5b9qUu0KAwQdApQCpz2T4NLgYxY4jTIOoZBYiASsLRH6VUf4vxg5OAJrMNwv2rr4SEMx7V0V9Dxopn5szHQ==}
+  '@arisutalk/character-spec@0.0.11':
+    resolution: {integrity: sha512-ihCMv3gPJ328t5J0u1ZKunKJLFOADafOFQWn/ylIn/yOoxDeahvpSxV5wPwm0d6pE2WcDXJ+LiytlAT0iDni2Q==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^4.1.13
@@ -3283,7 +3283,7 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@arisutalk/character-spec@0.0.9(zod@4.1.13)':
+  '@arisutalk/character-spec@0.0.11(zod@4.1.13)':
     dependencies:
       zod: 4.1.13
 

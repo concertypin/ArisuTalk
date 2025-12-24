@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { LocalStorageChatAdapter } from "@/lib/adapters/storage/chat/LocalStorageChatAdapter";
 import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
 import { apply } from "@arisutalk/character-spec/utils";
-import { MessageSchema } from "@arisutalk/character-spec/v0";
+import { MessageSchema } from "@arisutalk/character-spec/v0/Character";
 
 describe("LocalStorageChatAdapter", () => {
     let adapter: LocalStorageChatAdapter;
@@ -83,6 +83,8 @@ describe("LocalStorageChatAdapter", () => {
         const charId = "char-export";
         const chatId = await adapter.createChat(charId, "Export Chat");
 
+        expect(MessageSchema).toBeDefined();
+
         const message: Message = apply(MessageSchema, {
             id: "msg-export",
             chatId,
@@ -101,7 +103,14 @@ describe("LocalStorageChatAdapter", () => {
             chunks.push(value);
         }
 
-        const uint8Array = Uint8Array.from(chunks);
+        // Concatenate all chunks into single Uint8Array
+        const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
+        const uint8Array = new Uint8Array(totalLength);
+        let offset = 0;
+        for (const chunk of chunks) {
+            uint8Array.set(chunk, offset);
+            offset += chunk.length;
+        }
 
         // Create new adapter instance (simulating another session or device)
         const newAdapter = new LocalStorageChatAdapter();
