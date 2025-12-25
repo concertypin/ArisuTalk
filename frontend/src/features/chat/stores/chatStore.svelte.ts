@@ -255,7 +255,7 @@ export class ChatStore {
                 id: crypto.randomUUID(),
                 chatId,
                 role: "user",
-                content: { type: "string", data: content },
+                content: { type: "text", data: content },
                 inlays: [],
             };
 
@@ -273,7 +273,7 @@ export class ChatStore {
                 id: assistantMessageId,
                 chatId,
                 role: "assistant",
-                content: { type: "string", data: "" },
+                content: { type: "text", data: "" },
                 inlays: [],
             };
 
@@ -289,14 +289,14 @@ export class ChatStore {
                 fullContent += chunk;
                 if (assistantMessageRef) {
                     assistantMessageRef.content = {
-                        type: "string",
+                        type: "text",
                         data: fullContent,
                     };
                 }
             }
 
             // Save final message to storage
-            assistantMessage.content = { type: "string", data: fullContent };
+            assistantMessage.content = { type: "text", data: fullContent };
             await this.adapter.addMessage(chatId, assistantMessage);
             const chat = this.chats.find((c) => c.id === chatId);
             if (chat) {

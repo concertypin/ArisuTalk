@@ -76,8 +76,8 @@ importers:
   frontend:
     dependencies:
       '@arisutalk/character-spec':
-        specifier: 0.0.4
-        version: 0.0.4(zod@4.1.13)
+        specifier: 0.0.11
+        version: 0.0.11(zod@4.1.13)
       '@langchain/anthropic':
         specifier: ^1.3.3
         version: 1.3.3(@langchain/core@1.1.4(openai@6.14.0(ws@8.18.3)(zod@4.1.13)))
@@ -209,8 +209,8 @@ packages:
       zod:
         optional: true
 
-  '@arisutalk/character-spec@0.0.4':
-    resolution: {integrity: sha512-bjHa8jTZjTIlK07f2qnDKdx/xqOBNM+vubrjCEUKTR66WPd01ZtO4M3ITCW6lKoNN3ZkpZZWaszAVnVVZkb5FQ==}
+  '@arisutalk/character-spec@0.0.11':
+    resolution: {integrity: sha512-ihCMv3gPJ328t5J0u1ZKunKJLFOADafOFQWn/ylIn/yOoxDeahvpSxV5wPwm0d6pE2WcDXJ+LiytlAT0iDni2Q==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^4.1.13
@@ -3334,7 +3334,7 @@ snapshots:
     optionalDependencies:
       zod: 4.1.13
 
-  '@arisutalk/character-spec@0.0.4(zod@4.1.13)':
+  '@arisutalk/character-spec@0.0.11(zod@4.1.13)':
     dependencies:
       zod: 4.1.13
 
