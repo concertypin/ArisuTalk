@@ -79,7 +79,7 @@ describe("ChatStore Streaming", () => {
         await chatStore.initPromise;
         await chatStore.setProvider("MOCK", { responses: [] });
         // injecting malicious mock for failure testing
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+         
         chatStore["activeProvider"] = {
             stream: async function* () {
                 // Dummy yield to satisfy generator requirement

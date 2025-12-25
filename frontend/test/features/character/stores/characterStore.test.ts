@@ -126,7 +126,7 @@ describe("CharacterStore", () => {
 
     it("should import character via worker", async () => {
         const file = {
-             arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(8)),
+            arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(8)),
         } as unknown as File;
         const parsedChar = { ...defaultChar, id: "imported" };
 
@@ -142,10 +142,13 @@ describe("CharacterStore", () => {
 
     it("should handle import failure from worker", async () => {
         const file = {
-             arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(8)),
+            arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(8)),
         } as unknown as File;
         const workerMock = await getCardParseWorker();
-        (workerMock.parseCharacter as Mock).mockResolvedValue({ success: false, error: "Parse error" });
+        (workerMock.parseCharacter as Mock).mockResolvedValue({
+            success: false,
+            error: "Parse error",
+        });
 
         const result = await store.importCharacter(file);
         expect(result.success).toBe(false);
@@ -155,7 +158,7 @@ describe("CharacterStore", () => {
 
     it("should handle import exception", async () => {
         const file = {
-             arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(8)),
+            arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(8)),
         } as unknown as File;
         const workerMock = await getCardParseWorker();
         (workerMock.parseCharacter as Mock).mockRejectedValue(new Error("Worker crash"));

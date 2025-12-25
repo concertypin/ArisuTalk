@@ -15,8 +15,9 @@
         "test:browser": "vitest run test/browser",
         "test:ui": "vitest --ui",
         "test:coverage": "pnpm run test --coverage",
+        "check:fix": "pnpm run format && pnpm run lint:fix && pnpm exec concurrently \"pnpm run check:types\" \"pnpm run test\" \"pnpm run test:browser\"",
         "check:types": "svelte-check --tsconfig tsconfig.app.json --fail-on-warnings",
-        "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint/ src/ test/ worker/",
+        "lint": "pnpm run check:types && eslint --cache --cache-location ./node_modules/.cache/eslint/ src/ test/ worker/",
         "lint:fix": "pnpm run lint --fix",
         "format": "pnpm run format:check --write",
         "format:check": "prettier --cache --cache-location ./node_modules/.cache/prettier/ src/ test/ worker/"
@@ -51,6 +52,7 @@
         "@vitest/coverage-v8": "^4.0.7",
         "@vitest/ui": "^4.0.7",
         "autoprefixer": "^10.4.22",
+        "concurrently": "^9.2.1",
         "daisyui": "^5.5.13",
         "eslint": "^9.39.1",
         "eslint-plugin-svelte": "^3.13.1",

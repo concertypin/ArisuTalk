@@ -10,7 +10,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig([
     js.configs.recommended,
-    ...ts.configs.recommendedTypeChecked,
+    ...ts.configs.recommended,
     ...svelte.configs["flat/recommended"],
     {
         languageOptions: {

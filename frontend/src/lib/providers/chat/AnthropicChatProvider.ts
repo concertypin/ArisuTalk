@@ -28,7 +28,7 @@ export class AnthropicChatProvider extends ChatProvider<"ANTHROPIC"> {
     ) {
         super();
         this.apiKey = settings.apiKey || "";
-        this.modelName = settings.model || "claude-sonnet-4-20250514";
+        this.modelName = settings.model || "claude-sonnet-4-5-20250929";
         this.client = new ChatAnthropicCtor({
             model: this.modelName,
             temperature: settings.generationParameters?.temperature,
@@ -36,7 +36,9 @@ export class AnthropicChatProvider extends ChatProvider<"ANTHROPIC"> {
             apiKey: settings.apiKey,
             maxTokens: settings.generationParameters?.maxOutputTokens ?? 4096,
             // Anthropic requires dangerouslyAllowBrowser for browser usage
-            dangerouslyAllowBrowser: true,
+            clientOptions: {
+                dangerouslyAllowBrowser: true,
+            },
         });
     }
 
