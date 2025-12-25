@@ -5,11 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "node-terminal",
-            "name": "Run Browser Test",
+            "name": "Launch Edge",
             "request": "launch",
-            "command": "pnpm run test:browser",
-            "cwd": "${workspaceFolder}/frontend"
+            "type": "msedge",
+            "url": "http://localhost:5173",
+            "webRoot": "${workspaceFolder}/frontend"
         },
         {
             "type": "node-terminal",

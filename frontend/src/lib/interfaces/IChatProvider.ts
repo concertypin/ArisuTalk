@@ -27,6 +27,10 @@ type GeminiHarmBlockThreshold =
  */
 export interface ProviderSettings {
     /**
+     * OpenAI settings (also used for OpenAI-compatible APIs)
+     */
+    OPENAI: {};
+    /**
      * Gemini settings
      */
     GEMINI: {

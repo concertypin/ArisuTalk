@@ -49,7 +49,7 @@ export async function parseMagicPatterns(
     _context: MagicPatternContext
 ): Promise<string> {
     // Check if there are any magic patterns
-    const PATTERN_REGEX = /\{\|[\s\S]*?\|\}/g;
+    const PATTERN_REGEX = /\{\|[\s\S]*?\|\}/;
 
     if (PATTERN_REGEX.test(text)) {
         console.error(

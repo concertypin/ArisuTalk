@@ -61,6 +61,27 @@ describe.concurrent("ChatStore Provider Loading Logic", () => {
         expect(mockProvider).toBe("Mock");
     });
 
+    test.concurrent("mapProviderType maps OpenAI correctly", async () => {
+        const { LLMProviderSchema } = await import("@/lib/types/IDataModel");
+
+        const openAIProvider = LLMProviderSchema.parse("OpenAI");
+        expect(openAIProvider).toBe("OpenAI");
+    });
+
+    test.concurrent("mapProviderType maps OpenAI-compatible correctly", async () => {
+        const { LLMProviderSchema } = await import("@/lib/types/IDataModel");
+
+        const openAICompatible = LLMProviderSchema.parse("OpenAI-compatible");
+        expect(openAICompatible).toBe("OpenAI-compatible");
+    });
+
+    test.concurrent("mapProviderType maps Anthropic correctly", async () => {
+        const { LLMProviderSchema } = await import("@/lib/types/IDataModel");
+
+        const anthropicProvider = LLMProviderSchema.parse("Anthropic");
+        expect(anthropicProvider).toBe("Anthropic");
+    });
+
     test.concurrent("LLMConfig schema has required fields", async () => {
         const { LLMConfigSchema } = await import("@/lib/types/IDataModel");
 

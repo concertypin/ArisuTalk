@@ -111,6 +111,7 @@
                     bind:value={config.provider}
                 >
                     <option value="OpenAI">OpenAI</option>
+                    <option value="OpenAI-compatible">OpenAI-compatible</option>
                     <option value="Anthropic">Anthropic</option>
                     <option value="Gemini">Gemini</option>
                     <option value="OpenRouter">OpenRouter</option>

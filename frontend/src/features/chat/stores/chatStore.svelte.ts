@@ -11,6 +11,8 @@ import type { LLMConfig, LLMProvider } from "@/lib/types/IDataModel";
 import { StorageResolver } from "@/lib/adapters/storage/storageResolver";
 import { MockChatProvider } from "@/lib/providers/chat/MockChatProvider";
 import { GeminiChatProvider } from "@/lib/providers/chat/GeminiChatProvider";
+import { OpenAIChatProvider } from "@/lib/providers/chat/OpenAIChatProvider";
+import { AnthropicChatProvider } from "@/lib/providers/chat/AnthropicChatProvider";
 import { HumanMessage, AIMessage } from "@langchain/core/messages";
 import { OpenRouterChatProvider } from "@/lib/providers/chat/OpenRouterChatProvider";
 import { settings } from "@/lib/stores/settings.svelte";
@@ -24,8 +26,9 @@ function mapProviderType(provider: LLMProvider): ProviderType | null {
         Gemini: "GEMINI",
         OpenRouter: "OPENROUTER",
         Mock: "MOCK",
-        // Anthropic not yet implemented
-        // OpenAI and OpenAI-compatible not yet implemented
+        OpenAI: "OPENAI",
+        "OpenAI-compatible": "OPENAI",
+        Anthropic: "ANTHROPIC",
     };
     return mapping[provider] ?? null;
 }
@@ -96,7 +99,7 @@ export class ChatStore {
      */
     async loadProviderFromSettings(): Promise<void> {
         const configs = settings.value.llmConfigs;
-        const activeId = settings.value.activeLLMConfigId;
+        const activeId: string | null = settings.value.activeLLMConfigId;
 
         // Try to find the active config by ID
         let targetConfig = activeId ? configs.find((c) => c.id === activeId && c.enabled) : null;
@@ -177,7 +180,8 @@ export class ChatStore {
         }
         switch (type) {
             case "ANTHROPIC": {
-                throw new Error("Not implemented yet");
+                this.activeProvider = await AnthropicChatProvider.factory.connect(settings);
+                break;
             }
             case "GEMINI": {
                 this.activeProvider = await GeminiChatProvider.factory.connect(settings);
@@ -185,6 +189,10 @@ export class ChatStore {
             }
             case "MOCK": {
                 this.activeProvider = await MockChatProvider.factory.connect(settings);
+                break;
+            }
+            case "OPENAI": {
+                this.activeProvider = await OpenAIChatProvider.factory.connect(settings);
                 break;
             }
             case "OPENROUTER": {
