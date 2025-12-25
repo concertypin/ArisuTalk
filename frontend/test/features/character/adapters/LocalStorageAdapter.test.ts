@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import type { Character, Chat } from "@arisutalk/character-spec/v0/Character";
-import type { Settings } from "@/lib/types/IDataModel";
+import { SettingsSchema, type Settings } from "@/lib/types/IDataModel";
 import { exampleCharacter, exampleChatData } from "@/const/example_data";
 import { LocalStorageAdapter } from "@/features/character/adapters/storage/LocalStorageAdapter";
+import { apply } from "@arisutalk/character-spec/utils";
 
 describe("LocalStorageAdapter", () => {
     let adapter: LocalStorageAdapter;
@@ -53,13 +54,13 @@ describe("LocalStorageAdapter", () => {
     });
 
     it("should save and get settings", async () => {
-        const settings: Settings = {
+        const settings: Settings = apply(SettingsSchema, {
             theme: "dark",
             advanced: { debug: false, experimental: false },
             llmConfigs: [],
             prompt: { generationPrompt: "You are a helpful assistant." },
             activePersonaId: null,
-        };
+        });
         await adapter.saveSettings(settings);
         const retrieved = await adapter.getSettings();
         // Settings schema has defaults, so we check that our values were saved correctly

@@ -1,8 +1,9 @@
 import "fake-indexeddb/auto";
 import { describe, it, expect, beforeEach } from "vitest";
 import { getArisuDB } from "@/lib/adapters/storage/IndexedDBHelper";
-import type { Character } from "@arisutalk/character-spec/v0/Character";
+import { CharacterSchema, type Character } from "@arisutalk/character-spec/v0/Character";
 import { SettingsSchema, type Settings } from "@/lib/types/IDataModel";
+import { apply } from "@arisutalk/character-spec/utils";
 
 describe("IndexedDBHelper (ArisuDB)", () => {
     const db = getArisuDB();
@@ -30,29 +31,12 @@ describe("IndexedDBHelper (ArisuDB)", () => {
     });
 
     describe("Characters table", () => {
-        const testCharacter: Character = {
+        const testCharacter: Character = apply(CharacterSchema, {
             id: "char-1",
             name: "Test Character",
             specVersion: 0,
             description: "A test character",
-            assets: { assets: [] },
-            prompt: {
-                description: "",
-                authorsNote: "",
-                lorebook: { config: { tokenLimit: 0 }, data: [] },
-            },
-            executables: {
-                runtimeSetting: { mem: undefined },
-                replaceHooks: { display: [], input: [], output: [], request: [] },
-            },
-            metadata: {
-                author: undefined,
-                license: "",
-                version: undefined,
-                distributedOn: undefined,
-                additionalInfo: undefined,
-            },
-        };
+        });
 
         it("puts and gets a character", async () => {
             await db.characters.put(testCharacter);
@@ -119,7 +103,7 @@ describe("IndexedDBHelper (ArisuDB)", () => {
             id: "msg-1",
             chatId: "chat-1",
             role: "user" as const,
-            content: { type: "string" as const, data: "Hello" },
+            content: { type: "text" as const, data: "Hello" },
             timestamp: Date.now(),
             inlays: [],
         };
@@ -194,29 +178,13 @@ describe("IndexedDBHelper (ArisuDB)", () => {
 
     describe("deleteAll", () => {
         it("clears all tables", async () => {
-            await db.characters.put({
-                id: "c1",
-                name: "X",
-                specVersion: 0,
-                description: "",
-                assets: { assets: [] },
-                prompt: {
-                    description: "",
-                    authorsNote: "",
-                    lorebook: { config: { tokenLimit: 0 }, data: [] },
-                },
-                executables: {
-                    runtimeSetting: { mem: undefined },
-                    replaceHooks: { display: [], input: [], output: [], request: [] },
-                },
-                metadata: {
-                    author: undefined,
-                    license: "",
-                    version: undefined,
-                    distributedOn: undefined,
-                    additionalInfo: undefined,
-                },
-            });
+            await db.characters.put(
+                apply(CharacterSchema, {
+                    id: "c1",
+                    name: "X",
+                    specVersion: 0,
+                })
+            );
             await db.chats.put({
                 id: "ch1",
                 characterId: "c1",

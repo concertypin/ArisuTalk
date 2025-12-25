@@ -79,7 +79,7 @@ describe("ChatStore Streaming", () => {
         await chatStore.initPromise;
         await chatStore.setProvider("MOCK", { responses: [] });
         // injecting malicious mock for failure testing
-         
+
         chatStore["activeProvider"] = {
             stream: async function* () {
                 // Dummy yield to satisfy generator requirement

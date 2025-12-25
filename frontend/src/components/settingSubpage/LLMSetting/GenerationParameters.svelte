@@ -29,7 +29,7 @@
             },
             set checked(v: boolean) {
                 // target[key] is any, so we need to disable the linting here
-                 
+
                 target[key] = v ? (target[key] ?? defaultValue) : undefined;
             },
         };

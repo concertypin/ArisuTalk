@@ -16,7 +16,7 @@
         "test:ui": "vitest --ui",
         "test:coverage": "pnpm run test --coverage",
         "check:fix": "pnpm run format && pnpm run lint:fix && pnpm exec concurrently \"pnpm run check:types\" \"pnpm run test\" \"pnpm run test:browser\"",
-        "check:types": "svelte-check --tsconfig tsconfig.app.json --fail-on-warnings",
+        "check:types": "pnpm exec concurrently \"svelte-check --tsconfig tsconfig.app.json --fail-on-warnings\" \"svelte-check --tsconfig tsconfig.worker.json --fail-on-warnings\" \"svelte-check --tsconfig tsconfig.test.json\"",
         "lint": "pnpm run check:types && eslint --cache --cache-location ./node_modules/.cache/eslint/ src/ test/ worker/",
         "lint:fix": "pnpm run lint --fix",
         "format": "pnpm run format:check --write",

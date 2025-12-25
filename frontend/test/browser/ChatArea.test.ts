@@ -75,14 +75,14 @@ describe("ChatArea Component", () => {
             {
                 id: "1",
                 role: "user",
-                content: { type: "string", data: "Hello" },
+                content: { type: "text", data: "Hello" },
                 chatId: "chat-1",
                 inlays: [],
             },
             {
                 id: "2",
                 role: "assistant",
-                content: { type: "string", data: "Hi there!" },
+                content: { type: "text", data: "Hi there!" },
                 chatId: "chat-1",
                 inlays: [],
             },
