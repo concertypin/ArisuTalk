@@ -6,11 +6,17 @@ import { personaStore } from "@/features/persona/stores/personaStore.svelte";
 import type { Persona } from "@/features/persona/schema";
 
 // Mock the OpFSAssetStorageAdapter
-vi.mock("@/features/character/adapters/assetStorage/OpFSAssetStorageAdapter", () => ({
-    OpFSAssetStorageAdapter: vi.fn().mockImplementation(() => ({
+vi.mock("@/features/character/adapters/assetStorage/OpFSAssetStorageAdapter", () => {
+    const mockAdapter = {
         getAssetUrl: vi.fn().mockResolvedValue(null),
-    })),
-}));
+    };
+    return {
+        OpFSAssetStorageAdapter: vi.fn().mockImplementation(function (this: any) {
+            return mockAdapter;
+        }),
+        opfsAdapter: mockAdapter,
+    };
+});
 
 describe("PersonaList Component", () => {
     let mockPersonas: Persona[];
@@ -74,23 +80,25 @@ describe("PersonaList Component", () => {
     });
 
     test("selects persona when clicked", async () => {
-        const { getByRole } = render(PersonaList, {
+        const { getByText, getByRole } = render(PersonaList, {
             onEdit: mockOnEdit,
         });
 
-        const personaButton = getByRole("button", { name: /User-kun/i });
-        await personaButton.click();
+        // Click the persona item (which is a button)
+        const personaItem = getByRole("button", { name: /User-kun/i });
+        await personaItem.click({ force: true });
 
         expect(personaStore.select).toHaveBeenCalledWith("persona-1");
     });
 
     test("calls onEdit when edit button is clicked", async () => {
-        const { getByLabelText } = render(PersonaList, {
+        const { getByRole } = render(PersonaList, {
             onEdit: mockOnEdit,
         });
 
-        // Find the edit button for the first persona
-        const editButton = getByLabelText("Edit persona", { exact: false });
+        // Scope to the first persona item
+        const firstPersona = getByRole("button", { name: /User-kun/i });
+        const editButton = firstPersona.getByLabelText("Edit");
         await editButton.click();
 
         expect(mockOnEdit).toHaveBeenCalled();
@@ -100,11 +108,12 @@ describe("PersonaList Component", () => {
         const originalConfirm = window.confirm;
         window.confirm = vi.fn(() => true);
 
-        const { getByLabelText } = render(PersonaList, {
+        const { getByRole } = render(PersonaList, {
             onEdit: mockOnEdit,
         });
 
-        const deleteButton = getByLabelText("Delete persona", { exact: false });
+        const firstPersona = getByRole("button", { name: /User-kun/i });
+        const deleteButton = firstPersona.getByLabelText("Delete");
         await deleteButton.click();
 
         expect(window.confirm).toHaveBeenCalledWith("Delete this persona?");
@@ -114,41 +123,47 @@ describe("PersonaList Component", () => {
     });
 
     test("disables move up button for first persona", async () => {
-        const { getByLabelText } = render(PersonaList, {
+        const { getByRole } = render(PersonaList, {
             onEdit: mockOnEdit,
         });
 
-        const moveUpButton = getByLabelText("Move Up", { exact: false });
+        const firstPersona = getByRole("button", { name: /User-kun/i });
+        const moveUpButton = firstPersona.getByLabelText("Move Up");
         await expect.element(moveUpButton).toBeDisabled();
     });
 
     test("disables move down button for last persona", async () => {
-        render(PersonaList, {
+        const { getByRole } = render(PersonaList, {
             onEdit: mockOnEdit,
         });
 
-        // Note: Testing the last disabled state may require selecting by index
-        // For simplicity, we skip this test as DOM querySelectorAll is complex with vitest-browser-svelte
+        const lastPersona = getByRole("button", { name: /Admin-san/i });
+        const moveDownButton = lastPersona.getByLabelText("Move Down");
+        await expect.element(moveDownButton).toBeDisabled();
     });
 
     test("calls reorder when move buttons are clicked", async () => {
-        const { getByLabelText } = render(PersonaList, {
+        const { getByRole } = render(PersonaList, {
             onEdit: mockOnEdit,
         });
 
-        const moveDownButton = getByLabelText("Move Down", { exact: false });
+        const firstPersona = getByRole("button", { name: /User-kun/i });
+        const moveDownButton = firstPersona.getByLabelText("Move Down");
         await moveDownButton.click();
 
         expect(personaStore.reorder).toHaveBeenCalled();
     });
 
     test("renders initials when no avatar", async () => {
-        const { getByText } = render(PersonaList, {
+        const { getByRole } = render(PersonaList, {
             onEdit: mockOnEdit,
         });
 
-        await expect.element(getByText("US")).toBeVisible();
-        await expect.element(getByText("AD")).toBeVisible();
+        const firstPersona = getByRole("button", { name: /User-kun/i });
+        await expect.element(firstPersona.getByText("US", { exact: true })).toBeVisible();
+
+        const secondPersona = getByRole("button", { name: /Admin-san/i });
+        await expect.element(secondPersona.getByText("AD", { exact: true })).toBeVisible();
     });
 
     test("auto-selects first persona when none selected", async () => {

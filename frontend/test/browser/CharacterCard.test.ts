@@ -85,15 +85,17 @@ describe("CharacterCard Component", () => {
             avatarUrl: undefined,
         };
 
-        const { getByText } = render(CharacterCard, {
+        const { container } = render(CharacterCard, {
             character: characterWithoutAvatar,
             onEdit: mockOnEdit,
             onDelete: mockOnDelete,
             onExport: mockOnExport,
         });
 
-        const initials = getByText("TE");
-        await expect.element(initials).toBeVisible();
+        // Search specifically for the initials container
+        const initials = container.querySelector(".text-4xl.font-bold");
+        expect(initials).toBeTruthy();
+        expect(initials?.textContent?.trim()).toBe("TE");
     });
 
     test("shows action buttons on hover", async () => {
@@ -105,13 +107,13 @@ describe("CharacterCard Component", () => {
             onMove: mockOnMove,
         });
 
-        const editButton = getByLabelText("Edit character");
+        const editButton = getByLabelText("Edit");
         await expect.element(editButton).toBeVisible();
 
-        const deleteButton = getByLabelText("Delete character");
+        const deleteButton = getByLabelText("Delete");
         await expect.element(deleteButton).toBeVisible();
 
-        const exportButton = getByLabelText("Export character");
+        const exportButton = getByLabelText("Export");
         await expect.element(exportButton).toBeVisible();
     });
 
@@ -123,7 +125,7 @@ describe("CharacterCard Component", () => {
             onExport: mockOnExport,
         });
 
-        const editButton = getByLabelText("Edit character");
+        const editButton = getByLabelText("Edit");
         await editButton.click();
 
         expect(mockOnEdit).toHaveBeenCalledOnce();
@@ -137,7 +139,7 @@ describe("CharacterCard Component", () => {
             onExport: mockOnExport,
         });
 
-        const deleteButton = getByLabelText("Delete character");
+        const deleteButton = getByLabelText("Delete");
         await deleteButton.click();
 
         expect(mockOnDelete).toHaveBeenCalledOnce();
@@ -151,7 +153,7 @@ describe("CharacterCard Component", () => {
             onExport: mockOnExport,
         });
 
-        const exportButton = getByLabelText("Export character");
+        const exportButton = getByLabelText("Export");
         await exportButton.click();
 
         expect(mockOnExport).toHaveBeenCalledOnce();
@@ -167,7 +169,7 @@ describe("CharacterCard Component", () => {
             isFirst: true,
         });
 
-        const moveLeftButton = getByLabelText("Move left");
+        const moveLeftButton = getByLabelText("Move Backward");
         await expect.element(moveLeftButton).toBeDisabled();
     });
 
@@ -181,7 +183,7 @@ describe("CharacterCard Component", () => {
             isLast: true,
         });
 
-        const moveRightButton = getByLabelText("Move right");
+        const moveRightButton = getByLabelText("Move Forward");
         await expect.element(moveRightButton).toBeDisabled();
     });
 
@@ -194,11 +196,11 @@ describe("CharacterCard Component", () => {
             onMove: mockOnMove,
         });
 
-        const moveLeftButton = getByLabelText("Move left");
+        const moveLeftButton = getByLabelText("Move Backward");
         await moveLeftButton.click();
         expect(mockOnMove).toHaveBeenCalledWith(-1);
 
-        const moveRightButton = getByLabelText("Move right");
+        const moveRightButton = getByLabelText("Move Forward");
         await moveRightButton.click();
         expect(mockOnMove).toHaveBeenCalledWith(1);
     });

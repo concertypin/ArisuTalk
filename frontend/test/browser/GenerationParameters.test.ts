@@ -101,8 +101,8 @@ describe("GenerationParameters Component", () => {
             id: 0,
         });
 
-        const temperatureInput = getByLabelText(/temperature/i);
-        await expect.element(temperatureInput).toHaveValue(0.7);
+        const temperatureInput = getByLabelText(/temperature value/i);
+        await expect.element(temperatureInput).toHaveValue("0.7");
     });
 
     test("shows max tokens values when configured", async () => {
@@ -111,10 +111,10 @@ describe("GenerationParameters Component", () => {
             id: 0,
         });
 
-        const maxInputTokens = getByLabelText(/max input tokens/i);
+        const maxInputTokens = getByLabelText(/max input tokens value/i);
         await expect.element(maxInputTokens).toHaveValue(4096);
 
-        const maxOutputTokens = getByLabelText(/max output tokens/i);
+        const maxOutputTokens = getByLabelText(/max output tokens value/i);
         await expect.element(maxOutputTokens).toHaveValue(2048);
     });
 
@@ -192,9 +192,9 @@ describe("GenerationParameters Component", () => {
             id: 0,
         });
 
-        const temperatureCheckbox = getByLabelText(/temperature/i, { exact: false });
-        const topPCheckbox = getByLabelText(/top p/i, { exact: false });
-        const topKCheckbox = getByLabelText(/top k/i, { exact: false });
+        const temperatureCheckbox = getByLabelText(/^temperature/i, { exact: false });
+        const topPCheckbox = getByLabelText(/^top p/i, { exact: false });
+        const topKCheckbox = getByLabelText(/^top k/i, { exact: false });
 
         await expect.element(temperatureCheckbox).toBeChecked();
         await expect.element(topPCheckbox).toBeChecked();
@@ -207,11 +207,11 @@ describe("GenerationParameters Component", () => {
             id: 0,
         });
 
-        const temperatureCheckbox = getByLabelText(/temperature/i, { exact: false });
+        const temperatureCheckbox = getByLabelText(/^temperature/i, { exact: false });
         await temperatureCheckbox.click();
 
         // After clicking, the parameter should be undefined
-        // This is a simplified test - actual behavior depends on component implementation
+        expect(mockConfig.generationParameters.temperature).toBeUndefined();
     });
 
     test("clears active config when active config is deleted", async () => {

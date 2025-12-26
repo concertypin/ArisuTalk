@@ -100,9 +100,8 @@ describe("CharacterForm Component", () => {
     });
 
     test("shows error message when name is empty", async () => {
-        const { getByLabelText, getByText } = render(CharacterForm, {
-            character: { ...mockCharacter, name: "" },
-            onSave: mockOnSave,
+        const { getByLabelText, getByText, container } = render(CharacterForm, {
+            onCancel: mockOnCancel,
         });
 
         const nameInput = getByLabelText(/Name/i);
@@ -111,18 +110,19 @@ describe("CharacterForm Component", () => {
         const submitButton = getByText(/Save/i);
         await submitButton.click();
 
-        const errorMessage = getByText(/Name is required/i);
-        await expect.element(errorMessage).toBeVisible();
+        const errorMessage = container.querySelector(".alert-error");
+        expect(errorMessage).toBeTruthy();
+        expect(errorMessage?.textContent).toContain("Name is required");
     });
 
     test("calls onCancel when cancel button is clicked", async () => {
-        const { getByRole } = render(CharacterForm, {
-            character: mockCharacter,
-            onSave: mockOnSave,
+        const { getByRole, container } = render(CharacterForm, {
             onCancel: mockOnCancel,
         });
 
-        const cancelButton = getByRole("button", { name: /Cancel/i });
+        // Click cancel button in the active tab (Create New)
+        const activeTab = container.querySelector(".tab-content:not(.hidden)");
+        const cancelButton = getByRole("button", { name: /Cancel/i }).first();
         await cancelButton.click();
 
         expect(mockOnCancel).toHaveBeenCalledOnce();

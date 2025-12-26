@@ -12,6 +12,7 @@ vi.mock("@/features/chat/stores/chatStore.svelte", () => {
         activeChatId: null,
         createChat: vi.fn().mockResolvedValue("new-chat-id"),
         setActiveChat: vi.fn(),
+        deleteChat: vi.fn().mockResolvedValue(undefined),
         isGenerating: false,
         activeMessages: [],
         sendMessage: vi.fn(),

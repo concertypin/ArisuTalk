@@ -12,11 +12,17 @@ vi.mock("@/lib/workers/workerClient", () => ({
     })),
 }));
 
-vi.mock("@/features/character/adapters/assetStorage/OpFSAssetStorageAdapter", () => ({
-    OpFSAssetStorageAdapter: vi.fn().mockImplementation(() => ({
+vi.mock("@/features/character/adapters/assetStorage/OpFSAssetStorageAdapter", () => {
+    const mockAdapter = {
         getAssetUrl: vi.fn().mockResolvedValue(null),
-    })),
-}));
+    };
+    return {
+        OpFSAssetStorageAdapter: vi.fn().mockImplementation(function (this: any) {
+            return mockAdapter;
+        }),
+        opfsAdapter: mockAdapter,
+    };
+});
 
 vi.mock("comlink", () => ({
     transfer: vi.fn((data, _transferables) => data),
@@ -103,33 +109,31 @@ describe("CharacterList Component", () => {
     });
 
     test("calls onEdit with correct index", async () => {
-        const { getByLabelText } = render(CharacterList, {
+        const { getByRole } = render(CharacterList, {
             onEdit: mockOnEdit,
         });
 
-        const editButton = getByLabelText("Edit character", { exact: false });
-        await editButton.click();
+        // Try finding by role and name
+        const editButton = getByRole("button", { name: "Edit" }).first();
+        await editButton.click({ force: true });
 
         expect(mockOnEdit).toHaveBeenCalled();
     });
 
     test("deletes character when delete action is confirmed", async () => {
-        const { getByLabelText } = render(CharacterList, {
+        const { getByLabelText, getByText } = render(CharacterList, {
             onEdit: mockOnEdit,
         });
 
-        // Mock window.confirm to return true
-        const originalConfirm = window.confirm;
-        window.confirm = vi.fn(() => true);
+        // Click delete button on the first card to open modal
+        const deleteButton = getByLabelText("Delete").first();
+        await deleteButton.click({ force: true });
 
-        const deleteButton = getByLabelText("Delete character", { exact: false });
-        await deleteButton.click();
+        // Find and click the confirmation button in the modal
+        const confirmButton = getByText("Delete", { exact: true });
+        await confirmButton.click();
 
-        // Note: The component uses a dialog modal for confirmation,
-        // so this is a simplified test. In reality, you'd need to interact with the dialog.
         expect(characterStore.remove).toHaveBeenCalled();
-
-        window.confirm = originalConfirm;
     });
 
     test("exports character when export button is clicked", async () => {
@@ -142,8 +146,8 @@ describe("CharacterList Component", () => {
             onEdit: mockOnEdit,
         });
 
-        const exportButton = getByLabelText("Export character", { exact: false });
-        await exportButton.click();
+        const exportButton = getByLabelText("Export").nth(0);
+        await exportButton.click({ force: true });
 
         // Verify download link was created
         expect(mockCreateElement).toHaveBeenCalledWith("a");

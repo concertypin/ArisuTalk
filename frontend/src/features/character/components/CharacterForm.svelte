@@ -116,7 +116,7 @@
             <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-6">
                 <form onsubmit={handleSubmit} class="space-y-4">
                     <fieldset class="fieldset w-full">
-                        <legend class="fieldset-legend">Name</legend>
+                        <label for="char_name" class="fieldset-legend">Name</label>
                         <input
                             type="text"
                             id="char_name"
@@ -127,7 +127,7 @@
                     </fieldset>
 
                     <fieldset class="fieldset w-full">
-                        <legend class="fieldset-legend">Description</legend>
+                        <label for="char_desc" class="fieldset-legend">Description</label>
                         <textarea
                             id="char_desc"
                             bind:value={description}

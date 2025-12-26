@@ -20,6 +20,8 @@ vi.mock("@/features/persona/stores/personaStore.svelte", () => {
 
 describe("PersonaForm Component", () => {
     let mockPersona: Persona;
+    const mockOnSave = vi.fn();
+    const mockOnCancel = vi.fn();
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -34,12 +36,14 @@ describe("PersonaForm Component", () => {
         personaStore.personas = [];
         personaStore.add = vi.fn() satisfies () => void;
         personaStore.update = vi.fn() satisfies () => void;
+        mockOnSave.mockClear();
+        mockOnCancel.mockClear();
     });
 
     test("renders create form when no persona is provided", async () => {
         const { getByRole, getByLabelText } = render(PersonaForm, {
-            onSave: vi.fn(),
-            onCancel: vi.fn(),
+            onSave: mockOnSave,
+            onCancel: mockOnCancel,
         });
 
         await expect.element(getByRole("heading", { name: "Create New Persona" })).toBeVisible();
@@ -51,8 +55,8 @@ describe("PersonaForm Component", () => {
     test("renders edit form when persona is provided", async () => {
         const { getByRole, getByLabelText } = render(PersonaForm, {
             persona: mockPersona,
-            onSave: vi.fn(),
-            onCancel: vi.fn(),
+            onSave: mockOnSave,
+            onCancel: mockOnCancel,
         });
 
         await expect.element(getByRole("heading", { name: "Edit Persona" })).toBeVisible();
@@ -63,8 +67,8 @@ describe("PersonaForm Component", () => {
     test("populates form with persona data", async () => {
         const { getByLabelText } = render(PersonaForm, {
             persona: mockPersona,
-            onSave: vi.fn(),
-            onCancel: vi.fn(),
+            onSave: mockOnSave,
+            onCancel: mockOnCancel,
         });
 
         await expect.element(getByLabelText(/Name/i)).toHaveValue("Test Persona");
@@ -73,10 +77,9 @@ describe("PersonaForm Component", () => {
     });
 
     test("calls personaStore.add when creating new persona", async () => {
-        const mockOnSave = vi.fn();
         const { getByLabelText, getByRole } = render(PersonaForm, {
             onSave: mockOnSave,
-            onCancel: vi.fn(),
+            onCancel: mockOnCancel,
         });
 
         const nameInput = getByLabelText(/Name/i);
@@ -93,11 +96,10 @@ describe("PersonaForm Component", () => {
     });
 
     test("calls personaStore.update when editing persona", async () => {
-        const mockOnSave = vi.fn();
         const { getByLabelText, getByRole } = render(PersonaForm, {
             persona: mockPersona,
             onSave: mockOnSave,
-            onCancel: vi.fn(),
+            onCancel: mockOnCancel,
         });
 
         const nameInput = getByLabelText(/Name/i);
@@ -111,10 +113,9 @@ describe("PersonaForm Component", () => {
     });
 
     test("calls onCancel when cancel button is clicked", async () => {
-        const mockOnCancel = vi.fn();
         const { getByRole } = render(PersonaForm, {
             persona: mockPersona,
-            onSave: vi.fn(),
+            onSave: mockOnSave,
             onCancel: mockOnCancel,
         });
 
@@ -125,29 +126,27 @@ describe("PersonaForm Component", () => {
     });
 
     test("shows error message when name is empty", async () => {
-        const mockOnSave = vi.fn();
-        const { getByLabelText, getByRole, getByText } = render(PersonaForm, {
+        const { getByLabelText, getByText, getByRole } = render(PersonaForm, {
             onSave: mockOnSave,
-            onCancel: vi.fn(),
+            onCancel: mockOnCancel,
         });
 
         const nameInput = getByLabelText(/Name/i);
         await nameInput.fill(""); // Clear name
 
-        const submitButton = getByRole("button", { name: /Save/i });
+        const submitButton = getByRole("button", { name: /Save Persona/i });
         await submitButton.click();
 
-        const errorMessage = getByText(/validation failed/i);
+        const errorMessage = getByText(/Name is required/i);
         await expect.element(errorMessage).toBeVisible();
         expect(mockOnSave).not.toHaveBeenCalled();
     });
 
     test("handles save button click", async () => {
-        const mockOnSave = vi.fn();
         const { getByRole } = render(PersonaForm, {
             persona: mockPersona,
             onSave: mockOnSave,
-            onCancel: vi.fn(),
+            onCancel: mockOnCancel,
         });
 
         const submitButton = getByRole("button", { name: /Save/i });
@@ -157,10 +156,9 @@ describe("PersonaForm Component", () => {
     });
 
     test("handles cancel button click", async () => {
-        const mockOnCancel = vi.fn();
         const { getByRole } = render(PersonaForm, {
             persona: mockPersona,
-            onSave: vi.fn(),
+            onSave: mockOnSave,
             onCancel: mockOnCancel,
         });
 

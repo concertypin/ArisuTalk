@@ -3,20 +3,13 @@ import { test, expect, describe, vi } from "vitest";
 import { render } from "vitest-browser-svelte";
 import MarkdownRenderer from "@/components/MarkdownRenderer.svelte";
 
-// Mock the svelte-markdown module
-vi.mock("svelte-markdown", () => ({
-    default: vi.fn().mockImplementation(({ source }: { source: string }) => {
-        return { render: () => `<p>${source}</p>` };
-    }),
-}));
-
 describe("MarkdownRenderer Component", () => {
     test("renders markdown content", async () => {
         const { getByText } = render(MarkdownRenderer, {
             source: "Hello World",
         });
 
-        await expect.element(getByText("Hello World")).toBeVisible();
+        await vi.waitFor(() => expect.element(getByText("Hello World")).toBeVisible());
     });
 
     test("renders markdown with formatting", async () => {
@@ -26,8 +19,8 @@ describe("MarkdownRenderer Component", () => {
         });
 
         // The markdown should be rendered with styling
-        await expect.element(getByText("Heading")).toBeVisible();
-        await expect.element(getByText("Bold text and italic text")).toBeVisible();
+        await vi.waitFor(() => expect.element(getByText("Heading")).toBeVisible());
+        await vi.waitFor(() => expect.element(getByText("Bold text and italic text")).toBeVisible());
     });
 
     test("renders markdown with links", async () => {
@@ -36,8 +29,7 @@ describe("MarkdownRenderer Component", () => {
             source,
         });
 
-        const link = getByRole("link", { name: "Link text" });
-        await expect.element(link).toBeVisible();
+        await vi.waitFor(() => expect.element(getByRole("link", { name: "Link text" })).toBeVisible());
     });
 
     test("shows loading state initially", async () => {

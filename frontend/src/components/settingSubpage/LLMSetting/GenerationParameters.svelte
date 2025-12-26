@@ -195,6 +195,7 @@
                         step="0.05"
                         class="range range-xs range-primary mt-2"
                         bind:value={config.generationParameters.temperature}
+                        aria-label="Temperature value"
                     />
                 {:else}
                     <div class="h-6 bg-base-300 rounded-full w-full opacity-50"></div>
@@ -216,6 +217,7 @@
                     bind:value={config.generationParameters.maxInputTokens}
                     disabled={!maxInProxy.checked}
                     placeholder="1024"
+                    aria-label="Max Input Tokens value"
                 />
             </div>
 
@@ -234,6 +236,7 @@
                     bind:value={config.generationParameters.maxOutputTokens}
                     disabled={!maxOutProxy.checked}
                     placeholder="1024"
+                    aria-label="Max Output Tokens value"
                 />
             </div>
         </div>
@@ -262,6 +265,7 @@
                                 step="0.01"
                                 class="range range-xs range-primary mt-2"
                                 bind:value={config.generationParameters.topP}
+                                aria-label="Top P value"
                             />
                         {:else}
                             <div class="h-6 bg-base-300 rounded-full w-full opacity-50"></div>
@@ -283,6 +287,7 @@
                             bind:value={config.generationParameters.topK}
                             disabled={!topKProxy.checked}
                             placeholder="40"
+                            aria-label="Top K value"
                         />
                     </div>
 
@@ -306,6 +311,7 @@
                                 step="0.1"
                                 class="range range-xs range-primary mt-2"
                                 bind:value={config.generationParameters.frequencyPenalty}
+                                aria-label="Frequency Penalty value"
                             />
                         {:else}
                             <div class="h-6 bg-base-300 rounded-full w-full opacity-50"></div>
@@ -332,6 +338,7 @@
                                 step="0.1"
                                 class="range range-xs range-primary mt-2"
                                 bind:value={config.generationParameters.presencePenalty}
+                                aria-label="Presence Penalty value"
                             />
                         {:else}
                             <div class="h-6 bg-base-300 rounded-full w-full opacity-50"></div>

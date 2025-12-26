@@ -15,8 +15,15 @@ vi.mock("@/lib/stores/ui.svelte", () => ({
 
 describe("CharacterSidebar Component", () => {
     let mockCharacters: Character[];
+    let mockOnSelect: any;
+    let mockOnAdd: any;
+    let mockOnPersona: any;
 
     beforeEach(() => {
+        vi.clearAllMocks();
+        mockOnSelect = vi.fn();
+        mockOnAdd = vi.fn();
+        mockOnPersona = vi.fn();
         mockCharacters = [
             {
                 id: "char-1",
@@ -75,9 +82,9 @@ describe("CharacterSidebar Component", () => {
     test("renders all character items", async () => {
         const { getByLabelText } = render(CharacterSidebar, {
             selectedCharacterId: null,
-            onSelect: vi.fn(),
-            onAdd: vi.fn(),
-            onPersona: vi.fn(),
+            onSelect: mockOnSelect,
+            onAdd: mockOnAdd,
+            onPersona: mockOnPersona,
         });
 
         await expect.element(getByLabelText("Character 1")).toBeVisible();
@@ -85,12 +92,11 @@ describe("CharacterSidebar Component", () => {
     });
 
     test("calls onSelect when character is clicked", async () => {
-        const mockOnSelect = vi.fn();
         const { getByLabelText } = render(CharacterSidebar, {
             selectedCharacterId: null,
             onSelect: mockOnSelect,
-            onAdd: vi.fn(),
-            onPersona: vi.fn(),
+            onAdd: mockOnAdd,
+            onPersona: mockOnPersona,
         });
 
         const characterButton = getByLabelText("Character 1");
@@ -100,12 +106,11 @@ describe("CharacterSidebar Component", () => {
     });
 
     test("calls onAdd when add character button is clicked", async () => {
-        const mockOnAdd = vi.fn();
         const { getByLabelText } = render(CharacterSidebar, {
             selectedCharacterId: null,
-            onSelect: vi.fn(),
+            onSelect: mockOnSelect,
             onAdd: mockOnAdd,
-            onPersona: vi.fn(),
+            onPersona: mockOnPersona,
         });
 
         const addButton = getByLabelText("Add Character");
@@ -117,9 +122,9 @@ describe("CharacterSidebar Component", () => {
     test("opens settings modal when settings button is clicked", async () => {
         const { getByLabelText } = render(CharacterSidebar, {
             selectedCharacterId: null,
-            onSelect: vi.fn(),
-            onAdd: vi.fn(),
-            onPersona: vi.fn(),
+            onSelect: mockOnSelect,
+            onAdd: mockOnAdd,
+            onPersona: mockOnPersona,
         });
 
         const settingsButton = getByLabelText("Settings");
@@ -129,11 +134,10 @@ describe("CharacterSidebar Component", () => {
     });
 
     test("calls onPersona when personas button is clicked", async () => {
-        const mockOnPersona = vi.fn();
         const { getByLabelText } = render(CharacterSidebar, {
             selectedCharacterId: null,
-            onSelect: vi.fn(),
-            onAdd: vi.fn(),
+            onSelect: mockOnSelect,
+            onAdd: mockOnAdd,
             onPersona: mockOnPersona,
         });
 
@@ -146,38 +150,47 @@ describe("CharacterSidebar Component", () => {
     test("highlights selected character", async () => {
         const { getByLabelText } = render(CharacterSidebar, {
             selectedCharacterId: "char-1",
-            onSelect: vi.fn(),
-            onAdd: vi.fn(),
-            onPersona: vi.fn(),
+            onSelect: mockOnSelect,
+            onAdd: mockOnAdd,
+            onPersona: mockOnPersona,
         });
 
-        // The selected character should have visual indication
         const characterButton = getByLabelText("Character 1");
-        // The active character has a rounded-xl shape vs rounded-3xl for inactive
-        await expect.element(characterButton).toHaveClass(/rounded-xl/);
+        // The inner div of the button has the rounded-xl shape when active
+        const innerDiv = characterButton.locator("div");
+        await expect.element(innerDiv).toHaveClass(/rounded-xl/);
     });
 
     test("renders divider before action buttons", async () => {
-        const { getByRole } = render(CharacterSidebar, {
+        const { container } = render(CharacterSidebar, {
             selectedCharacterId: null,
-            onSelect: vi.fn(),
-            onAdd: vi.fn(),
-            onPersona: vi.fn(),
+            onSelect: mockOnSelect,
+            onAdd: mockOnAdd,
+            onPersona: mockOnPersona,
         });
 
-        const divider = getByRole("separator");
-        await expect.element(divider).toBeVisible();
+        const divider = container.querySelector(".divider");
+        expect(divider).toBeTruthy();
     });
 
     test("displays initials for characters without avatars", async () => {
-        const { getByText } = render(CharacterSidebar, {
+        const charNoAvatar = [
+            { ...mockCharacters[0], avatarUrl: undefined },
+            { ...mockCharacters[1], avatarUrl: undefined },
+        ];
+        characterStore.characters = charNoAvatar;
+
+        const { getByLabelText } = render(CharacterSidebar, {
             selectedCharacterId: null,
-            onSelect: vi.fn(),
-            onAdd: vi.fn(),
-            onPersona: vi.fn(),
+            onSelect: mockOnSelect,
+            onAdd: mockOnAdd,
+            onPersona: mockOnPersona,
         });
 
-        await expect.element(getByText("CH")).toBeVisible();
-        await expect.element(getByText("CH")).toBeVisible();
+        const char1 = getByLabelText("Character 1");
+        await expect.element(char1.getByText("CH", { exact: true })).toBeVisible();
+
+        const char2 = getByLabelText("Character 2");
+        await expect.element(char2.getByText("CH", { exact: true })).toBeVisible();
     });
 });

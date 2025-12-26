@@ -35,13 +35,10 @@ describe("Persona and Chat interactions", () => {
         const { getByLabelText, getByText, getByRole } = render(CharacterLayoutTestWrapper);
 
         // Open Add Character modal
-        const addBtn = getByLabelText("Add Character");
-        await expect.element(addBtn).toBeVisible();
-        await addBtn.click();
+        const addCharButton = getByLabelText("Add Character");
+        await addCharButton.click();
 
-        // Fill character form (input has id `char_name`)
-
-        const nameInput = getByRole("textbox", { name: "e.g. Arisu" });
+        const nameInput = getByLabelText("Name");
         await expect.element(nameInput).toBeVisible();
         await nameInput.fill("TestBot");
 
