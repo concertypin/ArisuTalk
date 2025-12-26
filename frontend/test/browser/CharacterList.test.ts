@@ -17,6 +17,7 @@ vi.mock("@/features/character/adapters/assetStorage/OpFSAssetStorageAdapter", ()
         getAssetUrl: vi.fn().mockResolvedValue(null),
     };
     return {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         OpFSAssetStorageAdapter: vi.fn().mockImplementation(function (this: any) {
             return mockAdapter;
         }),
@@ -115,7 +116,7 @@ describe("CharacterList Component", () => {
 
         // Use direct click since it's hidden by opacity
         const editButton = getByRole("button", { name: "Edit" }).first();
-        const element = await editButton.element();
+        const element = await editButton.element() as HTMLElement;
         element.click();
 
         expect(mockOnEdit).toHaveBeenCalled();
@@ -132,7 +133,9 @@ describe("CharacterList Component", () => {
             expect(deleteButton).toBeTruthy();
         });
 
-        const deleteButton = container.querySelector('button[aria-label="Delete"]') as HTMLButtonElement;
+        const deleteButton = container.querySelector(
+            'button[aria-label="Delete"]'
+        ) as HTMLButtonElement;
         deleteButton.click();
 
         // Find and click the confirmation button in the modal

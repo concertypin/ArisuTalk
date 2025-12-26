@@ -116,12 +116,11 @@ describe("CharacterForm Component", () => {
     });
 
     test("calls onCancel when cancel button is clicked", async () => {
-        const { getByRole, container } = render(CharacterForm, {
+        const { getByRole } = render(CharacterForm, {
             onCancel: mockOnCancel,
         });
 
         // Click cancel button in the active tab (Create New)
-        const activeTab = container.querySelector(".tab-content:not(.hidden)");
         const cancelButton = getByRole("button", { name: /Cancel/i }).first();
         await cancelButton.click();
 

@@ -2,7 +2,6 @@ import { test, expect, describe, vi, beforeEach } from "vitest";
 import { render } from "vitest-browser-svelte";
 import SettingsModal from "@/components/SettingsModal.svelte";
 import { settings } from "@/lib/stores/settings.svelte";
-import { uiState } from "@/lib/stores/ui.svelte";
 import { SettingsSchema } from "@/lib/types/IDataModel";
 
 // Mock uiState

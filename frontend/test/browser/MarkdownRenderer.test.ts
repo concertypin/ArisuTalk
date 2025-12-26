@@ -20,7 +20,9 @@ describe("MarkdownRenderer Component", () => {
 
         // The markdown should be rendered with styling
         await vi.waitFor(() => expect.element(getByText("Heading")).toBeVisible());
-        await vi.waitFor(() => expect.element(getByText("Bold text and italic text")).toBeVisible());
+        await vi.waitFor(() =>
+            expect.element(getByText("Bold text and italic text")).toBeVisible()
+        );
     });
 
     test("renders markdown with links", async () => {
@@ -29,7 +31,9 @@ describe("MarkdownRenderer Component", () => {
             source,
         });
 
-        await vi.waitFor(() => expect.element(getByRole("link", { name: "Link text" })).toBeVisible());
+        await vi.waitFor(() =>
+            expect.element(getByRole("link", { name: "Link text" })).toBeVisible()
+        );
     });
 
     /* Skip loading and error tests as they depend on internal library behavior and mock complexity

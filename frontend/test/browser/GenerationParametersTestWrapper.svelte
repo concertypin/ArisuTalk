@@ -9,4 +9,4 @@
     let { config = $bindable(), id }: Props = $props();
 </script>
 
-<GenerationParameters bind:config={config} {id} />
+<GenerationParameters bind:config {id} />

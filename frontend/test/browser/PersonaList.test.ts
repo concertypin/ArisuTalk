@@ -11,6 +11,7 @@ vi.mock("@/features/character/adapters/assetStorage/OpFSAssetStorageAdapter", ()
         getAssetUrl: vi.fn().mockResolvedValue(null),
     };
     return {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         OpFSAssetStorageAdapter: vi.fn().mockImplementation(function (this: any) {
             return mockAdapter;
         }),
@@ -102,13 +103,12 @@ describe("PersonaList Component", () => {
         });
 
         // Scope to the first persona item
-        const firstPersona = getByRole("button", { name: /User-kun/i });
-        const editButton = firstPersona.getByLabelText("Edit");
-        
-        // Manual click bypasses some visibility checks in Playwright
-        const element = await editButton.element();
-        element.click();
-
+                const firstPersona = getByRole("button", { name: /User-kun/i });
+                const editButton = firstPersona.getByLabelText("Edit");
+                
+                // Manual click bypasses some visibility checks in Playwright
+                const element = await editButton.element() as HTMLElement;
+                element.click();
         expect(mockOnEdit).toHaveBeenCalled();
     });
 
@@ -121,11 +121,10 @@ describe("PersonaList Component", () => {
         });
 
         const firstPersona = getByRole("button", { name: /User-kun/i });
-        const deleteButton = firstPersona.getByLabelText("Delete");
-        
-        const element = await deleteButton.element();
-        element.click();
-
+                const deleteButton = firstPersona.getByLabelText("Delete");
+                
+                const element = await deleteButton.element() as HTMLElement;
+                element.click();
         expect(window.confirm).toHaveBeenCalledWith("Delete this persona?");
         expect(personaStore.remove).toHaveBeenCalledWith("persona-1");
 
@@ -158,11 +157,10 @@ describe("PersonaList Component", () => {
         });
 
         const firstPersona = getByRole("button", { name: /User-kun/i });
-        const moveDownButton = firstPersona.getByLabelText("Move Down");
-        
-        const element = await moveDownButton.element();
-        element.click();
-
+                const moveDownButton = firstPersona.getByLabelText("Move Down");
+                
+                const element = await moveDownButton.element() as HTMLElement;
+                element.click();
         expect(personaStore.reorder).toHaveBeenCalled();
     });
 

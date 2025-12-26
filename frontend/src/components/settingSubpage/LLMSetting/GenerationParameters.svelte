@@ -82,7 +82,11 @@
             </div>
             <div class="flex items-center gap-1">
                 <label class="swap swap-rotate btn btn-ghost btn-xs" title="Enable/Disable">
-                    <input type="checkbox" bind:checked={config.enabled} aria-label="Toggle enabled" />
+                    <input
+                        type="checkbox"
+                        bind:checked={config.enabled}
+                        aria-label="Toggle enabled"
+                    />
                     <Power size={16} class="swap-on text-success" />
                     <Power size={16} class="swap-off text-base-content/30" />
                 </label>

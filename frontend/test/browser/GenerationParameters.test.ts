@@ -125,7 +125,7 @@ describe("GenerationParameters Component", () => {
         });
 
         const deleteButton = getByLabelText("Delete config");
-        const element = await deleteButton.element();
+        const element = (await deleteButton.element()) as HTMLElement;
         element.click();
 
         expect(settings.value.llmConfigs).toHaveLength(0);
@@ -146,7 +146,7 @@ describe("GenerationParameters Component", () => {
         });
 
         const setActiveButton = getByLabelText("Use this config");
-        const element = await setActiveButton.element();
+        const element = (await setActiveButton.element()) as HTMLElement;
         element.click();
 
         expect(settings.value.activeLLMConfigId).toBe("config-2");
@@ -161,8 +161,9 @@ describe("GenerationParameters Component", () => {
         const toggleButton = getByLabelText("Toggle enabled");
         // Start checked
         await expect.element(toggleButton).toBeChecked();
-        
-        await toggleButton.click({ force: true });
+
+        const element = (await toggleButton.element()) as HTMLElement;
+        element.click();
 
         // Verify UI change
         await expect.element(toggleButton).not.toBeChecked();
@@ -215,8 +216,9 @@ describe("GenerationParameters Component", () => {
 
         const temperatureCheckbox = getByLabelText(/Temperature/i).first();
         await expect.element(temperatureCheckbox).toBeChecked();
-        
-        await temperatureCheckbox.click({ force: true });
+
+        const element = (await temperatureCheckbox.element()) as HTMLElement;
+        element.click();
 
         // Verify UI change (Label will change to "Temperature (Off)")
         const offCheckbox = getByLabelText(/Temperature/i).first();
@@ -230,7 +232,7 @@ describe("GenerationParameters Component", () => {
         });
 
         const deleteButton = getByLabelText("Delete config");
-        const element = await deleteButton.element();
+        const element = (await deleteButton.element()) as HTMLElement;
         element.click();
 
         expect(settings.value.activeLLMConfigId).toBeNull();
