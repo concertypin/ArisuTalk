@@ -116,7 +116,7 @@ describe("CharacterList Component", () => {
 
         // Use direct click since it's hidden by opacity
         const editButton = getByRole("button", { name: "Edit" }).first();
-        const element = await editButton.element() as HTMLElement;
+        const element = (await editButton.element()) as HTMLElement;
         element.click();
 
         expect(mockOnEdit).toHaveBeenCalled();

@@ -4,7 +4,7 @@ import {
     type ProviderSettings,
     type IChatProviderFactory,
 } from "@/lib/interfaces/IChatProvider";
-import { type BaseMessage } from "@langchain/core/messages";
+import type { BaseMessage } from "@langchain/core/messages";
 import type { ChatOpenAI } from "@langchain/openai";
 
 type OpenRouterSettings = CommonChatSettings & ProviderSettings["OPENROUTER"];
@@ -22,7 +22,6 @@ export class OpenRouterChatProvider extends ChatProvider<"OPENROUTER"> {
     description = "OpenRouter compatible models (OpenAI-style API)";
 
     private apiKey: string;
-    private baseUrl: string;
     private modelName: string;
     private abortController: AbortController | null = null;
     private client: ChatOpenAI;
@@ -33,7 +32,6 @@ export class OpenRouterChatProvider extends ChatProvider<"OPENROUTER"> {
     ) {
         super();
         this.apiKey = settings.apiKey || "";
-        this.baseUrl = settings.baseUrl || "https://api.openrouter.ai/v1";
         // Defaults to no-training free model
         this.modelName = settings.model || "mistralai/devstral-2512:free";
         this.client = new ChatOpenAICtor({
@@ -45,6 +43,7 @@ export class OpenRouterChatProvider extends ChatProvider<"OPENROUTER"> {
             maxCompletionTokens: settings.generationParameters?.maxOutputTokens,
 
             configuration: {
+                baseURL: settings.baseURL || "https://api.openrouter.ai/v1",
                 dangerouslyAllowBrowser: true,
                 defaultHeaders: {
                     "HTTP-Referer": "https://arisutalk.moe",
@@ -73,6 +72,7 @@ export class OpenRouterChatProvider extends ChatProvider<"OPENROUTER"> {
         // Use LangChain client to produce a non-streaming response
         // If per-request settings are provided, we could recreate the client, but
         // for simplicity we use the existing client and rely on its configuration.
+
         const response = await this.client.invoke(messages);
         const content = response.content;
         if (typeof content === "string") return content;

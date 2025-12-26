@@ -49,7 +49,13 @@ export interface ProviderSettings {
     };
     /** Mock provider settings for testing */
     MOCK: {
+        /**
+         * Delay in milliseconds between responses.
+         */
         mockDelay?: number;
+        /**
+         * Predefined responses to return.
+         */
         responses?: string[];
     };
 }
