@@ -1,3 +1,4 @@
+/// <reference types="vitest/browser" />
 import { test, expect, describe, vi } from "vitest";
 import { render } from "vitest-browser-svelte";
 import MarkdownRenderer from "@/components/MarkdownRenderer.svelte";

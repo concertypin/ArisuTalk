@@ -4,6 +4,15 @@ import { expectTypeOf } from "vitest";
 import Sidebar from "@/components/Sidebar.svelte";
 import { uiState } from "@/lib/stores/ui.svelte";
 
+// Mock uiState
+vi.mock("@/lib/stores/ui.svelte", () => ({
+    uiState: {
+        openSettingsModal: vi.fn(),
+        settingsModalOpen: false,
+        closeSettingsModal: vi.fn(),
+    },
+}));
+
 describe("Sidebar Component", () => {
     test("renders correctly", async () => {
         const { getByText } = render(Sidebar);

@@ -1,11 +1,7 @@
-// DEPRECATED: This file has been moved to test/unit/stores/chatStoreStreaming.test.ts
-// This test does not use vitest-browser-svelte's render() function and should not be in the browser directory.
-// Please delete this file.
-
 import { test, expect, describe } from "vitest";
 import { chatStore } from "@/features/chat/stores/chatStore.svelte";
 
-describe.skip("ChatStore Streaming (DEPRECATED - moved to unit/stores)", () => {
+describe("ChatStore Streaming", () => {
     test("sendMessage streams response from MockChatProvider", async () => {
         // Initialize store
         await chatStore.initPromise;
@@ -17,7 +13,7 @@ describe.skip("ChatStore Streaming (DEPRECATED - moved to unit/stores)", () => {
         });
 
         // Create a chat to be active
-        // We might need to mock storage adapter or ensure the default one works in test env
+        // We might need to mock storage adapter or ensure that the default one works in test env
         // Assuming default in-memory or indexeddb mock works
         const chatId = await chatStore.createChat("test-char", "Test Chat");
         await chatStore.setActiveChat(chatId);
@@ -52,7 +48,7 @@ describe.skip("ChatStore Streaming (DEPRECATED - moved to unit/stores)", () => {
         }
     });
 
-    test("abortGeneration stops the stream", async () => {
+    test("abortGeneration stops stream", async () => {
         await chatStore.initPromise;
         await chatStore.setProvider("MOCK", {
             mockDelay: 100, // Slow delay
@@ -100,53 +96,5 @@ describe.skip("ChatStore Streaming (DEPRECATED - moved to unit/stores)", () => {
 
         await chatStore.sendMessage("Fail me");
         expect(chatStore.isGenerating).toBe(false);
-    });
-
-    test.skip("provider reloads when settings change", async () => {
-        const { settings } = await import("@/lib/stores/settings.svelte");
-        const { LLMConfigSchema } = await import("@/lib/types/IDataModel");
-
-        await chatStore.initPromise;
-
-        // Set initial provider
-        await chatStore.setProvider("MOCK", {
-            mockDelay: 10,
-            responses: ["Initial Response"],
-        });
-
-        // Create chat
-        const chatId = await chatStore.createChat("test-reload", "Test Reload");
-        await chatStore.setActiveChat(chatId);
-
-        // Send first message
-        await chatStore.sendMessage("First");
-        const assistantMsg = chatStore.activeMessages.find((m) => m.role === "assistant");
-        expect(assistantMsg).toBeDefined();
-        if (
-            assistantMsg &&
-            typeof assistantMsg.content === "object" &&
-            "data" in assistantMsg.content
-        ) {
-            expect(assistantMsg.content.data).toBe("Initial Response");
-        }
-
-        // Change settings - add new config and set as active
-        const newConfig = LLMConfigSchema.parse({
-            name: "Updated Config",
-            provider: "Mock",
-            enabled: true,
-        });
-        settings.value.llmConfigs = [newConfig];
-        settings.value.activeLLMConfigId = newConfig.id;
-
-        // Wait for $effect to trigger
-        await new Promise((r) => setTimeout(r, 200));
-
-        // Provider should have been reloaded automatically
-        // We can't directly check the provider, but we can verify it works
-        // by ensuring subsequent messages still work
-        await chatStore.sendMessage("Second");
-        const messages = chatStore.activeMessages.filter((m) => m.role === "assistant");
-        expect(messages.length).toBeGreaterThanOrEqual(1);
     });
 });

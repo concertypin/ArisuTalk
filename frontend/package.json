@@ -15,8 +15,8 @@
         "test:browser": "vitest run test/browser",
         "test:ui": "vitest --ui",
         "test:coverage": "pnpm run test --coverage",
-        "check:fix": "pnpm run format && pnpm run lint:fix && pnpm exec concurrently \"pnpm run check:types\" \"pnpm run test\" \"pnpm run test:browser\"",
-        "check:types": "pnpm exec concurrently \"svelte-check --tsconfig tsconfig.app.json --fail-on-warnings\" \"svelte-check --tsconfig tsconfig.worker.json --fail-on-warnings\" \"svelte-check --tsconfig tsconfig.test.json\"",
+        "check": "pnpm run format && pnpm run lint:fix && concurrently \"pnpm run test\" \"pnpm run test:browser\"",
+        "check:types": "concurrently \"svelte-check --tsconfig tsconfig.app.json --fail-on-warnings\" \"svelte-check --tsconfig tsconfig.worker.json --fail-on-warnings\" \"svelte-check --tsconfig tsconfig.test.json\"",
         "lint": "pnpm run check:types && eslint --cache --cache-location ./node_modules/.cache/eslint/ src/ test/ worker/",
         "lint:fix": "pnpm run lint --fix",
         "format": "pnpm run format:check --write",
@@ -29,7 +29,7 @@
         "node": ">20"
     },
     "dependencies": {
-        "@arisutalk/character-spec": "0.0.11",
+        "@arisutalk/character-spec": "0.0.13",
         "@langchain/anthropic": "^1.3.3",
         "@langchain/core": "^1.1.4",
         "@langchain/google-genai": "^2.1.0",
@@ -38,6 +38,7 @@
         "cbor-x": "^1.6.0",
         "comlink": "^4.4.2",
         "dexie": "^4.2.1",
+        "dist": "link:..\\..\\ArisuTalkFrontend\\character-spec\\dist",
         "svelte": "^5.39.3",
         "svelte-markdown": "^0.4.1",
         "tinybase": "^7.2.0",

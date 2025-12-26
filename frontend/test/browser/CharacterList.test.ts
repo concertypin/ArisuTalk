@@ -1,3 +1,4 @@
+/// <reference types="vitest/browser" />
 import { test, expect, describe, vi, beforeEach } from "vitest";
 import { render } from "vitest-browser-svelte";
 import CharacterList from "@/features/character/components/CharacterList.svelte";

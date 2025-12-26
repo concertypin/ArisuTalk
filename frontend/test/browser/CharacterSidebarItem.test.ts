@@ -1,3 +1,4 @@
+/// <reference types="vitest/browser" />
 import { test, expect, describe, vi } from "vitest";
 import { render } from "vitest-browser-svelte";
 import CharacterSidebarItem from "@/features/character/components/CharacterSidebarItem.svelte";

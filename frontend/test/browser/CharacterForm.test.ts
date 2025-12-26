@@ -1,3 +1,4 @@
+/// <reference types="vitest/browser" />
 import { test, expect, describe, vi, beforeEach } from "vitest";
 import { render } from "vitest-browser-svelte";
 import CharacterForm from "@/features/character/components/CharacterForm.svelte";
@@ -9,9 +10,12 @@ vi.mock("@/features/character/stores/characterStore.svelte", () => {
     const mockStore = {
         characters: [],
         importCharacter: vi.fn(),
+        add: vi.fn(),
+        delete: vi.fn(),
     };
     return {
         characterStore: mockStore,
+        CharacterStore: vi.fn(),
     };
 });
 

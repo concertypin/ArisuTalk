@@ -36,6 +36,13 @@ describe("IndexedDBHelper (ArisuDB)", () => {
             name: "Test Character",
             specVersion: 0,
             description: "A test character",
+            assets: {
+                assets: [],
+            },
+            prompt: {
+                description: "",
+            },
+            metadata: {},
         });
 
         it("puts and gets a character", async () => {
@@ -183,6 +190,14 @@ describe("IndexedDBHelper (ArisuDB)", () => {
                     id: "c1",
                     name: "X",
                     specVersion: 0,
+                    description: "Y",
+                    assets: {
+                        assets: [],
+                    },
+                    prompt: {
+                        description: "",
+                    },
+                    metadata: {},
                 })
             );
             await db.chats.put({

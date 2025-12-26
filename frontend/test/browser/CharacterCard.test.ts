@@ -1,3 +1,4 @@
+/// <reference types="vitest/browser" />
 import { test, expect, describe, vi, beforeEach } from "vitest";
 import { render } from "vitest-browser-svelte";
 import CharacterCard from "@/features/character/components/CharacterCard.svelte";
@@ -8,6 +9,7 @@ vi.mock("@/features/character/adapters/assetStorage/OpFSAssetStorageAdapter", ()
     opfsAdapter: {
         getAssetUrl: vi.fn().mockResolvedValue(null),
     },
+    OpFSAssetStorageAdapter: vi.fn(),
 }));
 
 describe("CharacterCard Component", () => {

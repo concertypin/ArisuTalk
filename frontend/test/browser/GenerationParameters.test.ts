@@ -1,3 +1,4 @@
+/// <reference types="vitest/browser" />
 import { test, expect, describe, vi, beforeEach } from "vitest";
 import { render } from "vitest-browser-svelte";
 import GenerationParameters from "@/components/settingSubpage/LLMSetting/GenerationParameters.svelte";
@@ -10,7 +11,17 @@ vi.mock("@/lib/stores/settings.svelte", () => {
         value: {
             llmConfigs: [],
             activeLLMConfigId: null,
+            prompt: {
+                generationPrompt: "",
+                authorsNote: "",
+            },
+            advanced: {
+                debug: false,
+                experimental: false,
+            },
         },
+        save: vi.fn().mockResolvedValue(undefined),
+        init: vi.fn().mockResolvedValue(undefined),
     };
     return {
         settings: mockSettings,

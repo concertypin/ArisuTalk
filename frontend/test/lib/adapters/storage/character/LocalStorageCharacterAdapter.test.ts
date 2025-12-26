@@ -8,23 +8,18 @@ describe("LocalStorageCharacterAdapter", () => {
     const testChar: Character = apply(CharacterSchema, {
         id: "char-1",
         name: "Test Character",
-        assets: {
-            assets: [],
-        },
-        executables: {
-            replaceHooks: { display: [], input: [], output: [], request: [] },
-        },
         metadata: {
             version: "0.0.1",
             license: "UNLICENSED",
         },
         prompt: {
-            authorsNote: "",
             description: "Be helpful",
-            lorebook: { config: { tokenLimit: 1000 }, data: [] },
         },
         specVersion: 0,
         description: "A test character",
+        assets: {
+            assets: [],
+        },
     });
 
     beforeEach(() => {

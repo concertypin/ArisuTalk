@@ -5,6 +5,15 @@ import { settings } from "@/lib/stores/settings.svelte";
 import { uiState } from "@/lib/stores/ui.svelte";
 import { SettingsSchema } from "@/lib/types/IDataModel";
 
+// Mock uiState
+vi.mock("@/lib/stores/ui.svelte", () => ({
+    uiState: {
+        settingsModalOpen: true,
+        openSettingsModal: vi.fn(),
+        closeSettingsModal: vi.fn(),
+    },
+}));
+
 describe("SettingsModal Component", () => {
     beforeEach(() => {
         // Reset stores
@@ -13,9 +22,6 @@ describe("SettingsModal Component", () => {
         // Better to mock the adapter or the save method.
         // Since we import the instance, we can spy on it.
         vi.spyOn(settings, "save").mockResolvedValue(undefined);
-
-        uiState.settingsModalOpen = true;
-        vi.spyOn(uiState, "closeSettingsModal");
     });
 
     test("renders correctly", async () => {

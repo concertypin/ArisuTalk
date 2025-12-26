@@ -13,9 +13,13 @@ vi.mock("@/features/chat/stores/chatStore.svelte", () => {
         activeChatId: null,
         activeMessages: [],
         sendMessage: vi.fn(),
+        createChat: vi.fn().mockResolvedValue("new-chat-id"),
+        setActiveChat: vi.fn(),
+        initPromise: Promise.resolve(),
     };
     return {
         chatStore: mockStore,
+        ChatStore: vi.fn(),
     };
 });
 

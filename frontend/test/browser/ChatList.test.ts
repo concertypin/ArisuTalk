@@ -1,3 +1,4 @@
+/// <reference types="vitest/browser" />
 import { test, expect, describe, vi, beforeEach } from "vitest";
 import { render } from "vitest-browser-svelte";
 import ChatList from "@/features/chat/components/ChatList.svelte";
@@ -11,10 +12,13 @@ vi.mock("@/features/chat/stores/chatStore.svelte", () => {
         activeChatId: null,
         createChat: vi.fn().mockResolvedValue("new-chat-id"),
         setActiveChat: vi.fn(),
-        deleteChat: vi.fn().mockResolvedValue(undefined),
+        isGenerating: false,
+        activeMessages: [],
+        sendMessage: vi.fn(),
     };
     return {
         chatStore: mockStore,
+        ChatStore: vi.fn(),
     };
 });
 
