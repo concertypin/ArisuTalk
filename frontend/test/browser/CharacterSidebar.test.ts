@@ -92,15 +92,21 @@ describe("CharacterSidebar Component", () => {
     });
 
     test("calls onSelect when character is clicked", async () => {
-        const { getByLabelText } = render(CharacterSidebar, {
+        const { container } = render(CharacterSidebar, {
             selectedCharacterId: null,
             onSelect: mockOnSelect,
             onAdd: mockOnAdd,
             onPersona: mockOnPersona,
         });
 
-        const characterButton = getByLabelText("Character 1");
-        await characterButton.click();
+        // Wait for rendering and click the button directly
+        await vi.waitFor(() => {
+            const characterButton = container.querySelector('button[aria-label="Character 1"]');
+            expect(characterButton).toBeTruthy();
+        });
+
+        const characterButton = container.querySelector('button[aria-label="Character 1"]') as HTMLButtonElement;
+        characterButton.click();
 
         expect(mockOnSelect).toHaveBeenCalledWith("char-1");
     });

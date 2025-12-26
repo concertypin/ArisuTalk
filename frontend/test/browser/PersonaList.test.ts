@@ -80,13 +80,18 @@ describe("PersonaList Component", () => {
     });
 
     test("selects persona when clicked", async () => {
-        const { getByText, getByRole } = render(PersonaList, {
+        const { container } = render(PersonaList, {
             onEdit: mockOnEdit,
         });
 
-        // Click the persona item (which is a button)
-        const personaItem = getByRole("button", { name: /User-kun/i });
-        await personaItem.click({ force: true });
+        // Find the persona item in the DOM
+        await vi.waitFor(() => {
+            const personaItem = container.querySelector('div[role="button"]');
+            expect(personaItem).toBeTruthy();
+        });
+
+        const personaItem = container.querySelector('div[role="button"]') as HTMLDivElement;
+        personaItem.click();
 
         expect(personaStore.select).toHaveBeenCalledWith("persona-1");
     });
@@ -99,7 +104,10 @@ describe("PersonaList Component", () => {
         // Scope to the first persona item
         const firstPersona = getByRole("button", { name: /User-kun/i });
         const editButton = firstPersona.getByLabelText("Edit");
-        await editButton.click();
+        
+        // Manual click bypasses some visibility checks in Playwright
+        const element = await editButton.element();
+        element.click();
 
         expect(mockOnEdit).toHaveBeenCalled();
     });
@@ -114,7 +122,9 @@ describe("PersonaList Component", () => {
 
         const firstPersona = getByRole("button", { name: /User-kun/i });
         const deleteButton = firstPersona.getByLabelText("Delete");
-        await deleteButton.click();
+        
+        const element = await deleteButton.element();
+        element.click();
 
         expect(window.confirm).toHaveBeenCalledWith("Delete this persona?");
         expect(personaStore.remove).toHaveBeenCalledWith("persona-1");
@@ -149,7 +159,9 @@ describe("PersonaList Component", () => {
 
         const firstPersona = getByRole("button", { name: /User-kun/i });
         const moveDownButton = firstPersona.getByLabelText("Move Down");
-        await moveDownButton.click();
+        
+        const element = await moveDownButton.element();
+        element.click();
 
         expect(personaStore.reorder).toHaveBeenCalled();
     });

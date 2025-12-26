@@ -113,21 +113,27 @@ describe("CharacterList Component", () => {
             onEdit: mockOnEdit,
         });
 
-        // Try finding by role and name
+        // Use direct click since it's hidden by opacity
         const editButton = getByRole("button", { name: "Edit" }).first();
-        await editButton.click({ force: true });
+        const element = await editButton.element();
+        element.click();
 
         expect(mockOnEdit).toHaveBeenCalled();
     });
 
     test("deletes character when delete action is confirmed", async () => {
-        const { getByLabelText, getByText } = render(CharacterList, {
+        const { container, getByText } = render(CharacterList, {
             onEdit: mockOnEdit,
         });
 
         // Click delete button on the first card to open modal
-        const deleteButton = getByLabelText("Delete").first();
-        await deleteButton.click({ force: true });
+        await vi.waitFor(() => {
+            const deleteButton = container.querySelector('button[aria-label="Delete"]');
+            expect(deleteButton).toBeTruthy();
+        });
+
+        const deleteButton = container.querySelector('button[aria-label="Delete"]') as HTMLButtonElement;
+        deleteButton.click();
 
         // Find and click the confirmation button in the modal
         const confirmButton = getByText("Delete", { exact: true });

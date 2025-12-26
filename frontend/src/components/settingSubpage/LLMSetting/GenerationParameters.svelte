@@ -82,7 +82,7 @@
             </div>
             <div class="flex items-center gap-1">
                 <label class="swap swap-rotate btn btn-ghost btn-xs" title="Enable/Disable">
-                    <input type="checkbox" bind:checked={config.enabled} />
+                    <input type="checkbox" bind:checked={config.enabled} aria-label="Toggle enabled" />
                     <Power size={16} class="swap-on text-success" />
                     <Power size={16} class="swap-off text-base-content/30" />
                 </label>
@@ -91,10 +91,15 @@
                     onclick={setAsActive}
                     disabled={isActive || !config.enabled}
                     title="Use this config"
+                    aria-label="Use this config"
                 >
                     <Check size={16} class={isActive ? "text-primary" : ""} />
                 </button>
-                <button class="btn btn-ghost btn-xs text-error" onclick={removeLLMConfig}>
+                <button
+                    class="btn btn-ghost btn-xs text-error"
+                    onclick={removeLLMConfig}
+                    aria-label="Delete config"
+                >
                     <Trash2 size={16} />
                 </button>
             </div>
