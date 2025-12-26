@@ -9,6 +9,7 @@ describe("LocalStoragePersonaAdapter", () => {
         name: "Test Persona",
         description: "A test persona",
         profileAsset: "avatar.png",
+        assets: { assets: [] },
     };
 
     beforeEach(() => {

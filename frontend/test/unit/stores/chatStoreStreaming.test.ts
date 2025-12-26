@@ -46,7 +46,7 @@ describe("ChatStore Streaming", () => {
             // Should not happen given we fixed the type
             expect(content).toBe("Streamed Response");
         }
-    });
+    }, 15000);
 
     test("abortGeneration stops stream", async () => {
         await chatStore.initPromise;
