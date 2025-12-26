@@ -33,6 +33,11 @@ vi.mock("@/lib/providers/chat/OpenRouterChatProvider", () => {
         },
     };
 });
+vi.spyOn(
+    ChatStore.prototype,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    "waitForSettings" in ChatStore.prototype ? "waitForSettings" : ("" as any)
+).mockResolvedValue(undefined);
 
 describe("ChatStore", () => {
     let store: ChatStore;
