@@ -1,4 +1,3 @@
-
 import { describe, it, expect, vi } from "vitest";
 import { GeminiChatProvider } from "@/lib/providers/chat/GeminiChatProvider";
 import { CommonChatSettings } from "@/lib/interfaces";
@@ -71,7 +70,9 @@ describe("GeminiChatProvider", () => {
     it("throws error if model is not specified", async () => {
         const settings = { ...commonSettings, model: undefined };
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await expect(GeminiChatProvider.factory.connect(settings as any)).rejects.toThrow("Model must be specified for GeminiChatProvider.");
+        await expect(GeminiChatProvider.factory.connect(settings as any)).rejects.toThrow(
+            "Model must be specified for GeminiChatProvider."
+        );
     });
 
     it("handles thinkingLevel string configuration", async () => {
@@ -115,7 +116,7 @@ describe("GeminiChatProvider", () => {
             ...commonSettings,
             ...geminiSettings,
             safetySettings: [
-                { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_LOW_AND_ABOVE" }
+                { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_LOW_AND_ABOVE" },
             ],
         };
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

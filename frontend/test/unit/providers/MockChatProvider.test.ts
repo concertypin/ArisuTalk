@@ -1,4 +1,3 @@
-
 import { describe, it, expect, expectTypeOf } from "vitest";
 import { MockChatProvider } from "@/lib/providers/chat/MockChatProvider";
 import { CommonChatSettings } from "@/lib/interfaces";

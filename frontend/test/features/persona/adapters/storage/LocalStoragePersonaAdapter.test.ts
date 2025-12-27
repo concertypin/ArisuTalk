@@ -1,4 +1,3 @@
-
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { LocalStoragePersonaAdapter } from "@/features/persona/adapters/storage/LocalStoragePersonaAdapter";
 import type { Persona } from "@/features/persona/schema";

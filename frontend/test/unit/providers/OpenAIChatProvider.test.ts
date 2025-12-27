@@ -1,4 +1,3 @@
-
 import { describe, it, expect, vi, expectTypeOf, beforeEach } from "vitest";
 import { OpenAIChatProvider } from "@/lib/providers/chat/OpenAIChatProvider";
 import { HumanMessage } from "@langchain/core/messages";

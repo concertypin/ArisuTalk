@@ -1,4 +1,3 @@
-
 import { describe, it, expect, vi } from "vitest";
 import { parseMagicPatterns, type MagicPatternContext } from "@/lib/parsers/magicPatternParser";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
@@ -22,7 +21,9 @@ describe("magicPatternParser", () => {
         const result = await parseMagicPatterns(input, mockContext);
 
         expect(result).toBe(input);
-        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Parser not implemented yet"));
+        expect(consoleSpy).toHaveBeenCalledWith(
+            expect.stringContaining("Parser not implemented yet")
+        );
 
         consoleSpy.mockRestore();
     });

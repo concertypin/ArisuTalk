@@ -1,4 +1,3 @@
-
 import { describe, it, expect, vi } from "vitest";
 import { getTablesSchema, applySchema } from "@/lib/adapters/storage/schematizer";
 import { type Store } from "tinybase";

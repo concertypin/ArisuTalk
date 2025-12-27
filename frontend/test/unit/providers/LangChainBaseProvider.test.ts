@@ -1,4 +1,3 @@
-
 import { describe, it, expect, vi } from "vitest";
 import { LangChainBaseProvider } from "@/lib/providers/chat/LangChainBaseProvider";
 import { HumanMessage } from "@langchain/core/messages";
@@ -105,7 +104,7 @@ describe("LangChainBaseProvider", () => {
                 if (options.signal.aborted) throw new DOMException("Aborted", "AbortError");
                 yield { content: "chunk1" };
                 // Simulate delay to allow abort to happen
-                await new Promise(r => setTimeout(r, 10));
+                await new Promise((r) => setTimeout(r, 10));
                 if (options.signal.aborted) throw new DOMException("Aborted", "AbortError");
                 yield { content: "chunk2" };
             }),
