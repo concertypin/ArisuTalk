@@ -59,12 +59,12 @@ import Button from './Button.svelte';
 describe('Button Component', () => {
     it.concurrent('should render with snippet content and handle clicks', async () => {
         // 1. Render the component
-        const screen = render(Button, { 
+        const { getByRole, getByText } = render(Button, { 
           props: { label: 'Click Me' } 
         });
         
         // 2. Locate using ARIA roles (best practice)
-        const btn = page.getByRole('button', { name: /click me/i });
+        const btn = getByRole('button', { name: /click me/i });
         
         // 3. Assert visibility and state
         await expect.element(btn).toBeVisible();
@@ -73,7 +73,7 @@ describe('Button Component', () => {
         await btn.click();
         
         // 5. Assert result (assuming it changes text on click)
-        await expect.element(page.getByText('Clicked')).toBeInTheDocument();
+        await expect.element(getByText('Clicked')).toBeInTheDocument();
     });
 });
 
