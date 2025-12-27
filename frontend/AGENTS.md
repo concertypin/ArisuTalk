@@ -46,7 +46,9 @@ The production-ready files will be in the `ArisuTalk/frontend/dist` directory.
 ### Testing
 
 ```bash
-pnpm run -F frontend test
+pnpm run -F frontend test # For unit tests
+pnpm run -F frontend test:browser # For browser tests
+pnpm run -F frontend test:coverage # For test coverage report
 ```
 
 ## Authentication Setup
@@ -82,22 +84,17 @@ const api = Comlink.wrap<MyWorkerApi>(worker);
 
 Worker logic should be tested via unit tests in `test/workers/`. Note that real Workers don't run in Vitest's default environment, so we mock the Worker construction and Comlink wrapping for unit tests.
 
-### Common Mistakes
+## Common Mistakes
 
 - Putting `.ts` on import statements.
     - Fix: Remove `.ts` from import statements.
 - Using `lucide-svelte` instead of `@lucide/svelte`.
     - Fix: Replace `lucide-svelte` with `@lucide/svelte`.
+- Using `@testing-library/svelte` instead of `vitest-browser-svelte`.
+    - Fix: Replace `@testing-library/svelte` with `vitest-browser-svelte`.
 
-### Documentation of Other Libraries
+## Documentation of Other Libraries
 
 - DaisyUI: https://daisyui.com/llms.txt
 - Svelte: https://svelte.dev/llms.txt
-
-## Contributing
-
-Contributions are welcome! Please see [CONTRIBUTING.md](../CONTRIBUTING.md) for guidelines.
-
-### License
-
-This project follows Apache License 2.0.
+- Vitest: https://vitest.dev/llms.txt

@@ -17,7 +17,11 @@ const browserTestConfig: Presence<UserConfig["test"]>["browser"] = {
     headless: true,
 };
 
-const runBrowserTest = process.env.npm_lifecycle_event?.includes("browser") ? true : false;
+const runBrowserTest =
+    process.env.npm_lifecycle_event?.includes("browser") ||
+    process.env.npm_lifecycle_event?.includes("coverage")
+        ? true
+        : false;
 
 export default defineConfig(async (ctx) => {
     const mode = ctx.mode;

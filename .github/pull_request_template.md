@@ -10,7 +10,7 @@ If these questions do not apply to your pull request, just check them.
 
 - [ ] I have tested my changes locally.
 - [ ] I have updated the documentation...
-- [ ] and docstrings(JSDoc or KDoc).
+- [ ] and JSDoc.
 - [ ] I've also checked the code for any linting error/warnings.
 - [ ] I formatted the code with the formatter.
 
