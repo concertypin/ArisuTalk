@@ -22,7 +22,7 @@ Thank you *so much* for contributing to the project! 🥳 Your participation gre
 - Do not include too many changes in one PR! Please split them into the smallest possible units. It makes it easier to review.
 - If there are `README.md` files in each directory, please follow their rules as well.
 - For developers, please leave documentation as comments in the source code if possible. If a very long or complex explanation is needed, please write it as a separate document.
-- *Actively* use JSDoc or KDoc!
+- *Actively* use JSDoc!
 
 ## Bug Report 🐛
 

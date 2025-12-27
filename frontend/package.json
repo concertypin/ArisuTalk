@@ -14,7 +14,7 @@
         "test": "vitest run --exclude test/browser",
         "test:browser": "vitest run test/browser",
         "test:ui": "vitest --ui",
-        "test:coverage": "pnpm run test --coverage",
+        "test:coverage": "vitest run test --coverage",
         "check": "pnpm run format && pnpm run lint:fix && concurrently \"pnpm run test\" \"pnpm run test:browser\"",
         "check:types": "concurrently \"svelte-check --tsconfig tsconfig.app.json --fail-on-warnings\" \"svelte-check --tsconfig tsconfig.worker.json --fail-on-warnings\" \"svelte-check --tsconfig tsconfig.test.json\"",
         "lint": "pnpm run check:types && eslint --cache --cache-location ./node_modules/.cache/eslint/ src/ test/ worker/",
