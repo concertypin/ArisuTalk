@@ -32,7 +32,7 @@ The current `main` branch will be kept as-is until Project Kei is ready to take 
 *   **Styling:** [Tailwind CSS](https://tailwindcss.com/) + [DaisyUI](https://daisyui.com/) 🌈
 *   **AI:** [LangChain](https://js.langchain.com/) 🧠
 *   **Storage:** [Dexie.js](https://dexie.org/) 📦
-*   **Character Spec:** [@arisutalk/character-spec](https://github.com/concertypin/ArisuTalk) 📄
+*   **Character Spec:** [@arisutalk/character-spec](https://github.com/arisutalk/character-spec) 📄
 
 ## 🚀 Getting Started
 
