@@ -33,6 +33,7 @@ export default defineConfig(async (ctx) => {
     let testConfig: UserConfig["test"] = {
         globals: true,
         environment: "happy-dom",
+        silent: "passed-only",
         setupFiles: ["./test/setup.ts"],
         exclude: ["node_modules", "dist", ".git"],
         browser: runBrowserTest ? browserTestConfig : undefined,

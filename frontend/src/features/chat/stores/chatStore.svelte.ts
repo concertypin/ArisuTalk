@@ -6,7 +6,7 @@ import type {
     ProviderSettings,
     CommonChatSettings,
 } from "@/lib/interfaces";
-import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
+import { MessageSchema, type Message } from "@arisutalk/character-spec/v0/Character/Message";
 import type { LLMConfig, LLMProvider } from "@/lib/types/IDataModel";
 import { StorageResolver } from "@/lib/adapters/storage/storageResolver";
 import { MockChatProvider } from "@/lib/providers/chat/MockChatProvider";
@@ -16,6 +16,7 @@ import { AnthropicChatProvider } from "@/lib/providers/chat/AnthropicChatProvide
 import { HumanMessage, AIMessage } from "@langchain/core/messages";
 import { OpenRouterChatProvider } from "@/lib/providers/chat/OpenRouterChatProvider";
 import { settings } from "@/lib/stores/settings.svelte";
+import { apply } from "@arisutalk/character-spec/utils";
 
 /**
  * Maps LLMProvider from settings to ProviderType used by chatStore.
@@ -251,13 +252,12 @@ export class ChatStore {
         const chatId = this.activeChatId;
 
         try {
-            const userMessage: Message = {
+            const userMessage: Message = apply(MessageSchema, {
                 id: crypto.randomUUID(),
                 chatId,
                 role: "user",
                 content: { type: "text", data: content },
-                inlays: [],
-            };
+            });
 
             await this.addMessage(chatId, userMessage);
 
@@ -269,13 +269,12 @@ export class ChatStore {
 
             // Placeholder for assistant message
             const assistantMessageId = crypto.randomUUID();
-            const assistantMessage: Message = {
+            const assistantMessage: Message = apply(MessageSchema, {
                 id: assistantMessageId,
                 chatId,
                 role: "assistant",
                 content: { type: "text", data: "" },
-                inlays: [],
-            };
+            });
 
             // Optimistically add to UI
             this.activeMessages.push(assistantMessage);

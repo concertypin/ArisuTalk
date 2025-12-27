@@ -4,7 +4,7 @@ import type { IAssetStorageAdapter } from "@/lib/interfaces";
 /**
  * Converts a Blob to a Uint8Array.
  */
-export async function blobToUint8Array(blob: Blob): Promise<Uint8Array> {
+export async function blobToUint8Array(blob: Blob): Promise<Uint8Array<ArrayBuffer>> {
     const buffer = await blob.arrayBuffer();
     return new Uint8Array(buffer);
 }

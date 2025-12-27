@@ -4,7 +4,7 @@ import { chatStore } from "@/features/chat/stores/chatStore.svelte";
 describe("ChatStore Streaming", () => {
     test("sendMessage streams response from MockChatProvider", async () => {
         // Initialize store
-        await chatStore.initPromise;
+        await chatStore.initPromise; // block for 5 seconds
 
         // Ensure we are using MockChatProvider with specific settings
         await chatStore.setProvider("MOCK", {
@@ -17,8 +17,6 @@ describe("ChatStore Streaming", () => {
         // Assuming default in-memory or indexeddb mock works
         const chatId = await chatStore.createChat("test-char", "Test Chat");
         await chatStore.setActiveChat(chatId);
-
-        // console.log("Active Provider:", chatStore["activeProvider"]); // accessing private if need be, or assume it's set
 
         // Send message
         const promise = chatStore.sendMessage("Hello");

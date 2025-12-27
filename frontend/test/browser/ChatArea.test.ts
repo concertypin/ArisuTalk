@@ -3,7 +3,8 @@ import { render } from "vitest-browser-svelte";
 import ChatArea from "@/components/ChatArea.svelte";
 import { chatStore } from "@/features/chat/stores/chatStore.svelte";
 import type { LocalChat } from "@/lib/interfaces";
-import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
+import { MessageSchema, type Message } from "@arisutalk/character-spec/v0/Character/Message";
+import { apply } from "@arisutalk/character-spec/utils";
 
 // Mock the chat store module
 vi.mock("@/features/chat/stores/chatStore.svelte", () => {
@@ -76,20 +77,18 @@ describe("ChatArea Component", () => {
             },
         ] satisfies LocalChat[];
         chatStore.activeMessages = [
-            {
+            apply(MessageSchema, {
                 id: "1",
                 role: "user",
                 content: { type: "text", data: "Hello" },
                 chatId: "chat-1",
-                inlays: [],
-            },
-            {
+            }),
+            apply(MessageSchema, {
                 id: "2",
                 role: "assistant",
                 content: { type: "text", data: "Hi there!" },
                 chatId: "chat-1",
-                inlays: [],
-            },
+            }),
         ] satisfies Message[]; // Casting partially correct objects
 
         const { getByText } = render(ChatArea);
@@ -97,7 +96,7 @@ describe("ChatArea Component", () => {
         await expect.element(getByText("Hello")).toBeVisible();
         await expect.element(getByText("Hi there!")).toBeVisible();
     });
-
+    //  something is h
     test("sends message when clicking send button", async () => {
         chatStore.activeChatId = "chat-1";
         chatStore.chats = [
