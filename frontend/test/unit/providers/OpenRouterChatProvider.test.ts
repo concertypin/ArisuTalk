@@ -1,41 +1,35 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { expectTypeOf } from "vitest";
+
+import { describe, it, expect, vi, expectTypeOf } from "vitest";
 import { OpenRouterChatProvider } from "@/lib/providers/chat/OpenRouterChatProvider";
+import { CommonChatSettings } from "@/lib/interfaces";
 import { HumanMessage } from "@langchain/core/messages";
 
-// Mock the @langchain/openai module
+// Mock the dynamic import of @langchain/openai
 vi.mock("@langchain/openai", async () => {
-    class MockChatOpenAI {
+    class MockClass {
+        constructor() {}
         invoke = vi.fn().mockResolvedValue({ content: "OpenRouter response" });
         stream = vi.fn().mockImplementation(async function* () {
-            yield { content: "OpenRouter" };
-            yield { content: " " };
-            yield { content: "stream" };
+            yield { content: "OpenRouter", text: "OpenRouter" };
+            yield { content: " ", text: " " };
+            yield { content: "stream", text: "stream" };
         });
     }
-
     return {
-        ChatOpenAI: MockChatOpenAI,
+        __esModule: true,
+        ChatOpenAI: MockClass,
+        default: { ChatOpenAI: MockClass },
     };
 });
 
 describe("OpenRouterChatProvider", () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
-    });
-
-    const commonSettings = {
-        apiKey: "test-api-key",
-        model: "mistralai/mistral-7b-instruct",
+    const commonSettings: CommonChatSettings = {
+        apiKey: "test-key",
+        model: "mistral-7b",
     };
 
     const openRouterSettings = {
-        baseUrl: "https://api.openrouter.ai/v1",
-        generationParameters: {
-            temperature: 0.7,
-            maxInputTokens: 2000,
-            maxOutputTokens: 1000,
-        },
+        // any specific OpenRouter settings
     };
 
     it("connects and creates instance with factory", async () => {

@@ -1,11 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { expectTypeOf } from "vitest";
+
+import { describe, it, expect, vi, expectTypeOf, beforeEach } from "vitest";
 import { AnthropicChatProvider } from "@/lib/providers/chat/AnthropicChatProvider";
 import { HumanMessage } from "@langchain/core/messages";
 
 // Mock the @langchain/anthropic module
 vi.mock("@langchain/anthropic", async () => {
     class MockChatAnthropic {
+        constructor() {}
         invoke = vi.fn().mockResolvedValue({ content: "Anthropic response" });
         stream = vi.fn().mockImplementation(async function* () {
             yield { content: "Anthropic" };
