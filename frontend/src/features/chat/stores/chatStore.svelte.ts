@@ -7,7 +7,7 @@ import type {
     CommonChatSettings,
 } from "@/lib/interfaces";
 import { MessageSchema, type Message } from "@arisutalk/character-spec/v0/Character/Message";
-import type { LLMConfig, LLMProvider } from "@/lib/types/IDataModel";
+import type { LLMConfig } from "@/lib/types/IDataModel";
 import { StorageResolver } from "@/lib/adapters/storage/storageResolver";
 import { MockChatProvider } from "@/lib/providers/chat/MockChatProvider";
 import { GeminiChatProvider } from "@/lib/providers/chat/GeminiChatProvider";
@@ -17,22 +17,6 @@ import { HumanMessage, AIMessage } from "@langchain/core/messages";
 import { OpenRouterChatProvider } from "@/lib/providers/chat/OpenRouterChatProvider";
 import { settings } from "@/lib/stores/settings.svelte";
 import { apply } from "@arisutalk/character-spec/utils";
-
-/**
- * Maps LLMProvider from settings to ProviderType used by chatStore.
- * Returns null if provider is not supported.
- */
-function mapProviderType(provider: LLMProvider): ProviderType | null {
-    const mapping: Partial<Record<LLMProvider, ProviderType>> = {
-        Gemini: "GEMINI",
-        OpenRouter: "OPENROUTER",
-        Mock: "MOCK",
-        OpenAI: "OPENAI",
-        "OpenAI-compatible": "OPENAI",
-        Anthropic: "ANTHROPIC",
-    };
-    return mapping[provider] ?? null;
-}
 
 export class ChatStore {
     chats = $state<LocalChat[]>([]);
@@ -127,30 +111,34 @@ export class ChatStore {
      * Applies an LLM config to create the appropriate provider.
      */
     async applyConfig(config: LLMConfig): Promise<void> {
-        const providerType = mapProviderType(config.provider);
-
-        if (!providerType) {
-            console.warn(
-                `ChatStore: Provider "${config.provider}" not supported yet, falling back to Mock`
-            );
-            await this.setProvider("MOCK", {
-                mockDelay: 50,
-                responses: [`Provider "${config.provider}" is not implemented yet.`],
-            });
-            return;
+        switch (config.provider) {
+            case "Gemini":
+                await this.setProvider("GEMINI", config);
+                break;
+            case "OpenAI":
+            case "OpenAI-compatible":
+                await this.setProvider("OPENAI", config);
+                break;
+            case "Anthropic":
+                await this.setProvider("ANTHROPIC", config);
+                break;
+            case "OpenRouter":
+                await this.setProvider("OPENROUTER", config);
+                break;
+            case "Mock":
+                await this.setProvider("MOCK", config);
+                break;
+            default: {
+                const _exhaustiveCheck: never = config;
+                console.warn(
+                    `ChatStore: Provider "${(config as LLMConfig).provider}" not supported yet, falling back to Mock`
+                );
+                await this.setProvider("MOCK", {
+                    mockDelay: 50,
+                    responses: [`Provider is not implemented yet.`],
+                });
+            }
         }
-
-        const commonSettings: CommonChatSettings = {
-            apiKey: config.apiKey,
-            baseURL: config.baseURL,
-            model: config.model,
-            generationParameters: config.generationParameters,
-        };
-
-        await this.setProvider(
-            providerType,
-            commonSettings as Parameters<typeof this.setProvider>[1]
-        );
         this.activeConfigId = config.id;
     }
 

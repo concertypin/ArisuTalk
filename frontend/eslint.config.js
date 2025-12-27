@@ -8,9 +8,11 @@ import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+// To fast up local linting, we use a lighter config when not in CI
+const tsConfig = process.env.CI ? ts.configs.recommendedTypeChecked : ts.configs.recommended;
 export default defineConfig([
     js.configs.recommended,
-    ...ts.configs.recommended,
+    ...tsConfig,
     ...svelte.configs["flat/recommended"],
     {
         languageOptions: {

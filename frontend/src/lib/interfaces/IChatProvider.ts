@@ -1,13 +1,15 @@
 import type { BaseMessage } from "@langchain/core/messages";
-import type { LLMConfig } from "../types/IDataModel";
+import type { LLMGenerationParameters } from "../types/IDataModel";
 
 /**
  * Common settings shared across all chat providers.
  */
-export type CommonChatSettings = Pick<
-    Partial<LLMConfig>,
-    "apiKey" | "baseURL" | "generationParameters" | "model"
->;
+export interface CommonChatSettings {
+    apiKey?: string;
+    baseURL?: string;
+    model?: string;
+    generationParameters?: LLMGenerationParameters;
+}
 type GeminiSafetySetting =
     | "HARM_CATEGORY_UNSPECIFIED"
     | "HARM_CATEGORY_HATE_SPEECH"

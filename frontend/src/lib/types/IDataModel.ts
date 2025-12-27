@@ -51,7 +51,8 @@ export const LLMGenerationParametersSchema = z.object({
      */
     thinkingLevel: z.union([z.number().int().min(0), z.string()]).optional(),
 });
-export const LLMConfigSchema = z.object({
+
+const BaseLLMConfigSchema = z.object({
     /**
      * Unique identifier for the LLM configuration.
      */
@@ -61,11 +62,6 @@ export const LLMConfigSchema = z.object({
      * Just for easier identification.
      */
     name: z.string().default("New Model"),
-    /**
-     * Provider of the LLM service.
-     * Defaults to "Mock" for testing purposes.
-     */
-    provider: LLMProviderSchema.default("Mock"),
     /**
      * API key for accessing the LLM service.
      * Optional, as some providers may not require it(self-hosted or mock providers).
@@ -90,6 +86,66 @@ export const LLMConfigSchema = z.object({
      */
     enabled: z.boolean().default(true),
 });
+
+export const OpenAILLMConfigSchema = BaseLLMConfigSchema.extend({
+    provider: z.literal("OpenAI"),
+});
+
+export const OpenAICompatibleLLMConfigSchema = BaseLLMConfigSchema.extend({
+    provider: z.literal("OpenAI-compatible"),
+});
+
+export const AnthropicLLMConfigSchema = BaseLLMConfigSchema.extend({
+    provider: z.literal("Anthropic"),
+});
+
+export const GeminiSafetySettingSchema = z.enum([
+    "HARM_CATEGORY_UNSPECIFIED",
+    "HARM_CATEGORY_HATE_SPEECH",
+    "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+    "HARM_CATEGORY_HARASSMENT",
+    "HARM_CATEGORY_DANGEROUS_CONTENT",
+    "HARM_CATEGORY_CIVIC_INTEGRITY",
+]);
+
+export const GeminiHarmBlockThresholdSchema = z.enum([
+    "HARM_BLOCK_THRESHOLD_UNSPECIFIED",
+    "BLOCK_LOW_AND_ABOVE",
+    "BLOCK_MEDIUM_AND_ABOVE",
+    "BLOCK_ONLY_HIGH",
+    "BLOCK_NONE",
+]);
+
+export const GeminiLLMConfigSchema = BaseLLMConfigSchema.extend({
+    provider: z.literal("Gemini"),
+    safetySettings: z
+        .array(
+            z.object({
+                category: GeminiSafetySettingSchema,
+                threshold: GeminiHarmBlockThresholdSchema,
+            })
+        )
+        .optional(),
+});
+
+export const OpenRouterLLMConfigSchema = BaseLLMConfigSchema.extend({
+    provider: z.literal("OpenRouter"),
+});
+
+export const MockLLMConfigSchema = BaseLLMConfigSchema.extend({
+    provider: z.literal("Mock"),
+    mockDelay: z.number().optional(),
+    responses: z.array(z.string()).optional(),
+});
+
+export const LLMConfigSchema = z.discriminatedUnion("provider", [
+    OpenAILLMConfigSchema,
+    OpenAICompatibleLLMConfigSchema,
+    AnthropicLLMConfigSchema,
+    GeminiLLMConfigSchema,
+    OpenRouterLLMConfigSchema,
+    MockLLMConfigSchema,
+]);
 
 /**
  * Configuration for system prompts to guide assistant behavior.
@@ -160,5 +216,6 @@ export const SettingsSchema = z.object({
 export type Settings = z.infer<typeof SettingsSchema>;
 export type LLMConfig = z.infer<typeof LLMConfigSchema>;
 export type LLMProvider = z.infer<typeof LLMProviderSchema>;
+export type LLMGenerationParameters = z.infer<typeof LLMGenerationParametersSchema>;
 export type PromptConfig = z.infer<typeof PromptConfigSchema>;
 export type AdvancedConfig = z.infer<typeof AdvancedConfigSchema>;
