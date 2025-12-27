@@ -145,7 +145,11 @@ export const LLMConfigSchema = z.discriminatedUnion("provider", [
     GeminiLLMConfigSchema,
     OpenRouterLLMConfigSchema,
     MockLLMConfigSchema,
-]);
+] as const satisfies Array<
+    z.ZodObject<{
+        provider: z.ZodLiteral<string>;
+    }>
+>);
 
 /**
  * Configuration for system prompts to guide assistant behavior.
@@ -176,39 +180,41 @@ export const AdvancedConfigSchema = z
          */
         experimental: z.boolean().default(false),
     })
-    .default({ debug: false, experimental: false });
+    .prefault({});
 
-export const SettingsSchema = z.object({
-    /**
-     * Theme preference for the application interface.
-     */
-    theme: z.enum(["light", "dark", "system"]).default("system"),
-    /**
-     * Identifier of the active persona.
-     * Nullable means no persona is selected.
-     * Keep in mind that user can't send messages without selecting a persona first.
-     */
-    activePersonaId: z.string().nullable().default(null),
-    /**
-     * List of configured LLMs available for use.
-     * Can be empty if no LLMs are set up.
-     */
-    llmConfigs: z.array(LLMConfigSchema).default([]),
-    /**
-     * ID of the currently active LLM configuration.
-     * Used by chatStore to determine which provider to use.
-     * Nullable means no config is active.
-     */
-    activeLLMConfigId: z.string().nullable().default(null),
-    /**
-     * Prompt configuration to guide assistant behavior.
-     */
-    prompt: PromptConfigSchema,
-    /**
-     * Advanced settings for the application.
-     */
-    advanced: AdvancedConfigSchema,
-});
+export const SettingsSchema = z
+    .object({
+        /**
+         * Theme preference for the application interface.
+         */
+        theme: z.enum(["light", "dark", "system"]).default("system"),
+        /**
+         * Identifier of the active persona.
+         * Nullable means no persona is selected.
+         * Keep in mind that user can't send messages without selecting a persona first.
+         */
+        activePersonaId: z.string().nullable().default(null),
+        /**
+         * List of configured LLMs available for use.
+         * Can be empty if no LLMs are set up.
+         */
+        llmConfigs: z.array(LLMConfigSchema).default([]),
+        /**
+         * ID of the currently active LLM configuration.
+         * Used by chatStore to determine which provider to use.
+         * Nullable means no config is active.
+         */
+        activeLLMConfigId: z.string().nullable().default(null),
+        /**
+         * Prompt configuration to guide assistant behavior.
+         */
+        prompt: PromptConfigSchema,
+        /**
+         * Advanced settings for the application.
+         */
+        advanced: AdvancedConfigSchema,
+    })
+    .prefault({});
 
 /**
  * Represents application settings.

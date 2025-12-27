@@ -3,8 +3,8 @@ import { test, expect, describe, vi, beforeEach } from "vitest";
 import { render } from "vitest-browser-svelte";
 import CharacterList from "@/features/character/components/CharacterList.svelte";
 import { characterStore } from "@/features/character/stores/characterStore.svelte";
-import type { Character } from "@arisutalk/character-spec/v0/Character";
-
+import type { AssetEntity, Character } from "@arisutalk/character-spec/v0/Character";
+import type * as comlink from "comlink";
 // Mock the worker and dependencies
 vi.mock("@/lib/workers/workerClient", () => ({
     getCardParseWorker: vi.fn(() => ({
@@ -25,12 +25,17 @@ vi.mock("@/features/character/adapters/assetStorage/OpFSAssetStorageAdapter", ()
     };
 });
 
-vi.mock("comlink", () => ({
-    transfer: vi.fn((data, _transferables) => data),
-}));
+vi.mock(
+    "comlink",
+    () =>
+        ({
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+            transfer: vi.fn((data, _transferables) => data),
+        }) satisfies Partial<typeof comlink>
+);
 
 vi.mock("@/features/character/utils/assetEncoding", () => ({
-    remapAssetToUint8Array: vi.fn((asset) => asset),
+    remapAssetToUint8Array: vi.fn((asset: AssetEntity) => asset),
     collectTransferableBuffers: vi.fn(() => []),
 }));
 
@@ -116,7 +121,7 @@ describe("CharacterList Component", () => {
 
         // Use direct click since it's hidden by opacity
         const editButton = getByRole("button", { name: "Edit" }).first();
-        const element = (await editButton.element()) as HTMLElement;
+        const element = editButton.element() as HTMLElement;
         element.click();
 
         expect(mockOnEdit).toHaveBeenCalled();

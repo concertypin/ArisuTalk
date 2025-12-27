@@ -30,7 +30,7 @@ export function mockFile({ content, option }: FileMockOptions): File {
         stream() {
             const readable = new ReadableStream<Uint8Array>({
                 start(controller) {
-                    const chunk = new Uint8Array(content as ArrayBuffer);
+                    const chunk = new Uint8Array(content);
                     controller.enqueue(chunk);
                     controller.close();
                 },

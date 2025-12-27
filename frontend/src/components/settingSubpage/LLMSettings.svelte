@@ -3,11 +3,12 @@
     import { LLMConfigSchema } from "@/lib/types/IDataModel";
     import { Plus, Info } from "@lucide/svelte";
     import GenerationParameters from "./LLMSetting/GenerationParameters.svelte";
-
+    import type * as z from "zod";
     function addLLMConfig() {
         const newConfig = LLMConfigSchema.parse({
             name: `Model ${settings.value.llmConfigs.length + 1}`,
-        });
+            provider: "OpenAI",
+        } satisfies z.input<typeof LLMConfigSchema>);
         settings.value.llmConfigs.push(newConfig);
     }
 </script>

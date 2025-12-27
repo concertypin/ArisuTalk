@@ -125,7 +125,7 @@ describe("GenerationParameters Component", () => {
         });
 
         const deleteButton = getByLabelText("Delete config");
-        const element = (await deleteButton.element()) as HTMLElement;
+        const element = deleteButton.element() as HTMLElement;
         element.click();
 
         expect(settings.value.llmConfigs).toHaveLength(0);
@@ -146,7 +146,7 @@ describe("GenerationParameters Component", () => {
         });
 
         const setActiveButton = getByLabelText("Use this config");
-        const element = (await setActiveButton.element()) as HTMLElement;
+        const element = setActiveButton.element() as HTMLElement;
         element.click();
 
         expect(settings.value.activeLLMConfigId).toBe("config-2");
@@ -162,7 +162,7 @@ describe("GenerationParameters Component", () => {
         // Start checked
         await expect.element(toggleButton).toBeChecked();
 
-        const element = (await toggleButton.element()) as HTMLElement;
+        const element = toggleButton.element() as HTMLElement;
         element.click();
 
         // Verify UI change
@@ -217,7 +217,7 @@ describe("GenerationParameters Component", () => {
         const temperatureCheckbox = getByLabelText(/Temperature/i).first();
         await expect.element(temperatureCheckbox).toBeChecked();
 
-        const element = (await temperatureCheckbox.element()) as HTMLElement;
+        const element = temperatureCheckbox.element() as HTMLElement;
         element.click();
 
         // Verify UI change (Label will change to "Temperature (Off)")
@@ -232,7 +232,7 @@ describe("GenerationParameters Component", () => {
         });
 
         const deleteButton = getByLabelText("Delete config");
-        const element = (await deleteButton.element()) as HTMLElement;
+        const element = deleteButton.element() as HTMLElement;
         element.click();
 
         expect(settings.value.activeLLMConfigId).toBeNull();

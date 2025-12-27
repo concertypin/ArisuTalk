@@ -1,11 +1,13 @@
-import { test, expect, describe } from "vitest";
+import { test, expect, describe, vi, afterEach } from "vitest";
 import { chatStore } from "@/features/chat/stores/chatStore.svelte";
 
 describe("ChatStore Streaming", () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
     test("sendMessage streams response from MockChatProvider", async () => {
         // Initialize store
         await chatStore.initPromise; // block for 5 seconds
-
         // Ensure we are using MockChatProvider with specific settings
         await chatStore.setProvider("MOCK", {
             mockDelay: 10,
@@ -77,17 +79,29 @@ describe("ChatStore Streaming", () => {
         await chatStore.initPromise;
         await chatStore.setProvider("MOCK", { responses: [] });
         // injecting malicious mock for failure testing
-
+        if (!chatStore["activeProvider"]) {
+            throw new Error("Active provider is not set");
+        }
         chatStore["activeProvider"] = {
+            ...chatStore["activeProvider"],
+
             stream: async function* () {
                 // Dummy yield to satisfy generator requirement
                 // eslint-disable-next-line no-constant-condition
                 if (false) yield "";
                 throw new Error("Simulated failure");
             },
-            abort: () => {},
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any;
+            abort() {},
+            disconnect() {
+                throw new Error("Function not implemented.");
+            },
+            generate(_msg, _setting) {
+                throw new Error("Function not implemented.");
+            },
+            isReady() {
+                throw new Error("Function not implemented.");
+            },
+        } satisfies (typeof chatStore)["activeProvider"];
 
         const chatId = await chatStore.createChat("test-fail", "Test Fail");
         await chatStore.setActiveChat(chatId);

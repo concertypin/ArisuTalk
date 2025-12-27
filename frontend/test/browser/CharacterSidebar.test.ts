@@ -15,12 +15,10 @@ vi.mock("@/lib/stores/ui.svelte", () => ({
 
 describe("CharacterSidebar Component", () => {
     let mockCharacters: Character[];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let mockOnSelect: any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let mockOnAdd: any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let mockOnPersona: any;
+
+    let mockOnSelect: (id: string) => void;
+    let mockOnAdd: () => void;
+    let mockOnPersona: () => void;
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -167,9 +165,10 @@ describe("CharacterSidebar Component", () => {
         });
 
         const characterButton = getByLabelText("Character 1");
+
         // The inner div of the button has the rounded-xl shape when active
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const innerDiv = (characterButton as any).locator("div");
+        const innerDiv = characterButton.element().querySelector("div");
+
         await expect.element(innerDiv).toHaveClass(/rounded-xl/);
     });
 

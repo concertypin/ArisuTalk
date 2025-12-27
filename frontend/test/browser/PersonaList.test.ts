@@ -107,7 +107,7 @@ describe("PersonaList Component", () => {
         const editButton = firstPersona.getByLabelText("Edit");
 
         // Manual click bypasses some visibility checks in Playwright
-        const element = (await editButton.element()) as HTMLElement;
+        const element = editButton.element() as HTMLElement;
         element.click();
         expect(mockOnEdit).toHaveBeenCalled();
     });
@@ -123,7 +123,7 @@ describe("PersonaList Component", () => {
         const firstPersona = getByRole("button", { name: /User-kun/i });
         const deleteButton = firstPersona.getByLabelText("Delete");
 
-        const element = (await deleteButton.element()) as HTMLElement;
+        const element = deleteButton.element() as HTMLElement;
         element.click();
         expect(window.confirm).toHaveBeenCalledWith("Delete this persona?");
         expect(personaStore.remove).toHaveBeenCalledWith("persona-1");
@@ -159,7 +159,7 @@ describe("PersonaList Component", () => {
         const firstPersona = getByRole("button", { name: /User-kun/i });
         const moveDownButton = firstPersona.getByLabelText("Move Down");
 
-        const element = (await moveDownButton.element()) as HTMLElement;
+        const element = moveDownButton.element() as HTMLElement;
         element.click();
         expect(personaStore.reorder).toHaveBeenCalled();
     });
