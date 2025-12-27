@@ -48,7 +48,7 @@ The production-ready files will be in the `ArisuTalk/frontend/dist` directory.
 ```bash
 pnpm run -F frontend test # For unit tests
 pnpm run -F frontend test:browser # For browser tests
-pnpm run -F frontend test:coverage # For
+pnpm run -F frontend test:coverage # For test coverage report
 ```
 
 ## Authentication Setup
