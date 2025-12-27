@@ -1,11 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { expectTypeOf } from "vitest";
+import { describe, it, expect, vi, expectTypeOf, beforeEach } from "vitest";
 import { OpenAIChatProvider } from "@/lib/providers/chat/OpenAIChatProvider";
 import { HumanMessage } from "@langchain/core/messages";
 
 // Mock the @langchain/openai module
 vi.mock("@langchain/openai", async () => {
     class MockChatOpenAI {
+        constructor() {}
         invoke = vi.fn().mockResolvedValue({ content: "OpenAI response" });
         stream = vi.fn().mockImplementation(async function* () {
             yield { content: "OpenAI" };
