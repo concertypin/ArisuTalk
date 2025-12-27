@@ -1,25 +1,23 @@
 import {
-    ChatProvider,
     type CommonChatSettings,
     type ProviderSettings,
     type IChatProviderFactory,
 } from "@/lib/interfaces/IChatProvider";
-import { type BaseMessage } from "@langchain/core/messages";
+import { LangChainBaseProvider } from "./LangChainBaseProvider";
 import type { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 
 type GeminiSettings = CommonChatSettings & ProviderSettings["GEMINI"];
 
-export class GeminiChatProvider extends ChatProvider<"GEMINI"> {
+export class GeminiChatProvider extends LangChainBaseProvider<"GEMINI"> {
     id = "GEMINI";
     name = "Google Gemini";
     description = "Google's Gemini models";
 
-    private model: ChatGoogleGenerativeAI;
-    private abortController: AbortController | null = null;
+    protected client: ChatGoogleGenerativeAI;
 
-    private constructor(model: ChatGoogleGenerativeAI) {
+    private constructor(client: ChatGoogleGenerativeAI) {
         super();
-        this.model = model;
+        this.client = client;
     }
 
     static factory: IChatProviderFactory<"GEMINI"> = {
@@ -35,12 +33,12 @@ export class GeminiChatProvider extends ChatProvider<"GEMINI"> {
                 model: settings.model,
                 temperature: settings.generationParameters?.temperature,
                 maxOutputTokens: settings.generationParameters?.maxOutputTokens,
-                safetySettings: settings.safetySettings?.map((i) => ({
-                    // Q: Is it safe?
-                    // A: Check here: https://tsplay.dev/w2qDbW
-                    category: i.category as SafetySetting["category"],
-                    threshold: i.threshold as SafetySetting["threshold"],
-                })),
+                safetySettings: settings.safetySettings?.map(
+                    (i): SafetySetting => ({
+                        category: i.category as SafetySetting["category"],
+                        threshold: i.threshold as SafetySetting["threshold"],
+                    })
+                ),
                 thinkingConfig: {
                     includeThoughts: true,
                 },
@@ -62,58 +60,12 @@ export class GeminiChatProvider extends ChatProvider<"GEMINI"> {
                 // Fallback, should not reach here due to prior check
                 throw new Error("Invalid thinkingLevel for GeminiChatProvider.");
             }
-            const model = new ChatGoogleGenerativeAI(modelConfig);
-            return new GeminiChatProvider(model);
+            const client = new ChatGoogleGenerativeAI(modelConfig);
+            return new GeminiChatProvider(client);
         },
     };
 
-    async disconnect(): Promise<void> {
-        // No persistent connection to close for REST API
-    }
-
-    async generate(messages: BaseMessage[], _settings?: Partial<GeminiSettings>): Promise<string> {
-        // If settings are provided, we might need to bind them or create a new instance.
-        // For simplicity, we assume per-request settings (like temperature) might need a new model instance
-        // or using .bind() if LangChain supports it for those specific params.
-        // For now, we use the instance as is.
-        const response = await this.model.invoke(messages);
-        return response.content as string;
-    }
-
-    async *stream(
-        messages: BaseMessage[],
-        _settings?: Partial<GeminiSettings>
-    ): AsyncGenerator<string, void, unknown> {
-        this.abortController = new AbortController();
-
-        // Pass signal to LangChain call if supported, or handle abort manually in loop
-        const stream = await this.model.stream(messages, {
-            signal: this.abortController.signal,
-        });
-
-        try {
-            for await (const chunk of stream) {
-                yield chunk.text;
-            }
-        } catch (error: unknown) {
-            if (error instanceof DOMException && error.name === "AbortError") {
-                // Ignore abort error
-                return;
-            }
-            throw error;
-        } finally {
-            this.abortController = null;
-        }
-    }
-
-    abort(): void {
-        if (this.abortController) {
-            this.abortController.abort();
-            this.abortController = null;
-        }
-    }
-
     isReady(): boolean {
-        return !!this.model;
+        return !!this.client;
     }
 }

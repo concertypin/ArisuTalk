@@ -13,6 +13,7 @@ type ParseResult<T> =
       }
     | {
           success: false;
+          error?: string;
       };
 const cborOptions = {
     useFloat32: FLOAT32_OPTIONS.DECIMAL_FIT,
@@ -45,7 +46,7 @@ async function parseCharacter(rawData: ArrayBuffer): Promise<ParseResult<Charact
         return { success: true, data: result.data } satisfies ParseResult<Character>;
     }
 
-    return { success: false } satisfies ParseResult<Character>;
+    return { success: false, error: "Failed to parse character" } satisfies ParseResult<Character>;
 }
 async function exportCharacter(character: Character): Promise<ArrayBufferLike> {
     const cbor = encoder.encode(character);

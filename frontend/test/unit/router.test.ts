@@ -1,10 +1,5 @@
 import { describe, it, expect, beforeEach, beforeAll } from "vitest";
-import {
-    navigate,
-    getCurrentPath,
-    isActive,
-    initRouter,
-} from "@/lib/router.svelte";
+import { navigate, getCurrentPath, isActive, initRouter } from "@/lib/router.svelte";
 
 describe("Router", () => {
     beforeAll(() => {

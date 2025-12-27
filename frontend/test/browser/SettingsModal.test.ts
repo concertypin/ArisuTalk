@@ -2,8 +2,16 @@ import { test, expect, describe, vi, beforeEach } from "vitest";
 import { render } from "vitest-browser-svelte";
 import SettingsModal from "@/components/SettingsModal.svelte";
 import { settings } from "@/lib/stores/settings.svelte";
-import { uiState } from "@/lib/stores/ui.svelte";
 import { SettingsSchema } from "@/lib/types/IDataModel";
+
+// Mock uiState
+vi.mock("@/lib/stores/ui.svelte", () => ({
+    uiState: {
+        settingsModalOpen: true,
+        openSettingsModal: vi.fn(),
+        closeSettingsModal: vi.fn(),
+    },
+}));
 
 describe("SettingsModal Component", () => {
     beforeEach(() => {
@@ -13,9 +21,6 @@ describe("SettingsModal Component", () => {
         // Better to mock the adapter or the save method.
         // Since we import the instance, we can spy on it.
         vi.spyOn(settings, "save").mockResolvedValue(undefined);
-
-        uiState.settingsModalOpen = true;
-        vi.spyOn(uiState, "closeSettingsModal");
     });
 
     test("renders correctly", async () => {
@@ -46,11 +51,14 @@ describe("SettingsModal Component", () => {
 
         await getByText("Models (LLM)").click();
 
+        // Before: no configs
+        expect(settings.value.llmConfigs.length).toBe(0);
+
         // Click Add Model
         await getByText("Add Model").click();
 
-        // The config name should be visible - input value "Model 1"
-        // Actually it's an input field, not text. Check for the label "Config Name" being visible
-        await expect.element(getByText("Config Name")).toBeVisible();
+        // After: one config added
+        expect(settings.value.llmConfigs.length).toBe(1);
+        expect(settings.value.llmConfigs[0].name).toBe("Model 1");
     });
 });

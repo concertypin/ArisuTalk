@@ -79,9 +79,9 @@
         {/if}
 
         <fieldset class="fieldset w-full">
-            <legend class="fieldset-legend flex items-center gap-2">
+            <label for="p_name" class="fieldset-legend flex items-center gap-2">
                 <User size={16} /> Name (Display Name)
-            </legend>
+            </label>
             <input
                 type="text"
                 id="p_name"
@@ -92,10 +92,10 @@
         </fieldset>
 
         <fieldset class="fieldset w-full">
-            <legend class="fieldset-legend flex items-center gap-2">
+            <label for="p_desc" class="fieldset-legend flex items-center gap-2">
                 <FileText size={16} /> Description (For AI)
                 <span class="text-xs opacity-60 ml-auto">Visible to character</span>
-            </legend>
+            </label>
             <textarea
                 id="p_desc"
                 bind:value={description}
@@ -105,9 +105,9 @@
         </fieldset>
 
         <fieldset class="fieldset w-full">
-            <legend class="fieldset-legend flex items-center gap-2">
+            <label for="p_note" class="fieldset-legend flex items-center gap-2">
                 <StickyNote size={16} /> Note (Private)
-            </legend>
+            </label>
             <textarea
                 id="p_note"
                 bind:value={note}

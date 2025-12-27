@@ -10,7 +10,7 @@ describe("Data Models", () => {
         const msg = {
             role: "user",
             content: {
-                type: "string",
+                type: "text",
                 data: "Hello",
             },
             id: "test",

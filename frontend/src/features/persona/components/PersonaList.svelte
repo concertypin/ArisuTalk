@@ -102,12 +102,17 @@
                 >
                     <ChevronDown size={14} />
                 </button>
-                <button class="btn btn-ghost btn-xs btn-square" onclick={() => onEdit(persona)}>
+                <button
+                    class="btn btn-ghost btn-xs btn-square"
+                    onclick={() => onEdit(persona)}
+                    aria-label="Edit"
+                >
                     <SquarePen size={14} />
                 </button>
                 <button
                     class="btn btn-ghost btn-xs btn-square text-error"
                     onclick={() => handleDelete(persona.id)}
+                    aria-label="Delete"
                 >
                     <Trash2 size={14} />
                 </button>

@@ -6,6 +6,7 @@
     import { tick } from "svelte";
 
     import { chatStore } from "@/features/chat/stores/chatStore.svelte";
+    import MarkdownRenderer from "@/components/MarkdownRenderer.svelte";
 
     let inputValue = $state("");
     let messagesContainer = $state<HTMLElement | null>(null);
@@ -67,7 +68,9 @@
                             ? 'chat-bubble-primary'
                             : 'chat-bubble-neutral'}"
                     >
-                        <p>{msg.content.data}</p>
+                        <MarkdownRenderer
+                            source={typeof msg.content.data === "string" ? msg.content.data : ""}
+                        />
                         <span class="text-xs opacity-70 mt-1 block">
                             {new Date(msg.timestamp || Date.now()).toLocaleTimeString()}
                         </span>

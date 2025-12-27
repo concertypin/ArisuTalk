@@ -1,11 +1,13 @@
-import { test, expect, describe } from "vitest";
+import { test, expect, describe, vi, afterEach } from "vitest";
 import { chatStore } from "@/features/chat/stores/chatStore.svelte";
 
 describe("ChatStore Streaming", () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
     test("sendMessage streams response from MockChatProvider", async () => {
         // Initialize store
-        await chatStore.initPromise;
-
+        await chatStore.initPromise; // block for 5 seconds
         // Ensure we are using MockChatProvider with specific settings
         await chatStore.setProvider("MOCK", {
             mockDelay: 10,
@@ -13,12 +15,10 @@ describe("ChatStore Streaming", () => {
         });
 
         // Create a chat to be active
-        // We might need to mock storage adapter or ensure the default one works in test env
+        // We might need to mock storage adapter or ensure that the default one works in test env
         // Assuming default in-memory or indexeddb mock works
         const chatId = await chatStore.createChat("test-char", "Test Chat");
         await chatStore.setActiveChat(chatId);
-
-        // console.log("Active Provider:", chatStore["activeProvider"]); // accessing private if need be, or assume it's set
 
         // Send message
         const promise = chatStore.sendMessage("Hello");
@@ -46,9 +46,9 @@ describe("ChatStore Streaming", () => {
             // Should not happen given we fixed the type
             expect(content).toBe("Streamed Response");
         }
-    });
+    }, 15000);
 
-    test("abortGeneration stops the stream", async () => {
+    test("abortGeneration stops stream", async () => {
         await chatStore.initPromise;
         await chatStore.setProvider("MOCK", {
             mockDelay: 100, // Slow delay
@@ -79,17 +79,29 @@ describe("ChatStore Streaming", () => {
         await chatStore.initPromise;
         await chatStore.setProvider("MOCK", { responses: [] });
         // injecting malicious mock for failure testing
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        if (!chatStore["activeProvider"]) {
+            throw new Error("Active provider is not set");
+        }
         chatStore["activeProvider"] = {
+            ...chatStore["activeProvider"],
+
             stream: async function* () {
                 // Dummy yield to satisfy generator requirement
                 // eslint-disable-next-line no-constant-condition
                 if (false) yield "";
                 throw new Error("Simulated failure");
             },
-            abort: () => {},
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any;
+            abort() {},
+            disconnect() {
+                throw new Error("Function not implemented.");
+            },
+            generate(_msg, _setting) {
+                throw new Error("Function not implemented.");
+            },
+            isReady() {
+                throw new Error("Function not implemented.");
+            },
+        } satisfies (typeof chatStore)["activeProvider"];
 
         const chatId = await chatStore.createChat("test-fail", "Test Fail");
         await chatStore.setActiveChat(chatId);

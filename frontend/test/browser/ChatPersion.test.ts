@@ -20,17 +20,31 @@ describe("Persona and Chat interactions", () => {
     });
 
     test("Create character and send chat message", async () => {
+        // Import and configure chatStore with Mock provider for testing
+        // Must happen BEFORE fake timers are enabled
+        // Mock chatStore.waitForSettings to avoid delays
+
+        const { chatStore } = await import("@/features/chat/stores/chatStore.svelte");
+        // Cast chatStore to access all private members
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        vi.spyOn(chatStore as any, "waitForSettings", "get").mockResolvedValue(undefined);
+        await chatStore.initPromise;
+        await chatStore.setProvider("MOCK", {
+            mockDelay: 50,
+            responses: ["Response 1", "Response 2"],
+            generationParameters: {},
+        });
+
+        // Enable fake timers AFTER async initialization completes
         vi.useFakeTimers();
+
         const { getByLabelText, getByText, getByRole } = render(CharacterLayoutTestWrapper);
 
         // Open Add Character modal
-        const addBtn = getByLabelText("Add Character");
-        await expect.element(addBtn).toBeVisible();
-        await addBtn.click();
+        const addCharButton = getByLabelText("Add Character");
+        await addCharButton.click();
 
-        // Fill character form (input has id `char_name`)
-
-        const nameInput = getByRole("textbox", { name: "e.g. Arisu" });
+        const nameInput = getByLabelText("Name");
         await expect.element(nameInput).toBeVisible();
         await nameInput.fill("TestBot");
 

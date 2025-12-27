@@ -62,14 +62,19 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
       - name: Check type errors
         timeout-minutes: 10 # It takes long time due to svelte type checking
         run: pnpm run --filter frontend check:types
+        
       - name: Run unit tests
         run: pnpm run --filter frontend test --reporter=dot
         timeout-minutes: 5
+
       - name: Run browser tests
         run: pnpm run --filter frontend test:browser --reporter=dot
         timeout-minutes: 10 # Browser is slow
+
       - name: Check linting
         run: pnpm run --filter frontend lint
+        timeout-minutes: 5

@@ -65,7 +65,7 @@
     async function handleExport(index: number) {
         // Export character at index
         // Cloning first to avoid mutating store data.
-        const char = structuredClone(characterStore.characters[index]);
+        const char = structuredClone($state.snapshot(characterStore.characters[index]));
 
         // Remap all assets to use Uint8Array for binary data
         const assetStorage = new OpFSAssetStorageAdapter();

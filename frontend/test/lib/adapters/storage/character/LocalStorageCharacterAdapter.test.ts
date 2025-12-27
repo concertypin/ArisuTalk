@@ -1,31 +1,26 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { LocalStorageCharacterAdapter } from "@/lib/adapters/storage/character/LocalStorageCharacterAdapter";
-import type { Character } from "@arisutalk/character-spec/v0/Character";
+import { CharacterSchema, type Character } from "@arisutalk/character-spec/v0/Character";
+import { apply } from "@arisutalk/character-spec/utils";
 
 describe("LocalStorageCharacterAdapter", () => {
     let adapter: LocalStorageCharacterAdapter;
-    const testChar: Character = {
+    const testChar: Character = apply(CharacterSchema, {
         id: "char-1",
         name: "Test Character",
-        assets: {
-            assets: [],
-        },
-        executables: {
-            replaceHooks: { display: [], input: [], output: [], request: [] },
-            runtimeSetting: {},
-        },
         metadata: {
             version: "0.0.1",
             license: "UNLICENSED",
         },
         prompt: {
-            authorsNote: "",
             description: "Be helpful",
-            lorebook: { config: { tokenLimit: 1000 }, data: [] },
         },
         specVersion: 0,
         description: "A test character",
-    };
+        assets: {
+            assets: [],
+        },
+    });
 
     beforeEach(() => {
         localStorage.clear();

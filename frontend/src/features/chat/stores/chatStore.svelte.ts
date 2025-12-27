@@ -6,12 +6,17 @@ import type {
     ProviderSettings,
     CommonChatSettings,
 } from "@/lib/interfaces";
-import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
+import { MessageSchema, type Message } from "@arisutalk/character-spec/v0/Character/Message";
+import type { LLMConfig } from "@/lib/types/IDataModel";
 import { StorageResolver } from "@/lib/adapters/storage/storageResolver";
 import { MockChatProvider } from "@/lib/providers/chat/MockChatProvider";
 import { GeminiChatProvider } from "@/lib/providers/chat/GeminiChatProvider";
-import { HumanMessage } from "@langchain/core/messages";
+import { OpenAIChatProvider } from "@/lib/providers/chat/OpenAIChatProvider";
+import { AnthropicChatProvider } from "@/lib/providers/chat/AnthropicChatProvider";
+import { HumanMessage, AIMessage } from "@langchain/core/messages";
 import { OpenRouterChatProvider } from "@/lib/providers/chat/OpenRouterChatProvider";
+import { settings } from "@/lib/stores/settings.svelte";
+import { apply } from "@arisutalk/character-spec/utils";
 
 export class ChatStore {
     chats = $state<LocalChat[]>([]);
@@ -24,20 +29,125 @@ export class ChatStore {
     private activeProvider: ChatProvider<ProviderType> | null = null;
     public readonly initPromise: Promise<void>;
 
+    /** Currently active LLM config ID from settings */
+    private activeConfigId: string | null = null;
+
     constructor(adapter?: IChatStorageAdapter) {
         this.initPromise = this.initialize(adapter);
+
+        // Watch for settings changes and reload provider
+        // Use $effect.root() to create effect context in class
+        $effect.root(() => {
+            $effect(() => {
+                // Track dependencies (prefixed with _ to indicate intentional for reactivity)
+                const _activeId = settings.value.activeLLMConfigId;
+                const _configs = settings.value.llmConfigs;
+
+                // Skip if not initialized yet
+                if (!settings.isLoaded) return;
+
+                // Reload provider when active config or configs change
+                void this.loadProviderFromSettings();
+            });
+        });
     }
 
     private async initialize(adapter?: IChatStorageAdapter) {
         this.adapter = adapter || (await StorageResolver.getChatAdapter());
         await this.load();
 
-        // Initialize with default provider (MOCK for now, can be configured)
-        // In real app, load from persistence
-        await this.setProvider("MOCK", {
-            mockDelay: 50,
-            responses: ["Response 1", "Response 2"],
-        });
+        // Wait for settings to load
+        await this.waitForSettings();
+
+        // Load provider from settings (first enabled config)
+        await this.loadProviderFromSettings();
+    }
+
+    /**
+     * Waits for settings to finish loading.
+     */
+    private async waitForSettings(): Promise<void> {
+        // Poll until settings are loaded (max 5 seconds)
+        const SETTINGS_POLL_TIMEOUT_MS = 5000;
+        const SETTINGS_POLL_INTERVAL_MS = 100;
+        for (let i = 0; i < SETTINGS_POLL_TIMEOUT_MS / SETTINGS_POLL_INTERVAL_MS; i++) {
+            if (settings.isLoaded) return;
+            await new Promise((r) => setTimeout(r, SETTINGS_POLL_INTERVAL_MS));
+        }
+        console.warn("ChatStore: Settings did not load in time, using defaults");
+    }
+
+    /**
+     * Loads provider from the active LLM config in settings.
+     * Falls back to first enabled config if active not found.
+     * If no config exists, falls back to Mock provider.
+     */
+    async loadProviderFromSettings(): Promise<void> {
+        const configs = settings.value.llmConfigs;
+        const activeId: string | null = settings.value.activeLLMConfigId;
+
+        // Try to find the active config by ID
+        let targetConfig = activeId ? configs.find((c) => c.id === activeId && c.enabled) : null;
+
+        // Fall back to first enabled config
+        if (!targetConfig) {
+            targetConfig = configs.find((c) => c.enabled);
+        }
+
+        if (!targetConfig) {
+            console.info("ChatStore: No LLM config found, using Mock provider");
+            await this.setProvider("MOCK", {
+                mockDelay: 50,
+                responses: ["Please configure an LLM in Settings → LLM Configuration."],
+            });
+            this.activeConfigId = null;
+            return;
+        }
+
+        await this.applyConfig(targetConfig);
+    }
+
+    /**
+     * Applies an LLM config to create the appropriate provider.
+     */
+    async applyConfig(config: LLMConfig): Promise<void> {
+        switch (config.provider) {
+            case "Gemini":
+                await this.setProvider("GEMINI", config);
+                break;
+            case "OpenAI":
+            case "OpenAI-compatible":
+                await this.setProvider("OPENAI", config);
+                break;
+            case "Anthropic":
+                await this.setProvider("ANTHROPIC", config);
+                break;
+            case "OpenRouter":
+                await this.setProvider("OPENROUTER", config);
+                break;
+            case "Mock":
+                await this.setProvider("MOCK", config);
+                break;
+            default: {
+                const _exhaustiveCheck: never = config;
+                console.warn(
+                    `ChatStore: Provider "${(config as LLMConfig).provider}" not supported yet, falling back to Mock`
+                );
+                await this.setProvider("MOCK", {
+                    mockDelay: 50,
+                    responses: [`Provider is not implemented yet.`],
+                });
+            }
+        }
+        this.activeConfigId = config.id;
+    }
+
+    /**
+     * Refreshes the provider when settings change.
+     * Call this when user modifies LLM configuration.
+     */
+    async refreshProvider(): Promise<void> {
+        await this.loadProviderFromSettings();
     }
 
     private async load() {
@@ -59,7 +169,8 @@ export class ChatStore {
         }
         switch (type) {
             case "ANTHROPIC": {
-                throw new Error("Not implemented yet");
+                this.activeProvider = await AnthropicChatProvider.factory.connect(settings);
+                break;
             }
             case "GEMINI": {
                 this.activeProvider = await GeminiChatProvider.factory.connect(settings);
@@ -67,6 +178,10 @@ export class ChatStore {
             }
             case "MOCK": {
                 this.activeProvider = await MockChatProvider.factory.connect(settings);
+                break;
+            }
+            case "OPENAI": {
+                this.activeProvider = await OpenAIChatProvider.factory.connect(settings);
                 break;
             }
             case "OPENROUTER": {
@@ -125,34 +240,34 @@ export class ChatStore {
         const chatId = this.activeChatId;
 
         try {
-            const userMessage: Message = {
+            const userMessage: Message = apply(MessageSchema, {
                 id: crypto.randomUUID(),
                 chatId,
                 role: "user",
                 content: { type: "text", data: content },
-                inlays: [],
-            };
+            });
 
             await this.addMessage(chatId, userMessage);
 
-            // Prepare LangChain messages
-            // TODO: Load history properly
-            const messages = [new HumanMessage(content)];
+            // Prepare LangChain messages from history
+            const langChainMessages = this.activeMessages.map((m) => {
+                const text = typeof m.content.data === "string" ? m.content.data : "";
+                return m.role === "user" ? new HumanMessage(text) : new AIMessage(text);
+            });
 
             // Placeholder for assistant message
             const assistantMessageId = crypto.randomUUID();
-            const assistantMessage: Message = {
+            const assistantMessage: Message = apply(MessageSchema, {
                 id: assistantMessageId,
                 chatId,
                 role: "assistant",
                 content: { type: "text", data: "" },
-                inlays: [],
-            };
+            });
 
             // Optimistically add to UI
             this.activeMessages.push(assistantMessage);
 
-            const stream = this.activeProvider.stream(messages);
+            const stream = this.activeProvider.stream(langChainMessages);
             let fullContent = "";
 
             const msgIndex = this.activeMessages.findIndex((m) => m.id === assistantMessageId);

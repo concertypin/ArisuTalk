@@ -1,11 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import {
-    setLoading,
-    getLoading,
-    setError,
-    getError,
-    clearAppState,
-} from "@/stores/app.svelte";
+import { setLoading, getLoading, setError, getError, clearAppState } from "@/stores/app.svelte";
 
 describe("App Global Store", () => {
     beforeEach(() => {
