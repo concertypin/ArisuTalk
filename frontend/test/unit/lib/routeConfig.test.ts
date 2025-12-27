@@ -1,5 +1,5 @@
 
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { routes } from "@/lib/routeConfig";
 
 describe("routeConfig", () => {
@@ -25,7 +25,7 @@ describe("routeConfig", () => {
         // For unit testing the config, proving it's a function returning a promise is usually enough coverage for the config file itself.
         try {
             await promise;
-        } catch (e) {
+        } catch {
             // It's expected to potentially fail to resolve the actual component in unit test environment
             // if configured with JSDOM/HappyDOM and without full vite build context for all imports in Home.svelte
             // But if it fails, it means it tried to import.

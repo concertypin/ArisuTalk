@@ -29,7 +29,6 @@ vi.mock(
     "comlink",
     () =>
         ({
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
             transfer: vi.fn((data, _transferables) => data),
         }) satisfies Partial<typeof comlink>
 );

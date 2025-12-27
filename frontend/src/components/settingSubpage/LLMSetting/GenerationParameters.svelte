@@ -29,7 +29,6 @@
             },
             set checked(v: boolean) {
                 // target[key] is any, so we need to disable the linting here
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 target[key] = v ? (target[key] ?? defaultValue) : undefined;
             },
         };

@@ -101,8 +101,7 @@ describe("LangChainBaseProvider", () => {
 
     it("abort cancels the stream", async () => {
         const mockClient = {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            stream: vi.fn().mockImplementation(async function* (msgs, options) {
+            stream: vi.fn().mockImplementation(async function* (_msgs, options) {
                 if (options.signal.aborted) throw new DOMException("Aborted", "AbortError");
                 yield { content: "chunk1" };
                 // Simulate delay to allow abort to happen
@@ -125,7 +124,7 @@ describe("LangChainBaseProvider", () => {
             for await (const chunk of generator) {
                 // do nothing
             }
-        } catch (e) {
+        } catch {
             // It might throw if we don't catch it inside, but the implementation catches AbortError
         }
         // If implementation is correct, it catches AbortError and returns, so the loop finishes cleanly or throws nothing.

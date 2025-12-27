@@ -13,7 +13,7 @@ describe("Home Component", () => {
     test("loads and renders layout and chat area", async () => {
         // Since the dynamic imports are real in browser tests, we might need to wait a bit
         // But for coverage, just rendering it is enough.
-        const { getByText } = render(Home);
+        render(Home);
         // We can wait for the loading text to disappear or the layout to appear.
         // However, `render` might not wait for async components unless suspended?
         // Svelte 5 async components via await block handle promises.
