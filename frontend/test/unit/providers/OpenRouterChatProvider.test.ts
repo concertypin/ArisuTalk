@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, expectTypeOf } from "vitest";
+import { describe, it, expect, vi, expectTypeOf, beforeEach } from "vitest";
 import { OpenRouterChatProvider } from "@/lib/providers/chat/OpenRouterChatProvider";
 import { CommonChatSettings } from "@/lib/interfaces";
 import { HumanMessage } from "@langchain/core/messages";
@@ -22,6 +22,10 @@ vi.mock("@langchain/openai", async () => {
 });
 
 describe("OpenRouterChatProvider", () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
     const commonSettings: CommonChatSettings = {
         apiKey: "test-key",
         model: "mistral-7b",

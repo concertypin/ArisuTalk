@@ -1,5 +1,5 @@
 /// <reference types="vitest/browser" />
-import { test, expect, describe } from "vitest";
+import { test, expect, describe, vi } from "vitest";
 import { render } from "vitest-browser-svelte";
 import Home from "@/routes/Home.svelte";
 
@@ -10,25 +10,18 @@ describe("Home Component", () => {
     });
 
     test("loads and renders layout and chat area", async () => {
-        // Since the dynamic imports are real in browser tests, we might need to wait a bit
-        // But for coverage, just rendering it is enough.
-        render(Home);
-        // We can wait for the loading text to disappear or the layout to appear.
-        // However, `render` might not wait for async components unless suspended?
-        // Svelte 5 async components via await block handle promises.
+        const { container } = render(Home);
 
-        // Let's just verify it renders something.
-        // We can't easily mock dynamic imports in browser tests without complex setup.
-        // But since we are in the same project, the imports should resolve.
-
-        // Wait for potential resolution
-        // await expect.element(getByText("Loading chat experience...")).not.toBeVisible();
-        // This might be flaky if imports are slow or fail.
-
-        // Actually, if we just want coverage on the Home.svelte file lines (6-22), rendering it once is good.
-        // The await block has 3 states: pending, then, catch.
-        // Initial render hits pending.
-        // If imports resolve, it hits then.
-        // If imports fail, it hits catch.
+        // In a browser test, dynamic imports resolve. We should wait for the loading state
+        // to be replaced by the content. A good way is to wait for an element that only
+        // exists in the loaded state.
+        await vi.waitFor(
+            () => {
+                // The loaded state wraps CharacterLayout in a div, while the loading state does not.
+                const loadedContent = container.querySelector(".home-layout > div");
+                expect(loadedContent).not.toBeNull();
+            },
+            { timeout: 5000 }
+        ); // Use a reasonable timeout for dynamic imports
     });
 });
