@@ -37,6 +37,7 @@ describe("LangChainBaseProvider", () => {
 
     it("generate handles non-string content (e.g. JSON/objects)", async () => {
         const mockClient = {
+
             invoke: vi.fn().mockResolvedValue({ content: { some: "data" } }),
         };
         const provider = new TestProvider(mockClient);
@@ -56,8 +57,10 @@ describe("LangChainBaseProvider", () => {
     it("generate returns empty string on JSON error", async () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const circular: any = {};
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         circular.self = circular;
         const mockClient = {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             invoke: vi.fn().mockResolvedValue({ content: circular }),
         };
         const provider = new TestProvider(mockClient);
@@ -101,10 +104,12 @@ describe("LangChainBaseProvider", () => {
     it("abort cancels the stream", async () => {
         const mockClient = {
             stream: vi.fn().mockImplementation(async function* (_msgs, options) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 if (options.signal.aborted) throw new DOMException("Aborted", "AbortError");
                 yield { content: "chunk1" };
                 // Simulate delay to allow abort to happen
                 await new Promise((r) => setTimeout(r, 10));
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 if (options.signal.aborted) throw new DOMException("Aborted", "AbortError");
                 yield { content: "chunk2" };
             }),

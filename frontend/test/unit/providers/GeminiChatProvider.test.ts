@@ -69,7 +69,7 @@ describe("GeminiChatProvider", () => {
 
     it("throws error if model is not specified", async () => {
         const settings = { ...commonSettings, model: undefined };
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
         await expect(GeminiChatProvider.factory.connect(settings as any)).rejects.toThrow(
             "Model must be specified for GeminiChatProvider."
         );
@@ -119,7 +119,7 @@ describe("GeminiChatProvider", () => {
                 { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_LOW_AND_ABOVE" },
             ],
         };
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
         const provider = await GeminiChatProvider.factory.connect(settings as any);
         expect(provider).toBeInstanceOf(GeminiChatProvider);
     });
