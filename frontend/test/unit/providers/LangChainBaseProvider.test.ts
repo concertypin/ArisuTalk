@@ -37,7 +37,6 @@ describe("LangChainBaseProvider", () => {
 
     it("generate handles non-string content (e.g. JSON/objects)", async () => {
         const mockClient = {
-
             invoke: vi.fn().mockResolvedValue({ content: { some: "data" } }),
         };
         const provider = new TestProvider(mockClient);
@@ -57,7 +56,7 @@ describe("LangChainBaseProvider", () => {
     it("generate returns empty string on JSON error", async () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const circular: any = {};
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
         circular.self = circular;
         const mockClient = {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
