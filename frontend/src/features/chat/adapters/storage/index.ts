@@ -1,1 +1,0 @@
-export { LocalStorageChatAdapter } from "./LocalStorageChatAdapter";

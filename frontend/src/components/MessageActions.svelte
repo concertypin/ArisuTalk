@@ -39,16 +39,25 @@
     // Delete confirmation state
     let isConfirmingDelete = $state(false);
 
+    // Auto-reset delete confirmation with proper cleanup
+    $effect(() => {
+        if (isConfirmingDelete) {
+            const timeoutId = setTimeout(() => {
+                isConfirmingDelete = false;
+            }, 3000);
+
+            return () => {
+                clearTimeout(timeoutId);
+            };
+        }
+    });
+
     function handleDeleteClick() {
         if (isConfirmingDelete) {
             onDelete?.();
             isConfirmingDelete = false;
         } else {
             isConfirmingDelete = true;
-            // Auto-reset after 3 seconds
-            setTimeout(() => {
-                isConfirmingDelete = false;
-            }, 3000);
         }
     }
 

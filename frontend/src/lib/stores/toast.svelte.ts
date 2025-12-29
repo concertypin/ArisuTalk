@@ -10,6 +10,7 @@ export interface ToastMessage {
 
 class ToastStore {
     toasts = $state<ToastMessage[]>([]);
+    private timers = new Map<string, ReturnType<typeof setTimeout>>();
 
     /**
      * Shows a toast notification.
@@ -22,7 +23,8 @@ class ToastStore {
         this.toasts.push({ id, type, message });
 
         if (duration > 0) {
-            setTimeout(() => this.dismiss(id), duration);
+            const timer = setTimeout(() => this.dismiss(id), duration);
+            this.timers.set(id, timer);
         }
     }
 
@@ -51,6 +53,11 @@ class ToastStore {
         const index = this.toasts.findIndex((t) => t.id === id);
         if (index !== -1) {
             this.toasts.splice(index, 1);
+        }
+        // Clear timer if exists to prevent orphaned timeouts
+        if (this.timers.has(id)) {
+            clearTimeout(this.timers.get(id));
+            this.timers.delete(id);
         }
     }
 }
