@@ -4,9 +4,10 @@
   Uses dynamic import for code-splitting with {#await} block.
 -->
 <script lang="ts">
-    interface Props {
+    type Props = {
+        /** Markdown content to render */
         source: string;
-    }
+    };
     let { source }: Props = $props();
 
     const svelteMarkdownPromise = import("svelte-markdown").catch((err) => {

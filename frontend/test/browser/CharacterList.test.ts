@@ -30,7 +30,7 @@ vi.mock(
     () =>
         ({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-            transfer: vi.fn((data, _transferables) => data),
+            transfer: vi.fn((data, _transferables) => data) satisfies (typeof comlink)["transfer"],
         }) satisfies Partial<typeof comlink>
 );
 

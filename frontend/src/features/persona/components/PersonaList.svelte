@@ -5,9 +5,9 @@
     import type { Persona } from "../schema";
     import { Trash2, SquarePen, ChevronUp, ChevronDown } from "@lucide/svelte";
 
-    interface Props {
+    type Props = {
         onEdit: (persona: Persona) => void;
-    }
+    };
 
     let { onEdit }: Props = $props();
 

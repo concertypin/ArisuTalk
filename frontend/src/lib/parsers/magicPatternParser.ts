@@ -10,7 +10,7 @@ import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
 /**
  * Context provided to magic pattern scripts.
  */
-export interface MagicPatternContext {
+export type MagicPatternContext = {
     /** The character being chatted with. */
     character: Character;
     /** The user's persona. */
@@ -25,7 +25,7 @@ export interface MagicPatternContext {
      * @returns Array of messages in the specified range.
      */
     chat: (a: number, b: number) => Message[];
-}
+};
 
 /**
  * Parses and executes magic patterns in text.

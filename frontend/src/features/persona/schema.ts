@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod";
 import { AssetsSettingSchema } from "@arisutalk/character-spec/v0/Character/Assets";
 
 /**

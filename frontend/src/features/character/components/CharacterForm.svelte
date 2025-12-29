@@ -3,12 +3,12 @@
     import { characterStore } from "../stores/characterStore.svelte";
     import { type Character } from "@arisutalk/character-spec/v0/Character";
 
-    interface Props {
+    type Props = {
         character?: Character;
         onSave?: () => void;
         onCancel?: () => void;
         onSubmit?: (character: Character) => void;
-    }
+    };
 
     let { character = undefined, onSave, onCancel, onSubmit }: Props = $props();
 

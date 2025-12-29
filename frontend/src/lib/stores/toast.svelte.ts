@@ -2,11 +2,11 @@
  * Simple toast notification store using Svelte 5 runes.
  */
 
-export interface ToastMessage {
+export type ToastMessage = {
     id: string;
     type: "info" | "success" | "warning" | "error";
     message: string;
-}
+};
 
 class ToastStore {
     toasts = $state<ToastMessage[]>([]);
@@ -28,27 +28,46 @@ class ToastStore {
         }
     }
 
-    /** Convenience method for error toasts */
+    /**
+     * Convenience method for error toasts.
+     * @param message - The error message to display.
+     * @param duration - Duration in ms before auto-dismiss (default: 5000).
+     */
     error(message: string, duration = 5000) {
         this.show("error", message, duration);
     }
 
-    /** Convenience method for success toasts */
+    /**
+     * Convenience method for success toasts.
+     * @param message - The success message to display.
+     * @param duration - Duration in ms before auto-dismiss (default: 3000).
+     */
     success(message: string, duration = 3000) {
         this.show("success", message, duration);
     }
 
-    /** Convenience method for info toasts */
+    /**
+     * Convenience method for info toasts.
+     * @param message - The info message to display.
+     * @param duration - Duration in ms before auto-dismiss (default: 3000).
+     */
     info(message: string, duration = 3000) {
         this.show("info", message, duration);
     }
 
-    /** Convenience method for warning toasts */
+    /**
+     * Convenience method for warning toasts.
+     * @param message - The warning message to display.
+     * @param duration - Duration in ms before auto-dismiss (default: 4000).
+     */
     warning(message: string, duration = 4000) {
         this.show("warning", message, duration);
     }
 
-    /** Dismisses a toast by ID */
+    /**
+     * Dismisses a toast by ID.
+     * @param id - The unique ID of the toast to dismiss.
+     */
     dismiss(id: string) {
         const index = this.toasts.findIndex((t) => t.id === id);
         if (index !== -1) {

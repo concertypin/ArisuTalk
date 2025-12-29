@@ -7,7 +7,7 @@
     import { Pencil, Trash2, RefreshCw, Check, X } from "@lucide/svelte";
     import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
 
-    interface Props {
+    type Props = {
         /** The message this actions component is for */
         message: Message;
         /** Whether this message is currently being edited */
@@ -22,7 +22,7 @@
         onConfirmEdit?: () => void;
         /** Callback when edit is cancelled */
         onCancelEdit?: () => void;
-    }
+    };
 
     let {
         message,
@@ -52,6 +52,10 @@
         }
     });
 
+    /**
+     * Handles the delete button click.
+     * On first click, enters confirmation mode. On second click, performs deletion.
+     */
     function handleDeleteClick() {
         if (isConfirmingDelete) {
             onDelete?.();
@@ -61,6 +65,9 @@
         }
     }
 
+    /**
+     * Cancels the delete confirmation and resets the state.
+     */
     function cancelDelete() {
         isConfirmingDelete = false;
     }

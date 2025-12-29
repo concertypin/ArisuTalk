@@ -24,6 +24,7 @@ vi.mock("@langchain/google-genai", async () => {
     };
 });
 
+type GeminiSettings = Parameters<typeof GeminiChatProvider.factory.connect>[0];
 describe("GeminiChatProvider", () => {
     const commonSettings: CommonChatSettings = {
         apiKey: "test-key",
@@ -68,9 +69,11 @@ describe("GeminiChatProvider", () => {
     });
 
     it("throws error if model is not specified", async () => {
-        const settings = { ...commonSettings, model: undefined };
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-        await expect(GeminiChatProvider.factory.connect(settings as any)).rejects.toThrow(
+        const settings: GeminiSettings = {
+            ...commonSettings,
+            model: undefined,
+        };
+        await expect(GeminiChatProvider.factory.connect(settings)).rejects.toThrow(
             "Model must be specified for GeminiChatProvider."
         );
     });
@@ -112,15 +115,14 @@ describe("GeminiChatProvider", () => {
     });
 
     it("handles safety settings mapping", async () => {
-        const settings = {
+        const settings: GeminiSettings = {
             ...commonSettings,
             ...geminiSettings,
             safetySettings: [
                 { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_LOW_AND_ABOVE" },
             ],
         };
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-        const provider = await GeminiChatProvider.factory.connect(settings as any);
+        const provider = await GeminiChatProvider.factory.connect(settings);
         expect(provider).toBeInstanceOf(GeminiChatProvider);
     });
 });

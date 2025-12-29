@@ -5,7 +5,7 @@
 <script lang="ts">
     import type { Snippet } from "svelte";
 
-    interface Props {
+    type Props = {
         /** Button variant */
         variant?: "primary" | "secondary" | "ghost" | "neutral";
         /** Button size */
@@ -18,7 +18,7 @@
         onclick?: () => void;
         /** Button content */
         children: Snippet;
-    }
+    };
 
     let {
         variant = "primary",

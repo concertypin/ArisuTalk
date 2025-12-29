@@ -1,9 +1,24 @@
-import { describe, it, expect, beforeEach, beforeAll } from "vitest";
+import { describe, it, expect, beforeEach, beforeAll, expectTypeOf } from "vitest";
 import { navigate, getCurrentPath, isActive, initRouter } from "@/lib/router.svelte";
 
 describe("Router", () => {
     beforeAll(() => {
         initRouter();
+    });
+
+    describe("Type Tests", () => {
+        it("getCurrentPath returns string", () => {
+            expectTypeOf(getCurrentPath()).toEqualTypeOf<string>();
+        });
+
+        it("isActive returns boolean", () => {
+            expectTypeOf(isActive("/")).toEqualTypeOf<boolean>();
+        });
+
+        it("navigate returns void", () => {
+            expectTypeOf(navigate).parameters.toEqualTypeOf<[string]>();
+            expectTypeOf(navigate).returns.toEqualTypeOf<void>();
+        });
     });
 
     beforeEach(() => {

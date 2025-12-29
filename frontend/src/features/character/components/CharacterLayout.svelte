@@ -9,9 +9,9 @@
     import { characterStore } from "../stores/characterStore.svelte";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
 
-    interface Props {
+    type Props = {
         children?: import("svelte").Snippet;
-    }
+    };
 
     let { children }: Props = $props();
 

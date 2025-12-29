@@ -4,7 +4,7 @@
     import { opfsAdapter } from "../adapters/assetStorage/OpFSAssetStorageAdapter";
     import { IfNotExistBehavior } from "@/lib/interfaces";
 
-    interface Props {
+    type Props = {
         character: Character;
         onEdit: () => void;
         onDelete: () => void;
@@ -12,7 +12,7 @@
         onMove?: (direction: -1 | 1) => void;
         isFirst?: boolean;
         isLast?: boolean;
-    }
+    };
     let {
         character,
         onEdit,

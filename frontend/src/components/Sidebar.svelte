@@ -6,10 +6,12 @@
     import { uiState } from "@/lib/stores/ui.svelte";
     import { Settings } from "@lucide/svelte";
 
-    interface Props {
+    type Props = {
+        /** Sidebar collapse state */
         collapsed?: boolean;
+        /** Toggle sidebar callback */
         onToggle?: () => void;
-    }
+    };
 
     let { collapsed = false, onToggle }: Props = $props();
 

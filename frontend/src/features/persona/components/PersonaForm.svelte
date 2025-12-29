@@ -4,11 +4,11 @@
     import { Plus, User, FileText, StickyNote, SquarePen } from "@lucide/svelte";
     import { ZodError } from "zod";
 
-    interface Props {
+    type Props = {
         persona?: Persona;
         onSave: () => void;
         onCancel: () => void;
-    }
+    };
 
     let { persona = undefined, onSave, onCancel }: Props = $props();
 

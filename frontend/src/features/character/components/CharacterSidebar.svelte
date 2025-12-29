@@ -4,12 +4,12 @@
     import { characterStore } from "../stores/characterStore.svelte";
     import { uiState } from "@/lib/stores/ui.svelte";
 
-    interface Props {
+    type Props = {
         selectedCharacterId: string | null;
         onSelect: (id: string) => void;
         onAdd: () => void;
         onPersona: () => void;
-    }
+    };
 
     let { selectedCharacterId, onSelect, onAdd, onPersona }: Props = $props();
 </script>

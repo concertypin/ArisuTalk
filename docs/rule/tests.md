@@ -7,7 +7,7 @@ Test should cover:
     - invalid input
     - boundary values
     - unexpected states
-    - TypeScript's type check, via Vitest's type assertion features. See [more](https://vitest.dev/guide/testing-types)
+    - TypeScript's type check, via Vitest's type assertion features. See [more](https://vitest.dev/guide/testing-types) and [more](https://github.com/mmkal/expect-type)
 
 ## 1. General Logic Tests (Node.js)
 
@@ -48,6 +48,24 @@ describe('Counter Logic', () => {
 
 ```
 
+```typescript
+// utils.ts (Pure TypeScript logic)
+export async function fetchUserList(): Promise<User[]> {
+  return [{ id: 1, name: 'Ms. Example' }];
+}
+
+// utils.test.ts (The Test)
+import { describe, it, expect, expectTypeOf } from 'vitest';
+import { fetchUserList } from './utils.ts';
+
+describe('User List', () => {
+    it.concurrent('should fetch user list', () => {
+        const users = await fetchUserList();
+        expectTypeOf(users).toEqualTypeOf<User[]>();
+        expect(users).toHaveLength(1);
+    });
+});
+```
 ---
 
 ## 2. Browser Component Tests (Playwright)

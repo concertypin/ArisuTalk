@@ -2,9 +2,9 @@
     import { chatStore } from "../stores/chatStore.svelte";
     import { Plus, MessageSquare, Trash2 } from "@lucide/svelte";
 
-    interface Props {
+    type Props = {
         characterId: string;
-    }
+    };
 
     let { characterId }: Props = $props();
 
