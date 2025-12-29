@@ -326,6 +326,117 @@ export class ChatStore {
             this.activeMessages = [];
         }
     }
+
+    /**
+     * Updates a message's content.
+     * @param messageId - The ID of the message to update.
+     * @param newContent - The new text content for the message.
+     */
+    async updateMessage(messageId: string, newContent: string) {
+        if (!this.activeChatId) return;
+
+        const content: Message["content"] = { type: "text", data: newContent };
+        await this.adapter.updateMessage(this.activeChatId, messageId, content);
+
+        // Update in reactive state
+        const index = this.activeMessages.findIndex((m) => m.id === messageId);
+        if (index !== -1) {
+            this.activeMessages[index].content = content;
+            this.activeMessages[index].timestamp = Date.now();
+        }
+    }
+
+    /**
+     * Deletes a message by ID.
+     * @param messageId - The ID of the message to delete.
+     */
+    async deleteMessage(messageId: string) {
+        if (!this.activeChatId) return;
+
+        await this.adapter.deleteMessage(this.activeChatId, messageId);
+
+        // Remove from reactive state
+        const index = this.activeMessages.findIndex((m) => m.id === messageId);
+        if (index !== -1) {
+            this.activeMessages.splice(index, 1);
+        }
+    }
+
+    /**
+     * Regenerates a message and all subsequent messages.
+     * Works on any assistant message, not just the latest.
+     * @param messageId - The ID of the assistant message to regenerate from.
+     */
+    async regenerateMessage(messageId: string) {
+        if (!this.activeChatId || !this.activeProvider) return;
+
+        const messageIndex = this.activeMessages.findIndex((m) => m.id === messageId);
+        if (messageIndex === -1) return;
+
+        const targetMessage = this.activeMessages[messageIndex];
+        if (targetMessage.role !== "assistant") return;
+
+        // Delete target message and all subsequent messages (parallel)
+        const messagesToDelete = this.activeMessages.slice(messageIndex);
+        await Promise.all(
+            messagesToDelete.map((msg) => this.adapter.deleteMessage(this.activeChatId!, msg.id))
+        );
+
+        // Remove from reactive state
+        this.activeMessages.splice(messageIndex);
+
+        // Re-invoke LLM with remaining history
+        this.isGenerating = true;
+        const chatId = this.activeChatId;
+
+        try {
+            // Prepare LangChain messages from remaining history
+            const langChainMessages = this.activeMessages.map((m) => {
+                const text = typeof m.content.data === "string" ? m.content.data : "";
+                return m.role === "user" ? new HumanMessage(text) : new AIMessage(text);
+            });
+
+            // Placeholder for new assistant message
+            const assistantMessageId = crypto.randomUUID();
+            const assistantMessage: Message = apply(MessageSchema, {
+                id: assistantMessageId,
+                chatId,
+                role: "assistant",
+                content: { type: "text", data: "" },
+            });
+
+            // Optimistically add to UI
+            this.activeMessages.push(assistantMessage);
+
+            const stream = this.activeProvider.stream(langChainMessages);
+            let fullContent = "";
+
+            const msgIndex = this.activeMessages.findIndex((m) => m.id === assistantMessageId);
+            const assistantMessageRef = msgIndex !== -1 ? this.activeMessages[msgIndex] : null;
+            for await (const chunk of stream) {
+                fullContent += chunk;
+                if (assistantMessageRef) {
+                    assistantMessageRef.content = {
+                        type: "text",
+                        data: fullContent,
+                    };
+                }
+            }
+
+            // Save final message to storage
+            assistantMessage.content = { type: "text", data: fullContent };
+            await this.adapter.addMessage(chatId, assistantMessage);
+            const chat = this.chats.find((c) => c.id === chatId);
+            if (chat) {
+                chat.lastMessage = Date.now();
+                chat.updatedAt = Date.now();
+            }
+        } catch (error) {
+            console.error("Regeneration failed", error);
+        } finally {
+            this.isGenerating = false;
+        }
+    }
 }
 
 export const chatStore = new ChatStore();

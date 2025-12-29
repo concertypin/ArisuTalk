@@ -99,6 +99,28 @@ export class IDBChatAdapter implements IChatStorageAdapter {
         return this.db.messages.where("chatId").equals(chatId).toArray();
     }
 
+    async updateMessage(
+        chatId: string,
+        messageId: string,
+        content: Message["content"]
+    ): Promise<void> {
+        const message = await this.db.messages.get(messageId);
+        if (!message || message.chatId !== chatId) {
+            throw new Error(`Message not found: ${messageId}`);
+        }
+        message.content = content;
+        message.timestamp = Date.now();
+        await this.db.messages.put(message);
+    }
+
+    async deleteMessage(chatId: string, messageId: string): Promise<void> {
+        const message = await this.db.messages.get(messageId);
+        if (!message || message.chatId !== chatId) {
+            throw new Error(`Message not found: ${messageId}`);
+        }
+        await this.db.messages.delete(messageId);
+    }
+
     // Provide export/import on chat adapter for convenience
     async exportData(): Promise<ReadableStream<Uint8Array>> {
         const chats = await this.db.chats.toArray();

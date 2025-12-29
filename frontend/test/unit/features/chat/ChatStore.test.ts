@@ -56,6 +56,8 @@ describe("ChatStore", () => {
             deleteChat: vi.fn(),
             addMessage: vi.fn(),
             getMessages: vi.fn().mockResolvedValue([]),
+            updateMessage: vi.fn().mockResolvedValue(undefined),
+            deleteMessage: vi.fn().mockResolvedValue(undefined),
         };
 
         // Mock default provider connection

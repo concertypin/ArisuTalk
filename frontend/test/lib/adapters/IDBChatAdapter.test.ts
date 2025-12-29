@@ -36,4 +36,59 @@ describe("DexieChatAdapter", () => {
         const got = await adapter.getChat(chat.id);
         expect(got).toBeUndefined();
     });
+
+    it("should update a message's content", async () => {
+        const chatId = await adapter.createChat("char-1", "Test Chat");
+        const message = {
+            id: "msg-1",
+            chatId,
+            role: "user" as const,
+            content: { type: "text" as const, data: "Original content" },
+            timestamp: Date.now(),
+            inlays: [],
+        };
+        await adapter.addMessage(chatId, message);
+
+        const newContent = { type: "text" as const, data: "Updated content" };
+        await adapter.updateMessage(chatId, message.id, newContent);
+
+        const messages = await adapter.getMessages(chatId);
+        expect(messages).toHaveLength(1);
+        expect(messages[0].content.data).toBe("Updated content");
+    });
+
+    it("should throw when updating non-existent message", async () => {
+        const chatId = await adapter.createChat("char-1", "Test Chat");
+        const newContent = { type: "text" as const, data: "Updated" };
+
+        await expect(adapter.updateMessage(chatId, "non-existent", newContent)).rejects.toThrow(
+            "Message not found"
+        );
+    });
+
+    it("should delete a message", async () => {
+        const chatId = await adapter.createChat("char-1", "Test Chat");
+        const message = {
+            id: "msg-1",
+            chatId,
+            role: "user" as const,
+            content: { type: "text" as const, data: "To be deleted" },
+            timestamp: Date.now(),
+            inlays: [],
+        };
+        await adapter.addMessage(chatId, message);
+
+        await adapter.deleteMessage(chatId, message.id);
+
+        const messages = await adapter.getMessages(chatId);
+        expect(messages).toHaveLength(0);
+    });
+
+    it("should throw when deleting non-existent message", async () => {
+        const chatId = await adapter.createChat("char-1", "Test Chat");
+
+        await expect(adapter.deleteMessage(chatId, "non-existent")).rejects.toThrow(
+            "Message not found"
+        );
+    });
 });

@@ -1,3 +1,14 @@
+## 0. General Guidelines
+
+Test should follow general TypeScript/Svelte guidelines.
+Test should cover:
+    - normal behavior
+    - edge cases
+    - invalid input
+    - boundary values
+    - unexpected states
+    - TypeScript's type check, via Vitest's type assertion features. See [more](https://vitest.dev/guide/testing-types)
+
 ## 1. General Logic Tests (Node.js)
 
 Use these for your `.svelte.ts` files or pure TypeScript utility files. These tests run in Node.js for maximum speed. Since Svelte 5 runes are "universal," they can be tested without a browser if they don't touch the DOM.
@@ -48,7 +59,10 @@ Use these for `.svelte` files. These tests run in a real browser, allowing you t
 - File Extension: Use `.test.ts` on `test/browser/` files.
 - Tooling: Use `vitest-browser-svelte` for rendering and `page` from `@vitest/browser/context` for interactions.
 - Concurrency: Use `it.concurrent` carefully. `vitest-browser-svelte` isolates `render()`, but if you manipulate the global `window` object, use serial tests.
-
+- A11y First: When using helpers returned by the `render` function, prioritize `getByRole` above all else.
+    - ❌ Avoid: `getByLabelText`, `getByText` (Use only as a last resort).
+    - ✅ Prefer: `getByRole('button', { name: 'Save' })` (Explicit selection based on the Accessibility Tree).
+- Upgrade Selectors: Even if the user's provided example uses simple selectors, you must upgrade them to Accessibility (Role) based selectors in your final code.
 ```typescript
 // Button.svelte.test.ts (The Component Test)
 import { render } from 'vitest-browser-svelte';

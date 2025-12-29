@@ -7,6 +7,7 @@
     import { routes } from "@/lib/routeConfig";
     import { uiState } from "@/lib/stores/ui.svelte";
     import { settings } from "@/lib/stores/settings.svelte";
+    import ToastContainer from "@/components/ToastContainer.svelte";
     import type { Component } from "svelte";
 
     // Initialize router and settings on mount
@@ -65,3 +66,5 @@
         </div>
     {/await}
 {/if}
+
+<ToastContainer />

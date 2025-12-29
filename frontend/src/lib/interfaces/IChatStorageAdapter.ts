@@ -64,4 +64,19 @@ export interface IChatStorageAdapter {
      * @returns Promise resolving to an array of messages.
      */
     getMessages(chatId: string): Promise<Message[]>;
+
+    /**
+     * Updates a message's content.
+     * @param chatId - The ID of the chat containing the message.
+     * @param messageId - The ID of the message to update.
+     * @param content - The new content for the message.
+     */
+    updateMessage(chatId: string, messageId: string, content: Message["content"]): Promise<void>;
+
+    /**
+     * Deletes a message by ID.
+     * @param chatId - The ID of the chat containing the message.
+     * @param messageId - The ID of the message to delete.
+     */
+    deleteMessage(chatId: string, messageId: string): Promise<void>;
 }
