@@ -215,12 +215,7 @@ export class ChatStore {
 
     async addMessage(chatId: string, message: Message) {
         await this.adapter.addMessage(chatId, message);
-        const chat = this.chats.find((c) => c.id === chatId);
-
-        if (chat) {
-            chat.lastMessage = Date.now();
-            chat.updatedAt = Date.now();
-        }
+        this.updateChatTimestamps(chatId);
 
         // Update activeMessages if this is the active chat
         if (chatId === this.activeChatId) {
@@ -231,6 +226,50 @@ export class ChatStore {
             };
             this.activeMessages.push(messageWithChatId);
         }
+    }
+
+    /**
+     * Updates chat timestamps in the reactive state.
+     */
+    private updateChatTimestamps(chatId: string) {
+        const chat = this.chats.find((c) => c.id === chatId);
+        if (chat) {
+            chat.lastMessage = Date.now();
+            chat.updatedAt = Date.now();
+        }
+    }
+
+    /**
+     * Helper to process an LLM stream and update a message ref.
+     */
+    private async processStream(
+        langChainMessages: (HumanMessage | AIMessage)[],
+        assistantMessageId: string
+    ) {
+        const stream = this.activeProvider!.stream(langChainMessages);
+        let fullContent = "";
+
+        for await (const chunk of stream) {
+            fullContent += chunk;
+            // Re-find to ensure we are updating the current reactive state
+            const msgIndex = this.activeMessages.findIndex((m) => m.id === assistantMessageId);
+            if (msgIndex !== -1) {
+                this.activeMessages[msgIndex].content = {
+                    type: "text",
+                    data: fullContent,
+                };
+            }
+        }
+        return fullContent;
+    }
+
+    /**
+     * Finalizes a message by saving it to storage and updating timestamps.
+     */
+    private async finalizeMessage(chatId: string, message: Message, fullContent: string) {
+        message.content = { type: "text", data: fullContent };
+        await this.adapter.addMessage(chatId, message);
+        this.updateChatTimestamps(chatId);
     }
 
     async sendMessage(content: string) {
@@ -255,7 +294,6 @@ export class ChatStore {
                 return m.role === "user" ? new HumanMessage(text) : new AIMessage(text);
             });
 
-            // Placeholder for assistant message
             const assistantMessageId = crypto.randomUUID();
             const assistantMessage: Message = apply(MessageSchema, {
                 id: assistantMessageId,
@@ -267,32 +305,10 @@ export class ChatStore {
             // Optimistically add to UI
             this.activeMessages.push(assistantMessage);
 
-            const stream = this.activeProvider.stream(langChainMessages);
-            let fullContent = "";
-
-            const msgIndex = this.activeMessages.findIndex((m) => m.id === assistantMessageId);
-            const assistantMessageRef = msgIndex !== -1 ? this.activeMessages[msgIndex] : null;
-            for await (const chunk of stream) {
-                fullContent += chunk;
-                if (assistantMessageRef) {
-                    assistantMessageRef.content = {
-                        type: "text",
-                        data: fullContent,
-                    };
-                }
-            }
-
-            // Save final message to storage
-            assistantMessage.content = { type: "text", data: fullContent };
-            await this.adapter.addMessage(chatId, assistantMessage);
-            const chat = this.chats.find((c) => c.id === chatId);
-            if (chat) {
-                chat.lastMessage = Date.now();
-                chat.updatedAt = Date.now();
-            }
+            const fullContent = await this.processStream(langChainMessages, assistantMessageId);
+            await this.finalizeMessage(chatId, assistantMessage, fullContent);
         } catch (error) {
             console.error("Generation failed", error);
-            // Handle error state in message
         } finally {
             this.isGenerating = false;
         }
@@ -385,7 +401,6 @@ export class ChatStore {
         // Remove from reactive state
         this.activeMessages.splice(messageIndex);
 
-        // Re-invoke LLM with remaining history
         this.isGenerating = true;
         const chatId = this.activeChatId;
 
@@ -396,7 +411,6 @@ export class ChatStore {
                 return m.role === "user" ? new HumanMessage(text) : new AIMessage(text);
             });
 
-            // Placeholder for new assistant message
             const assistantMessageId = crypto.randomUUID();
             const assistantMessage: Message = apply(MessageSchema, {
                 id: assistantMessageId,
@@ -408,29 +422,8 @@ export class ChatStore {
             // Optimistically add to UI
             this.activeMessages.push(assistantMessage);
 
-            const stream = this.activeProvider.stream(langChainMessages);
-            let fullContent = "";
-
-            const msgIndex = this.activeMessages.findIndex((m) => m.id === assistantMessageId);
-            const assistantMessageRef = msgIndex !== -1 ? this.activeMessages[msgIndex] : null;
-            for await (const chunk of stream) {
-                fullContent += chunk;
-                if (assistantMessageRef) {
-                    assistantMessageRef.content = {
-                        type: "text",
-                        data: fullContent,
-                    };
-                }
-            }
-
-            // Save final message to storage
-            assistantMessage.content = { type: "text", data: fullContent };
-            await this.adapter.addMessage(chatId, assistantMessage);
-            const chat = this.chats.find((c) => c.id === chatId);
-            if (chat) {
-                chat.lastMessage = Date.now();
-                chat.updatedAt = Date.now();
-            }
+            const fullContent = await this.processStream(langChainMessages, assistantMessageId);
+            await this.finalizeMessage(chatId, assistantMessage, fullContent);
         } catch (error) {
             console.error("Regeneration failed", error);
         } finally {
