@@ -140,10 +140,11 @@ describe("ChatArea Component", () => {
         ];
         chatStore.isGenerating = true;
 
-        const { getByRole } = render(ChatArea);
+        const { container } = render(ChatArea);
 
-        // DaisyUI loading-dots uses generic element, check via status role or structure
-        await expect.element(getByRole("status")).toBeVisible();
+        // DaisyUI loading-dots class on span element
+        const loader = container.querySelector(".loading-dots");
+        expect(loader).not.toBeNull();
     });
 
     test("renders action buttons on messages", async () => {
@@ -199,10 +200,13 @@ describe("ChatArea Component", () => {
 
         const { getByTitle } = render(ChatArea);
 
+        // First click shows confirm button
         const deleteBtn = getByTitle("Delete message");
         await deleteBtn.click();
-        // Need second click to confirm due to red confirm button
-        await deleteBtn.click();
+
+        // After first click, button changes to confirm state with different title
+        const confirmBtn = getByTitle("Click again to confirm delete");
+        await confirmBtn.click();
 
         expect(chatStore.deleteMessage).toHaveBeenCalledWith("msg-1");
     });
