@@ -272,6 +272,28 @@ export class ChatStore {
         this.updateChatTimestamps(chatId);
     }
 
+    /**
+     * Helper to stream and save a response from the LLM.
+     */
+    private async _streamAndSaveResponse(
+        chatId: string,
+        langChainMessages: (HumanMessage | AIMessage)[]
+    ) {
+        const assistantMessageId = crypto.randomUUID();
+        const assistantMessage: Message = apply(MessageSchema, {
+            id: assistantMessageId,
+            chatId,
+            role: "assistant",
+            content: { type: "text", data: "" },
+        });
+
+        // Optimistically add to UI
+        this.activeMessages.push(assistantMessage);
+
+        const fullContent = await this.processStream(langChainMessages, assistantMessageId);
+        await this.finalizeMessage(chatId, assistantMessage, fullContent);
+    }
+
     async sendMessage(content: string) {
         if (!this.activeChatId || !this.activeProvider) return;
 
@@ -294,19 +316,7 @@ export class ChatStore {
                 return m.role === "user" ? new HumanMessage(text) : new AIMessage(text);
             });
 
-            const assistantMessageId = crypto.randomUUID();
-            const assistantMessage: Message = apply(MessageSchema, {
-                id: assistantMessageId,
-                chatId,
-                role: "assistant",
-                content: { type: "text", data: "" },
-            });
-
-            // Optimistically add to UI
-            this.activeMessages.push(assistantMessage);
-
-            const fullContent = await this.processStream(langChainMessages, assistantMessageId);
-            await this.finalizeMessage(chatId, assistantMessage, fullContent);
+            await this._streamAndSaveResponse(chatId, langChainMessages);
         } catch (error) {
             console.error("Generation failed", error);
         } finally {

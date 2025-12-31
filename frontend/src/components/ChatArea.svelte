@@ -9,6 +9,7 @@
     import MarkdownRenderer from "@/components/MarkdownRenderer.svelte";
     import MessageActions from "@/components/MessageActions.svelte";
     import { toastStore } from "@/lib/stores/toast.svelte";
+    import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
 
     let inputValue = $state("");
     let messagesContainer = $state<HTMLElement | null>(null);
@@ -49,6 +50,13 @@
             e.preventDefault();
             void sendMessage();
         }
+    }
+
+    /**
+     * Extracts text content from a message safely.
+     */
+    function getMessageText(msg: Message): string {
+        return typeof msg.content.data === "string" ? msg.content.data : "";
     }
 
     function startEdit(messageId: string, content: string) {
@@ -132,11 +140,7 @@
                                 onkeydown={handleEditKeydown}
                             ></textarea>
                         {:else}
-                            <MarkdownRenderer
-                                source={typeof msg.content.data === "string"
-                                    ? msg.content.data
-                                    : ""}
-                            />
+                            <MarkdownRenderer source={getMessageText(msg)} />
                         {/if}
                         <div class="flex items-center justify-between mt-1">
                             <span class="text-xs opacity-70">
@@ -145,11 +149,7 @@
                             <MessageActions
                                 message={msg}
                                 isEditing={editingMessageId === msg.id}
-                                onEdit={() =>
-                                    startEdit(
-                                        msg.id,
-                                        typeof msg.content.data === "string" ? msg.content.data : ""
-                                    )}
+                                onEdit={() => startEdit(msg.id, getMessageText(msg))}
                                 onDelete={() => void handleDelete(msg.id)}
                                 onRegenerate={() => void handleRegenerate(msg.id)}
                                 onConfirmEdit={() => void confirmEdit()}
