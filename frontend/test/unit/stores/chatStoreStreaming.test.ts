@@ -1,5 +1,7 @@
 import { test, expect, describe, vi, afterEach } from "vitest";
 import { chatStore } from "@/features/chat/stores/chatStore.svelte";
+import { MessageSchema } from "@arisutalk/character-spec/v0/Character/Message";
+import { apply } from "@arisutalk/character-spec/utils";
 
 describe("ChatStore Streaming", () => {
     afterEach(() => {
@@ -73,6 +75,46 @@ describe("ChatStore Streaming", () => {
         const assistantMsg = chatStore.activeMessages.find((m) => m.role === "assistant");
         // We don't strictly assert content here because timing is flaky, but checking it didn't crash is good.
         expect(assistantMsg).toBeDefined();
+    });
+
+    test("regenerateMessage deletes subsequent messages and streams new response", async () => {
+        await chatStore.initPromise;
+        await chatStore.setProvider("MOCK", {
+            mockDelay: 10,
+            responses: ["Regenerated Content"],
+        });
+
+        const chatId = await chatStore.createChat("test-regen", "Regen Chat");
+        await chatStore.setActiveChat(chatId);
+
+        // Setup messages: User -> Assistant -> Assistant
+        await chatStore.addMessage(chatId, apply(MessageSchema, {
+            id: "msg-1", role: "user", content: { type: "text", data: "Hello" }, chatId
+        }));
+        await chatStore.addMessage(chatId, apply(MessageSchema, {
+            id: "msg-2", role: "assistant", content: { type: "text", data: "First Response" }, chatId
+        }));
+        await chatStore.addMessage(chatId, apply(MessageSchema, {
+            id: "msg-3", role: "assistant", content: { type: "text", data: "Second Response" }, chatId
+        }));
+
+        expect(chatStore.activeMessages.length).toBe(3);
+
+        // Regenerate from the first assistant message (msg-2)
+        const promise = chatStore.regenerateMessage("msg-2");
+        
+        // Should immediately clear from msg-2 onwards in activeMessages
+        // Now it should be 1 ([msg-1]) before the new assistant message is added inside try/catch
+        expect(chatStore.activeMessages.length).toBe(1);
+        expect(chatStore.activeMessages[0].id).toBe("msg-1");
+
+        await promise;
+
+        // Final check: [msg-1, new-assistant-msg]
+        expect(chatStore.activeMessages.length).toBe(2);
+        expect(chatStore.activeMessages[1].role).toBe("assistant");
+        expect(chatStore.activeMessages[1].content.data).toBe("Regenerated Content");
+        expect(chatStore.isGenerating).toBe(false);
     });
 
     test("error in provider resets isGenerating", async () => {

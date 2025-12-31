@@ -393,6 +393,11 @@ export class ChatStore {
      * Works on any assistant message, not just the latest.
      * @param messageId - The ID of the assistant message to regenerate from.
      */
+    /**
+     * Regenerates a message and all subsequent messages.
+     * Works on any assistant message, not just the latest.
+     * @param messageId - The ID of the assistant message to regenerate from.
+     */
     async regenerateMessage(messageId: string) {
         if (!this.activeChatId || !this.activeProvider) return;
 
@@ -402,38 +407,27 @@ export class ChatStore {
         const targetMessage = this.activeMessages[messageIndex];
         if (targetMessage.role !== "assistant") return;
 
-        // Delete target message and all subsequent messages (parallel)
         const messagesToDelete = this.activeMessages.slice(messageIndex);
-        await Promise.all(
-            messagesToDelete.map((msg) => this.adapter.deleteMessage(this.activeChatId!, msg.id))
-        );
 
-        // Remove from reactive state
+        // Remove from reactive state immediately for better responsiveness
         this.activeMessages.splice(messageIndex);
 
         this.isGenerating = true;
         const chatId = this.activeChatId;
 
         try {
+            // Delete from storage (can happen in background or parallel)
+            await Promise.all(
+                messagesToDelete.map((msg) => this.adapter.deleteMessage(chatId!, msg.id))
+            );
+
             // Prepare LangChain messages from remaining history
             const langChainMessages = this.activeMessages.map((m) => {
                 const text = typeof m.content.data === "string" ? m.content.data : "";
                 return m.role === "user" ? new HumanMessage(text) : new AIMessage(text);
             });
 
-            const assistantMessageId = crypto.randomUUID();
-            const assistantMessage: Message = apply(MessageSchema, {
-                id: assistantMessageId,
-                chatId,
-                role: "assistant",
-                content: { type: "text", data: "" },
-            });
-
-            // Optimistically add to UI
-            this.activeMessages.push(assistantMessage);
-
-            const fullContent = await this.processStream(langChainMessages, assistantMessageId);
-            await this.finalizeMessage(chatId, assistantMessage, fullContent);
+            await this._streamAndSaveResponse(chatId, langChainMessages);
         } catch (error) {
             console.error("Regeneration failed", error);
         } finally {
