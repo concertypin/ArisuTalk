@@ -418,7 +418,7 @@ export class ChatStore {
         try {
             // Delete from storage (can happen in background or parallel)
             await Promise.all(
-                messagesToDelete.map((msg) => this.adapter.deleteMessage(chatId!, msg.id))
+                messagesToDelete.map((msg) => this.adapter.deleteMessage(chatId, msg.id))
             );
 
             // Prepare LangChain messages from remaining history
