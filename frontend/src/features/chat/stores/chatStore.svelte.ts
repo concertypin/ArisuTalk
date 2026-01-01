@@ -319,6 +319,7 @@ export class ChatStore {
             await this._streamAndSaveResponse(chatId, langChainMessages);
         } catch (error) {
             console.error("Generation failed", error);
+            throw error;
         } finally {
             this.isGenerating = false;
         }
@@ -393,11 +394,6 @@ export class ChatStore {
      * Works on any assistant message, not just the latest.
      * @param messageId - The ID of the assistant message to regenerate from.
      */
-    /**
-     * Regenerates a message and all subsequent messages.
-     * Works on any assistant message, not just the latest.
-     * @param messageId - The ID of the assistant message to regenerate from.
-     */
     async regenerateMessage(messageId: string) {
         if (!this.activeChatId || !this.activeProvider) return;
 
@@ -430,6 +426,7 @@ export class ChatStore {
             await this._streamAndSaveResponse(chatId, langChainMessages);
         } catch (error) {
             console.error("Regeneration failed", error);
+            throw error;
         } finally {
             this.isGenerating = false;
         }

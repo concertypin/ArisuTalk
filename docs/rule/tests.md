@@ -59,7 +59,7 @@ import { describe, it, expect, expectTypeOf } from 'vitest';
 import { fetchUserList } from './utils.ts';
 
 describe('User List', () => {
-    it.concurrent('should fetch user list', () => {
+    it.concurrent('should fetch user list', async () => {
         const users = await fetchUserList();
         expectTypeOf(users).toEqualTypeOf<User[]>();
         expect(users).toHaveLength(1);
