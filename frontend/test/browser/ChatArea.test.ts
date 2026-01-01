@@ -16,6 +16,9 @@ vi.mock("@/features/chat/stores/chatStore.svelte", () => {
         sendMessage: vi.fn(),
         createChat: vi.fn().mockResolvedValue("new-chat-id"),
         setActiveChat: vi.fn(),
+        updateMessage: vi.fn(),
+        deleteMessage: vi.fn(),
+        regenerateMessage: vi.fn(),
         initPromise: Promise.resolve(),
     };
     return {
@@ -139,8 +142,143 @@ describe("ChatArea Component", () => {
 
         const { container } = render(ChatArea);
 
-        // DaisyUI loading-dots class
+        // DaisyUI loading-dots class on span element
         const loader = container.querySelector(".loading-dots");
         expect(loader).not.toBeNull();
+    });
+
+    test("renders action buttons on messages", async () => {
+        chatStore.activeChatId = "chat-1";
+        chatStore.chats = [
+            {
+                id: "chat-1",
+                name: "Test Chat",
+                characterId: "char-1",
+                createdAt: 0,
+                updatedAt: 0,
+                lastMessage: 0,
+                title: "Test Chat",
+            } satisfies LocalChat,
+        ];
+        chatStore.activeMessages = [
+            apply(MessageSchema, {
+                id: "msg-1",
+                role: "user",
+                content: { type: "text", data: "Hello" },
+                chatId: "chat-1",
+            }),
+        ] satisfies Message[];
+
+        const { getByTitle } = render(ChatArea);
+
+        // Action buttons should exist (hidden until hover via CSS)
+        await expect.element(getByTitle("Edit message")).toBeInTheDocument();
+        await expect.element(getByTitle("Delete message")).toBeInTheDocument();
+    });
+
+    test("calls deleteMessage when delete button is clicked", async () => {
+        chatStore.activeChatId = "chat-1";
+        chatStore.chats = [
+            {
+                id: "chat-1",
+                name: "Test Chat",
+                characterId: "char-1",
+                createdAt: 0,
+                updatedAt: 0,
+                lastMessage: 0,
+                title: "Test Chat",
+            } satisfies LocalChat,
+        ];
+        chatStore.activeMessages = [
+            apply(MessageSchema, {
+                id: "msg-1",
+                role: "user",
+                content: { type: "text", data: "Hello" },
+                chatId: "chat-1",
+            }),
+        ] satisfies Message[];
+
+        const { getByTitle } = render(ChatArea);
+
+        // First click shows confirm button
+        const deleteBtn = getByTitle("Delete message");
+        await deleteBtn.click();
+
+        // After first click, button changes to confirm state with different title
+        const confirmBtn = getByTitle("Click again to confirm delete");
+        await confirmBtn.click();
+
+        expect(chatStore.deleteMessage).toHaveBeenCalledWith("msg-1");
+    });
+
+    test("shows regenerate button only on assistant messages", async () => {
+        chatStore.activeChatId = "chat-1";
+        chatStore.chats = [
+            {
+                id: "chat-1",
+                name: "Test Chat",
+                characterId: "char-1",
+                createdAt: 0,
+                updatedAt: 0,
+                lastMessage: 0,
+                title: "Test Chat",
+            } satisfies LocalChat,
+        ];
+        chatStore.activeMessages = [
+            apply(MessageSchema, {
+                id: "msg-1",
+                role: "user",
+                content: { type: "text", data: "Hello" },
+                chatId: "chat-1",
+            }),
+            apply(MessageSchema, {
+                id: "msg-2",
+                role: "assistant",
+                content: { type: "text", data: "Hi there!" },
+                chatId: "chat-1",
+            }),
+        ] satisfies Message[];
+
+        const { getByTitle } = render(ChatArea);
+
+        // Should have 2 messages, only assistant should have regenerate button
+        // getByTitle returns the single element, if multiple exist it would throw
+        await expect.element(getByTitle("Regenerate response")).toBeInTheDocument();
+    });
+
+    test("calls regenerateMessage when regenerate button is clicked", async () => {
+        chatStore.activeChatId = "chat-1";
+        chatStore.chats = [
+            {
+                id: "chat-1",
+                name: "Test Chat",
+                characterId: "char-1",
+                createdAt: 0,
+                updatedAt: 0,
+                lastMessage: 0,
+                title: "Test Chat",
+            } satisfies LocalChat,
+        ];
+        chatStore.activeMessages = [
+            apply(MessageSchema, {
+                id: "msg-1",
+                role: "user",
+                content: { type: "text", data: "Hello" },
+                chatId: "chat-1",
+            }),
+            apply(MessageSchema, {
+                id: "msg-2",
+                role: "assistant",
+                content: { type: "text", data: "Hi there!" },
+                chatId: "chat-1",
+            }),
+        ] satisfies Message[];
+
+        const { getByTitle } = render(ChatArea);
+
+        const regenerateBtn = getByTitle("Regenerate response");
+        await regenerateBtn.click();
+
+        expect(chatStore.regenerateMessage).toHaveBeenCalledWith("msg-2");
     });
 });

@@ -56,6 +56,7 @@ describe("LangChainBaseProvider", () => {
     it("generate returns empty string on JSON error", async () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const circular: any = {};
+
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
         circular.self = circular;
         const mockClient = {
@@ -102,16 +103,18 @@ describe("LangChainBaseProvider", () => {
 
     it("abort cancels the stream", async () => {
         const mockClient = {
-            stream: vi.fn().mockImplementation(async function* (_msgs, options) {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                if (options.signal.aborted) throw new DOMException("Aborted", "AbortError");
+            stream: vi.fn().mockImplementation(async function* (
+                _msgs: unknown,
+                options: AbortController
+            ) {
+                if (options?.signal?.aborted) throw new DOMException("Aborted", "AbortError");
                 yield { content: "chunk1" };
                 // Simulate delay to allow abort to happen
                 await new Promise((r) => setTimeout(r, 10));
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                if (options.signal.aborted) throw new DOMException("Aborted", "AbortError");
+
+                if (options?.signal?.aborted) throw new DOMException("Aborted", "AbortError");
                 yield { content: "chunk2" };
-            }),
+            } satisfies Partial<BaseChatModel["stream"]>),
         };
         const provider = new TestProvider(mockClient);
         const generator = provider.stream([new HumanMessage("hi")]);
@@ -123,8 +126,7 @@ describe("LangChainBaseProvider", () => {
         try {
             await next;
             // consume rest
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            for await (const chunk of generator) {
+            for await (const _ of generator) {
                 // do nothing
             }
         } catch {
@@ -142,8 +144,7 @@ describe("LangChainBaseProvider", () => {
         const generator = provider.stream([new HumanMessage("hi")]);
 
         await expect(async () => {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            for await (const chunk of generator) {
+            for await (const _ of generator) {
                 // do nothing
             }
         }).rejects.toThrow("Network error");

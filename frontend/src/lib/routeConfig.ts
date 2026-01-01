@@ -17,6 +17,6 @@ export type RouteLoader = () => Promise<{ default: Component }>;
  * Values are lazy-load functions for components.
  */
 export const routes: Record<string, RouteLoader> = {
-    "/": () => import("../routes/Home.svelte"),
+    "/": () => import("@/routes/Home.svelte"),
     // Add new routes here as the app grows
 };

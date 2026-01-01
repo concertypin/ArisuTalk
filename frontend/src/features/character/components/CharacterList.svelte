@@ -6,9 +6,9 @@
     import { transfer } from "comlink";
     import { remapAssetToUint8Array, collectTransferableBuffers } from "../utils/assetEncoding";
 
-    interface Props {
+    type Props = {
         onEdit: (index: number) => void;
-    }
+    };
 
     let { onEdit }: Props = $props();
     let worker = getCardParseWorker();

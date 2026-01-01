@@ -27,7 +27,7 @@ describe("Persona and Chat interactions", () => {
         const { chatStore } = await import("@/features/chat/stores/chatStore.svelte");
         // Cast chatStore to access all private members
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        vi.spyOn(chatStore as any, "waitForSettings", "get").mockResolvedValue(undefined);
+        vi.spyOn(chatStore as any, "waitForSettings").mockResolvedValue(undefined);
         await chatStore.initPromise;
         await chatStore.setProvider("MOCK", {
             mockDelay: 50,

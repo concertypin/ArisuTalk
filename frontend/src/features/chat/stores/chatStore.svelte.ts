@@ -215,12 +215,7 @@ export class ChatStore {
 
     async addMessage(chatId: string, message: Message) {
         await this.adapter.addMessage(chatId, message);
-        const chat = this.chats.find((c) => c.id === chatId);
-
-        if (chat) {
-            chat.lastMessage = Date.now();
-            chat.updatedAt = Date.now();
-        }
+        this.updateChatTimestamps(chatId);
 
         // Update activeMessages if this is the active chat
         if (chatId === this.activeChatId) {
@@ -231,6 +226,72 @@ export class ChatStore {
             };
             this.activeMessages.push(messageWithChatId);
         }
+    }
+
+    /**
+     * Updates chat timestamps in the reactive state.
+     */
+    private updateChatTimestamps(chatId: string) {
+        const chat = this.chats.find((c) => c.id === chatId);
+        if (chat) {
+            chat.lastMessage = Date.now();
+            chat.updatedAt = Date.now();
+        }
+    }
+
+    /**
+     * Helper to process an LLM stream and update a message ref.
+     */
+    private async processStream(
+        langChainMessages: (HumanMessage | AIMessage)[],
+        assistantMessageId: string
+    ) {
+        const stream = this.activeProvider!.stream(langChainMessages);
+        let fullContent = "";
+
+        for await (const chunk of stream) {
+            fullContent += chunk;
+            // Re-find to ensure we are updating the current reactive state
+            const msgIndex = this.activeMessages.findIndex((m) => m.id === assistantMessageId);
+            if (msgIndex !== -1) {
+                this.activeMessages[msgIndex].content = {
+                    type: "text",
+                    data: fullContent,
+                };
+            }
+        }
+        return fullContent;
+    }
+
+    /**
+     * Finalizes a message by saving it to storage and updating timestamps.
+     */
+    private async finalizeMessage(chatId: string, message: Message, fullContent: string) {
+        message.content = { type: "text", data: fullContent };
+        await this.adapter.addMessage(chatId, message);
+        this.updateChatTimestamps(chatId);
+    }
+
+    /**
+     * Helper to stream and save a response from the LLM.
+     */
+    private async _streamAndSaveResponse(
+        chatId: string,
+        langChainMessages: (HumanMessage | AIMessage)[]
+    ) {
+        const assistantMessageId = crypto.randomUUID();
+        const assistantMessage: Message = apply(MessageSchema, {
+            id: assistantMessageId,
+            chatId,
+            role: "assistant",
+            content: { type: "text", data: "" },
+        });
+
+        // Optimistically add to UI
+        this.activeMessages.push(assistantMessage);
+
+        const fullContent = await this.processStream(langChainMessages, assistantMessageId);
+        await this.finalizeMessage(chatId, assistantMessage, fullContent);
     }
 
     async sendMessage(content: string) {
@@ -255,44 +316,10 @@ export class ChatStore {
                 return m.role === "user" ? new HumanMessage(text) : new AIMessage(text);
             });
 
-            // Placeholder for assistant message
-            const assistantMessageId = crypto.randomUUID();
-            const assistantMessage: Message = apply(MessageSchema, {
-                id: assistantMessageId,
-                chatId,
-                role: "assistant",
-                content: { type: "text", data: "" },
-            });
-
-            // Optimistically add to UI
-            this.activeMessages.push(assistantMessage);
-
-            const stream = this.activeProvider.stream(langChainMessages);
-            let fullContent = "";
-
-            const msgIndex = this.activeMessages.findIndex((m) => m.id === assistantMessageId);
-            const assistantMessageRef = msgIndex !== -1 ? this.activeMessages[msgIndex] : null;
-            for await (const chunk of stream) {
-                fullContent += chunk;
-                if (assistantMessageRef) {
-                    assistantMessageRef.content = {
-                        type: "text",
-                        data: fullContent,
-                    };
-                }
-            }
-
-            // Save final message to storage
-            assistantMessage.content = { type: "text", data: fullContent };
-            await this.adapter.addMessage(chatId, assistantMessage);
-            const chat = this.chats.find((c) => c.id === chatId);
-            if (chat) {
-                chat.lastMessage = Date.now();
-                chat.updatedAt = Date.now();
-            }
+            await this._streamAndSaveResponse(chatId, langChainMessages);
         } catch (error) {
             console.error("Generation failed", error);
-            // Handle error state in message
+            throw error;
         } finally {
             this.isGenerating = false;
         }
@@ -324,6 +351,84 @@ export class ChatStore {
             this.activeMessages = await this.adapter.getMessages(chatId);
         } else {
             this.activeMessages = [];
+        }
+    }
+
+    /**
+     * Updates a message's content.
+     * @param messageId - The ID of the message to update.
+     * @param newContent - The new text content for the message.
+     */
+    async updateMessage(messageId: string, newContent: string) {
+        if (!this.activeChatId) return;
+
+        const content: Message["content"] = { type: "text", data: newContent };
+        await this.adapter.updateMessage(this.activeChatId, messageId, content);
+
+        // Update in reactive state
+        const index = this.activeMessages.findIndex((m) => m.id === messageId);
+        if (index !== -1) {
+            this.activeMessages[index].content = content;
+            this.activeMessages[index].timestamp = Date.now();
+        }
+    }
+
+    /**
+     * Deletes a message by ID.
+     * @param messageId - The ID of the message to delete.
+     */
+    async deleteMessage(messageId: string) {
+        if (!this.activeChatId) return;
+
+        await this.adapter.deleteMessage(this.activeChatId, messageId);
+
+        // Remove from reactive state
+        const index = this.activeMessages.findIndex((m) => m.id === messageId);
+        if (index !== -1) {
+            this.activeMessages.splice(index, 1);
+        }
+    }
+
+    /**
+     * Regenerates a message and all subsequent messages.
+     * Works on any assistant message, not just the latest.
+     * @param messageId - The ID of the assistant message to regenerate from.
+     */
+    async regenerateMessage(messageId: string) {
+        if (!this.activeChatId || !this.activeProvider) return;
+
+        const messageIndex = this.activeMessages.findIndex((m) => m.id === messageId);
+        if (messageIndex === -1) return;
+
+        const targetMessage = this.activeMessages[messageIndex];
+        if (targetMessage.role !== "assistant") return;
+
+        const messagesToDelete = this.activeMessages.slice(messageIndex);
+
+        // Remove from reactive state immediately for better responsiveness
+        this.activeMessages.splice(messageIndex);
+
+        this.isGenerating = true;
+        const chatId = this.activeChatId;
+
+        try {
+            // Delete from storage (can happen in background or parallel)
+            await Promise.all(
+                messagesToDelete.map((msg) => this.adapter.deleteMessage(chatId, msg.id))
+            );
+
+            // Prepare LangChain messages from remaining history
+            const langChainMessages = this.activeMessages.map((m) => {
+                const text = typeof m.content.data === "string" ? m.content.data : "";
+                return m.role === "user" ? new HumanMessage(text) : new AIMessage(text);
+            });
+
+            await this._streamAndSaveResponse(chatId, langChainMessages);
+        } catch (error) {
+            console.error("Regeneration failed", error);
+            throw error;
+        } finally {
+            this.isGenerating = false;
         }
     }
 }

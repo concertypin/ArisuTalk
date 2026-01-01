@@ -19,18 +19,17 @@
      * @param defaultValue The default value to set when the checkbox is checked.
      * @return A proxy object with a 'checked' property for binding.
      */
-    // It needs to be any because the target object is dynamic.
-    // It's better to typing it, but idk how to do that in this case.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    function createFieldProxy(target: Record<string, any>, key: string, defaultValue: any = "") {
+    function createFieldProxy<T extends Record<string, unknown>, K extends keyof T>(
+        target: T,
+        key: K,
+        defaultValue: T[K] = "" as T[K]
+    ) {
         return {
             get checked() {
                 return target[key] !== undefined;
             },
             set checked(v: boolean) {
-                // target[key] is any, so we need to disable the linting here
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                target[key] = v ? (target[key] ?? defaultValue) : undefined;
+                target[key] = v ? (target[key] ?? defaultValue) : (undefined as T[K]);
             },
         };
     }

@@ -169,6 +169,31 @@ export class LocalStorageChatAdapter implements IChatStorageAdapter {
         this.saveStoredChats(filtered);
     }
 
+    async updateMessage(
+        chatId: string,
+        messageId: string,
+        content: Message["content"]
+    ): Promise<void> {
+        const messages = this.getStoredMessages();
+        const index = messages.findIndex((m) => m.id === messageId && m.chatId === chatId);
+        if (index === -1) {
+            throw new Error(`Message not found: ${messageId}`);
+        }
+        messages[index].content = content;
+        messages[index].timestamp = Date.now();
+        this.saveStoredMessages(messages);
+    }
+
+    async deleteMessage(chatId: string, messageId: string): Promise<void> {
+        const messages = this.getStoredMessages();
+        const index = messages.findIndex((m) => m.id === messageId && m.chatId === chatId);
+        if (index === -1) {
+            throw new Error(`Message not found: ${messageId}`);
+        }
+        messages.splice(index, 1);
+        this.saveStoredMessages(messages);
+    }
+
     async exportData(): Promise<ReadableStream<Uint8Array>> {
         const data = {
             chats: this.getStoredChats(),

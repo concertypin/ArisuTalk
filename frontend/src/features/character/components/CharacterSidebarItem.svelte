@@ -1,11 +1,11 @@
 <script lang="ts">
     import type { Character } from "@arisutalk/character-spec/v0/Character";
 
-    interface Props {
+    type Props = {
         character: Character;
         active: boolean;
         onClick: () => void;
-    }
+    };
 
     let { character, active, onClick }: Props = $props();
 

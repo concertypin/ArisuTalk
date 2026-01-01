@@ -7,6 +7,9 @@
 
     import { chatStore } from "@/features/chat/stores/chatStore.svelte";
     import MarkdownRenderer from "@/components/MarkdownRenderer.svelte";
+    import MessageActions from "@/components/MessageActions.svelte";
+    import { toastStore } from "@/lib/stores/toast.svelte";
+    import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
 
     let inputValue = $state("");
     let messagesContainer = $state<HTMLElement | null>(null);
@@ -14,6 +17,10 @@
 
     let activeChat = $derived(chatStore.chats.find((c) => c.id === chatStore.activeChatId));
     let messages = $derived(chatStore.activeMessages);
+
+    // Edit mode state
+    let editingMessageId = $state<string | null>(null);
+    let editContent = $state("");
 
     // Auto-scroll when messages change
     $effect(() => {
@@ -44,6 +51,64 @@
             void sendMessage();
         }
     }
+
+    /**
+     * Extracts text content from a message safely.
+     */
+    function getMessageText(msg: Message): string {
+        return typeof msg.content.data === "string" ? msg.content.data : "";
+    }
+
+    function startEdit(messageId: string, content: string) {
+        editingMessageId = messageId;
+        editContent = content;
+    }
+
+    async function confirmEdit() {
+        if (!editingMessageId) return;
+        try {
+            await chatStore.updateMessage(editingMessageId, editContent);
+            editingMessageId = null;
+            editContent = "";
+        } catch (error) {
+            toastStore.error(`Failed to update message: ${String(error)}`);
+        }
+    }
+
+    function cancelEdit() {
+        editingMessageId = null;
+        editContent = "";
+    }
+
+    /**
+     * Handles keydown in edit textarea.
+     * Ctrl+Enter = submit, Esc = cancel.
+     */
+    function handleEditKeydown(e: KeyboardEvent) {
+        if (e.key === "Enter" && e.ctrlKey) {
+            e.preventDefault();
+            void confirmEdit();
+        } else if (e.key === "Escape") {
+            e.preventDefault();
+            cancelEdit();
+        }
+    }
+
+    async function handleDelete(messageId: string) {
+        try {
+            await chatStore.deleteMessage(messageId);
+        } catch (error) {
+            toastStore.error(`Failed to delete message: ${String(error)}`);
+        }
+    }
+
+    async function handleRegenerate(messageId: string) {
+        try {
+            await chatStore.regenerateMessage(messageId);
+        } catch (error) {
+            toastStore.error(`Failed to regenerate message: ${String(error)}`);
+        }
+    }
 </script>
 
 <main class="flex flex-col flex-1 h-full bg-base-100">
@@ -62,18 +127,35 @@
             </div>
         {:else}
             {#each messages as msg (msg.id)}
-                <div class="chat {msg.role === 'user' ? 'chat-end' : 'chat-start'}">
+                <div class="chat group {msg.role === 'user' ? 'chat-end' : 'chat-start'}">
                     <div
                         class="chat-bubble {msg.role === 'user'
                             ? 'chat-bubble-primary'
                             : 'chat-bubble-neutral'}"
                     >
-                        <MarkdownRenderer
-                            source={typeof msg.content.data === "string" ? msg.content.data : ""}
-                        />
-                        <span class="text-xs opacity-70 mt-1 block">
-                            {new Date(msg.timestamp || Date.now()).toLocaleTimeString()}
-                        </span>
+                        {#if editingMessageId === msg.id}
+                            <textarea
+                                class="textarea textarea-bordered w-full min-h-[4rem]"
+                                bind:value={editContent}
+                                onkeydown={handleEditKeydown}
+                            ></textarea>
+                        {:else}
+                            <MarkdownRenderer source={getMessageText(msg)} />
+                        {/if}
+                        <div class="flex items-center justify-between mt-1">
+                            <span class="text-xs opacity-70">
+                                {new Date(msg.timestamp || Date.now()).toLocaleTimeString()}
+                            </span>
+                            <MessageActions
+                                message={msg}
+                                isEditing={editingMessageId === msg.id}
+                                onEdit={() => startEdit(msg.id, getMessageText(msg))}
+                                onDelete={() => void handleDelete(msg.id)}
+                                onRegenerate={() => void handleRegenerate(msg.id)}
+                                onConfirmEdit={() => void confirmEdit()}
+                                onCancelEdit={cancelEdit}
+                            />
+                        </div>
                     </div>
                 </div>
             {/each}
