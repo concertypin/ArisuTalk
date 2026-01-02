@@ -1,5 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
-import { getScriptingWorker } from "@/lib/workers/workerClient";
+import { describe, it, expect } from "vitest";
 
 // Mock Comlink for integration tests as we can't spin up real workers in Vitest env easily without setup
 // But we want to test the client interaction.

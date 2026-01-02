@@ -17,6 +17,9 @@ import { HumanMessage, AIMessage } from "@langchain/core/messages";
 import { OpenRouterChatProvider } from "@/lib/providers/chat/OpenRouterChatProvider";
 import { settings } from "@/lib/stores/settings.svelte";
 import { apply } from "@arisutalk/character-spec/utils";
+import { hookService } from "@/lib/services/HookService";
+import { characterStore } from "@/features/character/stores/characterStore.svelte";
+import { personaStore } from "@/features/persona/stores/personaStore.svelte";
 
 export class ChatStore {
     chats = $state<LocalChat[]>([]);
@@ -291,7 +294,23 @@ export class ChatStore {
         this.activeMessages.push(assistantMessage);
 
         const fullContent = await this.processStream(langChainMessages, assistantMessageId);
-        await this.finalizeMessage(chatId, assistantMessage, fullContent);
+
+        // Apply output hooks
+        const activeChat = this.chats.find((c) => c.id === chatId);
+        const character = characterStore.characters.find((c) => c.id === activeChat?.characterId);
+        const persona = personaStore.activePersona;
+
+        let processedContent = fullContent;
+        if (character) {
+            processedContent = await hookService.process(
+                fullContent,
+                character,
+                "output",
+                persona
+            );
+        }
+
+        await this.finalizeMessage(chatId, assistantMessage, processedContent);
     }
 
     async sendMessage(content: string) {
@@ -301,11 +320,25 @@ export class ChatStore {
         const chatId = this.activeChatId;
 
         try {
+            const activeChat = this.chats.find((c) => c.id === chatId);
+            const character = characterStore.characters.find((c) => c.id === activeChat?.characterId);
+            const persona = personaStore.activePersona;
+
+            let processedContent = content;
+            if (character) {
+                processedContent = await hookService.process(
+                    content,
+                    character,
+                    "input",
+                    persona
+                );
+            }
+
             const userMessage: Message = apply(MessageSchema, {
                 id: crypto.randomUUID(),
                 chatId,
                 role: "user",
-                content: { type: "text", data: content },
+                content: { type: "text", data: processedContent },
             });
 
             await this.addMessage(chatId, userMessage);

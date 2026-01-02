@@ -18,6 +18,8 @@ export const PersonaSchema = z.object({
     assets: AssetsSettingSchema.optional(),
     /** ID or Name of the asset to use as the profile picture */
     profileAsset: z.string().optional(),
+    /** If true, allow scripts to access low level APIs like network */
+    allowLowLevelAccess: z.boolean().default(false).optional(),
 });
 
 export type Persona = z.infer<typeof PersonaSchema>;
