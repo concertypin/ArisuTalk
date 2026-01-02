@@ -4,12 +4,12 @@ import type { LLMGenerationParameters } from "../types/IDataModel";
 /**
  * Common settings shared across all chat providers.
  */
-export interface CommonChatSettings {
+export type CommonChatSettings = {
     apiKey?: string;
     baseURL?: string;
     model?: string;
     generationParameters?: LLMGenerationParameters;
-}
+};
 type GeminiSafetySetting =
     | "HARM_CATEGORY_UNSPECIFIED"
     | "HARM_CATEGORY_HATE_SPEECH"
@@ -27,7 +27,7 @@ type GeminiHarmBlockThreshold =
 /**
  * Provider-specific settings.
  */
-export interface ProviderSettings {
+export type ProviderSettings = {
     /**
      * OpenAI settings (also used for OpenAI-compatible APIs)
      */
@@ -60,7 +60,7 @@ export interface ProviderSettings {
          */
         responses?: string[];
     };
-}
+};
 
 export type ProviderType = keyof ProviderSettings;
 

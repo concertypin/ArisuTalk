@@ -32,10 +32,10 @@ describe("PersonaStore", () => {
 
     const validPersona: Persona = {
         id: "123e4567-e89b-12d3-a456-426614174000",
-        name: "Test User",
+        name: "Test Persona",
         description: "A test description",
-        note: "Secret note",
-        assets: { assets: [] },
+        allowLowLevelAccess: false,
+        assets: { assets: [], inlays: [] },
     };
 
     it("should initialize with empty state", () => {

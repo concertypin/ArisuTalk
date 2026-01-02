@@ -35,6 +35,21 @@ export class ChatStore {
     /** Currently active LLM config ID from settings */
     private activeConfigId: string | null = null;
 
+    /**
+     * Gets the context for the active chat including character and persona.
+     * Centralizes lookup logic to avoid repetition and potential desync.
+     */
+    private get activeChatContext() {
+        const activeChat = this.activeChatId
+            ? this.chats.find((c) => c.id === this.activeChatId)
+            : null;
+        const character = activeChat
+            ? characterStore.characters.find((c) => c.id === activeChat.characterId)
+            : undefined;
+        const persona = personaStore.activePersona;
+        return { activeChat, character, persona };
+    }
+
     constructor(adapter?: IChatStorageAdapter) {
         this.initPromise = this.initialize(adapter);
 
@@ -268,9 +283,12 @@ export class ChatStore {
 
     /**
      * Finalizes a message by saving it to storage and updating timestamps.
+     * @param chatId The chat ID to save to.
+     * @param message The message object to finalize.
+     * @param content The processed content to save.
      */
-    private async finalizeMessage(chatId: string, message: Message, fullContent: string) {
-        message.content = { type: "text", data: fullContent };
+    private async finalizeMessage(chatId: string, message: Message, content: string) {
+        message.content = { type: "text", data: content };
         await this.adapter.addMessage(chatId, message);
         this.updateChatTimestamps(chatId);
     }
@@ -295,19 +313,12 @@ export class ChatStore {
 
         const fullContent = await this.processStream(langChainMessages, assistantMessageId);
 
-        // Apply output hooks
-        const activeChat = this.chats.find((c) => c.id === chatId);
-        const character = characterStore.characters.find((c) => c.id === activeChat?.characterId);
-        const persona = personaStore.activePersona;
+        // Apply output hooks using centralized context getter
+        const { character, persona } = this.activeChatContext;
 
         let processedContent = fullContent;
         if (character) {
-            processedContent = await hookService.process(
-                fullContent,
-                character,
-                "output",
-                persona
-            );
+            processedContent = await hookService.process(fullContent, character, "output", persona);
         }
 
         await this.finalizeMessage(chatId, assistantMessage, processedContent);
@@ -320,18 +331,12 @@ export class ChatStore {
         const chatId = this.activeChatId;
 
         try {
-            const activeChat = this.chats.find((c) => c.id === chatId);
-            const character = characterStore.characters.find((c) => c.id === activeChat?.characterId);
-            const persona = personaStore.activePersona;
+            // Use centralized context getter for character/persona lookup
+            const { character, persona } = this.activeChatContext;
 
             let processedContent = content;
             if (character) {
-                processedContent = await hookService.process(
-                    content,
-                    character,
-                    "input",
-                    persona
-                );
+                processedContent = await hookService.process(content, character, "input", persona);
             }
 
             const userMessage: Message = apply(MessageSchema, {

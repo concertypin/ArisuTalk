@@ -6,10 +6,10 @@ describe("LocalStoragePersonaAdapter", () => {
     let adapter: LocalStoragePersonaAdapter;
     const testPersona: Persona = {
         id: "persona-1",
-        name: "Test Persona",
+        name: "Arisu",
         description: "A test persona",
-        profileAsset: "avatar.png",
-        assets: { assets: [] },
+        allowLowLevelAccess: false,
+        assets: { assets: [], inlays: [] },
     };
 
     beforeEach(() => {

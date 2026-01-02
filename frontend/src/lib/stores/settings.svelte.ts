@@ -3,9 +3,10 @@
  */
 import { StorageResolver } from "@/lib/adapters/storage/storageResolver";
 import { SettingsSchema, type Settings } from "@/lib/types/IDataModel";
+import { apply } from "@arisutalk/character-spec/utils";
 
 class SettingsStore {
-    value = $state<Settings>(SettingsSchema.parse({}));
+    value = $state<Settings>(apply(SettingsSchema, {}));
     isLoaded = $state(false);
 
     async init() {

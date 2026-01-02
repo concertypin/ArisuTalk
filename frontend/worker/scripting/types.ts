@@ -1,7 +1,7 @@
 export interface ExecutionOptions {
     /**
      * Timeout in milliseconds for script execution.
-     * @default 1000
+     * @default 5000
      */
     timeout?: number;
 
@@ -10,6 +10,36 @@ export interface ExecutionOptions {
      * @default false
      */
     allowNetwork?: boolean;
+
+    /**
+     * Character ID for storage isolation.
+     * Each character gets its own storage namespace.
+     */
+    characterId?: string;
+
+    /**
+     * Context data passed to the script.
+     */
+    context?: ScriptContext;
+}
+
+export interface ScriptContext {
+    /**
+     * The message being processed.
+     */
+    message: {
+        content: string;
+        role: "user" | "assistant" | "system";
+        metadata: Record<string, unknown>;
+    };
+
+    /**
+     * Information about the current persona.
+     */
+    persona?: {
+        name: string;
+        id: string;
+    };
 }
 
 export interface ExecutionResult {
@@ -17,6 +47,11 @@ export interface ExecutionResult {
      * The result of the script execution (if any).
      */
     result?: unknown;
+
+    /**
+     * The modified context (if the script modified it).
+     */
+    modifiedContext?: ScriptContext;
 
     /**
      * Captured stdout/console.log output.

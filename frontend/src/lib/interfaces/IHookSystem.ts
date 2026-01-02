@@ -3,11 +3,11 @@
  * It will contain character object, settings, etc... to be used by scripts.
  * Since it allows dynamic properties(even added by scripts), we can't define a strict interface.
  */
-export interface ScriptContext {
+export type ScriptContext = {
     // Script can access properties dynamically
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
-}
+};
 
 /**
  * Function signature for a hook handler.

@@ -133,7 +133,9 @@
                 />
                 <div class="flex flex-col">
                     <span class="text-sm font-medium">Allow script network access</span>
-                    <span class="text-xs opacity-60">Grant permission for character scripts to make network requests.</span>
+                    <span class="text-xs opacity-60"
+                        >Grant permission for character scripts to make network requests.</span
+                    >
                 </div>
             </div>
         </fieldset>

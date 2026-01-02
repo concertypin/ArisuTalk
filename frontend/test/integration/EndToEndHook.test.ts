@@ -1,7 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ChatStore } from "@/features/chat/stores/chatStore.svelte";
-import { characterStore } from "@/features/character/stores/characterStore.svelte";
-import { personaStore } from "@/features/persona/stores/personaStore.svelte";
 import {
     CharacterSchema,
     type Character,
@@ -9,19 +7,20 @@ import {
 } from "@arisutalk/character-spec/v0/Character";
 import { PersonaSchema, type Persona } from "@/features/persona/schema";
 import { apply } from "@arisutalk/character-spec/utils";
-import type { IChatStorageAdapter, ChatProvider, LocalChat, ProviderType } from "@/lib/interfaces";
+import type { IChatStorageAdapter, LocalChat } from "@/lib/interfaces";
 
-// Mock everything needed
+// Use vi.hoisted to ensure these are available when vi.mock factories run
+const { mockCharacterStoreState, mockPersonaStoreState } = vi.hoisted(() => ({
+    mockCharacterStoreState: { characters: [] as Character[] },
+    mockPersonaStoreState: { activePersona: null as Persona | null },
+}));
+
 vi.mock("@/features/character/stores/characterStore.svelte", () => ({
-    characterStore: {
-        characters: [],
-    },
+    characterStore: mockCharacterStoreState,
 }));
 
 vi.mock("@/features/persona/stores/personaStore.svelte", () => ({
-    personaStore: {
-        activePersona: null,
-    },
+    personaStore: mockPersonaStoreState,
 }));
 
 vi.mock("@/lib/workers/workerClient", () => ({
@@ -49,18 +48,12 @@ vi.mock("@/lib/stores/settings.svelte", () => ({
     },
 }));
 
-interface PrivateChatStore {
-    adapter: IChatStorageAdapter;
-    chats: LocalChat[];
-    activeProvider: ChatProvider<ProviderType>;
-}
-
 describe("End-to-End Hook Integration", () => {
-    let chatStore: ChatStore;
-
     beforeEach(() => {
         vi.clearAllMocks();
-        chatStore = new ChatStore();
+        // Reset mock state
+        mockCharacterStoreState.characters = [];
+        mockPersonaStoreState.activePersona = null;
     });
 
     it("should transform message content through hooks", async () => {
@@ -124,7 +117,7 @@ describe("End-to-End Hook Integration", () => {
             allowLowLevelAccess: false,
         });
 
-        const mockChat = {
+        const mockChat: LocalChat = {
             ...apply(ChatSchema, {
                 id: "chat-1",
                 characterId: "char-1",
@@ -135,10 +128,11 @@ describe("End-to-End Hook Integration", () => {
             name: "Test Chat",
             lastMessage: Date.now(),
             characterId: "char-1",
-        } as LocalChat;
+        };
 
-        (characterStore as { characters: Character[] }).characters = [mockCharacter];
-        (personaStore as { activePersona: Persona | null }).activePersona = mockPersona;
+        // Set mock data via mutable mock state (no type casts needed)
+        mockCharacterStoreState.characters = [mockCharacter];
+        mockPersonaStoreState.activePersona = mockPersona;
 
         // Mock chat adapter
         const mockAdapter: IChatStorageAdapter = {
@@ -154,23 +148,24 @@ describe("End-to-End Hook Integration", () => {
             deleteMessage: vi.fn(),
         };
 
-        // Inject dependencies manually to bypass async wait
-        const privateStore = chatStore as unknown as PrivateChatStore;
-        privateStore.adapter = mockAdapter;
-        privateStore.chats = [mockChat];
-        chatStore.activeChatId = "chat-1";
+        // Use ChatStore's constructor with injected adapter
+        // Create a new store with the mock adapter
+        const testStore = new ChatStore(mockAdapter);
+        await testStore.initPromise;
 
-        // Mock provider explicitly
-        privateStore.activeProvider = {
-            stream: async function* () {
-                yield "AI response";
-            },
-            disconnect: vi.fn(),
-            abort: vi.fn(),
-        } as unknown as ChatProvider<ProviderType>;
+        // Set chats via setProvider pattern (avoid private access)
+        await testStore.setProvider("MOCK", {
+            mockDelay: 0,
+            responses: ["AI response"],
+        });
+
+        // Access the public API to set up state
+        // We need to use the internal state since chats comes from adapter
+        Object.assign(testStore, { chats: [mockChat] });
+        testStore.activeChatId = "chat-1";
 
         // Send message
-        await chatStore.sendMessage("hello world");
+        await testStore.sendMessage("hello world");
 
         // Verify user message transformation (input hook)
         expect(mockAdapter.addMessage).toHaveBeenCalledWith(

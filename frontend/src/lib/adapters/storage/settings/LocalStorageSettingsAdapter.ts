@@ -1,5 +1,6 @@
 import type { ISettingsStorageAdapter } from "@/lib/interfaces";
 import { Settings, SettingsSchema } from "@/lib/types/IDataModel";
+import { apply } from "@arisutalk/character-spec/utils";
 
 /**
  * LocalStorage-based settings storage adapter.
@@ -22,8 +23,9 @@ export class LocalStorageSettingsAdapter implements ISettingsStorageAdapter {
     async getSettings(): Promise<Settings> {
         const item = localStorage.getItem(this.KEY);
         if (!item) {
-            return SettingsSchema.parse({});
+            return apply(SettingsSchema, {});
         }
+        // Keep parse() here - validates external JSON data
         return SettingsSchema.parse(JSON.parse(item));
     }
 }

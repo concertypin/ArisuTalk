@@ -1,14 +1,17 @@
+<svelte:options runes={true} />
+
 <script lang="ts">
     import { settings } from "@/lib/stores/settings.svelte";
     import { LLMConfigSchema } from "@/lib/types/IDataModel";
     import { Plus, Info } from "@lucide/svelte";
     import GenerationParameters from "./LLMSetting/GenerationParameters.svelte";
-    import type * as z from "zod";
+    import { apply } from "@arisutalk/character-spec/utils";
+
     function addLLMConfig() {
-        const newConfig = LLMConfigSchema.parse({
+        const newConfig = apply(LLMConfigSchema, {
             name: `Model ${settings.value.llmConfigs.length + 1}`,
             provider: "OpenAI",
-        } satisfies z.input<typeof LLMConfigSchema>);
+        });
         settings.value.llmConfigs.push(newConfig);
     }
 </script>
@@ -29,8 +32,8 @@
     {/if}
 
     <div class="space-y-4">
-        {#each settings.value.llmConfigs as config, i (config.id)}
-            <GenerationParameters bind:config id={i} />
+        {#each settings.value.llmConfigs as _, i}
+            <GenerationParameters bind:config={settings.value.llmConfigs[i]} id={i} />
         {/each}
     </div>
 </div>

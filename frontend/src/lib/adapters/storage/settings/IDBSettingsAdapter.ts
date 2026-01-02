@@ -1,6 +1,7 @@
 import { getArisuDB } from "../IndexedDBHelper";
 import type { ISettingsStorageAdapter } from "@/lib/interfaces";
 import { Settings, SettingsSchema } from "@/lib/types/IDataModel";
+import { apply } from "@arisutalk/character-spec/utils";
 
 export class IDBSettingsAdapter implements ISettingsStorageAdapter {
     private db = getArisuDB();
@@ -15,7 +16,7 @@ export class IDBSettingsAdapter implements ISettingsStorageAdapter {
 
     async getSettings(): Promise<Settings> {
         const stored = await this.db.settings.get("singleton");
-        const inst = SettingsSchema.parse({});
+        const inst = apply(SettingsSchema, {});
         if (!stored) return inst;
         Object.assign(inst, stored);
         return inst;

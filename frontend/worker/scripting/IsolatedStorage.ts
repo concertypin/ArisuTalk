@@ -1,7 +1,7 @@
 /**
  * Simple in-memory storage for scripts, behaving similarly to sessionStorage.
  */
-export class IsolatedStorage {
+export class IsolatedStorage extends Storage {
     private storage = new Map<string, string>();
 
     /**

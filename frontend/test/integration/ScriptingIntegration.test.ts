@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 
 // Mock Comlink for integration tests as we can't spin up real workers in Vitest env easily without setup
 // But we want to test the client interaction.
-// Actually, since we are using the real worker code in unit tests, 
+// Actually, since we are using the real worker code in unit tests,
 // "Integration" here might mean testing the client wrapper + worker logic if possible.
 // Given the environment, I'll focus on the client factory behavior.
 

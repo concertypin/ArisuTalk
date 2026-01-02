@@ -28,10 +28,22 @@ export class HookService {
         // Sort by priority (higher first)
         const sortedHooks = [...hooks].sort((a, b) => b.meta.priority - a.meta.priority);
 
+        // Get workers once, outside the loop (performance optimization)
+        const regexWorker = await getRegexWorker();
+        const scriptingWorker = await getScriptingWorker();
+
         let result = content;
 
         for (const hook of sortedHooks) {
-            result = await this.applyHook(result, hook, character, persona);
+            result = await this.applyHook(
+                result,
+                hook,
+                character,
+                type,
+                persona,
+                regexWorker,
+                scriptingWorker
+            );
         }
 
         return result;
@@ -41,11 +53,11 @@ export class HookService {
         content: string,
         hook: Character["executables"]["replaceHooks"]["input"][number],
         character: Character,
-        persona?: Persona
+        type: HookType,
+        persona: Persona | undefined,
+        regexWorker: Awaited<ReturnType<typeof getRegexWorker>>,
+        scriptingWorker: Awaited<ReturnType<typeof getScriptingWorker>>
     ): Promise<string> {
-        const regexWorker = await getRegexWorker();
-        const scriptingWorker = await getScriptingWorker();
-
         let pattern = hook.input;
         let replacement = hook.output;
 
@@ -54,8 +66,9 @@ export class HookService {
         // 1. Resolve scripted input pattern if needed
         if (hook.meta.isInputPatternScripted) {
             const scriptResult = await scriptingWorker.execute(pattern, {
-                context: this.createContext(content, character, persona),
+                context: this.createContext(content, character, type, persona),
                 allowNetwork,
+                characterId: character.id,
             });
             if (scriptResult.error) {
                 console.error("Hook input script error:", scriptResult.error);
@@ -66,15 +79,17 @@ export class HookService {
 
         // 2. Perform replacement
         if (hook.meta.type === "regex") {
-            // If output is scripted, we might need a different approach.
-            // For now, if output is scripted, we evaluate it as a function or expression.
-            // Simplified: Just evaluate the script once.
+            // Scripted output: The script is evaluated ONCE, and the result is used as the replacement
+            // string for ALL matches. This is a simplified implementation - for per-match evaluation
+            // (like JS replace callback), the logic would need to move into the worker.
+            // See REVIEW.md L71 for design notes.
             if (hook.meta.isOutputScripted) {
                 // This is complex: native replace(re, (match) => script)
                 // We'll approximate by evaluating the script with the match context.
                 const scriptResult = await scriptingWorker.execute(replacement, {
-                    context: this.createContext(content, character, persona),
+                    context: this.createContext(content, character, type, persona),
                     allowNetwork,
+                    characterId: character.id,
                 });
                 if (scriptResult.result !== undefined && scriptResult.result !== null) {
                     replacement = String(scriptResult.result as unknown);
@@ -86,8 +101,9 @@ export class HookService {
             // String replacement
             if (hook.meta.isOutputScripted) {
                 const scriptResult = await scriptingWorker.execute(replacement, {
-                    context: this.createContext(content, character, persona),
+                    context: this.createContext(content, character, type, persona),
                     allowNetwork,
+                    characterId: character.id,
                 });
                 if (scriptResult.result !== undefined && scriptResult.result !== null) {
                     replacement = String(scriptResult.result as unknown);
@@ -104,12 +120,18 @@ export class HookService {
         }
     }
 
-    private createContext(content: string, _character: Character, persona?: Persona): ScriptContext {
+    private createContext(
+        content: string,
+        _character: Character,
+        type: HookType,
+        persona?: Persona
+    ): ScriptContext {
         const message = apply(MessageSchema, {
             id: crypto.randomUUID(),
             chatId: "temp-hook-chat-id", // Hooks run outside of a specific chat instance sometimes or before chatId is known
             content: { type: "text", data: content },
-            role: "assistant",
+            // Role is determined by hook type: input hooks process user messages, output hooks process assistant messages
+            role: type === "input" ? "user" : "assistant",
         });
 
         return {
@@ -128,7 +150,7 @@ export class HookService {
     }
 
     private escapeRegExp(string: string) {
-        return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$& ");
+        return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
     }
 }
 
