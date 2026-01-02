@@ -1,6 +1,6 @@
 <!--
   @component MarkdownRenderer
-  Renders markdown content safely using svelte-markdown.
+  Renders markdown content safely using @humanspeak/svelte-markdown.
   Uses dynamic import for code-splitting with {#await} block.
 -->
 <script lang="ts">
@@ -10,7 +10,7 @@
     };
     let { source }: Props = $props();
 
-    const svelteMarkdownPromise = import("svelte-markdown").catch((err) => {
+    const svelteMarkdownPromise = import("@humanspeak/svelte-markdown").catch((err) => {
         console.error("Failed to load markdown renderer:", err);
         return null;
     });
