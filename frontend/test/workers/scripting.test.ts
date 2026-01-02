@@ -14,5 +14,12 @@ describe("Scripting Worker Logic", () => {
             const response = await api.execute(code);
             expect(response.result).toBe(2);
         });
+
+        it.concurrent("should capture console.log output", async () => {
+            const code = 'console.log("hello"); console.log(123); "done"';
+            const response = await api.execute(code);
+            expect(response.result).toBe("done");
+            expect(response.logs).toEqual(["hello", "123"]);
+        });
     });
 });
