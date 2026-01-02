@@ -1,6 +1,7 @@
 import * as Comlink from "comlink";
 import type { ExampleWorkerApi } from "@worker/example/types";
 import type { api as CardParseWorkerApi } from "@worker/cardparse/main";
+import type { ScriptingWorkerApi } from "@worker/scripting/types";
 
 /**
  * Type representing a worker API with a terminate method.
@@ -82,4 +83,13 @@ export const getExampleWorker = createCachedWorkerFactory<ExampleWorkerApi>(
  */
 export const getCardParseWorker = createCachedWorkerFactory<typeof CardParseWorkerApi>(
     () => import("@worker/cardparse/main?worker")
+);
+
+/**
+ * Factory for the Scripting Worker with caching.
+ * Provides a sandboxed environment for executing JavaScript.
+ * Automatically cached using createCachedWorkerFactory.
+ */
+export const getScriptingWorker = createCachedWorkerFactory<ScriptingWorkerApi>(
+    () => import("@worker/scripting/main?worker")
 );
