@@ -6,6 +6,7 @@ import { PersonaStore } from "@/features/persona/stores/personaStore.svelte";
 import { PersonaSchema, type Persona } from "@/features/persona/schema";
 import type { IPersonaStorageAdapter } from "@/lib/interfaces";
 import { createLocalStorageMock } from "@test/utils/localStorageMock";
+import { apply } from "@arisutalk/character-spec/utils";
 
 describe("PersonaStore", () => {
     let store: PersonaStore;
@@ -30,13 +31,11 @@ describe("PersonaStore", () => {
         store = new PersonaStore(mockAdapter);
     });
 
-    const validPersona: Persona = {
+    const validPersona: Persona = apply(PersonaSchema, {
         id: "123e4567-e89b-12d3-a456-426614174000",
         name: "Test Persona",
         description: "A test description",
-        allowLowLevelAccess: false,
-        assets: { assets: [], inlays: [] },
-    };
+    });
 
     it("should initialize with empty state", () => {
         expect(store.personas).toEqual([]);

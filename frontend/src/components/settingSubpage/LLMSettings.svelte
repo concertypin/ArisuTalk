@@ -32,7 +32,7 @@
     {/if}
 
     <div class="space-y-4">
-        {#each settings.value.llmConfigs as _, i}
+        {#each settings.value.llmConfigs as config, i (config.id)}
             <GenerationParameters bind:config={settings.value.llmConfigs[i]} id={i} />
         {/each}
     </div>

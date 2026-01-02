@@ -1,16 +1,16 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { LocalStoragePersonaAdapter } from "@/lib/adapters/storage/persona/LocalStoragePersonaAdapter";
-import type { Persona } from "@/features/persona/schema";
+import { PersonaSchema, type Persona } from "@/features/persona/schema";
+import { apply } from "@arisutalk/character-spec/utils";
 
 describe("LocalStoragePersonaAdapter", () => {
     let adapter: LocalStoragePersonaAdapter;
-    const testPersona: Persona = {
+    const testPersona: Persona = apply(PersonaSchema, {
         id: "persona-1",
         name: "Arisu",
         description: "A test persona",
         allowLowLevelAccess: false,
-        assets: { assets: [], inlays: [] },
-    };
+    });
 
     beforeEach(() => {
         localStorage.clear();
