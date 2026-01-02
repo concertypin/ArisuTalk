@@ -39,6 +39,7 @@
         "comlink": "^4.4.2",
         "dexie": "^4.2.1",
         "dist": "link:..\\..\\ArisuTalkFrontend\\character-spec\\dist",
+        "quickjs-emscripten": "^0.31.0",
         "svelte": "^5.39.3",
         "svelte-markdown": "^0.4.1",
         "tinybase": "^7.2.0",
