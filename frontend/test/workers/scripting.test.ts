@@ -27,5 +27,11 @@ describe("Scripting Worker Logic", () => {
             const response = await api.execute(code);
             expect(response.result).toBe("Hello World");
         });
+
+        it.concurrent("should use storage API to persist values across calls", async () => {
+            await api.execute('storage.setItem("test", "value")');
+            const response = await api.execute('storage.getItem("test")');
+            expect(response.result).toBe("value");
+        });
     });
 });
