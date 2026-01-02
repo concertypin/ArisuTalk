@@ -26,5 +26,26 @@ describe("Regex Worker Logic", () => {
             const result = await api.applyRules(text, rules);
             expect(result).toBe("The slow red fox");
         });
+
+        it.concurrent("should handle case-insensitivity", async () => {
+            const text = "HELLO world";
+            const rules = [{ pattern: "hello", replacement: "Hi", flags: "gi" }];
+            const result = await api.applyRules(text, rules);
+            expect(result).toBe("Hi world");
+        });
+
+        it.concurrent("should handle global replacement", async () => {
+            const text = "apple apple apple";
+            const rules = [{ pattern: "apple", replacement: "orange", flags: "g" }];
+            const result = await api.applyRules(text, rules);
+            expect(result).toBe("orange orange orange");
+        });
+
+        it.concurrent("should handle capture groups", async () => {
+            const text = "John Doe";
+            const rules = [{ pattern: "(\\w+) (\\w+)", replacement: "$2, $1" }];
+            const result = await api.applyRules(text, rules);
+            expect(result).toBe("Doe, John");
+        });
     });
 });
