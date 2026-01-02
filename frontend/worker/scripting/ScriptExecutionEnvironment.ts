@@ -133,9 +133,11 @@ function setupFetch(
                 })
                 .catch((err) => {
                     if (context.alive && deferred.handle.alive) {
-                        using error = context.newError(
-                            err instanceof Error ? err.message : String(err)
-                        );
+                        const errorMessage =
+                            err instanceof Error
+                                ? `${err.name}: ${err.message}\n${err.stack}`
+                                : String(err);
+                        using error = context.newError(errorMessage);
                         deferred.reject(error);
                     }
                 })

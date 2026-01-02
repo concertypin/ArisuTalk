@@ -83,7 +83,10 @@ async function execute(code: string, options?: ExecutionOptions): Promise<Execut
         const modifiedContext = extractModifiedContext(env.context);
         return { result: finalValue, modifiedContext, logs: env.logs };
     } catch (e) {
-        return { logs: env.logs, error: e instanceof Error ? e.message : String(e) };
+        return {
+            logs: env.logs,
+            error: e instanceof Error ? `${e.message}\n${e.stack}` : String(e),
+        };
     }
 }
 

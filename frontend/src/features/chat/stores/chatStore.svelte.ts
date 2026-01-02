@@ -47,7 +47,8 @@ export class ChatStore {
             ? characterStore.characters.find((c) => c.id === activeChat.characterId)
             : undefined;
 
-        if (activeChat && !character && characterStore.characters.length > 0) {
+        if (activeChat && !character) {
+            // This can happen if characters are still loading. Hooks will be skipped.
             console.warn(
                 `ChatStore: Character with ID ${activeChat.characterId} not found. Hooks will be skipped.`
             );
