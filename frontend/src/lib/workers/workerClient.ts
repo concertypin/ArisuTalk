@@ -2,6 +2,7 @@ import * as Comlink from "comlink";
 import type { ExampleWorkerApi } from "@worker/example/types";
 import type { api as CardParseWorkerApi } from "@worker/cardparse/main";
 import type { ScriptingWorkerApi } from "@worker/scripting/types";
+import type { RegexWorkerApi } from "@worker/regex/types";
 
 /**
  * Type representing a worker API with a terminate method.
@@ -93,3 +94,13 @@ export const getCardParseWorker = createCachedWorkerFactory<typeof CardParseWork
 export const getScriptingWorker = createCachedWorkerFactory<ScriptingWorkerApi>(
     () => import("@worker/scripting/main?worker")
 );
+
+/**
+ * Factory for the Regex Worker with caching.
+ * Provides non-blocking text processing using native JS RegExp.
+ * Automatically cached using createCachedWorkerFactory.
+ */
+export const getRegexWorker = createCachedWorkerFactory<RegexWorkerApi>(
+    () => import("@worker/regex/main?worker")
+);
+
