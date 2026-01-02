@@ -9,7 +9,7 @@ import type { RegexWorkerApi } from "@worker/regex/types";
  * If the worker is terminated, calling any method will throw an error.
  * @template T The worker API type.
  */
-type WorkerApi<T> =
+export type WorkerApi<T> =
     | (Comlink.Remote<T> & {
           terminate: (this: WorkerApi<T>) => void;
           disabled?: false;

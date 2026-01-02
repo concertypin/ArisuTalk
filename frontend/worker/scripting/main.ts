@@ -199,7 +199,9 @@ function setupFetch(
                     }
                 })
                 .finally(() => {
-                    runtime.executePendingJobs();
+                    if (runtime.alive) {
+                        runtime.executePendingJobs();
+                    }
                     options.pendingHostPromises.delete(p);
                 });
 
@@ -300,11 +302,8 @@ async function awaitPromiseResult(
 
     void resultPromise.then((res) => {
         if (timedOut) {
-            // Dispose handles if we already timed out
-            /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
-            (res as any).value?.dispose?.();
-            (res as any).error?.dispose?.();
-            /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
+            // The caller is responsible for cleanup on timeout.
+            // Avoid using handles here as the context might be already disposed.
             return;
         }
         settled = true;

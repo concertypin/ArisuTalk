@@ -131,7 +131,7 @@ export class HookService {
             chatId: "temp-hook-chat-id", // Hooks run outside of a specific chat instance sometimes or before chatId is known
             content: { type: "text", data: content },
             // Role is determined by hook type: input hooks process user messages, output hooks process assistant messages
-            role: type === "input" ? "user" : "assistant",
+            role: this.getRoleForHookType(type),
         });
 
         return {
@@ -147,6 +147,16 @@ export class HookService {
                   }
                 : undefined,
         };
+    }
+
+    private getRoleForHookType(type: HookType): "user" | "assistant" {
+        switch (type) {
+            case "input":
+                return "user";
+            case "output":
+            case "display":
+                return "assistant";
+        }
     }
 
     private escapeRegExp(string: string) {

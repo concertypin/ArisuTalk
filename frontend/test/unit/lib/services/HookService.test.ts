@@ -137,4 +137,52 @@ describe("HookService", () => {
         const result = await hookService.process("an apple", character, "input");
         expect(result).toBe("an fruit");
     });
+
+    it("should assign correct roles based on hook type", async () => {
+        const character = apply(CharacterSchema, {
+            description: "",
+            prompt: { description: "" },
+            specVersion: 0,
+            id: "1",
+            name: "Test",
+            executables: {
+                replaceHooks: {
+                    display: [
+                        {
+                            input: "secret",
+                            output: "hidden",
+                            meta: {
+                                type: "regex",
+                                flag: "g",
+                                isInputPatternScripted: true, // Use scripted to access context role
+                                isOutputScripted: false,
+                                priority: 0,
+                            },
+                        },
+                    ],
+                },
+            },
+        });
+
+        // Mock scripting worker to return 'secret' only if role is 'assistant'
+        vi.mocked(await import("@/lib/workers/workerClient")).getScriptingWorker.mockResolvedValue({
+            terminate: vi.fn(),
+            execute: vi.fn(async (code: string, options) => {
+                // Check role in context
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+                const ctx = options?.context;
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+                const role = ctx?.message?.role;
+                if (role === "assistant") {
+                    return { result: "secret", logs: [] };
+                }
+                return { result: "nomatch", logs: [] };
+            }),
+        } as unknown as import("@/lib/workers/workerClient").WorkerApi<
+            import("@worker/scripting/types").ScriptingWorkerApi
+        >);
+
+        const result = await hookService.process("This is secret", character, "display");
+        expect(result).toBe("This is hidden");
+    });
 });
