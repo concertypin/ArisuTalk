@@ -103,4 +103,3 @@ export const getScriptingWorker = createCachedWorkerFactory<ScriptingWorkerApi>(
 export const getRegexWorker = createCachedWorkerFactory<RegexWorkerApi>(
     () => import("@worker/regex/main?worker")
 );
-

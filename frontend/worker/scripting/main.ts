@@ -14,7 +14,7 @@ export const api: ScriptingWorkerApi = {
             const logHandle = context.newFunction("log", (...args) => {
                 const message = args
                     .map((arg) => {
-                        const json = context.dump(arg);
+                        const json: unknown = context.dump(arg);
                         return typeof json === "string" ? json : JSON.stringify(json);
                     })
                     .join(" ");
@@ -29,7 +29,7 @@ export const api: ScriptingWorkerApi = {
             const result = context.evalCode(code);
 
             if (result.error) {
-                const error = context.dump(result.error);
+                const error: unknown = context.dump(result.error);
                 result.error.dispose();
                 context.dispose();
                 runtime.dispose();
@@ -39,7 +39,7 @@ export const api: ScriptingWorkerApi = {
                 };
             }
 
-            const val = context.dump(result.value);
+            const val: unknown = context.dump(result.value);
             result.value.dispose();
             context.dispose();
             runtime.dispose();
