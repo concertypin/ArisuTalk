@@ -21,5 +21,11 @@ describe("Scripting Worker Logic", () => {
             expect(response.result).toBe("done");
             expect(response.logs).toEqual(["hello", "123"]);
         });
+
+        it.concurrent("should execute Hello World script", async () => {
+            const code = '"Hello World"';
+            const response = await api.execute(code);
+            expect(response.result).toBe("Hello World");
+        });
     });
 });
