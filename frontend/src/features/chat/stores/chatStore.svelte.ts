@@ -17,6 +17,9 @@ import { HumanMessage, AIMessage } from "@langchain/core/messages";
 import { OpenRouterChatProvider } from "@/lib/providers/chat/OpenRouterChatProvider";
 import { settings } from "@/lib/stores/settings.svelte";
 import { apply } from "@arisutalk/character-spec/utils";
+import { hookService } from "@/lib/services/HookService";
+import { characterStore } from "@/features/character/stores/characterStore.svelte";
+import { personaStore } from "@/features/persona/stores/personaStore.svelte";
 
 export class ChatStore {
     chats = $state<LocalChat[]>([]);
@@ -31,6 +34,29 @@ export class ChatStore {
 
     /** Currently active LLM config ID from settings */
     private activeConfigId: string | null = null;
+
+    /**
+     * Gets the context for the active chat including character and persona.
+     * Centralizes lookup logic to avoid repetition and potential desync.
+     */
+    private get activeChatContext() {
+        const activeChat = this.activeChatId
+            ? this.chats.find((c) => c.id === this.activeChatId)
+            : null;
+        const character = activeChat
+            ? characterStore.characters.find((c) => c.id === activeChat.characterId)
+            : undefined;
+
+        if (activeChat && !character) {
+            // This can happen if characters are still loading. Hooks will be skipped.
+            console.warn(
+                `ChatStore: Character with ID ${activeChat.characterId} not found. Hooks will be skipped.`
+            );
+        }
+
+        const persona = personaStore.activePersona;
+        return { activeChat, character, persona };
+    }
 
     constructor(adapter?: IChatStorageAdapter) {
         this.initPromise = this.initialize(adapter);
@@ -265,9 +291,12 @@ export class ChatStore {
 
     /**
      * Finalizes a message by saving it to storage and updating timestamps.
+     * @param chatId The chat ID to save to.
+     * @param message The message object to finalize.
+     * @param content The processed content to save.
      */
-    private async finalizeMessage(chatId: string, message: Message, fullContent: string) {
-        message.content = { type: "text", data: fullContent };
+    private async finalizeMessage(chatId: string, message: Message, content: string) {
+        message.content = { type: "text", data: content };
         await this.adapter.addMessage(chatId, message);
         this.updateChatTimestamps(chatId);
     }
@@ -291,7 +320,16 @@ export class ChatStore {
         this.activeMessages.push(assistantMessage);
 
         const fullContent = await this.processStream(langChainMessages, assistantMessageId);
-        await this.finalizeMessage(chatId, assistantMessage, fullContent);
+
+        // Apply output hooks using centralized context getter
+        const { character, persona } = this.activeChatContext;
+
+        let processedContent = fullContent;
+        if (character) {
+            processedContent = await hookService.process(fullContent, character, "output", persona);
+        }
+
+        await this.finalizeMessage(chatId, assistantMessage, processedContent);
     }
 
     async sendMessage(content: string) {
@@ -301,11 +339,19 @@ export class ChatStore {
         const chatId = this.activeChatId;
 
         try {
+            // Use centralized context getter for character/persona lookup
+            const { character, persona } = this.activeChatContext;
+
+            let processedContent = content;
+            if (character) {
+                processedContent = await hookService.process(content, character, "input", persona);
+            }
+
             const userMessage: Message = apply(MessageSchema, {
                 id: crypto.randomUUID(),
                 chatId,
                 role: "user",
-                content: { type: "text", data: content },
+                content: { type: "text", data: processedContent },
             });
 
             await this.addMessage(chatId, userMessage);

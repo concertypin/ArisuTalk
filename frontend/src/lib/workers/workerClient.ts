@@ -1,13 +1,15 @@
 import * as Comlink from "comlink";
 import type { ExampleWorkerApi } from "@worker/example/types";
 import type { api as CardParseWorkerApi } from "@worker/cardparse/main";
+import type { ScriptingWorkerApi } from "@worker/scripting/types";
+import type { RegexWorkerApi } from "@worker/regex/types";
 
 /**
  * Type representing a worker API with a terminate method.
  * If the worker is terminated, calling any method will throw an error.
  * @template T The worker API type.
  */
-type WorkerApi<T> =
+export type WorkerApi<T> =
     | (Comlink.Remote<T> & {
           terminate: (this: WorkerApi<T>) => void;
           disabled?: false;
@@ -82,4 +84,22 @@ export const getExampleWorker = createCachedWorkerFactory<ExampleWorkerApi>(
  */
 export const getCardParseWorker = createCachedWorkerFactory<typeof CardParseWorkerApi>(
     () => import("@worker/cardparse/main?worker")
+);
+
+/**
+ * Factory for the Scripting Worker with caching.
+ * Provides a sandboxed environment for executing JavaScript.
+ * Automatically cached using createCachedWorkerFactory.
+ */
+export const getScriptingWorker = createCachedWorkerFactory<ScriptingWorkerApi>(
+    () => import("@worker/scripting/main?worker")
+);
+
+/**
+ * Factory for the Regex Worker with caching.
+ * Provides non-blocking text processing using native JS RegExp.
+ * Automatically cached using createCachedWorkerFactory.
+ */
+export const getRegexWorker = createCachedWorkerFactory<RegexWorkerApi>(
+    () => import("@worker/regex/main?worker")
 );

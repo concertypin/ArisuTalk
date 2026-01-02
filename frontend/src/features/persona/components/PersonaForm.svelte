@@ -1,7 +1,7 @@
 <script lang="ts">
     import { personaStore } from "../stores/personaStore.svelte";
     import { PersonaSchema, type Persona } from "../schema";
-    import { Plus, User, FileText, StickyNote, SquarePen } from "@lucide/svelte";
+    import { Plus, User, FileText, StickyNote, SquarePen, Shield } from "@lucide/svelte";
     import { ZodError } from "zod";
 
     type Props = {
@@ -15,6 +15,7 @@
     let name = $state("");
     let description = $state("");
     let note = $state("");
+    let allowLowLevelAccess = $state(false);
     let error = $state("");
 
     $effect(() => {
@@ -22,10 +23,12 @@
             name = persona.name;
             description = persona.description;
             note = persona.note || "";
+            allowLowLevelAccess = persona.allowLowLevelAccess ?? false;
         } else {
             name = "";
             description = "";
             note = "";
+            allowLowLevelAccess = false;
         }
     });
 
@@ -37,6 +40,7 @@
                 name,
                 description,
                 note: note || undefined,
+                allowLowLevelAccess,
                 assets: { assets: [], inlays: [] },
             };
 
@@ -114,6 +118,26 @@
                 class="textarea h-20 w-full"
                 placeholder="Personal notes (not sent to AI)..."
             ></textarea>
+        </fieldset>
+
+        <fieldset class="fieldset w-full">
+            <label for="p_low_level" class="fieldset-legend flex items-center gap-2">
+                <Shield size={16} /> Low-Level Access
+            </label>
+            <div class="flex items-center gap-4 bg-base-200 p-3 rounded-lg border border-base-300">
+                <input
+                    type="checkbox"
+                    id="p_low_level"
+                    bind:checked={allowLowLevelAccess}
+                    class="toggle toggle-warning"
+                />
+                <div class="flex flex-col">
+                    <span class="text-sm font-medium">Allow script network access</span>
+                    <span class="text-xs opacity-60"
+                        >Grant permission for character scripts to make network requests.</span
+                    >
+                </div>
+            </div>
         </fieldset>
 
         <div class="modal-action pt-4 border-t border-base-200 mt-6">
