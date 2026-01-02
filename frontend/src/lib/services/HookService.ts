@@ -161,6 +161,10 @@ export class HookService {
             case "output":
             case "display":
                 return "assistant";
+            default: {
+                const _exhaustiveCheck: never = type;
+                throw new Error(`Unhandled hook type: ${_exhaustiveCheck}`);
+            }
         }
     }
 
