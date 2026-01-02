@@ -154,16 +154,16 @@ export class HookService {
         };
     }
 
-    private getRoleForHookType(type: HookType): "user" | "assistant" {
-        switch (type) {
+    private getRoleForHookType(hookType: HookType): "user" | "assistant" {
+        switch (hookType) {
             case "input":
                 return "user";
             case "output":
             case "display":
                 return "assistant";
             default: {
-                const _exhaustiveCheck: never = type;
-                throw new Error(`Unhandled hook type: ${_exhaustiveCheck}`);
+                hookType satisfies never;
+                throw new Error(`Unhandled hook type: ${hookType as string}`);
             }
         }
     }
