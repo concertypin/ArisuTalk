@@ -20,7 +20,8 @@ export class HookService {
         content: string,
         character: Character,
         type: HookType,
-        persona?: Persona
+        persona?: Persona,
+        role?: "user" | "assistant"
     ): Promise<string> {
         const hooks = character.executables?.replaceHooks?.[type] || [];
         if (hooks.length === 0) return content;
@@ -42,7 +43,8 @@ export class HookService {
                 type,
                 persona,
                 regexWorker,
-                scriptingWorker
+                scriptingWorker,
+                role
             );
         }
 
@@ -56,7 +58,8 @@ export class HookService {
         type: HookType,
         persona: Persona | undefined,
         regexWorker: Awaited<ReturnType<typeof getRegexWorker>>,
-        scriptingWorker: Awaited<ReturnType<typeof getScriptingWorker>>
+        scriptingWorker: Awaited<ReturnType<typeof getScriptingWorker>>,
+        role?: "user" | "assistant"
     ): Promise<string> {
         let pattern = hook.input;
         let replacement = hook.output;
@@ -66,7 +69,7 @@ export class HookService {
         // 1. Resolve scripted input pattern if needed
         if (hook.meta.isInputPatternScripted) {
             const scriptResult = await scriptingWorker.execute(pattern, {
-                context: this.createContext(content, character, type, persona),
+                context: this.createContext(content, character, type, persona, role),
                 allowNetwork,
                 characterId: character.id,
             });
@@ -87,7 +90,7 @@ export class HookService {
                 // This is complex: native replace(re, (match) => script)
                 // We'll approximate by evaluating the script with the match context.
                 const scriptResult = await scriptingWorker.execute(replacement, {
-                    context: this.createContext(content, character, type, persona),
+                    context: this.createContext(content, character, type, persona, role),
                     allowNetwork,
                     characterId: character.id,
                 });
@@ -101,7 +104,7 @@ export class HookService {
             // String replacement
             if (hook.meta.isOutputScripted) {
                 const scriptResult = await scriptingWorker.execute(replacement, {
-                    context: this.createContext(content, character, type, persona),
+                    context: this.createContext(content, character, type, persona, role),
                     allowNetwork,
                     characterId: character.id,
                 });
@@ -124,14 +127,16 @@ export class HookService {
         content: string,
         _character: Character,
         type: HookType,
-        persona?: Persona
+        persona?: Persona,
+        role?: "user" | "assistant"
     ): ScriptContext {
         const message = apply(MessageSchema, {
             id: crypto.randomUUID(),
             chatId: "temp-hook-chat-id", // Hooks run outside of a specific chat instance sometimes or before chatId is known
             content: { type: "text", data: content },
-            // Role is determined by hook type: input hooks process user messages, output hooks process assistant messages
-            role: this.getRoleForHookType(type),
+            // Role is explicit if provided, otherwise determined by hook type:
+            // input hooks process user messages, output/display hooks process assistant messages
+            role: role || this.getRoleForHookType(type),
         });
 
         return {

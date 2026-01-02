@@ -46,6 +46,13 @@ export class ChatStore {
         const character = activeChat
             ? characterStore.characters.find((c) => c.id === activeChat.characterId)
             : undefined;
+
+        if (activeChat && !character && characterStore.characters.length > 0) {
+            console.warn(
+                `ChatStore: Character with ID ${activeChat.characterId} not found. Hooks will be skipped.`
+            );
+        }
+
         const persona = personaStore.activePersona;
         return { activeChat, character, persona };
     }
