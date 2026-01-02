@@ -29,7 +29,7 @@ export const api: ScriptingWorkerApi = {
             consoleHandle.dispose();
             logHandle.dispose();
 
-            // Setup IsolatedStorage (sessionStorage-like)
+            // Setup IsolatedStorage
             const storageHandle = context.newObject();
             const setItemHandle = context.newFunction("setItem", (key, value) => {
                 storage.setItem(context.getString(key), context.getString(value));
