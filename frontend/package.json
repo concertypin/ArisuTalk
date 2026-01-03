@@ -36,6 +36,7 @@
         "@langchain/google-genai": "^2.1.0",
         "@langchain/openai": "^1.2.0",
         "@lucide/svelte": "^0.559.0",
+        "adze": "^2.2.5",
         "cbor-x": "^1.6.0",
         "comlink": "^4.4.2",
         "dexie": "^4.2.1",
