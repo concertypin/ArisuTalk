@@ -3,6 +3,7 @@ import { render } from "vitest-browser-svelte";
 import SettingsModal from "@/components/SettingsModal.svelte";
 import { settings } from "@/lib/stores/settings.svelte";
 import { SettingsSchema } from "@/lib/types/IDataModel";
+import { Logger } from "@common/logger/Logger";
 
 // Mock uiState
 vi.mock("@/lib/stores/ui.svelte", () => ({
@@ -21,6 +22,25 @@ describe("SettingsModal Component", () => {
         // Better to mock the adapter or the save method.
         // Since we import the instance, we can spy on it.
         vi.spyOn(settings, "save").mockResolvedValue(undefined);
+        vi.spyOn(Logger, "structured").mockImplementation(() => {});
+    });
+
+    test("logs modal.open on mount", async () => {
+        render(SettingsModal);
+        
+        expect(Logger.structured).toHaveBeenCalledWith("modal.open", expect.objectContaining({
+            modalName: "SettingsModal"
+        }));
+    });
+
+    test("logs modal.close on close", async () => {
+        const { getByLabelText } = render(SettingsModal);
+        
+        await getByLabelText("Close").click();
+        
+        expect(Logger.structured).toHaveBeenCalledWith("modal.close", expect.objectContaining({
+            modalName: "SettingsModal"
+        }));
     });
 
     test("renders correctly", async () => {
