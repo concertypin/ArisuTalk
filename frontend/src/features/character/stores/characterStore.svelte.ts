@@ -2,6 +2,7 @@ import { getCardParseWorker } from "@/lib/workers/workerClient";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
 import { StorageResolver } from "@/lib/adapters/storage/storageResolver";
 import type { ICharacterStorageAdapter } from "@/lib/interfaces";
+import { Logger } from "@common/logger/Logger";
 
 const ORDER_KEY = "character_order";
 
@@ -60,6 +61,12 @@ export class CharacterStore {
             }
 
             this.characters = chars;
+            chars.forEach((c) => {
+                Logger.structured("character.load", {
+                    characterId: c.id,
+                    source: "local",
+                });
+            });
         } catch (e) {
             console.error("Failed to load characters", e);
             this.characters = [];
@@ -70,6 +77,10 @@ export class CharacterStore {
         await this.adapter.saveCharacter(character);
         this.characters.push(character);
         this.saveOrder();
+        Logger.structured("character.load", {
+            characterId: character.id,
+            source: "import",
+        });
     }
 
     async remove(index: number) {
@@ -109,17 +120,32 @@ export class CharacterStore {
     async importCharacter(file: File) {
         const buffer = await file.arrayBuffer();
         const worker = await getCardParseWorker();
+        const format = file.name.split(".").pop() || "unknown";
         try {
             const result = await worker.parseCharacter(buffer);
             if (result.success) {
                 // Check if already exists? For now just add.
                 await this.add(result.data);
+                Logger.structured("character.import", {
+                    format,
+                    success: true,
+                });
                 return { success: true };
             } else {
+                Logger.structured("character.import", {
+                    format,
+                    success: false,
+                    errorMessage: "Failed to parse character",
+                });
                 return { success: false, error: "Failed to parse character" };
             }
         } catch (e) {
             console.error(e);
+            Logger.structured("character.import", {
+                format,
+                success: false,
+                errorMessage: String(e),
+            });
             return { success: false, error: String(e) };
         }
     }
