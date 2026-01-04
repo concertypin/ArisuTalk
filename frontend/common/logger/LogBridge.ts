@@ -1,4 +1,4 @@
-import type { LogEntry, LogLevel } from "./Logger";
+import type { StandardLogEntry, LogLevel, StructuredLogEntry, StructuredLogLevel } from "./Logger";
 
 /**
  * Interface for the main thread's log receiver.
@@ -9,7 +9,13 @@ export interface LogBridgeReceiver {
      * Receive a log entry from a worker.
      * @param entry The log entry to forward to the main Logger.
      */
-    receiveLog(entry: LogEntry): void;
+    receiveLog(entry: StandardLogEntry): void;
+
+    /**
+     * Receive a structured telemetry log entry from a worker.
+     * @param entry The structured log entry.
+     */
+    receiveStructuredLog<K extends keyof StructuredLogLevel>(entry: StructuredLogEntry<K>): void;
 }
 
 /**
@@ -24,6 +30,13 @@ export interface LogBridgeSender {
      * @param args Additional arguments.
      */
     log(level: LogLevel, message: string, ...args: unknown[]): void;
+
+    /**
+     * Send a structured telemetry event to the main thread.
+     * @param event The event name.
+     * @param data The event data.
+     */
+    structured<K extends keyof StructuredLogLevel>(event: K, data: StructuredLogLevel[K]): void;
 
     /**
      * Convenience methods for each log level.
@@ -54,12 +67,12 @@ export interface LogBridgeSender {
  * const workerLogger = createLogBridgeSender(receiver);
  *
  * workerLogger.info("Worker started");
- * workerLogger.debug("Processing...", { count: 42 });
+ * workerLogger.structured("worker.status", { workerName: "Scripting", status: "ready" });
  * ```
  */
 export function createLogBridgeSender(receiver: LogBridgeReceiver): LogBridgeSender {
     const baseLog = (level: LogLevel, message: string, ...args: unknown[]) => {
-        const entry: LogEntry = {
+        const entry: StandardLogEntry = {
             level,
             message,
             timestamp: Date.now(),
@@ -73,8 +86,24 @@ export function createLogBridgeSender(receiver: LogBridgeReceiver): LogBridgeSen
         });
     };
 
+    const structuredLog = <K extends keyof StructuredLogLevel>(
+        event: K,
+        data: StructuredLogLevel[K]
+    ) => {
+        const entry: StructuredLogEntry<K> = {
+            level: event,
+            message: event,
+            timestamp: Date.now(),
+            data,
+        };
+        void Promise.resolve(receiver.receiveStructuredLog(entry)).catch((err) => {
+            console.error("[LogBridge] Failed to send structured log to main thread:", err);
+        });
+    };
+
     return {
         log: baseLog,
+        structured: structuredLog,
         info: (message, ...args) => baseLog("info", message, ...args),
         warn: (message, ...args) => baseLog("warn", message, ...args),
         error: (message, ...args) => baseLog("error", message, ...args),
@@ -89,46 +118,39 @@ export function createLogBridgeSender(receiver: LogBridgeReceiver): LogBridgeSen
  * This receives log entries from workers and forwards them to the Logger.
  *
  * @returns A LogBridgeReceiver instance to be exposed via Comlink.
- *
- * @example
- * ```typescript
- * // In main thread
- * import * as Comlink from "comlink";
- * import { createLogBridgeReceiver } from "@common/logger/LogBridge";
- * import { Logger } from "@common/logger/Logger";
- *
- * const worker = new Worker("./worker.ts", { type: "module" });
- * const receiver = createLogBridgeReceiver();
- *
- * // Expose receiver to worker (or pass via Comlink.proxy)
- * Comlink.expose(receiver, worker);
- * ```
  */
 export function createLogBridgeReceiver(): LogBridgeReceiver {
-    // Dynamic import to avoid circular dependency and allow tree-shaking
     return {
-        receiveLog(entry: LogEntry): void {
-            // We use dynamic import to get the Logger to avoid issues
-            // in workers where Logger might not be fully available
+        receiveLog(entry: StandardLogEntry): void {
             void import("./Logger").then(({ Logger }) => {
-                // Re-emit through the main Logger
                 switch (entry.level) {
-                    // General log levels
                     case "info":
-                    case "warn":
-                    case "error":
-                    case "debug":
-                    case "verbose":
-                    case "trace":
-                    case "log":
-                        Logger[entry.level](entry.message, ...(entry.data ?? []));
+                        Logger.info(entry.message, ...(entry.data ?? []));
                         break;
-                    // Specific, structured levels can be added here
-
-                    // Exhaustiveness check
+                    case "warn":
+                        Logger.warn(entry.message, ...(entry.data ?? []));
+                        break;
+                    case "error":
+                        Logger.error(entry.message, ...(entry.data ?? []));
+                        break;
+                    case "debug":
+                        Logger.debug(entry.message, ...(entry.data ?? []));
+                        break;
+                    case "verbose":
+                        Logger.verbose(entry.message, ...(entry.data ?? []));
+                        break;
+                    case "trace":
+                        Logger.trace(entry.message, ...(entry.data ?? []));
+                        break;
+                    case "log":
                     default:
-                        entry.level satisfies never;
+                        Logger.log(entry.message, ...(entry.data ?? []));
                 }
+            });
+        },
+        receiveStructuredLog<K extends keyof StructuredLogLevel>(entry: StructuredLogEntry<K>): void {
+            void import("./Logger").then(({ Logger }) => {
+                Logger.structured(entry.level, entry.data);
             });
         },
     };

@@ -1,9 +1,14 @@
-import { describe, it, expect, vi, beforeEach, expectTypeOf } from "vitest";
-import { Logger, type LogEntry, type LogListener } from "@common/logger/Logger";
+import { describe, it, expect, beforeEach, expectTypeOf } from "vitest";
+import {
+    Logger,
+    type AnyLogEntry,
+    type StandardLogEntry,
+    type StructuredLogEntry,
+    type LogListener,
+} from "@common/logger/Logger";
 
 describe("Logger Class", () => {
     beforeEach(() => {
-        vi.clearAllMocks();
         Logger.clearListeners();
     });
 
@@ -20,21 +25,43 @@ describe("Logger Class", () => {
         expectTypeOf(Logger.verbose).toBeFunction();
     });
 
+    it("should have structured logging method", () => {
+        expectTypeOf(Logger.structured).toBeFunction();
+    });
+
     it("should trigger a hook when a log is emitted", () => {
-        const entries: LogEntry[] = [];
+        const entries: AnyLogEntry[] = [];
         const listener: LogListener = (entry) => entries.push(entry);
         Logger.onLog(listener);
 
         Logger.info("Hello, world!", { meta: "data" });
 
         expect(entries).toHaveLength(1);
-        expect(entries[0].message).toContain("Hello, world!");
-        expect(entries[0].level).toBe("info");
-        expect(entries[0].data).toEqual([{ meta: "data" }]);
+        const entry = entries[0] as StandardLogEntry;
+        expect(entry.message).toContain("Hello, world!");
+        expect(entry.level).toBe("info");
+        expect(entry.data).toEqual([{ meta: "data" }]);
+    });
+
+    it("should trigger a hook when a structured event is emitted", () => {
+        const entries: AnyLogEntry[] = [];
+        const listener: LogListener = (entry) => entries.push(entry);
+        Logger.onLog(listener);
+
+        Logger.structured("chat.message.send", {
+            chatId: "chat-123",
+            messageLength: 42,
+        });
+
+        expect(entries).toHaveLength(1);
+        const entry = entries[0] as StructuredLogEntry<"chat.message.send">;
+        expect(entry.level).toBe("chat.message.send");
+        expect(entry.data.chatId).toBe("chat-123");
+        expect(entry.data.messageLength).toBe(42);
     });
 
     it("should support listener removal via returned cleanup function", () => {
-        const entries: LogEntry[] = [];
+        const entries: AnyLogEntry[] = [];
         const listener: LogListener = (entry) => entries.push(entry);
         const cleanup = Logger.onLog(listener);
 
@@ -48,7 +75,7 @@ describe("Logger Class", () => {
     });
 
     it("should support explicit listener removal via offLog", () => {
-        const entries: LogEntry[] = [];
+        const entries: AnyLogEntry[] = [];
         const listener: LogListener = (entry) => entries.push(entry);
         Logger.onLog(listener);
 
