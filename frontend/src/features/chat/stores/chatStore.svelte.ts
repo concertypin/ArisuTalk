@@ -20,6 +20,7 @@ import { apply } from "@arisutalk/character-spec/utils";
 import { hookService } from "@/lib/services/HookService";
 import { characterStore } from "@/features/character/stores/characterStore.svelte";
 import { personaStore } from "@/features/persona/stores/personaStore.svelte";
+import { Logger } from "@common/logger/Logger";
 
 export class ChatStore {
     chats = $state<LocalChat[]>([]);
@@ -228,6 +229,11 @@ export class ChatStore {
             this.chats.push(newChat);
         }
 
+        Logger.structured("chat.session.start", {
+            chatId,
+            characterId,
+        });
+
         return chatId;
     }
 
@@ -308,6 +314,7 @@ export class ChatStore {
         chatId: string,
         langChainMessages: (HumanMessage | AIMessage)[]
     ) {
+        const startTime = Date.now();
         const assistantMessageId = crypto.randomUUID();
         const assistantMessage: Message = apply(MessageSchema, {
             id: assistantMessageId,
@@ -330,6 +337,12 @@ export class ChatStore {
         }
 
         await this.finalizeMessage(chatId, assistantMessage, processedContent);
+
+        Logger.structured("chat.message.receive", {
+            chatId,
+            provider: this.activeProvider?.constructor.name || "unknown",
+            latencyMs: Date.now() - startTime,
+        });
     }
 
     async sendMessage(content: string) {
@@ -355,6 +368,11 @@ export class ChatStore {
             });
 
             await this.addMessage(chatId, userMessage);
+
+            Logger.structured("chat.message.send", {
+                chatId,
+                messageLength: content.length,
+            });
 
             // Prepare LangChain messages from history
             const langChainMessages = this.activeMessages.map((m) => {
@@ -395,6 +413,11 @@ export class ChatStore {
         this.activeChatId = chatId;
         if (chatId) {
             this.activeMessages = await this.adapter.getMessages(chatId);
+            const chat = this.chats.find((c) => c.id === chatId);
+            Logger.structured("chat.session.start", {
+                chatId,
+                characterId: chat?.characterId,
+            });
         } else {
             this.activeMessages = [];
         }
