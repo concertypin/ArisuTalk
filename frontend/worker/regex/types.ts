@@ -1,3 +1,5 @@
+import type { LogBridgeReceiver } from "@common/logger/LogBridge";
+
 export interface RegexRule {
     /**
      * The regex pattern string.
@@ -32,4 +34,10 @@ export interface RegexWorkerApi {
      * @param flags The flags.
      */
     replace(text: string, pattern: string, replacement: string, flags?: string): Promise<string>;
+
+    /**
+     * Sets the log receiver for this worker.
+     * @param receiver The log receiver proxy.
+     */
+    setLogReceiver(receiver: LogBridgeReceiver): void;
 }

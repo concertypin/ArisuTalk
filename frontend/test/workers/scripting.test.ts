@@ -8,6 +8,16 @@ vi.mock("comlink", () => ({
 import { api } from "@worker/scripting/main";
 
 describe("Scripting Worker Logic", () => {
+    it("should support setLogReceiver", async () => {
+        expect(api.setLogReceiver).toBeDefined();
+        const mockReceiver = {
+            receiveLog: vi.fn(),
+            receiveStructuredLog: vi.fn(),
+        };
+        // @ts-ignore
+        await api.setLogReceiver(mockReceiver);
+    });
+
     describe("execute", () => {
         it("should execute simple code", async () => {
             const code = "1 + 1";

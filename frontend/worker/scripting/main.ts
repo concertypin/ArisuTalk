@@ -7,6 +7,9 @@ import {
     dumpError,
     extractModifiedContext,
 } from "./ScriptExecutionEnvironment";
+import { createLogBridgeSender, type LogBridgeReceiver } from "@common/logger/LogBridge";
+
+let logger: ReturnType<typeof createLogBridgeSender> | null = null;
 
 /**
  * Executes JavaScript code in a sandboxed QuickJS environment.
@@ -21,6 +24,7 @@ import {
  * @see {@link ScriptingWorkerApi} - The worker API interface.
  */
 async function execute(code: string, options?: ExecutionOptions): Promise<ExecutionResult> {
+    logger?.debug("Executing script...", { characterId: options?.characterId });
     const QuickJS = await getQuickJS();
 
     // The 'await using' statement ensures proper disposal of the environment
@@ -91,6 +95,12 @@ async function execute(code: string, options?: ExecutionOptions): Promise<Execut
 }
 
 /** The worker API exposed via Comlink. */
-export const api: ScriptingWorkerApi = { execute };
+export const api: ScriptingWorkerApi = {
+    execute,
+    setLogReceiver(receiver: LogBridgeReceiver) {
+        logger = createLogBridgeSender(receiver);
+        logger.info("Scripting worker connected to telemetry");
+    },
+};
 
 Comlink.expose(api);

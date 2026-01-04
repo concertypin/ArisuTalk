@@ -1,3 +1,5 @@
+import type { LogBridgeReceiver } from "@common/logger/LogBridge";
+
 export interface ExecutionOptions {
     /**
      * Timeout in milliseconds for script execution.
@@ -71,4 +73,10 @@ export interface ScriptingWorkerApi {
      * @param options Execution options.
      */
     execute(code: string, options?: ExecutionOptions): Promise<ExecutionResult>;
+
+    /**
+     * Sets the log receiver for this worker.
+     * @param receiver The log receiver proxy.
+     */
+    setLogReceiver(receiver: LogBridgeReceiver): void;
 }
