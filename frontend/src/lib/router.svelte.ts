@@ -4,6 +4,7 @@
  */
 
 import type { Component } from "svelte";
+import { Logger } from "@common/logger/Logger";
 
 /** Route definition with lazy component loading */
 export type Route = {
@@ -28,8 +29,12 @@ function getHashPath(): string {
  * Initialize router listeners
  */
 export function initRouter(): void {
+    // Initial page view
+    Logger.structured("page.view", { pageName: getHashPath() });
+
     window.addEventListener("hashchange", () => {
         currentPath = getHashPath();
+        Logger.structured("page.view", { pageName: currentPath });
     });
 }
 
