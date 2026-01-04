@@ -3,6 +3,7 @@ import type { ExampleWorkerApi } from "@worker/example/types";
 import type { api as CardParseWorkerApi } from "@worker/cardparse/main";
 import type { ScriptingWorkerApi } from "@worker/scripting/types";
 import type { RegexWorkerApi } from "@worker/regex/types";
+import { logReceiver } from "@/lib/services/telemetry";
 
 /**
  * Type representing a worker API with a terminate method.
@@ -25,6 +26,14 @@ export type WorkerApi<T> =
 
 function createWorkerApi<T>(worker: Worker): WorkerApi<T> {
     const api = Comlink.wrap<T>(worker);
+
+    // Automatically set up logging if the worker supports it
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ("setLogReceiver" in (api as any)) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        void (api as any).setLogReceiver(Comlink.proxy(logReceiver));
+    }
+
     return {
         ...api,
         terminate(this) {
