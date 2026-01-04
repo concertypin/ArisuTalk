@@ -113,26 +113,21 @@ export function createLogBridgeReceiver(): LogBridgeReceiver {
             void import("./Logger").then(({ Logger }) => {
                 // Re-emit through the main Logger
                 switch (entry.level) {
+                    // General log levels
                     case "info":
-                        Logger.info(entry.message, ...(entry.data ?? []));
-                        break;
                     case "warn":
-                        Logger.warn(entry.message, ...(entry.data ?? []));
-                        break;
                     case "error":
-                        Logger.error(entry.message, ...(entry.data ?? []));
-                        break;
                     case "debug":
-                        Logger.debug(entry.message, ...(entry.data ?? []));
-                        break;
                     case "verbose":
-                        Logger.verbose(entry.message, ...(entry.data ?? []));
-                        break;
                     case "trace":
-                        Logger.trace(entry.message, ...(entry.data ?? []));
+                    case "log":
+                        Logger[entry.level](entry.message, ...(entry.data ?? []));
                         break;
+                    // Specific, structured levels can be added here
+
+                    // Exhaustiveness check
                     default:
-                        Logger.log(entry.message, ...(entry.data ?? []));
+                        entry.level satisfies never;
                 }
             });
         },

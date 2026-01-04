@@ -118,13 +118,14 @@ export class Logger {
     }
 
     private static emit(level: LogLevel, ...args: unknown[]) {
-        const message = args.length > 0 ? String(args[0]) : "";
-        const data = args.length > 1 ? args.slice(1) : undefined;
+        const firstArg = args[0];
+        const message = typeof firstArg === "string" ? firstArg : "";
+        const dataArgs = typeof firstArg === "string" ? args.slice(1) : args;
         const entry: LogEntry = {
             level,
             message,
             timestamp: Date.now(),
-            data,
+            data: dataArgs.length > 0 ? dataArgs : undefined,
         };
         Logger.listeners.forEach((listener) => listener(entry));
     }
@@ -161,7 +162,7 @@ export class Logger {
         this.emit("trace", ...args);
         // Use adze's trace modifier which prints a stacktrace
         const [msg, ...rest] = args;
-        adze.label("ArisuTalk").trace.log(msg, ...rest);
+        baseLogger.trace.log(msg, ...rest);
     }
     static verbose(...args: unknown[]) {
         this.emit("verbose", ...args);
