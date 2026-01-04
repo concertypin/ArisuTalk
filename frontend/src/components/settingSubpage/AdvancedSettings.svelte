@@ -1,9 +1,15 @@
 <script lang="ts">
     import { settings } from "@/lib/stores/settings.svelte";
+    import LogLevelSelector from "../ui/LogLevelSelector.svelte";
 </script>
 
 <div class="space-y-6">
     <h3 class="text-lg font-semibold">Advanced Settings</h3>
+
+    <LogLevelSelector />
+
+    <div class="divider"></div>
+
     <div class="form-control">
         <label class="label cursor-pointer justify-start gap-4" for="adv-debug">
             <span class="label-text">Debug Mode</span>

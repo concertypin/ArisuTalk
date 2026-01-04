@@ -64,6 +64,7 @@ describe("SettingsModal Component", () => {
         // Switch to Advanced
         await getByText("Advanced").click();
         await expect.element(getByRole("heading", { name: "Advanced Settings" })).toBeVisible();
+        await expect.element(getByRole("combobox")).toBeVisible();
     });
 
     test("adds new LLM config", async () => {
