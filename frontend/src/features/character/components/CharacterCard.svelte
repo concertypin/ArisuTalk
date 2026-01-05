@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import { Trash2, Edit, Download, ChevronLeft, ChevronRight } from "@lucide/svelte";
-    import { opfsAdapter } from "../adapters/assetStorage/OpFSAssetStorageAdapter";
+    import { AssetStorageResolver } from "../adapters/assetStorage/AssetStorageResolver";
     import { IfNotExistBehavior } from "@/lib/interfaces";
 
     type Props = {
@@ -38,7 +38,8 @@
         if (url.startsWith("local:")) {
             void (async () => {
                 try {
-                    const res = await opfsAdapter.getAssetUrl(
+                    const adapter = AssetStorageResolver.getAdapter();
+                    const res = await adapter.getAssetUrl(
                         new URL(url),
                         IfNotExistBehavior.RETURN_NULL
                     );

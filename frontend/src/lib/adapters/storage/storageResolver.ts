@@ -6,6 +6,11 @@ import type {
 } from "@/lib/interfaces";
 
 type AdapterPromise<T> = Promise<{ default: new () => T }>;
+
+function shouldUseServerStorage(): boolean {
+    return typeof document !== "undefined" && document.cookie.includes("useServerStorage=true");
+}
+
 /**
  * Storage resolver that provides the appropriate storage adapters.
  * Uses dynamic imports for tree-shaking and code splitting.
@@ -27,7 +32,9 @@ export class StorageResolver {
             return this.characterAdapter;
         }
         let adapterPromise: AdapterPromise<ICharacterStorageAdapter>;
-        if (import.meta.env.VITEST) {
+        if (shouldUseServerStorage()) {
+            adapterPromise = import("./character/ServerCharacterAdapter");
+        } else if (import.meta.env.VITEST) {
             // Use localStorage adapter in testing environment
             adapterPromise = import("./character/LocalStorageCharacterAdapter");
         } else {
@@ -46,7 +53,9 @@ export class StorageResolver {
             return this.chatAdapter;
         }
         let adapterPromise: AdapterPromise<IChatStorageAdapter>;
-        if (import.meta.env.VITEST) {
+        if (shouldUseServerStorage()) {
+            adapterPromise = import("./chat/ServerChatAdapter");
+        } else if (import.meta.env.VITEST) {
             // Use localStorage adapter in testing environment
             adapterPromise = import("./chat/LocalStorageChatAdapter");
         } else {
@@ -66,7 +75,9 @@ export class StorageResolver {
         }
 
         let adapterPromise: AdapterPromise<IPersonaStorageAdapter>;
-        if (import.meta.env.VITEST) {
+        if (shouldUseServerStorage()) {
+            adapterPromise = import("./persona/ServerPersonaAdapter");
+        } else if (import.meta.env.VITEST) {
             // Use localStorage adapter in testing environment
             adapterPromise = import("./persona/LocalStoragePersonaAdapter");
         } else {
@@ -86,7 +97,9 @@ export class StorageResolver {
         }
 
         let adapterPromise: AdapterPromise<ISettingsStorageAdapter>;
-        if (import.meta.env.VITEST) {
+        if (shouldUseServerStorage()) {
+            adapterPromise = import("./settings/ServerSettingsAdapter");
+        } else if (import.meta.env.VITEST) {
             // Use localStorage adapter in testing environment
             adapterPromise = import("./settings/LocalStorageSettingsAdapter");
         } else {
