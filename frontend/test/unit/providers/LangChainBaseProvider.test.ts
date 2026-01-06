@@ -33,12 +33,18 @@ describe("LangChainBaseProvider", () => {
         const provider = new TestProvider(mockClient);
         await provider.generate([new HumanMessage("hi")]);
 
-        expect(Logger.structured).toHaveBeenCalledWith("llm.request.start", expect.objectContaining({
-            provider: "MOCK"
-        }));
-        expect(Logger.structured).toHaveBeenCalledWith("llm.request.complete", expect.objectContaining({
-            provider: "MOCK"
-        }));
+        expect(Logger.structured).toHaveBeenCalledWith(
+            "llm.request.start",
+            expect.objectContaining({
+                provider: "MOCK",
+            })
+        );
+        expect(Logger.structured).toHaveBeenCalledWith(
+            "llm.request.complete",
+            expect.objectContaining({
+                provider: "MOCK",
+            })
+        );
     });
 
     it("logs error on generate failure", async () => {
@@ -48,10 +54,13 @@ describe("LangChainBaseProvider", () => {
         const provider = new TestProvider(mockClient);
         await expect(provider.generate([new HumanMessage("hi")])).rejects.toThrow("Fail");
 
-        expect(Logger.structured).toHaveBeenCalledWith("llm.request.error", expect.objectContaining({
-            provider: "MOCK",
-            errorMessage: "Fail"
-        }));
+        expect(Logger.structured).toHaveBeenCalledWith(
+            "llm.request.error",
+            expect.objectContaining({
+                provider: "MOCK",
+                errorMessage: "Fail",
+            })
+        );
     });
 
     it("logs start and complete on stream", async () => {
@@ -64,14 +73,22 @@ describe("LangChainBaseProvider", () => {
         const generator = provider.stream([new HumanMessage("hi")]);
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        for await (const chunk of generator) { /* consume */ }
+        for await (const chunk of generator) {
+            /* consume */
+        }
 
-        expect(Logger.structured).toHaveBeenCalledWith("llm.request.start", expect.objectContaining({
-            provider: "MOCK"
-        }));
-        expect(Logger.structured).toHaveBeenCalledWith("llm.request.complete", expect.objectContaining({
-            provider: "MOCK"
-        }));
+        expect(Logger.structured).toHaveBeenCalledWith(
+            "llm.request.start",
+            expect.objectContaining({
+                provider: "MOCK",
+            })
+        );
+        expect(Logger.structured).toHaveBeenCalledWith(
+            "llm.request.complete",
+            expect.objectContaining({
+                provider: "MOCK",
+            })
+        );
     });
 
     it("disconnect does nothing (default implementation)", async () => {

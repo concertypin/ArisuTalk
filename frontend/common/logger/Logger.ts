@@ -164,7 +164,7 @@ export type StructuredLogLevel = {
         /** Provider name */
         provider: string;
         /** Error type/code */
-        errorType: string;
+        errorType?: string;
         /** Error message */
         errorMessage: string;
     };

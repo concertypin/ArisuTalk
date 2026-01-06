@@ -4,8 +4,7 @@
 		"test/*.ts",
 		"test/**/*.svelte",
 		"src/**/*.ts",
-		"src/**/*.svelte",
-		"common/**/*.ts"
+		"src/**/*.svelte"
 	],
 	"compilerOptions": {
 		"tsBuildInfoFile": "./node_modules/.cache/test.tsbuildinfo",

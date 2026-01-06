@@ -27,20 +27,26 @@ describe("SettingsModal Component", () => {
 
     test("logs modal.open on mount", async () => {
         render(SettingsModal);
-        
-        expect(Logger.structured).toHaveBeenCalledWith("modal.open", expect.objectContaining({
-            modalName: "SettingsModal"
-        }));
+
+        expect(Logger.structured).toHaveBeenCalledWith(
+            "modal.open",
+            expect.objectContaining({
+                modalName: "SettingsModal",
+            })
+        );
     });
 
     test("logs modal.close on close", async () => {
         const { getByLabelText } = render(SettingsModal);
-        
+
         await getByLabelText("Close").click();
-        
-        expect(Logger.structured).toHaveBeenCalledWith("modal.close", expect.objectContaining({
-            modalName: "SettingsModal"
-        }));
+
+        expect(Logger.structured).toHaveBeenCalledWith(
+            "modal.close",
+            expect.objectContaining({
+                modalName: "SettingsModal",
+            })
+        );
     });
 
     test("renders correctly", async () => {

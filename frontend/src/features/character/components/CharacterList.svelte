@@ -5,6 +5,7 @@
     import { OpFSAssetStorageAdapter } from "../adapters/assetStorage/OpFSAssetStorageAdapter";
     import { transfer } from "comlink";
     import { remapAssetToUint8Array, collectTransferableBuffers } from "../utils/assetEncoding";
+    import { Logger } from "@common/logger/Logger";
 
     type Props = {
         onEdit: (index: number) => void;
@@ -25,6 +26,10 @@
 
         // Show the modal
         modal.showModal();
+        Logger.structured("modal.open", {
+            location: "characterList",
+            modalName: "DeleteConfirmModal",
+        });
     }
 
     async function confirmDelete() {
@@ -47,6 +52,10 @@
 
         // Close the modal
         modal.close();
+        Logger.structured("modal.close", {
+            location: "characterList",
+            modalName: "DeleteConfirmModal",
+        });
     }
 
     async function arrayBufferLikeToBlob(

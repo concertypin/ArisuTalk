@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import type { Character, Chat } from "@arisutalk/character-spec/v0/Character";
 import { SettingsSchema, type Settings } from "@/lib/types/IDataModel";

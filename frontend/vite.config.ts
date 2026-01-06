@@ -36,7 +36,7 @@ export default defineConfig(async (ctx) => {
     const env = loadEnv(mode, process.cwd(), "");
     let testConfig: UserConfig["test"] = {
         globals: true,
-        environment: "happy-dom",
+        environment: "node",
         silent: "passed-only",
         setupFiles: ["./test/setup.ts"],
         exclude: ["node_modules", "dist", ".git"],

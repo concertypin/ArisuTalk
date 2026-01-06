@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { LocalStoragePersonaAdapter } from "@/lib/adapters/storage/persona/LocalStoragePersonaAdapter";
 import { PersonaSchema, type Persona } from "@/features/persona/schema";

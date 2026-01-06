@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { describe, it, expect, beforeEach } from "vitest";
 import { LocalStorageCharacterAdapter } from "@/lib/adapters/storage/character/LocalStorageCharacterAdapter";
 import { CharacterSchema, type Character } from "@arisutalk/character-spec/v0/Character";

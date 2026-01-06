@@ -27,13 +27,13 @@
         value={currentLevel}
         onchange={handleLevelChange}
     >
-        {#each levels as level}
+        {#each levels as level (level)}
             <option value={level}>{level}</option>
         {/each}
     </select>
-    <label class="label">
+    <div class="label">
         <span class="label-text-alt text-base-content/60">
             Higher levels show more detailed logs in the console.
         </span>
-    </label>
+    </div>
 </div>

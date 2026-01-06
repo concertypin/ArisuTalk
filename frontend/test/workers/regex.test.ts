@@ -14,8 +14,7 @@ describe("Regex Worker Logic", () => {
             receiveLog: vi.fn(),
             receiveStructuredLog: vi.fn(),
         };
-        // @ts-ignore
-        await api.setLogReceiver(mockReceiver);
+        api.setLogReceiver(mockReceiver);
     });
 
     describe("applyRules", () => {

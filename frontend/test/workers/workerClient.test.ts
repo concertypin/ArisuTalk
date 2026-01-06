@@ -1,5 +1,6 @@
+// @vitest-environment happy-dom
+
 import { describe, it, expect, vi } from "vitest";
-import * as Comlink from "comlink";
 import { getExampleWorker } from "@/lib/workers/workerClient";
 
 // Mock the Vite worker import
@@ -25,6 +26,7 @@ vi.mock("comlink", () => {
     return {
         wrap: vi.fn(() => mockApi),
         expose: vi.fn(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return
         proxy: (x: any) => x,
     };
 });

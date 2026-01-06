@@ -1,3 +1,5 @@
+// @vitest-environment happy-dom
+
 import { describe, it, expect, vi } from "vitest";
 
 // Mock Comlink before importing main.ts
@@ -14,8 +16,7 @@ describe("Scripting Worker Logic", () => {
             receiveLog: vi.fn(),
             receiveStructuredLog: vi.fn(),
         };
-        // @ts-ignore
-        await api.setLogReceiver(mockReceiver);
+        api.setLogReceiver(mockReceiver);
     });
 
     describe("execute", () => {

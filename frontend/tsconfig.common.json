@@ -13,6 +13,8 @@
 	},
 	"extends": "./tsconfig.base.json",
 	"include": [
-		"common/**/*.ts"
+		"common/**/*.ts",
+		"*.ts", // config
+		"*.js"
 	]
 }

@@ -11,7 +11,7 @@ describe("LogLevelSelector Component", () => {
 
     test("renders correctly with current level", async () => {
         const { getByRole } = render(LogLevelSelector);
-        
+
         const select = getByRole("combobox");
         await expect.element(select).toBeVisible();
         await expect.element(select).toHaveValue("info");
@@ -19,10 +19,10 @@ describe("LogLevelSelector Component", () => {
 
     test("updates log level on change", async () => {
         const { getByRole } = render(LogLevelSelector);
-        
+
         const select = getByRole("combobox");
         await select.selectOptions("debug");
-        
+
         expect(Logger.setLevel).toHaveBeenCalledWith("debug");
     });
 });

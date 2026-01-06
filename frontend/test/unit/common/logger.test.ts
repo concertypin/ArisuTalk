@@ -1,11 +1,6 @@
+// @vitest-environment happy-dom
 import { describe, it, expect, beforeEach, expectTypeOf, vi } from "vitest";
-import {
-    Logger,
-    type AnyLogEntry,
-    type StandardLogEntry,
-    type StructuredLogEntry,
-    type LogListener,
-} from "@common/logger/Logger";
+import { Logger } from "@common/logger/Logger";
 import { createLogBridgeSender, createLogBridgeReceiver } from "@common/logger/LogBridge";
 
 describe("Logger Class", () => {
@@ -38,11 +33,13 @@ describe("Logger Class", () => {
 
         Logger.info("Hello, world!", { meta: "data" });
 
-        expect(listener).toHaveBeenCalledWith(expect.objectContaining({
-            message: "Hello, world!",
-            level: "info",
-            data: [{ meta: "data" }]
-        }));
+        expect(listener).toHaveBeenCalledWith(
+            expect.objectContaining({
+                message: "Hello, world!",
+                level: "info",
+                data: [{ meta: "data" }],
+            })
+        );
     });
 
     it("should trigger a hook for all log levels", () => {
@@ -69,10 +66,12 @@ describe("Logger Class", () => {
             messageLength: 42,
         });
 
-        expect(listener).toHaveBeenCalledWith(expect.objectContaining({
-            level: "chat.message.send",
-            data: { chatId: "chat-123", messageLength: 42 }
-        }));
+        expect(listener).toHaveBeenCalledWith(
+            expect.objectContaining({
+                level: "chat.message.send",
+                data: { chatId: "chat-123", messageLength: 42 },
+            })
+        );
     });
 
     it("should support listener removal via returned cleanup function", () => {
@@ -120,20 +119,22 @@ describe("LogBridge", () => {
     it("should forward logs from sender to receiver", async () => {
         const receiver = createLogBridgeReceiver();
         const sender = createLogBridgeSender(receiver);
-        
+
         const listener = vi.fn();
         Logger.onLog(listener);
-        
+
         sender.info("message from worker", { foo: "bar" });
-        
+
         // Wait for dynamic import and promise in receiver
-        await new Promise(resolve => setTimeout(resolve, 50));
-        
-        expect(listener).toHaveBeenCalledWith(expect.objectContaining({
-            level: "info",
-            message: "message from worker",
-            data: [{ foo: "bar" }]
-        }));
+        await new Promise((resolve) => setTimeout(resolve, 50));
+
+        expect(listener).toHaveBeenCalledWith(
+            expect.objectContaining({
+                level: "info",
+                message: "message from worker",
+                data: [{ foo: "bar" }],
+            })
+        );
     });
 
     it("should forward all log levels via bridge", async () => {
@@ -149,24 +150,26 @@ describe("LogBridge", () => {
         sender.verbose("verbose");
         sender.trace("trace");
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
         expect(listener).toHaveBeenCalledTimes(6);
     });
 
     it("should forward structured logs from sender to receiver", async () => {
         const receiver = createLogBridgeReceiver();
         const sender = createLogBridgeSender(receiver);
-        
+
         const listener = vi.fn();
         Logger.onLog(listener);
-        
+
         sender.structured("worker.status", { workerName: "test", status: "ready" });
-        
-        await new Promise(resolve => setTimeout(resolve, 50));
-        
-        expect(listener).toHaveBeenCalledWith(expect.objectContaining({
-            level: "worker.status",
-            data: { workerName: "test", status: "ready" }
-        }));
+
+        await new Promise((resolve) => setTimeout(resolve, 50));
+
+        expect(listener).toHaveBeenCalledWith(
+            expect.objectContaining({
+                level: "worker.status",
+                data: { workerName: "test", status: "ready" },
+            })
+        );
     });
 });

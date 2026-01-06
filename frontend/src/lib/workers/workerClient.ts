@@ -28,10 +28,9 @@ function createWorkerApi<T>(worker: Worker): WorkerApi<T> {
     const api = Comlink.wrap<T>(worker);
 
     // Automatically set up logging if the worker supports it
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ("setLogReceiver" in (api as any)) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        void (api as any).setLogReceiver(Comlink.proxy(logReceiver));
+    if ("setLogReceiver" in api && typeof api.setLogReceiver === "function") {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        void api.setLogReceiver(Comlink.proxy(logReceiver));
     }
 
     return {

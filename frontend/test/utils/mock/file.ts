@@ -5,6 +5,10 @@ type FileMockOptions = {
      */
     content: ArrayBuffer;
     /**
+     * Optional file name. Defaults to "mockfile.char".
+     */
+    name?: string;
+    /**
      * Optional File properties to override the defaults.
      */
     option?: Partial<File>;
@@ -15,7 +19,7 @@ type FileMockOptions = {
  * @param param0 - Object containing content and optional File properties.
  * @returns A mock File object.
  */
-export function mockFile({ content, option }: FileMockOptions): File {
+export function mockFile({ content, name, option }: FileMockOptions): File {
     return {
         ...option,
         arrayBuffer: vi.fn().mockResolvedValue(content),
@@ -25,7 +29,7 @@ export function mockFile({ content, option }: FileMockOptions): File {
         },
         lastModified: Date.now(),
 
-        name: "mockfile.char",
+        name: name ?? "mockfile.char",
         size: content.byteLength,
         stream() {
             const readable = new ReadableStream<Uint8Array>({

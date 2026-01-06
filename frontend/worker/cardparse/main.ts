@@ -48,7 +48,10 @@ async function parseCharacter(rawData: ArrayBuffer): Promise<ParseResult<Charact
     const result = await CharacterSchema.safeParseAsync(decoded);
 
     if (result.success) {
-        logger?.info("Character parsed successfully", { id: result.data.id, name: result.data.name });
+        logger?.info("Character parsed successfully", {
+            id: result.data.id,
+            name: result.data.name,
+        });
         return { success: true, data: result.data } satisfies ParseResult<Character>;
     }
 

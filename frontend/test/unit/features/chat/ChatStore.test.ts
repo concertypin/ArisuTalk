@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
 import { ChatStore } from "@/features/chat/stores/chatStore.svelte";
 import type { IChatStorageAdapter, LocalChat } from "@/lib/interfaces";
@@ -121,11 +122,14 @@ describe("ChatStore", () => {
         expect(mockAdapter.createChat).toHaveBeenCalledWith("char-1", "New Chat");
         expect(resultId).toBe(newChatId);
         expect(store.chats).toContainEqual(newChat);
-        
-        expect(Logger.structured).toHaveBeenCalledWith("chat.session.start", expect.objectContaining({
-            chatId: newChatId,
-            characterId: "char-1"
-        }));
+
+        expect(Logger.structured).toHaveBeenCalledWith(
+            "chat.session.start",
+            expect.objectContaining({
+                chatId: newChatId,
+                characterId: "char-1",
+            })
+        );
     });
 
     it("should set active chat and log session.start", async () => {
@@ -154,9 +158,12 @@ describe("ChatStore", () => {
         expect(mockAdapter.getMessages).toHaveBeenCalledWith(chatId);
         expect(store.activeMessages).toEqual(messages);
 
-        expect(Logger.structured).toHaveBeenCalledWith("chat.session.start", expect.objectContaining({
-            chatId: chatId
-        }));
+        expect(Logger.structured).toHaveBeenCalledWith(
+            "chat.session.start",
+            expect.objectContaining({
+                chatId: chatId,
+            })
+        );
     });
 
     it("should send message and log telemetry", async () => {
@@ -185,14 +192,20 @@ describe("ChatStore", () => {
         expect(store.activeMessages[0].content.data).toBe("Hello");
         expect(store.activeMessages[1].content.data).toBe("Response");
 
-        expect(Logger.structured).toHaveBeenCalledWith("chat.message.send", expect.objectContaining({
-            chatId: "chat-1",
-            messageLength: 5
-        }));
+        expect(Logger.structured).toHaveBeenCalledWith(
+            "chat.message.send",
+            expect.objectContaining({
+                chatId: "chat-1",
+                messageLength: 5,
+            })
+        );
 
-        expect(Logger.structured).toHaveBeenCalledWith("chat.message.receive", expect.objectContaining({
-            chatId: "chat-1"
-        }));
+        expect(Logger.structured).toHaveBeenCalledWith(
+            "chat.message.receive",
+            expect.objectContaining({
+                chatId: "chat-1",
+            })
+        );
     });
 
     it("should handle provider switch", async () => {

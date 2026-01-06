@@ -194,6 +194,12 @@ export class ChatStore {
         if (this.activeProvider) {
             await this.activeProvider.disconnect();
         }
+
+        Logger.structured("llm.request.start", {
+            provider: type,
+            model: settings.model || "default", // Should check if model is in settings type
+        });
+
         switch (type) {
             case "ANTHROPIC": {
                 this.activeProvider = await AnthropicChatProvider.factory.connect(settings);
@@ -383,6 +389,10 @@ export class ChatStore {
             await this._streamAndSaveResponse(chatId, langChainMessages);
         } catch (error) {
             console.error("Generation failed", error);
+            Logger.structured("llm.request.error", {
+                provider: this.activeProvider?.constructor.name || "unknown",
+                errorMessage: String(error),
+            });
             throw error;
         } finally {
             this.isGenerating = false;
@@ -495,6 +505,10 @@ export class ChatStore {
             await this._streamAndSaveResponse(chatId, langChainMessages);
         } catch (error) {
             console.error("Regeneration failed", error);
+            Logger.structured("llm.request.error", {
+                provider: this.activeProvider?.constructor.name || "unknown",
+                errorMessage: String(error),
+            });
             throw error;
         } finally {
             this.isGenerating = false;

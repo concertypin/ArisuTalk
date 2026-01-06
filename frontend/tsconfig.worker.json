@@ -6,7 +6,9 @@
 			"WebWorker",
 			"ESNext"
 		],
-		"types": [],
+		"types": [
+			"vite/client"
+		],
 		"allowImportingTsExtensions": false /* Allow imports to include TypeScript file extensions. Requires '--moduleResolution bundler' and either '--noEmit' or '--emitDeclarationOnly' to be set. */,
 		"outDir": "./dist" /* Specify an output folder for all emitted files. */,
 		"noEmit": false
@@ -14,5 +16,10 @@
 	"extends": "./tsconfig.base.json",
 	"include": [
 		"worker/**/*.ts"
+	],
+	"references": [
+		{
+			"path": "./tsconfig.common.json"
+		}
 	]
 }
