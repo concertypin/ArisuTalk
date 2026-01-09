@@ -16,7 +16,11 @@ describe("Regex Worker Logic", () => {
         };
         api.setLogReceiver(mockReceiver);
     });
-
+    it.concurrent("should perform a simple replacement", async () => {
+        const text = "Hello World";
+        const result = await api.replace(text, "World", "Arisu");
+        expect(result).toBe("Hello Arisu");
+    });
     describe("applyRules", () => {
         it.concurrent("should apply multiple rules", async () => {
             const text = "The quick brown fox";
