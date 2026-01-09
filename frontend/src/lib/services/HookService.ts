@@ -4,6 +4,7 @@ import type { Persona } from "@/features/persona/schema";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
 import { apply } from "@arisutalk/character-spec/utils";
 import type { ScriptContext } from "@worker/scripting/types";
+import { Logger } from "@common/logger/Logger";
 
 export type HookType = "input" | "output" | "display";
 
@@ -36,6 +37,12 @@ export class HookService {
         let result = content;
 
         for (const hook of sortedHooks) {
+            const startTime = Date.now();
+            Logger.structured("script.hook.start", {
+                characterId: character.id,
+                hookType: type,
+            });
+
             result = await this.applyHook(
                 result,
                 hook,
@@ -46,6 +53,12 @@ export class HookService {
                 scriptingWorker,
                 role
             );
+
+            Logger.structured("script.hook.complete", {
+                characterId: character.id,
+                hookType: type,
+                durationMs: Date.now() - startTime,
+            });
         }
 
         return result;
@@ -74,7 +87,12 @@ export class HookService {
                 characterId: character.id,
             });
             if (scriptResult.error) {
-                console.error("Hook input script error:", scriptResult.error);
+                Logger.error("Hook input script error:", scriptResult.error);
+                Logger.structured("script.hook.error", {
+                    characterId: character.id,
+                    hookType: type,
+                    errorMessage: scriptResult.error,
+                });
             } else if (scriptResult.result !== undefined && scriptResult.result !== null) {
                 pattern = String(scriptResult.result as unknown);
             }

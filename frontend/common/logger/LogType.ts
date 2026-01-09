@@ -49,7 +49,6 @@ type StructuredLogSettings = {
         value: string;
     };
     // ─── Chat Events ────────────────────────────────────────────
-    // ... (existing chat events)
     /**
      * User sent a message.
      */
@@ -147,6 +146,42 @@ type StructuredLogLLM = {
         /** Error message */
         errorMessage: string;
     };
+    /**
+     * LLM First Token latency (TTFT).
+     */
+    "llm.stream.first_token": {
+        /** Provider name */
+        provider: string;
+        /** Latency in milliseconds */
+        latencyMs: number;
+    };
+};
+type StructuredLogScript = {
+    // ─── Script/Hook Events ─────────────────────────────────────
+    /**
+     * Script/Hook execution started.
+     */
+    "script.hook.start": {
+        characterId: string;
+        hookType: "input" | "output" | "display";
+        hookId?: string;
+    };
+    /**
+     * Script/Hook execution completed successfully.
+     */
+    "script.hook.complete": {
+        characterId: string;
+        hookType: "input" | "output" | "display";
+        durationMs: number;
+    };
+    /**
+     * Script/Hook execution failed.
+     */
+    "script.hook.error": {
+        characterId: string;
+        hookType: "input" | "output" | "display";
+        errorMessage: string;
+    };
 };
 type StructuredLogWorker = {
     // ─── Worker Events ──────────────────────────────────────────
@@ -183,6 +218,22 @@ type StructuredLogError = {
         errorMessage: string;
     };
 };
+type StructuredLogStorage = {
+    // ─── Storage & Resources ─────────────────────────────────────
+    /**
+     * Asset failed to load from cache/storage.
+     */
+    "asset.cache.miss": {
+        assetId: string;
+    };
+    /**
+     * Storage operation failed due to quota.
+     */
+    "storage.quota_exceeded": {
+        storageType: "localStorage" | "IndexedDB" | "OpFS";
+        errorMessage: string;
+    };
+};
 type StructuredLogPerf = {
     // ─── Performance ────────────────────────────────────────────
     /**
@@ -205,6 +256,8 @@ export type StructuredLogLevel = StructuredLogUI &
     StructuredLogSettings &
     StructuredLogCharacter &
     StructuredLogLLM &
+    StructuredLogScript &
     StructuredLogWorker &
     StructuredLogError &
+    StructuredLogStorage &
     StructuredLogPerf;

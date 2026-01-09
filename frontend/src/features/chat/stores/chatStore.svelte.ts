@@ -50,7 +50,7 @@ export class ChatStore {
 
         if (activeChat && !character) {
             // This can happen if characters are still loading. Hooks will be skipped.
-            console.warn(
+            Logger.warn(
                 `ChatStore: Character with ID ${activeChat.characterId} not found. Hooks will be skipped.`
             );
         }
@@ -101,7 +101,7 @@ export class ChatStore {
             if (settings.isLoaded) return;
             await new Promise((r) => setTimeout(r, SETTINGS_POLL_INTERVAL_MS));
         }
-        console.warn("ChatStore: Settings did not load in time, using defaults");
+        Logger.warn("ChatStore: Settings did not load in time, using defaults");
     }
 
     /**
@@ -122,7 +122,7 @@ export class ChatStore {
         }
 
         if (!targetConfig) {
-            console.info("ChatStore: No LLM config found, using Mock provider");
+            Logger.info("ChatStore: No LLM config found, using Mock provider");
             await this.setProvider("MOCK", {
                 mockDelay: 50,
                 responses: ["Please configure an LLM in Settings → LLM Configuration."],
@@ -157,7 +157,7 @@ export class ChatStore {
                 break;
             default: {
                 const _exhaustiveCheck: never = config;
-                console.warn(
+                Logger.warn(
                     `ChatStore: Provider "${(config as LLMConfig).provider}" not supported yet, falling back to Mock`
                 );
                 await this.setProvider("MOCK", {
@@ -182,7 +182,7 @@ export class ChatStore {
             await this.adapter.init();
             this.chats = await this.adapter.getAllChats();
         } catch (e) {
-            console.error("Failed to load chats", e);
+            Logger.error("Failed to load chats", e);
             this.chats = [];
         }
     }
@@ -388,7 +388,7 @@ export class ChatStore {
 
             await this._streamAndSaveResponse(chatId, langChainMessages);
         } catch (error) {
-            console.error("Generation failed", error);
+            Logger.error("Generation failed", error);
             Logger.structured("llm.request.error", {
                 provider: this.activeProvider?.constructor.name || "unknown",
                 errorMessage: String(error),
@@ -504,7 +504,7 @@ export class ChatStore {
 
             await this._streamAndSaveResponse(chatId, langChainMessages);
         } catch (error) {
-            console.error("Regeneration failed", error);
+            Logger.error("Regeneration failed", error);
             Logger.structured("llm.request.error", {
                 provider: this.activeProvider?.constructor.name || "unknown",
                 errorMessage: String(error),
