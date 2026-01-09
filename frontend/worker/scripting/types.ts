@@ -44,12 +44,11 @@ export interface ScriptContext {
     };
 }
 
-export interface ExecutionResult {
+export interface ExecutionResult<ResultType = unknown> {
     /**
      * The result of the script execution (if any).
      */
-    result?: unknown;
-
+    result?: ResultType | undefined;
     /**
      * The modified context (if the script modified it).
      */

@@ -8,6 +8,7 @@ vi.mock("comlink", () => ({
 }));
 
 import { api } from "@worker/scripting/main";
+import { beforeEach } from "node:test";
 
 describe("Scripting Worker Logic", () => {
     it("should support setLogReceiver", async () => {
@@ -20,6 +21,12 @@ describe("Scripting Worker Logic", () => {
     });
 
     describe("execute", () => {
+        beforeEach(() => {
+            // Mock storageByCharacter to ensure isolated storage works
+            const storageMap = new Map<string, Map<string, string>>();
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+            (api as any).storageByCharacter = storageMap;
+        });
         it("should execute simple code", async () => {
             const code = "1 + 1";
             const response = await api.execute(code);
@@ -27,7 +34,7 @@ describe("Scripting Worker Logic", () => {
         });
 
         it("should capture console.log output", async () => {
-            const code = 'console.log("hello"); console.log(123); "done"';
+            const code = 'console.log("hello"); console.log(123); return "done";';
             const response = await api.execute(code);
             expect(response.result).toBe("done");
             expect(response.logs).toEqual(["hello", "123"]);
@@ -40,7 +47,7 @@ describe("Scripting Worker Logic", () => {
         });
 
         it("should use storage API to persist values across calls", async () => {
-            await api.execute('storage.setItem("test", "value")');
+            const request = await api.execute('storage.setItem("test", "value")');
             const response = await api.execute('storage.getItem("test")');
             expect(response.result).toBe("value");
         });

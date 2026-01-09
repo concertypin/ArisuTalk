@@ -76,8 +76,8 @@ importers:
   frontend:
     dependencies:
       '@arisutalk/character-spec':
-        specifier: 0.0.13
-        version: 0.0.13(zod@4.1.13)
+        specifier: 0.0.16
+        version: 0.0.16(zod@4.1.13)
       '@humanspeak/svelte-markdown':
         specifier: ^0.8.13
         version: 0.8.13(svelte@5.45.10)
@@ -105,15 +105,12 @@ importers:
       comlink:
         specifier: ^4.4.2
         version: 4.4.2
+      define-function:
+        specifier: ^2.0.0
+        version: 2.0.0
       dexie:
         specifier: ^4.2.1
         version: 4.2.1
-      dist:
-        specifier: link:..\..\ArisuTalkFrontend\character-spec\dist
-        version: link:../../ArisuTalkFrontend/character-spec/dist
-      quickjs-emscripten:
-        specifier: ^0.31.0
-        version: 0.31.0
       svelte:
         specifier: ^5.39.3
         version: 5.45.10
@@ -218,8 +215,8 @@ packages:
       zod:
         optional: true
 
-  '@arisutalk/character-spec@0.0.13':
-    resolution: {integrity: sha512-I/8JKLLsjOJLcp12srJKxlA+2By1xdhDhzEpOPgYpkInWVPG18DD2n1MbjoRJK7mgXWw2XMh1J7SFDsAkwsf4A==}
+  '@arisutalk/character-spec@0.0.16':
+    resolution: {integrity: sha512-4NQxJt2VcvNBQoq5nKAtB4Z1anYHoJyCM6Uift+6miGbuKyKGt1HPKxUp8esut/+04vT/LqS/eEPE2RaLWTUEA==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^4.1.13
@@ -1085,21 +1082,6 @@ packages:
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
     cpu: [x64]
     os: [win32]
-
-  '@jitl/quickjs-ffi-types@0.31.0':
-    resolution: {integrity: sha512-1yrgvXlmXH2oNj3eFTrkwacGJbmM0crwipA3ohCrjv52gBeDaD7PsTvFYinlAnqU8iPME3LGP437yk05a2oejw==}
-
-  '@jitl/quickjs-wasmfile-debug-asyncify@0.31.0':
-    resolution: {integrity: sha512-YkdzQdr1uaftFhgEnTRjTTZHk2SFZdpWO7XhOmRVbi6CEVsH9g5oNF8Ta1q3OuSJHRwwT8YsuR1YzEiEIJEk6w==}
-
-  '@jitl/quickjs-wasmfile-debug-sync@0.31.0':
-    resolution: {integrity: sha512-8XvloaaWBONqcHXYs5tWOjdhQVxzULilIfB2hvZfS6S+fI4m2+lFiwQy7xeP8ExHmiZ7D8gZGChNkdLgjGfknw==}
-
-  '@jitl/quickjs-wasmfile-release-asyncify@0.31.0':
-    resolution: {integrity: sha512-uz0BbQYTxNsFkvkurd7vk2dOg57ElTBLCuvNtRl4rgrtbC++NIndD5qv2+AXb6yXDD3Uy1O2PCwmoaH0eXgEOg==}
-
-  '@jitl/quickjs-wasmfile-release-sync@0.31.0':
-    resolution: {integrity: sha512-hYduecOByj9AsAfsJhZh5nA6exokmuFC8cls39+lYmTCGY51bgjJJJwReEu7Ff7vBWaQCL6TeDdVlnp2WYz0jw==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -2074,6 +2056,9 @@ packages:
     resolution: {integrity: sha512-3sUqbMEc77XqpdNO7FRyRog+eW3ph+GYCbj+rK+uYyRMuwsVy0rMiVtPn+QJlKFvWP/1PYpapqYn0Me2knFn+A==}
     engines: {node: '>=0.10.0'}
 
+  define-function@2.0.0:
+    resolution: {integrity: sha512-1uzDpqsvulJvpO6c8t+lU94JDu77moFcH7hxKD510/R4VGJS0p1kCJ3cVljCDP/wDDp8V+b3HmUiwHTihen4rw==}
+
   defu@6.1.4:
     resolution: {integrity: sha512-mEQCMmwJu317oSz8CwdIOdwf3xMif1ttiM8LTufzc3g6kR+9Pe236twL8j3IYT1F7GfRgGcW6MWxzZjLIkuHIg==}
 
@@ -2833,13 +2818,6 @@ packages:
   quansync@0.2.11:
     resolution: {integrity: sha512-AifT7QEbW9Nri4tAwR5M/uzpBuqfZf+zwaEM/QkzEjj7NBuFD2rBuy0K3dE+8wltbezDV7JMA0WfnCPYRSYbXA==}
 
-  quickjs-emscripten-core@0.31.0:
-    resolution: {integrity: sha512-oQz8p0SiKDBc1TC7ZBK2fr0GoSHZKA0jZIeXxsnCyCs4y32FStzCW4d1h6E1sE0uHDMbGITbk2zhNaytaoJwXQ==}
-
-  quickjs-emscripten@0.31.0:
-    resolution: {integrity: sha512-K7Yt78aRPLjPcqv3fIuLW1jW3pvwO21B9pmFOolsjM/57ZhdVXBr51GqJpalgBlkPu9foAvhEAuuQPnvIGvLvQ==}
-    engines: {node: '>=16.0.0'}
-
   react@19.2.3:
     resolution: {integrity: sha512-Ku/hhYbVjOQnXDZFv2+RibmLFGwFdeeKHFcOTlrt7xplBnya5OGn/hIRDsqDiSUcfORsDC7MPxwork8jBwsIWA==}
     engines: {node: '>=0.10.0'}
@@ -3380,7 +3358,7 @@ snapshots:
     optionalDependencies:
       zod: 4.1.13
 
-  '@arisutalk/character-spec@0.0.13(zod@4.1.13)':
+  '@arisutalk/character-spec@0.0.16(zod@4.1.13)':
     dependencies:
       zod: 4.1.13
 
@@ -4445,24 +4423,6 @@ snapshots:
   '@img/sharp-win32-x64@0.33.5':
     optional: true
 
-  '@jitl/quickjs-ffi-types@0.31.0': {}
-
-  '@jitl/quickjs-wasmfile-debug-asyncify@0.31.0':
-    dependencies:
-      '@jitl/quickjs-ffi-types': 0.31.0
-
-  '@jitl/quickjs-wasmfile-debug-sync@0.31.0':
-    dependencies:
-      '@jitl/quickjs-ffi-types': 0.31.0
-
-  '@jitl/quickjs-wasmfile-release-asyncify@0.31.0':
-    dependencies:
-      '@jitl/quickjs-ffi-types': 0.31.0
-
-  '@jitl/quickjs-wasmfile-release-sync@0.31.0':
-    dependencies:
-      '@jitl/quickjs-ffi-types': 0.31.0
-
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
@@ -5523,6 +5483,8 @@ snapshots:
 
   deepmerge@4.3.1: {}
 
+  define-function@2.0.0: {}
+
   defu@6.1.4: {}
 
   dequal@2.0.3: {}
@@ -6237,18 +6199,6 @@ snapshots:
   punycode@2.3.1: {}
 
   quansync@0.2.11: {}
-
-  quickjs-emscripten-core@0.31.0:
-    dependencies:
-      '@jitl/quickjs-ffi-types': 0.31.0
-
-  quickjs-emscripten@0.31.0:
-    dependencies:
-      '@jitl/quickjs-wasmfile-debug-asyncify': 0.31.0
-      '@jitl/quickjs-wasmfile-debug-sync': 0.31.0
-      '@jitl/quickjs-wasmfile-release-asyncify': 0.31.0
-      '@jitl/quickjs-wasmfile-release-sync': 0.31.0
-      quickjs-emscripten-core: 0.31.0
 
   react@19.2.3: {}
 

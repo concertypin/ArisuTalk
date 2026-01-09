@@ -9,12 +9,11 @@
 export { Logger, LOG_LEVELS } from "./Logger";
 export type {
     LogLevel,
-    StructuredLogLevel,
     StandardLogEntry,
     StructuredLogEntry,
     AnyLogEntry,
     LogListener,
 } from "./Logger";
-
+export { StructuredLogLevel } from "./LogType";
 export { createLogBridgeSender, createLogBridgeReceiver } from "./LogBridge";
 export type { LogBridgeSender, LogBridgeReceiver } from "./LogBridge";

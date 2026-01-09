@@ -42,20 +42,24 @@ export default defineConfig(async (ctx) => {
         exclude: ["node_modules", "dist", ".git"],
         browser: runBrowserTest ? browserTestConfig : undefined,
         coverage: {
-            reporter: ["text", "json", "html"],
+            reporter: ["html"],
+            reportsDirectory: "./coverage",
             include: ["src/**/*"],
             exclude: ["node_modules/", "dist/", "test/", "**/*.d.ts", "**/*.config.*", "static/"],
         },
         includeTaskLocation: true,
         env,
         typecheck: {
-            enabled: !runBrowserTest,
+            enabled: true,
         },
         fileParallelism: !runBrowserTest,
     };
 
     const define: Record<string, string> = {};
     const baseConfig: UserConfig = {
+        optimizeDeps: {
+            include: ["cbor-x"],
+        },
         server: {
             sourcemapIgnoreList(absSourcePath) {
                 if (absSourcePath.includes("node_modules")) return true;

@@ -1,18 +1,59 @@
 import * as Comlink from "comlink";
-import { getQuickJS } from "quickjs-emscripten";
-import type { ScriptingWorkerApi, ExecutionOptions, ExecutionResult } from "./types";
-import {
-    ScriptExecutionEnvironment,
-    awaitPromiseResult,
-    dumpError,
-    extractModifiedContext,
-} from "./ScriptExecutionEnvironment";
+import defFunc from "define-function";
+import type { ScriptingWorkerApi, ExecutionOptions, ExecutionResult, ScriptContext } from "./types";
+import { IsolatedStorage } from "./IsolatedStorage";
 import { createLogBridgeSender, type LogBridgeReceiver } from "@common/logger/LogBridge";
 
+const SCRIPT_TIMEOUT_MS = 5000;
 let logger: ReturnType<typeof createLogBridgeSender> | null = null;
 
 /**
- * Executes JavaScript code in a sandboxed QuickJS environment.
+ * Storage instances keyed by character ID for proper isolation.
+ * Each character gets its own storage namespace to prevent cross-contamination.
+ */
+const storageByCharacter = new Map<string, IsolatedStorage>();
+
+/**
+ * Gets or creates an isolated storage instance for a given character.
+ * If no characterId is provided, returns a shared default storage instance.
+ */
+function getStorageForCharacter(characterId?: string): IsolatedStorage {
+    const key = characterId ?? "__default__";
+    if (!storageByCharacter.has(key)) {
+        storageByCharacter.set(key, new IsolatedStorage());
+    }
+    return storageByCharacter.get(key)!;
+}
+
+/**
+ * Creates a console object that captures logs to an array.
+ */
+function createConsole(logs: string[]) {
+    return {
+        log: (...args: unknown[]) => {
+            const message = args
+                .map((arg) => (typeof arg === "string" ? arg : JSON.stringify(arg)))
+                .join(" ");
+            logs.push(message);
+        },
+    };
+}
+
+/**
+ * Creates a fetch function with permission checking and abort support.
+ */
+function createFetch(allowNetwork: boolean, abortController: AbortController) {
+    return async (url: string): Promise<string> => {
+        if (!allowNetwork) {
+            throw new Error("Network access denied. Enable 'Low-Level Access' to use fetch.");
+        }
+        const res = await fetch(url, { signal: abortController.signal });
+        return await res.text();
+    };
+}
+
+/**
+ * Executes JavaScript code in a sandboxed environment using define-function.
  * Provides isolated storage, optional network access, and context injection.
  *
  * @param code - The JavaScript code to execute.
@@ -23,72 +64,88 @@ let logger: ReturnType<typeof createLogBridgeSender> | null = null;
  * @see {@link ExecutionResult} - Return type structure.
  * @see {@link ScriptingWorkerApi} - The worker API interface.
  */
-async function execute(code: string, options?: ExecutionOptions): Promise<ExecutionResult> {
+async function execute<ResultType = unknown>(
+    code: string,
+    options?: ExecutionOptions
+): Promise<ExecutionResult<ResultType>> {
     logger?.debug("Executing script...", { characterId: options?.characterId });
-    const QuickJS = await getQuickJS();
 
-    // The 'await using' statement ensures proper disposal of the environment
-    await using env = new ScriptExecutionEnvironment(QuickJS, options);
+    const logs: string[] = [];
+    const storage = getStorageForCharacter(options?.characterId);
+    const abortController = new AbortController();
 
     try {
-        // Evaluate the code
-        const evalResult = env.context.evalCode(code);
+        // Create the sandbox context with global injections
+        // Note: We wrap storage methods to preserve 'this' binding in the sandbox
+        const storageApi = {
+            getItem: (key: string) => storage.getItem(key),
+            setItem: (key: string, value: string) => storage.setItem(key, value),
+            removeItem: (key: string) => storage.removeItem(key),
+            clear: () => storage.clear(),
+            get length() {
+                return storage.length;
+            },
+            key: (index: number) => storage.key(index),
+        };
 
-        if (evalResult.error) {
-            using errorHandle = evalResult.error;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-            (evalResult as any).value?.dispose?.();
-            return { logs: env.logs, error: dumpError(env.context, errorHandle) };
-        }
+        // Await is intended(due to improper d.ts.
+        // console.log(defFunc.context()) shows `Promise { <pending> }`)
+        // eslint-disable-next-line @typescript-eslint/await-thenable
+        const ctx = await defFunc.context({
+            global: {
+                console: createConsole(logs),
+                storage: storageApi,
+                fetch: createFetch(options?.allowNetwork ?? false, abortController),
+                context: options?.context,
+            },
+        });
 
-        // Handle the result
-        let finalValue: unknown = undefined;
-        {
-            using valueHandle = evalResult.value;
+        try {
+            // Smart code wrapping:
+            // If code contains statements (semicolons) or explicit return, use as function body
+            // Otherwise wrap as expression for convenience
+            const hasStatements = /[;]|^\s*return\s+/.test(code);
 
-            const isPromise = (() => {
-                using thenHandle = env.context.getProp(valueHandle, "then");
-                return thenHandle !== env.context.undefined && thenHandle !== env.context.null;
-            })();
+            let fn: Promise<() => ResultType>;
 
-            if (isPromise) {
-                const resultPromise = env.context.resolvePromise(valueHandle);
-                const timeout = options?.timeout ?? 5000;
-                const { result, timedOut } = await awaitPromiseResult(
-                    env.runtime,
-                    resultPromise,
-                    timeout
-                );
-
-                if (timedOut) {
-                    return { logs: env.logs, error: "Execution timed out" };
-                }
-
-                if (result) {
-                    if (result.error) {
-                        const error = dumpError(env.context, result.error);
-                        result.error.dispose();
-                        return {
-                            logs: env.logs,
-                            error: error,
-                        };
-                    }
-
-                    if (result.value) {
-                        finalValue = env.context.dump(result.value);
-                        result.value.dispose();
-                    }
-                }
+            if (hasStatements) {
+                // Code has statements - use as-is as function body
+                fn = ctx.def(code, { timeout: options?.timeout ?? SCRIPT_TIMEOUT_MS });
             } else {
-                finalValue = env.context.dump(valueHandle);
+                // Simple expression - wrap with return for convenience
+                fn = ctx.def(`return (${code});`, {
+                    timeout: options?.timeout ?? SCRIPT_TIMEOUT_MS,
+                });
             }
-        }
 
-        const modifiedContext = extractModifiedContext(env.context);
-        return { result: finalValue, modifiedContext, logs: env.logs };
+            console.log("fn type", fn);
+            console.log("await fn type", await fn);
+            //console.log("await fn exec type", (await fn)());
+            const result: ResultType = (await fn)();
+            console.log("Execution result", result);
+
+            // Extract modified context if it was mutated
+            let modifiedContext: ScriptContext | undefined = undefined;
+            if (options?.context) {
+                const extractCtx = await ctx.def(`return global.context;`);
+                const extractedValue = (await extractCtx()) as unknown;
+                if (extractedValue && typeof extractedValue === "object") {
+                    modifiedContext = extractedValue as ScriptContext;
+                }
+            }
+
+            return { result, modifiedContext, logs };
+        } finally {
+            // ctx.dispose is undefined. What?
+            ctx.dispose();
+        }
     } catch (e) {
+        abortController.abort();
+        //Should be replaced with logger when production
+        //Just for testing purpose
+        console.error("Script execution error", e);
         return {
-            logs: env.logs,
+            logs,
             error: e instanceof Error ? `${e.message}\n${e.stack}` : String(e),
         };
     }

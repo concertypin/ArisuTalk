@@ -1,4 +1,5 @@
-import type { StandardLogEntry, LogLevel, StructuredLogEntry, StructuredLogLevel } from "./Logger";
+import type { StandardLogEntry, LogLevel, StructuredLogEntry } from "./Logger";
+import type { StructuredLogLevel } from "./LogType";
 
 /**
  * Interface for the main thread's log receiver.
@@ -148,7 +149,9 @@ export function createLogBridgeReceiver(): LogBridgeReceiver {
                 }
             });
         },
-        receiveStructuredLog<K extends keyof StructuredLogLevel>(entry: StructuredLogEntry<K>): void {
+        receiveStructuredLog<K extends keyof StructuredLogLevel>(
+            entry: StructuredLogEntry<K>
+        ): void {
             void import("./Logger").then(({ Logger }) => {
                 Logger.structured(entry.level, entry.data);
             });
