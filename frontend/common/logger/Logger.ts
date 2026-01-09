@@ -139,7 +139,7 @@ export class Logger {
 
     private static emit(level: LogLevel, ...args: unknown[]) {
         const firstArg = args[0];
-        const message = typeof firstArg === "string" ? firstArg : "";
+        const message = typeof firstArg === "string" ? firstArg : JSON.stringify(firstArg);
         const dataArgs = typeof firstArg === "string" ? args.slice(1) : args;
         const entry: StandardLogEntry = {
             level,

@@ -132,7 +132,6 @@ async function execute<ResultType = unknown>(
 
             return { result, modifiedContext, logs };
         } finally {
-            // ctx.dispose is undefined. What?
             ctx.dispose();
         }
     } catch (e) {

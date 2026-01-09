@@ -14,6 +14,6 @@ export type {
     AnyLogEntry,
     LogListener,
 } from "./Logger";
-export { StructuredLogLevel } from "./LogType";
+export type { StructuredLogLevel } from "./LogType";
 export { createLogBridgeSender, createLogBridgeReceiver } from "./LogBridge";
 export type { LogBridgeSender, LogBridgeReceiver } from "./LogBridge";
