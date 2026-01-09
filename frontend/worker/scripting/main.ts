@@ -4,6 +4,11 @@ import type { ScriptingWorkerApi, ExecutionOptions, ExecutionResult, ScriptConte
 import { IsolatedStorage } from "./IsolatedStorage";
 import { createLogBridgeSender, type LogBridgeReceiver } from "@common/logger/LogBridge";
 
+/**
+ * Script timeout in milliseconds.
+ * It is used to prevent scripts from running indefinitely.
+ * Overridable by options.timeout, which is passed from character or user config, usually.
+ */
 const SCRIPT_TIMEOUT_MS = 5000;
 let logger: ReturnType<typeof createLogBridgeSender> | null = null;
 
@@ -138,7 +143,7 @@ async function execute<ResultType = unknown>(
         abortController.abort();
         //Should be replaced with logger when production
         //Just for testing purpose
-        console.error("Script execution error", e);
+        logger?.error("Script execution error", e);
         return {
             logs,
             error: e instanceof Error ? `${e.message}\n${e.stack}` : String(e),

@@ -75,7 +75,7 @@ Web Workers cannot access the main `Logger` directly. Use `LogBridge` to forward
 
 ```ts
 // In Worker
-import { createLogBridgeSender } from "@common/logger/LogBridge";
+import { createLogBridgeSender, type LogBridgeReceiver } from "@common/logger/LogBridge";
 
 let logger: ReturnType<typeof createLogBridgeSender>;
 
