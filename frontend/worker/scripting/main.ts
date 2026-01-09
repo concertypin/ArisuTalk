@@ -118,11 +118,7 @@ async function execute<ResultType = unknown>(
                 });
             }
 
-            console.log("fn type", fn);
-            console.log("await fn type", await fn);
-            //console.log("await fn exec type", (await fn)());
             const result: ResultType = (await fn)();
-            console.log("Execution result", result);
 
             // Extract modified context if it was mutated
             let modifiedContext: ScriptContext | undefined = undefined;

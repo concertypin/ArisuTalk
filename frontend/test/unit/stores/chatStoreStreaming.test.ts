@@ -179,6 +179,13 @@ describe("ChatStore Streaming", () => {
         } satisfies (typeof chatStore)["activeProvider"];
 
         const chatId = await chatStore.createChat("test-fail", "Test Fail");
+        //Suppress console.error
+        vi.spyOn(console, "error").mockImplementationOnce((i) => {
+            if (typeof i === "string") {
+                if (i.includes("Simulated failure")) return;
+            }
+            console.error(i);
+        });
         await chatStore.setActiveChat(chatId);
 
         await expect(chatStore.sendMessage("Fail me")).rejects.toThrow("Simulated failure");

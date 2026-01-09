@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Mock Comlink before importing main.ts
 vi.mock("comlink", () => ({
@@ -8,7 +8,6 @@ vi.mock("comlink", () => ({
 }));
 
 import { api } from "@worker/scripting/main";
-import { beforeEach } from "node:test";
 
 describe("Scripting Worker Logic", () => {
     it("should support setLogReceiver", async () => {
@@ -47,7 +46,7 @@ describe("Scripting Worker Logic", () => {
         });
 
         it("should use storage API to persist values across calls", async () => {
-            const request = await api.execute('storage.setItem("test", "value")');
+            await api.execute('storage.setItem("test", "value")');
             const response = await api.execute('storage.getItem("test")');
             expect(response.result).toBe("value");
         });

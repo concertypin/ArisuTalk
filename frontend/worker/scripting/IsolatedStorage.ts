@@ -3,7 +3,7 @@
 /**
  * Simple in-memory storage for scripts, behaving similarly to sessionStorage.
  */
-export class IsolatedStorage extends Storage {
+export class IsolatedStorage implements Storage {
     private storage: Record<string, string> = {};
 
     /**
