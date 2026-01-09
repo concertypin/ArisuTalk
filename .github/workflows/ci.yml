@@ -78,3 +78,7 @@ jobs:
       - name: Check linting
         run: pnpm run --filter frontend lint
         timeout-minutes: 5
+
+      - name: Run coverage check
+        run: pnpm run --filter frontend test:coverage --reporter=dot
+        timeout-minutes: 5
