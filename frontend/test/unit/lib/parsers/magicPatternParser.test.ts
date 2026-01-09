@@ -21,7 +21,10 @@ describe("magicPatternParser", () => {
         const result = await parseMagicPatterns(input, mockContext);
 
         expect(result).toBe(input);
+        // adze logger calls console.error with multiple args: [" Error     ", "[ArisuTalk] ", "message"]
         expect(consoleSpy).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.anything(),
             expect.stringContaining("Parser not implemented yet")
         );
 
