@@ -130,7 +130,7 @@ jobs:
             
             // 2. Total coverage % calc
             const total = summary.total.lines.pct; 
-            const color = total >= 60 ? 'success' : 'failure'; // Green if >= 60%
+            const color = total >= 75 ? 'success' : 'failure'; // Green if >= 75%
             const description = `Lines: ${total}% | Statements: ${summary.total.statements.pct}%`;
 
             // 3. Github PR checklist update
@@ -138,7 +138,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: context.sha,
-              state: 'success', // Build is success
+              state: color,
               context: 'Vitest Coverage', // List name
               description: description, // e.g. "Lines: 85%"
               target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}` // Click to see details
