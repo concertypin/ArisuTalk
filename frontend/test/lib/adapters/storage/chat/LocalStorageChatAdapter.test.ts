@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { LocalStorageChatAdapter } from "@/lib/adapters/storage/chat/LocalStorageChatAdapter";
 import type { Message } from "@arisutalk/character-spec/v0/Character/Message";

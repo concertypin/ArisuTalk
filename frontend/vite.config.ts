@@ -1,11 +1,14 @@
 /// <reference types="vitest/config" />
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { type PluginOption, UserConfig, defineConfig, loadEnv } from "vite";
-import tsconfigPaths from "vite-tsconfig-paths";
 import { playwright } from "@vitest/browser-playwright";
+import path from "path";
+
 type Presence<T> = T extends undefined ? never : T;
 
-const browserTestConfig: Presence<UserConfig["test"]>["browser"] = {
+type TestConfig = Presence<UserConfig["test"]>;
+
+const browserTestConfig: TestConfig["browser"] = {
     enabled: true,
     provider: playwright(),
     instances: [
@@ -22,11 +25,24 @@ const runBrowserTest =
     process.env.npm_lifecycle_event?.includes("coverage")
         ? true
         : false;
+const paths: Presence<UserConfig["resolve"]>["alias"] = {
+    "@": path.resolve(__dirname, "src"),
+    "@worker": path.resolve(__dirname, "worker"),
+    "@test": path.resolve(__dirname, "test"),
+    "@common": path.resolve(__dirname, "common"),
+};
 
+let coverage: TestConfig["coverage"] & { provider: "v8" } = {
+    provider: "v8",
+    reporter: ["html", "text"],
+    reportsDirectory: "./coverage",
+    include: ["src/**/*"],
+    reportOnFailure: true,
+    exclude: ["node_modules/", "dist/", "test/", "**/*.d.ts", "**/*.config.*", "static/"],
+};
 export default defineConfig(async (ctx) => {
     const mode = ctx.mode;
     const plugin: PluginOption[] = [
-        tsconfigPaths(),
         svelte({
             compilerOptions: {
                 dev: mode !== "production",
@@ -34,28 +50,45 @@ export default defineConfig(async (ctx) => {
         }),
     ];
     const env = loadEnv(mode, process.cwd(), "");
-    let testConfig: UserConfig["test"] = {
+
+    let testConfig: TestConfig = {
         globals: true,
-        environment: "happy-dom",
+        environment: "node",
         silent: "passed-only",
         setupFiles: ["./test/setup.ts"],
         exclude: ["node_modules", "dist", ".git"],
         browser: runBrowserTest ? browserTestConfig : undefined,
-        coverage: {
-            reporter: ["text", "json", "html"],
-            include: ["src/**/*"],
-            exclude: ["node_modules/", "dist/", "test/", "**/*.d.ts", "**/*.config.*", "static/"],
-        },
+        coverage,
         includeTaskLocation: true,
         env,
         typecheck: {
-            enabled: !runBrowserTest,
+            enabled: true,
         },
-        fileParallelism: !runBrowserTest,
+
+        fileParallelism: true,
     };
+
+    if (env.GITHUB_ACTIONS) {
+        testConfig.reporters = [
+            [
+                "github-actions",
+                {
+                    onWritePath(path) {
+                        return path.replace(/^\/app\//, `${env.GITHUB_WORKSPACE}/`);
+                    },
+                },
+            ],
+        ];
+    }
 
     const define: Record<string, string> = {};
     const baseConfig: UserConfig = {
+        optimizeDeps: {
+            include: ["cbor-x"],
+        },
+        resolve: {
+            alias: paths,
+        },
         server: {
             sourcemapIgnoreList(absSourcePath) {
                 if (absSourcePath.includes("node_modules")) return true;

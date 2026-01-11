@@ -20,5 +20,10 @@
     "typescript.preferences.importModuleSpecifier": "non-relative",
     "javascript.preferences.importModuleSpecifier": "non-relative",
     "javascript.preferences.importModuleSpecifierEnding": "minimal",
-    "typescript.preferences.importModuleSpecifierEnding": "minimal"
+    "typescript.preferences.importModuleSpecifierEnding": "minimal",
+    "vitest.nodeEnv": {
+        // Enabling browser test on VSC vitest,
+        // since it will not run browser tests by default
+        "npm_lifecycle_event": "coverage"
+    }
 }

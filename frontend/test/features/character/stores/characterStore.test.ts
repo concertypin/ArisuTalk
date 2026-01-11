@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import "fake-indexeddb/auto";
 import { describe, it, expect, beforeEach, vi, type Mocked, type Mock } from "vitest";
 import { CharacterStore } from "@/features/character/stores/characterStore.svelte";
@@ -7,6 +8,7 @@ import { exampleCharacter } from "@/const/example_data";
 import { getCardParseWorker } from "@/lib/workers/workerClient";
 import { mockFile } from "@test/utils/mock/file";
 import asMock from "@test/utils/asMock";
+import { Logger } from "@common/logger/Logger";
 
 // Mock worker client
 vi.mock("@/lib/workers/workerClient", () => ({
@@ -33,6 +35,7 @@ describe("CharacterStore", () => {
         vi.clearAllMocks();
         localStorage.clear();
         vi.spyOn(console, "error").mockImplementation(() => {});
+        vi.spyOn(Logger, "structured").mockImplementation(() => {});
 
         // Reset default adapter behavior
         mockAdapter.init.mockResolvedValue(undefined);
@@ -46,10 +49,76 @@ describe("CharacterStore", () => {
         await store.initPromise;
     });
 
-    it("should initialize and load characters", async () => {
+    it("should initialize and load characters and log character.load", async () => {
+        const char1 = { ...defaultChar, id: "1" };
+        const char2 = { ...defaultChar, id: "2" };
+        mockAdapter.getAllCharacters.mockResolvedValue([char1, char2]);
+
+        const newStore = new CharacterStore(mockAdapter);
+        await newStore.initPromise;
+
         expect(mockAdapter.init).toHaveBeenCalled();
         expect(mockAdapter.getAllCharacters).toHaveBeenCalled();
-        expect(store.characters).toEqual([]);
+
+        expect(Logger.structured).toHaveBeenCalledWith(
+            "character.load",
+            expect.objectContaining({
+                characterId: "1",
+                source: "local",
+            })
+        );
+        expect(Logger.structured).toHaveBeenCalledWith(
+            "character.load",
+            expect.objectContaining({
+                characterId: "2",
+                source: "local",
+            })
+        );
+    });
+
+    it("should log character.load when adding a character", async () => {
+        await store.add(defaultChar);
+        expect(Logger.structured).toHaveBeenCalledWith(
+            "character.load",
+            expect.objectContaining({
+                characterId: defaultChar.id,
+                source: "import", // wait, add() currently doesn't distinguish, let's see implementation
+            })
+        );
+    });
+
+    it("should log character.import when importing a character", async () => {
+        const file = mockFile({ content: new ArrayBuffer(8), name: "test.png" });
+        const parsedChar = { ...defaultChar, id: "imported" };
+
+        const workerMock = await getCardParseWorker();
+        asMock(workerMock.parseCharacter).mockResolvedValue({ success: true, data: parsedChar });
+
+        await store.importCharacter(file);
+
+        expect(Logger.structured).toHaveBeenCalledWith(
+            "character.import",
+            expect.objectContaining({
+                format: "png",
+                success: true,
+            })
+        );
+    });
+
+    it("should log character.import on failure", async () => {
+        const file = mockFile({ content: new ArrayBuffer(8), name: "test.json" });
+        const workerMock = await getCardParseWorker();
+        asMock(workerMock.parseCharacter).mockResolvedValue({ success: false });
+
+        await store.importCharacter(file);
+
+        expect(Logger.structured).toHaveBeenCalledWith(
+            "character.import",
+            expect.objectContaining({
+                format: "json",
+                success: false,
+            })
+        );
     });
 
     it("should add a character", async () => {

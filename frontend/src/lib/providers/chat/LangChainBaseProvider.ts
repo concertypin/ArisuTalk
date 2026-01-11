@@ -6,6 +6,7 @@ import {
 } from "@/lib/interfaces/IChatProvider";
 import { type BaseMessage } from "@langchain/core/messages";
 import { type BaseChatModel } from "@langchain/core/language_models/chat_models";
+import { Logger } from "@common/logger/Logger";
 
 /**
  * Base class for chat providers that use LangChain.
@@ -24,14 +25,31 @@ export abstract class LangChainBaseProvider<
     }
 
     async generate(messages: BaseMessage[], _settings?: Partial<SETTING>): Promise<string> {
-        const response = await this.client.invoke(messages);
-        const content = response.content;
-        if (typeof content === "string") return content;
-        if (content == null) return "";
+        const startTime = Date.now();
+        Logger.structured("llm.request.start", {
+            provider: this.id,
+        });
         try {
-            return JSON.stringify(content);
-        } catch {
-            return "";
+            const response = await this.client.invoke(messages);
+            const content = response.content;
+            Logger.structured("llm.request.complete", {
+                provider: this.id,
+                latencyMs: Date.now() - startTime,
+            });
+            if (typeof content === "string") return content;
+            if (content == null) return "";
+            try {
+                return JSON.stringify(content);
+            } catch {
+                return "";
+            }
+        } catch (error: unknown) {
+            Logger.structured("llm.request.error", {
+                provider: this.id,
+                errorType: (error as Error).name || "Error",
+                errorMessage: (error as Error).message || String(error),
+            });
+            throw error;
         }
     }
 
@@ -40,6 +58,10 @@ export abstract class LangChainBaseProvider<
         _settings?: Partial<SETTING>
     ): AsyncGenerator<string, void, unknown> {
         this.abortController = new AbortController();
+        const startTime = Date.now();
+        Logger.structured("llm.request.start", {
+            provider: this.id,
+        });
 
         try {
             const stream = await this.client.stream(messages, {
@@ -54,10 +76,19 @@ export abstract class LangChainBaseProvider<
                     yield JSON.stringify(chunk.content);
                 }
             }
+            Logger.structured("llm.request.complete", {
+                provider: this.id,
+                latencyMs: Date.now() - startTime,
+            });
         } catch (error: unknown) {
             if (error instanceof DOMException && error.name === "AbortError") {
                 return;
             }
+            Logger.structured("llm.request.error", {
+                provider: this.id,
+                errorType: (error as Error).name || "Error",
+                errorMessage: (error as Error).message || String(error),
+            });
             throw error;
         } finally {
             this.abortController = null;

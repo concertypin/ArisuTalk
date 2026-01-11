@@ -1,5 +1,6 @@
 import type { IChatStorageAdapter, LocalChat } from "@/lib/interfaces";
 import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
+import { Logger } from "@common/logger/Logger";
 
 /**
  * LocalStorage-based chat storage adapter.
@@ -42,14 +43,14 @@ export class LocalStorageChatAdapter implements IChatStorageAdapter {
             const parsedArray: unknown[] = parsed;
             return parsedArray.filter(predicate);
         } catch (e) {
-            console.error("Failed to parse stored data", e);
+            Logger.error("Failed to parse stored data", e);
             return [];
         }
     }
 
     async init(): Promise<void> {
         if (!import.meta.env.DEV) {
-            console.warn("LocalStorageChatAdapter is for development/testing only.");
+            Logger.warn("LocalStorageChatAdapter is for development/testing only.");
         }
         return Promise.resolve();
     }
@@ -60,7 +61,7 @@ export class LocalStorageChatAdapter implements IChatStorageAdapter {
             if (!raw) return [];
             return this.parseArray<LocalChat>(raw, this.isLocalChat.bind(this));
         } catch (e) {
-            console.error("Failed to load chats", e);
+            Logger.error("Failed to load chats", e);
             return [];
         }
     }
@@ -69,7 +70,7 @@ export class LocalStorageChatAdapter implements IChatStorageAdapter {
         try {
             localStorage.setItem(this.CHATS_KEY, JSON.stringify(chats));
         } catch (e) {
-            console.error("Failed to save chats", e);
+            Logger.error("Failed to save chats", e);
         }
     }
 
@@ -79,7 +80,7 @@ export class LocalStorageChatAdapter implements IChatStorageAdapter {
             if (!raw) return [];
             return this.parseArray<Message>(raw, this.isMessage.bind(this));
         } catch (e) {
-            console.error("Failed to load messages", e);
+            Logger.error("Failed to load messages", e);
             return [];
         }
     }
@@ -88,7 +89,7 @@ export class LocalStorageChatAdapter implements IChatStorageAdapter {
         try {
             localStorage.setItem(this.MESSAGES_KEY, JSON.stringify(messages));
         } catch (e) {
-            console.error("Failed to save messages", e);
+            Logger.error("Failed to save messages", e);
         }
     }
 
@@ -232,7 +233,7 @@ export class LocalStorageChatAdapter implements IChatStorageAdapter {
                 this.saveStoredMessages(messages);
             }
         } catch (e) {
-            console.error("Failed to import data", e);
+            Logger.error("Failed to import data", e);
             throw new Error("Invalid data format");
         }
     }

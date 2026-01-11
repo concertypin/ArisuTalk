@@ -1,5 +1,7 @@
-import { describe, it, expect, beforeEach, beforeAll, expectTypeOf } from "vitest";
+// @vitest-environment happy-dom
+import { describe, it, expect, beforeEach, beforeAll, expectTypeOf, vi } from "vitest";
 import { navigate, getCurrentPath, isActive, initRouter } from "@/lib/router.svelte";
+import { Logger } from "@common/logger/Logger";
 
 describe("Router", () => {
     beforeAll(() => {
@@ -21,11 +23,24 @@ describe("Router", () => {
         });
     });
 
-    beforeEach(() => {
+    beforeEach(async () => {
         window.location.hash = "";
-        // Give time for hashchange to fire?
-        // Or manually trigger it if happy-dom doesn't auto-fire on hash assignment?
-        // happy-dom usually fires hashchange.
+        // Reset reactive state by navigating to root and waiting
+        navigate("/");
+        await new Promise((r) => setTimeout(r, 0));
+        vi.spyOn(Logger, "structured").mockImplementation(() => {});
+    });
+
+    it("should log page.view on navigation", async () => {
+        navigate("settings");
+        await new Promise((r) => setTimeout(r, 0));
+
+        expect(Logger.structured).toHaveBeenCalledWith(
+            "page.view",
+            expect.objectContaining({
+                pageName: "settings",
+            })
+        );
     });
 
     it("should return root path initially", () => {

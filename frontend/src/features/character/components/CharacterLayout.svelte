@@ -8,6 +8,7 @@
     import type { Persona } from "../../persona/schema";
     import { characterStore } from "../stores/characterStore.svelte";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
+    import { Logger } from "@common/logger/Logger";
 
     type Props = {
         children?: import("svelte").Snippet;
@@ -36,11 +37,19 @@
     function handleAdd() {
         editingIndex = null;
         dialog?.showModal();
+        Logger.structured("modal.open", {
+            location: "characterLayout",
+            modalName: "CharacterForm",
+        });
     }
 
     function handleEdit(index: number) {
         editingIndex = index;
         dialog?.showModal();
+        Logger.structured("modal.open", {
+            location: "characterLayout",
+            modalName: "CharacterForm",
+        });
     }
 
     async function handleFormSubmit(char: Character) {
@@ -50,12 +59,20 @@
             await characterStore.add(char);
         }
         dialog?.close();
+        Logger.structured("modal.close", {
+            location: "characterLayout",
+            modalName: "CharacterForm",
+        });
     }
 
     function handlePersona() {
         personaDialog?.showModal();
         isPersonaFormOpen = false;
         editingPersona = undefined;
+        Logger.structured("modal.open", {
+            location: "characterLayout",
+            modalName: "PersonaModal",
+        });
     }
 
     function handleEditPersona(persona: Persona) {

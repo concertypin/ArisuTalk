@@ -1,8 +1,10 @@
+/// <reference lib="DOM" />
+
 /**
  * Simple in-memory storage for scripts, behaving similarly to sessionStorage.
  */
-export class IsolatedStorage extends Storage {
-    private storage = new Map<string, string>();
+export class IsolatedStorage implements Storage {
+    private storage: Record<string, string> = {};
 
     /**
      * Sets a value in the storage.
@@ -10,7 +12,7 @@ export class IsolatedStorage extends Storage {
      * @param value The value to set (will be stringified).
      */
     setItem(key: string, value: string): void {
-        this.storage.set(key, value);
+        this.storage[key] = value;
     }
 
     /**
@@ -19,7 +21,7 @@ export class IsolatedStorage extends Storage {
      * @returns The value, or null if not found.
      */
     getItem(key: string): string | null {
-        return this.storage.get(key) ?? null;
+        return this.storage[key] ?? null;
     }
 
     /**
@@ -27,21 +29,21 @@ export class IsolatedStorage extends Storage {
      * @param key The key to remove.
      */
     removeItem(key: string): void {
-        this.storage.delete(key);
+        delete this.storage[key];
     }
 
     /**
      * Clears all values from the storage.
      */
     clear(): void {
-        this.storage.clear();
+        this.storage = {};
     }
 
     /**
      * Gets the number of items in the storage.
      */
     get length(): number {
-        return this.storage.size;
+        return Object.keys(this.storage).length;
     }
 
     /**
@@ -50,6 +52,6 @@ export class IsolatedStorage extends Storage {
      * @returns The key, or null if index is out of bounds.
      */
     key(index: number): string | null {
-        return Array.from(this.storage.keys())[index] ?? null;
+        return Object.keys(this.storage)[index] ?? null;
     }
 }

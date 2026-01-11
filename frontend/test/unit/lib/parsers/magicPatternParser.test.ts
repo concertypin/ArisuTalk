@@ -21,9 +21,17 @@ describe("magicPatternParser", () => {
         const result = await parseMagicPatterns(input, mockContext);
 
         expect(result).toBe(input);
-        expect(consoleSpy).toHaveBeenCalledWith(
-            expect.stringContaining("Parser not implemented yet")
+        // adze logger calls console.error differently in Node vs Browser:
+        // - Node: [" Error     ", "[ArisuTalk] ", "message"]
+        // - Browser: ["%c Error", "CSS styles...", "message"]
+        // So we just verify it was called and check the last argument contains our message
+        expect(consoleSpy).toHaveBeenCalled();
+        const lastCall = consoleSpy.mock.calls[0] as unknown[];
+        const messageArg = lastCall?.find(
+            (arg): arg is string =>
+                typeof arg === "string" && arg.includes("Parser not implemented yet")
         );
+        expect(messageArg).toBeDefined();
 
         consoleSpy.mockRestore();
     });

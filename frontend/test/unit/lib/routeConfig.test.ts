@@ -1,5 +1,8 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { routes } from "@/lib/routeConfig";
+
+// Mock the component to avoid loading the actual Svelte file and its dependencies
+vi.mock("@/routes/Home.svelte", () => ({ default: {} }));
 
 describe("routeConfig", () => {
     it("exports a routes object", () => {

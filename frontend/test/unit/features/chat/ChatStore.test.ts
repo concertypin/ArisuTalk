@@ -1,7 +1,9 @@
+// @vitest-environment happy-dom
 import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
 import { ChatStore } from "@/features/chat/stores/chatStore.svelte";
 import type { IChatStorageAdapter, LocalChat } from "@/lib/interfaces";
 import { MockChatProvider } from "@/lib/providers/chat/MockChatProvider";
+import { Logger } from "@common/logger/Logger";
 
 // Mock Providers
 vi.mock("@/lib/providers/chat/MockChatProvider", () => {
@@ -17,6 +19,26 @@ vi.mock("@/lib/providers/chat/MockChatProvider", () => {
 vi.mock("@/lib/providers/chat/GeminiChatProvider", () => {
     return {
         GeminiChatProvider: {
+            factory: {
+                connect: vi.fn(),
+            },
+        },
+    };
+});
+
+vi.mock("@/lib/providers/chat/OpenAIChatProvider", () => {
+    return {
+        OpenAIChatProvider: {
+            factory: {
+                connect: vi.fn(),
+            },
+        },
+    };
+});
+
+vi.mock("@/lib/providers/chat/AnthropicChatProvider", () => {
+    return {
+        AnthropicChatProvider: {
             factory: {
                 connect: vi.fn(),
             },
@@ -45,6 +67,7 @@ describe("ChatStore", () => {
 
     beforeEach(async () => {
         vi.clearAllMocks();
+        vi.spyOn(Logger, "structured").mockImplementation(() => {});
 
         // Create a mock adapter
         mockAdapter = {
@@ -66,17 +89,20 @@ describe("ChatStore", () => {
             stream: vi.fn(),
             abort: vi.fn(),
         });
-
-        store = new ChatStore(mockAdapter);
-        await store.initPromise;
     });
 
-    it("should initialize with adapter", () => {
+    it("should initialize with adapter", async () => {
+        store = new ChatStore(mockAdapter);
+        await store.initPromise;
         expect(mockAdapter.init).toHaveBeenCalled();
         expect(mockAdapter.getAllChats).toHaveBeenCalled();
     });
 
-    it("should create a chat", async () => {
+    it("should create a chat and log session.start", async () => {
+        store = new ChatStore(mockAdapter);
+        await store.initPromise;
+        vi.clearAllMocks();
+
         const newChatId = "new-chat-id";
         const newChat: LocalChat = {
             id: newChatId,
@@ -96,9 +122,21 @@ describe("ChatStore", () => {
         expect(mockAdapter.createChat).toHaveBeenCalledWith("char-1", "New Chat");
         expect(resultId).toBe(newChatId);
         expect(store.chats).toContainEqual(newChat);
+
+        expect(Logger.structured).toHaveBeenCalledWith(
+            "chat.session.start",
+            expect.objectContaining({
+                chatId: newChatId,
+                characterId: "char-1",
+            })
+        );
     });
 
-    it("should set active chat", async () => {
+    it("should set active chat and log session.start", async () => {
+        store = new ChatStore(mockAdapter);
+        await store.initPromise;
+        vi.clearAllMocks();
+
         const chatId = "chat-1";
         const messages = [
             {
@@ -112,15 +150,26 @@ describe("ChatStore", () => {
         ];
 
         (mockAdapter.getMessages as Mock).mockResolvedValue(messages);
+        (mockAdapter.getChat as Mock).mockResolvedValue({ id: chatId, characterId: "char-1" });
 
         await store.setActiveChat(chatId);
 
         expect(store.activeChatId).toBe(chatId);
         expect(mockAdapter.getMessages).toHaveBeenCalledWith(chatId);
         expect(store.activeMessages).toEqual(messages);
+
+        expect(Logger.structured).toHaveBeenCalledWith(
+            "chat.session.start",
+            expect.objectContaining({
+                chatId: chatId,
+            })
+        );
     });
 
-    it("should send message", async () => {
+    it("should send message and log telemetry", async () => {
+        store = new ChatStore(mockAdapter);
+        await store.initPromise;
+
         // Setup active chat
         store.activeChatId = "chat-1";
 
@@ -134,6 +183,7 @@ describe("ChatStore", () => {
             abort: vi.fn(),
         });
         await store.setProvider("MOCK", { responses: [] });
+        vi.clearAllMocks();
 
         await store.sendMessage("Hello");
 
@@ -141,9 +191,28 @@ describe("ChatStore", () => {
         expect(store.activeMessages).toHaveLength(2);
         expect(store.activeMessages[0].content.data).toBe("Hello");
         expect(store.activeMessages[1].content.data).toBe("Response");
+
+        expect(Logger.structured).toHaveBeenCalledWith(
+            "chat.message.send",
+            expect.objectContaining({
+                chatId: "chat-1",
+                messageLength: 5,
+            })
+        );
+
+        expect(Logger.structured).toHaveBeenCalledWith(
+            "chat.message.receive",
+            expect.objectContaining({
+                chatId: "chat-1",
+            })
+        );
     });
 
     it("should handle provider switch", async () => {
+        store = new ChatStore(mockAdapter);
+        await store.initPromise;
+        vi.clearAllMocks();
+
         // First provider setup
         const disconnectSpy = vi.fn();
         (MockChatProvider.factory.connect as Mock).mockResolvedValue({
@@ -165,10 +234,14 @@ describe("ChatStore", () => {
         // Verify old provider was disconnected
         expect(disconnectSpy).toHaveBeenCalled();
         // Verify new provider was connected
-        expect(MockChatProvider.factory.connect).toHaveBeenCalledTimes(3); // init + 2 switches
+        // Two more calls after the init one (which was cleared)
+        expect(MockChatProvider.factory.connect).toHaveBeenCalledTimes(2);
     });
 
     it("should delete chat", async () => {
+        store = new ChatStore(mockAdapter);
+        await store.initPromise;
+
         const chat: LocalChat = {
             id: "chat-1",
             name: "Delete Me",

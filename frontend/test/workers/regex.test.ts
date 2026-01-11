@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 
-// Mock Comlink
+// Mock Comlink before importing main.ts
 vi.mock("comlink", () => ({
     expose: vi.fn(),
 }));
@@ -8,14 +8,19 @@ vi.mock("comlink", () => ({
 import { api } from "@worker/regex/main";
 
 describe("Regex Worker Logic", () => {
-    describe("replace", () => {
-        it.concurrent("should perform a simple replacement", async () => {
-            const text = "Hello World";
-            const result = await api.replace(text, "World", "Arisu");
-            expect(result).toBe("Hello Arisu");
-        });
+    it("should support setLogReceiver", async () => {
+        expect(api.setLogReceiver).toBeDefined();
+        const mockReceiver = {
+            receiveLog: vi.fn(),
+            receiveStructuredLog: vi.fn(),
+        };
+        api.setLogReceiver(mockReceiver);
     });
-
+    it.concurrent("should perform a simple replacement", async () => {
+        const text = "Hello World";
+        const result = await api.replace(text, "World", "Arisu");
+        expect(result).toBe("Hello Arisu");
+    });
     describe("applyRules", () => {
         it.concurrent("should apply multiple rules", async () => {
             const text = "The quick brown fox";

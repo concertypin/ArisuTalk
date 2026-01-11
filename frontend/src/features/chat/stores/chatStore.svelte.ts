@@ -20,6 +20,7 @@ import { apply } from "@arisutalk/character-spec/utils";
 import { hookService } from "@/lib/services/HookService";
 import { characterStore } from "@/features/character/stores/characterStore.svelte";
 import { personaStore } from "@/features/persona/stores/personaStore.svelte";
+import { Logger } from "@common/logger/Logger";
 
 export class ChatStore {
     chats = $state<LocalChat[]>([]);
@@ -49,7 +50,7 @@ export class ChatStore {
 
         if (activeChat && !character) {
             // This can happen if characters are still loading. Hooks will be skipped.
-            console.warn(
+            Logger.warn(
                 `ChatStore: Character with ID ${activeChat.characterId} not found. Hooks will be skipped.`
             );
         }
@@ -100,7 +101,7 @@ export class ChatStore {
             if (settings.isLoaded) return;
             await new Promise((r) => setTimeout(r, SETTINGS_POLL_INTERVAL_MS));
         }
-        console.warn("ChatStore: Settings did not load in time, using defaults");
+        Logger.warn("ChatStore: Settings did not load in time, using defaults");
     }
 
     /**
@@ -121,7 +122,7 @@ export class ChatStore {
         }
 
         if (!targetConfig) {
-            console.info("ChatStore: No LLM config found, using Mock provider");
+            Logger.info("ChatStore: No LLM config found, using Mock provider");
             await this.setProvider("MOCK", {
                 mockDelay: 50,
                 responses: ["Please configure an LLM in Settings → LLM Configuration."],
@@ -156,7 +157,7 @@ export class ChatStore {
                 break;
             default: {
                 const _exhaustiveCheck: never = config;
-                console.warn(
+                Logger.warn(
                     `ChatStore: Provider "${(config as LLMConfig).provider}" not supported yet, falling back to Mock`
                 );
                 await this.setProvider("MOCK", {
@@ -181,7 +182,7 @@ export class ChatStore {
             await this.adapter.init();
             this.chats = await this.adapter.getAllChats();
         } catch (e) {
-            console.error("Failed to load chats", e);
+            Logger.error("Failed to load chats", e);
             this.chats = [];
         }
     }
@@ -193,6 +194,12 @@ export class ChatStore {
         if (this.activeProvider) {
             await this.activeProvider.disconnect();
         }
+
+        Logger.structured("llm.request.start", {
+            provider: type,
+            model: settings.model || "default", // Should check if model is in settings type
+        });
+
         switch (type) {
             case "ANTHROPIC": {
                 this.activeProvider = await AnthropicChatProvider.factory.connect(settings);
@@ -227,6 +234,11 @@ export class ChatStore {
         if (newChat) {
             this.chats.push(newChat);
         }
+
+        Logger.structured("chat.session.start", {
+            chatId,
+            characterId,
+        });
 
         return chatId;
     }
@@ -308,6 +320,7 @@ export class ChatStore {
         chatId: string,
         langChainMessages: (HumanMessage | AIMessage)[]
     ) {
+        const startTime = Date.now();
         const assistantMessageId = crypto.randomUUID();
         const assistantMessage: Message = apply(MessageSchema, {
             id: assistantMessageId,
@@ -330,6 +343,12 @@ export class ChatStore {
         }
 
         await this.finalizeMessage(chatId, assistantMessage, processedContent);
+
+        Logger.structured("chat.message.receive", {
+            chatId,
+            provider: this.activeProvider?.constructor.name || "unknown",
+            latencyMs: Date.now() - startTime,
+        });
     }
 
     async sendMessage(content: string) {
@@ -356,6 +375,11 @@ export class ChatStore {
 
             await this.addMessage(chatId, userMessage);
 
+            Logger.structured("chat.message.send", {
+                chatId,
+                messageLength: content.length,
+            });
+
             // Prepare LangChain messages from history
             const langChainMessages = this.activeMessages.map((m) => {
                 const text = typeof m.content.data === "string" ? m.content.data : "";
@@ -364,7 +388,11 @@ export class ChatStore {
 
             await this._streamAndSaveResponse(chatId, langChainMessages);
         } catch (error) {
-            console.error("Generation failed", error);
+            Logger.error("Generation failed", error);
+            Logger.structured("llm.request.error", {
+                provider: this.activeProvider?.constructor.name || "unknown",
+                errorMessage: String(error),
+            });
             throw error;
         } finally {
             this.isGenerating = false;
@@ -395,6 +423,11 @@ export class ChatStore {
         this.activeChatId = chatId;
         if (chatId) {
             this.activeMessages = await this.adapter.getMessages(chatId);
+            const chat = this.chats.find((c) => c.id === chatId);
+            Logger.structured("chat.session.start", {
+                chatId,
+                characterId: chat?.characterId,
+            });
         } else {
             this.activeMessages = [];
         }
@@ -471,7 +504,11 @@ export class ChatStore {
 
             await this._streamAndSaveResponse(chatId, langChainMessages);
         } catch (error) {
-            console.error("Regeneration failed", error);
+            Logger.error("Regeneration failed", error);
+            Logger.structured("llm.request.error", {
+                provider: this.activeProvider?.constructor.name || "unknown",
+                errorMessage: String(error),
+            });
             throw error;
         } finally {
             this.isGenerating = false;

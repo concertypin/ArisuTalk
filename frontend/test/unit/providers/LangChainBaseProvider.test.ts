@@ -1,7 +1,8 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { LangChainBaseProvider } from "@/lib/providers/chat/LangChainBaseProvider";
 import { HumanMessage } from "@langchain/core/messages";
 import type { BaseChatModel } from "@langchain/core/language_models/chat_models";
+import { Logger } from "@common/logger/Logger";
 
 // Concrete implementation for testing
 class TestProvider extends LangChainBaseProvider<"MOCK"> {
@@ -21,6 +22,74 @@ class TestProvider extends LangChainBaseProvider<"MOCK"> {
 }
 
 describe("LangChainBaseProvider", () => {
+    beforeEach(() => {
+        vi.spyOn(Logger, "structured").mockImplementation(() => {});
+    });
+
+    it("logs start and complete on generate", async () => {
+        const mockClient = {
+            invoke: vi.fn().mockResolvedValue({ content: "test response" }),
+        };
+        const provider = new TestProvider(mockClient);
+        await provider.generate([new HumanMessage("hi")]);
+
+        expect(Logger.structured).toHaveBeenCalledWith(
+            "llm.request.start",
+            expect.objectContaining({
+                provider: "MOCK",
+            })
+        );
+        expect(Logger.structured).toHaveBeenCalledWith(
+            "llm.request.complete",
+            expect.objectContaining({
+                provider: "MOCK",
+            })
+        );
+    });
+
+    it("logs error on generate failure", async () => {
+        const mockClient = {
+            invoke: vi.fn().mockRejectedValue(new Error("Fail")),
+        };
+        const provider = new TestProvider(mockClient);
+        await expect(provider.generate([new HumanMessage("hi")])).rejects.toThrow("Fail");
+
+        expect(Logger.structured).toHaveBeenCalledWith(
+            "llm.request.error",
+            expect.objectContaining({
+                provider: "MOCK",
+                errorMessage: "Fail",
+            })
+        );
+    });
+
+    it("logs start and complete on stream", async () => {
+        const mockClient = {
+            stream: vi.fn().mockImplementation(async function* () {
+                yield { content: "chunk" };
+            }),
+        };
+        const provider = new TestProvider(mockClient);
+        const generator = provider.stream([new HumanMessage("hi")]);
+
+        for await (const _ of generator) {
+            /* consume */
+        }
+
+        expect(Logger.structured).toHaveBeenCalledWith(
+            "llm.request.start",
+            expect.objectContaining({
+                provider: "MOCK",
+            })
+        );
+        expect(Logger.structured).toHaveBeenCalledWith(
+            "llm.request.complete",
+            expect.objectContaining({
+                provider: "MOCK",
+            })
+        );
+    });
+
     it("disconnect does nothing (default implementation)", async () => {
         const provider = new TestProvider({});
         await expect(provider.disconnect()).resolves.toBeUndefined();

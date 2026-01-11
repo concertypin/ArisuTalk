@@ -6,6 +6,7 @@
 
 import type { Character } from "@arisutalk/character-spec/v0/Character";
 import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
+import { Logger } from "@common/logger/Logger";
 
 /**
  * Context provided to magic pattern scripts.
@@ -52,7 +53,7 @@ export async function parseMagicPatterns(
     const PATTERN_REGEX = /\{\|[\s\S]*?\|\}/;
 
     if (PATTERN_REGEX.test(text)) {
-        console.error(
+        Logger.error(
             "[MagicPattern] Parser not implemented yet. " +
                 "Magic patterns will be displayed as-is. " +
                 "QuickJS integration pending."

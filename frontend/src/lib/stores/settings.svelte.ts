@@ -4,6 +4,7 @@
 import { StorageResolver } from "@/lib/adapters/storage/storageResolver";
 import { SettingsSchema, type Settings } from "@/lib/types/IDataModel";
 import { apply } from "@arisutalk/character-spec/utils";
+import { Logger } from "@common/logger/Logger";
 
 class SettingsStore {
     value = $state<Settings>(apply(SettingsSchema, {}));
@@ -16,7 +17,7 @@ class SettingsStore {
             const stored = await adapter.getSettings();
             this.value = stored;
         } catch (e) {
-            console.error("Failed to load settings", e);
+            Logger.error("Failed to load settings", e);
         } finally {
             this.isLoaded = true;
         }
@@ -30,7 +31,7 @@ class SettingsStore {
             const plainSettings = $state.snapshot(this.value);
             await adapter.saveSettings(plainSettings);
         } catch (e) {
-            console.error("Failed to save settings", e);
+            Logger.error("Failed to save settings", e);
         }
     }
 }

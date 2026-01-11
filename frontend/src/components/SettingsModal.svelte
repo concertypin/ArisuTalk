@@ -1,5 +1,6 @@
 <script lang="ts">
     import { uiState } from "@/lib/stores/ui.svelte";
+    import { Logger } from "@common/logger/Logger";
 
     import { settings } from "@/lib/stores/settings.svelte";
     import {
@@ -26,11 +27,19 @@
         // App.svelte conditionally renders this component.
         // When it mounts, we show the modal immediately.
         dialog?.showModal();
+        Logger.structured("modal.open", {
+            location: window.location.pathname,
+            modalName: "SettingsModal",
+        });
     });
 
     function close() {
         dialog?.close();
         uiState.closeSettingsModal();
+        Logger.structured("modal.close", {
+            location: window.location.pathname,
+            modalName: "SettingsModal",
+        });
     }
 
     function handleBackdropClick(e: MouseEvent) {

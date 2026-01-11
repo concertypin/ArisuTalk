@@ -1,7 +1,22 @@
+// @vitest-environment happy-dom
 import { test, expect, describe, vi, afterEach } from "vitest";
 import { chatStore } from "@/features/chat/stores/chatStore.svelte";
 import { MessageSchema } from "@arisutalk/character-spec/v0/Character/Message";
 import { apply } from "@arisutalk/character-spec/utils";
+
+// Mock settings to avoid 5s timeout in chatStore.initialize()
+vi.mock("@/lib/stores/settings.svelte", () => ({
+    settings: {
+        value: {
+            llmConfigs: [],
+            activeLLMConfigId: null,
+            model: "test-model",
+        },
+        isLoaded: true,
+        init: vi.fn(),
+        save: vi.fn(),
+    },
+}));
 
 describe("ChatStore Streaming", () => {
     afterEach(() => {
@@ -164,6 +179,13 @@ describe("ChatStore Streaming", () => {
         } satisfies (typeof chatStore)["activeProvider"];
 
         const chatId = await chatStore.createChat("test-fail", "Test Fail");
+        //Suppress console.error
+        vi.spyOn(console, "error").mockImplementationOnce((i) => {
+            if (typeof i === "string") {
+                if (i.includes("Simulated failure")) return;
+            }
+            console.error(i);
+        });
         await chatStore.setActiveChat(chatId);
 
         await expect(chatStore.sendMessage("Fail me")).rejects.toThrow("Simulated failure");

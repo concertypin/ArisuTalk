@@ -27,6 +27,9 @@
 		},
 		{
 			"path": "./tsconfig.worker.json"
+		},
+		{
+			"path": "./tsconfig.common.json"
 		}
 	]
 }
