@@ -72,8 +72,7 @@ describe("LangChainBaseProvider", () => {
         const provider = new TestProvider(mockClient);
         const generator = provider.stream([new HumanMessage("hi")]);
 
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        for await (const chunk of generator) {
+        for await (const _ of generator) {
             /* consume */
         }
 

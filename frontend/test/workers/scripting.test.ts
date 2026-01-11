@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 
 // Mock Comlink before importing main.ts
 vi.mock("comlink", () => ({
@@ -20,12 +20,6 @@ describe("Scripting Worker Logic", () => {
     });
 
     describe("execute", () => {
-        beforeEach(() => {
-            // Mock storageByCharacter to ensure isolated storage works
-            const storageMap = new Map<string, Map<string, string>>();
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-            (api as any).storageByCharacter = storageMap;
-        });
         it("should execute simple code", async () => {
             const code = "1 + 1";
             const response = await api.execute(code);
@@ -46,9 +40,40 @@ describe("Scripting Worker Logic", () => {
         });
 
         it("should use storage API to persist values across calls", async () => {
-            await api.execute('storage.setItem("test", "value")');
-            const response = await api.execute('storage.getItem("test")');
+            const charId = "persistent-char";
+            await api.execute('storage.setItem("test", "value")', { characterId: charId });
+            const response = await api.execute('storage.getItem("test")', { characterId: charId });
             expect(response.result).toBe("value");
+        });
+
+        it("should isolate storage between different characters", async () => {
+            const charA = "char-A";
+            const charB = "char-B";
+
+            // Set value for Char A
+            await api.execute('storage.setItem("secret", "A-secret")', { characterId: charA });
+
+            // Verify Char A can read it
+            const responseA = await api.execute('storage.getItem("secret")', {
+                characterId: charA,
+            });
+            expect(responseA.result).toBe("A-secret");
+
+            // Verify Char B cannot read it
+            const responseB = await api.execute('storage.getItem("secret")', {
+                characterId: charB,
+            });
+            // Should be null, but define-function/serialization might return undefined for null
+            expect(responseB.result ?? null).toBeNull();
+
+            // Set different value for Char B
+            await api.execute('storage.setItem("secret", "B-secret")', { characterId: charB });
+
+            // Verify Char A still sees original value
+            const responseA2 = await api.execute('storage.getItem("secret")', {
+                characterId: charA,
+            });
+            expect(responseA2.result).toBe("A-secret");
         });
     });
 });
