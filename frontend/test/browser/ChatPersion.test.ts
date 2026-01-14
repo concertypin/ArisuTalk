@@ -9,13 +9,14 @@ describe("Persona and Chat interactions", () => {
     });
 
     test("Manage Personas opens persona modal", async () => {
-        const { getByLabelText, getByText } = render(CharacterLayoutTestWrapper);
+        const { getByLabelText, getByRole } = render(CharacterLayoutTestWrapper);
 
         const personaBtn = getByLabelText("Manage Personas");
         await expect.element(personaBtn).toBeVisible();
         await personaBtn.click();
 
-        const header = getByText("Manage Personas");
+        // Look for the modal heading specifically (h3 in the dialog)
+        const header = getByRole("heading", { name: "Manage Personas", level: 3 });
         await expect.element(header).toBeVisible();
     });
 

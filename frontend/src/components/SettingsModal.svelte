@@ -63,14 +63,23 @@
     aria-labelledby="settings-title"
 >
     <div
-        class="modal-box w-11/12 max-w-5xl h-[80vh] p-0 flex flex-col overflow-hidden bg-base-100 text-base-content"
+        class="modal-box w-11/12 max-w-5xl h-[80vh] p-0 flex flex-col overflow-hidden bg-base-100 text-base-content shadow-2xl"
     >
         <!-- Header -->
-        <header class="flex items-center justify-between p-4 border-b border-base-300 bg-base-200">
-            <h2 id="settings-title" class="text-xl font-bold flex items-center gap-2">
+        <header
+            class="flex items-center justify-between p-4 border-b border-base-300/50 bg-base-200/80"
+        >
+            <h2
+                id="settings-title"
+                class="text-xl font-bold flex items-center gap-2 tracking-tight"
+            >
                 <SettingsIcon size={24} /> Settings
             </h2>
-            <button class="btn btn-ghost btn-sm btn-square" onclick={close} aria-label="Close">
+            <button
+                class="btn btn-ghost btn-sm btn-square hover:bg-base-300/50"
+                onclick={close}
+                aria-label="Close"
+            >
                 <X size={20} />
             </button>
         </header>
@@ -78,11 +87,11 @@
         <!-- Content -->
         <div class="flex flex-1 overflow-hidden">
             <!-- Sidebar -->
-            <aside class="w-64 bg-base-200 p-2 overflow-y-auto border-r border-base-300">
-                <ul class="menu w-full p-0 rounded-box">
+            <aside class="w-56 bg-base-200/60 p-3 overflow-y-auto border-r border-base-300/50">
+                <ul class="menu w-full p-0 gap-1">
                     <li>
                         <button
-                            class="flex gap-2"
+                            class="flex gap-2 rounded-lg"
                             class:active={activeTab === "general"}
                             onclick={() => (activeTab = "general")}
                             aria-label="General Settings"
@@ -92,17 +101,17 @@
                     </li>
                     <li>
                         <button
-                            class="flex gap-2"
+                            class="flex gap-2 rounded-lg"
                             class:active={activeTab === "llm"}
                             onclick={() => (activeTab = "llm")}
                             aria-label="LLM Configuration"
                         >
-                            <Cpu size={18} /> Models (LLM)
+                            <Cpu size={18} /> Models
                         </button>
                     </li>
                     <li>
                         <button
-                            class="flex gap-2"
+                            class="flex gap-2 rounded-lg"
                             class:active={activeTab === "prompt"}
                             onclick={() => (activeTab = "prompt")}
                             aria-label="Prompt Settings"
@@ -112,7 +121,7 @@
                     </li>
                     <li>
                         <button
-                            class="flex gap-2"
+                            class="flex gap-2 rounded-lg"
                             class:active={activeTab === "advanced"}
                             onclick={() => (activeTab = "advanced")}
                             aria-label="Advanced Settings"
@@ -122,7 +131,7 @@
                     </li>
                     <li>
                         <button
-                            class="flex gap-2"
+                            class="flex gap-2 rounded-lg"
                             class:active={activeTab === "about"}
                             onclick={() => (activeTab = "about")}
                             aria-label="About"
@@ -134,7 +143,7 @@
             </aside>
 
             <!-- Main Panel -->
-            <main class="flex-1 p-6 overflow-y-auto">
+            <main class="flex-1 p-6 overflow-y-auto bg-base-100">
                 {#if activeTab === "general"}
                     <GeneralSettings />
                 {:else if activeTab === "llm"}
@@ -150,9 +159,9 @@
         </div>
 
         <!-- Footer -->
-        <div class="modal-action p-4 border-t border-base-300 bg-base-100 m-0">
-            <button class="btn" onclick={close}>Cancel</button>
-            <button class="btn btn-primary" onclick={save}>Save Changes</button>
+        <div class="modal-action p-4 border-t border-base-300/50 bg-base-200/60 m-0">
+            <button class="btn btn-ghost" onclick={close}>Cancel</button>
+            <button class="btn btn-primary shadow-md" onclick={save}>Save & Close</button>
         </div>
     </div>
     <form method="dialog" class="modal-backdrop">

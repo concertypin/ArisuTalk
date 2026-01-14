@@ -106,19 +106,32 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="flex-1 flex flex-col min-w-0 bg-base-200 relative">
+    <main class="flex-1 flex flex-col min-w-0 bg-base-100 relative">
         {#if selectedCharacterId}
             {@render children?.()}
         {:else}
-            <div class="h-full overflow-y-auto w-full">
-                <div class="container mx-auto p-6 md:p-8 max-w-7xl">
-                    <div class="mb-8">
-                        <h1 class="text-3xl font-bold mb-2">My Characters</h1>
-                        <p class="text-base-content/60">
-                            Manage your AI characters, import cards, or create new ones.
-                        </p>
+            <!-- Welcome / No Character Selected -->
+            <div class="flex flex-col items-center justify-center h-full text-center p-8">
+                <div class="space-y-4 max-w-md">
+                    <h1 class="text-3xl font-bold tracking-tight">
+                        <span class="text-gradient-accent">ArisuTalk</span>
+                    </h1>
+                    <p class="text-base-content/60 text-lg">
+                        Select a character from the sidebar to start chatting
+                    </p>
+                    <div class="flex flex-wrap justify-center gap-3 mt-6">
+                        <button class="btn btn-primary gap-2" onclick={handleAdd}>
+                            <span class="text-lg">+</span> Create Character
+                        </button>
+                        <button class="btn btn-ghost gap-2" onclick={handlePersona}>
+                            Manage Personas
+                        </button>
                     </div>
-                    <CharacterList onEdit={handleEdit} />
+                    <p class="text-sm text-base-content/40 mt-8">
+                        {characterStore.characters.length === 0
+                            ? "No characters yet. Create your first one!"
+                            : `${characterStore.characters.length} character${characterStore.characters.length > 1 ? "s" : ""} available`}
+                    </p>
                 </div>
             </div>
         {/if}

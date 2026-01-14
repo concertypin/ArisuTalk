@@ -24,13 +24,13 @@
 </script>
 
 <aside
-    class="flex flex-col h-full bg-base-200 border-r border-base-300 transition-all duration-300 {collapsed
+    class="flex flex-col h-full bg-base-200 border-r border-base-300/50 transition-all duration-300 {collapsed
         ? 'w-0'
         : 'w-80'} relative"
 >
     <!-- Toggle Button -->
     <button
-        class="btn btn-circle btn-sm absolute top-1/2 -right-4 z-20 border border-base-300"
+        class="btn btn-circle btn-sm absolute top-1/2 -right-4 z-20 glass border-base-300/50 shadow-lg"
         onclick={onToggle}
         aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
     >
@@ -42,21 +42,23 @@
             ? 'opacity-0 pointer-events-none'
             : 'opacity-100'}"
     >
-        <header class="p-4 border-b border-base-300">
-            <h1 class="text-lg font-semibold">ArisuTalk</h1>
+        <header class="p-4 border-b border-base-300/50">
+            <h1 class="text-lg font-semibold tracking-tight">ArisuTalk</h1>
         </header>
 
-        <nav class="flex-1 overflow-y-auto p-4 space-y-2">
+        <nav class="flex-1 overflow-y-auto p-3 space-y-1">
             {#each chats as chat (chat.id)}
-                <button class="btn btn-ghost justify-start w-full">
+                <button
+                    class="btn btn-ghost justify-start w-full hover:bg-base-300/50 transition-colors"
+                >
                     {chat.name}
                 </button>
             {/each}
         </nav>
 
-        <div class="p-4 border-t border-base-300">
+        <div class="p-3 border-t border-base-300/50">
             <button
-                class="btn btn-ghost btn-sm w-full justify-start gap-2"
+                class="btn btn-ghost btn-sm w-full justify-start gap-2 hover:bg-base-300/50"
                 onclick={() => uiState.openSettingsModal()}
             >
                 <Settings class="w-4 h-4" /><span>Settings</span>

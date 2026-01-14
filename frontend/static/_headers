@@ -1,0 +1,14 @@
+
+/*
+  # COOP/COEP, for better Performance.now() resolution
+  Cross-Origin-Embedder-Policy: require-corp
+  Cross-Origin-Opener-Policy: same-origin
+
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+
+  # No permissions policy
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  # Dedicated process for this
+  Origin-Agent-Cluster: ?1

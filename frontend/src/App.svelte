@@ -53,16 +53,25 @@
 
 {#if uiState.settingsModalOpen}
     {#await import("@/components/SettingsModal.svelte")}
-        <div class="flex items-center justify-center w-full h-full text-base-content/50">
-            Loading settings...
+        <div
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 text-base-content/70 backdrop-blur-sm"
+        >
+            <span class="loading loading-spinner loading-lg"></span>
         </div>
     {:then { default: Component }}
         <Component />
     {:catch error}
         <div
-            class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 text-error backdrop-blur-sm"
         >
-            Failed to load settings modal: {String(error)}
+            <div class="bg-base-100 p-8 rounded-xl shadow-xl border border-error/20">
+                <h3 class="font-bold text-lg mb-2">Error Loading Settings</h3>
+                <p>{String(error)}</p>
+                <button
+                    class="btn btn-sm btn-ghost mt-4"
+                    onclick={() => uiState.closeSettingsModal()}>Close</button
+                >
+            </div>
         </div>
     {/await}
 {/if}

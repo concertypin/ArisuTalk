@@ -96,6 +96,11 @@ export default defineConfig(async (ctx) => {
                 if (absSourcePath.includes("@vite")) return true;
                 return false;
             },
+            headers: {
+                // COOP/COEP, for better Performance.now() resolution
+                "Cross-Origin-Embedder-Policy": "require-corp",
+                "Cross-Origin-Opener-Policy": "same-origin",
+            },
             open: "index.html",
             allowedHosts: process.env.npm_lifecycle_event?.includes("dev") ? true : undefined,
         },

@@ -64,7 +64,7 @@ describe("SettingsModal Component", () => {
         await expect.element(getByRole("heading", { name: "General Settings" })).toBeVisible();
 
         // Switch to LLM
-        await getByText("Models (LLM)").click();
+        await getByText("Models").click();
         await expect.element(getByRole("heading", { name: "LLM Configuration" })).toBeVisible();
 
         // Switch to Advanced
@@ -76,7 +76,7 @@ describe("SettingsModal Component", () => {
     test("adds new LLM config", async () => {
         const { getByText } = render(SettingsModal);
 
-        await getByText("Models (LLM)").click();
+        await getByText("Models").click();
 
         // Before: no configs
         expect(settings.value.llmConfigs.length).toBe(0);

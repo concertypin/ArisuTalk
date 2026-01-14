@@ -326,6 +326,7 @@ export class ChatStore {
             id: assistantMessageId,
             chatId,
             role: "assistant",
+            timestamp: this.getNextTimestamp(),
             content: { type: "text", data: "" },
         });
 
@@ -351,6 +352,24 @@ export class ChatStore {
         });
     }
 
+    /**
+     * Generates a monotonic timestamp.
+     * Ensures that new messages always have a timestamp > the last message effectively.
+     */
+    private getNextTimestamp(): number {
+        const now = Date.now();
+        const lastMsg = this.activeMessages[this.activeMessages.length - 1];
+        // If last message is older than 60 seconds, use current time. No sub-millisec needed.
+        if (lastMsg.timestamp > now + 60000) {
+            return now;
+        }
+        // Ensure strictly greater than last message if collision
+        if (lastMsg && typeof lastMsg.timestamp === "number" && lastMsg.timestamp >= now) {
+            return lastMsg.timestamp + 1;
+        }
+        return now;
+    }
+
     async sendMessage(content: string) {
         if (!this.activeChatId || !this.activeProvider) return;
 
@@ -370,6 +389,7 @@ export class ChatStore {
                 id: crypto.randomUUID(),
                 chatId,
                 role: "user",
+                timestamp: this.getNextTimestamp(),
                 content: { type: "text", data: processedContent },
             });
 

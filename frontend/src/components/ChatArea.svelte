@@ -112,8 +112,8 @@
 </script>
 
 <main class="flex flex-col flex-1 h-full bg-base-100">
-    <header class="flex items-center p-4 border-b border-base-300 bg-base-200">
-        <h2 class="text-lg font-medium">{activeChat?.name || "Chat"}</h2>
+    <header class="flex items-center p-4 border-b border-base-300/50 bg-base-200/80">
+        <h2 class="text-lg font-medium tracking-tight">{activeChat?.name || "Chat"}</h2>
     </header>
 
     <section class="flex-1 overflow-y-auto p-6 space-y-4" bind:this={messagesContainer}>
@@ -135,7 +135,7 @@
                     >
                         {#if editingMessageId === msg.id}
                             <textarea
-                                class="textarea textarea-bordered w-full min-h-[4rem]"
+                                class="textarea textarea-bordered w-full min-h-16"
                                 bind:value={editContent}
                                 onkeydown={handleEditKeydown}
                             ></textarea>
@@ -143,7 +143,7 @@
                             <MarkdownRenderer source={getMessageText(msg)} />
                         {/if}
                         <div class="flex items-center justify-between mt-1">
-                            <span class="text-xs opacity-70">
+                            <span class="text-xs opacity-60">
                                 {new Date(msg.timestamp || Date.now()).toLocaleTimeString()}
                             </span>
                             <MessageActions
@@ -163,25 +163,27 @@
 
         {#if isTyping}
             <div class="chat chat-start">
-                <div class="chat-bubble chat-bubble-neutral">
+                <div
+                    class="chat-bubble chat-bubble-neutral flex items-center justify-center min-w-12 min-h-10"
+                >
                     <span class="loading loading-dots loading-sm"></span>
                 </div>
             </div>
         {/if}
     </section>
 
-    <footer class="p-4 border-t border-base-300 bg-base-200">
+    <footer class="p-4 border-t border-base-300/50 bg-base-200/80">
         <div class="flex gap-2">
             <input
                 type="text"
-                class="input flex-1"
+                class="input flex-1 bg-base-100/50 border-base-300/50 focus:border-primary/50"
                 placeholder="Type a message..."
                 bind:value={inputValue}
                 onkeydown={handleKeydown}
                 disabled={!activeChat}
             />
             <button
-                class="btn btn-primary"
+                class="btn btn-primary shadow-md hover:shadow-lg transition-shadow"
                 onclick={() => void sendMessage()}
                 disabled={!inputValue.trim() || !activeChat}>Send</button
             >

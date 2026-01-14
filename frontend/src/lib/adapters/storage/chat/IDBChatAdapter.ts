@@ -96,7 +96,7 @@ export class IDBChatAdapter implements IChatStorageAdapter {
     }
 
     async getMessages(chatId: string): Promise<Message[]> {
-        return this.db.messages.where("chatId").equals(chatId).toArray();
+        return this.db.messages.where("chatId").equals(chatId).sortBy("timestamp");
     }
 
     async updateMessage(

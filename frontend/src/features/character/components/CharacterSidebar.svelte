@@ -1,5 +1,6 @@
 <script lang="ts">
-    import { Plus, User, Settings } from "@lucide/svelte";
+    import { Plus, User, Settings, GripVertical } from "@lucide/svelte";
+    import { flip } from "svelte/animate";
     import CharacterSidebarItem from "./CharacterSidebarItem.svelte";
     import { characterStore } from "../stores/characterStore.svelte";
     import { uiState } from "@/lib/stores/ui.svelte";
@@ -12,18 +13,83 @@
     };
 
     let { selectedCharacterId, onSelect, onAdd, onPersona }: Props = $props();
+
+    const flipDurationMs = 200;
+
+    /** Currently dragged item index */
+    let draggedIndex = $state<number | null>(null);
+    /** Drop target index */
+    let dropTargetIndex = $state<number | null>(null);
+
+    function handleDragStart(e: DragEvent, index: number) {
+        draggedIndex = index;
+        if (e.dataTransfer) {
+            e.dataTransfer.effectAllowed = "move";
+            e.dataTransfer.setData("text/plain", String(index));
+        }
+    }
+
+    function handleDragOver(e: DragEvent, index: number) {
+        e.preventDefault();
+        if (draggedIndex !== null && draggedIndex !== index) {
+            dropTargetIndex = index;
+        }
+    }
+
+    function handleDragLeave() {
+        dropTargetIndex = null;
+    }
+
+    function handleDrop(e: DragEvent, toIndex: number) {
+        e.preventDefault();
+        if (draggedIndex !== null && draggedIndex !== toIndex) {
+            characterStore.reorder(draggedIndex, toIndex);
+        }
+        draggedIndex = null;
+        dropTargetIndex = null;
+    }
+
+    function handleDragEnd() {
+        draggedIndex = null;
+        dropTargetIndex = null;
+    }
 </script>
 
 <div
-    class="flex flex-col items-center w-[72px] bg-base-300 py-3 overflow-y-auto overflow-x-hidden h-full scrollbar-none"
+    class="flex flex-col items-center w-18 bg-base-300 py-3 overflow-y-auto overflow-x-hidden h-full scrollbar-none"
 >
-    {#each characterStore.characters as character (character.id)}
-        <CharacterSidebarItem
-            {character}
-            active={selectedCharacterId === character.id}
-            onClick={() => onSelect(character.id)}
-        />
-    {/each}
+    <div class="flex flex-col items-center gap-1 w-full" role="listbox" aria-label="Characters">
+        {#each characterStore.characters as character, index (character.id)}
+            {@const dragged = draggedIndex === index}
+            {@const dropTarget = dropTargetIndex === index}
+            {@const selected = selectedCharacterId === character.id}
+            <div
+                class="relative"
+                class:opacity-50={dragged}
+                class:border-t-2={dropTarget && draggedIndex !== null && draggedIndex > index}
+                class:border-b-2={dropTarget && draggedIndex !== null && draggedIndex < index}
+                class:border-primary={dropTarget}
+                role="option"
+                tabindex="0"
+                aria-selected={selected}
+                aria-roledescription="draggable character"
+                aria-grabbed={dragged}
+                draggable="true"
+                ondragstart={(e) => handleDragStart(e, index)}
+                ondragover={(e) => handleDragOver(e, index)}
+                ondragleave={handleDragLeave}
+                ondrop={(e) => handleDrop(e, index)}
+                ondragend={handleDragEnd}
+                animate:flip={{ duration: flipDurationMs }}
+            >
+                <CharacterSidebarItem
+                    {character}
+                    active={selected}
+                    onClick={() => onSelect(character.id)}
+                />
+            </div>
+        {/each}
+    </div>
 
     <div class="divider mx-2 my-2"></div>
 
