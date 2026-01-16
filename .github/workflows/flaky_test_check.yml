@@ -7,6 +7,7 @@ on:
         description: |
           Number of parallel iterations to run.
           Note that iterations above 20 require GitHub Pro or better to run in parallel.
+          Range: 1..200
         required: true
         default: 10
         type: number
@@ -20,6 +21,10 @@ jobs:
       - id: set-matrix
         run: |
           ITER="${{ github.event.inputs.iterations }}"
+          if [ "$ITER" -lt 1 ] || [ "$ITER" -gt 200 ]; then
+            echo "Error: iterations must be between 1 and 200."
+            exit 1
+          fi
           # Generate a JSON array [1, 2, ..., N]
           INDICES=$(node -e "console.log(JSON.stringify(Array.from({length: $ITER}, (_, i) => i + 1)))")
           echo "indices=$INDICES" >> $GITHUB_OUTPUT
@@ -57,6 +62,6 @@ jobs:
       - name: Run Tests (Iteration ${{ matrix.index }})
         run: |
             pnpm -F frontend test:browser
-            pnpm -F frontend test:coverage
+            pnpm -F frontend test:coverage --coverage.reporters=text-summary
             pnpm -F frontend test
-        timeout-minutes: 20
+        timeout-minutes: 10
