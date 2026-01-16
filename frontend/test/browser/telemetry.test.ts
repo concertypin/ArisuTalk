@@ -1,4 +1,4 @@
-// @vitest-environment happy-dom
+/// <reference types="vitest/browser" />
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Logger } from "@common/logger/Logger";
 import "@/lib/services/telemetry"; // This should register the event listeners
@@ -34,7 +34,7 @@ describe("Telemetry Service", () => {
     });
 
     it("should register global unhandledrejection listener and log error.uncaught", () => {
-        const reason = "Test promise rejection";
+        const reason = new Error("Test promise rejection");
         const event = new PromiseRejectionEvent("unhandledrejection", {
             reason,
             promise: Promise.reject(reason),

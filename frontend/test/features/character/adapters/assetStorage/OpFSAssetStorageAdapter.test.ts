@@ -57,11 +57,16 @@ describe("OpFSAssetStorageAdapter", () => {
         const mockFileHandle = {
             createWritable: vi.fn().mockResolvedValue(mockWritable),
         };
-        mockRoot.getFileHandle.mockResolvedValue(mockFileHandle);
+        // First call with { create: false } should throw NotFoundError (file doesn't exist)
+        // Second call with { create: true } should return the file handle
+        mockRoot.getFileHandle
+            .mockRejectedValueOnce(new DOMException("Not found", "NotFoundError"))
+            .mockResolvedValueOnce(mockFileHandle);
 
         const testFile = new File(["data"], "hello.txt", { type: "text/plain" });
         const resultUrl = await adapter.saveAsset("hello.txt", testFile);
 
+        expect(mockRoot.getFileHandle).toHaveBeenCalledWith("hello.txt", { create: false });
         expect(mockRoot.getFileHandle).toHaveBeenCalledWith("hello.txt", { create: true });
         expect(mockWritable.write).toHaveBeenCalledWith(testFile);
         expect(resultUrl.toString()).toBe("local://opfs/hello.txt");
@@ -74,14 +79,16 @@ describe("OpFSAssetStorageAdapter", () => {
         };
         mockRoot.getFileHandle.mockResolvedValue(mockFileHandle);
 
-        vi.stubGlobal("URL", {
-            createObjectURL: vi.fn().mockReturnValue("blob:http://localhost/123"),
-        });
+        // Mock only createObjectURL, not the entire URL constructor
+        const createObjectURLSpy = vi
+            .spyOn(URL, "createObjectURL")
+            .mockReturnValue("blob:http://localhost/123");
 
         const testUrl = new URL("local://opfs/test.png");
         const result = await adapter.getAssetUrl(testUrl);
 
         expect(result).toBe("blob:http://localhost/123");
+        createObjectURLSpy.mockRestore();
     });
 
     it("should handle missing asset in getAssetBlob", async () => {

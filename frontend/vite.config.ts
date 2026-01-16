@@ -33,14 +33,6 @@ const paths: Presence<UserConfig["resolve"]>["alias"] = {
     "@common": path.resolve(__dirname, "common"),
 };
 
-let coverage: TestConfig["coverage"] & { provider: "v8" } = {
-    provider: "v8",
-    reporter: ["html", "text"],
-    reportsDirectory: "./coverage",
-    include: ["src/**/*", "common/**/*"],
-    reportOnFailure: true,
-    exclude: ["node_modules/", "dist/", "test/", "**/*.d.ts", "**/*.config.*", "static/"],
-};
 export default defineConfig(async (ctx) => {
     const mode = ctx.mode;
     const plugin: PluginOption[] = [
@@ -53,6 +45,17 @@ export default defineConfig(async (ctx) => {
     let env = loadEnv(mode, process.cwd(), "") as Record<string, any>;
     env.VITEST_BROWSER_MODE = runBrowserTest ? "true" : "false";
 
+    let coverage: TestConfig["coverage"] & { provider: "v8" } = {
+        provider: "v8",
+        reporter: ["html", "text"],
+        reportsDirectory: "./coverage",
+        include: ["src/**/*", "common/**/*"],
+        reportOnFailure: true,
+        exclude: ["node_modules/", "dist/", "test/", "**/*.d.ts", "**/*.config.*", "static/"],
+    };
+    if (env.GITHUB_ACTIONS) {
+        coverage.reporter = ["json-summary", "text"];
+    }
     let testConfig: TestConfig = {
         globals: true,
         environment: "node",
@@ -67,11 +70,12 @@ export default defineConfig(async (ctx) => {
             enabled: true,
         },
         testTimeout: 10000, // 10 seconds global timeout
-        fileParallelism: true, // Enable parallel execution for faster tests
+        fileParallelism: true,
     };
 
     if (env.GITHUB_ACTIONS) {
         testConfig.reporters = [
+            "default",
             [
                 "github-actions",
                 {
@@ -86,7 +90,14 @@ export default defineConfig(async (ctx) => {
     const define: Record<string, string> = {};
     const baseConfig: UserConfig = {
         optimizeDeps: {
-            include: ["cbor-x"],
+            include: [
+                "cbor-x",
+                // Pre-include these to prevent Vite from re-optimizing during tests
+                // which causes flaky test failures due to unexpected reloads
+                "@langchain/core/language_models/chat_models",
+                "@langchain/core/messages",
+                "@langchain/core/outputs",
+            ],
         },
         resolve: {
             alias: paths,
