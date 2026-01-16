@@ -34,7 +34,7 @@ describe("Telemetry Service", () => {
     });
 
     it("should register global unhandledrejection listener and log error.uncaught", () => {
-        const reason = new Error("Test promise rejection");
+        const reason = "Test promise rejection";
         const event = new PromiseRejectionEvent("unhandledrejection", {
             reason,
             promise: Promise.reject(reason),
