@@ -21,6 +21,8 @@ import { hookService } from "@/lib/services/HookService";
 import { characterStore } from "@/features/character/stores/characterStore.svelte";
 import { personaStore } from "@/features/persona/stores/personaStore.svelte";
 import { Logger } from "@common/logger/Logger";
+import type { Persona } from "@/features/persona/schema";
+import type { Character } from "@arisutalk/character-spec/types/v0/index";
 
 export class ChatStore {
     chats = $state<LocalChat[]>([]);
@@ -40,7 +42,11 @@ export class ChatStore {
      * Gets the context for the active chat including character and persona.
      * Centralizes lookup logic to avoid repetition and potential desync.
      */
-    private get activeChatContext() {
+    private get activeChatContext(): {
+        activeChat: LocalChat | null;
+        character: Character | undefined;
+        persona: Persona | null;
+    } {
         const activeChat = this.activeChatId
             ? this.chats.find((c) => c.id === this.activeChatId)
             : null;
@@ -56,7 +62,7 @@ export class ChatStore {
         }
 
         const persona = personaStore.activePersona;
-        return { activeChat, character, persona };
+        return { activeChat: activeChat ?? null, character, persona };
     }
 
     constructor(adapter?: IChatStorageAdapter) {
@@ -340,7 +346,12 @@ export class ChatStore {
 
         let processedContent = fullContent;
         if (character) {
-            processedContent = await hookService.process(fullContent, character, "output", persona);
+            processedContent = await hookService.process(
+                fullContent,
+                character,
+                "output",
+                persona ?? undefined
+            );
         }
 
         await this.finalizeMessage(chatId, assistantMessage, processedContent);
@@ -359,12 +370,15 @@ export class ChatStore {
     private getNextTimestamp(): number {
         const now = Date.now();
         const lastMsg = this.activeMessages[this.activeMessages.length - 1];
+        if (!lastMsg) {
+            return now;
+        }
         // If last message is older than 60 seconds, use current time. No sub-millisec needed.
         if (lastMsg.timestamp > now + 60000) {
             return now;
         }
         // Ensure strictly greater than last message if collision
-        if (lastMsg && typeof lastMsg.timestamp === "number" && lastMsg.timestamp >= now) {
+        if (typeof lastMsg.timestamp === "number" && lastMsg.timestamp >= now) {
             return lastMsg.timestamp + 1;
         }
         return now;
@@ -382,7 +396,12 @@ export class ChatStore {
 
             let processedContent = content;
             if (character) {
-                processedContent = await hookService.process(content, character, "input", persona);
+                processedContent = await hookService.process(
+                    content,
+                    character,
+                    "input",
+                    persona ?? undefined
+                );
             }
 
             const userMessage: Message = apply(MessageSchema, {

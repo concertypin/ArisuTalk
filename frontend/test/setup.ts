@@ -11,6 +11,9 @@ beforeEach(() => {
             localStorage.removeItem("arisutalk_chats");
             localStorage.removeItem("arisutalk_characters");
             localStorage.removeItem("arisutalk_settings");
+            localStorage.removeItem("arisutalk_personas");
+            localStorage.removeItem("arisutalk_active_persona");
+            localStorage.removeItem("arisutalk_persona_order");
         }
     } catch {
         // ignore in non-browser environments

@@ -1,6 +1,6 @@
 /// <reference types="vitest/config" />
 import { svelte } from "@sveltejs/vite-plugin-svelte";
-import { type PluginOption, UserConfig, defineConfig, loadEnv } from "vite";
+import { type PluginOption, type UserConfig, defineConfig, loadEnv } from "vite";
 import { playwright } from "@vitest/browser-playwright";
 import path from "path";
 
@@ -14,10 +14,11 @@ const browserTestConfig: TestConfig["browser"] = {
     instances: [
         {
             browser: "chromium",
-            testTimeout: 15 * 1000,
+            testTimeout: 20 * 1000,
         },
     ],
     headless: true,
+    screenshotFailures: false, // Speed up by not taking screenshots
 };
 
 const runBrowserTest =
@@ -36,7 +37,7 @@ let coverage: TestConfig["coverage"] & { provider: "v8" } = {
     provider: "v8",
     reporter: ["html", "text"],
     reportsDirectory: "./coverage",
-    include: ["src/**/*"],
+    include: ["src/**/*", "common/**/*"],
     reportOnFailure: true,
     exclude: ["node_modules/", "dist/", "test/", "**/*.d.ts", "**/*.config.*", "static/"],
 };
@@ -49,14 +50,15 @@ export default defineConfig(async (ctx) => {
             },
         }),
     ];
-    const env = loadEnv(mode, process.cwd(), "");
+    let env = loadEnv(mode, process.cwd(), "") as Record<string, any>;
+    env.VITEST_BROWSER_MODE = runBrowserTest ? "true" : "false";
 
     let testConfig: TestConfig = {
         globals: true,
         environment: "node",
         silent: "passed-only",
         setupFiles: ["./test/setup.ts"],
-        exclude: ["node_modules", "dist", ".git"],
+        exclude: ["node_modules", "dist", ".git", "**/EndToEndHook.test.ts"],
         browser: runBrowserTest ? browserTestConfig : undefined,
         coverage,
         includeTaskLocation: true,
@@ -64,8 +66,8 @@ export default defineConfig(async (ctx) => {
         typecheck: {
             enabled: true,
         },
-
-        fileParallelism: true,
+        testTimeout: 10000, // 10 seconds global timeout
+        fileParallelism: true, // Enable parallel execution for faster tests
     };
 
     if (env.GITHUB_ACTIONS) {

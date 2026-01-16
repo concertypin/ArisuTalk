@@ -13,7 +13,7 @@ vi.mock("@/lib/stores/ui.svelte", () => ({
     },
 }));
 
-describe("Sidebar Component", () => {
+describe.concurrent("Sidebar Component", () => {
     test("renders correctly", async () => {
         const { getByText } = render(Sidebar);
         await expect.element(getByText("ArisuTalk")).toBeVisible();

@@ -19,7 +19,7 @@ vi.mock("@/features/character/adapters/assetStorage/OpFSAssetStorageAdapter", ()
     };
 });
 
-describe("PersonaList Component", () => {
+describe.concurrent("PersonaList Component", () => {
     let mockPersonas: Persona[];
     const mockOnEdit = vi.fn() satisfies (persona: Persona) => void;
 

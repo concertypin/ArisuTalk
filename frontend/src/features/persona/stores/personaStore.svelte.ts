@@ -114,8 +114,8 @@ export class PersonaStore {
         this.activePersonaId = id;
     }
 
-    get activePersona() {
-        return this.personas.find((p) => p.id === this.activePersonaId);
+    get activePersona(): Persona | null {
+        return this.personas.find((p) => p.id === this.activePersonaId) || null;
     }
 
     // --- Reorder Support ---

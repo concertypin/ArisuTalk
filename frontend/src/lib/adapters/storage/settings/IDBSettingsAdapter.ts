@@ -1,6 +1,6 @@
 import { getArisuDB } from "../IndexedDBHelper";
 import type { ISettingsStorageAdapter } from "@/lib/interfaces";
-import { Settings, SettingsSchema } from "@/lib/types/IDataModel";
+import { type Settings, SettingsSchema } from "@/lib/types/IDataModel";
 import { apply } from "@arisutalk/character-spec/utils";
 
 export class IDBSettingsAdapter implements ISettingsStorageAdapter {

@@ -3,7 +3,7 @@ import { test, expect, describe, vi } from "vitest";
 import { render } from "vitest-browser-svelte";
 import MarkdownRenderer from "@/components/MarkdownRenderer.svelte";
 
-describe("MarkdownRenderer Component", () => {
+describe.concurrent("MarkdownRenderer Component", () => {
     test("renders markdown content", async () => {
         const { getByText } = render(MarkdownRenderer, {
             source: "Hello World",

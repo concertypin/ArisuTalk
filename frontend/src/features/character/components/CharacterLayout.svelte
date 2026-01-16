@@ -1,7 +1,6 @@
 <script lang="ts">
     import CharacterSidebar from "./CharacterSidebar.svelte";
     import CharacterForm from "./CharacterForm.svelte";
-    import CharacterList from "./CharacterList.svelte";
     import CharacterSettingsModal from "./CharacterSettingsModal.svelte";
     import ChatList from "../../chat/components/ChatList.svelte";
     import PersonaList from "../../persona/components/PersonaList.svelte";

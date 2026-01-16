@@ -3,7 +3,7 @@ import { test, expect, describe } from "vitest";
 import { render } from "vitest-browser-svelte";
 import SNSFeedCard from "@/features/sns/SNSFeedCard.svelte";
 
-describe("SNSFeedCard Component", () => {
+describe.concurrent("SNSFeedCard Component", () => {
     test("renders with default props", async () => {
         const { getByText } = render(SNSFeedCard);
         await expect.element(getByText("Hello from the SNS mode!")).toBeVisible();

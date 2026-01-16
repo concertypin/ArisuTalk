@@ -24,11 +24,10 @@ interface ImportMetaEnv {
      */
     readonly VITEST?: boolean;
     /**
-     * API key for Gemini LLM access.
-     * If exists, enables integration tests with the real Gemini API.
-     * Optional.
+     * Indicates if Vitest is running in browser mode.
+     * "false" on non-testing or node mode.
      */
-    readonly GEMINI_API_KEY?: string;
+    readonly VITEST_BROWSER_MODE: "true" | "false";
 }
 
 interface ImportMeta {

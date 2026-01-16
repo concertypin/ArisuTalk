@@ -1,5 +1,5 @@
 import type { Chat, Character } from "@arisutalk/character-spec/v0/Character";
-import { Settings, SettingsSchema } from "@/lib/types/IDataModel";
+import { type Settings, SettingsSchema } from "@/lib/types/IDataModel";
 
 export class LocalStorageAdapter {
     private readonly KEYS = {

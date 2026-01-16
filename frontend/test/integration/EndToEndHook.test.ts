@@ -51,6 +51,7 @@ vi.mock("@/lib/stores/settings.svelte", () => ({
 describe("End-to-End Hook Integration", () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        vi.useRealTimers();
         // Reset mock state
         mockCharacterStoreState.characters = [];
         mockPersonaStoreState.activePersona = null;

@@ -3,7 +3,7 @@ import { test, expect, describe } from "vitest";
 import { render } from "vitest-browser-svelte";
 import SNSProfile from "@/features/sns/SNSProfile.svelte";
 
-describe("SNSProfile Component", () => {
+describe.concurrent("SNSProfile Component", () => {
     test("renders profile header with name", async () => {
         const { container } = render(SNSProfile);
         const heading = container.querySelector("h1");

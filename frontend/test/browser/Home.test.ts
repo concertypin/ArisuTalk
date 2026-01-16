@@ -3,7 +3,7 @@ import { test, expect, describe, vi } from "vitest";
 import { render } from "vitest-browser-svelte";
 import Home from "@/routes/Home.svelte";
 
-describe("Home Component", () => {
+describe.concurrent("Home Component", () => {
     test("renders loading state initially", async () => {
         const { getByText } = render(Home);
         await expect.element(getByText("Loading...")).toBeVisible();

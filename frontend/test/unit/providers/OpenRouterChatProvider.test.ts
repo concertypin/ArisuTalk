@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, expectTypeOf, beforeEach } from "vitest";
 import { OpenRouterChatProvider } from "@/lib/providers/chat/OpenRouterChatProvider";
-import { CommonChatSettings } from "@/lib/interfaces";
+import type { CommonChatSettings } from "@/lib/interfaces";
 import { HumanMessage } from "@langchain/core/messages";
 
 // Mock the dynamic import of @langchain/openai

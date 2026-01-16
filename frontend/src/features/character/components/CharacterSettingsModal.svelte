@@ -36,7 +36,6 @@
 
     // Effect to open modal when state is set AND dialog is bound
     $effect(() => {
-        1;
         const dialogEl = dialog;
         if (!dialogEl) return;
 
@@ -86,16 +85,21 @@
             clearTimeout(saveTimeout);
         }
 
-        saveTimeout = setTimeout(async () => {
-            if (!editingCharacter) return;
+        saveTimeout = setTimeout(() => {
+            // IIFE to suppress eslint complaint about ()=>Promise in setTimeout
+            void (async () => {
+                if (!editingCharacter) return;
 
-            const index = characterStore.characters.findIndex((c) => c.id === editingCharacter!.id);
-            if (index !== -1) {
-                await characterStore.update(index, editingCharacter);
-                Logger.structured("character.autosave", {
-                    characterId: editingCharacter.id,
-                });
-            }
+                const index = characterStore.characters.findIndex(
+                    (c) => c.id === editingCharacter!.id
+                );
+                if (index !== -1) {
+                    await characterStore.update(index, editingCharacter);
+                    Logger.structured("character.autosave", {
+                        characterId: editingCharacter.id,
+                    });
+                }
+            })();
         }, 300);
     }
 

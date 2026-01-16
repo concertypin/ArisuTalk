@@ -28,7 +28,7 @@ vi.mock("@/lib/stores/settings.svelte", () => {
     };
 });
 
-describe("GenerationParameters Component", () => {
+describe.concurrent("GenerationParameters Component", () => {
     let mockConfig: LLMConfig;
 
     beforeEach(() => {

@@ -80,5 +80,5 @@ describe("Persona and Chat interactions", () => {
         await vi.advanceTimersByTimeAsync(1200);
         const botMsg = getByText("Response 1");
         await expect.element(botMsg).toBeVisible();
-    }, 20000);
+    });
 });

@@ -19,7 +19,7 @@ vi.mock("@/features/character/stores/characterStore.svelte", () => {
     };
 });
 
-describe("CharacterForm Component", () => {
+describe.concurrent("CharacterForm Component", () => {
     let mockCharacter: Character;
     const mockOnSave = vi.fn() satisfies () => void;
     const mockOnCancel = vi.fn() satisfies () => void;

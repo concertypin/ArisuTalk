@@ -28,7 +28,7 @@ vi.mock("@common/logger/Logger", () => ({
     },
 }));
 
-describe("CharacterSettingsModal Component", () => {
+describe.concurrent("CharacterSettingsModal Component", () => {
     let mockCharacter: Character;
 
     beforeEach(() => {
@@ -90,7 +90,9 @@ describe("CharacterSettingsModal Component", () => {
         const { getByText, getByRole } = render(CharacterSettingsModal);
 
         // Check header
-        await expect.element(getByText("Test Character Settings")).toBeInTheDocument();
+        await expect
+            .element(getByText("Test Character Settings", { exact: true }))
+            .toBeInTheDocument();
 
         // Check sidebar tabs
         await expect.element(getByRole("button", { name: /Basic Settings/i })).toBeInTheDocument();
@@ -114,7 +116,7 @@ describe("CharacterSettingsModal Component", () => {
         // Switch to Lorebook tab
         const lorebookTab = getByRole("button", { name: /Lorebook Settings/i });
         await lorebookTab.click();
-        await expect.element(getByText("Lorebook")).toBeVisible();
+        await expect.element(getByRole("heading", { name: "Lorebook", level: 3 })).toBeVisible();
         await expect.element(getByText(/Entries \(1\)/i)).toBeVisible();
     });
 

@@ -15,7 +15,7 @@
 		],
 		"types": [
 			"vite/client",
-			"svelte/compiler",
+			"svelte",
 		],
 		/* Type Checking */
 		"noImplicitAny": true /* Enable error reporting for expressions and declarations with an implied 'any' type. */

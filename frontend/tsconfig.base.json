@@ -84,8 +84,8 @@
 		// "preserveConstEnums": true,                       /* Disable erasing 'const enum' declarations in generated code. */
 		// "declarationDir": "./",                           /* Specify the output directory for generated declaration files. */
 		/* Interop Constraints */
-		// "isolatedModules": true,                          /* Ensure that each file can be safely transpiled without relying on other imports. */
-		// "verbatimModuleSyntax": true,                     /* Do not transform or elide any imports or exports not marked as type-only, ensuring they are written in the output file's format based on the 'module' setting. */
+		"isolatedModules": true, /* Ensure that each file can be safely transpiled without relying on other imports. */
+		"verbatimModuleSyntax": true, /* Do not transform or elide any imports or exports not marked as type-only, ensuring they are written in the output file's format based on the 'module' setting. */
 		// "isolatedDeclarations": true,                     /* Require sufficient annotation on exports so other tools can trivially generate declaration files. */
 		// "erasableSyntaxOnly": true,                       /* Do not allow runtime constructs that are not part of ECMAScript. */
 		// "allowSyntheticDefaultImports": true,             /* Allow 'import x from y' when a module doesn't have a default export. */
@@ -114,7 +114,7 @@
 		// "allowUnusedLabels": true,                        /* Disable error reporting for unused labels. */
 		// "allowUnreachableCode": true,                     /* Disable error reporting for unreachable code. */
 		/* Completeness */
-		// "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
+		// "	DefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
 		"skipLibCheck": true /* Skip type checking all .d.ts files. */
 	},
 	"references": []

@@ -3,7 +3,7 @@ import { render } from "vitest-browser-svelte";
 import LogLevelSelector from "@/components/ui/LogLevelSelector.svelte";
 import { Logger } from "@common/logger/Logger";
 
-describe("LogLevelSelector Component", () => {
+describe.concurrent("LogLevelSelector Component", () => {
     beforeEach(() => {
         vi.spyOn(Logger, "setLevel").mockImplementation(() => {});
         vi.spyOn(Logger, "getLevel").mockReturnValue("info");
