@@ -11,7 +11,8 @@ on:
         required: true
         default: 10
         type: number
-
+permissions:
+  contents: read
 jobs:
   setup-matrix:
     runs-on: ubuntu-latest
