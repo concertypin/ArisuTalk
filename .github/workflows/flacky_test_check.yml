@@ -6,7 +6,7 @@ on:
       iterations:
         description: |
           Number of parallel iterations to run.
-          Note that iteration above 20 requires GitHub Pro or better to run in parallel.
+          Note that iterations above 20 require GitHub Pro or better to run in parallel.
         required: true
         default: 10
         type: number
@@ -19,7 +19,7 @@ jobs:
     steps:
       - id: set-matrix
         run: |
-          ITER=$(echo "${{ github.event.inputs.iterations }}")
+          ITER="${{ github.event.inputs.iterations }}"
           # Generate a JSON array [1, 2, ..., N]
           INDICES=$(node -e "console.log(JSON.stringify(Array.from({length: $ITER}, (_, i) => i + 1)))")
           echo "indices=$INDICES" >> $GITHUB_OUTPUT
@@ -27,6 +27,7 @@ jobs:
   run-flaky-check:
     needs: setup-matrix
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       fail-fast: false # Don't stop other jobs if one fails, we want to see all fails
       matrix:
@@ -58,4 +59,4 @@ jobs:
             pnpm -F frontend test:browser
             pnpm -F frontend test:coverage
             pnpm -F frontend test
-        timeout-minutes: 5
+        timeout-minutes: 20
