@@ -4,7 +4,7 @@ import { render } from "vitest-browser-svelte";
 import CharacterSidebarItem from "@/features/character/components/CharacterSidebarItem.svelte";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
 
-describe.concurrent("CharacterSidebarItem Component", () => {
+describe("CharacterSidebarItem Component", () => {
     const mockCharacter = {
         id: "char-1",
         specVersion: 0,

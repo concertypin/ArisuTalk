@@ -28,7 +28,7 @@ vi.mock("@common/logger/Logger", () => ({
     },
 }));
 
-describe.concurrent("CharacterSettingsModal Component", () => {
+describe("CharacterSettingsModal Component", () => {
     let mockCharacter: Character;
 
     beforeEach(() => {

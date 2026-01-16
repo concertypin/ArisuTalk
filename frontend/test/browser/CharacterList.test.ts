@@ -39,7 +39,7 @@ vi.mock("@/features/character/utils/assetEncoding", () => ({
     collectTransferableBuffers: vi.fn(() => []),
 }));
 
-describe.concurrent("CharacterList Component", () => {
+describe("CharacterList Component", () => {
     let mockCharacters: Character[];
     const mockOnEdit = vi.fn() satisfies (index: number) => void;
 

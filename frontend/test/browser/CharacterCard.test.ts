@@ -12,7 +12,7 @@ vi.mock("@/features/character/adapters/assetStorage/OpFSAssetStorageAdapter", ()
     OpFSAssetStorageAdapter: vi.fn(),
 }));
 
-describe.concurrent("CharacterCard Component", () => {
+describe("CharacterCard Component", () => {
     let mockCharacter: Character;
     const mockOnEdit = vi.fn() satisfies () => void;
     const mockOnDelete = vi.fn() satisfies () => void;

@@ -23,7 +23,7 @@ vi.mock("@/features/chat/stores/chatStore.svelte", () => {
     };
 });
 
-describe.concurrent("ChatList Component", () => {
+describe("ChatList Component", () => {
     beforeEach(() => {
         vi.clearAllMocks();
         chatStore.chats = [];

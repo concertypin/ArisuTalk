@@ -18,7 +18,7 @@ vi.mock("@/features/persona/stores/personaStore.svelte", () => {
     };
 });
 
-describe.concurrent("PersonaForm Component", () => {
+describe("PersonaForm Component", () => {
     let mockPersona: Persona;
     const mockOnSave = vi.fn();
     const mockOnCancel = vi.fn();

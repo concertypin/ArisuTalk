@@ -3,7 +3,7 @@ import { test, expect, describe } from "vitest";
 import { render } from "vitest-browser-svelte";
 import AboutPage from "@/components/settingSubpage/AboutPage.svelte";
 
-describe.concurrent("AboutPage Component", () => {
+describe("AboutPage Component", () => {
     test("renders correctly", async () => {
         const { getByText, getByRole } = render(AboutPage);
 

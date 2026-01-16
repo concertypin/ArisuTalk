@@ -13,7 +13,7 @@ vi.mock("@/lib/stores/ui.svelte", () => ({
     },
 }));
 
-describe.concurrent("CharacterSidebar Component", () => {
+describe("CharacterSidebar Component", () => {
     let mockCharacters: Character[];
 
     let mockOnSelect: (id: string) => void;

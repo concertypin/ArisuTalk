@@ -11,7 +11,7 @@ vi.mock("@/lib/stores/ui.svelte", () => ({
     },
 }));
 
-describe.concurrent("Character Sidebar Verification", () => {
+describe("Character Sidebar Verification", () => {
     let mockCharacters: Character[];
 
     beforeEach(() => {

@@ -14,7 +14,7 @@ vi.mock("@/lib/stores/ui.svelte", () => ({
     },
 }));
 
-describe.concurrent("SettingsModal Component", () => {
+describe("SettingsModal Component", () => {
     beforeEach(() => {
         // Reset stores
         settings.value = SettingsSchema.parse({});

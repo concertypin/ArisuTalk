@@ -27,7 +27,7 @@ vi.mock("@/features/chat/stores/chatStore.svelte", () => {
     };
 });
 
-describe.concurrent("ChatArea Component", () => {
+describe("ChatArea Component", () => {
     beforeEach(() => {
         vi.clearAllMocks();
         // Reset state

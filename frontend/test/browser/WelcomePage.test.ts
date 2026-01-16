@@ -12,7 +12,7 @@ vi.mock("@/lib/stores/ui.svelte", () => ({
     },
 }));
 
-describe.concurrent("WelcomePage Component", () => {
+describe("WelcomePage Component", () => {
     test("renders heading and description", async () => {
         const { container } = render(WelcomePage);
         expect(container.textContent).toContain("ArisuTalk");

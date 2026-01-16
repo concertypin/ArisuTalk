@@ -2,7 +2,7 @@ import { test, expect, describe, vi } from "vitest";
 import { render } from "vitest-browser-svelte";
 import ButtonTestWrapper from "./ButtonTestWrapper.svelte";
 
-describe.concurrent("Button Component", () => {
+describe("Button Component", () => {
     test("renders with accessible name and is visible", async () => {
         // Arrange
         const { getByRole } = render(ButtonTestWrapper, {
