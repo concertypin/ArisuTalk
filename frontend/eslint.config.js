@@ -12,6 +12,9 @@ const tsConfig = !process.env.SKIP_TYPE_LINT
     ? ts.configs.recommendedTypeChecked
     : ts.configs.recommended;
 export default defineConfig([
+    {
+        ignores: ["dist/", "node_modules/", "*.config.*"],
+    },
     js.configs.recommended,
     ...tsConfig,
     ...svelte.configs["flat/recommended"],
@@ -50,8 +53,5 @@ export default defineConfig([
             // Disable unbound-method - false positives with Svelte stores
             "@typescript-eslint/unbound-method": "off",
         },
-    },
-    {
-        ignores: ["dist/", "node_modules/", "*.config.*"],
     },
 ]);

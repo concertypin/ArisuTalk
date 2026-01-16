@@ -6,10 +6,13 @@
     import { tick } from "svelte";
 
     import { chatStore } from "@/features/chat/stores/chatStore.svelte";
+    import { characterStore } from "@/features/character/stores/characterStore.svelte";
+    import { uiState } from "@/lib/stores/ui.svelte";
     import MarkdownRenderer from "@/components/MarkdownRenderer.svelte";
     import MessageActions from "@/components/MessageActions.svelte";
     import { toastStore } from "@/lib/stores/toast.svelte";
     import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
+    import { Settings } from "@lucide/svelte";
 
     let inputValue = $state("");
     let messagesContainer = $state<HTMLElement | null>(null);
@@ -17,6 +20,13 @@
 
     let activeChat = $derived(chatStore.chats.find((c) => c.id === chatStore.activeChatId));
     let messages = $derived(chatStore.activeMessages);
+
+    /** Get the current character for this chat */
+    let currentCharacter = $derived(
+        activeChat
+            ? characterStore.characters.find((c) => c.id === activeChat.characterId)
+            : undefined
+    );
 
     // Edit mode state
     let editingMessageId = $state<string | null>(null);
@@ -109,11 +119,29 @@
             toastStore.error(`Failed to regenerate message: ${String(error)}`);
         }
     }
+
+    function openCharacterSettings() {
+        if (currentCharacter) {
+            uiState.openCharacterSettings(currentCharacter);
+        }
+    }
 </script>
 
 <main class="flex flex-col flex-1 h-full bg-base-100">
-    <header class="flex items-center p-4 border-b border-base-300/50 bg-base-200/80">
+    <header
+        class="flex items-center justify-between p-4 border-b border-base-300/50 bg-base-200/80"
+    >
         <h2 class="text-lg font-medium tracking-tight">{activeChat?.name || "Chat"}</h2>
+        {#if currentCharacter}
+            <button
+                class="btn btn-ghost btn-sm btn-square hover:bg-base-300/50"
+                onclick={openCharacterSettings}
+                aria-label="Character Settings"
+                title="Character Settings"
+            >
+                <Settings size={18} />
+            </button>
+        {/if}
     </header>
 
     <section class="flex-1 overflow-y-auto p-6 space-y-4" bind:this={messagesContainer}>

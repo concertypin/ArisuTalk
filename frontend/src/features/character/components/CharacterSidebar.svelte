@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Plus, User, Settings, GripVertical } from "@lucide/svelte";
+    import { Plus, User, Settings } from "@lucide/svelte";
     import { flip } from "svelte/animate";
     import CharacterSidebarItem from "./CharacterSidebarItem.svelte";
     import { characterStore } from "../stores/characterStore.svelte";

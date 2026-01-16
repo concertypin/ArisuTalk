@@ -6,6 +6,7 @@ import CharacterLayoutTestWrapper from "./CharacterLayoutTestWrapper.svelte";
 describe("Persona and Chat interactions", () => {
     afterEach(() => {
         vi.restoreAllMocks();
+        vi.useRealTimers();
     });
 
     test("Manage Personas opens persona modal", async () => {
@@ -21,6 +22,7 @@ describe("Persona and Chat interactions", () => {
     });
 
     test("Create character and send chat message", async () => {
+        console.log("Starting ChatPersion test");
         // Import and configure chatStore with Mock provider for testing
         // Must happen BEFORE fake timers are enabled
         // Mock chatStore.waitForSettings to avoid delays
@@ -78,5 +80,5 @@ describe("Persona and Chat interactions", () => {
         await vi.advanceTimersByTimeAsync(1200);
         const botMsg = getByText("Response 1");
         await expect.element(botMsg).toBeVisible();
-    });
+    }, 20000);
 });

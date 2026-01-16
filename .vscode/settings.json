@@ -25,5 +25,14 @@
         // Enabling browser test on VSC vitest,
         // since it will not run browser tests by default
         "npm_lifecycle_event": "coverage"
-    }
+    },
+    "eslint.workingDirectories": [
+        {
+            "mode": "auto"
+        },
+        {
+            "!cwd": true,
+            "directory": "./frontend/",
+        }
+    ]
 }

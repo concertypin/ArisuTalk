@@ -2,11 +2,13 @@
     import CharacterSidebar from "./CharacterSidebar.svelte";
     import CharacterForm from "./CharacterForm.svelte";
     import CharacterList from "./CharacterList.svelte";
+    import CharacterSettingsModal from "./CharacterSettingsModal.svelte";
     import ChatList from "../../chat/components/ChatList.svelte";
     import PersonaList from "../../persona/components/PersonaList.svelte";
     import PersonaForm from "../../persona/components/PersonaForm.svelte";
     import type { Persona } from "../../persona/schema";
     import { characterStore } from "../stores/characterStore.svelte";
+    import { uiState } from "@/lib/stores/ui.svelte";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import { Logger } from "@common/logger/Logger";
 
@@ -36,15 +38,6 @@
 
     function handleAdd() {
         editingIndex = null;
-        dialog?.showModal();
-        Logger.structured("modal.open", {
-            location: "characterLayout",
-            modalName: "CharacterForm",
-        });
-    }
-
-    function handleEdit(index: number) {
-        editingIndex = index;
         dialog?.showModal();
         Logger.structured("modal.open", {
             location: "characterLayout",
@@ -155,7 +148,7 @@
     <!-- Persona Modal -->
     <dialog bind:this={personaDialog} id="persona_modal" class="modal">
         <div
-            class="modal-box w-11/12 max-w-2xl min-h-[500px] flex flex-col border border-base-300 shadow-2xl"
+            class="modal-box w-11/12 max-w-2xl min-h-125 flex flex-col border border-base-300 shadow-2xl"
         >
             <h3 class="font-bold text-lg mb-4">Manage Personas</h3>
 
@@ -188,4 +181,9 @@
             <button>close</button>
         </form>
     </dialog>
+
+    <!-- Character Settings Modal -->
+    {#if uiState.characterSettingsOpen}
+        <CharacterSettingsModal />
+    {/if}
 </div>

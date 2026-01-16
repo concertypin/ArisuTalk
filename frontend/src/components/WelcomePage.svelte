@@ -3,7 +3,7 @@
   Landing page with welcome message and quick actions.
 -->
 <script lang="ts">
-    import { MessageCircle, Users, Settings, Sparkles } from "@lucide/svelte";
+    import { MessageCircle, Settings, Sparkles } from "@lucide/svelte";
     import { uiState } from "@/lib/stores/ui.svelte";
 
     type Props = {
