@@ -369,7 +369,7 @@ export class ChatStore {
      */
     private getNextTimestamp(): number {
         const now = Date.now();
-        const lastMsg = this.activeMessages[this.activeMessages.length - 1];
+        const lastMsg: Message | undefined = this.activeMessages[this.activeMessages.length - 1];
         if (!lastMsg) {
             return now;
         }
