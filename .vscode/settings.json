@@ -1,18 +1,18 @@
 {
     "[javascript]": {
-        "editor.defaultFormatter": "prettier.prettier-vscode",
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.tabSize": 4
     },
     "[typescript]": {
-        "editor.defaultFormatter": "prettier.prettier-vscode",
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.tabSize": 4
     },
     "[svelte]": {
         "editor.tabSize": 4,
-        "editor.defaultFormatter": "prettier.prettier-vscode"
+        "editor.defaultFormatter": "svelte.svelte-vscode"
     },
     "[json]": {
-        "editor.defaultFormatter": "prettier.prettier-vscode",
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.tabSize": 4
     },
     "typescript.preferences.preferTypeOnlyAutoImports": true,

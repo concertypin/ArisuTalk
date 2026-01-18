@@ -6,7 +6,7 @@
      */
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import { Plus, Trash2, ChevronDown, ChevronUp, AlertTriangle } from "@lucide/svelte";
-    import { merge } from "lodash-es";
+    import { merge, cloneDeep } from "lodash-es";
 
     type ReplaceHook = Character["executables"]["replaceHooks"];
     type HookType = keyof ReplaceHook;
@@ -37,13 +37,9 @@
         field: K,
         value: Character["executables"]["runtimeSetting"][K]
     ) {
-        onChange(
-            merge({}, character, {
-                executables: {
-                    runtimeSetting: { [field]: value },
-                },
-            })
-        );
+        const newChar = cloneDeep(character);
+        newChar.executables.runtimeSetting[field] = value;
+        onChange(newChar);
     }
 
     function getHooks(type: HookType): HookEntity[] {
@@ -62,39 +58,23 @@
                 priority: 0,
             },
         };
-        onChange(
-            merge({}, character, {
-                executables: {
-                    replaceHooks: {
-                        [type]: [...character.executables.replaceHooks[type], newHook],
-                    },
-                },
-            })
-        );
+        const newChar = cloneDeep(character);
+        newChar.executables.replaceHooks[type].push(newHook);
+        onChange(newChar);
         expandedHookIndex = character.executables.replaceHooks[type].length;
     }
 
     function updateHook(type: HookType, index: number, updates: Partial<HookEntity>) {
-        const hooks = [...character.executables.replaceHooks[type]];
-        hooks[index] = merge({}, hooks[index], updates) as HookEntity;
-        onChange(
-            merge({}, character, {
-                executables: {
-                    replaceHooks: { [type]: hooks },
-                },
-            })
-        );
+        const newChar = cloneDeep(character);
+        const hook = newChar.executables.replaceHooks[type][index];
+        newChar.executables.replaceHooks[type][index] = merge(hook, updates) as HookEntity;
+        onChange(newChar);
     }
 
     function deleteHook(type: HookType, index: number) {
-        const hooks = character.executables.replaceHooks[type].filter((_, i) => i !== index);
-        onChange(
-            merge({}, character, {
-                executables: {
-                    replaceHooks: { [type]: hooks },
-                },
-            })
-        );
+        const newChar = cloneDeep(character);
+        newChar.executables.replaceHooks[type].splice(index, 1);
+        onChange(newChar);
         expandedHookIndex = null;
     }
 
@@ -251,12 +231,23 @@
                                         class="select select-sm w-full"
                                         value={hook.meta.type}
                                         onchange={(e) => {
-                                            if (e.currentTarget.value === "string") {
+                                            const newType = e.currentTarget
+                                                .value as HookEntity["meta"]["type"];
+                                            if (newType === hook.meta.type) return;
+                                            if (newType === "string") {
                                                 updateHook(activeHookType, index, {
                                                     meta: {
                                                         ...hook.meta,
                                                         type: "string",
                                                         caseSensitive: true,
+                                                    },
+                                                });
+                                            } else {
+                                                updateHook(activeHookType, index, {
+                                                    meta: {
+                                                        ...hook.meta,
+                                                        type: "regex",
+                                                        flag: "g",
                                                     },
                                                 });
                                             }

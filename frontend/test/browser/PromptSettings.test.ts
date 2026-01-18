@@ -13,5 +13,7 @@ test("PromptSettings renders correctly", async () => {
     // Note: Using getByRole('textbox') since <legend> doesn't create a label-input relationship
     const textarea = getByRole("textbox");
     await expect.element(textarea).toBeVisible();
-    expect((textarea.element() as HTMLTextAreaElement).value).toBe(settings.value.prompt.generationPrompt);
+    expect((textarea.element() as HTMLTextAreaElement).value).toBe(
+        settings.value.prompt.generationPrompt
+    );
 });
