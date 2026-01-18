@@ -1,18 +1,28 @@
 // @vitest-environment happy-dom
 import "fake-indexeddb/auto";
-import { describe, it, expect, beforeEach, vi, type Mocked, type Mock } from "vitest";
+import { describe, it, expect, beforeEach, vi, type Mocked } from "vitest";
 import { CharacterStore } from "@/features/character/stores/characterStore.svelte";
 import type { ICharacterStorageAdapter } from "@/lib/interfaces";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
 import { exampleCharacter } from "@/const/example_data";
-import { getCardParseWorker } from "@/lib/workers/workerClient";
 import { mockFile } from "@test/utils/mock/file";
+
 import { Logger } from "@common/logger/Logger";
 
 // Mock worker client
+// Use vi.hoisted() to ensure the mock function is available when vi.mock() is hoisted
+const { mockParseCharacter } = vi.hoisted(() => {
+    type ParseCharacterFn = (
+        rawData: ArrayBuffer
+    ) => Promise<{ success: true; data: Character } | { success: false; error?: string }>;
+    return {
+        mockParseCharacter: vi.fn<ParseCharacterFn>(),
+    };
+});
+
 vi.mock("@/lib/workers/workerClient", () => ({
     getCardParseWorker: vi.fn().mockResolvedValue({
-        parseCharacter: vi.fn(),
+        parseCharacter: mockParseCharacter,
     }),
 }));
 
@@ -90,8 +100,7 @@ describe("CharacterStore", () => {
         const file = mockFile({ content: new ArrayBuffer(8), name: "test.png" });
         const parsedChar = { ...defaultChar, id: "imported" };
 
-        const workerMock = await getCardParseWorker();
-        vi.mocked(workerMock.parseCharacter).mockResolvedValue({ success: true, data: parsedChar });
+        mockParseCharacter.mockResolvedValue({ success: true, data: parsedChar });
 
         await store.importCharacter(file);
 
@@ -106,8 +115,7 @@ describe("CharacterStore", () => {
 
     it("should log character.import on failure", async () => {
         const file = mockFile({ content: new ArrayBuffer(8), name: "test.json" });
-        const workerMock = await getCardParseWorker();
-        vi.mocked(workerMock.parseCharacter).mockResolvedValue({ success: false });
+        mockParseCharacter.mockResolvedValue({ success: false });
 
         await store.importCharacter(file);
 
@@ -198,8 +206,7 @@ describe("CharacterStore", () => {
         const file = mockFile({ content: new ArrayBuffer(8) });
         const parsedChar = { ...defaultChar, id: "imported" };
 
-        const workerMock = await getCardParseWorker();
-        vi.mocked(workerMock.parseCharacter).mockResolvedValue({ success: true, data: parsedChar });
+        mockParseCharacter.mockResolvedValue({ success: true, data: parsedChar });
 
         const result = await store.importCharacter(file);
 
@@ -210,10 +217,8 @@ describe("CharacterStore", () => {
 
     it("should handle import failure from worker", async () => {
         const file: File = mockFile({ content: new ArrayBuffer(8) });
-        const workerMock = await getCardParseWorker();
-        (workerMock.parseCharacter as Mock<typeof workerMock.parseCharacter>).mockResolvedValue({
+        mockParseCharacter.mockResolvedValue({
             success: false,
-
             error: "Parse error",
         });
 
@@ -225,10 +230,7 @@ describe("CharacterStore", () => {
 
     it("should handle import exception", async () => {
         const file: File = mockFile({ content: new ArrayBuffer(8) });
-        const workerMock = await getCardParseWorker();
-        (workerMock.parseCharacter as Mock<typeof workerMock.parseCharacter>).mockRejectedValue(
-            new Error("Worker crash")
-        );
+        mockParseCharacter.mockRejectedValue(new Error("Worker crash"));
 
         const result = await store.importCharacter(file);
         expect(result.success).toBe(false);

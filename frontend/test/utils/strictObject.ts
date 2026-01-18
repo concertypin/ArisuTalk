@@ -14,6 +14,11 @@ export function strictObject<const Target extends object>(obj: NoInfer<Partial<T
             if (prop in target) {
                 return Reflect.get(target, prop, receiver);
             }
+            // Allow 'then' property access for proper Promise/await behavior
+            // JavaScript checks for 'then' to determine if an object is thenable
+            if (prop === "then") {
+                return undefined;
+            }
             expect
                 .soft(false, `Property ${String(prop)} is not implemented on strict object.`)
                 .toBeTruthy();

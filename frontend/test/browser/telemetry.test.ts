@@ -45,7 +45,7 @@ describe("Telemetry Service", () => {
         expect(mockStructured).toHaveBeenCalledWith(
             "error.uncaught",
             expect.objectContaining({
-                errorMessage: reason,
+                errorMessage: reason.message,
             })
         );
     });
