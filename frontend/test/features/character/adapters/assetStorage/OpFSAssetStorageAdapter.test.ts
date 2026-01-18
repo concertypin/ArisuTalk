@@ -1,25 +1,26 @@
 // @vitest-environment happy-dom
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, type Mocked } from "vitest";
 import { OpFSAssetStorageAdapter } from "@/features/character/adapters/assetStorage/OpFSAssetStorageAdapter";
 import { IfNotExistBehavior } from "@/lib/interfaces";
+import { strictMock } from "@test/utils/strictObject";
 
 describe("OpFSAssetStorageAdapter", () => {
     let adapter: OpFSAssetStorageAdapter;
-    let mockRoot: any;
+    let mockRoot: Mocked<FileSystemDirectoryHandle>;
 
     beforeEach(() => {
         // Mock FileSystem API
-        mockRoot = {
+        mockRoot = strictMock<FileSystemDirectoryHandle>({
             getDirectoryHandle: vi.fn(),
             getFileHandle: vi.fn(),
             removeEntry: vi.fn(),
+        });
+        const storage = {
+            getDirectory: vi.fn().mockResolvedValue(mockRoot),
         };
-
         // Stub navigator.storage.getDirectory
         vi.stubGlobal("navigator", {
-            storage: {
-                getDirectory: vi.fn().mockResolvedValue(mockRoot),
-            },
+            storage: storage,
         });
 
         adapter = new OpFSAssetStorageAdapter();
@@ -31,16 +32,18 @@ describe("OpFSAssetStorageAdapter", () => {
     });
 
     it("should handle initialization errors gracefully", async () => {
-        (navigator.storage.getDirectory as any).mockRejectedValue(new Error("OPFS not supported"));
+        vi.mocked(navigator.storage.getDirectory).mockRejectedValue(
+            new Error("OPFS not supported")
+        );
         await expect(adapter.init()).rejects.toThrow("OPFS not supported");
     });
 
     it("should get asset blob correctly", async () => {
         const mockFile = new Blob(["test data"], { type: "text/plain" });
-        const mockFileHandle = {
+        const mockFileHandle = strictMock<FileSystemFileHandle>({
             getFile: vi.fn().mockResolvedValue(mockFile),
-        };
-        mockRoot.getFileHandle.mockResolvedValue(mockFileHandle);
+        });
+        vi.mocked(mockRoot.getFileHandle).mockResolvedValue(mockFileHandle);
 
         const testUrl = new URL("local://opfs/test.txt");
         const blob = await adapter.getAssetBlob(testUrl);
@@ -54,13 +57,14 @@ describe("OpFSAssetStorageAdapter", () => {
             write: vi.fn().mockResolvedValue(undefined),
             close: vi.fn().mockResolvedValue(undefined),
         };
-        const mockFileHandle = {
+        const mockFileHandle = strictMock<FileSystemFileHandle>({
             createWritable: vi.fn().mockResolvedValue(mockWritable),
-        };
+        });
         // First call with { create: false } should throw NotFoundError (file doesn't exist)
         // Second call with { create: true } should return the file handle
-        mockRoot.getFileHandle
-            .mockRejectedValueOnce(new DOMException("Not found", "NotFoundError"))
+
+        vi.mocked(mockRoot)
+            .getFileHandle.mockRejectedValueOnce(new DOMException("Not found", "NotFoundError"))
             .mockResolvedValueOnce(mockFileHandle);
 
         const testFile = new File(["data"], "hello.txt", { type: "text/plain" });
@@ -74,9 +78,9 @@ describe("OpFSAssetStorageAdapter", () => {
 
     it("should get asset URL correctly", async () => {
         const mockFile = new Blob(["data"]);
-        const mockFileHandle = {
+        const mockFileHandle = strictMock<FileSystemFileHandle>({
             getFile: vi.fn().mockResolvedValue(mockFile),
-        };
+        });
         mockRoot.getFileHandle.mockResolvedValue(mockFileHandle);
 
         // Mock only createObjectURL, not the entire URL constructor

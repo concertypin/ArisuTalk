@@ -1,16 +1,16 @@
 /// <reference types="vitest/browser" />
 
-import { test, expect, describe, vi, beforeEach } from "vitest";
+import { test, expect, describe, vi, beforeEach, type Mock } from "vitest";
 import { render } from "vitest-browser-svelte";
 import CharacterHooksSettings from "@/features/character/components/settingsSubpage/CharacterHooksSettings.svelte";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
 
 describe("CharacterHooksSettings Component", () => {
     let mockCharacter: Character;
-    let onChangeSpy: ReturnType<typeof vi.fn>;
+    let onChangeSpy: Mock<(character: Character) => void>;
 
     beforeEach(() => {
-        onChangeSpy = vi.fn();
+        onChangeSpy = vi.fn(() => {});
         mockCharacter = {
             id: "char-1",
             specVersion: 0,
@@ -45,7 +45,6 @@ describe("CharacterHooksSettings Component", () => {
     test("renders runtime settings correctly", async () => {
         const { getByLabelText, getByText } = render(CharacterHooksSettings, {
             character: mockCharacter,
-            // @ts-expect-error - Mock signature mismatch
             onChange: onChangeSpy,
         });
 
@@ -63,7 +62,6 @@ describe("CharacterHooksSettings Component", () => {
     test("updates runtime settings", async () => {
         const { getByLabelText, getByText } = render(CharacterHooksSettings, {
             character: mockCharacter,
-            // @ts-expect-error - Mock signature mismatch
             onChange: onChangeSpy,
         });
 
@@ -74,7 +72,7 @@ describe("CharacterHooksSettings Component", () => {
         await expect.element(memInput).toBeVisible();
 
         await memInput.fill("1024");
-
+        /* eslint-disable @typescript-eslint/no-unsafe-assignment */
         expect(onChangeSpy).toHaveBeenCalledWith(
             expect.objectContaining({
                 executables: expect.objectContaining({
@@ -84,6 +82,7 @@ describe("CharacterHooksSettings Component", () => {
                 }),
             })
         );
+        /* eslint-enable @typescript-eslint/no-unsafe-assignment */
     });
 
     test("switches between hook tabs", async () => {
@@ -103,7 +102,6 @@ describe("CharacterHooksSettings Component", () => {
 
         const { getByRole, getByText } = render(CharacterHooksSettings, {
             character: mockCharacter,
-            // @ts-expect-error - Mock signature mismatch
             onChange: onChangeSpy,
         });
 
@@ -118,14 +116,13 @@ describe("CharacterHooksSettings Component", () => {
     test("adds a new hook", async () => {
         const { getByRole } = render(CharacterHooksSettings, {
             character: mockCharacter,
-            // @ts-expect-error - Mock signature mismatch
             onChange: onChangeSpy,
         });
 
         await getByRole("button", { name: /Add Hook/i }).click();
 
         expect(onChangeSpy).toHaveBeenCalled();
-        const calledArg = onChangeSpy.mock.calls[0][0] as Character;
+        const calledArg = onChangeSpy.mock.calls[0][0];
         expect(calledArg.executables.replaceHooks.display).toHaveLength(1);
     });
 
@@ -146,7 +143,6 @@ describe("CharacterHooksSettings Component", () => {
 
         const { getByText, getByLabelText } = render(CharacterHooksSettings, {
             character: mockCharacter,
-            // @ts-expect-error - Mock signature mismatch
             onChange: onChangeSpy,
         });
 
@@ -155,18 +151,19 @@ describe("CharacterHooksSettings Component", () => {
         const inputField = getByLabelText("Input Pattern");
         await expect.element(inputField).toBeVisible();
         await inputField.fill("baz");
-
+        /* eslint-disable @typescript-eslint/no-unsafe-assignment */
         expect(onChangeSpy).toHaveBeenCalledWith(
             expect.objectContaining({
                 executables: expect.objectContaining({
                     replaceHooks: expect.objectContaining({
                         display: expect.arrayContaining([
-                            expect.objectContaining({ input: "baz" }),
+                            expect.objectContaining({ input: "baz" } as const),
                         ]),
                     }),
                 }),
             })
         );
+        /* eslint-enable @typescript-eslint/no-unsafe-assignment */
     });
 
     test("deletes a hook", async () => {
@@ -186,7 +183,6 @@ describe("CharacterHooksSettings Component", () => {
 
         const { getByText, getByRole } = render(CharacterHooksSettings, {
             character: mockCharacter,
-            // @ts-expect-error - Mock signature mismatch
             onChange: onChangeSpy,
         });
 
@@ -198,11 +194,13 @@ describe("CharacterHooksSettings Component", () => {
 
         expect(onChangeSpy).toHaveBeenCalledWith(
             expect.objectContaining({
+                /* eslint-disable @typescript-eslint/no-unsafe-assignment */
                 executables: expect.objectContaining({
                     replaceHooks: expect.objectContaining({
                         display: [],
                     }),
                 }),
+                /* eslint-enable @typescript-eslint/no-unsafe-assignment */
             })
         );
     });
@@ -224,7 +222,6 @@ describe("CharacterHooksSettings Component", () => {
 
         const { getByText, getByLabelText } = render(CharacterHooksSettings, {
             character: mockCharacter,
-            // @ts-expect-error - Mock signature mismatch
             onChange: onChangeSpy,
         });
 
@@ -241,6 +238,7 @@ describe("CharacterHooksSettings Component", () => {
 
         expect(onChangeSpy).toHaveBeenCalledWith(
             expect.objectContaining({
+                /* eslint-disable @typescript-eslint/no-unsafe-assignment */
                 executables: expect.objectContaining({
                     replaceHooks: expect.objectContaining({
                         display: expect.arrayContaining([
@@ -250,6 +248,7 @@ describe("CharacterHooksSettings Component", () => {
                         ]),
                     }),
                 }),
+                /* eslint-enable @typescript-eslint/no-unsafe-assignment */
             })
         );
     });

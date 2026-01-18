@@ -7,7 +7,6 @@ import type { Character } from "@arisutalk/character-spec/v0/Character";
 import { exampleCharacter } from "@/const/example_data";
 import { getCardParseWorker } from "@/lib/workers/workerClient";
 import { mockFile } from "@test/utils/mock/file";
-import asMock from "@test/utils/asMock";
 import { Logger } from "@common/logger/Logger";
 
 // Mock worker client
@@ -92,7 +91,7 @@ describe("CharacterStore", () => {
         const parsedChar = { ...defaultChar, id: "imported" };
 
         const workerMock = await getCardParseWorker();
-        asMock(workerMock.parseCharacter).mockResolvedValue({ success: true, data: parsedChar });
+        vi.mocked(workerMock.parseCharacter).mockResolvedValue({ success: true, data: parsedChar });
 
         await store.importCharacter(file);
 
@@ -108,7 +107,7 @@ describe("CharacterStore", () => {
     it("should log character.import on failure", async () => {
         const file = mockFile({ content: new ArrayBuffer(8), name: "test.json" });
         const workerMock = await getCardParseWorker();
-        asMock(workerMock.parseCharacter).mockResolvedValue({ success: false });
+        vi.mocked(workerMock.parseCharacter).mockResolvedValue({ success: false });
 
         await store.importCharacter(file);
 
@@ -200,7 +199,7 @@ describe("CharacterStore", () => {
         const parsedChar = { ...defaultChar, id: "imported" };
 
         const workerMock = await getCardParseWorker();
-        asMock(workerMock.parseCharacter).mockResolvedValue({ success: true, data: parsedChar });
+        vi.mocked(workerMock.parseCharacter).mockResolvedValue({ success: true, data: parsedChar });
 
         const result = await store.importCharacter(file);
 
