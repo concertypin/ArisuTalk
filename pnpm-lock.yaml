@@ -117,9 +117,6 @@ importers:
       svelte:
         specifier: ^5.39.3
         version: 5.45.10
-      ts-deepmerge:
-        specifier: ^7.0.3
-        version: 7.0.3
       zod:
         specifier: ^4.1.12
         version: 4.1.13
@@ -3053,10 +3050,6 @@ packages:
     engines: {node: '>=18.12'}
     peerDependencies:
       typescript: '>=4.8.4'
-
-  ts-deepmerge@7.0.3:
-    resolution: {integrity: sha512-Du/ZW2RfwV/D4cmA5rXafYjBQVuvu4qGiEEla4EmEHVHgRdx68Gftx7i66jn2bzHPwSVZY36Ae6OuDn9el4ZKA==}
-    engines: {node: '>=14.13.1'}
 
   tsconfck@3.1.6:
     resolution: {integrity: sha512-ks6Vjr/jEw0P1gmOVwutM3B7fWxoWBL2KRDb1JfqGVawBmO5UsvmWOQFGHBPl5yxYz4eERr19E6L7NMv+Fej4w==}
@@ -6473,8 +6466,6 @@ snapshots:
   ts-api-utils@2.1.0(typescript@5.9.3):
     dependencies:
       typescript: 5.9.3
-
-  ts-deepmerge@7.0.3: {}
 
   tsconfck@3.1.6(typescript@5.9.3):
     optionalDependencies:

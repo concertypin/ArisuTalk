@@ -105,8 +105,14 @@
             <!-- Welcome / No Character Selected -->
             <div class="flex flex-col items-center justify-center h-full text-center p-8">
                 <div class="space-y-4 max-w-md">
-                    <h1 class="text-3xl font-bold tracking-tight">
-                        <span class="text-gradient-accent">ArisuTalk</span>
+                    <h1
+                        class="text-4xl font-black tracking-tight flex items-center justify-center cursor-default"
+                    >
+                        <span
+                            class="text-gradient-accent flex items-center leading-none select-none"
+                        >
+                            ArisuTalk
+                        </span>
                     </h1>
                     <p class="text-base-content/60 text-lg">
                         Select a character from the sidebar to start chatting

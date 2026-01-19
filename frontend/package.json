@@ -43,7 +43,6 @@
         "dexie": "^4.2.1",
         "lodash-es": "^4.17.22",
         "svelte": "^5.39.3",
-        "ts-deepmerge": "^7.0.3",
         "zod": "^4.1.12"
     },
     "devDependencies": {
