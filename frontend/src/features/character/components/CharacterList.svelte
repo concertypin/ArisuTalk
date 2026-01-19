@@ -6,6 +6,7 @@
     import { transfer } from "comlink";
     import { remapAssetToUint8Array, collectTransferableBuffers } from "../utils/assetEncoding";
     import { Logger } from "@common/logger/Logger";
+    import { cloneDeep } from "lodash-es";
 
     type Props = {
         onEdit: (index: number) => void;
@@ -74,7 +75,7 @@
     async function handleExport(index: number) {
         // Export character at index
         // Cloning first to avoid mutating store data.
-        const char = structuredClone($state.snapshot(characterStore.characters[index]));
+        const char = cloneDeep($state.snapshot(characterStore.characters[index]));
 
         // Remap all assets to use Uint8Array for binary data
         const assetStorage = new OpFSAssetStorageAdapter();

@@ -5,6 +5,7 @@ import { SettingsSchema, type Settings } from "@/lib/types/IDataModel";
 import { exampleCharacter, exampleChatData } from "@/const/example_data";
 import { LocalStorageAdapter } from "@/features/character/adapters/storage/LocalStorageAdapter";
 import { apply } from "@arisutalk/character-spec/utils";
+import { cloneDeep } from "lodash-es";
 
 describe("LocalStorageAdapter", () => {
     let adapter: LocalStorageAdapter;
@@ -20,14 +21,14 @@ describe("LocalStorageAdapter", () => {
     });
 
     it("should save and retrieve a chat", async () => {
-        const chat: Chat = structuredClone(exampleChatData);
+        const chat: Chat = cloneDeep(exampleChatData);
         await adapter.saveChat(chat);
         const retrieved = await adapter.getChat(chat.id);
         expect(retrieved).toEqual(chat);
     });
 
     it("should save and retrieve a character", async () => {
-        const character: Character = structuredClone(exampleCharacter);
+        const character: Character = cloneDeep(exampleCharacter);
         await adapter.saveCharacter(character);
 
         const retrieved = await adapter.getCharacter(character.id);
@@ -35,7 +36,7 @@ describe("LocalStorageAdapter", () => {
     });
 
     it("should update existing character", async () => {
-        const character: Character = structuredClone(exampleCharacter);
+        const character: Character = cloneDeep(exampleCharacter);
         await adapter.saveCharacter(character);
 
         const updated: Character = { ...character, description: "Maid" };
@@ -46,7 +47,7 @@ describe("LocalStorageAdapter", () => {
     });
 
     it("should delete a character", async () => {
-        const character: Character = structuredClone(exampleCharacter);
+        const character: Character = cloneDeep(exampleCharacter);
         await adapter.saveCharacter(character);
         await adapter.deleteCharacter(character.id);
 

@@ -23,6 +23,7 @@
     import CharacterLorebookSettings from "./settingsSubpage/CharacterLorebookSettings.svelte";
     import CharacterMetadataSettings from "./settingsSubpage/CharacterMetadataSettings.svelte";
     import CharacterHooksSettings from "./settingsSubpage/CharacterHooksSettings.svelte";
+    import { cloneDeep } from "lodash-es";
 
     let dialog = $state<HTMLDialogElement>();
     type ActiveTab = "basic" | "prompt" | "lorebook" | "metadata" | "advanced";
@@ -41,9 +42,7 @@
 
         if (uiState.characterSettingsOpen && uiState.characterSettingsTarget && !dialogEl.open) {
             // Deep clone using JSON to avoid Svelte proxy issues
-            editingCharacter = JSON.parse(
-                JSON.stringify(uiState.characterSettingsTarget)
-            ) as Character;
+            editingCharacter = cloneDeep(uiState.characterSettingsTarget);
             activeTab = "basic";
             dialogEl.showModal();
             Logger.structured("modal.open", {
@@ -94,9 +93,11 @@
                     (c) => c.id === editingCharacter!.id
                 );
                 if (index !== -1) {
+                    // Extract ID before logging to avoid DataCloneError with Svelte proxies
+                    const characterId = editingCharacter.id;
                     await characterStore.update(index, editingCharacter);
                     Logger.structured("character.autosave", {
-                        characterId: editingCharacter.id,
+                        characterId,
                     });
                 }
             })();

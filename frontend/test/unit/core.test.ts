@@ -4,6 +4,7 @@ import { SettingsSchema } from "@/lib/types/IDataModel";
 import { ChatProvider, type ProviderSettings } from "@/lib/interfaces";
 import { BaseMessage, HumanMessage } from "@langchain/core/messages";
 import { exampleCharacter, exampleChatData } from "@/const/example_data";
+import { cloneDeep } from "lodash-es";
 
 describe("Data Models", () => {
     it.concurrent("should generate valid IDs for new instances", async () => {
@@ -27,8 +28,8 @@ describe("Data Models", () => {
     });
 
     it.concurrent("should correctly structure a Chat", async () => {
-        const char: Character = structuredClone(exampleCharacter);
-        const chat = structuredClone(exampleChatData);
+        const char: Character = cloneDeep(exampleCharacter);
+        const chat = cloneDeep(exampleChatData);
         // Messages are now stored separately, not in the Chat object
         expect(chat.id).toBeDefined();
         expect(chat.characterId).toBe(char.id);

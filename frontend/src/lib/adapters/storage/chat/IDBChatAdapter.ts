@@ -1,6 +1,7 @@
 import type { Chat, Message } from "@arisutalk/character-spec/v0/Character";
 import { getArisuDB } from "../IndexedDBHelper";
 import type { IChatStorageAdapter, LocalChat } from "@/lib/interfaces";
+import { cloneDeep } from "lodash-es";
 
 export class IDBChatAdapter implements IChatStorageAdapter {
     private db = getArisuDB();
@@ -28,7 +29,9 @@ export class IDBChatAdapter implements IChatStorageAdapter {
     }
 
     async saveChat(chat: Chat): Promise<void> {
-        await this.db.chats.put(chat);
+        // Remove Svelte proxy wrapper by cloning
+        const plainChat = cloneDeep(chat);
+        await this.db.chats.put(plainChat);
     }
 
     private toLocalChat(chat: Chat): LocalChat {
@@ -69,7 +72,9 @@ export class IDBChatAdapter implements IChatStorageAdapter {
             createdAt: now,
             updatedAt: now,
         };
-        await this.db.chats.put(chat);
+        // Anti-proxy
+        const plainChat = cloneDeep(chat);
+        await this.db.chats.put(plainChat);
         return id;
     }
 
@@ -88,7 +93,9 @@ export class IDBChatAdapter implements IChatStorageAdapter {
             chatId,
             inlays: message.inlays || [],
         };
-        await this.db.messages.put(messageWithChatId);
+        // Remove Svelte proxy wrapper
+        const plainMessage = cloneDeep(messageWithChatId);
+        await this.db.messages.put(plainMessage);
 
         // Update chat's updatedAt timestamp
         chat.updatedAt = message.timestamp || Date.now();
@@ -110,7 +117,9 @@ export class IDBChatAdapter implements IChatStorageAdapter {
         }
         message.content = content;
         message.timestamp = Date.now();
-        await this.db.messages.put(message);
+        // Remove Svelte proxy wrapper
+        const plainMessage = cloneDeep(message);
+        await this.db.messages.put(plainMessage);
     }
 
     async deleteMessage(chatId: string, messageId: string): Promise<void> {

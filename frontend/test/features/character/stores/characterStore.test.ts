@@ -8,6 +8,7 @@ import { exampleCharacter } from "@/const/example_data";
 import { mockFile } from "@test/utils/mock/file";
 
 import { Logger } from "@common/logger/Logger";
+import { cloneDeep } from "lodash-es";
 
 // Mock worker client
 // Use vi.hoisted() to ensure the mock function is available when vi.mock() is hoisted
@@ -35,7 +36,7 @@ const mockAdapter: Mocked<ICharacterStorageAdapter> = {
     getCharacter: vi.fn().mockResolvedValue(undefined),
 };
 
-const defaultChar: Character = structuredClone(exampleCharacter);
+const defaultChar: Character = cloneDeep(exampleCharacter);
 
 describe("CharacterStore", () => {
     let store: CharacterStore;

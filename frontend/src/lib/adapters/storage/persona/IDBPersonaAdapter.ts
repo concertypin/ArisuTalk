@@ -3,6 +3,7 @@ import type { IPersonaStorageAdapter } from "@/lib/interfaces";
 import type { Persona } from "@/features/persona/schema";
 import { SettingsSchema } from "@/lib/types/IDataModel";
 import { apply } from "@arisutalk/character-spec/utils";
+import { cloneDeep } from "lodash-es";
 
 export class IDBPersonaAdapter implements IPersonaStorageAdapter {
     private db = getArisuDB();
@@ -16,11 +17,15 @@ export class IDBPersonaAdapter implements IPersonaStorageAdapter {
     }
 
     async savePersona(persona: Persona): Promise<void> {
-        await this.db.personas.put(persona);
+        // Remove Svelte proxy wrapper by serializing/deserializing
+        const plainPersona = cloneDeep(persona);
+        await this.db.personas.put(plainPersona);
     }
 
     async updatePersona(id: string, persona: Persona): Promise<void> {
-        await this.db.personas.put({ ...persona, id });
+        // Remove Svelte proxy wrapper by serializing/deserializing
+        const plainPersona = cloneDeep({ ...persona, id });
+        await this.db.personas.put(plainPersona);
     }
 
     async deletePersona(id: string): Promise<void> {
@@ -41,10 +46,14 @@ export class IDBPersonaAdapter implements IPersonaStorageAdapter {
             const defaults = apply(SettingsSchema, {
                 activePersonaId: id,
             });
-            await this.db.settings.put({
-                ...defaults,
-                id: "singleton",
-            });
+            // Remove Svelte proxy wrapper by serializing/deserializing
+            const plainDefaults = JSON.parse(
+                JSON.stringify({
+                    ...defaults,
+                    id: "singleton",
+                })
+            ) as typeof defaults & { id: string };
+            await this.db.settings.put(plainDefaults);
         }
     }
 }
