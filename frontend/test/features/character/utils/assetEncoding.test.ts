@@ -51,6 +51,7 @@ describe("remapAssetToUint8Array", () => {
             getAssetBlob: vi.fn(),
             getAssetUrl: vi.fn(),
             saveAsset: vi.fn(),
+            deleteAsset: vi.fn(),
         };
     });
 
@@ -246,10 +247,10 @@ describe("remapAssetToUint8Array", () => {
             const result = await remapAssetToUint8Array(asset, mockAssetStorage);
 
             expect(result.data).toBe("data:text/plain;base64SGVsbG8=");
-            expect(consoleWarnSpy).toHaveBeenCalledWith(
-                "Malformed data URL (no comma), leaving as is:",
-                expect.any(String)
-            );
+            // Logger adds formatting prefix, so check that the warning was called
+            expect(consoleWarnSpy).toHaveBeenCalled();
+            const warnCall = consoleWarnSpy.mock.calls[0];
+            expect(warnCall).toContain("Malformed data URL (no comma), leaving as is:");
 
             consoleWarnSpy.mockRestore();
         });
@@ -266,10 +267,10 @@ describe("remapAssetToUint8Array", () => {
             const result = await remapAssetToUint8Array(asset, mockAssetStorage);
 
             expect(result.data).toBe("data:text/plain;base64,!!!INVALID!!!");
-            expect(consoleErrorSpy).toHaveBeenCalledWith(
-                "Failed to decode base64 data URL:",
-                expect.any(Error)
-            );
+            // Logger adds formatting prefix, so check that the error was called
+            expect(consoleErrorSpy).toHaveBeenCalled();
+            const errorCall = consoleErrorSpy.mock.calls[0];
+            expect(errorCall).toContain("Failed to decode base64 data URL:");
 
             consoleErrorSpy.mockRestore();
         });

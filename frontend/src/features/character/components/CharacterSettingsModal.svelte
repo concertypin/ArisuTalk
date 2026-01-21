@@ -15,6 +15,7 @@
         BookOpen,
         FileText,
         Settings as SettingsIcon,
+        Image,
     } from "@lucide/svelte";
 
     // Subpage components
@@ -23,10 +24,11 @@
     import CharacterLorebookSettings from "./settingsSubpage/CharacterLorebookSettings.svelte";
     import CharacterMetadataSettings from "./settingsSubpage/CharacterMetadataSettings.svelte";
     import CharacterHooksSettings from "./settingsSubpage/CharacterHooksSettings.svelte";
+    import CharacterAssetsSettings from "./settingsSubpage/CharacterAssetsSettings.svelte";
     import { cloneDeep } from "lodash-es";
 
     let dialog = $state<HTMLDialogElement>();
-    type ActiveTab = "basic" | "prompt" | "lorebook" | "metadata" | "advanced";
+    type ActiveTab = "basic" | "prompt" | "lorebook" | "assets" | "metadata" | "advanced";
     let activeTab = $state<ActiveTab>("basic");
 
     /** Local copy of character being edited (for autosave) */
@@ -182,6 +184,16 @@
                     <li>
                         <button
                             class="flex gap-2 rounded-lg"
+                            class:active={activeTab === "assets"}
+                            onclick={() => (activeTab = "assets")}
+                            aria-label="Assets Settings"
+                        >
+                            <Image size={18} /> Assets
+                        </button>
+                    </li>
+                    <li>
+                        <button
+                            class="flex gap-2 rounded-lg"
                             class:active={activeTab === "metadata"}
                             onclick={() => (activeTab = "metadata")}
                             aria-label="Metadata Settings"
@@ -220,12 +232,17 @@
                             character={editingCharacter}
                             onChange={handleCharacterChange}
                         />
+                    {:else if activeTab === "assets"}
+                        <CharacterAssetsSettings
+                            character={editingCharacter}
+                            onChange={handleCharacterChange}
+                        />
                     {:else if activeTab === "metadata"}
                         <CharacterMetadataSettings
                             character={editingCharacter}
                             onChange={handleCharacterChange}
                         />
-                    {:else if activeTab === "advanced"}
+                    {:else if activeTab === "advanced"}}
                         <CharacterHooksSettings
                             character={editingCharacter}
                             onChange={handleCharacterChange}

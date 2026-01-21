@@ -159,6 +159,14 @@ export class OpFSAssetStorageAdapter implements IAssetStorageAdapter {
             throw e;
         }
     }
+
+    async deleteAsset(id: URL): Promise<void> {
+        this.checkValidId(id);
+        const root = await this.root;
+
+        const filename = id.pathname.startsWith("/") ? id.pathname.slice(1) : id.pathname;
+        await root.removeEntry(filename);
+    }
 }
 
 /**

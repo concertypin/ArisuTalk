@@ -74,4 +74,11 @@ export interface IAssetStorageAdapter {
         id: FilePointerURL,
         ifNotExist?: T
     ): Promise<Blob | (T extends IfNotExistBehavior.RETURN_NULL ? null : never)>;
+
+    /**
+     * Delete an asset from storage.
+     * @param id - URL object for the asset data. `local://` prefix is required.
+     * @throws Error if the asset does not exist.
+     */
+    deleteAsset(id: FilePointerURL): Promise<void>;
 }
