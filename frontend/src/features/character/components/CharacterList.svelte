@@ -18,7 +18,7 @@
     async function handleDelete(index: number) {
         const modal = document.getElementById("delete-confirm-modal") as HTMLDialogElement;
         if (!modal) {
-            console.error("Delete confirmation modal not found");
+            Logger.error("Delete confirmation modal not found");
             return;
         }
 
@@ -39,13 +39,13 @@
 
         const idxStr = modal.dataset.deleteIndex;
         if (!idxStr) {
-            console.error("No delete index set on modal");
+            Logger.error("No delete index set on modal");
             modal.close();
             return;
         }
         const index = Number(idxStr);
         if (!Number.isFinite(index)) {
-            console.error("Invalid delete index on modal:", idxStr);
+            Logger.error("Invalid delete index on modal:", idxStr);
             modal.close();
             return;
         }

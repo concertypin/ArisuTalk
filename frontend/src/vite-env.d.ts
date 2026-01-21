@@ -33,3 +33,11 @@ interface ImportMetaEnv {
 interface ImportMeta {
     readonly env: ImportMetaEnv;
 }
+
+// No SharedArrayBuffer, we can't use it due to browser
+interface SharedArrayBuffer {
+    readonly [Symbol.toStringTag]: "SharedArrayBuffer";
+}
+type ArrayBufferLike = ArrayBuffer;
+// eslint-disable-next-line no-var
+declare var SharedArrayBuffer: never;

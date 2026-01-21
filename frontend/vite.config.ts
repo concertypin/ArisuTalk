@@ -3,7 +3,6 @@ import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { type PluginOption, type UserConfig, defineConfig, loadEnv } from "vite";
 import { playwright } from "@vitest/browser-playwright";
 import path from "path";
-
 type Presence<T> = T extends undefined ? never : T;
 
 type TestConfig = Presence<UserConfig["test"]>;

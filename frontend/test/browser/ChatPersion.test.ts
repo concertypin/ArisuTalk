@@ -22,7 +22,6 @@ describe("Persona and Chat interactions", () => {
     });
 
     test("Create character and send chat message", async () => {
-        console.log("Starting ChatPersion test");
         // Import and configure chatStore with Mock provider for testing
         // Must happen BEFORE fake timers are enabled
         // Mock chatStore.waitForSettings to avoid delays

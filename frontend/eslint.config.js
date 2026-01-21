@@ -11,6 +11,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const tsConfig = !process.env.SKIP_TYPE_LINT
     ? ts.configs.recommendedTypeChecked
     : ts.configs.recommended;
+
+const isCI = process.env.CI ? true : false;
 export default defineConfig([
     {
         ignores: ["dist/", "node_modules/", "*.config.*"],
@@ -51,6 +53,9 @@ export default defineConfig([
             "@typescript-eslint/require-await": "off",
             // Disable unbound-method - false positives with Svelte stores
             "@typescript-eslint/unbound-method": "off",
+            "no-debugger": isCI ? "error" : "warn",
+            // Use dedicated logger. Console is unrecommended since it's not pretty
+            "no-console": "warn",
         },
     },
 ]);

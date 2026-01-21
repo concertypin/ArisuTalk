@@ -1,5 +1,6 @@
 import type { Chat, Character } from "@arisutalk/character-spec/v0/Character";
 import { type Settings, SettingsSchema } from "@/lib/types/IDataModel";
+import { Logger } from "@common/logger/Logger";
 
 export class LocalStorageAdapter {
     private readonly KEYS = {
@@ -10,7 +11,7 @@ export class LocalStorageAdapter {
 
     async init(): Promise<void> {
         if (!import.meta.env.DEV)
-            console.warn("LocalStorageAdapter is intended for development/testing purposes only.");
+            Logger.warn("LocalStorageAdapter is intended for development/testing purposes only.");
         // LocalStorage is synchronous and always ready in browser environment
         return Promise.resolve();
     }
@@ -152,7 +153,7 @@ export class LocalStorageAdapter {
                 if (result.success) await this.saveSettings(result.data);
             }
         } catch (e) {
-            console.error("Failed to import data", e);
+            Logger.error("Failed to import data", e);
             throw new Error("Invalid data format");
         }
     }

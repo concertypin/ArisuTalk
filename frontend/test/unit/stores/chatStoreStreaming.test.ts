@@ -3,6 +3,7 @@ import { test, expect, describe, vi, afterEach } from "vitest";
 import { chatStore } from "@/features/chat/stores/chatStore.svelte";
 import { MessageSchema } from "@arisutalk/character-spec/v0/Character/Message";
 import { apply } from "@arisutalk/character-spec/utils";
+import { Logger } from "@common/logger/Logger";
 
 // Mock settings to avoid 5s timeout in chatStore.initialize()
 vi.mock("@/lib/stores/settings.svelte", () => ({
@@ -179,12 +180,12 @@ describe("ChatStore Streaming", () => {
         } satisfies (typeof chatStore)["activeProvider"];
 
         const chatId = await chatStore.createChat("test-fail", "Test Fail");
-        //Suppress console.error
-        vi.spyOn(console, "error").mockImplementationOnce((i) => {
+        //Suppress Logger.error
+        vi.spyOn(Logger, "error").mockImplementationOnce((i) => {
             if (typeof i === "string") {
                 if (i.includes("Simulated failure")) return;
             }
-            console.error(i);
+            Logger.error(i);
         });
         await chatStore.setActiveChat(chatId);
 

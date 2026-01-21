@@ -33,13 +33,23 @@ function createWorkerApi<T>(worker: Worker): WorkerApi<T> {
         void api.setLogReceiver(Comlink.proxy(logReceiver));
     }
 
-    return {
-        ...api,
-        terminate(this) {
-            this.disabled = true;
-            worker.terminate();
+    // Proxy api again
+
+    return new Proxy<WorkerApi<T>>(api as WorkerApi<T>, {
+        get: (target, prop) => {
+            if (prop === "terminate") {
+                return function (this: WorkerApi<T>) {
+                    this.disabled = true;
+                    worker.terminate();
+                };
+            }
+            if (prop === "disabled") {
+                return false;
+            }
+            if (typeof prop == "symbol") return Reflect.get(target, prop);
+            return target[prop as keyof T];
         },
-    };
+    });
 }
 // Used example's one, but actually all worker import have the same type.
 type WorkerImport = typeof import("@worker/example/main?worker");

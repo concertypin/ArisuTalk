@@ -4,6 +4,7 @@
 -->
 <script lang="ts">
     import { tick } from "svelte";
+    import { Logger } from "@common/logger/Logger";
 
     import { chatStore } from "@/features/chat/stores/chatStore.svelte";
     import { characterStore } from "@/features/character/stores/characterStore.svelte";
@@ -35,7 +36,7 @@
     // Auto-scroll when messages change
     $effect(() => {
         if (messages.length) {
-            void scrollToBottom().catch((err) => console.error("Scroll failed", err));
+            void scrollToBottom().catch((err) => Logger.error("Scroll failed", err));
         }
     });
 

@@ -4,6 +4,7 @@
 -->
 <script lang="ts">
     import { initRouter, getCurrentPath } from "@/lib/router.svelte";
+    import { Logger } from "@common/logger/Logger";
     import { routes } from "@/lib/routeConfig";
     import { uiState } from "@/lib/stores/ui.svelte";
     import { settings } from "@/lib/stores/settings.svelte";
@@ -35,7 +36,7 @@
             } finally {
                 isLoading = false;
             }
-        })().catch((err) => console.error("Failed to load route", err));
+        })().catch((err) => Logger.error("Failed to load route", err));
     });
 </script>
 
