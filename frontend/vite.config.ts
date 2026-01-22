@@ -3,6 +3,7 @@ import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { type PluginOption, type UserConfig, defineConfig, loadEnv } from "vite";
 import { playwright } from "@vitest/browser-playwright";
 import path from "path";
+import { sveltePhosphorOptimize } from "phosphor-svelte/vite";
 type Presence<T> = T extends undefined ? never : T;
 
 type TestConfig = Presence<UserConfig["test"]>;
@@ -12,6 +13,7 @@ const browserTestConfig: TestConfig["browser"] = {
     provider: playwright(),
     instances: [
         {
+            hideSkippedTests: true,
             browser: "chromium",
             testTimeout: 20 * 1000,
         },
@@ -40,6 +42,7 @@ export default defineConfig(async (ctx) => {
                 dev: mode !== "production",
             },
         }),
+        sveltePhosphorOptimize(),
     ];
     let env = loadEnv(mode, process.cwd(), "") as Record<string, any>;
     env.VITEST_BROWSER_MODE = runBrowserTest ? "true" : "false";
@@ -96,6 +99,7 @@ export default defineConfig(async (ctx) => {
                 "@langchain/core/language_models/chat_models",
                 "@langchain/core/messages",
                 "@langchain/core/outputs",
+                "phosphor-svelte/lib/*",
             ],
         },
         resolve: {

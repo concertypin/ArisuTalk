@@ -43,13 +43,18 @@ describe("CharacterHooksSettings Component", () => {
     });
 
     test("renders runtime settings correctly", async () => {
-        const { getByLabelText, getByText } = render(CharacterHooksSettings, {
+        const screen = render(CharacterHooksSettings, {
             character: mockCharacter,
             onChange: onChangeSpy,
         });
 
-        // Expand Runtime Settings
-        await getByText("Runtime Settings").click();
+        // Expand Runtime Settings - DaisyUI collapse uses a hidden checkbox
+        const collapseCheckbox = screen.container.querySelector(
+            ".collapse input[type='checkbox']"
+        ) as HTMLInputElement;
+        collapseCheckbox.click();
+
+        const { getByLabelText } = screen;
 
         const memInput = getByLabelText(/Memory \(MB\)/i);
         const timeoutInput = getByLabelText(/Timeout \(ms\)/i);
@@ -60,13 +65,18 @@ describe("CharacterHooksSettings Component", () => {
     });
 
     test("updates runtime settings", async () => {
-        const { getByLabelText, getByText } = render(CharacterHooksSettings, {
+        const screen = render(CharacterHooksSettings, {
             character: mockCharacter,
             onChange: onChangeSpy,
         });
 
-        // Expand Runtime Settings
-        await getByText("Runtime Settings").click();
+        // Expand Runtime Settings - DaisyUI collapse uses a hidden checkbox
+        const collapseCheckbox = screen.container.querySelector(
+            ".collapse input[type='checkbox']"
+        ) as HTMLInputElement;
+        collapseCheckbox.click();
+
+        const { getByLabelText } = screen;
 
         const memInput = getByLabelText(/Memory \(MB\)/i);
         await expect.element(memInput).toBeVisible();

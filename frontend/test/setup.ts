@@ -19,3 +19,6 @@ beforeEach(() => {
         // ignore in non-browser environments
     }
 });
+if (import.meta.env.VITEST_BROWSER_MODE === "true") {
+    await import("@/global.css");
+}

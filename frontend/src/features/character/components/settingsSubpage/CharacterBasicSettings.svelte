@@ -4,7 +4,12 @@
      * Basic character info: name, description, avatar.
      * Fields include helper text based on character-spec JSDoc.
      */
+    import { SvelteMap, SvelteSet } from "svelte/reactivity";
+    import { getAssetStorage } from "@/features/character/adapters/assetStorage/assetStorageResolver";
+    import { Logger } from "@common/logger/Logger";
+    import { IfNotExistBehavior } from "@/lib/interfaces";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
+    import { merge } from "lodash-es";
 
     type Props = {
         character: Character;
@@ -13,8 +18,55 @@
 
     let { character, onChange }: Props = $props();
 
-    function updateField<K extends keyof Character>(field: K, value: Character[K]) {
-        onChange({ ...character, [field]: value });
+    const assetStorage = getAssetStorage();
+    let assetPreviews = new SvelteMap<string, string>();
+    let showManualUrl = $state(false);
+
+    const imageAssets = $derived(
+        character.assets.assets.filter((a) => a.mimeType.startsWith("image/"))
+    );
+
+    // Load image previews
+    $effect(() => {
+        let revoked = false;
+        const blobUrls = new SvelteSet<string | Uint8Array<ArrayBuffer>>();
+
+        const loadPreviews = async () => {
+            await assetStorage.init();
+            for (const asset of imageAssets) {
+                if (typeof asset.data === "string" && asset.data.startsWith("local:")) {
+                    try {
+                        const url = await assetStorage.getAssetUrl(
+                            new URL(asset.data),
+                            IfNotExistBehavior.RETURN_NULL
+                        );
+                        if (url && !revoked) {
+                            assetPreviews.set(asset.name, url);
+                            blobUrls.add(url);
+                        }
+                    } catch (e) {
+                        Logger.error(
+                            "Failed to load asset preview for avatar picker:",
+                            asset.name,
+                            e
+                        );
+                    }
+                }
+            }
+        };
+
+        void loadPreviews();
+
+        return () => {
+            revoked = true;
+            for (const url of blobUrls) {
+                if (typeof url === "string") URL.revokeObjectURL(url);
+            }
+        };
+    });
+
+    function updateField<const K extends keyof Character>(field: K, value: Character[K]) {
+        onChange(merge({}, character, { [field]: value }));
     }
 </script>
 
@@ -53,29 +105,114 @@
     </fieldset>
 
     <fieldset class="fieldset w-full">
-        <label for="char-avatar" class="fieldset-legend">Avatar URL</label>
-        <input
-            type="text"
-            id="char-avatar"
-            class="input w-full"
-            value={character.avatarUrl || ""}
-            oninput={(e) => updateField("avatarUrl", e.currentTarget.value || undefined)}
-            placeholder="Asset name or URL for avatar image"
-        />
-        <div class="label">
-            <span class="label-text-alt"
-                >Reference to an asset name or external URL for the character's avatar.</span
-            >
-        </div>
+        <label for="char-avatar" class="fieldset-legend text-base font-medium">Avatar</label>
+
+        <!-- Current Preview -->
         {#if character.avatarUrl}
-            <div class="mt-2">
-                <img
-                    src={character.avatarUrl}
-                    alt="Avatar preview"
-                    class="w-24 h-24 rounded-full object-cover border border-base-300"
-                    onerror={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")}
-                />
+            <div class="mb-4 flex justify-center">
+                <div class="avatar">
+                    <div
+                        class="w-24 h-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden shadow-lg"
+                    >
+                        <img
+                            src={character.avatarUrl.startsWith("local:")
+                                ? assetPreviews.get(
+                                      character.assets.assets.find(
+                                          (a) => a.data === character.avatarUrl
+                                      )?.name || ""
+                                  )
+                                : character.avatarUrl}
+                            alt="Avatar preview"
+                            class="object-cover"
+                            onerror={(e) =>
+                                ((e.currentTarget as HTMLImageElement).src =
+                                    `https://api.dicebear.com/7.x/initials/svg?seed=${character?.name ?? "unknown"}`)}
+                        />
+                    </div>
+                </div>
             </div>
         {/if}
+
+        <!-- Asset Picker Grid -->
+        {#if imageAssets.length > 0}
+            <div class="mb-4">
+                <p class="text-sm opacity-70 mb-2">Select from assets:</p>
+                <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
+                    {#each imageAssets as asset (asset.name)}
+                        {@const previewUrl = assetPreviews.get(asset.name)}
+                        {@const isSelected = character.avatarUrl === asset.data}
+                        <button
+                            class="relative aspect-square rounded-lg overflow-hidden border-2 transition-all duration-200 hover:scale-105 active:scale-95 group shadow-sm bg-base-200"
+                            class:border-primary={isSelected}
+                            class:border-transparent={!isSelected}
+                            onclick={() => {
+                                if (typeof asset.data === "string") {
+                                    updateField("avatarUrl", asset.data);
+                                } else {
+                                    Logger.error(
+                                        `Asset data is not a string. Perhaps it's still embedded file, not a pointer for AssetStorage?`,
+                                        `${asset.name} as ${asset.mimeType}`
+                                    );
+                                }
+                            }}
+                            aria-label="Select {asset.name} as avatar"
+                        >
+                            {#if previewUrl}
+                                <img
+                                    src={previewUrl}
+                                    alt={asset.name}
+                                    class="w-full h-full object-cover"
+                                />
+                            {:else}
+                                <div class="w-full h-full flex items-center justify-center">
+                                    <span class="loading loading-spinner loading-xs"></span>
+                                </div>
+                            {/if}
+
+                            {#if isSelected}
+                                <div
+                                    class="absolute inset-0 bg-primary/20 flex items-center justify-center"
+                                >
+                                    <div
+                                        class="badge badge-primary badge-sm shadow-sm ring-1 ring-white/20"
+                                    >
+                                        Selected
+                                    </div>
+                                </div>
+                            {/if}
+                        </button>
+                    {/each}
+                </div>
+            </div>
+        {/if}
+
+        <!-- Manual URL Input (Hidden by default) -->
+        <div class="collapse collapse-arrow bg-base-200/30 border border-base-300 rounded-lg">
+            <input type="checkbox" bind:checked={showManualUrl} />
+            <div class="collapse-title text-sm font-medium flex items-center gap-2">
+                Manual URL Settings
+            </div>
+            <div class="collapse-content space-y-4">
+                <div class="fieldset">
+                    <label for="char-avatar-url" class="fieldset-legend"
+                        >Avatar External URL / Storage Key</label
+                    >
+                    <input
+                        type="text"
+                        id="char-avatar-url"
+                        class="input input-sm w-full bg-base-100"
+                        value={character.avatarUrl || ""}
+                        oninput={(e) =>
+                            updateField("avatarUrl", e.currentTarget.value || undefined)}
+                        placeholder="e.g. https://example.com/image.png or local:..."
+                    />
+                    <div class="label">
+                        <span class="label-text-alt"
+                            >Directly specify the avatar source. Useful for external links.</span
+                        >
+                    </div>
+                </div>
+            </div>
+        </div>
     </fieldset>
 </div>

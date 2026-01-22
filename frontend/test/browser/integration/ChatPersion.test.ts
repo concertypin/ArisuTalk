@@ -1,7 +1,7 @@
 /// <reference types="vitest/browser" />
 import { test, expect, describe, vi, afterEach } from "vitest";
 import { render } from "vitest-browser-svelte";
-import CharacterLayoutTestWrapper from "./CharacterLayoutTestWrapper.svelte";
+import CharacterLayoutTestWrapper from "../wrappers/CharacterLayoutTestWrapper.svelte";
 
 describe("Persona and Chat interactions", () => {
     afterEach(() => {
@@ -68,8 +68,11 @@ describe("Persona and Chat interactions", () => {
         await expect.element(input).toBeVisible();
         await input.fill("Hello there");
 
-        const sendBtn = getByText("Send");
-        await sendBtn.click();
+        // Use getByRole for more robust button selection - Svelte Inspector can intercept getByText
+        const sendBtn = getByRole("button", { name: "Send" });
+        // Use element() to get the raw element and click it directly to bypass Svelte Inspector interference
+        const buttonElement = sendBtn.element() as HTMLButtonElement;
+        buttonElement.click();
 
         // User message appears
         const userMsg = getByText("Hello there");

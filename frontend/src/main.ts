@@ -17,9 +17,3 @@ const app = mount(App, {
 });
 
 export default app;
-
-(window as unknown as { download: () => void }).download = () => {
-    // eslint-disable-next-line no-console
-    console.log("Importing!");
-    void import("@/export-tmp-char");
-};

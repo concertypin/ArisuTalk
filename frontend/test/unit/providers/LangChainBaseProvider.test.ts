@@ -227,8 +227,7 @@ describe("LangChainBaseProvider", () => {
         const generator = provider.stream([new HumanMessage("hi")]);
 
         await expect(async () => {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            for await (const chunk of generator) {
+            for await (const _ of generator) {
                 // do nothing
             }
         }).rejects.toThrow("Other error");
