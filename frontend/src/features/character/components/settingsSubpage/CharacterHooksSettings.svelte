@@ -5,7 +5,11 @@
      * Fully editable hooks for display, input, output, request.
      */
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import { Plus, Trash2, ChevronDown, ChevronUp, AlertTriangle } from "@lucide/svelte";
+    import Plus from "phosphor-svelte/lib/Plus";
+    import Trash from "phosphor-svelte/lib/Trash";
+    import CaretDown from "phosphor-svelte/lib/CaretDown";
+    import CaretUp from "phosphor-svelte/lib/CaretUp";
+    import Warning from "phosphor-svelte/lib/Warning";
     import { merge, cloneDeep } from "lodash-es";
 
     type ReplaceHook = Character["executables"]["replaceHooks"];
@@ -87,7 +91,7 @@
     <h3 class="text-lg font-semibold">Advanced Settings</h3>
 
     <div class="alert alert-warning">
-        <AlertTriangle size={18} />
+        <Warning size={18} />
         <span
             >These are advanced settings. Incorrect configuration may affect character behavior.</span
         >
@@ -179,9 +183,9 @@
                         </span>
                         <span class="badge badge-sm badge-ghost">{hook.meta.type}</span>
                         {#if expandedHookIndex === index}
-                            <ChevronUp size={16} />
+                            <CaretUp size={16} />
                         {:else}
-                            <ChevronDown size={16} />
+                            <CaretDown size={16} />
                         {/if}
                     </div>
 
@@ -317,7 +321,7 @@
                                     class="btn btn-sm btn-error btn-outline gap-1"
                                     onclick={() => deleteHook(activeHookType, index)}
                                 >
-                                    <Trash2 size={14} /> Delete
+                                    <Trash size={14} /> Delete
                                 </button>
                             </div>
                         </div>

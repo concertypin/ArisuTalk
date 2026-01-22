@@ -3,14 +3,12 @@
     import { Logger } from "@common/logger/Logger";
 
     import { settings } from "@/lib/stores/settings.svelte";
-    import {
-        X,
-        Settings as SettingsIcon,
-        MessageSquare,
-        Cpu,
-        Info,
-        SlidersVertical,
-    } from "@lucide/svelte";
+    import X from "phosphor-svelte/lib/X";
+    import Gear from "phosphor-svelte/lib/Gear";
+    import ChatCircleText from "phosphor-svelte/lib/ChatCircleText";
+    import Cpu from "phosphor-svelte/lib/Cpu";
+    import Info from "phosphor-svelte/lib/Info";
+    import SlidersHorizontal from "phosphor-svelte/lib/SlidersHorizontal";
 
     // Subpage components
     import GeneralSettings from "./settingSubpage/GeneralSettings.svelte";
@@ -73,7 +71,7 @@
                 id="settings-title"
                 class="text-xl font-bold flex items-center gap-2 tracking-tight"
             >
-                <SettingsIcon size={24} /> Settings
+                <Gear size={24} /> Settings
             </h2>
             <button
                 class="btn btn-ghost btn-sm btn-square hover:bg-base-300/50"
@@ -96,7 +94,7 @@
                             onclick={() => (activeTab = "general")}
                             aria-label="General Settings"
                         >
-                            <SettingsIcon size={18} /> General
+                            <Gear size={18} /> General
                         </button>
                     </li>
                     <li>
@@ -116,7 +114,7 @@
                             onclick={() => (activeTab = "prompt")}
                             aria-label="Prompt Settings"
                         >
-                            <MessageSquare size={18} /> Prompts
+                            <ChatCircleText size={18} /> Prompts
                         </button>
                     </li>
                     <li>
@@ -126,7 +124,7 @@
                             onclick={() => (activeTab = "advanced")}
                             aria-label="Advanced Settings"
                         >
-                            <SlidersVertical size={18} /> Advanced
+                            <SlidersHorizontal size={18} /> Advanced
                         </button>
                     </li>
                     <li>

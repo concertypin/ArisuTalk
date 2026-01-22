@@ -87,9 +87,6 @@ importers:
       '@langchain/openai':
         specifier: ^1.2.0
         version: 1.2.0(@langchain/core@1.1.4(openai@6.14.0(ws@8.18.3)(zod@4.1.13)))(ws@8.18.3)
-      '@lucide/svelte':
-        specifier: ^0.559.0
-        version: 0.559.0(svelte@5.45.10)
       adze:
         specifier: ^2.2.5
         version: 2.2.5
@@ -108,6 +105,9 @@ importers:
       lodash-es:
         specifier: ^4.17.22
         version: 4.17.22
+      phosphor-svelte:
+        specifier: ^3.0.1
+        version: 3.0.1(svelte@5.45.10)(vite@7.2.7(@types/node@25.0.2)(jiti@2.6.1)(lightningcss@1.30.2)(yaml@2.8.2))
       svelte:
         specifier: ^5.39.3
         version: 5.45.10
@@ -1120,11 +1120,6 @@ packages:
     engines: {node: '>=20'}
     peerDependencies:
       '@langchain/core': ^1.0.0
-
-  '@lucide/svelte@0.559.0':
-    resolution: {integrity: sha512-ZIGuYvrayrbPR/GhNlhvFXesH45LyEz38WphtkIu6UEyKZsFnGHFQD7CAXDOoum6JiqN2PSIxilVRcHwWLBmoQ==}
-    peerDependencies:
-      svelte: ^5
 
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
@@ -2729,6 +2724,15 @@ packages:
 
   pathe@2.0.3:
     resolution: {integrity: sha512-WUjGcAqP1gQacoQe+OBJsFA7Ld4DyXuUIjZ5cc75cLHvJ7dtNsTugphxIADwspS+AraAUePCKrSVtPLFj/F88w==}
+
+  phosphor-svelte@3.0.1:
+    resolution: {integrity: sha512-QuxdzWCBjNZXglk4XpmaKb+JRA6XgKOYWpBY8k82NZwxO5ec7u2iFuueAijKYgj/7hLWHtreAPc2Q5uZFNTRSQ==}
+    peerDependencies:
+      svelte: ^5.0.0 || ^5.0.0-next.96
+      vite: '>=5'
+    peerDependenciesMeta:
+      vite:
+        optional: true
 
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
@@ -4492,10 +4496,6 @@ snapshots:
     transitivePeerDependencies:
       - ws
 
-  '@lucide/svelte@0.559.0(svelte@5.45.10)':
-    dependencies:
-      svelte: 5.45.10
-
   '@polka/url@1.0.0-next.29': {}
 
   '@poppinss/colors@4.1.6':
@@ -6149,6 +6149,14 @@ snapshots:
   path-to-regexp@6.3.0: {}
 
   pathe@2.0.3: {}
+
+  phosphor-svelte@3.0.1(svelte@5.45.10)(vite@7.2.7(@types/node@25.0.2)(jiti@2.6.1)(lightningcss@1.30.2)(yaml@2.8.2)):
+    dependencies:
+      estree-walker: 3.0.3
+      magic-string: 0.30.21
+      svelte: 5.45.10
+    optionalDependencies:
+      vite: 7.2.7(@types/node@25.0.2)(jiti@2.6.1)(lightningcss@1.30.2)(yaml@2.8.2)
 
   picocolors@1.1.1: {}
 

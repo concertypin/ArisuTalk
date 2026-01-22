@@ -5,7 +5,10 @@
      * Each entry has name, content, conditions, priority, and enabled toggle.
      */
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import { Plus, Trash2, ChevronDown, ChevronUp } from "@lucide/svelte";
+    import Plus from "phosphor-svelte/lib/Plus";
+    import Trash from "phosphor-svelte/lib/Trash";
+    import CaretDown from "phosphor-svelte/lib/CaretDown";
+    import CaretUp from "phosphor-svelte/lib/CaretUp";
     import { merge } from "lodash-es";
 
     type LorebookEntry = Character["prompt"]["lorebook"]["data"][number];
@@ -150,9 +153,9 @@
                         </span>
                         <span class="text-xs text-base-content/50">P: {entry.priority}</span>
                         {#if expandedEntryId === entry.id}
-                            <ChevronUp size={16} />
+                            <CaretUp size={16} />
                         {:else}
-                            <ChevronDown size={16} />
+                            <CaretDown size={16} />
                         {/if}
                     </div>
 
@@ -255,7 +258,7 @@
                                     class="btn btn-sm btn-error btn-outline gap-1"
                                     onclick={() => deleteEntry(entry.id)}
                                 >
-                                    <Trash2 size={14} /> Delete
+                                    <Trash size={14} /> Delete
                                 </button>
                             </div>
                         </div>

@@ -3,7 +3,8 @@
 <script lang="ts">
     import { settings } from "@/lib/stores/settings.svelte";
     import { LLMConfigSchema } from "@/lib/types/IDataModel";
-    import { Plus, Info } from "@lucide/svelte";
+    import Plus from "phosphor-svelte/lib/Plus";
+    import Info from "phosphor-svelte/lib/Info";
     import GenerationParameters from "./LLMSetting/GenerationParameters.svelte";
     import { apply } from "@arisutalk/character-spec/utils";
 

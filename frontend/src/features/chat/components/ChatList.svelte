@@ -1,6 +1,8 @@
 <script lang="ts">
     import { chatStore } from "../stores/chatStore.svelte";
-    import { Plus, MessageSquare, Trash2 } from "@lucide/svelte";
+    import Plus from "phosphor-svelte/lib/Plus";
+    import ChatTeardropText from "phosphor-svelte/lib/ChatTeardropText";
+    import Trash from "phosphor-svelte/lib/Trash";
 
     type Props = {
         characterId: string;
@@ -49,7 +51,7 @@
                     : ''}"
                 onclick={() => handleSelect(chat.id)}
             >
-                <MessageSquare size={16} class="opacity-70" />
+                <ChatTeardropText size={16} class="opacity-70" />
                 <span class="truncate text-sm font-medium flex-1 text-left">{chat.name}</span>
 
                 <div class="opacity-0 group-hover:opacity-100 transition-opacity">
@@ -64,7 +66,7 @@
                             }
                         }}
                     >
-                        <Trash2 size={14} />
+                        <Trash size={14} />
                     </div>
                 </div>
             </button>

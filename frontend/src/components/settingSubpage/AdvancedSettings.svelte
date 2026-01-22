@@ -1,14 +1,14 @@
 <script lang="ts">
     import { settings } from "@/lib/stores/settings.svelte";
     import LogLevelSelector from "../ui/LogLevelSelector.svelte";
-    import { TriangleAlert } from "@lucide/svelte";
+    import Warning from "phosphor-svelte/lib/Warning";
 </script>
 
 {#snippet noopIcon()}
     <!--When hover, shows small  this is a noop-->
     <div class="tooltip" data-tip="This is currently a no-op.">
         <!--Use daisyui color-->
-        <TriangleAlert class="text-warning" />
+        <Warning class="text-warning" />
     </div>
 {/snippet}
 <div class="space-y-6">

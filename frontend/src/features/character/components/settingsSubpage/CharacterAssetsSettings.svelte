@@ -7,7 +7,11 @@
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import type { AssetEntity } from "@arisutalk/character-spec/v0/Character/Assets";
     import { merge } from "lodash-es";
-    import { Upload, Trash2, ChevronDown, ChevronUp, GripVertical } from "@lucide/svelte";
+    import UploadSimple from "phosphor-svelte/lib/UploadSimple";
+    import Trash from "phosphor-svelte/lib/Trash";
+    import CaretDown from "phosphor-svelte/lib/CaretDown";
+    import CaretUp from "phosphor-svelte/lib/CaretUp";
+    import DotsSixVertical from "phosphor-svelte/lib/DotsSixVertical";
     import { getAssetStorage } from "@/features/character/adapters/assetStorage/assetStorageResolver";
     import { Logger } from "@common/logger/Logger";
 
@@ -183,7 +187,7 @@
                 onclick={() => fileInput?.click()}
                 aria-label="Upload Asset"
             >
-                <Upload size={18} />
+                <UploadSimple size={18} />
                 Upload
             </button>
         </div>
@@ -214,7 +218,7 @@
                         tabindex="0"
                     >
                         <div class="flex items-start gap-2 mb-2">
-                            <GripVertical size={16} class="text-base-content/50 mt-1" />
+                            <DotsSixVertical size={16} class="text-base-content/50 mt-1" />
                             <div class="flex-1 min-w-0">
                                 <input
                                     type="text"
@@ -230,7 +234,7 @@
                                 onclick={() => deleteAsset(globalIndex)}
                                 aria-label="Delete asset"
                             >
-                                <Trash2 size={16} />
+                                <Trash size={16} />
                             </button>
                         </div>
                         {#if previewUrl}
@@ -265,9 +269,9 @@
             >
                 <h4 class="font-medium">Other Assets ({otherAssets.length})</h4>
                 {#if expandOtherAssets}
-                    <ChevronUp size={16} />
+                    <CaretUp size={16} />
                 {:else}
-                    <ChevronDown size={16} />
+                    <CaretDown size={16} />
                 {/if}
             </div>
 
@@ -284,7 +288,7 @@
                             role="button"
                             tabindex="0"
                         >
-                            <GripVertical size={16} class="text-base-content/50" />
+                            <DotsSixVertical size={16} class="text-base-content/50" />
                             <div class="flex-1 min-w-0">
                                 <input
                                     type="text"
@@ -301,7 +305,7 @@
                                 onclick={() => deleteAsset(globalIndex)}
                                 aria-label="Delete asset"
                             >
-                                <Trash2 size={16} />
+                                <Trash size={16} />
                             </button>
                         </div>
                     {/each}

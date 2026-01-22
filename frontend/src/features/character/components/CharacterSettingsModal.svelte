@@ -8,15 +8,13 @@
     import { characterStore } from "@/features/character/stores/characterStore.svelte";
     import { Logger } from "@common/logger/Logger";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import {
-        X,
-        User,
-        MessageSquare,
-        BookOpen,
-        FileText,
-        Settings as SettingsIcon,
-        Image,
-    } from "@lucide/svelte";
+    import X from "phosphor-svelte/lib/X";
+    import User from "phosphor-svelte/lib/User";
+    import ChatCircleText from "phosphor-svelte/lib/ChatCircleText";
+    import BookOpen from "phosphor-svelte/lib/BookOpen";
+    import FileText from "phosphor-svelte/lib/FileText";
+    import Gear from "phosphor-svelte/lib/Gear";
+    import Image from "phosphor-svelte/lib/Image";
 
     // Subpage components
     import CharacterBasicSettings from "./settingsSubpage/CharacterBasicSettings.svelte";
@@ -134,7 +132,7 @@
                 id="character-settings-title"
                 class="text-xl font-bold flex items-center gap-2 tracking-tight"
             >
-                <SettingsIcon size={24} />
+                <Gear size={24} />
                 {editingCharacter?.name || "Character"} Settings
             </h2>
             <button
@@ -168,7 +166,7 @@
                             onclick={() => (activeTab = "prompt")}
                             aria-label="Prompt Settings"
                         >
-                            <MessageSquare size={18} /> Prompt
+                            <ChatCircleText size={18} /> Prompt
                         </button>
                     </li>
                     <li>
@@ -208,7 +206,7 @@
                             onclick={() => (activeTab = "advanced")}
                             aria-label="Advanced Settings"
                         >
-                            <SettingsIcon size={18} /> Advanced
+                            <Gear size={18} /> Advanced
                         </button>
                     </li>
                 </ul>

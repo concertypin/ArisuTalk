@@ -1,7 +1,12 @@
 <script lang="ts">
     import { personaStore } from "../stores/personaStore.svelte";
     import { PersonaSchema, type Persona } from "../schema";
-    import { Plus, User, FileText, StickyNote, SquarePen, Shield } from "@lucide/svelte";
+    import Plus from "phosphor-svelte/lib/Plus";
+    import User from "phosphor-svelte/lib/User";
+    import FileText from "phosphor-svelte/lib/FileText";
+    import Note from "phosphor-svelte/lib/Note";
+    import PencilSimple from "phosphor-svelte/lib/PencilSimple";
+    import Shield from "phosphor-svelte/lib/Shield";
     import { ZodError } from "zod";
 
     type Props = {
@@ -67,7 +72,7 @@
 <div class="flex flex-col h-full">
     <div class="flex items-center gap-2 mb-6 pb-2 border-b border-base-300">
         {#if persona}
-            <SquarePen class="w-5 h-5 text-primary" />
+            <PencilSimple class="w-5 h-5 text-primary" />
             <h3 class="font-bold text-lg">Edit Persona</h3>
         {:else}
             <Plus class="w-5 h-5 text-primary" />
@@ -110,7 +115,7 @@
 
         <fieldset class="fieldset w-full">
             <label for="p_note" class="fieldset-legend flex items-center gap-2">
-                <StickyNote size={16} /> Note (Private)
+                <Note size={16} /> Note (Private)
             </label>
             <textarea
                 id="p_note"

@@ -13,7 +13,7 @@
     import MessageActions from "@/components/MessageActions.svelte";
     import { toastStore } from "@/lib/stores/toast.svelte";
     import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
-    import { Settings } from "@lucide/svelte";
+    import Gear from "phosphor-svelte/lib/Gear";
 
     let inputValue = $state("");
     let messagesContainer = $state<HTMLElement | null>(null);
@@ -140,7 +140,7 @@
                 aria-label="Character Settings"
                 title="Character Settings"
             >
-                <Settings size={18} />
+                <Gear size={18} />
             </button>
         {/if}
     </header>

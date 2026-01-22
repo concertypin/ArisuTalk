@@ -4,7 +4,11 @@
   Shows on hover and provides controls for message manipulation.
 -->
 <script lang="ts">
-    import { Pencil, Trash2, RefreshCw, Check, X } from "@lucide/svelte";
+    import Pencil from "phosphor-svelte/lib/Pencil";
+    import Trash from "phosphor-svelte/lib/Trash";
+    import ArrowClockwise from "phosphor-svelte/lib/ArrowClockwise";
+    import Check from "phosphor-svelte/lib/Check";
+    import X from "phosphor-svelte/lib/X";
     import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
 
     type Props = {
@@ -95,7 +99,7 @@
             onclick={handleDeleteClick}
             title="Click again to confirm delete"
         >
-            <Trash2 class="w-3.5 h-3.5" />
+            <Trash class="w-3.5 h-3.5" />
         </button>
         <button
             class="btn btn-xs btn-ghost btn-circle"
@@ -113,7 +117,7 @@
             onclick={handleDeleteClick}
             title="Delete message"
         >
-            <Trash2 class="w-3.5 h-3.5" />
+            <Trash class="w-3.5 h-3.5" />
         </button>
         {#if isAssistant}
             <button
@@ -121,7 +125,7 @@
                 onclick={onRegenerate}
                 title="Regenerate response"
             >
-                <RefreshCw class="w-3.5 h-3.5" />
+                <ArrowClockwise class="w-3.5 h-3.5" />
             </button>
         {/if}
     {/if}

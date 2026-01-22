@@ -1,7 +1,9 @@
 <script lang="ts">
     import { settings } from "@/lib/stores/settings.svelte";
     import { type LLMConfig } from "@/lib/types/IDataModel";
-    import { Trash2, Check, Power } from "@lucide/svelte";
+    import Trash from "phosphor-svelte/lib/Trash";
+    import Check from "phosphor-svelte/lib/Check";
+    import Power from "phosphor-svelte/lib/Power";
 
     type Props = {
         config: LLMConfig;
@@ -103,7 +105,7 @@
                     onclick={removeLLMConfig}
                     aria-label="Delete config"
                 >
-                    <Trash2 size={16} />
+                    <Trash size={16} />
                 </button>
             </div>
         </div>

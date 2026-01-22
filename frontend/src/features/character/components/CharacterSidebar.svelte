@@ -1,5 +1,7 @@
 <script lang="ts">
-    import { Plus, User, Settings } from "@lucide/svelte";
+    import Plus from "phosphor-svelte/lib/Plus";
+    import User from "phosphor-svelte/lib/User";
+    import Gear from "phosphor-svelte/lib/Gear";
     import { flip } from "svelte/animate";
     import CharacterSidebarItem from "./CharacterSidebarItem.svelte";
     import { characterStore } from "../stores/characterStore.svelte";
@@ -110,7 +112,7 @@
                 onclick={() => uiState.openSettingsModal()}
                 aria-label="Settings"
             >
-                <Settings size={24} />
+                <Gear size={24} />
             </button>
         </div>
         <div class="tooltip tooltip-right z-50" data-tip="Personas">
