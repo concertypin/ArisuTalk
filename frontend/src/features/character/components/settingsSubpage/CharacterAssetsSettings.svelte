@@ -38,9 +38,9 @@
                     try {
                         await assetStorage.init();
                         const url = await assetStorage.getAssetUrl(new URL(asset.data));
-                        assetPreviews.set(asset.name, url);
+                        assetPreviews.set(asset.id, url);
                     } catch (e) {
-                        Logger.error("Failed to load asset preview:", asset.name, e);
+                        Logger.error("Failed to load asset preview:", asset.id, e);
                     }
                 }
             }
@@ -55,10 +55,6 @@
         character.assets.assets.filter((a) => !a.mimeType.startsWith("image/"))
     );
 
-    function checkDuplicateName(name: string, currentIndex: number): boolean {
-        return character.assets.assets.some((a, i) => i !== currentIndex && a.name === name);
-    }
-
     async function handleFileUpload(e: Event) {
         const target = e.target as HTMLInputElement;
         const files = target.files;
@@ -67,19 +63,19 @@
         const file = files[0];
         const baseName = file.name;
 
-        // Check for duplicate names
-        if (character.assets.assets.some((a) => a.name === baseName)) {
-            duplicateNameError = `Asset name "${baseName}" already exists!`;
-            setTimeout(() => (duplicateNameError = null), 3000);
-            target.value = "";
-            return;
-        }
-
         try {
             await assetStorage.init();
-            const localUrl = await assetStorage.saveAsset(baseName, file);
+
+            // Use ID-based filename to avoid collision even if names are duplicate
+            const id = crypto.randomUUID();
+            const extension = baseName.split(".").pop();
+            // If extension exists, keep it. Otherwise just use ID.
+            const storageName = extension && baseName.includes(".") ? `${id}.${extension}` : id;
+
+            const localUrl = await assetStorage.saveAsset(storageName, file);
 
             const newAsset: AssetEntity = {
+                id,
                 name: baseName,
                 mimeType: file.type,
                 data: localUrl.toString(),
@@ -104,14 +100,7 @@
     }
 
     function updateAssetName(index: number, newName: string) {
-        const isDuplicate = checkDuplicateName(newName, index);
-
-        if (isDuplicate) {
-            duplicateNameError = `Asset name "${newName}" already exists!`;
-            setTimeout(() => (duplicateNameError = null), 3000);
-            return;
-        }
-
+        // No duplicate check needed as per new spec (v0.0.17)
         const updatedAssets = [...character.assets.assets];
         updatedAssets[index] = { ...updatedAssets[index], name: newName };
 
@@ -205,9 +194,9 @@
         <div class="space-y-2">
             <h4 class="font-medium">Images</h4>
             <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {#each imageAssets as asset, _ (asset.name)}
+                {#each imageAssets as asset, _ (asset.id)}
                     {@const globalIndex = character.assets.assets.indexOf(asset)}
-                    {@const previewUrl = assetPreviews.get(asset.name)}
+                    {@const previewUrl = assetPreviews.get(asset.id)}
                     <div
                         class="border border-base-300 rounded-lg p-3 bg-base-100 cursor-move"
                         draggable="true"
@@ -277,7 +266,7 @@
 
             {#if expandOtherAssets}
                 <div class="p-3 space-y-2">
-                    {#each otherAssets as asset (asset.name)}
+                    {#each otherAssets as asset (asset.id)}
                         {@const globalIndex = character.assets.assets.indexOf(asset)}
                         <div
                             class="flex items-center gap-2 p-2 border border-base-300 rounded bg-base-100 cursor-move"

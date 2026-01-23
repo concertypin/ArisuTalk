@@ -12,6 +12,7 @@ export async function parseCharacter(rawData: ArrayBuffer): Promise<ParseResult<
     //cbor decode
     const data = await readAll(decom);
     const decoded: unknown = decode(data);
+
     const result = await CharacterSchema.safeParseAsync(decoded);
 
     if (result.success) {

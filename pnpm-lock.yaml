@@ -70,8 +70,8 @@ importers:
   frontend:
     dependencies:
       '@arisutalk/character-spec':
-        specifier: 0.0.16
-        version: 0.0.16(zod@4.1.13)
+        specifier: 0.0.17
+        version: 0.0.17(zod@4.1.13)
       '@humanspeak/svelte-markdown':
         specifier: ^0.8.13
         version: 0.8.13(svelte@5.45.10)
@@ -212,8 +212,8 @@ packages:
       zod:
         optional: true
 
-  '@arisutalk/character-spec@0.0.16':
-    resolution: {integrity: sha512-4NQxJt2VcvNBQoq5nKAtB4Z1anYHoJyCM6Uift+6miGbuKyKGt1HPKxUp8esut/+04vT/LqS/eEPE2RaLWTUEA==}
+  '@arisutalk/character-spec@0.0.17':
+    resolution: {integrity: sha512-uRA3DAt2+ohOkbjTPUAwLcKbNd90kTEF2+wtWJhF4O7ey/7dMkS+Lzj3KrBOVktDrdXYbT0meujMZc6/R4GrOw==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^4.1.13
@@ -3368,7 +3368,7 @@ snapshots:
     optionalDependencies:
       zod: 4.1.13
 
-  '@arisutalk/character-spec@0.0.16(zod@4.1.13)':
+  '@arisutalk/character-spec@0.0.17(zod@4.1.13)':
     dependencies:
       zod: 4.1.13
 

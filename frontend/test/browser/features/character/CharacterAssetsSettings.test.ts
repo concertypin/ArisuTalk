@@ -81,6 +81,7 @@ describe("CharacterAssetsSettings Component", () => {
     test("shows image assets section when image exists", async () => {
         mockCharacter.assets.assets = [
             {
+                id: "asset-1",
                 name: "portrait.png",
                 mimeType: "image/png",
                 data: "local://opfs/portrait.png",
@@ -98,6 +99,7 @@ describe("CharacterAssetsSettings Component", () => {
     test("shows other assets section when non-image exists", async () => {
         mockCharacter.assets.assets = [
             {
+                id: "asset-2",
                 name: "script.js",
                 mimeType: "application/javascript",
                 data: "local://opfs/script.js",
@@ -115,6 +117,7 @@ describe("CharacterAssetsSettings Component", () => {
     test("calls onChange when deleting asset", async () => {
         mockCharacter.assets.assets = [
             {
+                id: "asset-3",
                 name: "delete-me.png",
                 mimeType: "image/png",
                 data: "local://opfs/delete-me.png",
@@ -145,11 +148,13 @@ describe("CharacterAssetsSettings Component", () => {
     test("has draggable elements for reordering", async () => {
         mockCharacter.assets.assets = [
             {
+                id: "asset-4",
                 name: "first.png",
                 mimeType: "image/png",
                 data: "local://opfs/first.png",
             },
             {
+                id: "asset-5",
                 name: "second.png",
                 mimeType: "image/png",
                 data: "local://opfs/second.png",

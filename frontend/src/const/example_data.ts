@@ -54,6 +54,7 @@ export const exampleCharacter: Character = {
     assets: {
         assets: [
             {
+                id: "profile-image",
                 data: profileImageUrl,
                 mimeType: "image/png",
                 name: "profile.png",

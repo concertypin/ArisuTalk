@@ -70,6 +70,7 @@ describe("CharacterBasicSettings Component", () => {
     test("shows asset picker when image assets exist", async () => {
         mockCharacter.assets.assets = [
             {
+                id: "asset-1",
                 name: "avatar.png",
                 mimeType: "image/png",
                 data: "local://opfs/avatar.png",
@@ -89,6 +90,7 @@ describe("CharacterBasicSettings Component", () => {
         const assetData = "local://opfs/avatar.png";
         mockCharacter.assets.assets = [
             {
+                id: "asset-1",
                 name: "avatar.png",
                 mimeType: "image/png",
                 data: assetData,
@@ -119,12 +121,14 @@ describe("CharacterBasicSettings Component", () => {
         const manualUrlInput = screen.getByRole("textbox", {
             name: "Avatar External URL / Storage Key",
             includeHidden: true,
+            //includeHidden: true, // vitest-browser might handle this differently, but let's keep it safe
         });
-        // DaisyUI collapse hides content using height/overflow/visibility
+
+        // Wait for potential async rendering (though not usually needed for initial render)
+        // Check visibility.
+        // Note: DaisyUI collapse uses checkbox. If not checked, content has max-height: 0 etc.
         await expect.element(manualUrlInput).not.toBeVisible();
 
-        // DaisyUI collapse uses a hidden checkbox to control expand/collapse state.
-        // Click the checkbox (via its label text) instead of the title text directly.
         const collapseCheckbox = screen.container.querySelector(
             ".collapse input[type='checkbox']"
         ) as HTMLInputElement;
@@ -144,7 +148,6 @@ describe("CharacterBasicSettings Component", () => {
 
         const preview = getByAltText("Avatar preview");
         await expect.element(preview).toBeVisible();
-        //await sleep(30)
         await expect.element(preview).toHaveAttribute("src", character.avatarUrl);
     });
 });

@@ -41,13 +41,13 @@
                             IfNotExistBehavior.RETURN_NULL
                         );
                         if (url && !revoked) {
-                            assetPreviews.set(asset.name, url);
+                            assetPreviews.set(asset.id, url);
                             blobUrls.add(url);
                         }
                     } catch (e) {
                         Logger.error(
                             "Failed to load asset preview for avatar picker:",
-                            asset.name,
+                            asset.id,
                             e
                         );
                     }
@@ -63,6 +63,14 @@
                 if (typeof url === "string") URL.revokeObjectURL(url);
             }
         };
+    });
+
+    const avatarPreviewSrc = $derived.by(() => {
+        if (!character.avatarUrl) return "";
+        if (!character.avatarUrl.startsWith("local:")) return character.avatarUrl;
+
+        const asset = character.assets.assets.find((a) => a.data === character.avatarUrl);
+        return asset ? assetPreviews.get(asset.id) || "" : character.avatarUrl;
     });
 
     function updateField<const K extends keyof Character>(field: K, value: Character[K]) {
@@ -115,13 +123,7 @@
                         class="w-24 h-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden shadow-lg"
                     >
                         <img
-                            src={character.avatarUrl.startsWith("local:")
-                                ? assetPreviews.get(
-                                      character.assets.assets.find(
-                                          (a) => a.data === character.avatarUrl
-                                      )?.name || ""
-                                  )
-                                : character.avatarUrl}
+                            src={avatarPreviewSrc}
                             alt="Avatar preview"
                             class="object-cover"
                             onerror={(e) =>
@@ -138,8 +140,8 @@
             <div class="mb-4">
                 <p class="text-sm opacity-70 mb-2">Select from assets:</p>
                 <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
-                    {#each imageAssets as asset (asset.name)}
-                        {@const previewUrl = assetPreviews.get(asset.name)}
+                    {#each imageAssets as asset (asset.id)}
+                        {@const previewUrl = assetPreviews.get(asset.id)}
                         {@const isSelected = character.avatarUrl === asset.data}
                         <button
                             class="relative aspect-square rounded-lg overflow-hidden border-2 transition-all duration-200 hover:scale-105 active:scale-95 group shadow-sm bg-base-200"
