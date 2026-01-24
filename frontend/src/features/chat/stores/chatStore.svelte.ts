@@ -369,19 +369,14 @@ export class ChatStore {
      */
     private getNextTimestamp(): number {
         const now = Date.now();
-        const lastMsg: Message | undefined = this.activeMessages[this.activeMessages.length - 1];
-        if (!lastMsg) {
+        const lastMsg = this.activeMessages[this.activeMessages.length - 1];
+
+        if (!lastMsg?.timestamp) {
             return now;
         }
-        // If last message is older than 60 seconds, use current time. No sub-millisec needed.
-        if (lastMsg.timestamp > now + 60000) {
-            return now;
-        }
-        // Ensure strictly greater than last message if collision
-        if (typeof lastMsg.timestamp === "number" && lastMsg.timestamp >= now) {
-            return lastMsg.timestamp + 1;
-        }
-        return now;
+
+        // Ensure the new timestamp is strictly greater than the last one.
+        return Math.max(now, lastMsg.timestamp + 1);
     }
 
     async sendMessage(content: string) {
