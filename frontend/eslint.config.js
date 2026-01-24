@@ -5,6 +5,7 @@ import globals from "globals";
 import { defineConfig } from "eslint/config";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
+import phosphorSvelte from "eslint-plugin-phosphor-svelte";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -20,6 +21,7 @@ export default defineConfig([
     js.configs.recommended,
     ...tsConfig,
     ...svelte.configs["flat/recommended"],
+    phosphorSvelte.configs.recommended,
     {
         languageOptions: {
             globals: {

@@ -3,7 +3,6 @@ import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { type PluginOption, type UserConfig, defineConfig, loadEnv } from "vite";
 import { playwright } from "@vitest/browser-playwright";
 import path from "path";
-import { sveltePhosphorOptimize } from "phosphor-svelte/vite";
 type Presence<T> = T extends undefined ? never : T;
 
 type TestConfig = Presence<UserConfig["test"]>;
@@ -42,7 +41,6 @@ export default defineConfig(async (ctx) => {
                 dev: mode !== "production",
             },
         }),
-        sveltePhosphorOptimize(),
     ];
     let env = loadEnv(mode, process.cwd(), "") as Record<string, any>;
     env.VITEST_BROWSER_MODE = runBrowserTest ? "true" : "false";
