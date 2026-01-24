@@ -8,26 +8,36 @@
     default: true;
     prefersdark: true;
     color-scheme: "dark";
-    --color-base-100: oklch(20.768% 0.039 265.754);
-    --color-base-200: oklch(19.314% 0.037 265.754);
-    --color-base-300: oklch(17.86% 0.034 265.754);
-    --color-base-content: oklch(84.153% 0.007 265.754);
-    --color-primary: oklch(75.351% 0.138 232.661);
-    --color-primary-content: oklch(15.07% 0.027 232.661);
-    --color-secondary: oklch(68.011% 0.158 276.934);
-    --color-secondary-content: oklch(13.602% 0.031 276.934);
-    --color-accent: oklch(72.36% 0.176 350.048);
-    --color-accent-content: oklch(14.472% 0.035 350.048);
-    --color-neutral: oklch(27.949% 0.036 260.03);
-    --color-neutral-content: oklch(85.589% 0.007 260.03);
-    --color-info: oklch(68.455% 0.148 237.251);
-    --color-info-content: oklch(0% 0 0);
-    --color-success: oklch(78.452% 0.132 181.911);
-    --color-success-content: oklch(15.69% 0.026 181.911);
-    --color-warning: oklch(83.242% 0.139 82.95);
-    --color-warning-content: oklch(16.648% 0.027 82.95);
-    --color-error: oklch(71.785% 0.17 13.118);
-    --color-error-content: oklch(14.357% 0.034 13.118);
+    /* Optimized backgrounds for good contrast without being too dark */
+    --color-base-100: oklch(19% 0.05 265.754);
+    --color-base-200: oklch(17% 0.048 265.754);
+    --color-base-300: oklch(15% 0.045 265.754);
+    /* Much brighter content for strong contrast (WCAG AAA) */
+    --color-base-content: oklch(96% 0.01 265.754);
+    /* Vibrant, high-saturation primary color */
+    --color-primary: oklch(72% 0.22 235);
+    --color-primary-content: oklch(98% 0.012 235);
+    /* Vibrant, high-saturation secondary color */
+    --color-secondary: oklch(70% 0.24 280);
+    --color-secondary-content: oklch(98% 0.014 280);
+    /* Vibrant, high-saturation accent color */
+    --color-accent: oklch(75% 0.26 350);
+    --color-accent-content: oklch(98% 0.015 350);
+    /* Darker neutral with high-contrast content */
+    --color-neutral: oklch(24% 0.045 260.03);
+    --color-neutral-content: oklch(96% 0.01 260.03);
+    /* High-contrast info color */
+    --color-info: oklch(72% 0.2 240);
+    --color-info-content: oklch(98% 0 0);
+    /* Vivid success color */
+    --color-success: oklch(76% 0.18 160);
+    --color-success-content: oklch(98% 0.012 160);
+    /* Vibrant warning color */
+    --color-warning: oklch(85% 0.19 85);
+    --color-warning-content: oklch(15% 0.04 85);
+    /* Strong error color */
+    --color-error: oklch(68% 0.23 15);
+    --color-error-content: oklch(98% 0.015 15);
     --radius-selector: 1rem;
     --radius-field: 0.5rem;
     --radius-box: 1rem;

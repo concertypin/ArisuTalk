@@ -31,7 +31,7 @@
     let editingPersona = $state<Persona | undefined>(undefined);
     let isPersonaFormOpen = $state(false);
 
-    function handleSelect(id: string) {
+    function handleSelect(id: string | null) {
         selectedCharacterId = id;
     }
 

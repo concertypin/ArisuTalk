@@ -2,6 +2,7 @@
     import Plus from "phosphor-svelte/lib/Plus";
     import User from "phosphor-svelte/lib/User";
     import Gear from "phosphor-svelte/lib/Gear";
+    import House from "phosphor-svelte/lib/House";
     import { flip } from "svelte/animate";
     import CharacterSidebarItem from "./CharacterSidebarItem.svelte";
     import { characterStore } from "../stores/characterStore.svelte";
@@ -9,7 +10,7 @@
 
     type Props = {
         selectedCharacterId: string | null;
-        onSelect: (id: string) => void;
+        onSelect: (id: string | null) => void;
         onAdd: () => void;
         onPersona: () => void;
     };
@@ -60,6 +61,17 @@
 <div
     class="flex flex-col items-center w-18 bg-base-300 py-3 overflow-y-auto overflow-x-hidden h-full scrollbar-none"
 >
+    <!-- Home Button -->
+    <div class="mb-2 tooltip tooltip-right z-50" data-tip="Home">
+        <button
+            class="flex items-center justify-center w-12 h-12 rounded-3xl hover:rounded-xl bg-base-200 hover:bg-accent text-accent hover:text-white transition-all duration-200"
+            onclick={() => onSelect(null)}
+            aria-label="Home"
+        >
+            <House size={24} weight={selectedCharacterId === null ? "fill" : "bold"} />
+        </button>
+    </div>
+
     <div class="flex flex-col items-center gap-1 w-full" role="listbox" aria-label="Characters">
         {#each characterStore.characters as character, index (character.id)}
             {@const dragged = draggedIndex === index}

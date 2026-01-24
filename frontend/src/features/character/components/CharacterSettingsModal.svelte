@@ -240,7 +240,7 @@
                             character={editingCharacter}
                             onChange={handleCharacterChange}
                         />
-                    {:else if activeTab === "advanced"}}
+                    {:else if activeTab === "advanced"}
                         <CharacterHooksSettings
                             character={editingCharacter}
                             onChange={handleCharacterChange}
