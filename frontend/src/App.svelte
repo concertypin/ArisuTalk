@@ -11,6 +11,7 @@
     import ToastContainer from "@/components/ToastContainer.svelte";
     import IconContext from "phosphor-svelte/lib/IconContext";
     import type { Component } from "svelte";
+    import { loadFont } from "@/lib/utils/fontUtils";
 
     // Initialize router and settings on mount
     $effect(() => {
@@ -38,6 +39,18 @@
                 isLoading = false;
             }
         })().catch((err) => Logger.error("Failed to load route", err));
+    });
+
+    // Apply global font settings
+    $effect(() => {
+        const { fontSize, fontFamily } = settings.value;
+        if (fontFamily) {
+            loadFont(fontFamily);
+            document.documentElement.style.setProperty("--app-font-family", fontFamily);
+        }
+        if (fontSize) {
+            document.documentElement.style.setProperty("--app-font-size", `${fontSize}px`);
+        }
     });
 </script>
 

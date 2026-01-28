@@ -1,8 +1,15 @@
 @import "tailwindcss";
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap");
 
+/* Dark mode annotation */
+:root {
+    color-scheme: light dark;
+}
+
 /* DaisyUI theme */
-@plugin "daisyui";
+@plugin "daisyui" {
+    themes: false;
+}
 @plugin "daisyui/theme" {
     name: "night";
     default: true;
@@ -55,8 +62,11 @@
         background-color: var(--color-base-100);
         color: var(--color-base-content);
         -webkit-font-smoothing: antialiased;
+        /* Default font size, overridden by --app-font-size */
+        font-size: var(--app-font-size, 16px);
+        /* Default font family, overridden by --app-font-family */
         font-family:
-            "Noto Sans KR",
+            var(--app-font-family, "Noto Sans KR"),
             system-ui,
             -apple-system,
             BlinkMacSystemFont,
@@ -64,6 +74,10 @@
             Roboto,
             sans-serif;
         font-weight: 400;
+        /* Smooth font transition */
+        transition:
+            font-size 0.2s ease,
+            font-family 0.2s ease;
     }
     #app {
         height: 100%;

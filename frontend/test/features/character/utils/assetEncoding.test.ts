@@ -4,6 +4,14 @@ import {
     blobToUint8Array,
     collectTransferableBuffers,
 } from "@/features/character/utils/assetEncoding";
+import { Logger } from "@common/logger/Logger";
+
+vi.mock("@common/logger/Logger", () => ({
+    Logger: {
+        warn: vi.fn(),
+        error: vi.fn(),
+    },
+}));
 import type { AssetEntity } from "@arisutalk/character-spec/v0/Character/Assets";
 import type { IAssetStorageAdapter } from "@/lib/interfaces";
 
@@ -248,8 +256,6 @@ describe("remapAssetToUint8Array", () => {
         });
 
         it("should warn and leave malformed data URL (no comma) as is", async () => {
-            const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-
             const asset: AssetEntity = {
                 id: "test-id-13",
                 name: "malformed.txt",
@@ -260,17 +266,15 @@ describe("remapAssetToUint8Array", () => {
             const result = await remapAssetToUint8Array(asset, mockAssetStorage);
 
             expect(result.data).toBe("data:text/plain;base64SGVsbG8=");
+            expect(result.data).toBe("data:text/plain;base64SGVsbG8=");
             // Logger adds formatting prefix, so check that the warning was called
-            expect(consoleWarnSpy).toHaveBeenCalled();
-            const warnCall = consoleWarnSpy.mock.calls[0];
-            expect(warnCall).toContain("Malformed data URL (no comma), leaving as is:");
-
-            consoleWarnSpy.mockRestore();
+            expect(Logger.warn).toHaveBeenCalledWith(
+                "Malformed data URL (no comma), leaving as is:",
+                expect.stringContaining("data:text/plain;base64SGVsbG8")
+            );
         });
 
         it("should handle invalid base64 gracefully", async () => {
-            const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-
             const asset: AssetEntity = {
                 id: "test-id-14",
                 name: "invalid.txt",
@@ -281,12 +285,12 @@ describe("remapAssetToUint8Array", () => {
             const result = await remapAssetToUint8Array(asset, mockAssetStorage);
 
             expect(result.data).toBe("data:text/plain;base64,!!!INVALID!!!");
+            expect(result.data).toBe("data:text/plain;base64,!!!INVALID!!!");
             // Logger adds formatting prefix, so check that the error was called
-            expect(consoleErrorSpy).toHaveBeenCalled();
-            const errorCall = consoleErrorSpy.mock.calls[0];
-            expect(errorCall).toContain("Failed to decode base64 data URL:");
-
-            consoleErrorSpy.mockRestore();
+            expect(Logger.error).toHaveBeenCalledWith(
+                "Failed to decode base64 data URL:",
+                expect.anything()
+            );
         });
 
         it("should handle empty base64 data", async () => {
