@@ -31,6 +31,9 @@ vi.mock("@/lib/workers/workerClient", () => ({
     })),
     getScriptingWorker: vi.fn(async () => ({
         execute: vi.fn(async (code: string) => ({
+            // Scripting worker is used for testing purposes
+            // No actual worker making, since Node has no compatible Web Worker API
+            // oxlint-disable-next-line no-eval
             result: eval(code) as unknown,
             logs: [],
         })),

@@ -1,5 +1,6 @@
+// oxlint-disable no-console
 // It's logger, so we should use console
-/* eslint-disable no-console */
+
 import type { StandardLogEntry, LogLevel, StructuredLogEntry } from "./Logger";
 import type { StructuredLogLevel } from "./LogType";
 

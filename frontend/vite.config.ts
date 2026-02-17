@@ -42,10 +42,12 @@ export default defineConfig(async (ctx) => {
             },
         }),
     ];
-    let env = loadEnv(mode, process.cwd(), "") as Record<string, any>;
+    // Requirements for vite's env
+    // oxlint-disable-next-line typescript/no-explicit-any
+    const env = loadEnv(mode, process.cwd(), "") as Record<string, any>;
     env.VITEST_BROWSER_MODE = runBrowserTest ? "true" : "false";
 
-    let coverage: TestConfig["coverage"] & { provider: "v8" } = {
+    const coverage: TestConfig["coverage"] & { provider: "v8" } = {
         provider: "v8",
         reporter: ["html", "text"],
         reportsDirectory: "./coverage",
@@ -56,7 +58,7 @@ export default defineConfig(async (ctx) => {
     if (env.GITHUB_ACTIONS) {
         coverage.reporter = ["json-summary", "text"];
     }
-    let testConfig: TestConfig = {
+    const testConfig: TestConfig = {
         globals: true,
         environment: "node",
         silent: "passed-only",
@@ -79,8 +81,8 @@ export default defineConfig(async (ctx) => {
             [
                 "github-actions",
                 {
-                    onWritePath(path) {
-                        return path.replace(/^\/app\//, `${env.GITHUB_WORKSPACE}/`);
+                    onWritePath(writePath) {
+                        return writePath.replace(/^\/app\//, `${env.GITHUB_WORKSPACE}/`);
                     },
                 },
             ],

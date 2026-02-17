@@ -55,8 +55,8 @@
         character.assets.assets.filter((a) => !a.mimeType.startsWith("image/"))
     );
 
-    async function handleFileUpload(e: Event) {
-        const target = e.target as HTMLInputElement;
+    async function handleFileUpload(ev: Event) {
+        const target = ev.target as HTMLInputElement;
         const files = target.files;
         if (!files || files.length === 0) return;
 

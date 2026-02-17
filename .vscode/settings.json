@@ -21,6 +21,7 @@
     "javascript.preferences.importModuleSpecifier": "non-relative",
     "javascript.preferences.importModuleSpecifierEnding": "minimal",
     "typescript.preferences.importModuleSpecifierEnding": "minimal",
+    "oxc.typeAware": true,
     "vitest.nodeEnv": {
         // Enabling browser test on VSC vitest,
         // since it will not run browser tests by default

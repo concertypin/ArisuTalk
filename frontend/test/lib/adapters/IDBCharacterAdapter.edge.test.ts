@@ -19,7 +19,7 @@ describe("DexieCharacterAdapter (edge)", () => {
     it("saves and retrieves a character with very large prompt.description", async () => {
         const big = "x".repeat(100_000);
         const c = cloneDeep(exampleCharacter);
-        c.prompt = { ...(c.prompt || {}), description: big };
+        c.prompt = { ...c.prompt, description: big };
         await adapter.saveCharacter(c);
         const got = await adapter.getCharacter(c.id);
         expect(got).toBeDefined();

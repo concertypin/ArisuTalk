@@ -82,17 +82,17 @@ describe("CharacterHooksSettings Component", () => {
         await expect.element(memInput).toBeVisible();
 
         await memInput.fill("1024");
-        /* eslint-disable @typescript-eslint/no-unsafe-assignment */
         expect(onChangeSpy).toHaveBeenCalledWith(
             expect.objectContaining({
+                // oxlint-disable-next-line typescript/no-unsafe-assignment
                 executables: expect.objectContaining({
+                    // oxlint-disable-next-line typescript/no-unsafe-assignment
                     runtimeSetting: expect.objectContaining({
                         mem: 1024,
                     }),
                 }),
             })
         );
-        /* eslint-enable @typescript-eslint/no-unsafe-assignment */
     });
 
     test("switches between hook tabs", async () => {
@@ -161,11 +161,14 @@ describe("CharacterHooksSettings Component", () => {
         const inputField = getByLabelText("Input Pattern");
         await expect.element(inputField).toBeVisible();
         await inputField.fill("baz");
-        /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
         expect(onChangeSpy).toHaveBeenCalledWith(
             expect.objectContaining({
+                // oxlint-disable-next-line typescript/no-unsafe-assignment
                 executables: expect.objectContaining({
+                    // oxlint-disable-next-line typescript/no-unsafe-assignment
                     replaceHooks: expect.objectContaining({
+                        // oxlint-disable-next-line typescript/no-unsafe-assignment
                         display: expect.arrayContaining([
                             expect.objectContaining({ input: "baz" } as const),
                         ]),
@@ -173,7 +176,6 @@ describe("CharacterHooksSettings Component", () => {
                 }),
             })
         );
-        /* eslint-enable @typescript-eslint/no-unsafe-assignment */
     });
 
     test("deletes a hook", async () => {
@@ -204,13 +206,13 @@ describe("CharacterHooksSettings Component", () => {
 
         expect(onChangeSpy).toHaveBeenCalledWith(
             expect.objectContaining({
-                /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+                // oxlint-disable-next-line typescript/no-unsafe-assignment
                 executables: expect.objectContaining({
+                    // oxlint-disable-next-line typescript/no-unsafe-assignment
                     replaceHooks: expect.objectContaining({
                         display: [],
                     }),
                 }),
-                /* eslint-enable @typescript-eslint/no-unsafe-assignment */
             })
         );
     });
@@ -248,17 +250,19 @@ describe("CharacterHooksSettings Component", () => {
 
         expect(onChangeSpy).toHaveBeenCalledWith(
             expect.objectContaining({
-                /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+                // oxlint-disable-next-line typescript/no-unsafe-assignment
                 executables: expect.objectContaining({
+                    // oxlint-disable-next-line typescript/no-unsafe-assignment
                     replaceHooks: expect.objectContaining({
+                        // oxlint-disable-next-line typescript/no-unsafe-assignment
                         display: expect.arrayContaining([
                             expect.objectContaining({
+                                // oxlint-disable-next-line typescript/no-unsafe-assignment
                                 meta: expect.objectContaining({ type: "regex" }),
                             }),
                         ]),
                     }),
                 }),
-                /* eslint-enable @typescript-eslint/no-unsafe-assignment */
             })
         );
     });

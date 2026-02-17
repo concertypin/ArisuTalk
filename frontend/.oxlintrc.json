@@ -1,0 +1,63 @@
+{
+    "$schema": "./node_modules/oxlint/configuration_schema.json",
+    "plugins": [
+        "typescript",
+        "unicorn",
+        "import",
+        "vitest",
+        "promise"
+    ],
+    "jsPlugins": [
+        "eslint-plugin-phosphor-svelte"
+    ],
+    "env": {
+        "builtin": true
+    },
+    "ignorePatterns": [
+        "**/node_modules/**",
+        "**/dist/**",
+        "**/coverage/**",
+        "**/.cache/**",
+        "**/.vscode/**",
+        "**/.git/**",
+        "**/conductor/**"
+    ],
+    "overrides": [
+        {
+            "files": [
+                "**/*.d.ts"
+            ],
+            "rules": {
+                "no-unused-vars": "off"
+            }
+        },
+        {
+            "files": [
+                "**/*.svelte",
+                "**/*.svelte.ts"
+            ],
+            "rules": {
+                "prefer-const": "off",
+                "no-unassigned-vars": "off"
+            }
+        },
+        {
+            "files": [
+                "**/test/**",
+                "**/*.test.ts",
+                "**/*.test.tsx",
+                "**/*.spec.ts"
+            ],
+            "rules": {
+                "jest/require-to-throw-message": "off",
+                "jest/expect-expect": "off"
+            }
+        }
+    ],
+    "rules": {
+        "phosphor-svelte/optimize-imports": "warn"
+    },
+    "extends": [
+        "scripts/linter/oxlint-eslint.json"
+    ]
+}

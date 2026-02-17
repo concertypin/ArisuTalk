@@ -56,7 +56,7 @@ const BaseLLMConfigSchema = z.object({
     /**
      * Unique identifier for the LLM configuration.
      */
-    id: z.string().default(() => "LLMconfig-" + crypto.randomUUID()),
+    id: z.string().default(() => `LLMconfig-${crypto.randomUUID()}`),
     /**
      * Human-readable name for the LLM configuration.
      * Just for easier identification.

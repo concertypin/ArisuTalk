@@ -26,7 +26,8 @@ vi.mock("comlink", () => {
     return {
         wrap: vi.fn(() => mockApi),
         expose: vi.fn(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return
+
+        // oxlint-disable-next-line typescript/no-explicit-any typescript/no-unsafe-return
         proxy: (x: any) => x,
     };
 });

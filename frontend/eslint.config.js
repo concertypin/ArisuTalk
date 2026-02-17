@@ -6,20 +6,19 @@ import { defineConfig } from "eslint/config";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import phosphorSvelte from "eslint-plugin-phosphor-svelte";
+import oxlint from "eslint-plugin-oxlint";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const tsConfig = !process.env.SKIP_TYPE_LINT
-    ? ts.configs.recommendedTypeChecked
-    : ts.configs.recommended;
-
 const isCI = process.env.CI ? true : false;
+
 export default defineConfig([
     {
         ignores: ["dist/", "node_modules/", "*.config.*"],
     },
     js.configs.recommended,
-    ...tsConfig,
+    // No type check for it, oxlint does it.
+    ...ts.configs.recommended,
     ...svelte.configs["flat/recommended"],
     phosphorSvelte.configs.recommended,
     {
@@ -60,4 +59,8 @@ export default defineConfig([
             "no-console": "warn",
         },
     },
+    // Disable ESLint rules that are already handled by oxlint
+    ...oxlint.buildFromOxlintConfigFile(".oxlintrc.json", {
+        typeAware: true,
+    }),
 ]);

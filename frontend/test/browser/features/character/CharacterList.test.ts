@@ -17,7 +17,7 @@ vi.mock("@/features/character/adapters/assetStorage/OpFSAssetStorageAdapter", ()
         getAssetUrl: vi.fn().mockResolvedValue(null),
     };
     return {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // oxlint-disable-next-line typescript/no-explicit-any
         OpFSAssetStorageAdapter: vi.fn().mockImplementation(function (this: any) {
             return mockAdapter;
         }),
@@ -29,7 +29,7 @@ vi.mock(
     "comlink",
     () =>
         ({
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+            // oxlint-disable-next-line typescript/no-unsafe-return
             transfer: vi.fn((data, _transferables) => data) satisfies (typeof comlink)["transfer"],
         }) satisfies Partial<typeof comlink>
 );

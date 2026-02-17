@@ -16,7 +16,7 @@ vi.mock("@/lib/workers/workerClient", () => ({
     getScriptingWorker: vi.fn(async () => ({
         execute: vi.fn(async (code: string) => ({
             // Since scripts are user-defined, it might be `any` type.
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            // oxlint-disable-next-line no-eval typescript/no-unsafe-assignment
             result: code.includes("return") ? eval(`(() => { ${code} })()`) : eval(code),
             logs: [],
         })),
@@ -169,9 +169,11 @@ describe("HookService", () => {
             terminate: vi.fn(),
             execute: vi.fn(async (code: string, options) => {
                 // Check role in context
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+
+                // oxlint-disable-next-line typescript/no-unsafe-assignment typescript/no-unsafe-member-access
                 const ctx = options?.context;
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+
+                // oxlint-disable-next-line typescript/no-unsafe-assignment typescript/no-unsafe-member-access
                 const role = ctx?.message?.role;
                 if (role === "assistant") {
                     return { result: "secret", logs: [] };

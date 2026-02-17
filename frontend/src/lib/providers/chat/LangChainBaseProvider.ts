@@ -37,6 +37,7 @@ export abstract class LangChainBaseProvider<
                 latencyMs: Date.now() - startTime,
             });
             if (typeof content === "string") return content;
+            // oxlint-disable-next-line eqeqeq
             if (content == null) return "";
             try {
                 return JSON.stringify(content);

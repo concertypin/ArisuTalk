@@ -123,13 +123,13 @@ describe("LangChainBaseProvider", () => {
     });
 
     it("generate returns empty string on JSON error", async () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // oxlint-disable-next-line typescript/no-explicit-any
         const circular: any = {};
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+        // oxlint-disable-next-line typescript/no-unsafe-assignment typescript/no-unsafe-member-access
         circular.self = circular;
         const mockClient = {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            // oxlint-disable-next-line typescript/no-unsafe-assignment
             invoke: vi.fn().mockResolvedValue({ content: circular }),
         };
         const provider = new TestProvider(mockClient);

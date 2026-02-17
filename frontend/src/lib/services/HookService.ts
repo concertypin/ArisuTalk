@@ -118,27 +118,22 @@ export class HookService {
             }
 
             return await regexWorker.replace(content, pattern, replacement, hook.meta.flag);
-        } else {
-            // String replacement
-            if (hook.meta.isOutputScripted) {
-                const scriptResult = await scriptingWorker.execute(replacement, {
-                    context: this.createContext(content, character, type, persona, role),
-                    allowNetwork,
-                    characterId: character.id,
-                });
-                if (scriptResult.result !== undefined && scriptResult.result !== null) {
-                    replacement = String(scriptResult.result as unknown);
-                }
-            }
-
-            const flags = hook.meta.caseSensitive ? "g" : "gi";
-            return await regexWorker.replace(
-                content,
-                this.escapeRegExp(pattern),
-                replacement,
-                flags
-            );
         }
+
+        // String replacement
+        if (hook.meta.isOutputScripted) {
+            const scriptResult = await scriptingWorker.execute(replacement, {
+                context: this.createContext(content, character, type, persona, role),
+                allowNetwork,
+                characterId: character.id,
+            });
+            if (scriptResult.result !== undefined && scriptResult.result !== null) {
+                replacement = String(scriptResult.result as unknown);
+            }
+        }
+
+        const flags = hook.meta.caseSensitive ? "g" : "gi";
+        return await regexWorker.replace(content, this.escapeRegExp(pattern), replacement, flags);
     }
 
     private createContext(

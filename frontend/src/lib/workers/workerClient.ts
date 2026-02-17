@@ -29,8 +29,9 @@ function createWorkerApi<T>(worker: Worker): WorkerApi<T> {
 
     // Automatically set up logging if the worker supports it
     if ("setLogReceiver" in api && typeof api.setLogReceiver === "function") {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        void api.setLogReceiver(Comlink.proxy(logReceiver));
+        void (api.setLogReceiver as (receiver: typeof logReceiver) => Promise<void>)(
+            Comlink.proxy(logReceiver)
+        );
     }
 
     // Proxy api again
@@ -46,7 +47,7 @@ function createWorkerApi<T>(worker: Worker): WorkerApi<T> {
             if (prop === "disabled") {
                 return false;
             }
-            if (typeof prop == "symbol") return Reflect.get(target, prop);
+            if (typeof prop === "symbol") return Reflect.get(target, prop);
             return target[prop as keyof T];
         },
     });

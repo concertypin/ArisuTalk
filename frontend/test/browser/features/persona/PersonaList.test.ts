@@ -11,7 +11,7 @@ vi.mock("@/features/character/adapters/assetStorage/OpFSAssetStorageAdapter", ()
         getAssetUrl: vi.fn().mockResolvedValue(null),
     };
     return {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // oxlint-disable-next-line typescript/no-explicit-any
         OpFSAssetStorageAdapter: vi.fn().mockImplementation(function (this: any) {
             return mockAdapter;
         }),

@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { test, expect, describe, vi, afterEach } from "vitest";
+import { test, expect, describe, vi, afterEach, assert } from "vitest";
 import { chatStore } from "@/features/chat/stores/chatStore.svelte";
 import { MessageSchema } from "@arisutalk/character-spec/v0/Character/Message";
 import { apply } from "@arisutalk/character-spec/utils";
@@ -58,12 +58,8 @@ describe("ChatStore Streaming", () => {
         const content = assistantMsg?.content;
         expect(content).toBeDefined();
 
-        if (typeof content === "object" && "data" in content) {
-            expect(content.data).toBe("Streamed Response");
-        } else {
-            // Should not happen given we fixed the type
-            expect(content).toBe("Streamed Response");
-        }
+        assert(content !== undefined);
+        expect(content.data).toBe("Streamed Response");
     }, 15000);
 
     test("abortGeneration stops stream", async () => {
@@ -159,11 +155,12 @@ describe("ChatStore Streaming", () => {
             throw new Error("Active provider is not set");
         }
         chatStore["activeProvider"] = {
+            // oxlint-disable-next-line typescript/no-misused-spread
             ...chatStore["activeProvider"],
 
             stream: async function* () {
                 // Dummy yield to satisfy generator requirement
-                // eslint-disable-next-line no-constant-condition
+                // oxlint-disable-next-line no-constant-condition
                 if (false) yield "";
                 throw new Error("Simulated failure");
             },

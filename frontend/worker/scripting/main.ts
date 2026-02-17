@@ -95,7 +95,7 @@ async function execute<ResultType = unknown>(
 
         // Await is intended(due to improper d.ts.
         // console.log(defFunc.context()) shows `Promise { <pending> }`)
-        // eslint-disable-next-line @typescript-eslint/await-thenable
+        // oxlint-disable-next-line typescript/await-thenable
         const ctx = await defFunc.context({
             global: {
                 console: createConsole(logs),

@@ -195,7 +195,7 @@ export class ChatStore {
 
     async setProvider<T extends ProviderType>(
         type: T,
-        settings: CommonChatSettings & ProviderSettings[T]
+        providerSettings: CommonChatSettings & ProviderSettings[T]
     ) {
         if (this.activeProvider) {
             await this.activeProvider.disconnect();
@@ -203,28 +203,29 @@ export class ChatStore {
 
         Logger.structured("llm.request.start", {
             provider: type,
-            model: settings.model || "default", // Should check if model is in settings type
+            model: providerSettings.model || "default", // Should check if model is in settings type
         });
 
         switch (type) {
             case "ANTHROPIC": {
-                this.activeProvider = await AnthropicChatProvider.factory.connect(settings);
+                this.activeProvider = await AnthropicChatProvider.factory.connect(providerSettings);
                 break;
             }
             case "GEMINI": {
-                this.activeProvider = await GeminiChatProvider.factory.connect(settings);
+                this.activeProvider = await GeminiChatProvider.factory.connect(providerSettings);
                 break;
             }
             case "MOCK": {
-                this.activeProvider = await MockChatProvider.factory.connect(settings);
+                this.activeProvider = await MockChatProvider.factory.connect(providerSettings);
                 break;
             }
             case "OPENAI": {
-                this.activeProvider = await OpenAIChatProvider.factory.connect(settings);
+                this.activeProvider = await OpenAIChatProvider.factory.connect(providerSettings);
                 break;
             }
             case "OPENROUTER": {
-                this.activeProvider = await OpenRouterChatProvider.factory.connect(settings);
+                this.activeProvider =
+                    await OpenRouterChatProvider.factory.connect(providerSettings);
                 break;
             }
             default: {
