@@ -8,6 +8,8 @@ type StructuredLogUI = {
         location: string;
         /** Modal identifier (e.g., "LLMSettings") */
         modalName: string;
+        /** Optional character context */
+        characterId?: string;
     };
     /**
      * Modal dialog closed.
@@ -111,6 +113,13 @@ type StructuredLogCharacter = {
         success: boolean;
         /** Error message if failed */
         errorMessage?: string;
+    };
+    /**
+     * Character settings autosaved.
+     */
+    "character.autosave": {
+        /** Character ID */
+        characterId: string;
     };
 };
 type StructuredLogLLM = {

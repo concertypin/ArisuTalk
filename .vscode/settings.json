@@ -1,18 +1,18 @@
 {
     "[javascript]": {
-        "editor.defaultFormatter": "prettier.prettier-vscode",
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.tabSize": 4
     },
     "[typescript]": {
-        "editor.defaultFormatter": "prettier.prettier-vscode",
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.tabSize": 4
     },
     "[svelte]": {
         "editor.tabSize": 4,
-        "editor.defaultFormatter": "prettier.prettier-vscode"
+        "editor.defaultFormatter": "svelte.svelte-vscode"
     },
     "[json]": {
-        "editor.defaultFormatter": "prettier.prettier-vscode",
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.tabSize": 4
     },
     "typescript.preferences.preferTypeOnlyAutoImports": true,
@@ -24,6 +24,12 @@
     "vitest.nodeEnv": {
         // Enabling browser test on VSC vitest,
         // since it will not run browser tests by default
-        "npm_lifecycle_event": "coverage"
-    }
+        "npm_lifecycle_event": "coverage",
+        "IS_IDE": "vscode"
+    },
+    "eslint.workingDirectories": [
+        {
+            "directory": "./frontend/",
+        }
+    ]
 }

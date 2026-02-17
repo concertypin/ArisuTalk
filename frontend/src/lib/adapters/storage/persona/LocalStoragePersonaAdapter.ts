@@ -1,5 +1,6 @@
 import type { IPersonaStorageAdapter } from "@/lib/interfaces";
 import { PersonaSchema, type Persona } from "@/features/persona/schema";
+import { Logger } from "@common/logger/Logger";
 
 /**
  * LocalStorage-based persona storage adapter.
@@ -15,7 +16,7 @@ export class LocalStoragePersonaAdapter implements IPersonaStorageAdapter {
 
     async init(): Promise<void> {
         if (!import.meta.env.DEV) {
-            console.warn("LocalStoragePersonaAdapter is for development/testing only.");
+            Logger.warn("LocalStoragePersonaAdapter is for development/testing only.");
         }
         return Promise.resolve();
     }

@@ -6,7 +6,8 @@
 
 - **JSDoc Documentation**: Use JSDoc for all exported functions and complex logic.
 - HTML Separation: Avoid HTML strings in JS files. Who does that with Svelte?
-- Use DaisyUI: We have libraries, use them!
+- Use DaisyUI: We have libraries, use them! Don't use Tailwind CSS's classes if DaisyUI has the same class.
+    - Use color theme, not Tailwind CSS's color classes.
 
 ### Event Handling
 
@@ -91,6 +92,7 @@ Worker logic should be tested via unit tests in `test/workers/`. Note that real 
 - Using `lucide-svelte` instead of `@lucide/svelte`.
     - Fix: Replace `lucide-svelte` with `@lucide/svelte`.
 - Using `@testing-library/svelte` instead of `vitest-browser-svelte`.
+    - This makes tests run in not browser, but in Node.js. It might not work as intended, since some are not the same as in the browser.
     - Fix: Replace `@testing-library/svelte` with `vitest-browser-svelte`.
 
 ## Documentation of Other Libraries

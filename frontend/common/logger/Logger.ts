@@ -230,6 +230,16 @@ export class Logger {
     }
 
     /**
+     * Reset the logger to its initial state.
+     * Useful for clearing all listeners and resetting the log level in tests.
+     */
+    static reset(): void {
+        this.listeners.clear();
+        currentLogLevel = getStoredLogLevel();
+        initializeAdze(currentLogLevel);
+    }
+
+    /**
      * Remove all listeners.
      */
     static clearListeners(): void {

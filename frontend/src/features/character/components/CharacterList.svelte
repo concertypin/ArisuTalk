@@ -6,6 +6,7 @@
     import { transfer } from "comlink";
     import { remapAssetToUint8Array, collectTransferableBuffers } from "../utils/assetEncoding";
     import { Logger } from "@common/logger/Logger";
+    import { cloneDeep } from "lodash-es";
 
     type Props = {
         onEdit: (index: number) => void;
@@ -17,7 +18,7 @@
     async function handleDelete(index: number) {
         const modal = document.getElementById("delete-confirm-modal") as HTMLDialogElement;
         if (!modal) {
-            console.error("Delete confirmation modal not found");
+            Logger.error("Delete confirmation modal not found");
             return;
         }
 
@@ -38,13 +39,13 @@
 
         const idxStr = modal.dataset.deleteIndex;
         if (!idxStr) {
-            console.error("No delete index set on modal");
+            Logger.error("No delete index set on modal");
             modal.close();
             return;
         }
         const index = Number(idxStr);
         if (!Number.isFinite(index)) {
-            console.error("Invalid delete index on modal:", idxStr);
+            Logger.error("Invalid delete index on modal:", idxStr);
             modal.close();
             return;
         }
@@ -74,7 +75,7 @@
     async function handleExport(index: number) {
         // Export character at index
         // Cloning first to avoid mutating store data.
-        const char = structuredClone($state.snapshot(characterStore.characters[index]));
+        const char = cloneDeep($state.snapshot(characterStore.characters[index]));
 
         // Remap all assets to use Uint8Array for binary data
         const assetStorage = new OpFSAssetStorageAdapter();

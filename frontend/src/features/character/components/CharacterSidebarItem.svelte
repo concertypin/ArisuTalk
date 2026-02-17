@@ -1,5 +1,7 @@
 <script lang="ts">
     import type { Character } from "@arisutalk/character-spec/v0/Character";
+    import PencilSimple from "phosphor-svelte/lib/PencilSimple";
+    import { uiState } from "@/lib/stores/ui.svelte";
 
     type Props = {
         character: Character;
@@ -14,13 +16,34 @@
 
     // Check for avatar in this order: top-level property -> assets 'portrait-default' -> any image asset
     let avatarUrl = $derived(character.avatarUrl || "");
+
+    function handleButtonClick(e: MouseEvent) {
+        if (active) {
+            e.stopPropagation();
+            uiState.openCharacterSettings(character);
+        } else {
+            onClick();
+        }
+    }
+
+    let isHovered = $state(false);
 </script>
 
-<div class="tooltip tooltip-right z-50" data-tip={character.name}>
+{#snippet CharacterIcon()}
+    {#if avatarUrl}
+        <img src={avatarUrl} alt={character.name} class="w-full h-full object-cover" />
+    {:else}
+        <span class="font-bold text-sm select-none">{initials}</span>
+    {/if}
+{/snippet}
+
+<div class="tooltip tooltip-right z-50" data-tip={active ? "Settings" : character.name}>
     <button
         class="group relative flex items-center justify-center w-12 h-12 mb-2 transition-all duration-200 ease-out focus:outline-none"
-        onclick={onClick}
-        aria-label={character.name}
+        onclick={handleButtonClick}
+        onmouseenter={() => (isHovered = true)}
+        onmouseleave={() => (isHovered = false)}
+        aria-label={active ? "Settings" : character.name}
     >
         <!-- Active Pill -->
         <span
@@ -33,19 +56,27 @@
             class:group-hover:opacity-100={!active}
         ></span>
 
-        <!-- Icon/Avatar -->
+        <!-- Icon/Avatar Swap -->
         <div
-            class="flex items-center justify-center w-12 h-12 overflow-hidden bg-neutral text-neutral-content transition-all duration-200"
+            class="swap swap-rotate w-12 h-12 overflow-hidden transition-all duration-200"
+            class:swap-active={active && isHovered}
             class:rounded-xl={active}
             class:rounded-3xl={!active}
             class:group-hover:rounded-xl={!active}
             class:bg-primary={active}
+            class:text-primary-content={active}
+            class:bg-neutral={!active}
+            class:text-neutral-content={!active}
         >
-            {#if avatarUrl}
-                <img src={avatarUrl} alt={character.name} class="w-full h-full object-cover" />
-            {:else}
-                <span class="font-bold text-sm select-none">{initials}</span>
-            {/if}
+            <!-- Start State: Settings Icon (when active & hovered) -->
+            <div class="swap-on flex items-center justify-center w-full h-full">
+                <PencilSimple size={20} />
+            </div>
+
+            <!-- End State: Avatar (when inactive OR not hovered) -->
+            <div class="swap-off flex items-center justify-center w-full h-full">
+                {@render CharacterIcon()}
+            </div>
         </div>
     </button>
 </div>

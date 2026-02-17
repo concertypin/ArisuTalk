@@ -1,7 +1,7 @@
 /// <reference types="vitest/browser" />
 import { test, expect, describe, vi, beforeEach } from "vitest";
 import { render } from "vitest-browser-svelte";
-import Wrapper from "./GenerationParametersTestWrapper.svelte";
+import Wrapper from "../../wrappers/GenerationParametersTestWrapper.svelte";
 import { settings } from "@/lib/stores/settings.svelte";
 import type { LLMConfig } from "@/lib/types/IDataModel";
 

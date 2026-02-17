@@ -3,7 +3,10 @@
     import { type IAssetStorageAdapter, IfNotExistBehavior } from "@/lib/interfaces";
     import { OpFSAssetStorageAdapter } from "@/features/character/adapters/assetStorage/OpFSAssetStorageAdapter";
     import type { Persona } from "../schema";
-    import { Trash2, SquarePen, ChevronUp, ChevronDown } from "@lucide/svelte";
+    import Trash from "phosphor-svelte/lib/Trash";
+    import PencilSimple from "phosphor-svelte/lib/PencilSimple";
+    import CaretUp from "phosphor-svelte/lib/CaretUp";
+    import CaretDown from "phosphor-svelte/lib/CaretDown";
 
     type Props = {
         onEdit: (persona: Persona) => void;
@@ -92,7 +95,7 @@
                     onclick={() => personaStore.reorder(index, index - 1)}
                     aria-label="Move Up"
                 >
-                    <ChevronUp size={14} />
+                    <CaretUp size={14} />
                 </button>
                 <button
                     class="btn btn-ghost btn-xs btn-square"
@@ -100,21 +103,21 @@
                     onclick={() => personaStore.reorder(index, index + 1)}
                     aria-label="Move Down"
                 >
-                    <ChevronDown size={14} />
+                    <CaretDown size={14} />
                 </button>
                 <button
                     class="btn btn-ghost btn-xs btn-square"
                     onclick={() => onEdit(persona)}
                     aria-label="Edit"
                 >
-                    <SquarePen size={14} />
+                    <PencilSimple size={14} />
                 </button>
                 <button
                     class="btn btn-ghost btn-xs btn-square text-error"
                     onclick={() => handleDelete(persona.id)}
                     aria-label="Delete"
                 >
-                    <Trash2 size={14} />
+                    <Trash size={14} />
                 </button>
             </div>
         </div>

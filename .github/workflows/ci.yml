@@ -109,7 +109,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run coverage check
-        run: pnpm run --filter frontend test:coverage --coverage.reporter=json-summary
+        run: pnpm run --filter frontend test:coverage
         timeout-minutes: 5
 
       - name: Update Coverage Status

@@ -185,6 +185,16 @@ export const AdvancedConfigSchema = z
 export const SettingsSchema = z
     .object({
         /**
+         * Global font size in pixels.
+         * Default is 16px (Medium).
+         */
+        fontSize: z.number().min(10).max(32).default(16),
+        /**
+         * Global font family.
+         * Default is "Noto Sans KR".
+         */
+        fontFamily: z.string().default("Noto Sans KR"),
+        /**
          * Theme preference for the application interface.
          */
         theme: z.enum(["light", "dark", "system"]).default("system"),

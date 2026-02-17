@@ -68,7 +68,7 @@ export class CharacterStore {
                 });
             });
         } catch (e) {
-            console.error("Failed to load characters", e);
+            Logger.error("Failed to load characters", e);
             this.characters = [];
         }
     }
@@ -140,7 +140,7 @@ export class CharacterStore {
                 return { success: false, error: "Failed to parse character" };
             }
         } catch (e) {
-            console.error(e);
+            Logger.error(e);
             Logger.structured("character.import", {
                 format,
                 success: false,

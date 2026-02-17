@@ -1,6 +1,8 @@
 <script lang="ts">
     import { chatStore } from "../stores/chatStore.svelte";
-    import { Plus, MessageSquare, Trash2 } from "@lucide/svelte";
+    import Plus from "phosphor-svelte/lib/Plus";
+    import ChatTeardropText from "phosphor-svelte/lib/ChatTeardropText";
+    import Trash from "phosphor-svelte/lib/Trash";
 
     type Props = {
         characterId: string;
@@ -10,6 +12,28 @@
 
     let chats = $derived(chatStore.chats.filter((c) => c.characterId === characterId));
     let activeChatId = $derived(chatStore.activeChatId);
+
+    // Automatically select the most recent chat when character changes
+    $effect(() => {
+        const characterChats = chats; // Use the derived chats
+        const currentActive = chatStore.activeChatId
+            ? chatStore.chats.find((c) => c.id === chatStore.activeChatId)
+            : null;
+
+        // If the active chat doesn't belong to the current character,
+        // switch to the most recent chat of this character
+        if (!currentActive || currentActive.characterId !== characterId) {
+            if (characterChats.length > 0) {
+                // Sort by lastMessage or updatedAt to get the most recent
+                const mostRecent = [...characterChats].sort(
+                    (a, b) => (b.lastMessage || 0) - (a.lastMessage || 0)
+                )[0];
+                void chatStore.setActiveChat(mostRecent.id);
+            } else {
+                void chatStore.setActiveChat(null);
+            }
+        }
+    });
 
     async function handleNewChat() {
         const id = await chatStore.createChat(characterId, `Chat ${chats.length + 1}`);
@@ -49,7 +73,7 @@
                     : ''}"
                 onclick={() => handleSelect(chat.id)}
             >
-                <MessageSquare size={16} class="opacity-70" />
+                <ChatTeardropText size={16} class="opacity-70" />
                 <span class="truncate text-sm font-medium flex-1 text-left">{chat.name}</span>
 
                 <div class="opacity-0 group-hover:opacity-100 transition-opacity">
@@ -64,7 +88,7 @@
                             }
                         }}
                     >
-                        <Trash2 size={14} />
+                        <Trash size={14} />
                     </div>
                 </div>
             </button>

@@ -5,21 +5,27 @@ import globals from "globals";
 import { defineConfig } from "eslint/config";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
+import phosphorSvelte from "eslint-plugin-phosphor-svelte";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const tsConfig = !process.env.SKIP_TYPE_LINT
     ? ts.configs.recommendedTypeChecked
     : ts.configs.recommended;
+
+const isCI = process.env.CI ? true : false;
 export default defineConfig([
+    {
+        ignores: ["dist/", "node_modules/", "*.config.*"],
+    },
     js.configs.recommended,
     ...tsConfig,
     ...svelte.configs["flat/recommended"],
+    phosphorSvelte.configs.recommended,
     {
         languageOptions: {
             globals: {
                 ...globals.browser,
-                ...globals.node,
             },
             parserOptions: {
                 projectService: true,
@@ -49,9 +55,9 @@ export default defineConfig([
             "@typescript-eslint/require-await": "off",
             // Disable unbound-method - false positives with Svelte stores
             "@typescript-eslint/unbound-method": "off",
+            "no-debugger": isCI ? "error" : "warn",
+            // Use dedicated logger. Console is unrecommended since it's not pretty
+            "no-console": "warn",
         },
-    },
-    {
-        ignores: ["dist/", "node_modules/", "*.config.*"],
     },
 ]);

@@ -1,6 +1,10 @@
 <script lang="ts">
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import { Trash2, Edit, Download, ChevronLeft, ChevronRight } from "@lucide/svelte";
+    import Trash from "phosphor-svelte/lib/Trash";
+    import PencilSimple from "phosphor-svelte/lib/PencilSimple";
+    import DownloadSimple from "phosphor-svelte/lib/DownloadSimple";
+    import CaretLeft from "phosphor-svelte/lib/CaretLeft";
+    import CaretRight from "phosphor-svelte/lib/CaretRight";
     import { opfsAdapter } from "../adapters/assetStorage/OpFSAssetStorageAdapter";
     import { IfNotExistBehavior } from "@/lib/interfaces";
 
@@ -103,7 +107,7 @@
                     onclick={() => onMove?.(-1)}
                     aria-label="Move Backward"
                 >
-                    <ChevronLeft size={16} />
+                    <CaretLeft size={16} />
                 </button>
                 <button
                     class="btn btn-ghost btn-xs"
@@ -111,22 +115,22 @@
                     onclick={() => onMove?.(1)}
                     aria-label="Move Forward"
                 >
-                    <ChevronRight size={16} />
+                    <CaretRight size={16} />
                 </button>
             </div>
             <div class="flex gap-1">
                 <button class="btn btn-ghost btn-xs" onclick={onExport} aria-label="Export">
-                    <Download size={16} />
+                    <DownloadSimple size={16} />
                 </button>
                 <button class="btn btn-ghost btn-xs" onclick={onEdit} aria-label="Edit">
-                    <Edit size={16} />
+                    <PencilSimple size={16} />
                 </button>
                 <button
                     class="btn btn-ghost btn-xs text-error"
                     onclick={onDelete}
                     aria-label="Delete"
                 >
-                    <Trash2 size={16} />
+                    <Trash size={16} />
                 </button>
             </div>
         </div>

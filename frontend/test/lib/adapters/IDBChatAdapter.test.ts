@@ -3,6 +3,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { IDBChatAdapter } from "@/lib/adapters/storage/chat/IDBChatAdapter";
 import { getArisuDB } from "@/lib/adapters/storage/IndexedDBHelper";
 import { exampleChatData } from "@/const/example_data";
+import { cloneDeep } from "lodash-es";
 
 describe("DexieChatAdapter", () => {
     let adapter: IDBChatAdapter;
@@ -15,7 +16,7 @@ describe("DexieChatAdapter", () => {
     });
 
     it("should save and retrieve a chat", async () => {
-        const chat = structuredClone(exampleChatData);
+        const chat = cloneDeep(exampleChatData);
         await adapter.saveChat(chat);
         const got = await adapter.getChat(chat.id);
         // Adapter may return enriched LocalChat; ensure stored fields match original chat
@@ -23,14 +24,14 @@ describe("DexieChatAdapter", () => {
     });
 
     it("should return all chats", async () => {
-        const chat = structuredClone(exampleChatData);
+        const chat = cloneDeep(exampleChatData);
         await adapter.saveChat(chat);
         const all = await adapter.getAllChats();
         expect(all.length).toBeGreaterThanOrEqual(1);
     });
 
     it("should delete a chat", async () => {
-        const chat = structuredClone(exampleChatData);
+        const chat = cloneDeep(exampleChatData);
         await adapter.saveChat(chat);
         await adapter.deleteChat(chat.id);
         const got = await adapter.getChat(chat.id);

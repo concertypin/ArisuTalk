@@ -3,6 +3,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { IDBChatAdapter } from "@/lib/adapters/storage/chat/IDBChatAdapter";
 import { getArisuDB } from "@/lib/adapters/storage/IndexedDBHelper";
 import { exampleChatData, exampleMessageData } from "@/const/example_data";
+import { cloneDeep } from "lodash-es";
 
 describe("DexieChatAdapter (edge)", () => {
     let adapter: IDBChatAdapter;
@@ -15,7 +16,7 @@ describe("DexieChatAdapter (edge)", () => {
     });
 
     it("addMessage with missing timestamp sets chat.updatedAt and appends message", async () => {
-        const chat = structuredClone(exampleChatData);
+        const chat = cloneDeep(exampleChatData);
         await adapter.saveChat(chat);
         const msg = { ...exampleMessageData[0] };
         // remove timestamp
@@ -30,12 +31,12 @@ describe("DexieChatAdapter (edge)", () => {
     });
 
     it("addMessage on non-existent chat throws", async () => {
-        const msg = structuredClone(exampleMessageData[0]);
+        const msg = cloneDeep(exampleMessageData[0]);
         await expect(adapter.addMessage("no-such-chat", msg)).rejects.toThrow();
     });
 
     it("export/import roundtrip restores chats and messages", async () => {
-        const chat = structuredClone(exampleChatData);
+        const chat = cloneDeep(exampleChatData);
         await adapter.saveChat(chat);
         // Add a message
         await adapter.addMessage(chat.id, exampleMessageData[0]);

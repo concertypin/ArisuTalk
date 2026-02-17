@@ -16,7 +16,7 @@ vi.mock("@/lib/stores/ui.svelte", () => ({
 describe("CharacterSidebar Component", () => {
     let mockCharacters: Character[];
 
-    let mockOnSelect: (id: string) => void;
+    let mockOnSelect: (id: string | null) => void;
     let mockOnAdd: () => void;
     let mockOnPersona: () => void;
 
@@ -157,19 +157,21 @@ describe("CharacterSidebar Component", () => {
     });
 
     test("highlights selected character", async () => {
-        const { getByLabelText } = render(CharacterSidebar, {
+        const { container } = render(CharacterSidebar, {
             selectedCharacterId: "char-1",
             onSelect: mockOnSelect,
             onAdd: mockOnAdd,
             onPersona: mockOnPersona,
         });
 
-        const characterButton = getByLabelText("Character 1");
+        //Wait for rendering
+        await vi.waitFor(() => {
+            const items = container.querySelectorAll('[role="option"]');
+            expect(items.length).toBeGreaterThan(0);
+        });
 
-        // The inner div of the button has the rounded-xl shape when active
-        const innerDiv = characterButton.element().querySelector("div");
-
-        await expect.element(innerDiv).toHaveClass(/rounded-xl/);
+        const selectedOption = container.querySelector('[aria-selected="true"]');
+        expect(selectedOption).toBeTruthy();
     });
 
     test("renders divider before action buttons", async () => {

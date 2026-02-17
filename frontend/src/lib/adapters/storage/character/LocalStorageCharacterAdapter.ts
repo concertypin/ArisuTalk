@@ -1,5 +1,6 @@
 import type { ICharacterStorageAdapter, CharacterMetadata } from "@/lib/interfaces";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
+import { Logger } from "@common/logger/Logger";
 
 /**
  * LocalStorage-based character storage adapter.
@@ -20,7 +21,7 @@ export class LocalStorageCharacterAdapter implements ICharacterStorageAdapter {
 
     async init(): Promise<void> {
         if (!import.meta.env.DEV) {
-            console.warn("LocalStorageCharacterAdapter is for development/testing only.");
+            Logger.warn("LocalStorageCharacterAdapter is for development/testing only.");
         }
         return Promise.resolve();
     }
