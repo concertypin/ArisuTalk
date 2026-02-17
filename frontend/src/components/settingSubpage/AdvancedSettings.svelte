@@ -2,15 +2,9 @@
     import { settings } from "@/lib/stores/settings.svelte";
     import LogLevelSelector from "../ui/LogLevelSelector.svelte";
     import Warning from "phosphor-svelte/lib/Warning";
+    import NoopIcon from "@/components/Snippets/NoopIcon.svelte";
 </script>
 
-{#snippet noopIcon()}
-    <!--When hover, shows small  this is a noop-->
-    <div class="tooltip" data-tip="This is currently a no-op.">
-        <!--Use daisyui color-->
-        <Warning class="text-warning" />
-    </div>
-{/snippet}
 <div class="space-y-6">
     <h3 class="text-lg font-semibold">Advanced Settings</h3>
 
@@ -27,7 +21,7 @@
                 class="toggle"
                 bind:checked={settings.value.advanced.debug}
             />
-            {@render noopIcon()}
+            <NoopIcon />
         </label>
     </div>
     <div class="form-control">
@@ -39,7 +33,7 @@
                 class="toggle"
                 bind:checked={settings.value.advanced.experimental}
             />
-            {@render noopIcon()}
+            <NoopIcon />
         </label>
     </div>
 </div>

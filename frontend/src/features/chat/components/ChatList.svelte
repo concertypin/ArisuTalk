@@ -13,6 +13,28 @@
     let chats = $derived(chatStore.chats.filter((c) => c.characterId === characterId));
     let activeChatId = $derived(chatStore.activeChatId);
 
+    // Automatically select the most recent chat when character changes
+    $effect(() => {
+        const characterChats = chats; // Use the derived chats
+        const currentActive = chatStore.activeChatId
+            ? chatStore.chats.find((c) => c.id === chatStore.activeChatId)
+            : null;
+
+        // If the active chat doesn't belong to the current character,
+        // switch to the most recent chat of this character
+        if (!currentActive || currentActive.characterId !== characterId) {
+            if (characterChats.length > 0) {
+                // Sort by lastMessage or updatedAt to get the most recent
+                const mostRecent = [...characterChats].sort(
+                    (a, b) => (b.lastMessage || 0) - (a.lastMessage || 0)
+                )[0];
+                void chatStore.setActiveChat(mostRecent.id);
+            } else {
+                void chatStore.setActiveChat(null);
+            }
+        }
+    });
+
     async function handleNewChat() {
         const id = await chatStore.createChat(characterId, `Chat ${chats.length + 1}`);
         void chatStore.setActiveChat(id);

@@ -1,6 +1,6 @@
 <script lang="ts">
     import { settings } from "@/lib/stores/settings.svelte";
-
+    import NoopIcon from "@/components/Snippets/NoopIcon.svelte";
     import TextT from "phosphor-svelte/lib/TextT";
     import Palette from "phosphor-svelte/lib/Palette";
     import { SUPPORTED_FONTS } from "@/lib/utils/fontUtils";
@@ -23,6 +23,7 @@
                 <option value="light">Light</option>
                 <option value="dark">Dark</option>
             </select>
+            <NoopIcon />
         </div>
     </fieldset>
 
