@@ -20,7 +20,7 @@
         "lint:oxlint": "oxlint . --type-aware --type-check --report-unused-disable-directives-severity=off",
         "lint:eslint": "eslint --cache --cache-location ./node_modules/.cache/eslint/ src/ test/ worker/ common/",
         "lint": "pnpm run lint:oxlint --fix && pnpm run lint:eslint --fix",
-        "lint:check": "pnpm run check:types && pnpm run lint:oxlint && pnpm run lint:eslint",
+        "lint:check": "concurrently --group \"pnpm run check:types\" \"pnpm run lint:oxlint\" \"pnpm run lint:eslint\"",
         "format": "pnpm run format:check --write --list-different",
         "format:check": "prettier --cache --cache-location ./node_modules/.cache/prettier/ src/ test/ worker/"
     },
