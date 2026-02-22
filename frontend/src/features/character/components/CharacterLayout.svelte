@@ -15,15 +15,15 @@
         children?: import("svelte").Snippet;
     };
 
-    let { children }: Props = $props();
+    const { children }: Props = $props();
 
     let selectedCharacterId = $state<string | null>(null);
-    let dialog = $state<HTMLDialogElement>();
-    let personaDialog = $state<HTMLDialogElement>();
+    const dialog = $state<HTMLDialogElement>();
+    const personaDialog = $state<HTMLDialogElement>();
 
     // Character UI State
     let editingIndex = $state<number | null>(null);
-    let editingCharacter = $derived(
+    const editingCharacter = $derived(
         editingIndex !== null ? characterStore.characters[editingIndex] : undefined
     );
 

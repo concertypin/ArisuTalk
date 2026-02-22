@@ -15,7 +15,7 @@
         onPersona: () => void;
     };
 
-    let { selectedCharacterId, onSelect, onAdd, onPersona }: Props = $props();
+    const { selectedCharacterId, onSelect, onAdd, onPersona }: Props = $props();
 
     const flipDurationMs = 200;
 

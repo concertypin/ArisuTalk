@@ -11,7 +11,7 @@
         onChange: (character: Character) => void;
     };
 
-    let { character, onChange }: Props = $props();
+    const { character, onChange }: Props = $props();
 
     /** Common license options for autocomplete */
     const licenseOptions = [

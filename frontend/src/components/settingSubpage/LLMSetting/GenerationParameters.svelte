@@ -10,7 +10,7 @@
         id: number;
     };
 
-    let { config = $bindable(), id }: Props = $props();
+    const { config = $bindable(), id }: Props = $props();
 
     /**
      * Creates a proxy object to bind a checkbox to the presence of a field in a target object.
@@ -46,7 +46,7 @@
         settings.value.activeLLMConfigId = config.id;
     }
 
-    let isActive = $derived(settings.value.activeLLMConfigId === config.id);
+    const isActive = $derived(settings.value.activeLLMConfigId === config.id);
 
     const modelProxy = $derived(createFieldProxy(config, "model"));
     const keyProxy = $derived(createFieldProxy(config, "apiKey"));

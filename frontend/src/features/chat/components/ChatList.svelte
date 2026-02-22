@@ -8,10 +8,10 @@
         characterId: string;
     };
 
-    let { characterId }: Props = $props();
+    const { characterId }: Props = $props();
 
-    let chats = $derived(chatStore.chats.filter((c) => c.characterId === characterId));
-    let activeChatId = $derived(chatStore.activeChatId);
+    const chats = $derived(chatStore.chats.filter((c) => c.characterId === characterId));
+    const activeChatId = $derived(chatStore.activeChatId);
 
     // Automatically select the most recent chat when character changes
     $effect(() => {

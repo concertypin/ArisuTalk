@@ -7,21 +7,30 @@ import { dirname } from "path";
 import { fileURLToPath } from "url";
 import phosphorSvelte from "eslint-plugin-phosphor-svelte";
 import oxlint from "eslint-plugin-oxlint";
+import { noSvelteStore } from "./scripts/linter/eslint-config";
+import svelteConfig from "./svelte.config.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-
 const isCI = process.env.CI ? true : false;
+
+// Ducktyping for ESLintConfig since pnpm can't hoist it properly.
+type TypescriptParserOptions =
+    import("../node_modules/.pnpm/@typescript-eslint+types@8.56.0/node_modules/@typescript-eslint/types/dist/parser-options").ParserOptions;
+const oxlintize = false;
 
 export default defineConfig([
     {
-        ignores: ["dist/", "node_modules/", "*.config.*"],
+        ignores: ["dist/", "node_modules/", "*.config.*", "coverage/"],
     },
-    js.configs.recommended,
-    // No type check for it, oxlint does it.
-    ...ts.configs.recommended,
-    ...svelte.configs["flat/recommended"],
-    phosphorSvelte.configs.recommended,
+
     {
+        files: ["**/*.svelte", "**/*.svelte.ts"],
+        extends: [
+            js.configs.recommended,
+            ...ts.configs.recommendedTypeChecked,
+            ...svelte.configs["flat/recommended"],
+            phosphorSvelte.configs.recommended,
+        ],
         languageOptions: {
             globals: {
                 ...globals.browser,
@@ -30,18 +39,27 @@ export default defineConfig([
                 projectService: true,
                 tsconfigRootDir: __dirname,
                 extraFileExtensions: [".svelte"],
-            },
+            } satisfies TypescriptParserOptions,
         },
     },
+
     {
         files: ["**/*.svelte", "**/*.svelte.ts"],
         languageOptions: {
             parserOptions: {
                 parser: ts.parser,
+                svelteConfig: svelteConfig,
             },
         },
     },
+
+    ...noSvelteStore.map((config) => ({
+        ...config,
+        files: ["**/*.svelte", "**/*.svelte.ts"],
+    })),
+
     {
+        files: ["**/*.svelte", "**/*.svelte.ts"],
         rules: {
             // Allow unused vars prefixed with _
             "@typescript-eslint/no-unused-vars": [
@@ -59,8 +77,16 @@ export default defineConfig([
             "no-console": "warn",
         },
     },
+
     // Disable ESLint rules that are already handled by oxlint
-    ...oxlint.buildFromOxlintConfigFile(".oxlintrc.json", {
-        typeAware: true,
-    }),
+    ...(oxlintize
+        ? oxlint
+              .buildFromOxlintConfigFile(".oxlintrc.json", {
+                  typeAware: true,
+              })
+              .map((config) => ({
+                  ...config,
+                  files: ["**/*.svelte", "**/*.svelte.ts"],
+              }))
+        : []),
 ]);

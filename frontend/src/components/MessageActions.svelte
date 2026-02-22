@@ -28,7 +28,7 @@
         onCancelEdit?: () => void;
     };
 
-    let {
+    const {
         message,
         isEditing = false,
         onEdit,

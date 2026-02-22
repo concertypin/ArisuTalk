@@ -19,7 +19,7 @@
         onChange: (character: Character) => void;
     };
 
-    let { character, onChange }: Props = $props();
+    const { character, onChange }: Props = $props();
 
     let expandedEntryId = $state<string | null>(null);
 

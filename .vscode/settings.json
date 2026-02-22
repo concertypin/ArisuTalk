@@ -28,9 +28,9 @@
         "npm_lifecycle_event": "coverage",
         "IS_IDE": "vscode"
     },
-    "eslint.workingDirectories": [
-        {
-            "directory": "./frontend/",
-        }
+    "eslint.validate": [
+        "javascript",
+        "typescript",
+        "svelte"
     ]
 }

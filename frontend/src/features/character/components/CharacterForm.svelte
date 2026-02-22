@@ -10,7 +10,7 @@
         onSubmit?: (character: Character) => void;
     };
 
-    let { character = undefined, onSave, onCancel, onSubmit }: Props = $props();
+    const { character = undefined, onSave, onCancel, onSubmit }: Props = $props();
 
     let name = $state("");
     let description = $state("");

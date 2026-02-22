@@ -25,7 +25,7 @@
     import CharacterAssetsSettings from "./settingsSubpage/CharacterAssetsSettings.svelte";
     import { cloneDeep } from "lodash-es";
 
-    let dialog = $state<HTMLDialogElement>();
+    const dialog = $state<HTMLDialogElement>();
     type ActiveTab = "basic" | "prompt" | "lorebook" | "assets" | "metadata" | "advanced";
     let activeTab = $state<ActiveTab>("basic");
 

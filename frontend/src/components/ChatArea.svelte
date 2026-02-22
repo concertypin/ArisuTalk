@@ -16,14 +16,14 @@
     import Gear from "phosphor-svelte/lib/Gear";
 
     let inputValue = $state("");
-    let messagesContainer = $state<HTMLElement | null>(null);
-    let isTyping = $derived(chatStore.isGenerating);
+    const messagesContainer = $state<HTMLElement | null>(null);
+    const isTyping = $derived(chatStore.isGenerating);
 
-    let activeChat = $derived(chatStore.chats.find((c) => c.id === chatStore.activeChatId));
-    let messages = $derived(chatStore.activeMessages);
+    const activeChat = $derived(chatStore.chats.find((c) => c.id === chatStore.activeChatId));
+    const messages = $derived(chatStore.activeMessages);
 
     /** Get the current character for this chat */
-    let currentCharacter = $derived(
+    const currentCharacter = $derived(
         activeChat
             ? characterStore.characters.find((c) => c.id === activeChat.characterId)
             : undefined

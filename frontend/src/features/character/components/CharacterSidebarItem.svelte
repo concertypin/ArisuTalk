@@ -9,13 +9,13 @@
         onClick: () => void;
     };
 
-    let { character, active, onClick }: Props = $props();
+    const { character, active, onClick }: Props = $props();
 
     // Generate initials from name
-    let initials = $derived(character.name.substring(0, 2).toUpperCase());
+    const initials = $derived(character.name.substring(0, 2).toUpperCase());
 
     // Check for avatar in this order: top-level property -> assets 'portrait-default' -> any image asset
-    let avatarUrl = $derived(character.avatarUrl || "");
+    const avatarUrl = $derived(character.avatarUrl || "");
 
     function handleButtonClick(e: MouseEvent) {
         if (active) {

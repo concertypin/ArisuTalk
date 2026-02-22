@@ -17,7 +17,7 @@
         isFirst?: boolean;
         isLast?: boolean;
     };
-    let {
+    const {
         character,
         onEdit,
         onDelete,

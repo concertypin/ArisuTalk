@@ -24,7 +24,7 @@
         tags?: string[];
     };
 
-    let {
+    const {
         content = "Hello from the SNS mode!",
         author = "User",
         timestamp = "1m ago",

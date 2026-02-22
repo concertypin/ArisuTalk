@@ -12,8 +12,8 @@
         onEdit: (index: number) => void;
     };
 
-    let { onEdit }: Props = $props();
-    let worker = getCardParseWorker();
+    const { onEdit }: Props = $props();
+    const worker = getCardParseWorker();
 
     async function handleDelete(index: number) {
         const modal = document.getElementById("delete-confirm-modal") as HTMLDialogElement;

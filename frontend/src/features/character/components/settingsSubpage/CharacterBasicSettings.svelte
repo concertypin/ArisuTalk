@@ -16,11 +16,11 @@
         onChange: (character: Character) => void;
     };
 
-    let { character, onChange }: Props = $props();
+    const { character, onChange }: Props = $props();
 
     const assetStorage = getAssetStorage();
-    let assetPreviews = new SvelteMap<string, string>();
-    let showManualUrl = $state(false);
+    const assetPreviews = new SvelteMap<string, string>();
+    const showManualUrl = $state(false);
 
     const imageAssets = $derived(
         character.assets.assets.filter((a) => a.mimeType.startsWith("image/"))
