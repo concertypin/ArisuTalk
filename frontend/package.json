@@ -16,10 +16,9 @@
         "test:coverage": "vitest run test --coverage",
         "check": "pnpm run format && pnpm run lint && pnpm run test",
         "check:types": "concurrently --group \"svelte-check --tsconfig tsconfig.app.json --fail-on-warnings\" \"svelte-check --tsconfig tsconfig.worker.json --fail-on-warnings\" \"svelte-check --tsconfig tsconfig.test.json\"",
-        "lint:oxlint": "oxlint . --type-aware --type-check --report-unused-disable-directives-severity=error",
         "lint:eslint": "eslint --cache --cache-location ./node_modules/.cache/eslint/ src/ test/",
-        "lint": "pnpm run lint:oxlint --fix && pnpm run lint:eslint --fix",
-        "lint:check": "concurrently --group \"pnpm run check:types\" \"pnpm run lint:oxlint\" \"pnpm run lint:eslint\"",
+        "lint": "pnpm run lint:eslint --fix",
+        "lint:check": "concurrently --group \"pnpm run check:types\" \"pnpm run lint:eslint\"",
         "format": "pnpm run format:check --write --list-different",
         "format:check": "prettier --cache --cache-location ./node_modules/.cache/prettier/ src/ test/ worker/"
     },
