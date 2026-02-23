@@ -58,8 +58,9 @@ export const testConfig: TestConfig = {
         {
             test: {
                 name: "unit",
-                include: ["test/**/*.test.ts"],
-                exclude: ["test/browser/**/*"],
+                include: ["features", "integration", "lib", "unit", "utils", "workers"].map(
+                    (i) => `test/${i}/**/*.test.ts`
+                ),
             },
             extends: true,
         },

@@ -1,3 +1,4 @@
+//oxlint-disable eslint/no-console
 import { spawnSync } from "child_process";
 import { readdirSync, statSync, utimesSync } from "fs";
 import path from "path";
@@ -35,11 +36,10 @@ function touchHalfOfSvelteFiles(targetDir: string[] = ["src", "test"]): void {
 
             if (stat.isDirectory()) {
                 getAllFiles(filePath, fileList);
-            } else {
-                // .svelte / .svelte.ts file filter
-                if (file.endsWith(".svelte") || file.endsWith(".svelte.ts")) {
-                    fileList.push(filePath);
-                }
+            }
+            // .svelte / .svelte.ts file filter
+            else if (file.endsWith(".svelte") || file.endsWith(".svelte.ts")) {
+                fileList.push(filePath);
             }
         });
 
@@ -76,7 +76,8 @@ function runBenchCommand(command: string): number {
         if (res.error) throw new Error(`Failed to start command: ${res.error.message}`);
         return (end - start) / 1000;
     } catch (err) {
-        if (err instanceof Error) throw new Error(`[Execution Error] ${err.message}`);
+        if (err instanceof Error)
+            throw new Error(`[Execution Error] ${err.message}`, { cause: err });
         throw err;
     }
 }
@@ -125,7 +126,7 @@ async function runBenchmarkForCase(caseInfo: {
 
     for (let i = 1; i <= maxRuns; i++) {
         caseInfo.beforeRun?.();
-        let elapsed = runBenchCommand(caseInfo.command);
+        const elapsed = runBenchCommand(caseInfo.command);
         durations.push(elapsed);
         const { mean, stdev } = getCleanedStats(durations);
         const cv = mean > 0 ? stdev / mean : 0;
@@ -144,12 +145,11 @@ async function runBenchmarkForCase(caseInfo: {
 async function main() {
     const results = [];
     for (const c of CASES) {
-        // @ts-ignore
         const stats = await runBenchmarkForCase(c);
         results.push({ ...c, ...stats });
     }
 
-    console.log("\n" + "=".repeat(70));
+    console.log(`${"\n"} ${"=".repeat(70)}`);
     console.log("📊 Linter Performance Benchmark Results (Hybrid Setup)");
     console.log("=".repeat(70));
     console.log(`${"Case".padEnd(45)} | ${"Mean (s)".padStart(10)} | ${"Stdev".padStart(8)}`);
