@@ -13,9 +13,6 @@ import svelteConfig from "./svelte.config.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const isCI = process.env.CI ? true : false;
 
-// Ducktyping for ESLintConfig since pnpm can't hoist it properly.
-type TypescriptParserOptions =
-    import("../node_modules/.pnpm/@typescript-eslint+types@8.56.0/node_modules/@typescript-eslint/types/dist/parser-options").ParserOptions;
 const oxlintize = false;
 
 export default defineConfig([
@@ -38,7 +35,7 @@ export default defineConfig([
                 projectService: true,
                 tsconfigRootDir: __dirname,
                 extraFileExtensions: [".svelte"],
-            } satisfies TypescriptParserOptions,
+            },
         },
     },
 
