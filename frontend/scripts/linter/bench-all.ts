@@ -1,10 +1,17 @@
 import { spawnSync } from "child_process";
+import { readdirSync, statSync, utimesSync } from "fs";
+import path from "path";
 import { performance } from "perf_hooks";
 
 const CASES = [
     {
         name: "Hybrid (Oxlint + ESLint) w/ Cache",
         command: "pnpm run lint:oxlint && pnpm run lint:eslint",
+    },
+    {
+        name: "Hybrid (Partial Cache Invalidation)",
+        command: "pnpm run lint:oxlint && pnpm run lint:eslint",
+        beforeRun: touchHalfOfSvelteFiles,
     },
     {
         name: "Hybrid (Oxlint + ESLint) w/o Cache",
@@ -17,6 +24,45 @@ const CASES = [
     { name: "ESLint (Svelte Only) w/ Cache", command: "pnpm run lint:eslint" },
     { name: "ESLint (Svelte Only) w/o Cache", command: "pnpm run lint:eslint --no-cache" },
 ];
+function touchHalfOfSvelteFiles(targetDir: string[] = ["src", "test"]): void {
+    // 1. Get all .svelte / .svelte.ts files
+    const getAllFiles = (dir: string, fileList: string[] = []): string[] => {
+        const files = readdirSync(dir);
+
+        files.forEach((file) => {
+            const filePath = path.join(dir, file);
+            const stat = statSync(filePath);
+
+            if (stat.isDirectory()) {
+                getAllFiles(filePath, fileList);
+            } else {
+                // .svelte / .svelte.ts file filter
+                if (file.endsWith(".svelte") || file.endsWith(".svelte.ts")) {
+                    fileList.push(filePath);
+                }
+            }
+        });
+
+        return fileList;
+    };
+
+    const allFiles = targetDir.flatMap((dir) => getAllFiles(dir));
+
+    if (allFiles.length === 0) {
+        console.warn("No suitable files found.");
+        return;
+    }
+
+    // 2. Randomly select half of the files
+    const shuffled = allFiles.sort(() => Math.random() - 0.5);
+    const halfCount = Math.ceil(allFiles.length / 2);
+    const targetFiles = shuffled.slice(0, halfCount);
+
+    const now = new Date();
+    targetFiles.forEach((filePath) => {
+        utimesSync(filePath, now, now);
+    });
+}
 
 function runBenchCommand(command: string): number {
     const start = performance.now();
@@ -58,7 +104,11 @@ function getCleanedStats(data: number[]): { mean: number; stdev: number } {
     return calculateStats(filteredData.length >= 2 ? filteredData : data);
 }
 
-async function runBenchmarkForCase(caseInfo: { name: string; command: string }) {
+async function runBenchmarkForCase(caseInfo: {
+    name: string;
+    command: string;
+    beforeRun?: () => void;
+}) {
     console.log(`\n🚀 Testing: ${caseInfo.name}`);
     console.log(`   Command: ${caseInfo.command}`);
 
@@ -68,9 +118,13 @@ async function runBenchmarkForCase(caseInfo: { name: string; command: string }) 
     const maxRuns = 15;
 
     console.log("   ⚡ Warming up (2 runs)...");
-    for (let i = 0; i < 2; i++) runBenchCommand(caseInfo.command);
+    for (let i = 0; i < 2; i++) {
+        caseInfo.beforeRun?.();
+        runBenchCommand(caseInfo.command);
+    }
 
     for (let i = 1; i <= maxRuns; i++) {
+        caseInfo.beforeRun?.();
         let elapsed = runBenchCommand(caseInfo.command);
         durations.push(elapsed);
         const { mean, stdev } = getCleanedStats(durations);
@@ -90,6 +144,7 @@ async function runBenchmarkForCase(caseInfo: { name: string; command: string }) 
 async function main() {
     const results = [];
     for (const c of CASES) {
+        // @ts-ignore
         const stats = await runBenchmarkForCase(c);
         results.push({ ...c, ...stats });
     }
