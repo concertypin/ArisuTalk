@@ -12,10 +12,10 @@
     const { character, active, onClick }: Props = $props();
 
     // Generate initials from name
-    const initials = $derived(character.name.substring(0, 2).toUpperCase());
+    let initials = $derived(character.name.substring(0, 2).toUpperCase());
 
     // Check for avatar in this order: top-level property -> assets 'portrait-default' -> any image asset
-    const avatarUrl = $derived(character.avatarUrl || "");
+    let avatarUrl = $derived(character.avatarUrl || "");
 
     function handleButtonClick(e: MouseEvent) {
         if (active) {

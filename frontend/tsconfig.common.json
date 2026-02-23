@@ -14,9 +14,9 @@
 	"extends": "./tsconfig.base.json",
 	"include": [
 		"common/**/*.ts",
+		"scripts/**/*.ts",
 		"*.ts", // config
 		"*.js",
-		"scripts/**/*.ts",
 		"scripts/**/*.js"
 	]
 }

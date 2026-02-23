@@ -62,7 +62,5 @@ jobs:
 
       - name: Run Tests (Iteration ${{ matrix.index }})
         run: |
-            pnpm -F frontend test:browser
-            pnpm -F frontend test:coverage --coverage.reporters=text-summary
-            pnpm -F frontend test
+            pnpm -F frontend test --coverage.reporters=text-summary
         timeout-minutes: 10

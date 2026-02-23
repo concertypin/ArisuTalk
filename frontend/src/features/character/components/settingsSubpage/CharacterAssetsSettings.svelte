@@ -22,7 +22,7 @@
 
     const { character, onChange }: Props = $props();
 
-    const fileInput = $state<HTMLInputElement>();
+    let fileInput = $state<HTMLInputElement>();
     let expandOtherAssets = $state(false);
     let duplicateNameError = $state<string | null>(null);
     let draggedIndex = $state<number | null>(null);
@@ -48,10 +48,10 @@
         void loadPreviews();
     });
 
-    const imageAssets = $derived(
+    let imageAssets = $derived(
         character.assets.assets.filter((a) => a.mimeType.startsWith("image/"))
     );
-    const otherAssets = $derived(
+    let otherAssets = $derived(
         character.assets.assets.filter((a) => !a.mimeType.startsWith("image/"))
     );
 

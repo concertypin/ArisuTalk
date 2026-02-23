@@ -1,31 +1,11 @@
 /// <reference types="vitest/config" />
 import { svelte } from "@sveltejs/vite-plugin-svelte";
-import { type PluginOption, type UserConfig, defineConfig, loadEnv } from "vite";
-import { playwright } from "@vitest/browser-playwright";
+import { type PluginOption, type UserConfig, defineConfig } from "vite";
+import { testConfig } from "./scripts/testConfig";
 import path from "path";
+
 type Presence<T> = T extends undefined ? never : T;
 
-type TestConfig = Presence<UserConfig["test"]>;
-
-const browserTestConfig: TestConfig["browser"] = {
-    enabled: true,
-    provider: playwright(),
-    instances: [
-        {
-            hideSkippedTests: true,
-            browser: "chromium",
-            testTimeout: 20 * 1000,
-        },
-    ],
-    headless: true,
-    screenshotFailures: false, // Speed up by not taking screenshots
-};
-
-const runBrowserTest =
-    process.env.npm_lifecycle_event?.includes("browser") ||
-    process.env.npm_lifecycle_event?.includes("coverage")
-        ? true
-        : false;
 const paths: Presence<UserConfig["resolve"]>["alias"] = {
     "@": path.resolve(__dirname, "src"),
     "@worker": path.resolve(__dirname, "worker"),
@@ -42,52 +22,11 @@ export default defineConfig(async (ctx) => {
             },
         }),
     ];
+    /*
     // Requirements for vite's env
     // oxlint-disable-next-line typescript/no-explicit-any
     const env = loadEnv(mode, process.cwd(), "") as Record<string, any>;
-    env.VITEST_BROWSER_MODE = runBrowserTest ? "true" : "false";
-
-    const coverage: TestConfig["coverage"] & { provider: "v8" } = {
-        provider: "v8",
-        reporter: ["html", "text"],
-        reportsDirectory: "./coverage",
-        include: ["src/**/*", "common/**/*"],
-        reportOnFailure: true,
-        exclude: ["node_modules/", "dist/", "test/", "**/*.d.ts", "**/*.config.*", "static/"],
-    };
-    if (env.GITHUB_ACTIONS) {
-        coverage.reporter = ["json-summary", "text"];
-    }
-    const testConfig: TestConfig = {
-        globals: true,
-        environment: "node",
-        silent: "passed-only",
-        setupFiles: ["./test/setup.ts"],
-        exclude: ["node_modules", "dist", ".git", "**/EndToEndHook.test.ts"],
-        browser: runBrowserTest ? browserTestConfig : undefined,
-        coverage,
-        includeTaskLocation: true,
-        env,
-        typecheck: {
-            enabled: true,
-        },
-        testTimeout: 10000, // 10 seconds global timeout
-        fileParallelism: true,
-    };
-
-    if (env.GITHUB_ACTIONS) {
-        testConfig.reporters = [
-            "default",
-            [
-                "github-actions",
-                {
-                    onWritePath(writePath) {
-                        return writePath.replace(/^\/app\//, `${env.GITHUB_WORKSPACE}/`);
-                    },
-                },
-            ],
-        ];
-    }
+    */
 
     const define: Record<string, string> = {};
     const baseConfig: UserConfig = {
@@ -120,7 +59,7 @@ export default defineConfig(async (ctx) => {
             open: "index.html",
             allowedHosts: process.env.npm_lifecycle_event?.includes("dev") ? true : undefined,
         },
-        define: define,
+        define,
         build: {
             outDir: "dist",
             sourcemap: true,

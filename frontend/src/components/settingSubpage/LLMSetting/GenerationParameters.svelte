@@ -46,24 +46,24 @@
         settings.value.activeLLMConfigId = config.id;
     }
 
-    const isActive = $derived(settings.value.activeLLMConfigId === config.id);
+    let isActive = $derived(settings.value.activeLLMConfigId === config.id);
 
-    const modelProxy = $derived(createFieldProxy(config, "model"));
-    const keyProxy = $derived(createFieldProxy(config, "apiKey"));
-    const urlProxy = $derived(createFieldProxy(config, "baseURL"));
-    const tempProxy = $derived(createFieldProxy(config.generationParameters, "temperature", 1));
-    const maxInProxy = $derived(
+    let modelProxy = $derived(createFieldProxy(config, "model"));
+    let keyProxy = $derived(createFieldProxy(config, "apiKey"));
+    let urlProxy = $derived(createFieldProxy(config, "baseURL"));
+    let tempProxy = $derived(createFieldProxy(config.generationParameters, "temperature", 1));
+    let maxInProxy = $derived(
         createFieldProxy(config.generationParameters, "maxInputTokens", 1024)
     );
-    const maxOutProxy = $derived(
+    let maxOutProxy = $derived(
         createFieldProxy(config.generationParameters, "maxOutputTokens", 1024)
     );
-    const topPProxy = $derived(createFieldProxy(config.generationParameters, "topP", 0.95));
-    const topKProxy = $derived(createFieldProxy(config.generationParameters, "topK", 40));
-    const freqPenProxy = $derived(
+    let topPProxy = $derived(createFieldProxy(config.generationParameters, "topP", 0.95));
+    let topKProxy = $derived(createFieldProxy(config.generationParameters, "topK", 40));
+    let freqPenProxy = $derived(
         createFieldProxy(config.generationParameters, "frequencyPenalty", 0)
     );
-    const presPenProxy = $derived(
+    let presPenProxy = $derived(
         createFieldProxy(config.generationParameters, "presencePenalty", 0)
     );
 </script>

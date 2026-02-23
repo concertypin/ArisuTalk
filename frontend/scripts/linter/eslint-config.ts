@@ -26,6 +26,7 @@ type ActualRuleConfig = NonNullable<ESLintConfigObj["rules"]>[string];
 type CustomRules = Partial<Record<ESLintRulesKey, ActualRuleConfig>>;
 export const noSvelteStore = [
     {
+        files: ["**/*.svelte", "**/*.svelte.ts"],
         rules: {
             // Disable slow & conflicting rule.
             "svelte/require-store-reactive-access": "off",
@@ -37,7 +38,7 @@ export const noSvelteStore = [
                         "Direct use of 'writable' or 'readable' is discouraged in Svelte 5. You should use Runes instead.",
                 },
             ],
-            "svelte/block-lang": ["warn", { script: "ts" }],
+            "svelte/block-lang": ["error", { script: "ts" }],
         } satisfies CustomRules,
     },
 ] as const satisfies ESLintConfig[];

@@ -19,7 +19,7 @@
             personaStore.remove(id);
         }
     }
-    const personas = $derived(personaStore.personas);
+    let personas = $derived(personaStore.personas);
     $effect(() => {
         // Auto-select first persona if none selected
         if (!personaStore.activePersonaId && personaStore.personas.length > 0) {

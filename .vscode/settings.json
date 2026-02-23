@@ -9,7 +9,7 @@
     },
     "[svelte]": {
         "editor.tabSize": 4,
-        "editor.defaultFormatter": "svelte.svelte-vscode"
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "[json]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -32,5 +32,8 @@
         "javascript",
         "typescript",
         "svelte"
-    ]
+    ],
+    "files.exclude": {
+        "coverage": true
+    }
 }

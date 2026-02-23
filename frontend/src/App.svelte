@@ -20,7 +20,7 @@
     });
 
     // Current route path (reactive)
-    const currentPath = $derived(getCurrentPath());
+    let currentPath = $derived(getCurrentPath());
 
     // Current component (lazy loaded)
     let CurrentComponent = $state<Component | null>(null);

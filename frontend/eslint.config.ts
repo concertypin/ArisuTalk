@@ -22,7 +22,6 @@ export default defineConfig([
     {
         ignores: ["dist/", "node_modules/", "*.config.*", "coverage/"],
     },
-
     {
         files: ["**/*.svelte", "**/*.svelte.ts"],
         extends: [
@@ -52,12 +51,7 @@ export default defineConfig([
             },
         },
     },
-
-    ...noSvelteStore.map((config) => ({
-        ...config,
-        files: ["**/*.svelte", "**/*.svelte.ts"],
-    })),
-
+    ...noSvelteStore,
     {
         files: ["**/*.svelte", "**/*.svelte.ts"],
         rules: {

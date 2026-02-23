@@ -41,6 +41,7 @@ describe("GeminiChatProvider", () => {
             ...geminiSettings,
         });
         expect(provider).toBeInstanceOf(GeminiChatProvider);
+
         expect(provider.isReady()).toBe(true);
     });
 
