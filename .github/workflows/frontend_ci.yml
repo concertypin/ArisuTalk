@@ -1,0 +1,91 @@
+name: Frontend CI
+on:
+  pull_request:
+    branches:
+      - kei
+      - main
+    paths:
+      - "frontend/**"
+      - ".github/workflows/**"
+      - "pnpm-lock.yaml"
+
+jobs:
+  lint:
+    name: Frontend Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup pnpm Environment
+        uses: concertypin/action/pnpm-install@master
+        with:
+          working-directory: frontend
+
+      - name: Lint
+        run: pnpm -F frontend run lint
+
+      - name: Type check
+        run: pnpm -F frontend run check:types
+
+  tests:
+    name: Frontend Tests
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        shardIndex: [1, 2, 3, 4, 5] # [1,2,3,4,5...]
+        shardTotal: [5] # [len(shardIndex)]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm Environment
+        uses: concertypin/action/pnpm-install@master
+        with:
+          working-directory: frontend
+          install-playwright-deps: "true"
+
+      - name: Run tests
+        run: pnpm -F frontend run test --reporter=blob --coverage.enabled --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+
+      - name: Upload blob report to GitHub Actions Artifacts
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: blob-report-${{ matrix.shardIndex }}
+          path: frontend/.vitest-reports/*
+          include-hidden-files: true
+          retention-days: 1
+
+  merge-reports:
+    name: Merge Reports
+    if: ${{ !cancelled() }}
+    needs: [tests]
+    permissions:
+      pull-requests: write
+      statuses: write
+      contents: read
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup pnpm Environment
+        uses: concertypin/action/pnpm-install@master
+        with:
+          working-directory: frontend
+
+      - name: Download blob reports from GitHub Actions Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: frontend/.vitest-reports
+          pattern: blob-report-*
+          merge-multiple: true
+
+      - name: Merge reports
+        run: pnpm -F frontend run test --merge-reports --reporter=github-actions --reporter=default --coverage.reporter=text --coverage.reporter=json-summary
+
+      - name: Update Coverage Status
+        if: ${{ github.event_name == 'pull_request' && always()}}
+        uses: concertypin/action/report-vitest-coverage@master
+        with:
+          json-file: frontend/coverage/coverage-summary.json
+          threshold: 80

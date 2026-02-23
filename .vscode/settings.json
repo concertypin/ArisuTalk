@@ -15,6 +15,9 @@
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.tabSize": 4
     },
+    "[github-actions-workflow]": {
+        "editor.tabSize": 2
+    },
     "typescript.preferences.preferTypeOnlyAutoImports": true,
     "js/ts.implicitProjectConfig.target": "ESNext",
     "typescript.preferences.importModuleSpecifier": "non-relative",
@@ -22,12 +25,6 @@
     "javascript.preferences.importModuleSpecifierEnding": "minimal",
     "typescript.preferences.importModuleSpecifierEnding": "minimal",
     "oxc.typeAware": true,
-    "vitest.nodeEnv": {
-        // Enabling browser test on VSC vitest,
-        // since it will not run browser tests by default
-        "npm_lifecycle_event": "coverage",
-        "IS_IDE": "vscode"
-    },
     "eslint.validate": [
         "javascript",
         "typescript",
