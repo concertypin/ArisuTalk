@@ -3,9 +3,10 @@ description: Check for type errors and linting errors in the project.
 
 on:
   pull_request:
-    branches:
-      - main
-      - kei
+    paths: 
+      - "backend/**"
+      - ".github/workflows/**"
+      - "pnpm-lock.yaml"
   workflow_dispatch:
 permissions:
   contents: read

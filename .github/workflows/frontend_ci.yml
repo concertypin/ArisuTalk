@@ -1,9 +1,6 @@
 name: Frontend CI
 on:
   pull_request:
-    branches:
-      - kei
-      - main
     paths:
       - "frontend/**"
       - ".github/workflows/**"
