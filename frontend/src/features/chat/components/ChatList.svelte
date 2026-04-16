@@ -2,7 +2,7 @@
     import { chatStore } from "../stores/chatStore.svelte";
     import Plus from "phosphor-svelte/lib/Plus";
     import ChatTeardropText from "phosphor-svelte/lib/ChatTeardropText";
-    import Trash from "phosphor-svelte/lib/Trash";
+    import TrashIcon from "phosphor-svelte/lib/TrashIcon";
 
     type Props = {
         characterId: string;
@@ -88,7 +88,7 @@
                             }
                         }}
                     >
-                        <Trash size={14} />
+                        <TrashIcon size={14} />
                     </div>
                 </div>
             </button>

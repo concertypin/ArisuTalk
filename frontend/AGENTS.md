@@ -47,10 +47,12 @@ The production-ready files will be in the `ArisuTalk/frontend/dist` directory.
 ### Testing
 
 ```bash
-pnpm run -F frontend test # For unit tests
-pnpm run -F frontend test:browser # For browser tests
-pnpm run -F frontend test:coverage # For test coverage report
+pnpm run -F frontend test       # Run all tests
+pnpm run -F frontend test:ui    # Run tests with Vitest UI
+pnpm vitest -k 'pattern'        # Run specific tests matching pattern
 ```
+
+Note: CI runs the same full test suite (`pnpm run -F frontend check`). Ensure tests pass locally before pushing.
 
 ## Authentication Setup
 

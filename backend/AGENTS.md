@@ -4,10 +4,11 @@ This file provides guidance for AI coding agents working on the backend of this 
 
 ## Build and Test Commands
 
-- **Run the application**: `pnpm run dev` (from the `backend` directory) or `pnpm run dev:be` (from the root directory)
+- **Run the application**: `pnpm run dev` (from `backend/`)
+- **Build**: `pnpm run build` (from `backend/`)
+- **Deploy**: `pnpm run deploy` (from `backend/`)
+
 - **Run tests**: Currently no tests.
-- **Build the application**: `pnpm run build` (from the `backend` directory) or `pnpm run build:be` (from the root directory)
-- **Format code**: `pnpm run format` (from the `backend` directory) or `pnpm run format:be` (from the root directory)
 
 ## Backend Development Guidelines
 
