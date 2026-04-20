@@ -1,3 +1,5 @@
 dist
 node_modules
 **/__screenshots__
+.svelte-check
+.vitest-report

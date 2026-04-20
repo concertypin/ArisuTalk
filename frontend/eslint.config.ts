@@ -17,7 +17,7 @@ const oxlintize = false;
 
 export default defineConfig([
     {
-        ignores: ["dist/", "node_modules/", "*.config.*", "coverage/"],
+        ignores: ["dist/", "node_modules/", "*.config.*", "coverage/", ".svelte-check/"],
     },
     {
         files: ["**/*.svelte", "**/*.svelte.ts"],

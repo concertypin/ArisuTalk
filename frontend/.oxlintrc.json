@@ -9,7 +9,8 @@
         "**/node_modules/**",
         "**/dist/**",
         "**/coverage/**",
-        "**/.cache/**"
+        "**/.cache/**",
+        "**/.svelte-check/**",
     ],
     "overrides": [
         {
@@ -31,5 +32,8 @@
                 "jest/expect-expect": "off"
             }
         }
-    ]
+    ],
+    "rules": {
+        "typescript/no-deprecated": "error"
+    }
 }

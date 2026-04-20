@@ -155,7 +155,6 @@ describe("ChatStore Streaming", () => {
             throw new Error("Active provider is not set");
         }
         chatStore["activeProvider"] = {
-            // oxlint-disable-next-line typescript/no-misused-spread
             ...chatStore["activeProvider"],
 
             stream: async function* () {
