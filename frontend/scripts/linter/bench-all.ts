@@ -1,4 +1,3 @@
-//oxlint-disable eslint/no-console
 import { spawnSync } from "child_process";
 import { readdirSync, statSync, utimesSync } from "fs";
 import path from "path";

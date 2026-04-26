@@ -18,12 +18,10 @@
     "[github-actions-workflow]": {
         "editor.tabSize": 2
     },
-    "typescript.preferences.preferTypeOnlyAutoImports": true,
+    "js/ts.preferences.preferTypeOnlyAutoImports": true,
     "js/ts.implicitProjectConfig.target": "ESNext",
-    "typescript.preferences.importModuleSpecifier": "non-relative",
-    "javascript.preferences.importModuleSpecifier": "non-relative",
-    "javascript.preferences.importModuleSpecifierEnding": "minimal",
-    "typescript.preferences.importModuleSpecifierEnding": "minimal",
+    "js/ts.preferences.importModuleSpecifier": "non-relative",
+    "js/ts.preferences.importModuleSpecifierEnding": "minimal",
     "oxc.typeAware": true,
     "eslint.validate": [
         "javascript",
@@ -32,5 +30,9 @@
     ],
     "files.exclude": {
         "coverage": true
-    }
+    },
+    "typescript.native-preview.additionalTsdkLocations": [
+        "./frontend/node_modules/@typescript/native-preview"
+    ],
+    "typescript.native-preview.tsdk": "./frontend/node_modules/@typescript/native-preview"
 }

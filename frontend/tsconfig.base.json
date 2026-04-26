@@ -62,14 +62,14 @@
 		"checkJs": true /* Enable error reporting in type-checked JavaScript files. */,
 		// "maxNodeModuleJsDepth": 1,                        /* Specify the maximum folder depth used for checking JavaScript files from 'node_modules'. Only applicable with 'allowJs'. */
 		/* Emit */
-		// "declaration": true,                              /* Generate .d.ts files from TypeScript and JavaScript files in your project. */
+		"declaration": true, /* Generate .d.ts files from TypeScript and JavaScript files in your project. */
 		// "declarationMap": true,                           /* Create sourcemaps for d.ts files. */
-		// "emitDeclarationOnly": true,                      /* Only output d.ts files and not JavaScript files. */
-		"sourceMap": true /* Create source map files for emitted JavaScript files. */,
+		"emitDeclarationOnly": true, /* Only output d.ts files and not JavaScript files. */
+		//"sourceMap": true /* Create source map files for emitted JavaScript files. */,
 		// "inlineSourceMap": true,                          /* Include sourcemap files inside the emitted JavaScript. */
 		"noEmit": false /* Disable emitting files from a compilation. */,
 		// "outFile": "./",                                  /* Specify a file that bundles all outputs into one JavaScript file. If 'declaration' is true, also designates a file that bundles all .d.ts output. */
-		"outDir": "./dist" /* Specify an output folder for all emitted files. */,
+		"outDir": "./dist-ts/unspecified" /* Specify an output folder for all emitted files. */,
 		// "removeComments": true,                           /* Disable emitting comments. */
 		// "importHelpers": true,                            /* Allow importing helper functions from tslib once per project, instead of including them per-file. */
 		// "downlevelIteration": true,                       /* Emit more compliant, but verbose and less performant JavaScript for iteration. */
@@ -82,7 +82,7 @@
 		// "noEmitHelpers": true,                            /* Disable generating custom helper functions like '__extends' in compiled output. */
 		// "noEmitOnError": true,                            /* Disable emitting files if any type checking errors are reported. */
 		// "preserveConstEnums": true,                       /* Disable erasing 'const enum' declarations in generated code. */
-		// "declarationDir": "./",                           /* Specify the output directory for generated declaration files. */
+		"declarationDir": "./dist-ts/unspecified", /* Specify the output directory for generated declaration files. */
 		/* Interop Constraints */
 		"isolatedModules": true, /* Ensure that each file can be safely transpiled without relying on other imports. */
 		"verbatimModuleSyntax": true, /* Do not transform or elide any imports or exports not marked as type-only, ensuring they are written in the output file's format based on the 'module' setting. */
@@ -115,11 +115,7 @@
 		// "allowUnreachableCode": true,                     /* Disable error reporting for unreachable code. */
 		/* Completeness */
 		// "DefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
-		"skipLibCheck": true /* Skip type checking all .d.ts files. */
+		"skipLibCheck": true, /* Skip type checking all .d.ts files. */
 	},
-	"references": [],
-	"exclude": [
-		"coverage",
-		"dist",
-	]
+	"references": []
 }

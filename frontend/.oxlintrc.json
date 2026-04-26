@@ -11,6 +11,7 @@
         "**/coverage/**",
         "**/.cache/**",
         "**/.svelte-check/**",
+        "**/dist-ts/**"
     ],
     "overrides": [
         {
@@ -30,6 +31,14 @@
             "rules": {
                 "jest/require-to-throw-message": "off",
                 "jest/expect-expect": "off"
+            }
+        },
+        {
+            "files": [
+                "scripts/**/*.ts"
+            ],
+            "rules": {
+                "no-console": "off"
             }
         }
     ],

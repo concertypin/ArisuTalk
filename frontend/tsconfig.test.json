@@ -3,8 +3,12 @@
 		"test/**/*.ts",
 		"test/*.ts",
 		"test/**/*.svelte",
-		"src/**/*.ts",
-		"src/**/*.svelte"
+	],
+	"exclude": [
+		"node_modules",
+		"dist",
+		"dist-ts",
+		"coverage",
 	],
 	"compilerOptions": {
 		"tsBuildInfoFile": "./node_modules/.cache/test.tsbuildinfo",
@@ -13,23 +17,24 @@
 			"DOM"
 		],
 		"types": [
-			"vite/client"
+			"vite/client",
+			"svelte",
 		] /* Specify type package names to be included without being referenced in a source file. */,
 		"noEmit": false /* Disable emitting files from a compilation. */,
-		"outDir": "./dist" /* Specify an output folder for all emitted files. */,
+		"declarationDir": "./dist-ts/test" /* Specify an output folder for all emitted files. */,
 		/* Type Checking */
 		"noImplicitAny": true
 	},
 	"extends": "./tsconfig.base.json",
 	"references": [
 		{
-			"path": "./tsconfig.app.json"
-		},
-		{
 			"path": "./tsconfig.worker.json"
 		},
 		{
 			"path": "./tsconfig.common.json"
-		}
+		},
+		{
+			"path": "./tsconfig.app.json"
+		},
 	]
 }

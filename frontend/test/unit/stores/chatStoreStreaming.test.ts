@@ -4,6 +4,7 @@ import { chatStore } from "@/features/chat/stores/chatStore.svelte";
 import { MessageSchema } from "@arisutalk/character-spec/v0/Character/Message";
 import { apply } from "@arisutalk/character-spec/utils";
 import { Logger } from "@common/logger/Logger";
+import type { ChatProvider, ProviderType } from "@/lib/interfaces";
 
 // Mock settings to avoid 5s timeout in chatStore.initialize()
 vi.mock("@/lib/stores/settings.svelte", () => ({
@@ -154,7 +155,8 @@ describe("ChatStore Streaming", () => {
         if (!chatStore["activeProvider"]) {
             throw new Error("Active provider is not set");
         }
-        chatStore["activeProvider"] = {
+        const mockChatProvider: ChatProvider<ProviderType> = {
+            // oxlint-disable-next-line typescript/no-misused-spread
             ...chatStore["activeProvider"],
 
             stream: async function* () {
@@ -173,7 +175,8 @@ describe("ChatStore Streaming", () => {
             isReady() {
                 throw new Error("Function not implemented.");
             },
-        } satisfies (typeof chatStore)["activeProvider"];
+        };
+        chatStore["activeProvider"] = mockChatProvider;
 
         const chatId = await chatStore.createChat("test-fail", "Test Fail");
         //Suppress Logger.error

@@ -1,26 +1,19 @@
 {
 	"compilerOptions": {
-		"tsBuildInfoFile": "./node_modules/.cache/common.tsbuildinfo",
+		"tsBuildInfoFile": "./node_modules/.cache/node.tsbuildinfo",
 		"composite": true,
 		"lib": [
-			"DOM",
-			"WebWorker",
 			"ESNext"
 		],
 		"allowImportingTsExtensions": false /* Allow imports to include TypeScript file extensions. Requires '--moduleResolution bundler' and either '--noEmit' or '--emitDeclarationOnly' to be set. */,
-		"declarationDir": "./dist-ts/common" /* Specify an output folder for all emitted files. */,
+		"declarationDir": "./dist-ts/node" /* Specify an output folder for all emitted files. */,
 		"noEmit": false
 	},
 	"extends": "./tsconfig.base.json",
 	"include": [
-		"common/**/*.ts"
-	],
-	"exclude": [
-		"coverage",
-		"dist-ts/",
-		"dist/",
-		"test/**/*.test.ts",
-		"test/*.test.ts",
-		"test/**/*.svelte",
+		"scripts/**/*.ts",
+		"*.ts", // config
+		"*.js",
+		"scripts/**/*.js"
 	]
 }
