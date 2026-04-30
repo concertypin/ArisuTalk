@@ -10,7 +10,7 @@
         id: number;
     };
 
-    const { config = $bindable(), id }: Props = $props();
+    let { config = $bindable(), id }: Props = $props();
 
     /**
      * Creates a proxy object to bind a checkbox to the presence of a field in a target object.

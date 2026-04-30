@@ -9,7 +9,7 @@
         onClick: () => void;
     };
 
-    const { character, active, onClick }: Props = $props();
+    let { character, active, onClick }: Props = $props();
 
     // Generate initials from name
     let initials = $derived(character.name.substring(0, 2).toUpperCase());

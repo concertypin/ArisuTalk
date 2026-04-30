@@ -20,13 +20,13 @@
         onChange: (character: Character) => void;
     };
 
-    const { character, onChange }: Props = $props();
+    let { character, onChange }: Props = $props();
 
     let fileInput = $state<HTMLInputElement>();
     let expandOtherAssets = $state(false);
     let duplicateNameError = $state<string | null>(null);
     let draggedIndex = $state<number | null>(null);
-    const assetPreviews = new SvelteMap<string, string>();
+    let assetPreviews = new SvelteMap<string, string>();
 
     const assetStorage = getAssetStorage();
 

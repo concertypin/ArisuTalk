@@ -21,7 +21,7 @@
         onChange: (character: Character) => void;
     };
 
-    const { character, onChange }: Props = $props();
+    let { character, onChange }: Props = $props();
 
     let activeHookType = $state<HookType>("display");
     let expandedHookIndex = $state<number | null>(null);

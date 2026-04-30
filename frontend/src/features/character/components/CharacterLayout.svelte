@@ -15,7 +15,7 @@
         children?: import("svelte").Snippet;
     };
 
-    const { children }: Props = $props();
+    let { children }: Props = $props();
 
     let selectedCharacterId = $state<string | null>(null);
     let dialog = $state<HTMLDialogElement>();

@@ -12,7 +12,7 @@
         onEdit: (index: number) => void;
     };
 
-    const { onEdit }: Props = $props();
+    let { onEdit }: Props = $props();
     const worker = getCardParseWorker();
 
     async function handleDelete(index: number) {

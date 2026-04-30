@@ -15,7 +15,7 @@
         onCancel: () => void;
     };
 
-    const { persona = undefined, onSave, onCancel }: Props = $props();
+    let { persona = undefined, onSave, onCancel }: Props = $props();
 
     let name = $state("");
     let description = $state("");

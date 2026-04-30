@@ -16,6 +16,15 @@
     "overrides": [
         {
             "files": [
+                "**/*.svelte"
+            ],
+            "rules": {
+                "prefer-const": "off",
+                "no-unassigned-vars": "off"
+            }
+        },
+        {
+            "files": [
                 "**/*.d.ts"
             ],
             "rules": {

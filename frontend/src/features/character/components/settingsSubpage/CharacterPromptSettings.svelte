@@ -14,7 +14,7 @@
         onChange: (character: Character) => void;
     };
 
-    const { character, onChange }: Props = $props();
+    let { character, onChange }: Props = $props();
 
     let isDescriptionExpanded = $state(false);
     let isAuthorsNoteExpanded = $state(false);

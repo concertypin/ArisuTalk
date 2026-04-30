@@ -12,7 +12,7 @@
         onEdit: (persona: Persona) => void;
     };
 
-    const { onEdit }: Props = $props();
+    let { onEdit }: Props = $props();
 
     function handleDelete(id: string) {
         if (confirm("Delete this persona?")) {

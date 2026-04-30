@@ -8,7 +8,7 @@
         characterId: string;
     };
 
-    const { characterId }: Props = $props();
+    let { characterId }: Props = $props();
 
     let chats = $derived(chatStore.chats.filter((c) => c.characterId === characterId));
     let activeChatId = $derived(chatStore.activeChatId);
