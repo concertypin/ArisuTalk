@@ -1,8 +1,8 @@
 <script lang="ts">
-    import Plus from "phosphor-svelte/lib/Plus";
-    import User from "phosphor-svelte/lib/User";
-    import Gear from "phosphor-svelte/lib/Gear";
-    import House from "phosphor-svelte/lib/House";
+    import PlusIcon from "phosphor-svelte/lib/PlusIcon";
+    import UserIcon from "phosphor-svelte/lib/UserIcon";
+    import GearIcon from "phosphor-svelte/lib/GearIcon";
+    import HouseIcon from "phosphor-svelte/lib/HouseIcon";
     import { flip } from "svelte/animate";
     import CharacterSidebarItem from "./CharacterSidebarItem.svelte";
     import { characterStore } from "../stores/characterStore.svelte";
@@ -68,7 +68,7 @@
             onclick={() => onSelect(null)}
             aria-label="Home"
         >
-            <House size={24} weight={selectedCharacterId === null ? "fill" : "bold"} />
+            <HouseIcon size={24} weight={selectedCharacterId === null ? "fill" : "bold"} />
         </button>
     </div>
 
@@ -113,7 +113,7 @@
             onclick={onAdd}
             aria-label="Add Character"
         >
-            <Plus size={24} />
+            <PlusIcon size={24} />
         </button>
     </div>
 
@@ -124,7 +124,7 @@
                 onclick={() => uiState.openSettingsModal()}
                 aria-label="Settings"
             >
-                <Gear size={24} />
+                <GearIcon size={24} />
             </button>
         </div>
         <div class="tooltip tooltip-right z-50" data-tip="Personas">
@@ -133,7 +133,7 @@
                 onclick={onPersona}
                 aria-label="Manage Personas"
             >
-                <User size={24} />
+                <UserIcon size={24} />
             </button>
         </div>
     </div>

@@ -43,6 +43,7 @@ export const testConfig: TestConfig = {
     includeTaskLocation: true,
     testTimeout: 10000, // 10 seconds global timeout
     fileParallelism: true,
+    execArgv: ["--no-experimental-webstorage"],
     projects: [
         {
             test: {

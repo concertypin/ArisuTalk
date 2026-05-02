@@ -53,5 +53,12 @@
     ],
     "rules": {
         "typescript/no-deprecated": "error"
+    },
+    "options": {
+        "typeCheck": true,
+        "typeAware": true,
+        "reportUnusedDisableDirectives": "warn",
+        "maxWarnings": 0,
+        "denyWarnings": true
     }
 }

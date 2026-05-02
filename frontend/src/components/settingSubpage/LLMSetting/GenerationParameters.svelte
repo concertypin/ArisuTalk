@@ -1,9 +1,9 @@
 <script lang="ts">
     import { settings } from "@/lib/stores/settings.svelte";
     import { type LLMConfig } from "@/lib/types/IDataModel";
-    import Trash from "phosphor-svelte/lib/Trash";
-    import Check from "phosphor-svelte/lib/Check";
-    import Power from "phosphor-svelte/lib/Power";
+    import TrashIcon from "phosphor-svelte/lib/TrashIcon";
+    import CheckIcon from "phosphor-svelte/lib/CheckIcon";
+    import PowerIcon from "phosphor-svelte/lib/PowerIcon";
 
     type Props = {
         config: LLMConfig;
@@ -88,8 +88,8 @@
                         bind:checked={config.enabled}
                         aria-label="Toggle enabled"
                     />
-                    <Power size={16} class="swap-on text-success" />
-                    <Power size={16} class="swap-off text-base-content/30" />
+                    <PowerIcon size={16} class="swap-on text-success" />
+                    <PowerIcon size={16} class="swap-off text-base-content/30" />
                 </label>
                 <button
                     class="btn btn-ghost btn-xs"
@@ -98,14 +98,14 @@
                     title="Use this config"
                     aria-label="Use this config"
                 >
-                    <Check size={16} class={isActive ? "text-primary" : ""} />
+                    <CheckIcon size={16} class={isActive ? "text-primary" : ""} />
                 </button>
                 <button
                     class="btn btn-ghost btn-xs text-error"
                     onclick={removeLLMConfig}
                     aria-label="Delete config"
                 >
-                    <Trash size={16} />
+                    <TrashIcon size={16} />
                 </button>
             </div>
         </div>

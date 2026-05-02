@@ -159,7 +159,7 @@ describe("ChatStore Streaming", () => {
             // oxlint-disable-next-line typescript/no-misused-spread
             ...chatStore["activeProvider"],
 
-            stream: async function* () {
+            async *stream() {
                 // Dummy yield to satisfy generator requirement
                 // oxlint-disable-next-line no-constant-condition
                 if (false) yield "";

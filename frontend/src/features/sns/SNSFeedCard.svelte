@@ -3,9 +3,9 @@
   Individual post card for SNS feed display (UI only).
 -->
 <script lang="ts">
-    import Heart from "phosphor-svelte/lib/Heart";
-    import ChatCircleText from "phosphor-svelte/lib/ChatCircleText";
-    import BookmarkSimple from "phosphor-svelte/lib/BookmarkSimple";
+    import HeartIcon from "phosphor-svelte/lib/HeartIcon";
+    import ChatCircleTextIcon from "phosphor-svelte/lib/ChatCircleTextIcon";
+    import BookmarkSimpleIcon from "phosphor-svelte/lib/BookmarkSimpleIcon";
 
     type Props = {
         /** Post content text */
@@ -59,13 +59,13 @@
         <button
             class="flex items-center gap-1 text-xs text-base-content/60 hover:text-accent transition-colors"
         >
-            <Heart size={14} />
+            <HeartIcon size={14} />
             <span>{likes}</span>
         </button>
         <button
             class="flex items-center gap-1 text-xs text-base-content/60 hover:text-primary transition-colors"
         >
-            <ChatCircleText size={14} />
+            <ChatCircleTextIcon size={14} />
             <span>{comments}</span>
         </button>
         <button
@@ -73,7 +73,7 @@
                 ? 'text-accent'
                 : 'text-base-content/60 hover:text-accent'}"
         >
-            <BookmarkSimple size={14} weight={bookmarked ? "fill" : "regular"} />
+            <BookmarkSimpleIcon size={14} weight={bookmarked ? "fill" : "regular"} />
         </button>
     </div>
 </article>

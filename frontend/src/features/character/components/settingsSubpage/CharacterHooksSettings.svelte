@@ -5,11 +5,11 @@
      * Fully editable hooks for display, input, output, request.
      */
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import Plus from "phosphor-svelte/lib/Plus";
-    import Trash from "phosphor-svelte/lib/Trash";
-    import CaretDown from "phosphor-svelte/lib/CaretDown";
-    import CaretUp from "phosphor-svelte/lib/CaretUp";
-    import Warning from "phosphor-svelte/lib/Warning";
+    import PlusIcon from "phosphor-svelte/lib/PlusIcon";
+    import TrashIcon from "phosphor-svelte/lib/TrashIcon";
+    import CaretDownIcon from "phosphor-svelte/lib/CaretDownIcon";
+    import CaretUpIcon from "phosphor-svelte/lib/CaretUpIcon";
+    import WarningIcon from "phosphor-svelte/lib/WarningIcon";
     import { merge, cloneDeep } from "lodash-es";
 
     type ReplaceHook = Character["executables"]["replaceHooks"];
@@ -71,7 +71,7 @@
     function updateHook(type: HookType, index: number, updates: Partial<HookEntity>) {
         const newChar = cloneDeep(character);
         const hook = newChar.executables.replaceHooks[type][index];
-        newChar.executables.replaceHooks[type][index] = merge(hook, updates) as HookEntity;
+        newChar.executables.replaceHooks[type][index] = merge(hook, updates);
         onChange(newChar);
     }
 
@@ -91,7 +91,7 @@
     <h3 class="text-lg font-semibold">Advanced Settings</h3>
 
     <div class="alert alert-warning">
-        <Warning size={18} />
+        <WarningIcon size={18} />
         <span
             >These are advanced settings. Incorrect configuration may affect character behavior.</span
         >
@@ -159,7 +159,7 @@
 
     <div class="flex justify-end">
         <button class="btn btn-sm btn-primary gap-1" onclick={() => addHook(activeHookType)}>
-            <Plus size={16} /> Add Hook
+            <PlusIcon size={16} /> Add Hook
         </button>
     </div>
 
@@ -183,9 +183,9 @@
                         </span>
                         <span class="badge badge-sm badge-ghost">{hook.meta.type}</span>
                         {#if expandedHookIndex === index}
-                            <CaretUp size={16} />
+                            <CaretUpIcon size={16} />
                         {:else}
-                            <CaretDown size={16} />
+                            <CaretDownIcon size={16} />
                         {/if}
                     </div>
 
@@ -321,7 +321,7 @@
                                     class="btn btn-sm btn-error btn-outline gap-1"
                                     onclick={() => deleteHook(activeHookType, index)}
                                 >
-                                    <Trash size={14} /> Delete
+                                    <TrashIcon size={14} /> Delete
                                 </button>
                             </div>
                         </div>

@@ -5,8 +5,8 @@
      * Features expandable textarea (small at first, large on click).
      */
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import CornersOut from "phosphor-svelte/lib/CornersOut";
-    import CornersIn from "phosphor-svelte/lib/CornersIn";
+    import CornersOutIcon from "phosphor-svelte/lib/CornersOutIcon";
+    import CornersInIcon from "phosphor-svelte/lib/CornersInIcon";
     import { merge } from "lodash-es";
 
     type Props = {
@@ -44,9 +44,9 @@
                 aria-label={isDescriptionExpanded ? "Collapse" : "Expand"}
             >
                 {#if isDescriptionExpanded}
-                    <CornersIn size={14} />
+                    <CornersInIcon size={14} />
                 {:else}
-                    <CornersOut size={14} />
+                    <CornersOutIcon size={14} />
                 {/if}
             </button>
         </div>
@@ -78,9 +78,9 @@
                 aria-label={isAuthorsNoteExpanded ? "Collapse" : "Expand"}
             >
                 {#if isAuthorsNoteExpanded}
-                    <CornersIn size={14} />
+                    <CornersInIcon size={14} />
                 {:else}
-                    <CornersOut size={14} />
+                    <CornersOutIcon size={14} />
                 {/if}
             </button>
         </div>

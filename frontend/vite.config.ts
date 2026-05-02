@@ -63,7 +63,11 @@ export default defineConfig(async (ctx) => {
         build: {
             outDir: "dist",
             sourcemap: true,
-            rollupOptions: {
+            rolldownOptions: {
+                checks: {
+                    circularDependency: true,
+                    pluginTimings: false,
+                },
                 output: {
                     sourcemapIgnoreList(relativeSourcePath) {
                         if (relativeSourcePath.includes("node_modules")) return true;

@@ -3,8 +3,8 @@
   SNS profile view with header, tabs, and feed (UI only - no functionality).
 -->
 <script lang="ts">
-    import User from "phosphor-svelte/lib/User";
-    import Lock from "phosphor-svelte/lib/Lock";
+    import UserIcon from "phosphor-svelte/lib/UserIcon";
+    import LockIcon from "phosphor-svelte/lib/LockIcon";
     import SNSFeedCard from "./SNSFeedCard.svelte";
 
     type TabName = "posts" | "secrets" | "tags";
@@ -74,7 +74,7 @@
                         class="w-full h-full rounded-full object-cover"
                     />
                 {:else}
-                    <User size={28} class="text-white" />
+                    <UserIcon size={28} class="text-white" />
                 {/if}
             </div>
 
@@ -86,7 +86,7 @@
                         <span
                             class="badge-pill gradient-accent text-white text-xs flex items-center gap-1"
                         >
-                            <Lock size={10} /> Secret
+                            <LockIcon size={10} /> Secret
                         </span>
                     {/if}
                 </div>
@@ -150,7 +150,7 @@
             {/each}
         {:else if activeTab === "secrets"}
             <div class="flex flex-col items-center justify-center h-32 text-base-content/50">
-                <Lock size={24} />
+                <LockIcon size={24} />
                 <p class="mt-2 text-sm">Secret posts are private</p>
             </div>
         {:else if activeTab === "tags"}

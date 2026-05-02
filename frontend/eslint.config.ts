@@ -37,6 +37,9 @@ export default defineConfig([
                 extraFileExtensions: [".svelte"],
             },
         },
+        rules: {
+            "@typescript-eslint/no-deprecated": "warn",
+        },
     },
 
     {
@@ -44,7 +47,7 @@ export default defineConfig([
         languageOptions: {
             parserOptions: {
                 parser: ts.parser,
-                svelteConfig: svelteConfig,
+                svelteConfig,
             },
         },
     },

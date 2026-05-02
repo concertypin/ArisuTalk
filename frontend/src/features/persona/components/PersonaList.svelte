@@ -3,10 +3,10 @@
     import { type IAssetStorageAdapter, IfNotExistBehavior } from "@/lib/interfaces";
     import { OpFSAssetStorageAdapter } from "@/features/character/adapters/assetStorage/OpFSAssetStorageAdapter";
     import type { Persona } from "../schema";
-    import Trash from "phosphor-svelte/lib/Trash";
-    import PencilSimple from "phosphor-svelte/lib/PencilSimple";
-    import CaretUp from "phosphor-svelte/lib/CaretUp";
-    import CaretDown from "phosphor-svelte/lib/CaretDown";
+    import TrashIcon from "phosphor-svelte/lib/TrashIcon";
+    import PencilSimpleIcon from "phosphor-svelte/lib/PencilSimpleIcon";
+    import CaretUpIcon from "phosphor-svelte/lib/CaretUpIcon";
+    import CaretDownIcon from "phosphor-svelte/lib/CaretDownIcon";
 
     type Props = {
         onEdit: (persona: Persona) => void;
@@ -95,7 +95,7 @@
                     onclick={() => personaStore.reorder(index, index - 1)}
                     aria-label="Move Up"
                 >
-                    <CaretUp size={14} />
+                    <CaretUpIcon size={14} />
                 </button>
                 <button
                     class="btn btn-ghost btn-xs btn-square"
@@ -103,21 +103,21 @@
                     onclick={() => personaStore.reorder(index, index + 1)}
                     aria-label="Move Down"
                 >
-                    <CaretDown size={14} />
+                    <CaretDownIcon size={14} />
                 </button>
                 <button
                     class="btn btn-ghost btn-xs btn-square"
                     onclick={() => onEdit(persona)}
                     aria-label="Edit"
                 >
-                    <PencilSimple size={14} />
+                    <PencilSimpleIcon size={14} />
                 </button>
                 <button
                     class="btn btn-ghost btn-xs btn-square text-error"
                     onclick={() => handleDelete(persona.id)}
                     aria-label="Delete"
                 >
-                    <Trash size={14} />
+                    <TrashIcon size={14} />
                 </button>
             </div>
         </div>

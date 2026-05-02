@@ -5,10 +5,10 @@
      * Each entry has name, content, conditions, priority, and enabled toggle.
      */
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import Plus from "phosphor-svelte/lib/Plus";
-    import Trash from "phosphor-svelte/lib/Trash";
-    import CaretDown from "phosphor-svelte/lib/CaretDown";
-    import CaretUp from "phosphor-svelte/lib/CaretUp";
+    import PlusIcon from "phosphor-svelte/lib/PlusIcon";
+    import TrashIcon from "phosphor-svelte/lib/TrashIcon";
+    import CaretDownIcon from "phosphor-svelte/lib/CaretDownIcon";
+    import CaretUpIcon from "phosphor-svelte/lib/CaretUpIcon";
     import { merge } from "lodash-es";
 
     type LorebookEntry = Character["prompt"]["lorebook"]["data"][number];
@@ -118,7 +118,7 @@
     <div class="flex items-center justify-between">
         <h4 class="font-medium">Entries ({character.prompt.lorebook.data.length})</h4>
         <button class="btn btn-sm btn-primary gap-1" onclick={addEntry}>
-            <Plus size={16} /> Add Entry
+            <PlusIcon size={16} /> Add Entry
         </button>
     </div>
 
@@ -153,9 +153,9 @@
                         </span>
                         <span class="text-xs text-base-content/50">P: {entry.priority}</span>
                         {#if expandedEntryId === entry.id}
-                            <CaretUp size={16} />
+                            <CaretUpIcon size={16} />
                         {:else}
-                            <CaretDown size={16} />
+                            <CaretDownIcon size={16} />
                         {/if}
                     </div>
 
@@ -258,7 +258,7 @@
                                     class="btn btn-sm btn-error btn-outline gap-1"
                                     onclick={() => deleteEntry(entry.id)}
                                 >
-                                    <Trash size={14} /> Delete
+                                    <TrashIcon size={14} /> Delete
                                 </button>
                             </div>
                         </div>

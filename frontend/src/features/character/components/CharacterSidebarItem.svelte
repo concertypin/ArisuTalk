@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import PencilSimple from "phosphor-svelte/lib/PencilSimple";
+    import PencilSimpleIcon from "phosphor-svelte/lib/PencilSimpleIcon";
     import { uiState } from "@/lib/stores/ui.svelte";
 
     type Props = {
@@ -70,7 +70,7 @@
         >
             <!-- Start State: Settings Icon (when active & hovered) -->
             <div class="swap-on flex items-center justify-center w-full h-full">
-                <PencilSimple size={20} />
+                <PencilSimpleIcon size={20} />
             </div>
 
             <!-- End State: Avatar (when inactive OR not hovered) -->

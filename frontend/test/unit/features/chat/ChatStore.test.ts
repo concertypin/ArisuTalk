@@ -162,7 +162,7 @@ describe("ChatStore", () => {
         expect(Logger.structured).toHaveBeenCalledWith(
             "chat.session.start",
             expect.objectContaining({
-                chatId: chatId,
+                chatId,
             })
         );
     });

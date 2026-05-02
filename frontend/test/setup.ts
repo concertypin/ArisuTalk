@@ -1,12 +1,17 @@
 // Global test setup
 // This file is run before each test file
 
-import { beforeEach } from "vitest";
+import { beforeEach, vi } from "vitest";
+import { createLocalStorageMock } from "@test/utils/localStorageMock";
 
 // Ensure LocalStorage-based adapters start from a clean state for browser tests.
 // Remove only the keys used by LocalStorageAdapter so other globals are preserved.
 beforeEach(() => {
     try {
+        if (typeof localStorage === "undefined" || typeof localStorage.clear !== "function") {
+            vi.stubGlobal("localStorage", createLocalStorageMock(vi));
+        }
+
         if (typeof localStorage !== "undefined") {
             localStorage.removeItem("arisutalk_chats");
             localStorage.removeItem("arisutalk_characters");

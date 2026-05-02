@@ -1,7 +1,7 @@
 <script lang="ts">
     import { chatStore } from "../stores/chatStore.svelte";
-    import Plus from "phosphor-svelte/lib/Plus";
-    import ChatTeardropText from "phosphor-svelte/lib/ChatTeardropText";
+    import PlusIcon from "phosphor-svelte/lib/PlusIcon";
+    import ChatTeardropTextIcon from "phosphor-svelte/lib/ChatTeardropTextIcon";
     import TrashIcon from "phosphor-svelte/lib/TrashIcon";
 
     type Props = {
@@ -60,7 +60,7 @@
             onclick={() => void handleNewChat()}
             aria-label="New Chat"
         >
-            <Plus size={16} />
+            <PlusIcon size={16} />
         </button>
     </div>
 
@@ -73,7 +73,7 @@
                     : ''}"
                 onclick={() => handleSelect(chat.id)}
             >
-                <ChatTeardropText size={16} class="opacity-70" />
+                <ChatTeardropTextIcon size={16} class="opacity-70" />
                 <span class="truncate text-sm font-medium flex-1 text-left">{chat.name}</span>
 
                 <div class="opacity-0 group-hover:opacity-100 transition-opacity">

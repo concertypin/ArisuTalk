@@ -1,17 +1,5 @@
 {
-    "[javascript]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
-        "editor.tabSize": 4
-    },
-    "[typescript]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
-        "editor.tabSize": 4
-    },
-    "[svelte]": {
-        "editor.tabSize": 4,
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[json]": {
+    "[javascript][typescript][svelte][json]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.tabSize": 4
     },
@@ -34,5 +22,7 @@
     "typescript.native-preview.additionalTsdkLocations": [
         "./frontend/node_modules/@typescript/native-preview"
     ],
-    "typescript.native-preview.tsdk": "./frontend/node_modules/@typescript/native-preview"
+    "typescript.native-preview.tsdk": "./frontend/node_modules/@typescript/native-preview",
+    "oxc.requireConfig": true,
+    "oxc.configPath": "./frontend/.oxlintrc.json"
 }

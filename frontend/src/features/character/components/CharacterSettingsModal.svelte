@@ -8,13 +8,13 @@
     import { characterStore } from "@/features/character/stores/characterStore.svelte";
     import { Logger } from "@common/logger/Logger";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import X from "phosphor-svelte/lib/X";
-    import User from "phosphor-svelte/lib/User";
-    import ChatCircleText from "phosphor-svelte/lib/ChatCircleText";
-    import BookOpen from "phosphor-svelte/lib/BookOpen";
-    import FileText from "phosphor-svelte/lib/FileText";
-    import Gear from "phosphor-svelte/lib/Gear";
-    import Image from "phosphor-svelte/lib/Image";
+    import XIcon from "phosphor-svelte/lib/XIcon";
+    import UserIcon from "phosphor-svelte/lib/UserIcon";
+    import ChatCircleTextIcon from "phosphor-svelte/lib/ChatCircleTextIcon";
+    import BookOpenIcon from "phosphor-svelte/lib/BookOpenIcon";
+    import FileTextIcon from "phosphor-svelte/lib/FileTextIcon";
+    import GearIcon from "phosphor-svelte/lib/GearIcon";
+    import ImageIcon from "phosphor-svelte/lib/ImageIcon";
 
     // Subpage components
     import CharacterBasicSettings from "./settingsSubpage/CharacterBasicSettings.svelte";
@@ -132,7 +132,7 @@
                 id="character-settings-title"
                 class="text-xl font-bold flex items-center gap-2 tracking-tight"
             >
-                <Gear size={24} />
+                <GearIcon size={24} />
                 {editingCharacter?.name || "Character"} Settings
             </h2>
             <button
@@ -140,7 +140,7 @@
                 onclick={close}
                 aria-label="Close"
             >
-                <X size={20} />
+                <XIcon size={20} />
             </button>
         </header>
 
@@ -156,7 +156,7 @@
                             onclick={() => (activeTab = "basic")}
                             aria-label="Basic Settings"
                         >
-                            <User size={18} /> Basic
+                            <UserIcon size={18} /> Basic
                         </button>
                     </li>
                     <li>
@@ -166,7 +166,7 @@
                             onclick={() => (activeTab = "prompt")}
                             aria-label="Prompt Settings"
                         >
-                            <ChatCircleText size={18} /> Prompt
+                            <ChatCircleTextIcon size={18} /> Prompt
                         </button>
                     </li>
                     <li>
@@ -176,7 +176,7 @@
                             onclick={() => (activeTab = "lorebook")}
                             aria-label="Lorebook Settings"
                         >
-                            <BookOpen size={18} /> Lorebook
+                            <BookOpenIcon size={18} /> Lorebook
                         </button>
                     </li>
                     <li>
@@ -186,7 +186,7 @@
                             onclick={() => (activeTab = "assets")}
                             aria-label="Assets Settings"
                         >
-                            <Image size={18} /> Assets
+                            <ImageIcon size={18} /> Assets
                         </button>
                     </li>
                     <li>
@@ -196,7 +196,7 @@
                             onclick={() => (activeTab = "metadata")}
                             aria-label="Metadata Settings"
                         >
-                            <FileText size={18} /> Metadata
+                            <FileTextIcon size={18} /> Metadata
                         </button>
                     </li>
                     <li>
@@ -206,7 +206,7 @@
                             onclick={() => (activeTab = "advanced")}
                             aria-label="Advanced Settings"
                         >
-                            <Gear size={18} /> Advanced
+                            <GearIcon size={18} /> Advanced
                         </button>
                     </li>
                 </ul>

@@ -1,7 +1,7 @@
 <script lang="ts">
     import { settings } from "@/lib/stores/settings.svelte";
     import NoopIcon from "@/components/Snippets/NoopIcon.svelte";
-    import Palette from "phosphor-svelte/lib/Palette";
+    import PaletteIcon from "phosphor-svelte/lib/PaletteIcon";
     import { SUPPORTED_FONTS } from "@/lib/utils/fontUtils";
     import TextTIcon from "phosphor-svelte/lib/TextTIcon";
 </script>
@@ -10,7 +10,7 @@
     <h3 class="text-lg font-semibold">General Settings</h3>
     <fieldset class="fieldset w-full max-w-md bg-base-100 p-4 rounded-box border border-base-200">
         <legend class="fieldset-legend font-medium flex items-center gap-2 text-base-content/70">
-            <Palette size={16} />
+            <PaletteIcon size={16} />
             Theme
         </legend>
         <div class="flex items-center justify-between">
