@@ -1,7 +1,7 @@
 // Base rule, which is similar to ESLint. Machine-generated, unrecommended to edit manually.
 // Instead, extend this in .oxlintrc.json and override rules.
 {
-    "$schema": "../../node_modules/oxlint/configuration_schema.json",
+    "$schema": "../../../node_modules/oxlint/configuration_schema.json",
     "rules": {
         "@typescript-eslint/await-thenable": "error",
         "@typescript-eslint/ban-ts-comment": "error",

@@ -2,7 +2,7 @@
 // but are still worth warning about, for machine-generated ./oxlint-eslint-error.json
 
 {
-    "$schema": "../../node_modules/oxlint/configuration_schema.json",
+    "$schema": "../../../node_modules/oxlint/configuration_schema.json",
     "rules": {
         // Working, but unrecommended patterns.
         "@typescript-eslint/ban-ts-comment": "warn",
