@@ -1,7 +1,7 @@
 /// <reference types="vitest/browser" />
 import { test, expect, describe, vi, afterEach } from "vitest";
 import { render } from "vitest-browser-svelte";
-import CharacterLayoutTestWrapper from "../wrappers/CharacterLayoutTestWrapper.svelte";
+import CharacterLayoutTestWrapper from "@test/wrappers/CharacterLayoutTestWrapper.svelte";
 
 describe("Persona and Chat interactions", () => {
     afterEach(() => {

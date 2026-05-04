@@ -7,6 +7,7 @@ import { LangChainBaseProvider } from "./LangChainBaseProvider";
 import type { ChatAnthropic as ChatAnthropicType } from "@langchain/anthropic";
 
 type AnthropicSettings = CommonChatSettings & ProviderSettings["ANTHROPIC"];
+type ChatAnthropicCtor = typeof ChatAnthropicType;
 
 /**
  * Anthropic Claude chat provider using @langchain/anthropic.
@@ -21,7 +22,7 @@ export class AnthropicChatProvider extends LangChainBaseProvider<"ANTHROPIC"> {
 
     private constructor(
         settings: AnthropicSettings,
-        ChatAnthropicCtor: typeof import("@langchain/anthropic").ChatAnthropic
+        ChatAnthropicCtor: ChatAnthropicCtor
     ) {
         super();
         this.apiKey = settings.apiKey || "";

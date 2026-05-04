@@ -2,8 +2,12 @@
     "$schema": "../../../node_modules/oxlint/configuration_schema.json",
     "overrides": [
         {
-            "files": ["**/*.svelte"],
-            "jsPlugins": ["eslint-plugin-phosphor-svelte"],
+            "files": [
+                "**/*.svelte"
+            ],
+            "jsPlugins": [
+                "eslint-plugin-phosphor-svelte"
+            ],
             "rules": {
                 "phosphor-svelte/optimize-imports": "warn",
                 // Reactivity-related false positives.

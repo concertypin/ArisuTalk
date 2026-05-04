@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { personaStore } from "../stores/personaStore.svelte";
+    import { personaStore } from "@/features/persona/stores/personaStore.svelte";
     import { type IAssetStorageAdapter, IfNotExistBehavior } from "@/lib/interfaces";
     import { OpFSAssetStorageAdapter } from "@/features/character/adapters/assetStorage/OpFSAssetStorageAdapter";
-    import type { Persona } from "../schema";
+    import type { Persona } from "@/features/persona/schema";
     import TrashIcon from "phosphor-svelte/lib/TrashIcon";
     import PencilSimpleIcon from "phosphor-svelte/lib/PencilSimpleIcon";
     import CaretUpIcon from "phosphor-svelte/lib/CaretUpIcon";

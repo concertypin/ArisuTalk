@@ -5,7 +5,7 @@
     import HouseIcon from "phosphor-svelte/lib/HouseIcon";
     import { flip } from "svelte/animate";
     import CharacterSidebarItem from "./CharacterSidebarItem.svelte";
-    import { characterStore } from "../stores/characterStore.svelte";
+    import { characterStore } from "@/features/character/stores/characterStore.svelte";
     import { uiState } from "@/lib/stores/ui.svelte";
 
     type Props = {

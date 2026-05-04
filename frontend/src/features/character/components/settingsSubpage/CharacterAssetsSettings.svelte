@@ -56,7 +56,8 @@
     );
 
     async function handleFileUpload(ev: Event) {
-        const target = ev.target as HTMLInputElement;
+        if (!(ev.target instanceof HTMLInputElement)) return;
+        const target = ev.target;
         const files = target.files;
         if (!files || files.length === 0) return;
 

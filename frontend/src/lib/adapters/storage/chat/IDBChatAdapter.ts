@@ -1,5 +1,5 @@
 import type { Chat, Message } from "@arisutalk/character-spec/v0/Character";
-import { getArisuDB } from "../IndexedDBHelper";
+import { getArisuDB } from "@/lib/adapters/storage/IndexedDBHelper";
 import type { IChatStorageAdapter, LocalChat } from "@/lib/interfaces";
 import { cloneDeep } from "lodash-es";
 
@@ -147,7 +147,7 @@ export class IDBChatAdapter implements IChatStorageAdapter {
     async importData(stream: ReadableStream<Uint8Array>): Promise<void> {
         const buf = await new Response(stream).arrayBuffer();
         const json = new TextDecoder().decode(buf);
-        const data = JSON.parse(json) as unknown;
+        const data: unknown = JSON.parse(json);
 
         if (!this.isRecord(data)) return;
 

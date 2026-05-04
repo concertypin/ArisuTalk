@@ -1,5 +1,5 @@
 import type { Character } from "@arisutalk/character-spec/v0/Character";
-import { getArisuDB } from "../IndexedDBHelper";
+import { getArisuDB } from "@/lib/adapters/storage/IndexedDBHelper";
 import type { ICharacterStorageAdapter, CharacterMetadata } from "@/lib/interfaces";
 import { cloneDeep } from "lodash-es";
 

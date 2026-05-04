@@ -16,7 +16,7 @@
         "check": "pnpm run format && pnpm run lint && pnpm run test",
         "check:types": "pnpm node scripts/svelte-check.ts",
         "lint:oxlint": "oxlint . --type-aware --type-check --report-unused-disable-directives-severity=error",
-        "lint:eslint": "eslint --cache --cache-location ./node_modules/.cache/eslint/ src/ test/",
+        "lint:eslint": "eslint --no-error-on-unmatched-pattern --cache --cache-location ./node_modules/.cache/eslint/ \"src/**/*.svelte\" \"src/**/*.svelte.ts\" \"test/**/*.svelte\" \"test/**/*.svelte.ts\"",
         "lint": "pnpm run lint:oxlint --fix && pnpm run lint:eslint --fix",
         "lint:check": "concurrently --group \"pnpm run check:types\" \"pnpm run lint:oxlint\" \"pnpm run lint:eslint\"",
         "format": "pnpm run format:check --write --list-different",

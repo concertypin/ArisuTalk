@@ -126,9 +126,12 @@
                             src={avatarPreviewSrc}
                             alt="Avatar preview"
                             class="object-cover"
-                            onerror={(e) =>
-                                ((e.currentTarget as HTMLImageElement).src =
-                                    `https://api.dicebear.com/7.x/initials/svg?seed=${character?.name ?? "unknown"}`)}
+                            onerror={(e) => {
+                                if (e.currentTarget instanceof HTMLImageElement) {
+                                    e.currentTarget.src =
+                                        `https://api.dicebear.com/7.x/initials/svg?seed=${character?.name ?? "unknown"}`;
+                                }
+                            }}
                         />
                     </div>
                 </div>

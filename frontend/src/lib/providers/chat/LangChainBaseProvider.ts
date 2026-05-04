@@ -45,10 +45,12 @@ export abstract class LangChainBaseProvider<
                 return "";
             }
         } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            const errorType = error instanceof Error ? error.name : "Error";
             Logger.structured("llm.request.error", {
                 provider: this.id,
-                errorType: (error as Error).name || "Error",
-                errorMessage: (error as Error).message || String(error),
+                errorType,
+                errorMessage,
             });
             throw error;
         }
@@ -85,10 +87,12 @@ export abstract class LangChainBaseProvider<
             if (error instanceof DOMException && error.name === "AbortError") {
                 return;
             }
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            const errorType = error instanceof Error ? error.name : "Error";
             Logger.structured("llm.request.error", {
                 provider: this.id,
-                errorType: (error as Error).name || "Error",
-                errorMessage: (error as Error).message || String(error),
+                errorType,
+                errorMessage,
             });
             throw error;
         } finally {

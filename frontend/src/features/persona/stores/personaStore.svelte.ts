@@ -1,4 +1,4 @@
-import { type Persona, PersonaSchema } from "../schema";
+import { type Persona, PersonaSchema } from "@/features/persona/schema";
 import type { IPersonaStorageAdapter } from "@/lib/interfaces";
 import { StorageResolver } from "@/lib/adapters/storage/storageResolver";
 import { Logger } from "@common/logger/Logger";
@@ -126,7 +126,10 @@ export class PersonaStore {
         try {
             const stored = localStorage.getItem(this.ORDER_KEY);
             if (!stored) return [];
-            return JSON.parse(stored) as string[];
+            const parsed: unknown = JSON.parse(stored);
+            return Array.isArray(parsed) && parsed.every((value) => typeof value === "string")
+                ? parsed
+                : [];
         } catch {
             return [];
         }

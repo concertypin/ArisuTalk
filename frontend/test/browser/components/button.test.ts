@@ -1,6 +1,6 @@
 import { test, expect, describe, vi } from "vitest";
 import { render } from "vitest-browser-svelte";
-import ButtonTestWrapper from "../wrappers/ButtonTestWrapper.svelte";
+import ButtonTestWrapper from "@test/wrappers/ButtonTestWrapper.svelte";
 
 describe("Button Component", () => {
     test("renders with accessible name and is visible", async () => {

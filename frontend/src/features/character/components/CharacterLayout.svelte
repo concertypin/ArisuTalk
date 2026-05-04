@@ -2,11 +2,11 @@
     import CharacterSidebar from "./CharacterSidebar.svelte";
     import CharacterForm from "./CharacterForm.svelte";
     import CharacterSettingsModal from "./CharacterSettingsModal.svelte";
-    import ChatList from "../../chat/components/ChatList.svelte";
-    import PersonaList from "../../persona/components/PersonaList.svelte";
-    import PersonaForm from "../../persona/components/PersonaForm.svelte";
-    import type { Persona } from "../../persona/schema";
-    import { characterStore } from "../stores/characterStore.svelte";
+    import ChatList from "@/features/chat/components/ChatList.svelte";
+    import PersonaList from "@/features/persona/components/PersonaList.svelte";
+    import PersonaForm from "@/features/persona/components/PersonaForm.svelte";
+    import type { Persona } from "@/features/persona/schema";
+    import { characterStore } from "@/features/character/stores/characterStore.svelte";
     import { uiState } from "@/lib/stores/ui.svelte";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import { Logger } from "@common/logger/Logger";

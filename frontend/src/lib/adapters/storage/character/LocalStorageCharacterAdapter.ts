@@ -30,7 +30,7 @@ export class LocalStorageCharacterAdapter implements ICharacterStorageAdapter {
         const item = localStorage.getItem(this.KEY);
         if (!item) return [];
         try {
-            const parsed = JSON.parse(item) as unknown;
+            const parsed: unknown = JSON.parse(item);
             if (!Array.isArray(parsed)) return [];
             const parsedArray: unknown[] = parsed;
             return parsedArray.filter((c): c is Character => this.isCharacter(c));

@@ -14,7 +14,7 @@
     // Mock profile data
     const profile = {
         name: "Han Jieyon",
-        avatar: null as string | null,
+        avatar: null,
         isSecret: true,
         stats: {
             posts: 12,

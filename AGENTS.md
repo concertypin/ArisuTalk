@@ -9,7 +9,7 @@ Ongoing remake of the application for modularity and performance.
 ## Structure & Guides
 - Frontend: Svelte 5 + Vite + Dexie. [Frontend Guide](./frontend/AGENTS.md)
 - Backend: WASI + Cloudflare. [Backend Guide](./backend/AGENTS.md)
-- Rules: [TypeScript/Svelte Conventions](./docs/rule/README.md)
+- Rules: [Project Conventions](./docs/rule/README.md)
 
 ## Quick Start
 

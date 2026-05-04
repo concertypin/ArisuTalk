@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { personaStore } from "../stores/personaStore.svelte";
-    import { PersonaSchema, type Persona } from "../schema";
+    import { personaStore } from "@/features/persona/stores/personaStore.svelte";
+    import { PersonaSchema, type Persona } from "@/features/persona/schema";
     import PlusIcon from "phosphor-svelte/lib/PlusIcon";
     import UserIcon from "phosphor-svelte/lib/UserIcon";
     import FileTextIcon from "phosphor-svelte/lib/FileTextIcon";

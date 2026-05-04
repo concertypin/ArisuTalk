@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { chatStore } from "../stores/chatStore.svelte";
+    import { chatStore } from "@/features/chat/stores/chatStore.svelte";
     import PlusIcon from "phosphor-svelte/lib/PlusIcon";
     import ChatTeardropTextIcon from "phosphor-svelte/lib/ChatTeardropTextIcon";
     import TrashIcon from "phosphor-svelte/lib/TrashIcon";

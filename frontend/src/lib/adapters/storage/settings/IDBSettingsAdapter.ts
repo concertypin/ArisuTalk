@@ -1,4 +1,4 @@
-import { getArisuDB } from "../IndexedDBHelper";
+import { getArisuDB } from "@/lib/adapters/storage/IndexedDBHelper";
 import type { ISettingsStorageAdapter } from "@/lib/interfaces";
 import { type Settings, SettingsSchema } from "@/lib/types/IDataModel";
 import { apply } from "@arisutalk/character-spec/utils";

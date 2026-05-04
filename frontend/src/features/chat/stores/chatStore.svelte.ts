@@ -163,9 +163,7 @@ export class ChatStore {
                 break;
             default: {
                 const _exhaustiveCheck: never = config;
-                Logger.warn(
-                    `ChatStore: Provider "${(config as LLMConfig).provider}" not supported yet, falling back to Mock`
-                );
+                Logger.warn("ChatStore: Provider not supported yet, falling back to Mock");
                 await this.setProvider("MOCK", {
                     mockDelay: 50,
                     responses: [`Provider is not implemented yet.`],

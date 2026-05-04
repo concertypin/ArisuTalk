@@ -121,28 +121,30 @@ export class OpFSAssetStorageAdapter implements IAssetStorageAdapter {
         return new URL(filename, "local://opfs/");
     }
 
-    async getAssetUrl<T extends IfNotExistBehavior | undefined>(
+    async getAssetUrl(
         id: URL,
-        ifNotExist?: T
-    ): Promise<string | (T extends IfNotExistBehavior.RETURN_NULL ? null : never)> {
+        ifNotExist: IfNotExistBehavior.RETURN_NULL
+    ): Promise<string | null>;
+    async getAssetUrl(id: URL, ifNotExist?: IfNotExistBehavior): Promise<string>;
+    async getAssetUrl(id: URL, ifNotExist?: IfNotExistBehavior): Promise<string | null> {
         // Returns browser-usable URL. Not internal one like local://.
 
         const blob = await this.getAssetBlob(id, ifNotExist);
         if (!blob) {
-            if ((ifNotExist ?? IfNotExistBehavior.THROW_ERROR) === IfNotExistBehavior.RETURN_NULL)
-                // We'll use evil here
-                // Typescript doesn't allow us to return null even if it's possible
-                return null as string | (T extends IfNotExistBehavior.RETURN_NULL ? null : never);
+            if ((ifNotExist ?? IfNotExistBehavior.THROW_ERROR) === IfNotExistBehavior.RETURN_NULL) {
+                return null;
+            }
             throw new Error("Asset not found");
         }
         return URL.createObjectURL(blob);
     }
 
-    async getAssetBlob<T extends IfNotExistBehavior | undefined = undefined>(
+    async getAssetBlob(
         id: URL,
-        ifNotExist?: T
-    ): Promise<Blob | (T extends IfNotExistBehavior.RETURN_NULL ? null : never)> {
-        type ReturnInnerType = Blob | (T extends IfNotExistBehavior.RETURN_NULL ? null : never);
+        ifNotExist: IfNotExistBehavior.RETURN_NULL
+    ): Promise<Blob | null>;
+    async getAssetBlob(id: URL, ifNotExist?: IfNotExistBehavior): Promise<Blob>;
+    async getAssetBlob(id: URL, ifNotExist?: IfNotExistBehavior): Promise<Blob | null> {
         this.checkValidId(id);
         const root = await this.root;
 
@@ -153,9 +155,7 @@ export class OpFSAssetStorageAdapter implements IAssetStorageAdapter {
             const file = await fileHandle.getFile();
             return file;
         } catch (e) {
-            // Evil cast
-            // Typescript doesn't allow us to return null even if it's possible
-            if (ifNotExist === IfNotExistBehavior.RETURN_NULL) return null as ReturnInnerType;
+            if (ifNotExist === IfNotExistBehavior.RETURN_NULL) return null;
             throw e;
         }
     }

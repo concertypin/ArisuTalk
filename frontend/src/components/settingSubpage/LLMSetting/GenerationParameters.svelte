@@ -1,6 +1,7 @@
 <script lang="ts">
     import { settings } from "@/lib/stores/settings.svelte";
     import { type LLMConfig } from "@/lib/types/IDataModel";
+    import { GENERATION_DEFAULTS } from "@/const/generationDefaults";
     import TrashIcon from "phosphor-svelte/lib/TrashIcon";
     import CheckIcon from "phosphor-svelte/lib/CheckIcon";
     import PowerIcon from "phosphor-svelte/lib/PowerIcon";
@@ -11,6 +12,30 @@
     };
 
     let { config = $bindable(), id }: Props = $props();
+
+    type OptionalTextFieldKey = "apiKey" | "baseURL" | "model";
+
+    /**
+     * Creates a proxy object to bind a checkbox to an optional text field.
+     * When enabled, empty text is enough to make the input bindable.
+     * @param target The LLM config containing the optional text field.
+     * @param key The text field to bind.
+     * @return A proxy object with a 'checked' property for binding.
+     */
+    function createOptionalTextFieldProxy(target: LLMConfig, key: OptionalTextFieldKey) {
+        return {
+            get checked() {
+                return target[key] !== undefined;
+            },
+            set checked(v: boolean) {
+                if (v) {
+                    target[key] ??= "";
+                } else {
+                    delete target[key];
+                }
+            },
+        };
+    }
 
     /**
      * Creates a proxy object to bind a checkbox to the presence of a field in a target object.
@@ -24,14 +49,20 @@
     function createFieldProxy<T extends Record<string, unknown>, K extends keyof T>(
         target: T,
         key: K,
-        defaultValue: T[K] = "" as T[K]
+        defaultValue: Exclude<T[K], undefined>
     ) {
         return {
             get checked() {
                 return target[key] !== undefined;
             },
             set checked(v: boolean) {
-                target[key] = v ? (target[key] ?? defaultValue) : (undefined as T[K]);
+                if (v) {
+                    if (target[key] === undefined) {
+                        target[key] = defaultValue;
+                    }
+                } else {
+                    delete target[key];
+                }
             },
         };
     }
@@ -48,23 +79,49 @@
 
     let isActive = $derived(settings.value.activeLLMConfigId === config.id);
 
-    let modelProxy = $derived(createFieldProxy(config, "model"));
-    let keyProxy = $derived(createFieldProxy(config, "apiKey"));
-    let urlProxy = $derived(createFieldProxy(config, "baseURL"));
-    let tempProxy = $derived(createFieldProxy(config.generationParameters, "temperature", 1));
+    let modelProxy = $derived(createOptionalTextFieldProxy(config, "model"));
+    let keyProxy = $derived(createOptionalTextFieldProxy(config, "apiKey"));
+    let urlProxy = $derived(createOptionalTextFieldProxy(config, "baseURL"));
+    let tempProxy = $derived(
+        createFieldProxy(
+            config.generationParameters,
+            "temperature",
+            GENERATION_DEFAULTS.temperature
+        )
+    );
     let maxInProxy = $derived(
-        createFieldProxy(config.generationParameters, "maxInputTokens", 1024)
+        createFieldProxy(
+            config.generationParameters,
+            "maxInputTokens",
+            GENERATION_DEFAULTS.maxInputTokens
+        )
     );
     let maxOutProxy = $derived(
-        createFieldProxy(config.generationParameters, "maxOutputTokens", 1024)
+        createFieldProxy(
+            config.generationParameters,
+            "maxOutputTokens",
+            GENERATION_DEFAULTS.maxOutputTokens
+        )
     );
-    let topPProxy = $derived(createFieldProxy(config.generationParameters, "topP", 0.95));
-    let topKProxy = $derived(createFieldProxy(config.generationParameters, "topK", 40));
+    let topPProxy = $derived(
+        createFieldProxy(config.generationParameters, "topP", GENERATION_DEFAULTS.topP)
+    );
+    let topKProxy = $derived(
+        createFieldProxy(config.generationParameters, "topK", GENERATION_DEFAULTS.topK)
+    );
     let freqPenProxy = $derived(
-        createFieldProxy(config.generationParameters, "frequencyPenalty", 0)
+        createFieldProxy(
+            config.generationParameters,
+            "frequencyPenalty",
+            GENERATION_DEFAULTS.frequencyPenalty
+        )
     );
     let presPenProxy = $derived(
-        createFieldProxy(config.generationParameters, "presencePenalty", 0)
+        createFieldProxy(
+            config.generationParameters,
+            "presencePenalty",
+            GENERATION_DEFAULTS.presencePenalty
+        )
     );
 </script>
 

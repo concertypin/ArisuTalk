@@ -7,6 +7,7 @@ import { LangChainBaseProvider } from "./LangChainBaseProvider";
 import type { ChatOpenAI } from "@langchain/openai";
 
 type OpenAISettings = CommonChatSettings & ProviderSettings["OPENAI"];
+type ChatOpenAICtor = typeof ChatOpenAI;
 
 /**
  * OpenAI chat provider using @langchain/openai.
@@ -24,7 +25,7 @@ export class OpenAIChatProvider extends LangChainBaseProvider<"OPENAI"> {
 
     private constructor(
         settings: OpenAISettings,
-        ChatOpenAICtor: typeof import("@langchain/openai").ChatOpenAI
+        ChatOpenAICtor: ChatOpenAICtor
     ) {
         super();
         this.apiKey = settings.apiKey || "";

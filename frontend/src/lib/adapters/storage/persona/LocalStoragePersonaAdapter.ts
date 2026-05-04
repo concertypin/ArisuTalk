@@ -25,7 +25,7 @@ export class LocalStoragePersonaAdapter implements IPersonaStorageAdapter {
         const item = localStorage.getItem(this.PERSONAS_KEY);
         if (!item) return [];
         try {
-            const parsed = JSON.parse(item) as unknown;
+            const parsed: unknown = JSON.parse(item);
             const result = PersonaSchema.array().safeParse(parsed);
             return result.success ? result.data : [];
         } catch {

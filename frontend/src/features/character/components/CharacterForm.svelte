@@ -1,6 +1,6 @@
 <script lang="ts">
     import CloudArrowUpIcon from "phosphor-svelte/lib/CloudArrowUpIcon";
-    import { characterStore } from "../stores/characterStore.svelte";
+    import { characterStore } from "@/features/character/stores/characterStore.svelte";
     import { type Character } from "@arisutalk/character-spec/v0/Character";
 
     type Props = {

@@ -5,7 +5,7 @@
     import DownloadSimpleIcon from "phosphor-svelte/lib/DownloadSimpleIcon";
     import CaretLeftIcon from "phosphor-svelte/lib/CaretLeftIcon";
     import CaretRightIcon from "phosphor-svelte/lib/CaretRightIcon";
-    import { opfsAdapter } from "../adapters/assetStorage/OpFSAssetStorageAdapter";
+    import { opfsAdapter } from "@/features/character/adapters/assetStorage/OpFSAssetStorageAdapter";
     import { IfNotExistBehavior } from "@/lib/interfaces";
 
     type Props = {

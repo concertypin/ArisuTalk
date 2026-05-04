@@ -28,15 +28,15 @@ function createWorkerApi<T>(worker: Worker): WorkerApi<T> {
     const api = Comlink.wrap<T>(worker);
 
     // Automatically set up logging if the worker supports it
-    if ("setLogReceiver" in api && typeof api.setLogReceiver === "function") {
-        void (api.setLogReceiver as (receiver: typeof logReceiver) => Promise<void>)(
-            Comlink.proxy(logReceiver)
-        );
+    const setLogReceiver = Reflect.get(api, "setLogReceiver");
+    if (isLogReceiverInvoker(setLogReceiver)) {
+        void setLogReceiver(Comlink.proxy(logReceiver));
     }
 
     // Proxy api again
 
-    return new Proxy<WorkerApi<T>>(api as WorkerApi<T>, {
+    // oxlint-disable-next-line typescript-eslint/consistent-type-assertions -- Proxy adds the terminate wrapper at runtime.
+    return new Proxy<Comlink.Remote<T>>(api, {
         get: (target, prop) => {
             if (prop === "terminate") {
                 return function (this: WorkerApi<T>) {
@@ -48,12 +48,20 @@ function createWorkerApi<T>(worker: Worker): WorkerApi<T> {
                 return false;
             }
             if (typeof prop === "symbol") return Reflect.get(target, prop);
-            return target[prop as keyof T];
+            return Reflect.get(target, prop);
         },
-    });
-}
+    }) as WorkerApi<T>;
+} 
 // Used example's one, but actually all worker import have the same type.
-type WorkerImport = typeof import("@worker/example/main?worker");
+type WorkerImport = {
+    default: new () => Worker;
+};
+
+function isLogReceiverInvoker(
+    value: unknown
+): value is (receiver: typeof logReceiver) => Promise<void> {
+    return typeof value === "function";
+}
 
 /**
  * Creates a reusable worker factory with caching functionality.

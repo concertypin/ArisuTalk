@@ -30,7 +30,11 @@ export class CharacterStore {
         if (typeof localStorage === "undefined") return [];
         try {
             const item = localStorage.getItem(ORDER_KEY);
-            return item ? (JSON.parse(item) as string[]) : [];
+            if (!item) return [];
+            const parsed: unknown = JSON.parse(item);
+            return Array.isArray(parsed) && parsed.every((value) => typeof value === "string")
+                ? parsed
+                : [];
         } catch {
             return [];
         }

@@ -7,6 +7,7 @@ import { LangChainBaseProvider } from "./LangChainBaseProvider";
 import type { ChatOpenAI } from "@langchain/openai";
 
 type OpenRouterSettings = CommonChatSettings & ProviderSettings["OPENROUTER"];
+type ChatOpenAICtor = typeof ChatOpenAI;
 
 /**
  * Minimal OpenRouter chat provider.
@@ -25,7 +26,7 @@ export class OpenRouterChatProvider extends LangChainBaseProvider<"OPENROUTER"> 
 
     private constructor(
         settings: OpenRouterSettings,
-        ChatOpenAICtor: typeof import("@langchain/openai").ChatOpenAI
+        ChatOpenAICtor: ChatOpenAICtor
     ) {
         super();
         this.apiKey = settings.apiKey || "";

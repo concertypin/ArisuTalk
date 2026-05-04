@@ -94,7 +94,7 @@ export class HookService {
                     errorMessage: scriptResult.error,
                 });
             } else if (scriptResult.result !== undefined && scriptResult.result !== null) {
-                pattern = String(scriptResult.result as unknown);
+                pattern = stringifyResult(scriptResult.result);
             }
         }
 
@@ -113,7 +113,7 @@ export class HookService {
                     characterId: character.id,
                 });
                 if (scriptResult.result !== undefined && scriptResult.result !== null) {
-                    replacement = String(scriptResult.result as unknown);
+                    replacement = stringifyResult(scriptResult.result);
                 }
             }
 
@@ -128,7 +128,7 @@ export class HookService {
                 characterId: character.id,
             });
             if (scriptResult.result !== undefined && scriptResult.result !== null) {
-                replacement = String(scriptResult.result as unknown);
+                replacement = stringifyResult(scriptResult.result);
             }
         }
 
@@ -176,7 +176,7 @@ export class HookService {
                 return "assistant";
             default: {
                 hookType satisfies never;
-                throw new Error(`Unhandled hook type: ${hookType as string}`);
+                throw new Error(`Unhandled hook type: ${String(hookType)}`);
             }
         }
     }
@@ -184,6 +184,10 @@ export class HookService {
     private escapeRegExp(string: string) {
         return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
     }
+}
+
+function stringifyResult(value: unknown): string {
+    return typeof value === "string" ? value : JSON.stringify(value);
 }
 
 export const hookService = new HookService();

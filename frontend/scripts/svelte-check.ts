@@ -9,10 +9,10 @@ const COLOR = {
     gray: "\x1b[38;5;244m",
 } as const;
 
-interface Config {
+type Config = {
     name: string;
     file: string;
-}
+};
 
 const successPattern = "svelte-check found 0 errors and 0 warnings";
 const CONFIGS: Config[] = [
@@ -25,6 +25,11 @@ const isCI = !!process.env.CI;
 const isSequential = process.argv.includes("--sequential");
 const isClean = process.argv.includes("--clean");
 const localOnly = ["--incremental", "--tsgo"];
+const pnpmCommand = process.platform === "win32" ? process.execPath : "pnpm";
+const pnpmArgs = (args: string[]) =>
+    process.platform === "win32"
+        ? [`${process.env.APPDATA}\\npm\\node_modules\\corepack\\dist\\pnpm.js`, ...args]
+        : args;
 
 if (isClean && !isSequential) {
     console.error(
@@ -51,8 +56,7 @@ async function runCheck({ name, file }: Config): Promise<{ name: string; code: n
             "--tsconfig",
             file,
         ];
-        const proc = spawn("pnpm", args, {
-            shell: true,
+        const proc = spawn(pnpmCommand, pnpmArgs(args), {
             env: {
                 ...process.env,
                 FORCE_COLOR: "1",
@@ -104,7 +108,9 @@ async function main() {
         // Initial build
         console.log(`${COLOR.gray}Starting initial build...${COLOR.reset}`);
         await new Promise<void>((resolve, reject) => {
-            const proc = spawn("pnpm", ["exec", "tsgo", "-b"], { shell: true, stdio: "inherit" });
+            const proc = spawn(pnpmCommand, pnpmArgs(["exec", "tsgo", "-b"]), {
+                stdio: "inherit",
+            });
             proc.on("close", (code) => {
                 if (code === 0) {
                     resolve();

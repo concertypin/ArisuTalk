@@ -38,7 +38,7 @@ export class LocalStorageChatAdapter implements IChatStorageAdapter {
 
     private parseArray<T>(raw: string, predicate: (value: unknown) => value is T): T[] {
         try {
-            const parsed = JSON.parse(raw) as unknown;
+            const parsed: unknown = JSON.parse(raw);
             if (!Array.isArray(parsed)) return [];
             const parsedArray: unknown[] = parsed;
             return parsedArray.filter(predicate);

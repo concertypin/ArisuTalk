@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
-import * as apiClient from "../../../../src/lib/api/client";
+import * as apiClient from "@/lib/api/client";
 
 describe("api client shorthands", () => {
     afterEach(() => {
@@ -38,8 +38,8 @@ describe("api client shorthands", () => {
     });
 
     test("apiRequest default throws Not implemented", async () => {
-        const actual = await vi.importActual<typeof import("../../../../src/lib/api/client")>(
-            "../../../../src/lib/api/client"
+        const actual = await vi.importActual<typeof import("@/lib/api/client")>(
+            "@/lib/api/client"
         );
         await expect(actual.apiRequest("/x")).rejects.toThrow("Not implemented");
     });

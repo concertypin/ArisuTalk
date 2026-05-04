@@ -11,54 +11,55 @@
         "**/coverage/**",
         "**/.cache/**",
         "**/.svelte-check/**",
-        "**/dist-ts/**"
+        "**/dist-ts/**",
+        "**/*.svelte",
+        "**/*.svelte.ts"
     ],
     "overrides": [
         {
-            "files": [
-                "**/*.svelte"
-            ],
+            "files": ["**/*.svelte"],
             "rules": {
                 "prefer-const": "off",
                 "no-unassigned-vars": "off"
             }
         },
         {
-            "files": [
-                "**/*.d.ts"
-            ],
+            "files": ["**/*.d.ts"],
             "rules": {
                 "no-unused-vars": "off"
             }
         },
         {
-            "files": [
-                "**/test/**",
-                "**/*.test.ts",
-                "**/*.spec.ts"
-            ],
+            "files": ["**/test/**", "**/*.test.ts", "**/*.spec.ts"],
             "rules": {
                 "jest/require-to-throw-message": "off",
-                "jest/expect-expect": "off"
+                "jest/expect-expect": "off",
+                "@typescript-eslint/consistent-type-assertions": "off",
+                "@typescript-eslint/consistent-type-imports": "off"
             }
         },
         {
-            "files": [
-                "scripts/**/*.ts"
-            ],
+            "files": ["scripts/**/*.ts"],
             "rules": {
                 "no-console": "off"
             }
         }
     ],
     "rules": {
-        "typescript/no-deprecated": "error"
+        "typescript/no-deprecated": "error",
+        "@typescript-eslint/consistent-type-imports": "error",
+        "@typescript-eslint/consistent-type-assertions": [
+            "error",
+            {
+                "assertionStyle": "never"
+            }
+        ],
+        "import/no-relative-parent-imports": "error"
     },
     "options": {
         "typeCheck": true,
         "typeAware": true,
         "reportUnusedDisableDirectives": "warn",
-        "maxWarnings": 0,
         "denyWarnings": true
     }
 }
