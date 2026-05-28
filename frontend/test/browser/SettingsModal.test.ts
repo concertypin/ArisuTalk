@@ -58,7 +58,7 @@ describe("SettingsModal Component", () => {
     });
 
     test("switches tabs", async () => {
-        const { getByText, getByRole } = render(SettingsModal);
+        const { getByRole } = render(SettingsModal);
 
         // Initial tab is General
         await expect.element(getByRole("heading", { name: "General Settings" })).toBeVisible();
