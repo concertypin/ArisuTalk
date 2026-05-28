@@ -10,7 +10,7 @@
     import CaretDownIcon from "phosphor-svelte/lib/CaretDownIcon";
     import CaretUpIcon from "phosphor-svelte/lib/CaretUpIcon";
     import WarningIcon from "phosphor-svelte/lib/WarningIcon";
-    import { withCharacter, appendArrayItem } from "@/lib/utils/characterState";
+    import { withCharacter } from "@/lib/utils/characterState";
 
     type ReplaceHook = Character["executables"]["replaceHooks"];
     type HookType = keyof ReplaceHook;
@@ -66,7 +66,7 @@
         };
         onChange(
             withCharacter(character, (draft) => {
-                appendArrayItem(draft.executables.replaceHooks[type], newHook);
+                draft.executables.replaceHooks[type].push(newHook);
                 expandedHookIndex = draft.executables.replaceHooks[type].length - 1;
             })
         );

@@ -157,17 +157,21 @@ describe("CharacterSidebar Component", () => {
     });
 
     test("highlights selected character", async () => {
-        const { getByLabelText } = render(CharacterSidebar, {
+        const { getByRole } = render(CharacterSidebar, {
             selectedCharacterId: "char-1",
             onSelect: mockOnSelect,
             onAdd: mockOnAdd,
             onPersona: mockOnPersona,
         });
 
-        const characterButton = getByLabelText("Character 1");
+        // When active, aria-label is "Settings", so find by role and check the option
+        const characterOption = getByRole("option", { selected: true });
+        const button = characterOption.element().querySelector("button");
+
+        await expect.element(button).toHaveAttribute("aria-label", "Settings");
 
         // The inner div of the button has the rounded-xl shape when active
-        const innerDiv = characterButton.element().querySelector("div");
+        const innerDiv = button?.querySelector("div");
 
         await expect.element(innerDiv).toHaveClass(/rounded-xl/);
     });
