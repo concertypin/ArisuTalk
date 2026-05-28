@@ -9,14 +9,20 @@ describe("Persona and Chat interactions", () => {
     });
 
     test("Manage Personas opens persona modal", async () => {
-        const { getByLabelText, getByText } = render(CharacterLayoutTestWrapper);
+        const { getByLabelText, container } = render(CharacterLayoutTestWrapper);
 
         const personaBtn = getByLabelText("Manage Personas");
         await expect.element(personaBtn).toBeVisible();
         await personaBtn.click();
 
-        const header = getByText("Manage Personas");
-        await expect.element(header).toBeVisible();
+        // Wait for the dialog to become visible (open attribute)
+        await vi.waitFor(
+            () => {
+                const dialog = container.querySelector("#persona_modal");
+                expect(dialog?.hasAttribute("open")).toBe(true);
+            },
+            { timeout: 5000 }
+        );
     });
 
     test("Create character and send chat message", async () => {
