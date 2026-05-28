@@ -8,10 +8,11 @@
         /** Markdown content to render */
         source: string;
     };
+    import { Logger } from "@common/logger/Logger";
     let { source }: Props = $props();
 
     const svelteMarkdownPromise = import("@humanspeak/svelte-markdown").catch((err) => {
-        console.error("Failed to load markdown renderer:", err);
+        Logger.error("Failed to load markdown renderer:", err);
         return null;
     });
 </script>

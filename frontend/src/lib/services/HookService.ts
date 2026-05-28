@@ -94,7 +94,7 @@ export class HookService {
                     errorMessage: scriptResult.error,
                 });
             } else if (scriptResult.result !== undefined && scriptResult.result !== null) {
-                pattern = String(scriptResult.result as unknown);
+                pattern = stringifyResult(scriptResult.result);
             }
         }
 
@@ -113,32 +113,27 @@ export class HookService {
                     characterId: character.id,
                 });
                 if (scriptResult.result !== undefined && scriptResult.result !== null) {
-                    replacement = String(scriptResult.result as unknown);
+                    replacement = stringifyResult(scriptResult.result);
                 }
             }
 
             return await regexWorker.replace(content, pattern, replacement, hook.meta.flag);
-        } else {
-            // String replacement
-            if (hook.meta.isOutputScripted) {
-                const scriptResult = await scriptingWorker.execute(replacement, {
-                    context: this.createContext(content, character, type, persona, role),
-                    allowNetwork,
-                    characterId: character.id,
-                });
-                if (scriptResult.result !== undefined && scriptResult.result !== null) {
-                    replacement = String(scriptResult.result as unknown);
-                }
-            }
-
-            const flags = hook.meta.caseSensitive ? "g" : "gi";
-            return await regexWorker.replace(
-                content,
-                this.escapeRegExp(pattern),
-                replacement,
-                flags
-            );
         }
+
+        // String replacement
+        if (hook.meta.isOutputScripted) {
+            const scriptResult = await scriptingWorker.execute(replacement, {
+                context: this.createContext(content, character, type, persona, role),
+                allowNetwork,
+                characterId: character.id,
+            });
+            if (scriptResult.result !== undefined && scriptResult.result !== null) {
+                replacement = stringifyResult(scriptResult.result);
+            }
+        }
+
+        const flags = hook.meta.caseSensitive ? "g" : "gi";
+        return await regexWorker.replace(content, this.escapeRegExp(pattern), replacement, flags);
     }
 
     private createContext(
@@ -181,13 +176,31 @@ export class HookService {
                 return "assistant";
             default: {
                 hookType satisfies never;
-                throw new Error(`Unhandled hook type: ${hookType as string}`);
+                throw new Error(`Unhandled hook type: ${String(hookType)}`);
             }
         }
     }
 
     private escapeRegExp(string: string) {
         return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
+    }
+}
+
+/**
+ * Converts a script result into user-facing text.
+ *
+ * Objects and arrays stay readable as JSON, while values that JSON cannot represent
+ * still fall back to JavaScript's string conversion instead of breaking hook output.
+ */
+function stringifyResult(value: unknown): string {
+    if (typeof value === "string") return value;
+    if (value === undefined) return "";
+    if (typeof value === "bigint" || typeof value === "symbol") return String(value);
+
+    try {
+        return JSON.stringify(value) ?? "";
+    } catch {
+        return String(value);
     }
 }
 

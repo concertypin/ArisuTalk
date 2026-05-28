@@ -5,7 +5,7 @@
  */
 export type ScriptContext = {
     // Script can access properties dynamically
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any
     [key: string]: any;
 };
 

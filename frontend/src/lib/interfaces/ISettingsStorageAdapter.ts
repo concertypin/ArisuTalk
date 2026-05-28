@@ -1,4 +1,4 @@
-import { Settings } from "@/lib/types/IDataModel";
+import type { Settings } from "@/lib/types/IDataModel";
 
 /**
  * Interface for settings storage adapters.

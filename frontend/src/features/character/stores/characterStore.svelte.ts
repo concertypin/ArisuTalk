@@ -30,7 +30,11 @@ export class CharacterStore {
         if (typeof localStorage === "undefined") return [];
         try {
             const item = localStorage.getItem(ORDER_KEY);
-            return item ? (JSON.parse(item) as string[]) : [];
+            if (!item) return [];
+            const parsed: unknown = JSON.parse(item);
+            return Array.isArray(parsed) && parsed.every((value) => typeof value === "string")
+                ? parsed
+                : [];
         } catch {
             return [];
         }
@@ -44,11 +48,12 @@ export class CharacterStore {
             // Sort by saved order
             const order = this.getOrder();
             if (order.length > 0) {
-                // eslint-disable-next-line svelte/prefer-svelte-reactivity
-                const orderMap = new Map(order.map((id, index) => [id, index]));
+                const orderMap: Record<string, number> = Object.fromEntries(
+                    order.map((id, index) => [id, index])
+                );
                 chars.sort((a, b) => {
-                    const idxA = orderMap.get(a.id);
-                    const idxB = orderMap.get(b.id);
+                    const idxA = orderMap[a.id];
+                    const idxB = orderMap[b.id];
                     // If both present, sort by index
                     if (idxA !== undefined && idxB !== undefined) return idxA - idxB;
                     // If only one present, present goes first? Or last?
@@ -68,7 +73,7 @@ export class CharacterStore {
                 });
             });
         } catch (e) {
-            console.error("Failed to load characters", e);
+            Logger.error("Failed to load characters", e);
             this.characters = [];
         }
     }
@@ -131,16 +136,15 @@ export class CharacterStore {
                     success: true,
                 });
                 return { success: true };
-            } else {
-                Logger.structured("character.import", {
-                    format,
-                    success: false,
-                    errorMessage: "Failed to parse character",
-                });
-                return { success: false, error: "Failed to parse character" };
             }
+            Logger.structured("character.import", {
+                format,
+                success: false,
+                errorMessage: "Failed to parse character",
+            });
+            return { success: false, error: "Failed to parse character" };
         } catch (e) {
-            console.error(e);
+            Logger.error(e);
             Logger.structured("character.import", {
                 format,
                 success: false,

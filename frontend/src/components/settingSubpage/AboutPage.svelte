@@ -4,7 +4,13 @@
             <span class="text-3xl"><img src="icon_192.png" alt="ArisuTalk logo" /></span>
         </div>
     </div>
-    <h3 class="text-2xl font-bold">ArisuTalk</h3>
+    <h3
+        class="text-2xl font-bold tracking-tight inline-flex items-center justify-center cursor-default"
+    >
+        <span class="text-gradient-accent flex items-center leading-none select-none">
+            ArisuTalk
+        </span>
+    </h3>
     <p class="text-base-content/70">
         Version {import.meta.env.VITE_VERSION_CHANNEL} on channel {import.meta.env
             .VITE_VERSION_NAME}
