@@ -3,6 +3,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { IDBChatAdapter } from "@/lib/adapters/storage/chat/IDBChatAdapter";
 import { getArisuDB } from "@/lib/adapters/storage/IndexedDBHelper";
 import { exampleChatData, exampleMessageData } from "@/const/example_data";
+import { cloneDeep } from "lodash-es";
 
 describe("DexieChatAdapter (comprehensive)", () => {
     let adapter: IDBChatAdapter;
@@ -25,14 +26,14 @@ describe("DexieChatAdapter (comprehensive)", () => {
         });
 
         it("saves and retrieves complete chat object", async () => {
-            const chat = structuredClone(exampleChatData);
+            const chat = cloneDeep(exampleChatData);
             await adapter.saveChat(chat);
             const retrieved = await adapter.getChat(chat.id);
             expect(retrieved?.id).toBe(chat.id);
         });
 
         it("deletes a chat and its messages", async () => {
-            const chat = structuredClone(exampleChatData);
+            const chat = cloneDeep(exampleChatData);
             await adapter.saveChat(chat);
             await adapter.addMessage(chat.id, exampleMessageData[0]);
             await adapter.deleteChat(chat.id);
@@ -50,7 +51,7 @@ describe("DexieChatAdapter (comprehensive)", () => {
 
     describe("Message handling", () => {
         it("adds and retrieves messages", async () => {
-            const chat = structuredClone(exampleChatData);
+            const chat = cloneDeep(exampleChatData);
             await adapter.saveChat(chat);
             await adapter.addMessage(chat.id, exampleMessageData[0]);
             const msgs = await adapter.getMessages(chat.id);
@@ -59,9 +60,9 @@ describe("DexieChatAdapter (comprehensive)", () => {
         });
 
         it("sets timestamp if missing", async () => {
-            const chat = structuredClone(exampleChatData);
+            const chat = cloneDeep(exampleChatData);
             await adapter.saveChat(chat);
-            const msg = structuredClone(exampleMessageData[0]);
+            const msg = cloneDeep(exampleMessageData[0]);
             delete (msg as { timestamp?: number }).timestamp;
             await adapter.addMessage(chat.id, msg);
             const msgs = await adapter.getMessages(chat.id);
@@ -69,7 +70,7 @@ describe("DexieChatAdapter (comprehensive)", () => {
         });
 
         it("updates chat updatedAt when adding message", async () => {
-            const chat = structuredClone(exampleChatData);
+            const chat = cloneDeep(exampleChatData);
             const oldTime = Date.now() - 10000;
             chat.updatedAt = oldTime;
             await adapter.saveChat(chat);
@@ -86,7 +87,7 @@ describe("DexieChatAdapter (comprehensive)", () => {
         });
 
         it("preserves message order", async () => {
-            const chat = structuredClone(exampleChatData);
+            const chat = cloneDeep(exampleChatData);
             await adapter.saveChat(chat);
             for (let i = 0; i < 5; i++) {
                 await adapter.addMessage(chat.id, {
@@ -119,7 +120,7 @@ describe("DexieChatAdapter (comprehensive)", () => {
 
     describe("Export/Import", () => {
         it("exports and imports data", async () => {
-            const chat = structuredClone(exampleChatData);
+            const chat = cloneDeep(exampleChatData);
             await adapter.saveChat(chat);
             await adapter.addMessage(chat.id, exampleMessageData[0]);
 

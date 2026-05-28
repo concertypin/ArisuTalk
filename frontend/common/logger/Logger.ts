@@ -69,13 +69,17 @@ function getStoredLogLevel(): LogLevel {
     if (!hasLocalStorage()) return DEFAULT_LOG_LEVEL;
     try {
         const stored = window.localStorage.getItem(STORAGE_KEY);
-        if (stored && stored in LOG_LEVELS) {
-            return stored as LogLevel;
+        if (stored && isLogLevel(stored)) {
+            return stored;
         }
     } catch {
         // localStorage access may throw in some contexts
     }
     return DEFAULT_LOG_LEVEL;
+}
+
+function isLogLevel(value: string): value is LogLevel {
+    return value in LOG_LEVELS;
 }
 
 /**
@@ -227,6 +231,16 @@ export class Logger {
      */
     static offLog(listener: LogListener): void {
         this.listeners.delete(listener);
+    }
+
+    /**
+     * Reset the logger to its initial state.
+     * Useful for clearing all listeners and resetting the log level in tests.
+     */
+    static reset(): void {
+        this.listeners.clear();
+        currentLogLevel = getStoredLogLevel();
+        initializeAdze(currentLogLevel);
     }
 
     /**

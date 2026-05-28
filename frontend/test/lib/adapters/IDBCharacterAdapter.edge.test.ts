@@ -4,6 +4,7 @@ import { IDBCharacterAdapter } from "@/lib/adapters/storage/character/IDBCharact
 import { IDBChatAdapter } from "@/lib/adapters/storage/chat/IDBChatAdapter";
 import { getArisuDB } from "@/lib/adapters/storage/IndexedDBHelper";
 import { exampleCharacter } from "@/const/example_data";
+import { cloneDeep } from "lodash-es";
 
 describe("DexieCharacterAdapter (edge)", () => {
     let adapter: IDBCharacterAdapter;
@@ -17,8 +18,8 @@ describe("DexieCharacterAdapter (edge)", () => {
 
     it("saves and retrieves a character with very large prompt.description", async () => {
         const big = "x".repeat(100_000);
-        const c = structuredClone(exampleCharacter);
-        c.prompt = { ...(c.prompt || {}), description: big };
+        const c = cloneDeep(exampleCharacter);
+        c.prompt = { ...c.prompt, description: big };
         await adapter.saveCharacter(c);
         const got = await adapter.getCharacter(c.id);
         expect(got).toBeDefined();
@@ -29,7 +30,7 @@ describe("DexieCharacterAdapter (edge)", () => {
     it("handles concurrent saveCharacter calls", async () => {
         const tasks: Promise<void>[] = [];
         for (let i = 0; i < 10; i++) {
-            const nc = structuredClone(exampleCharacter);
+            const nc = cloneDeep(exampleCharacter);
             nc.id = `concurrent-${i}-${Date.now()}-${Math.random()}`;
             nc.name = `C-${i}`;
             tasks.push(adapter.saveCharacter(nc));

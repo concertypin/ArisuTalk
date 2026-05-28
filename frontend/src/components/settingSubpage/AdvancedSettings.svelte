@@ -1,6 +1,7 @@
 <script lang="ts">
     import { settings } from "@/lib/stores/settings.svelte";
-    import LogLevelSelector from "../ui/LogLevelSelector.svelte";
+    import LogLevelSelector from "@/components/ui/LogLevelSelector.svelte";
+    import NoopIcon from "@/components/Snippets/NoopIcon.svelte";
 </script>
 
 <div class="space-y-6">
@@ -19,6 +20,7 @@
                 class="toggle"
                 bind:checked={settings.value.advanced.debug}
             />
+            <NoopIcon />
         </label>
     </div>
     <div class="form-control">
@@ -30,6 +32,7 @@
                 class="toggle"
                 bind:checked={settings.value.advanced.experimental}
             />
+            <NoopIcon />
         </label>
     </div>
 </div>

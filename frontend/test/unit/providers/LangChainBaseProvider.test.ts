@@ -123,13 +123,13 @@ describe("LangChainBaseProvider", () => {
     });
 
     it("generate returns empty string on JSON error", async () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // oxlint-disable-next-line typescript/no-explicit-any
         const circular: any = {};
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+        // oxlint-disable-next-line typescript/no-unsafe-assignment typescript/no-unsafe-member-access
         circular.self = circular;
         const mockClient = {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            // oxlint-disable-next-line typescript/no-unsafe-assignment
             invoke: vi.fn().mockResolvedValue({ content: circular }),
         };
         const provider = new TestProvider(mockClient);
@@ -227,8 +227,7 @@ describe("LangChainBaseProvider", () => {
         const generator = provider.stream([new HumanMessage("hi")]);
 
         await expect(async () => {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            for await (const chunk of generator) {
+            for await (const _ of generator) {
                 // do nothing
             }
         }).rejects.toThrow("Other error");

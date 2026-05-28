@@ -4,7 +4,11 @@
   Shows on hover and provides controls for message manipulation.
 -->
 <script lang="ts">
-    import { Pencil, Trash2, RefreshCw, Check, X } from "@lucide/svelte";
+    import PencilIcon from "phosphor-svelte/lib/PencilIcon";
+    import TrashIcon from "phosphor-svelte/lib/TrashIcon";
+    import ArrowClockwiseIcon from "phosphor-svelte/lib/ArrowClockwiseIcon";
+    import CheckIcon from "phosphor-svelte/lib/CheckIcon";
+    import XIcon from "phosphor-svelte/lib/XIcon";
     import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
 
     type Props = {
@@ -24,7 +28,7 @@
         onCancelEdit?: () => void;
     };
 
-    let {
+    const {
         message,
         isEditing = false,
         onEdit,
@@ -34,7 +38,7 @@
         onCancelEdit,
     }: Props = $props();
 
-    const isAssistant = $derived(message.role === "assistant");
+    let isAssistant = $derived(message.role === "assistant");
 
     // Delete confirmation state
     let isConfirmingDelete = $state(false);
@@ -80,14 +84,14 @@
             onclick={onConfirmEdit}
             title="Save edit (Ctrl+Enter)"
         >
-            <Check class="w-3.5 h-3.5 text-success" />
+            <CheckIcon class="w-3.5 h-3.5 text-success" />
         </button>
         <button
             class="btn btn-xs btn-ghost btn-circle"
             onclick={onCancelEdit}
             title="Cancel edit (Esc)"
         >
-            <X class="w-3.5 h-3.5 text-error" />
+            <XIcon class="w-3.5 h-3.5 text-error" />
         </button>
     {:else if isConfirmingDelete}
         <button
@@ -95,25 +99,25 @@
             onclick={handleDeleteClick}
             title="Click again to confirm delete"
         >
-            <Trash2 class="w-3.5 h-3.5" />
+            <TrashIcon class="w-3.5 h-3.5" />
         </button>
         <button
             class="btn btn-xs btn-ghost btn-circle"
             onclick={cancelDelete}
             title="Cancel delete"
         >
-            <X class="w-3.5 h-3.5" />
+            <XIcon class="w-3.5 h-3.5" />
         </button>
     {:else}
         <button class="btn btn-xs btn-ghost btn-circle" onclick={onEdit} title="Edit message">
-            <Pencil class="w-3.5 h-3.5" />
+            <PencilIcon class="w-3.5 h-3.5" />
         </button>
         <button
             class="btn btn-xs btn-ghost btn-circle"
             onclick={handleDeleteClick}
             title="Delete message"
         >
-            <Trash2 class="w-3.5 h-3.5" />
+            <TrashIcon class="w-3.5 h-3.5" />
         </button>
         {#if isAssistant}
             <button
@@ -121,7 +125,7 @@
                 onclick={onRegenerate}
                 title="Regenerate response"
             >
-                <RefreshCw class="w-3.5 h-3.5" />
+                <ArrowClockwiseIcon class="w-3.5 h-3.5" />
             </button>
         {/if}
     {/if}

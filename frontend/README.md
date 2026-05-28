@@ -19,7 +19,7 @@ This frontend is currently being rebuilt as part of **Project Kei**! 🚀 We're 
 
 ### Prerequisites
 
-- Node.js (>20)
+- Node.js (>=22.18.0 <23.0.0 || >=23.6.0), which supports type stripping without flag.
 - pnpm (10.14.0+)
 
 ### Setup

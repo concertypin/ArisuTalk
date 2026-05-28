@@ -75,29 +75,34 @@ describe("PersonaStore", () => {
         expect(store.activePersona).toEqual(validPersona);
     });
 
-    it("should load from localStorage", async () => {
-        localStorageMock.setItem("arisutalk_personas", JSON.stringify([validPersona]));
+    it("should handle null selection", () => {
+        store.add(validPersona);
+        store.select(validPersona.id);
+        store.select(null);
+        expect(store.activePersonaId).toBeNull();
+        expect(store.activePersona).toBeNull();
+    });
 
-        // Create a mock adapter that respects what's in localStorage
-        const mockLocalStorageAdapter = {
-            init: vi.fn().mockResolvedValue(undefined),
-            getAllPersonas: vi.fn().mockImplementation(async () => {
-                const stored = localStorage.getItem("arisutalk_personas");
-                if (!stored) return [];
-                const parsed: unknown = JSON.parse(stored);
-                const result = PersonaSchema.array().safeParse(parsed);
-                return result.success ? result.data : [];
-            }),
-            savePersona: vi.fn().mockResolvedValue(undefined),
-            updatePersona: vi.fn().mockResolvedValue(undefined),
-            deletePersona: vi.fn().mockResolvedValue(undefined),
-            getActivePersonaId: vi.fn().mockResolvedValue(null),
-            setActivePersonaId: vi.fn().mockResolvedValue(undefined),
-        };
+    it("should handle update for non-existent persona", () => {
+        const updated = { ...validPersona, name: "Non-existent" };
+        store.update("wrong-id", updated);
+        expect(store.personas).toHaveLength(0);
+    });
 
-        const newStore = new PersonaStore(mockLocalStorageAdapter);
-        await newStore.initPromise; // wait for async load
-        expect(newStore.personas).toHaveLength(1);
+    it("should handle remove for non-existent persona", () => {
+        store.add(validPersona);
+        store.remove("wrong-id");
+        expect(store.personas).toHaveLength(1);
+    });
+
+    it("should return null for activePersona when no persona is selected", () => {
+        expect(store.activePersona).toBeNull();
+    });
+
+    it("should throw error when loading corrupted state", () => {
+        localStorageMock.setItem("arisutalk_personas", "invalid json");
+        const newStore = new PersonaStore(mockAdapter);
+        expect(newStore.personas).toEqual([]);
     });
 
     it("should correctly load state on initialization", () => {

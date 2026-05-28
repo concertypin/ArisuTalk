@@ -1,7 +1,8 @@
-import { getArisuDB } from "../IndexedDBHelper";
+import { getArisuDB } from "@/lib/adapters/storage/IndexedDBHelper";
 import type { ISettingsStorageAdapter } from "@/lib/interfaces";
-import { Settings, SettingsSchema } from "@/lib/types/IDataModel";
+import { type Settings, SettingsSchema } from "@/lib/types/IDataModel";
 import { apply } from "@arisutalk/character-spec/utils";
+import { cloneDeep } from "lodash-es";
 
 export class IDBSettingsAdapter implements ISettingsStorageAdapter {
     private db = getArisuDB();
@@ -11,7 +12,9 @@ export class IDBSettingsAdapter implements ISettingsStorageAdapter {
     }
 
     async saveSettings(settings: Settings): Promise<void> {
-        await this.db.settings.put({ ...settings, id: "singleton" });
+        // Remove Svelte proxy wrapper by serializing/deserializing
+        const plainSettings = cloneDeep({ ...settings, id: "singleton" });
+        await this.db.settings.put(plainSettings);
     }
 
     async getSettings(): Promise<Settings> {

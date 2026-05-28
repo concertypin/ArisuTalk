@@ -9,6 +9,20 @@ Test should cover:
     - unexpected states
     - TypeScript's type check, via Vitest's type assertion features. See [more](https://vitest.dev/guide/testing-types) and [more](https://github.com/mmkal/expect-type)
 
+### Guidelines:
+
+When using mocks, prefer `vi.mocked()` over direct casting to `any` for better type safety.
+```typescript
+import { vi } from 'vitest';
+const myMockedFunction = vi.fn();
+
+// Don't(it makes error on lint. Also, loses type safety and autocomplete.)
+(myMockedFunction as any).mockReturnValue(42);
+
+// Do:
+vi.mocked(myMockedFunction).mockReturnValue(42);
+```
+
 ## 1. General Logic Tests (Node.js)
 
 Use these for your `.svelte.ts` files or pure TypeScript utility files. These tests run in Node.js for maximum speed. Since Svelte 5 runes are "universal," they can be tested without a browser if they don't touch the DOM.

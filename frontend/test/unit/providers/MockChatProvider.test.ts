@@ -1,6 +1,6 @@
 import { describe, it, expect, expectTypeOf } from "vitest";
 import { MockChatProvider } from "@/lib/providers/chat/MockChatProvider";
-import { CommonChatSettings } from "@/lib/interfaces";
+import type { CommonChatSettings } from "@/lib/interfaces";
 import { HumanMessage } from "@langchain/core/messages";
 
 describe("MockChatProvider", () => {

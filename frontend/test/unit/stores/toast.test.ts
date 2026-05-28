@@ -20,7 +20,7 @@ describe("ToastStore", () => {
         });
 
         it("ToastMessage has correct structure", () => {
-            expectTypeOf<ToastMessage>().toMatchTypeOf<{
+            expectTypeOf<ToastMessage>().toExtend<{
                 id: string;
                 type: "info" | "success" | "warning" | "error";
                 message: string;

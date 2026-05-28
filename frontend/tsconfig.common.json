@@ -8,13 +8,19 @@
 			"ESNext"
 		],
 		"allowImportingTsExtensions": false /* Allow imports to include TypeScript file extensions. Requires '--moduleResolution bundler' and either '--noEmit' or '--emitDeclarationOnly' to be set. */,
-		"outDir": "./dist" /* Specify an output folder for all emitted files. */,
+		"declarationDir": "./dist-ts/common" /* Specify an output folder for all emitted files. */,
 		"noEmit": false
 	},
 	"extends": "./tsconfig.base.json",
 	"include": [
-		"common/**/*.ts",
-		"*.ts", // config
-		"*.js"
+		"common/**/*.ts"
+	],
+	"exclude": [
+		"coverage",
+		"dist-ts/",
+		"dist/",
+		"test/**/*.test.ts",
+		"test/*.test.ts",
+		"test/**/*.svelte",
 	]
 }

@@ -1,0 +1,20 @@
+{
+	"compilerOptions": {
+		"tsBuildInfoFile": "./node_modules/.cache/node.tsbuildinfo",
+		"composite": true,
+		"lib": [
+			"ESNext"
+		],
+		"allowImportingTsExtensions": false /* Allow imports to include TypeScript file extensions. Requires '--moduleResolution bundler' and either '--noEmit' or '--emitDeclarationOnly' to be set. */,
+		"declarationDir": "./dist-ts/node" /* Specify an output folder for all emitted files. */,
+		"noEmit": false
+	},
+	"extends": "./tsconfig.base.json",
+	"include": [
+		"scripts/**/*.ts",
+		"*.ts", // config
+		"*.js",
+		"scripts/**/*.js",
+		"scripts/**/*.json"
+	]
+}

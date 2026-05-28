@@ -6,10 +6,13 @@ import { defineConfig } from "eslint/config";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import phosphorSvelte from "eslint-plugin-phosphor-svelte";
+import oxlint from "eslint-plugin-oxlint";
 import svelteConfig from "./svelte.config.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const isCI = process.env.CI ? true : false;
+
+const oxlintize = false;
 
 export default defineConfig([
     {
@@ -82,4 +85,16 @@ export default defineConfig([
             "no-console": "warn",
         },
     },
+
+    // Disable ESLint rules that are already handled by oxlint
+    ...(oxlintize
+        ? oxlint
+              .buildFromOxlintConfigFile(".oxlintrc.json", {
+                  typeAware: true,
+              })
+              .map((config) => ({
+                  ...config,
+                  files: ["**/*.svelte", "**/*.svelte.ts"],
+              }))
+        : []),
 ]);

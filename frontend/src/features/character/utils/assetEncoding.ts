@@ -1,5 +1,6 @@
 import type { AssetEntity } from "@arisutalk/character-spec/v0/Character/Assets";
 import type { IAssetStorageAdapter } from "@/lib/interfaces";
+import { Logger } from "@common/logger/Logger";
 
 /**
  * Converts a Blob to a Uint8Array.
@@ -40,7 +41,7 @@ export async function remapAssetToUint8Array(
             const uint8Array = await blobToUint8Array(blob);
             return { ...asset, data: uint8Array };
         } catch (e) {
-            console.error("Failed to fetch local file for export:", asset.data, e);
+            Logger.error("Failed to fetch local file for export:", asset.data, e);
             throw e instanceof Error ? e : new Error(String(e));
         }
     }
@@ -50,7 +51,7 @@ export async function remapAssetToUint8Array(
         try {
             const commaIndex = asset.data.indexOf(",");
             if (commaIndex === -1) {
-                console.warn(
+                Logger.warn(
                     "Malformed data URL (no comma), leaving as is:",
                     asset.data.slice(0, 50)
                 );
@@ -61,7 +62,7 @@ export async function remapAssetToUint8Array(
             const bytes = Uint8Array.from(binaryString, (c) => c.charCodeAt(0));
             return { ...asset, data: bytes };
         } catch (e) {
-            console.error("Failed to decode base64 data URL:", e);
+            Logger.error("Failed to decode base64 data URL:", e);
             return asset; // Leave as is on error
         }
     }
@@ -77,8 +78,9 @@ export async function remapAssetToUint8Array(
  * @param assets - Array of assets to collect buffers from
  * @returns Array of ArrayBuffers from Uint8Array assets
  */
-export function collectTransferableBuffers(assets: AssetEntity[]): ArrayBufferLike[] {
+export function collectTransferableBuffers(assets: AssetEntity[]): ArrayBuffer[] {
     return assets
-        .filter((a): a is AssetEntity & { data: Uint8Array } => a.data instanceof Uint8Array)
-        .map((a) => a.data.buffer);
+        .map((a) => a.data)
+        .filter((a) => a instanceof Uint8Array)
+        .map((a) => a.buffer);
 }

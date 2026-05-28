@@ -47,13 +47,12 @@ The production-ready files will be in the `ArisuTalk/frontend/dist` directory.
 ### Testing
 
 ```bash
-pnpm run -F frontend check      # Format + lint + test (full CI suite)
-pnpm run -F frontend test       # Run all tests (unit + browser)
+pnpm run -F frontend test       # Run all tests
 pnpm run -F frontend test:ui    # Run tests with Vitest UI
 pnpm vitest -k 'pattern'        # Run specific tests matching pattern
 ```
 
-Note: CI runs `pnpm run -F frontend check`. Ensure tests pass locally before pushing.
+Note: CI runs the same full test suite (`pnpm run -F frontend check`). Ensure tests pass locally before pushing.
 
 ## Authentication Setup
 
@@ -95,7 +94,7 @@ Worker logic should be tested via unit tests in `test/workers/`. Note that real 
 - Using `lucide-svelte` instead of `@lucide/svelte`.
     - Fix: Replace `lucide-svelte` with `@lucide/svelte`.
 - Using `@testing-library/svelte` instead of `vitest-browser-svelte`.
-    - This makes tests run in Node.js instead of the browser. It might not work as intended, since some APIs differ from the browser environment.
+    - This makes tests run in not browser, but in Node.js. It might not work as intended, since some are not the same as in the browser.
     - Fix: Replace `@testing-library/svelte` with `vitest-browser-svelte`.
 
 ## Documentation of Other Libraries

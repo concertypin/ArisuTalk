@@ -16,7 +16,7 @@ vi.mock("@/lib/workers/workerClient", () => ({
     getScriptingWorker: vi.fn(async () => ({
         execute: vi.fn(async (code: string) => ({
             // Since scripts are user-defined, it might be `any` type.
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            // oxlint-disable-next-line no-eval typescript/no-unsafe-assignment
             result: code.includes("return") ? eval(`(() => { ${code} })()`) : eval(code),
             logs: [],
         })),
@@ -169,9 +169,11 @@ describe("HookService", () => {
             terminate: vi.fn(),
             execute: vi.fn(async (code: string, options) => {
                 // Check role in context
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+
+                // oxlint-disable-next-line typescript/no-unsafe-assignment typescript/no-unsafe-member-access
                 const ctx = options?.context;
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+
+                // oxlint-disable-next-line typescript/no-unsafe-assignment typescript/no-unsafe-member-access
                 const role = ctx?.message?.role;
                 if (role === "assistant") {
                     return { result: "secret", logs: [] };
@@ -184,5 +186,221 @@ describe("HookService", () => {
 
         const result = await hookService.process("This is secret", character, "display");
         expect(result).toBe("This is hidden");
+    });
+
+    it("should handle scripted input pattern errors gracefully", async () => {
+        const character = apply(CharacterSchema, {
+            description: "",
+            prompt: { description: "" },
+            specVersion: 0,
+            id: "1",
+            name: "Test",
+            executables: {
+                replaceHooks: {
+                    input: [
+                        {
+                            input: "throw new Error('test error')",
+                            output: "replacement",
+                            meta: {
+                                type: "regex",
+                                flag: "g",
+                                isInputPatternScripted: true,
+                                isOutputScripted: false,
+                                priority: 0,
+                            },
+                        },
+                    ],
+                },
+            },
+        });
+
+        // Mock scripting worker to return error
+        vi.mocked(await import("@/lib/workers/workerClient")).getScriptingWorker.mockResolvedValue({
+            terminate: vi.fn(),
+            execute: vi.fn(async () => ({
+                result: undefined,
+                error: "test error",
+                logs: [],
+            })),
+        } as unknown as import("@/lib/workers/workerClient").WorkerApi<
+            import("@worker/scripting/types").ScriptingWorkerApi
+        >);
+
+        // Should not throw, just log error and skip the hook
+        const result = await hookService.process("test content", character, "input");
+        expect(result).toBe("test content");
+    });
+
+    it("should handle scripted output for regex hooks", async () => {
+        const character = apply(CharacterSchema, {
+            description: "",
+            prompt: { description: "" },
+            specVersion: 0,
+            id: "1",
+            name: "Test",
+            executables: {
+                replaceHooks: {
+                    output: [
+                        {
+                            input: "\\d+",
+                            output: "'NUMBER'",
+                            meta: {
+                                type: "regex",
+                                flag: "g",
+                                isInputPatternScripted: false,
+                                isOutputScripted: true,
+                                priority: 0,
+                            },
+                        },
+                    ],
+                },
+            },
+        });
+
+        const result = await hookService.process("I have 42 apples", character, "output");
+        // The mock eval returns the string with quotes, so we expect 'NUMBER' not NUMBER
+        expect(result).toBe("I have 'NUMBER' apples");
+    });
+
+    it("should handle scripted output for string hooks", async () => {
+        const character = apply(CharacterSchema, {
+            description: "",
+            prompt: { description: "" },
+            specVersion: 0,
+            id: "1",
+            name: "Test",
+            executables: {
+                replaceHooks: {
+                    display: [
+                        {
+                            input: "hello",
+                            output: "'GREETING'",
+                            meta: {
+                                type: "string",
+                                caseSensitive: false,
+                                isInputPatternScripted: false,
+                                isOutputScripted: true,
+                                priority: 0,
+                            },
+                        },
+                    ],
+                },
+            },
+        });
+
+        const result = await hookService.process("hello world", character, "display");
+        // The mock eval returns the string with quotes, so we expect 'GREETING' not GREETING
+        expect(result).toBe("'GREETING' world");
+    });
+
+    it("should handle string replacement with case sensitivity", async () => {
+        const character = apply(CharacterSchema, {
+            description: "",
+            prompt: { description: "" },
+            specVersion: 0,
+            id: "1",
+            name: "Test",
+            executables: {
+                replaceHooks: {
+                    input: [
+                        {
+                            input: "Hello",
+                            output: "Hi",
+                            meta: {
+                                type: "string",
+                                caseSensitive: true,
+                                isInputPatternScripted: false,
+                                isOutputScripted: false,
+                                priority: 0,
+                            },
+                        },
+                    ],
+                },
+            },
+        });
+
+        const result = await hookService.process("Hello world, hello again", character, "input");
+        // Case sensitive: only "Hello" should be replaced, not "hello"
+        expect(result).toBe("Hi world, hello again");
+    });
+
+    it("should handle string replacement without case sensitivity", async () => {
+        const character = apply(CharacterSchema, {
+            description: "",
+            prompt: { description: "" },
+            specVersion: 0,
+            id: "1",
+            name: "Test",
+            executables: {
+                replaceHooks: {
+                    input: [
+                        {
+                            input: "Hello",
+                            output: "Hi",
+                            meta: {
+                                type: "string",
+                                caseSensitive: false,
+                                isInputPatternScripted: false,
+                                isOutputScripted: false,
+                                priority: 0,
+                            },
+                        },
+                    ],
+                },
+            },
+        });
+
+        const result = await hookService.process("Hello world, hello again", character, "input");
+        // Case insensitive: both "Hello" and "hello" should be replaced
+        expect(result).toBe("Hi world, Hi again");
+    });
+
+    it("should return content unchanged when no hooks are defined", async () => {
+        const character = apply(CharacterSchema, {
+            description: "",
+            prompt: { description: "" },
+            specVersion: 0,
+            id: "1",
+            name: "Test",
+            executables: {
+                replaceHooks: {
+                    input: [],
+                },
+            },
+        });
+
+        const result = await hookService.process("test content", character, "input");
+        expect(result).toBe("test content");
+    });
+
+    it("should escape special regex characters in string replacement", async () => {
+        const character = apply(CharacterSchema, {
+            description: "",
+            prompt: { description: "" },
+            specVersion: 0,
+            id: "1",
+            name: "Test",
+            executables: {
+                replaceHooks: {
+                    input: [
+                        {
+                            input: "a.b",
+                            output: "X",
+                            meta: {
+                                type: "string",
+                                caseSensitive: false,
+                                isInputPatternScripted: false,
+                                isOutputScripted: false,
+                                priority: 0,
+                            },
+                        },
+                    ],
+                },
+            },
+        });
+
+        // Should match literal "a.b", not "a" + any char + "b"
+        const result = await hookService.process("a.b and aXb", character, "input");
+        expect(result).toBe("X and aXb");
     });
 });

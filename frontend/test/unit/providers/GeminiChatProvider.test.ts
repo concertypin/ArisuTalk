@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { GeminiChatProvider } from "@/lib/providers/chat/GeminiChatProvider";
-import { CommonChatSettings } from "@/lib/interfaces";
+import type { CommonChatSettings } from "@/lib/interfaces";
 import { HumanMessage } from "@langchain/core/messages";
 
 // Mock the dynamic import of @langchain/google-genai
@@ -41,6 +41,7 @@ describe("GeminiChatProvider", () => {
             ...geminiSettings,
         });
         expect(provider).toBeInstanceOf(GeminiChatProvider);
+
         expect(provider.isReady()).toBe(true);
     });
 

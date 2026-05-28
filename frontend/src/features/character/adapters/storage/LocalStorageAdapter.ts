@@ -1,5 +1,6 @@
 import type { Chat, Character } from "@arisutalk/character-spec/v0/Character";
-import { Settings, SettingsSchema } from "@/lib/types/IDataModel";
+import { type Settings, SettingsSchema } from "@/lib/types/IDataModel";
+import { Logger } from "@common/logger/Logger";
 
 export class LocalStorageAdapter {
     private readonly KEYS = {
@@ -10,7 +11,7 @@ export class LocalStorageAdapter {
 
     async init(): Promise<void> {
         if (!import.meta.env.DEV)
-            console.warn("LocalStorageAdapter is intended for development/testing purposes only.");
+            Logger.warn("LocalStorageAdapter is intended for development/testing purposes only.");
         // LocalStorage is synchronous and always ready in browser environment
         return Promise.resolve();
     }
@@ -27,7 +28,7 @@ export class LocalStorageAdapter {
         const item = localStorage.getItem(key);
         if (!item) return [];
         try {
-            const parsed = JSON.parse(item) as unknown;
+            const parsed: unknown = JSON.parse(item);
             if (!Array.isArray(parsed)) return [];
             return parsed.filter((entry): entry is T => this.hasId(entry));
         } catch {
@@ -129,7 +130,7 @@ export class LocalStorageAdapter {
         try {
             const buffer = await new Response(stream).arrayBuffer();
             const json = new TextDecoder().decode(buffer);
-            const parsed = JSON.parse(json) as unknown;
+            const parsed: unknown = JSON.parse(json);
             if (!this.isRecord(parsed)) {
                 throw new Error("Invalid data format");
             }
@@ -152,8 +153,8 @@ export class LocalStorageAdapter {
                 if (result.success) await this.saveSettings(result.data);
             }
         } catch (e) {
-            console.error("Failed to import data", e);
-            throw new Error("Invalid data format");
+            Logger.error("Failed to import data", e);
+            throw new Error("Invalid data format", { cause: e });
         }
     }
 }

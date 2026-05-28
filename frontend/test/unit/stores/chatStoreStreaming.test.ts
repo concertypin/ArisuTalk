@@ -1,8 +1,10 @@
 // @vitest-environment happy-dom
-import { test, expect, describe, vi, afterEach } from "vitest";
+import { test, expect, describe, vi, afterEach, assert } from "vitest";
 import { chatStore } from "@/features/chat/stores/chatStore.svelte";
 import { MessageSchema } from "@arisutalk/character-spec/v0/Character/Message";
 import { apply } from "@arisutalk/character-spec/utils";
+import { Logger } from "@common/logger/Logger";
+import type { ChatProvider, ProviderType } from "@/lib/interfaces";
 
 // Mock settings to avoid 5s timeout in chatStore.initialize()
 vi.mock("@/lib/stores/settings.svelte", () => ({
@@ -57,12 +59,8 @@ describe("ChatStore Streaming", () => {
         const content = assistantMsg?.content;
         expect(content).toBeDefined();
 
-        if (typeof content === "object" && "data" in content) {
-            expect(content.data).toBe("Streamed Response");
-        } else {
-            // Should not happen given we fixed the type
-            expect(content).toBe("Streamed Response");
-        }
+        assert(content !== undefined);
+        expect(content.data).toBe("Streamed Response");
     }, 15000);
 
     test("abortGeneration stops stream", async () => {
@@ -157,12 +155,13 @@ describe("ChatStore Streaming", () => {
         if (!chatStore["activeProvider"]) {
             throw new Error("Active provider is not set");
         }
-        chatStore["activeProvider"] = {
+        const mockChatProvider: ChatProvider<ProviderType> = {
+            // oxlint-disable-next-line typescript/no-misused-spread
             ...chatStore["activeProvider"],
 
-            stream: async function* () {
+            async *stream() {
                 // Dummy yield to satisfy generator requirement
-                // eslint-disable-next-line no-constant-condition
+                // oxlint-disable-next-line no-constant-condition
                 if (false) yield "";
                 throw new Error("Simulated failure");
             },
@@ -176,15 +175,16 @@ describe("ChatStore Streaming", () => {
             isReady() {
                 throw new Error("Function not implemented.");
             },
-        } satisfies (typeof chatStore)["activeProvider"];
+        };
+        chatStore["activeProvider"] = mockChatProvider;
 
         const chatId = await chatStore.createChat("test-fail", "Test Fail");
-        //Suppress console.error
-        vi.spyOn(console, "error").mockImplementationOnce((i) => {
+        //Suppress Logger.error
+        vi.spyOn(Logger, "error").mockImplementationOnce((i) => {
             if (typeof i === "string") {
                 if (i.includes("Simulated failure")) return;
             }
-            console.error(i);
+            Logger.error(i);
         });
         await chatStore.setActiveChat(chatId);
 

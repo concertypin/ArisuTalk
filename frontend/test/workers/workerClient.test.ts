@@ -26,15 +26,16 @@ vi.mock("comlink", () => {
     return {
         wrap: vi.fn(() => mockApi),
         expose: vi.fn(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return
+
+        // oxlint-disable-next-line typescript/no-explicit-any typescript/no-unsafe-return
         proxy: (x: any) => x,
     };
 });
 
 describe("Worker Client", () => {
-    it.concurrent("should call setLogReceiver on worker creation", async () => {
+    it.concurrent("should not call setLogReceiver on example worker creation", async () => {
         await getExampleWorker();
-        expect(mockApi.setLogReceiver).toHaveBeenCalled();
+        expect(mockApi.setLogReceiver).not.toHaveBeenCalled();
     });
 
     it.concurrent("should create a worker instance", async () => {

@@ -95,7 +95,7 @@ async function execute<ResultType = unknown>(
 
         // Await is intended(due to improper d.ts.
         // console.log(defFunc.context()) shows `Promise { <pending> }`)
-        // eslint-disable-next-line @typescript-eslint/await-thenable
+        // oxlint-disable-next-line typescript/await-thenable
         const ctx = await defFunc.context({
             global: {
                 console: createConsole(logs),
@@ -129,9 +129,10 @@ async function execute<ResultType = unknown>(
             let modifiedContext: ScriptContext | undefined = undefined;
             if (options?.context) {
                 const extractCtx = await ctx.def(`return global.context;`);
-                const extractedValue = (await extractCtx()) as unknown;
-                if (extractedValue && typeof extractedValue === "object") {
-                    modifiedContext = extractedValue as ScriptContext;
+                // oxlint-disable-next-line typescript/no-unsafe-assignment -- the sandbox API is untyped at the boundary.
+                const extractedValue = await extractCtx();
+                if (isScriptContext(extractedValue)) {
+                    modifiedContext = extractedValue;
                 }
             }
 
@@ -161,3 +162,12 @@ export const api: ScriptingWorkerApi = {
 };
 
 Comlink.expose(api);
+
+function isScriptContext(value: unknown): value is ScriptContext {
+    return (
+        typeof value === "object" &&
+        value !== null &&
+        "message" in value &&
+        "persona" in value
+    );
+}

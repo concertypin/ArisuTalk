@@ -15,10 +15,11 @@
 		],
 		"types": [
 			"vite/client",
-			"svelte/compiler",
+			"svelte",
 		],
 		/* Type Checking */
-		"noImplicitAny": true /* Enable error reporting for expressions and declarations with an implied 'any' type. */
+		"noImplicitAny": true, /* Enable error reporting for expressions and declarations with an implied 'any' type. */
+		"declarationDir": "./dist-ts/app"
 	},
 	"extends": "./tsconfig.base.json",
 	"references": [
@@ -28,5 +29,13 @@
 		{
 			"path": "./tsconfig.common.json"
 		}
+	],
+	"exclude": [
+		"coverage",
+		"dist-ts/",
+		"dist/",
+		"test/**/*.test.ts",
+		"test/*.test.ts",
+		"test/**/*.svelte",
 	]
 }

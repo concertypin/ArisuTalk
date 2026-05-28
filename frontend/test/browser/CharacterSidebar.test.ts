@@ -16,7 +16,7 @@ vi.mock("@/lib/stores/ui.svelte", () => ({
 describe("CharacterSidebar Component", () => {
     let mockCharacters: Character[];
 
-    let mockOnSelect: (id: string) => void;
+    let mockOnSelect: (id: string | null) => void;
     let mockOnAdd: () => void;
     let mockOnPersona: () => void;
 
