@@ -9,7 +9,7 @@
     import { Logger } from "@common/logger/Logger";
     import { IfNotExistBehavior } from "@/lib/interfaces";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import { merge } from "lodash-es";
+    import { withCharacter } from "@/lib/utils/characterState";
 
     type Props = {
         character: Character;
@@ -74,7 +74,11 @@
     });
 
     function updateField<const K extends keyof Character>(field: K, value: Character[K]) {
-        onChange(merge({}, character, { [field]: value }));
+        onChange(
+            withCharacter(character, (draft) => {
+                draft[field] = value;
+            })
+        );
     }
 </script>
 

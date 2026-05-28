@@ -10,7 +10,7 @@
     import CaretDownIcon from "phosphor-svelte/lib/CaretDownIcon";
     import CaretUpIcon from "phosphor-svelte/lib/CaretUpIcon";
     import WarningIcon from "phosphor-svelte/lib/WarningIcon";
-    import { merge, cloneDeep } from "lodash-es";
+    import { withCharacter, appendArrayItem } from "@/lib/utils/characterState";
 
     type ReplaceHook = Character["executables"]["replaceHooks"];
     type HookType = keyof ReplaceHook;
@@ -41,9 +41,11 @@
         field: K,
         value: Character["executables"]["runtimeSetting"][K]
     ) {
-        const newChar = cloneDeep(character);
-        newChar.executables.runtimeSetting[field] = value;
-        onChange(newChar);
+        onChange(
+            withCharacter(character, (draft) => {
+                draft.executables.runtimeSetting[field] = value;
+            })
+        );
     }
 
     function getHooks(type: HookType): HookEntity[] {
@@ -62,24 +64,31 @@
                 priority: 0,
             },
         };
-        const newChar = cloneDeep(character);
-        newChar.executables.replaceHooks[type].push(newHook);
-        onChange(newChar);
-        expandedHookIndex = character.executables.replaceHooks[type].length;
+        onChange(
+            withCharacter(character, (draft) => {
+                appendArrayItem(draft.executables.replaceHooks[type], newHook);
+                expandedHookIndex = draft.executables.replaceHooks[type].length - 1;
+            })
+        );
     }
 
-    function updateHook(type: HookType, index: number, updates: Partial<HookEntity>) {
-        const newChar = cloneDeep(character);
-        const hook = newChar.executables.replaceHooks[type][index];
-        newChar.executables.replaceHooks[type][index] = merge(hook, updates);
-        onChange(newChar);
+    function updateHook(type: HookType, index: number, newHook: HookEntity) {
+        onChange(
+            withCharacter(character, (draft) => {
+                draft.executables.replaceHooks[type][index] = newHook;
+            })
+        );
     }
 
     function deleteHook(type: HookType, index: number) {
-        const newChar = cloneDeep(character);
-        newChar.executables.replaceHooks[type].splice(index, 1);
-        onChange(newChar);
-        expandedHookIndex = null;
+        onChange(
+            withCharacter(character, (draft) => {
+                draft.executables.replaceHooks[type].splice(index, 1);
+            })
+        );
+        if (expandedHookIndex === index) {
+            expandedHookIndex = null;
+        }
     }
 
     function toggleExpand(index: number) {
@@ -291,9 +300,11 @@
                                             checked={hook.meta.caseSensitive}
                                             onchange={(e) =>
                                                 updateHook(activeHookType, index, {
-                                                    meta: merge({}, hook.meta, {
+                                                    ...hook,
+                                                    meta: {
+                                                        ...hook.meta,
                                                         caseSensitive: e.currentTarget.checked,
-                                                    }),
+                                                    },
                                                 })}
                                         />
                                         <span class="label-text text-sm">Case Sensitive</span>

@@ -4,7 +4,7 @@
      * Metadata fields: author, license (with autocomplete), version, distribution URL.
      */
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import { merge } from "lodash-es";
+    import { withCharacter } from "@/lib/utils/characterState";
 
     type Props = {
         character: Character;
@@ -29,8 +29,8 @@
         value: NonNullable<Character["metadata"]>[K]
     ) {
         onChange(
-            merge({}, character, {
-                metadata: { [field]: value },
+            withCharacter(character, (draft) => {
+                draft.metadata[field] = value;
             })
         );
     }

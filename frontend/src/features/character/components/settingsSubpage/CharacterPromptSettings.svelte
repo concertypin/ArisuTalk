@@ -7,7 +7,7 @@
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import CornersOutIcon from "phosphor-svelte/lib/CornersOutIcon";
     import CornersInIcon from "phosphor-svelte/lib/CornersInIcon";
-    import { merge } from "lodash-es";
+    import { withCharacter } from "@/lib/utils/characterState";
 
     type Props = {
         character: Character;
@@ -24,8 +24,8 @@
         value: Character["prompt"][K]
     ) {
         onChange(
-            merge({}, character, {
-                prompt: { [field]: value },
+            withCharacter(character, (draft) => {
+                draft.prompt[field] = value;
             })
         );
     }

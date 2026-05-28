@@ -9,7 +9,12 @@
     import TrashIcon from "phosphor-svelte/lib/TrashIcon";
     import CaretDownIcon from "phosphor-svelte/lib/CaretDownIcon";
     import CaretUpIcon from "phosphor-svelte/lib/CaretUpIcon";
-    import { merge } from "lodash-es";
+    import {
+        withCharacter,
+        updateArrayItem,
+        removeArrayItem,
+        appendArrayItem,
+    } from "@/lib/utils/characterState";
 
     type LorebookEntry = Character["prompt"]["lorebook"]["data"][number];
     type ConditionType = LorebookEntry["condition"][number]["type"];
@@ -25,12 +30,8 @@
 
     function updateTokenLimit(limit: number) {
         onChange(
-            merge({}, character, {
-                prompt: {
-                    lorebook: {
-                        config: { tokenLimit: limit },
-                    },
-                },
+            withCharacter(character, (draft) => {
+                draft.prompt.lorebook.config.tokenLimit = limit;
             })
         );
     }
@@ -46,37 +47,29 @@
             priority: 0,
         };
         onChange(
-            merge({}, character, {
-                prompt: {
-                    lorebook: {
-                        data: [...character.prompt.lorebook.data, newEntry],
-                    },
-                },
+            withCharacter(character, (draft) => {
+                draft.prompt.lorebook.data = appendArrayItem(draft.prompt.lorebook.data, newEntry);
             })
         );
         expandedEntryId = newEntry.id;
     }
 
     function updateEntry(entryId: string, updates: Partial<LorebookEntry>) {
-        const data = character.prompt.lorebook.data.map((e) =>
-            e.id === entryId ? merge({}, e, updates) : e
-        );
         onChange(
-            merge({}, character, {
-                prompt: {
-                    lorebook: { data },
-                },
+            withCharacter(character, (draft) => {
+                draft.prompt.lorebook.data = updateArrayItem(
+                    draft.prompt.lorebook.data,
+                    entryId,
+                    updates
+                );
             })
         );
     }
 
     function deleteEntry(entryId: string) {
-        const data = character.prompt.lorebook.data.filter((e) => e.id !== entryId);
         onChange(
-            merge({}, character, {
-                prompt: {
-                    lorebook: { data },
-                },
+            withCharacter(character, (draft) => {
+                draft.prompt.lorebook.data = removeArrayItem(draft.prompt.lorebook.data, entryId);
             })
         );
     }

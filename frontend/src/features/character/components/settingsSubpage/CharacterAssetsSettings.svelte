@@ -6,7 +6,12 @@
     import { SvelteMap } from "svelte/reactivity";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import type { AssetEntity } from "@arisutalk/character-spec/v0/Character/Assets";
-    import { merge } from "lodash-es";
+    import {
+        withCharacter,
+        replaceArrayItem,
+        moveArrayItem,
+        appendArrayItem,
+    } from "@/lib/utils/characterState";
     import UploadSimpleIcon from "phosphor-svelte/lib/UploadSimpleIcon";
     import TrashIcon from "phosphor-svelte/lib/TrashIcon";
     import CaretDownIcon from "phosphor-svelte/lib/CaretDownIcon";
@@ -32,6 +37,7 @@
 
     // Load asset preview URLs
     $effect(() => {
+        const createdUrls = new Set<string>();
         const loadPreviews = async () => {
             for (const asset of character.assets.assets) {
                 if (typeof asset.data === "string" && asset.data.startsWith("local:")) {
@@ -39,6 +45,7 @@
                         await assetStorage.init();
                         const url = await assetStorage.getAssetUrl(new URL(asset.data));
                         assetPreviews.set(asset.id, url);
+                        createdUrls.add(url);
                     } catch (e) {
                         Logger.error("Failed to load asset preview:", asset.id, e);
                     }
@@ -46,6 +53,11 @@
             }
         };
         void loadPreviews();
+        return () => {
+            for (const url of createdUrls) {
+                URL.revokeObjectURL(url);
+            }
+        };
     });
 
     let imageAssets = $derived(
@@ -83,10 +95,8 @@
             };
 
             onChange(
-                merge({}, character, {
-                    assets: {
-                        assets: [...character.assets.assets, newAsset],
-                    },
+                withCharacter(character, (draft) => {
+                    draft.assets.assets = appendArrayItem(draft.assets.assets, newAsset);
                 })
             );
 
@@ -102,12 +112,12 @@
 
     function updateAssetName(index: number, newName: string) {
         // No duplicate check needed as per new spec (v0.0.17)
-        const updatedAssets = [...character.assets.assets];
-        updatedAssets[index] = { ...updatedAssets[index], name: newName };
-
         onChange(
-            merge({}, character, {
-                assets: { assets: updatedAssets },
+            withCharacter(character, (draft) => {
+                draft.assets.assets = replaceArrayItem(draft.assets.assets, index, {
+                    ...draft.assets.assets[index],
+                    name: newName,
+                });
             })
         );
     }
@@ -122,10 +132,9 @@
             });
         }
 
-        const updatedAssets = character.assets.assets.filter((_, i) => i !== index);
         onChange(
-            merge({}, character, {
-                assets: { assets: updatedAssets },
+            withCharacter(character, (draft) => {
+                draft.assets.assets = draft.assets.assets.filter((_, i) => i !== index);
             })
         );
 
@@ -140,15 +149,15 @@
         e.preventDefault();
         if (draggedIndex === null || draggedIndex === targetIndex) return;
 
-        const updatedAssets = [...character.assets.assets];
-        const [draggedItem] = updatedAssets.splice(draggedIndex, 1);
-        updatedAssets.splice(targetIndex, 0, draggedItem);
-
         draggedIndex = targetIndex;
 
         onChange(
-            merge({}, character, {
-                assets: { assets: updatedAssets },
+            withCharacter(character, (draft) => {
+                draft.assets.assets = moveArrayItem(
+                    draft.assets.assets,
+                    draggedIndex!,
+                    targetIndex
+                );
             })
         );
     }
