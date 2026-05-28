@@ -1,3 +1,5 @@
 dist
+dist-ts
+.svelte-check
 node_modules
 **/__screenshots__
