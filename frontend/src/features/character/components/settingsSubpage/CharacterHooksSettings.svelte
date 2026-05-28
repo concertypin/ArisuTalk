@@ -211,6 +211,7 @@
                                     value={hook.input}
                                     oninput={(e) =>
                                         updateHook(activeHookType, index, {
+                                            ...hook,
                                             input: e.currentTarget.value,
                                         })}
                                     placeholder="Pattern to match..."
@@ -228,6 +229,7 @@
                                     value={hook.output}
                                     oninput={(e) =>
                                         updateHook(activeHookType, index, {
+                                            ...hook,
                                             output: e.currentTarget.value,
                                         })}
                                     placeholder="Replacement text..."
@@ -249,6 +251,7 @@
                                             if (newType === hook.meta.type) return;
                                             if (newType === "string") {
                                                 updateHook(activeHookType, index, {
+                                                    ...hook,
                                                     meta: {
                                                         ...hook.meta,
                                                         type: "string",
@@ -257,10 +260,15 @@
                                                 });
                                             } else {
                                                 updateHook(activeHookType, index, {
+                                                    ...hook,
                                                     meta: {
-                                                        ...hook.meta,
                                                         type: "regex",
                                                         flag: "g",
+                                                        isInputPatternScripted:
+                                                            hook.meta.isInputPatternScripted,
+                                                        isOutputScripted:
+                                                            hook.meta.isOutputScripted,
+                                                        priority: hook.meta.priority,
                                                     },
                                                 });
                                             }
@@ -282,6 +290,7 @@
                                         value={hook.meta.priority}
                                         oninput={(e) =>
                                             updateHook(activeHookType, index, {
+                                                ...hook,
                                                 meta: {
                                                     ...hook.meta,
                                                     priority: parseInt(e.currentTarget.value) || 0,
@@ -302,8 +311,13 @@
                                                 updateHook(activeHookType, index, {
                                                     ...hook,
                                                     meta: {
-                                                        ...hook.meta,
+                                                        type: "string" as const,
                                                         caseSensitive: e.currentTarget.checked,
+                                                        isInputPatternScripted:
+                                                            hook.meta.isInputPatternScripted,
+                                                        isOutputScripted:
+                                                            hook.meta.isOutputScripted,
+                                                        priority: hook.meta.priority,
                                                     },
                                                 })}
                                         />
@@ -317,6 +331,7 @@
                                         checked={hook.meta.isOutputScripted}
                                         onchange={(e) =>
                                             updateHook(activeHookType, index, {
+                                                ...hook,
                                                 meta: {
                                                     ...hook.meta,
                                                     isOutputScripted: e.currentTarget.checked,

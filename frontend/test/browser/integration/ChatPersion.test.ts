@@ -32,7 +32,10 @@ describe("Persona and Chat interactions", () => {
         interface ChatStoreWithWaitForSettings {
             waitForSettings: () => Promise<void>;
         }
-        vi.spyOn(chatStore as unknown as ChatStoreWithWaitForSettings, "waitForSettings").mockResolvedValue(undefined);
+        vi.spyOn(
+            chatStore as unknown as ChatStoreWithWaitForSettings,
+            "waitForSettings"
+        ).mockResolvedValue(undefined);
         await chatStore.initPromise;
         await chatStore.setProvider("MOCK", {
             mockDelay: 50,
