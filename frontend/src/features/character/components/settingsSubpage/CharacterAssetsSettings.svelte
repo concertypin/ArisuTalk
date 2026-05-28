@@ -3,7 +3,7 @@
      * @component CharacterAssetsSettings
      * Asset management: upload, preview, naming, delete, and reorder.
      */
-    import { SvelteMap } from "svelte/reactivity";
+    import { SvelteMap, SvelteSet } from "svelte/reactivity";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import type { AssetEntity } from "@arisutalk/character-spec/v0/Character/Assets";
     import {
@@ -37,7 +37,7 @@
 
     // Load asset preview URLs
     $effect(() => {
-        const createdUrls = new Set<string>();
+        const createdUrls = new SvelteSet<string>();
         const loadPreviews = async () => {
             for (const asset of character.assets.assets) {
                 if (typeof asset.data === "string" && asset.data.startsWith("local:")) {

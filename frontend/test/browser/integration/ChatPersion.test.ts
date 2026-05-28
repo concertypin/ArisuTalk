@@ -28,8 +28,11 @@ describe("Persona and Chat interactions", () => {
 
         const { chatStore } = await import("@/features/chat/stores/chatStore.svelte");
 
-        // Cast chatStore to access all private members
-        vi.spyOn(chatStore as any, "waitForSettings").mockResolvedValue(undefined);
+        // Spy on waitForSettings to avoid delays during testing
+        interface ChatStoreWithWaitForSettings {
+            waitForSettings: () => Promise<void>;
+        }
+        vi.spyOn(chatStore as unknown as ChatStoreWithWaitForSettings, "waitForSettings").mockResolvedValue(undefined);
         await chatStore.initPromise;
         await chatStore.setProvider("MOCK", {
             mockDelay: 50,

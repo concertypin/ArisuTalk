@@ -200,7 +200,8 @@ function stringifyResult(value: unknown): string {
     try {
         return JSON.stringify(value) ?? "";
     } catch {
-        return String(value);
+        // Fallback for non-serializable values (e.g., functions, circular refs)
+        return value === null ? "null" : typeof value;
     }
 }
 

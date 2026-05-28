@@ -1,4 +1,4 @@
-/// <reference types="vitest/config"/>
+import "vitest/config";
 import { type UserConfig } from "vite";
 import { playwright } from "@vitest/browser-playwright";
 import type { TestProjectInlineConfiguration as TestProject } from "vitest/config";

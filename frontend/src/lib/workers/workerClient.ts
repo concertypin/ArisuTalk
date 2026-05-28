@@ -28,7 +28,7 @@ function createWorkerApi<T>(worker: Worker): WorkerApi<T> {
     const api = Comlink.wrap<T>(worker);
     let isDisabled = false;
 
-    return new Proxy<Comlink.Remote<T>>(api, {
+    const handler: ProxyHandler<Comlink.Remote<T>> = {
         get: (target, prop) => {
             if (prop === "terminate") {
                 return function () {
@@ -42,7 +42,11 @@ function createWorkerApi<T>(worker: Worker): WorkerApi<T> {
             if (typeof prop === "symbol") return Reflect.get(target, prop);
             return Reflect.get(target, prop);
         },
-    }) as WorkerApi<T>;
+    };
+
+    // Proxy's inferred return type (Comlink.Remote<T>) doesn't include terminate/disabled
+    // oxlint-disable-next-line typescript-eslint/consistent-type-assertions
+    return new Proxy(api, handler) as WorkerApi<T>;
 }
 
 // Used example's one, but actually all worker import have the same type.
