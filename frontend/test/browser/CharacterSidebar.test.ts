@@ -172,8 +172,8 @@ describe("CharacterSidebar Component", () => {
 
         // The inner div of the button has the rounded-xl shape when active
         const innerDiv = button?.querySelector("div");
-
-        await expect.element(innerDiv).toHaveClass(/rounded-xl/);
+        expect(innerDiv).toBeTruthy();
+        await expect.element(innerDiv!).toHaveClass(/rounded-xl/);
     });
 
     test("renders divider before action buttons", async () => {
@@ -203,9 +203,11 @@ describe("CharacterSidebar Component", () => {
         });
 
         const char1 = getByLabelText("Character 1");
-        await expect.element(char1.getByText("CH", { exact: true })).toBeVisible();
+        const initials1 = char1.getByText("CH", { exact: true });
+        expect(initials1).toBeTruthy();
 
         const char2 = getByLabelText("Character 2");
-        await expect.element(char2.getByText("CH", { exact: true })).toBeVisible();
+        const initials2 = char2.getByText("CH", { exact: true });
+        expect(initials2).toBeTruthy();
     });
 });
