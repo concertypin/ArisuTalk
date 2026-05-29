@@ -9,7 +9,7 @@
         source: string;
     };
     import { Logger } from "@common/logger/Logger";
-    let { source }: Props = $props();
+    const { source }: Props = $props();
 
     const svelteMarkdownPromise = import("@humanspeak/svelte-markdown").catch((err) => {
         Logger.error("Failed to load markdown renderer:", err);

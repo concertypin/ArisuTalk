@@ -25,7 +25,7 @@
     import CharacterAssetsSettings from "./settingsSubpage/CharacterAssetsSettings.svelte";
     import { cloneDeep } from "lodash-es";
 
-    let dialog = $state<HTMLDialogElement>();
+    const dialog = $state<HTMLDialogElement>();
     type ActiveTab = "basic" | "prompt" | "lorebook" | "assets" | "metadata" | "advanced";
     let activeTab = $state<ActiveTab>("basic");
 
@@ -34,6 +34,16 @@
 
     /** Debounce timer for autosave */
     let saveTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    // Clear debounce timer on component unmount
+    $effect(() => {
+        return () => {
+            if (saveTimeout) {
+                clearTimeout(saveTimeout);
+                saveTimeout = null;
+            }
+        };
+    });
 
     // Effect to open modal when state is set AND dialog is bound
     $effect(() => {

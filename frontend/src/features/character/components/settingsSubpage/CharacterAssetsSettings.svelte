@@ -25,13 +25,13 @@
         onChange: (character: Character) => void;
     };
 
-    let { character, onChange }: Props = $props();
+    const { character, onChange }: Props = $props();
 
-    let fileInput = $state<HTMLInputElement>();
+    const fileInput = $state<HTMLInputElement>();
     let expandOtherAssets = $state(false);
     let duplicateNameError = $state<string | null>(null);
     let draggedIndex = $state<number | null>(null);
-    let assetPreviews = new SvelteMap<string, string>();
+    const assetPreviews = new SvelteMap<string, string>();
 
     const assetStorage = getAssetStorage();
 
@@ -60,10 +60,10 @@
         };
     });
 
-    let imageAssets = $derived(
+    const imageAssets = $derived(
         character.assets.assets.filter((a) => a.mimeType.startsWith("image/"))
     );
-    let otherAssets = $derived(
+    const otherAssets = $derived(
         character.assets.assets.filter((a) => !a.mimeType.startsWith("image/"))
     );
 

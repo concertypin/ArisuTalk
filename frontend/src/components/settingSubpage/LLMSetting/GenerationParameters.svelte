@@ -11,7 +11,7 @@
         id: number;
     };
 
-    let { config = $bindable(), id }: Props = $props();
+    const { config = $bindable(), id }: Props = $props();
 
     type OptionalTextFieldKey = "apiKey" | "baseURL" | "model";
 
@@ -77,46 +77,46 @@
         settings.value.activeLLMConfigId = config.id;
     }
 
-    let isActive = $derived(settings.value.activeLLMConfigId === config.id);
+    const isActive = $derived(settings.value.activeLLMConfigId === config.id);
 
-    let modelProxy = $derived(createOptionalTextFieldProxy(config, "model"));
-    let keyProxy = $derived(createOptionalTextFieldProxy(config, "apiKey"));
-    let urlProxy = $derived(createOptionalTextFieldProxy(config, "baseURL"));
-    let tempProxy = $derived(
+    const modelProxy = $derived(createOptionalTextFieldProxy(config, "model"));
+    const keyProxy = $derived(createOptionalTextFieldProxy(config, "apiKey"));
+    const urlProxy = $derived(createOptionalTextFieldProxy(config, "baseURL"));
+    const tempProxy = $derived(
         createFieldProxy(
             config.generationParameters,
             "temperature",
             GENERATION_DEFAULTS.temperature
         )
     );
-    let maxInProxy = $derived(
+    const maxInProxy = $derived(
         createFieldProxy(
             config.generationParameters,
             "maxInputTokens",
             GENERATION_DEFAULTS.maxInputTokens
         )
     );
-    let maxOutProxy = $derived(
+    const maxOutProxy = $derived(
         createFieldProxy(
             config.generationParameters,
             "maxOutputTokens",
             GENERATION_DEFAULTS.maxOutputTokens
         )
     );
-    let topPProxy = $derived(
+    const topPProxy = $derived(
         createFieldProxy(config.generationParameters, "topP", GENERATION_DEFAULTS.topP)
     );
-    let topKProxy = $derived(
+    const topKProxy = $derived(
         createFieldProxy(config.generationParameters, "topK", GENERATION_DEFAULTS.topK)
     );
-    let freqPenProxy = $derived(
+    const freqPenProxy = $derived(
         createFieldProxy(
             config.generationParameters,
             "frequencyPenalty",
             GENERATION_DEFAULTS.frequencyPenalty
         )
     );
-    let presPenProxy = $derived(
+    const presPenProxy = $derived(
         createFieldProxy(
             config.generationParameters,
             "presencePenalty",

@@ -16,20 +16,20 @@
         onChange: (character: Character) => void;
     };
 
-    let { character, onChange }: Props = $props();
+    const { character, onChange }: Props = $props();
 
     const assetStorage = getAssetStorage();
-    let assetPreviews = new SvelteMap<string, string>();
-    let showManualUrl = $state(false);
+    const assetPreviews = new SvelteMap<string, string>();
+    const showManualUrl = $state(false);
 
-    let imageAssets = $derived(
+    const imageAssets = $derived(
         character.assets.assets.filter((a) => a.mimeType.startsWith("image/"))
     );
 
     // Load image previews
     $effect(() => {
         let revoked = false;
-        let blobUrls = new SvelteSet<string | Uint8Array<ArrayBuffer>>();
+        const blobUrls = new SvelteSet<string | Uint8Array<ArrayBuffer>>();
 
         const loadPreviews = async () => {
             await assetStorage.init();
@@ -65,7 +65,7 @@
         };
     });
 
-    let avatarPreviewSrc = $derived.by(() => {
+    const avatarPreviewSrc = $derived.by(() => {
         if (!character.avatarUrl) return "";
         if (!character.avatarUrl.startsWith("local:")) return character.avatarUrl;
 

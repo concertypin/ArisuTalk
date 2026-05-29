@@ -12,14 +12,14 @@
         onEdit: (persona: Persona) => void;
     };
 
-    let { onEdit }: Props = $props();
+    const { onEdit }: Props = $props();
 
     function handleDelete(id: string) {
         if (confirm("Delete this persona?")) {
             personaStore.remove(id);
         }
     }
-    let personas = $derived(personaStore.personas);
+    const personas = $derived(personaStore.personas);
     $effect(() => {
         // Auto-select first persona if none selected
         if (!personaStore.activePersonaId && personaStore.personas.length > 0) {

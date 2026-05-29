@@ -10,7 +10,7 @@
         label: string;
     }
 
-    let { variant, size, disabled, type, onclick, label }: Props = $props();
+    const { variant, size, disabled, type, onclick, label }: Props = $props();
 </script>
 
 <Button {variant} {size} {disabled} {type} {onclick}>

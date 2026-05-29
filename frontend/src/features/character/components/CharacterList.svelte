@@ -15,7 +15,7 @@
         onEdit: (index: number) => void;
     };
 
-    let { onEdit }: Props = $props();
+    const { onEdit }: Props = $props();
     const worker = getCardParseWorker();
 
     function getDeleteConfirmModal(): HTMLDialogElement | null {

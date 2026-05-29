@@ -38,7 +38,7 @@
         onCancelEdit,
     }: Props = $props();
 
-    let isAssistant = $derived(message.role === "assistant");
+    const isAssistant = $derived(message.role === "assistant");
 
     // Delete confirmation state
     let isConfirmingDelete = $state(false);
