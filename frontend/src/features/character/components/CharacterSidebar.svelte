@@ -59,7 +59,7 @@
 </script>
 
 <div
-    class="flex flex-col items-center w-18 bg-base-300 py-3 overflow-y-auto overflow-x-hidden h-full scrollbar-none"
+    class="flex flex-col items-center w-[72px] bg-base-300 py-3 overflow-y-auto overflow-x-hidden h-full scrollbar-none"
 >
     <!-- Home Button -->
     <div class="mb-2 tooltip tooltip-right z-50" data-tip="Home">

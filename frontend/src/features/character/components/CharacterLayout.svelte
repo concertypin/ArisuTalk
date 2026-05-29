@@ -153,7 +153,7 @@
     <!-- Persona Modal -->
     <dialog bind:this={personaDialog} id="persona_modal" class="modal">
         <div
-            class="modal-box w-11/12 max-w-2xl min-h-125 flex flex-col border border-base-300 shadow-2xl"
+            class="modal-box w-11/12 max-w-2xl min-h-[500px] flex flex-col border border-base-300 shadow-2xl"
         >
             <h3 class="font-bold text-lg mb-4">Manage Personas</h3>
 

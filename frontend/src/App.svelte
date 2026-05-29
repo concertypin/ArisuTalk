@@ -80,7 +80,7 @@
             <div
                 class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 text-error backdrop-blur-sm"
             >
-                <div class="bg-100 p-8 rounded-xl shadow-xl border border-error/20">
+                <div class="bg-base-100 p-8 rounded-xl shadow-xl border border-error/20">
                     <h3 class="font-bold text-lg mb-2">Error Loading Settings</h3>
                     <p>{String(error)}</p>
                     <button
