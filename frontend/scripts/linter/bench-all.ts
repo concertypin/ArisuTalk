@@ -78,11 +78,11 @@ function runBenchCommand(command: string): number {
         });
         const end = performance.now();
         if (res.error) throw new Error(`Failed to start command: ${res.error.message}`);
+        if (res.signal !== null) {
+            throw new Error(`Command was killed by signal ${res.signal}: ${command}`);
+        }
         if (res.status !== null && res.status !== 0) {
-            const signalInfo = res.signal ? ` (signal: ${res.signal})` : "";
-            throw new Error(
-                `Command exited with code ${res.status}${signalInfo}: ${command}`
-            );
+            throw new Error(`Command exited with code ${res.status}: ${command}`);
         }
         return (end - start) / 1000;
     } catch (err) {
