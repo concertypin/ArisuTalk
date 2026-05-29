@@ -53,8 +53,13 @@ function touchHalfOfSvelteFiles(targetDir: string[] = ["src", "test"]): void {
     }
 
     // 2. Randomly select half of the files
-    const shuffled = allFiles.sort(() => Math.random() - 0.5);
-    const halfCount = Math.ceil(allFiles.length / 2);
+    // Fisher-Yates shuffle for uniform distribution
+    const shuffled = [...allFiles];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    const halfCount = Math.ceil(shuffled.length / 2);
     const targetFiles = shuffled.slice(0, halfCount);
 
     const now = new Date();
@@ -73,6 +78,12 @@ function runBenchCommand(command: string): number {
         });
         const end = performance.now();
         if (res.error) throw new Error(`Failed to start command: ${res.error.message}`);
+        if (res.status !== null && res.status !== 0) {
+            const signalInfo = res.signal ? ` (signal: ${res.signal})` : "";
+            throw new Error(
+                `Command exited with code ${res.status}${signalInfo}: ${command}`
+            );
+        }
         return (end - start) / 1000;
     } catch (err) {
         if (err instanceof Error)
