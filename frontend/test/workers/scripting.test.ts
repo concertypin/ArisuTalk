@@ -78,7 +78,9 @@ describe("Scripting Worker Logic", () => {
 
         it("should support storage.removeItem and storage.clear", async () => {
             const charId = "cleanup-char";
-            await api.execute('storage.setItem("k1", "v1"); storage.setItem("k2", "v2")', { characterId: charId });
+            await api.execute('storage.setItem("k1", "v1"); storage.setItem("k2", "v2")', {
+                characterId: charId,
+            });
 
             // Verify removal
             await api.execute('storage.removeItem("k1")', { characterId: charId });
@@ -86,19 +88,21 @@ describe("Scripting Worker Logic", () => {
             expect(afterRemove.result ?? null).toBeNull();
 
             // Verify clear
-            await api.execute('storage.clear()', { characterId: charId });
+            await api.execute("storage.clear()", { characterId: charId });
             const afterClear = await api.execute('storage.getItem("k2")', { characterId: charId });
             expect(afterClear.result ?? null).toBeNull();
         });
 
         it("should support storage.length and storage.key", async () => {
             const charId = "enum-char";
-            await api.execute('storage.setItem("a", "1"); storage.setItem("b", "2")', { characterId: charId });
+            await api.execute('storage.setItem("a", "1"); storage.setItem("b", "2")', {
+                characterId: charId,
+            });
 
-            const lenResult = await api.execute('storage.length', { characterId: charId });
+            const lenResult = await api.execute("storage.length", { characterId: charId });
             expect(lenResult.result).toBe(2);
 
-            const keyResult = await api.execute('storage.key(0)', { characterId: charId });
+            const keyResult = await api.execute("storage.key(0)", { characterId: charId });
             expect(typeof keyResult.result).toBe("string");
         });
 
