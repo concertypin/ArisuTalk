@@ -9,7 +9,21 @@ Ongoing remake of the application for modularity and performance.
 ## Structure & Guides
 - Frontend: Svelte 5 + Vite + Dexie. [Frontend Guide](./frontend/AGENTS.md)
 - Backend: WASI + Cloudflare. [Backend Guide](./backend/AGENTS.md)
-- Rules: [TypeScript/Svelte Conventions](./docs/rule/README.md)
+- Rules: [Project Conventions](./docs/rule/README.md)
+
+## Quick Start
+
+```bash
+pnpm install
+pnpm run -F frontend dev  # Frontend dev server at localhost:5173
+pnpm run -F backend dev   # Backend dev server
+```
+
+## Git Workflow
+
+- **Branch naming**: `kei-dev/<feature-name>` (e.g., `kei-dev/oxlint`)
+- **Target branch**: PRs should target `kei` (the development branch for Project Kei)
+- **Production**: `main` branch is for production releases
 
 ## Core Rules
 1. Svelte 5: Use Runes (`$state`, `$derived`). No Svelte 4 syntax.

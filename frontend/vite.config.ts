@@ -1,30 +1,11 @@
 /// <reference types="vitest/config" />
 import { svelte } from "@sveltejs/vite-plugin-svelte";
-import { type PluginOption, UserConfig, defineConfig, loadEnv } from "vite";
-import { playwright } from "@vitest/browser-playwright";
+import { type PluginOption, type UserConfig, defineConfig } from "vite";
+import { testConfig } from "./scripts/testConfig";
 import path from "path";
 
 type Presence<T> = T extends undefined ? never : T;
 
-type TestConfig = Presence<UserConfig["test"]>;
-
-const browserTestConfig: TestConfig["browser"] = {
-    enabled: true,
-    provider: playwright(),
-    instances: [
-        {
-            browser: "chromium",
-            testTimeout: 15 * 1000,
-        },
-    ],
-    headless: true,
-};
-
-const runBrowserTest =
-    process.env.npm_lifecycle_event?.includes("browser") ||
-    process.env.npm_lifecycle_event?.includes("coverage")
-        ? true
-        : false;
 const paths: Presence<UserConfig["resolve"]>["alias"] = {
     "@": path.resolve(__dirname, "src"),
     "@worker": path.resolve(__dirname, "worker"),
@@ -32,14 +13,6 @@ const paths: Presence<UserConfig["resolve"]>["alias"] = {
     "@common": path.resolve(__dirname, "common"),
 };
 
-let coverage: TestConfig["coverage"] & { provider: "v8" } = {
-    provider: "v8",
-    reporter: ["html", "text"],
-    reportsDirectory: "./coverage",
-    include: ["src/**/*"],
-    reportOnFailure: true,
-    exclude: ["node_modules/", "dist/", "test/", "**/*.d.ts", "**/*.config.*", "static/"],
-};
 export default defineConfig(async (ctx) => {
     const mode = ctx.mode;
     const plugin: PluginOption[] = [
@@ -49,42 +22,29 @@ export default defineConfig(async (ctx) => {
             },
         }),
     ];
-    const env = loadEnv(mode, process.cwd(), "");
-
-    let testConfig: TestConfig = {
-        globals: true,
-        environment: "node",
-        silent: "passed-only",
-        setupFiles: ["./test/setup.ts"],
-        exclude: ["node_modules", "dist", ".git"],
-        browser: runBrowserTest ? browserTestConfig : undefined,
-        coverage,
-        includeTaskLocation: true,
-        env,
-        typecheck: {
-            enabled: true,
-        },
-
-        fileParallelism: true,
-    };
-
-    if (env.GITHUB_ACTIONS) {
-        testConfig.reporters = [
-            [
-                "github-actions",
-                {
-                    onWritePath(path) {
-                        return path.replace(/^\/app\//, `${env.GITHUB_WORKSPACE}/`);
-                    },
-                },
-            ],
-        ];
-    }
+    /*
+    // Requirements for vite's env
+    // oxlint-disable-next-line typescript/no-explicit-any
+    const env = loadEnv(mode, process.cwd(), "") as Record<string, any>;
+    */
 
     const define: Record<string, string> = {};
     const baseConfig: UserConfig = {
         optimizeDeps: {
-            include: ["cbor-x"],
+            include: [
+                "cbor-x",
+                // Pre-include these to prevent Vite from re-optimizing during tests
+                // which causes flaky test failures due to unexpected reloads
+                "@langchain/core/language_models/chat_models",
+                "@langchain/core/messages",
+                "@langchain/core/outputs",
+                "phosphor-svelte/lib/*",
+            ],
+            rolldownOptions: {
+                checks: {
+                    pluginTimings: false,
+                },
+            },
         },
         resolve: {
             alias: paths,
@@ -96,14 +56,23 @@ export default defineConfig(async (ctx) => {
                 if (absSourcePath.includes("@vite")) return true;
                 return false;
             },
+            headers: {
+                // COOP/COEP, for better Performance.now() resolution
+                "Cross-Origin-Embedder-Policy": "require-corp",
+                "Cross-Origin-Opener-Policy": "same-origin",
+            },
             open: "index.html",
             allowedHosts: process.env.npm_lifecycle_event?.includes("dev") ? true : undefined,
         },
-        define: define,
+        define,
         build: {
             outDir: "dist",
             sourcemap: true,
-            rollupOptions: {
+            rolldownOptions: {
+                checks: {
+                    circularDependency: true,
+                    pluginTimings: false,
+                },
                 output: {
                     sourcemapIgnoreList(relativeSourcePath) {
                         if (relativeSourcePath.includes("node_modules")) return true;
