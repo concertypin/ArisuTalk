@@ -165,7 +165,17 @@ jobs:
           pattern: blob-report-*
           merge-multiple: true
 
+      - name: Check for reports
+        id: check-reports
+        run: |
+          if compgen -G "frontend/.vitest-reports/*" > /dev/null 2>&1; then
+            echo "has-reports=true" >> $GITHUB_OUTPUT
+          else
+            echo "has-reports=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Merge reports
+        if: steps.check-reports.outputs.has-reports == 'true'
         run: pnpm -F frontend run test --merge-reports --reporter=github-actions --reporter=default --coverage.reporter=text --coverage.reporter=json-summary
 
       - name: Update Coverage Status
