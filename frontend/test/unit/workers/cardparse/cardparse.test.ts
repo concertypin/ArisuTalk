@@ -4,8 +4,13 @@ import { describe, it, expect, vi } from "vitest";
 import { parseCharacter } from "@worker/cardparse/parse";
 import { exportCharacter } from "@worker/cardparse/encode";
 import { iterableToStream, readAll, setLogger } from "@worker/cardparse/shared";
-import { decode } from "cbor-x";
+import type { createLogBridgeSender } from "@common/logger/LogBridge";
 import { CharacterSchema } from "@arisutalk/character-spec/v0/Character";
+
+// Helper to cast ReadableStream (from iterableToStream) to the typed version
+function asTypedStream(s: ReadableStream): ReadableStream<Uint8Array<ArrayBuffer>> {
+    return s as ReadableStream<Uint8Array<ArrayBuffer>>;
+}
 
 // Mock Comlink's transfer to return the value directly (no actual transfer in tests)
 vi.mock("comlink", async (importOriginal) => {
@@ -18,22 +23,24 @@ vi.mock("comlink", async (importOriginal) => {
 
 // Minimal valid character matching CharacterSchema
 // Note: tokenLimit must be >= 1 (positiveInteger in schema), timeout must be >= 1
-function createTestCharacter(overrides: Record<string, unknown> = {}) {
-    return {
-        specVersion: 0,
+function createTestCharacter(
+    overrides: Record<string, unknown> = {}
+): import("@arisutalk/character-spec/v0/Character").Character {
+    return CharacterSchema.parse({
+        specVersion: 0 as const,
         id: crypto.randomUUID(),
         name: "Test Character",
         description: "A test character for cardparse tests",
         avatarUrl: "",
-        assets: { assets: [] },
+        assets: { assets: [] as never[] },
         prompt: {
             description: "",
             authorsNote: "",
-            lorebook: { config: { tokenLimit: 1 }, data: [] },
+            lorebook: { config: { tokenLimit: 1 }, data: [] as never[] },
         },
         executables: {
             runtimeSetting: { mem: undefined, timeout: 3 },
-            replaceHooks: { display: [], input: [], output: [], request: [] },
+            replaceHooks: { display: [] as never[], input: [] as never[], output: [] as never[], request: [] as never[] },
         },
         metadata: {
             author: undefined,
@@ -43,7 +50,7 @@ function createTestCharacter(overrides: Record<string, unknown> = {}) {
             additionalInfo: undefined,
         },
         ...overrides,
-    };
+    }) as import("@arisutalk/character-spec/v0/Character").Character;
 }
 
 describe("CardParse Worker — parseCharacter", () => {
@@ -58,9 +65,6 @@ describe("CardParse Worker — parseCharacter", () => {
         expect(exported.byteLength).toBeGreaterThan(0);
 
         const result = await parseCharacter(exported);
-        if (!result.success) {
-            console.log("Parse failed:", JSON.stringify(result));
-        }
         expect(result.success).toBe(true);
 
         if (result.success) {
@@ -128,7 +132,7 @@ describe("CardParse Worker — parseCharacter", () => {
     it("should throw on uncompressed CBOR data (missing deflate)", async () => {
         // Valid CBOR but not compressed — DecompressionStream will fail
         const { encode } = await import("cbor-x");
-        const cborData = encode(createTestCharacter({ name: "Uncompressed" }));
+        const cborData = new Uint8Array(encode(createTestCharacter({ name: "Uncompressed" })));
         await expect(parseCharacter(cborData.buffer)).rejects.toThrow();
     });
 
@@ -151,7 +155,7 @@ describe("CardParse Worker — parseCharacter", () => {
     it("should return failure for valid compressed CBOR that fails schema validation", async () => {
         // Create valid deflate-compressed CBOR with data that doesn't match CharacterSchema
         const { encode } = await import("cbor-x");
-        const invalidData = encode({ notACharacter: true, id: 12345 });
+        const invalidData = new Uint8Array(encode({ notACharacter: true, id: 12345 }));
         const compressed = new Blob([invalidData])
             .stream()
             .pipeThrough(new CompressionStream("deflate-raw"));
@@ -210,33 +214,33 @@ describe("CardParse Worker — shared utilities", () => {
                 new Uint8Array([7, 8, 9]),
             ];
             const stream = iterableToStream(chunks);
-            const result = await readAll(stream);
+            const result = await readAll(asTypedStream(stream));
             expect(result).toEqual(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9]));
         });
 
         it("should convert Blob iterable to ReadableStream", async () => {
             const blob = new Blob([new Uint8Array([10, 20, 30])]);
             const stream = iterableToStream([blob]);
-            const result = await readAll(stream);
+            const result = await readAll(asTypedStream(stream));
             expect(result).toEqual(new Uint8Array([10, 20, 30]));
         });
 
         it("should handle empty iterable", async () => {
             const stream = iterableToStream([]);
-            const result = await readAll(stream);
+            const result = await readAll(asTypedStream(stream));
             expect(result).toEqual(new Uint8Array([]));
         });
 
         it("should handle single empty Uint8Array", async () => {
             const stream = iterableToStream([new Uint8Array([])]);
-            const result = await readAll(stream);
+            const result = await readAll(asTypedStream(stream));
             expect(result).toEqual(new Uint8Array([]));
         });
     });
 
     describe("readAll", () => {
         it("should read entire stream into single Uint8Array", async () => {
-            const stream = new ReadableStream({
+            const stream = new ReadableStream<Uint8Array<ArrayBuffer>>({
                 start(controller) {
                     controller.enqueue(new Uint8Array([1, 2]));
                     controller.enqueue(new Uint8Array([3, 4]));
@@ -249,7 +253,7 @@ describe("CardParse Worker — shared utilities", () => {
         });
 
         it("should handle empty stream", async () => {
-            const stream = new ReadableStream({
+            const stream = new ReadableStream<Uint8Array<ArrayBuffer>>({
                 start(controller) {
                     controller.close();
                 },
@@ -261,7 +265,12 @@ describe("CardParse Worker — shared utilities", () => {
 
     describe("setLogger", () => {
         it("should set and return the logger", () => {
-            const mockLogger = { debug: vi.fn(), info: vi.fn(), error: vi.fn() } as any;
+            const mockLogger = {
+                debug: vi.fn(),
+                info: vi.fn(),
+                warn: vi.fn(),
+                error: vi.fn(),
+            } as unknown as ReturnType<typeof createLogBridgeSender>;
             const result = setLogger(mockLogger);
             expect(result).toBe(mockLogger);
         });

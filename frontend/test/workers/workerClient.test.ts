@@ -12,7 +12,7 @@ import {
 let workerInstanceCount = 0;
 
 // Shared worker class instances to simulate actual caching behavior
-const createMockWorkerClass = (name: string) => {
+const createMockWorkerClass = (_name: string) => {
     return class MockWorker {
         constructor() {
             workerInstanceCount++;

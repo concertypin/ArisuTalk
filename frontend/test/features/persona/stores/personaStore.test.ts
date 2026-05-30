@@ -181,7 +181,7 @@ describe("PersonaStore", () => {
         store.add(personaB);
 
         store.reorder(1, 0);
-        const order = JSON.parse(localStorageMock.getItem("arisutalk_persona_order")!);
+        const order = JSON.parse(localStorageMock.getItem("arisutalk_persona_order")!) as string[];
         expect(order).toEqual(["id-b", "id-a"]);
     });
 

@@ -87,7 +87,7 @@ describe("LocalStorageChatAdapter", () => {
 
     it("should save a new chat and update an existing one", async () => {
         const chatId = await adapter.createChat("char-1", "Original");
-        let chat = await adapter.getChat(chatId);
+        const chat = await adapter.getChat(chatId);
         expect(chat?.name).toBe("Original");
 
         // Update existing chat
