@@ -20,7 +20,7 @@
 
     const assetStorage = getAssetStorage();
     const assetPreviews = new SvelteMap<string, string>();
-    const showManualUrl = $state(false);
+    let showManualUrl = $state(false);
 
     const imageAssets = $derived(
         character.assets.assets.filter((a) => a.mimeType.startsWith("image/"))

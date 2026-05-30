@@ -18,8 +18,8 @@
     const { children }: Props = $props();
 
     let selectedCharacterId = $state<string | null>(null);
-    const dialog = $state<HTMLDialogElement>();
-    const personaDialog = $state<HTMLDialogElement>();
+    let dialog = $state<HTMLDialogElement>();
+    let personaDialog = $state<HTMLDialogElement>();
 
     // Character UI State
     let editingIndex = $state<number | null>(null);

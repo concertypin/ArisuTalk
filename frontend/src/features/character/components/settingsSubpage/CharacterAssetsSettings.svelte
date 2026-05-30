@@ -27,7 +27,7 @@
 
     const { character, onChange }: Props = $props();
 
-    const fileInput = $state<HTMLInputElement>();
+    let fileInput = $state<HTMLInputElement>();
     let expandOtherAssets = $state(false);
     let duplicateNameError = $state<string | null>(null);
     let draggedIndex = $state<number | null>(null);

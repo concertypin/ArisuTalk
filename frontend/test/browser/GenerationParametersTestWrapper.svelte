@@ -6,7 +6,7 @@
         config: LLMConfig;
         id: number;
     }
-    const { config = $bindable(), id }: Props = $props();
+    let { config = $bindable(), id }: Props = $props();
 </script>
 
 <GenerationParameters bind:config {id} />

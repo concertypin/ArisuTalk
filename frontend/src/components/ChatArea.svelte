@@ -16,7 +16,7 @@
     import GearIcon from "phosphor-svelte/lib/GearIcon";
 
     let inputValue = $state("");
-    const messagesContainer = $state<HTMLElement | null>(null);
+    let messagesContainer = $state<HTMLElement | null>(null);
     const isTyping = $derived(chatStore.isGenerating);
 
     const activeChat = $derived(chatStore.chats.find((c) => c.id === chatStore.activeChatId));
