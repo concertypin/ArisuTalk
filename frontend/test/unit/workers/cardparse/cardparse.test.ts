@@ -40,7 +40,12 @@ function createTestCharacter(
         },
         executables: {
             runtimeSetting: { mem: undefined, timeout: 3 },
-            replaceHooks: { display: [] as never[], input: [] as never[], output: [] as never[], request: [] as never[] },
+            replaceHooks: {
+                display: [] as never[],
+                input: [] as never[],
+                output: [] as never[],
+                request: [] as never[],
+            },
         },
         metadata: {
             author: undefined,

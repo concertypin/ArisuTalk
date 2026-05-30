@@ -106,7 +106,11 @@ describe("characterState utilities", () => {
         });
 
         it("handles empty array", () => {
-            const result = updateArrayItem([] as MockIdentifiable[], "1", { id: "1", name: "New", value: 0 });
+            const result = updateArrayItem([] as MockIdentifiable[], "1", {
+                id: "1",
+                name: "New",
+                value: 0,
+            });
             expect(result).toEqual([]);
         });
     });
