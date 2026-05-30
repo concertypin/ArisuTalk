@@ -29,4 +29,18 @@ describe("UI Store", () => {
         uiState.toggleSettingsModal();
         expect(uiState.settingsModalOpen).toBe(false);
     });
+
+    it("should open and close character settings for a character", () => {
+        const character = { id: "char-1", name: "Test" } as any;
+        expect(uiState.characterSettingsOpen).toBe(false);
+        expect(uiState.characterSettingsTarget).toBeNull();
+
+        uiState.openCharacterSettings(character);
+        expect(uiState.characterSettingsOpen).toBe(true);
+        expect(uiState.characterSettingsTarget).toBe(character);
+
+        uiState.closeCharacterSettings();
+        expect(uiState.characterSettingsOpen).toBe(false);
+        expect(uiState.characterSettingsTarget).toBeNull();
+    });
 });

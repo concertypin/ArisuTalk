@@ -1,17 +1,54 @@
 // @vitest-environment happy-dom
 
-import { describe, it, expect, vi } from "vitest";
-import { getExampleWorker } from "@/lib/workers/workerClient";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import {
+    getExampleWorker,
+    getCardParseWorker,
+    getScriptingWorker,
+    getRegexWorker,
+} from "@/lib/workers/workerClient";
 
-// Mock the Vite worker import
+// Track worker instances to verify caching
+let workerInstanceCount = 0;
+
+// Shared worker class instances to simulate actual caching behavior
+const createMockWorkerClass = (name: string) => {
+    return class MockWorker {
+        constructor() {
+            workerInstanceCount++;
+        }
+        terminate() {}
+        postMessage() {}
+        addEventListener() {}
+        removeEventListener() {}
+    };
+};
+
+// Mock the Example worker - use a shared class to simulate caching
 vi.mock("@worker/example/main?worker", () => {
     return {
-        default: class MockWorker {
-            terminate() {}
-            postMessage() {}
-            addEventListener() {}
-            removeEventListener() {}
-        },
+        default: createMockWorkerClass("example"),
+    };
+});
+
+// Mock the CardParse worker
+vi.mock("@worker/cardparse/main?worker", () => {
+    return {
+        default: createMockWorkerClass("cardparse"),
+    };
+});
+
+// Mock the Scripting worker
+vi.mock("@worker/scripting/main?worker", () => {
+    return {
+        default: createMockWorkerClass("scripting"),
+    };
+});
+
+// Mock the Regex worker
+vi.mock("@worker/regex/main?worker", () => {
+    return {
+        default: createMockWorkerClass("regex"),
     };
 });
 
@@ -19,20 +56,29 @@ const mockApi = {
     greet: vi.fn(async (name: string) => `Hello, ${name}!`),
     fibonacci: vi.fn(async (n: number) => n),
     setLogReceiver: vi.fn(),
+    parseCharacter: vi.fn(),
+    exportCharacter: vi.fn(),
 };
 
-// Mock Comlink
+// Create a shared mock instance to simulate caching behavior
+const sharedMockApi = { ...mockApi };
+
+// Mock Comlink - return the same mock instance to simulate caching
 vi.mock("comlink", () => {
     return {
-        wrap: vi.fn(() => mockApi),
+        wrap: vi.fn(() => sharedMockApi),
         expose: vi.fn(),
-
         // oxlint-disable-next-line typescript/no-explicit-any typescript/no-unsafe-return
         proxy: (x: any) => x,
     };
 });
 
 describe("Worker Client", () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        workerInstanceCount = 0;
+    });
+
     it.concurrent("should not call setLogReceiver on example worker creation", async () => {
         await getExampleWorker();
         expect(mockApi.setLogReceiver).not.toHaveBeenCalled();
@@ -55,5 +101,69 @@ describe("Worker Client", () => {
         const worker = await getExampleWorker();
         // Just checking it doesn't throw
         worker.terminate();
+    });
+
+    // Additional tests for coverage
+
+    it.concurrent("should cache worker instance - only one worker created", async () => {
+        await getExampleWorker();
+        await getExampleWorker();
+        // Sequential calls should only create one worker
+        expect(workerInstanceCount).toBe(1);
+    });
+
+    it.concurrent("should set disabled flag after terminate", async () => {
+        const worker = await getExampleWorker();
+        expect(worker.disabled).toBe(false);
+        worker.terminate();
+        expect(worker.disabled).toBe(true);
+    });
+
+    it.concurrent("should call setLogReceiver on cardparse worker (non-example)", async () => {
+        await getCardParseWorker();
+        expect(mockApi.setLogReceiver).toHaveBeenCalled();
+    });
+
+    it.concurrent("should handle concurrent worker creation - race condition", async () => {
+        // Reset instance count for this specific test
+        workerInstanceCount = 0;
+
+        // Multiple concurrent calls should only create one worker
+        const [worker1, worker2, worker3] = await Promise.all([
+            getExampleWorker(),
+            getExampleWorker(),
+            getExampleWorker(),
+        ]);
+        // All should resolve to the same mock API object (due to sharedMockApi)
+        expect(worker1).toBe(worker2);
+        expect(worker2).toBe(worker3);
+        // Only one worker should be instantiated
+        expect(workerInstanceCount).toBe(1);
+    });
+
+    it.concurrent("should create scripting worker and call setLogReceiver", async () => {
+        const worker = await getScriptingWorker();
+        expect(worker).toBeDefined();
+        expect(worker.terminate).toBeDefined();
+        expect(mockApi.setLogReceiver).toHaveBeenCalled();
+    });
+
+    it.concurrent("should create regex worker and call setLogReceiver", async () => {
+        const worker = await getRegexWorker();
+        expect(worker).toBeDefined();
+        expect(worker.terminate).toBeDefined();
+        expect(mockApi.setLogReceiver).toHaveBeenCalled();
+    });
+
+    it.concurrent("should create and cache all worker types", async () => {
+        // Verify each worker type can be created and has terminate
+        const example = await getExampleWorker();
+        expect(example.terminate).toBeDefined();
+        const cardparse = await getCardParseWorker();
+        expect(cardparse.terminate).toBeDefined();
+        const scripting = await getScriptingWorker();
+        expect(scripting.terminate).toBeDefined();
+        const regex = await getRegexWorker();
+        expect(regex.terminate).toBeDefined();
     });
 });

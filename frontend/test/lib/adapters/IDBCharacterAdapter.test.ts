@@ -36,4 +36,16 @@ describe("DexieCharacterAdapter", () => {
         const got = await adapter.getCharacter(char.id);
         expect(got).toBeUndefined();
     });
+
+    it("should return metadata for all characters", async () => {
+        const char = cloneDeep(exampleCharacter);
+        await adapter.saveCharacter(char);
+
+        const metadata = await adapter.getCharactersMetadata();
+        expect(metadata).toHaveLength(1);
+        expect(metadata[0].id).toBe(char.id);
+        expect(metadata[0].name).toBe(char.name);
+        expect(metadata[0].description).toBe(char.description);
+        expect(metadata[0].avatarUrl).toBe(char.avatarUrl);
+    });
 });
