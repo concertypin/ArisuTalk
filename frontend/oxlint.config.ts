@@ -1,9 +1,8 @@
 import { defineConfig } from "oxlint";
-import oxlintSvelte from "./scripts/linter/oxlint-svelte.js";
 import oxlintEslintWarn from "./scripts/linter/oxlint-eslint-warn.js";
 import oxlintEslintError from "./scripts/linter/oxlint-eslint-error.js";
 export default defineConfig({
-    extends: [oxlintEslintError, oxlintEslintWarn, oxlintSvelte],
+    extends: [oxlintEslintError, oxlintEslintWarn],
     ignorePatterns: [
         "**/node_modules/**",
         "**/dist/**",
@@ -11,13 +10,17 @@ export default defineConfig({
         "**/.cache/**",
         "**/.svelte-check/**",
         "**/dist-ts/**",
-        "**/*.svelte",
-        "**/*.svelte.ts",
     ],
+    // oxlint does not support ESLint-style rule options (e.g. assertionStyle).
+    // The @typescript-eslint/consistent-type-assertions rule below will use oxlint defaults.
+    // For strict "never" assertion style enforcement, use ESLint on Svelte files.
     overrides: [
         {
             files: ["**/*.svelte"],
+            jsPlugins: ["eslint-plugin-phosphor-svelte"],
             rules: {
+                "phosphor-svelte/optimize-imports": "warn",
+                // Reactivity-related false positives.
                 "prefer-const": "off",
                 "no-unassigned-vars": "off",
             },
