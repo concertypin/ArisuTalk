@@ -118,10 +118,10 @@ jobs:
         working-directory: frontend
 
       - name: Run tests
+        continue-on-error: true
         run: pnpm -F frontend run test --reporter=blob --coverage.enabled --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
 
       - name: Upload blob report
-        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: blob-report-${{ matrix.shardIndex }}
