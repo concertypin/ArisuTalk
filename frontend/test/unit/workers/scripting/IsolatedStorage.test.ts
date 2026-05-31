@@ -120,8 +120,9 @@ describe("IsolatedStorage", () => {
             storage.setItem("second", "2");
             storage.setItem("third", "3");
 
-            // Access internal storage record through known API shape
-            const internalStorage = (storage as unknown as { storage: Record<string, string> }).storage;
+            // Access private storage field for deterministic key enumeration
+            const internalStorage = (storage as unknown as { storage: Record<string, string> })
+                .storage;
             const keys = Object.keys(internalStorage);
             expect(storage.key(0)).toBe(keys[0]);
             expect(storage.key(1)).toBe(keys[1]);
