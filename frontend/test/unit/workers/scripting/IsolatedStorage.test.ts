@@ -121,8 +121,8 @@ describe("IsolatedStorage", () => {
             storage.setItem("third", "3");
 
             // Access private storage field for deterministic key enumeration
-            const internalStorage = (storage as unknown as { storage: Record<string, string> })
-                .storage;
+            const internalStorage = storage["storage"];
+
             const keys = Object.keys(internalStorage);
             expect(storage.key(0)).toBe(keys[0]);
             expect(storage.key(1)).toBe(keys[1]);

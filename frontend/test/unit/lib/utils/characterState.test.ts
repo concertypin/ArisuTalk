@@ -9,6 +9,7 @@ import {
     type Identifiable,
 } from "@/lib/utils/characterState";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
+import { strictObject } from "@test/utils/strictObject";
 
 interface MockIdentifiable extends Identifiable {
     name: string;
@@ -53,13 +54,16 @@ describe("characterState utilities", () => {
         it("deep clones nested properties", () => {
             const original = createMockCharacter();
             const updated = withCharacter(original, (draft) => {
-                // Immer draft — narrow to Record to add test-only properties
-                (draft as unknown as Record<string, unknown>).nested = { deep: { value: 42 } };
+                // Immer draft — assignment uses set trap (not intercepted), so strictObject works
+                strictObject<Record<string, unknown>>(draft).nested = { deep: { value: 42 } };
             });
 
-            expect((updated as unknown as Record<string, unknown>).nested).toEqual({
+            // After mutation, 'nested' is in the target — get trap passes
+            expect(strictObject<Record<string, unknown>>(updated).nested).toEqual({
                 deep: { value: 42 },
             });
+            // Original was never mutated — use as unknown as since we assert absence
+            // (strictObject fires soft failure on missing props, but we expect nested to be missing)
             expect((original as unknown as Record<string, unknown>).nested).toBeUndefined();
         });
 
