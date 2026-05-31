@@ -47,18 +47,20 @@ describe("Font Utilities", () => {
         const mockHead = {
             appendChild: vi.fn(),
         };
-
+        // Use a standalone mock function to avoid the deprecated createElement type
+        const mockCreateElement = vi.fn<() => { id: string; rel: string; href: string }>(() => ({
+            id: "",
+            rel: "",
+            href: "",
+        }));
         const mockElements: Map<string, { id: string }> = new Map();
 
         beforeEach(() => {
+            mockCreateElement.mockClear();
             vi.stubGlobal("document", {
                 head: mockHead,
                 getElementById: vi.fn((id: string) => mockElements.get(id) ?? null),
-                createElement: vi.fn(() => ({
-                    id: "",
-                    rel: "",
-                    href: "",
-                })),
+                createElement: mockCreateElement,
             });
             mockHead.appendChild.mockClear();
             mockElements.clear();
@@ -70,22 +72,22 @@ describe("Font Utilities", () => {
 
         it("does nothing for system fonts", () => {
             loadFont("system-ui");
-            expect(vi.mocked(document.createElement).mock.calls).toHaveLength(0);
+            expect(mockCreateElement.mock.calls).toHaveLength(0);
         });
 
         it("does nothing for unsupported fonts", () => {
             loadFont("Unknown Font");
-            expect(vi.mocked(document.createElement).mock.calls).toHaveLength(0);
+            expect(mockCreateElement.mock.calls).toHaveLength(0);
         });
 
         it("creates a link element for Google fonts", () => {
             loadFont("Roboto");
-            expect(document.createElement).toHaveBeenCalledWith("link");
+            expect(mockCreateElement).toHaveBeenCalledWith("link");
         });
 
         it("sets correct attributes on the link element", () => {
             const mockLink = { id: "", rel: "", href: "" };
-            vi.mocked(document.createElement).mockReturnValue(mockLink as any);
+            mockCreateElement.mockReturnValue(mockLink);
 
             loadFont("Roboto");
 
@@ -97,7 +99,7 @@ describe("Font Utilities", () => {
 
         it("generates correct font ID with hyphens", () => {
             const mockLink = { id: "", rel: "", href: "" };
-            vi.mocked(document.createElement).mockReturnValue(mockLink as any);
+            mockCreateElement.mockReturnValue(mockLink);
 
             loadFont("Noto Sans KR");
 
@@ -106,7 +108,7 @@ describe("Font Utilities", () => {
 
         it("generates correct href with plus signs for spaces", () => {
             const mockLink = { id: "", rel: "", href: "" };
-            vi.mocked(document.createElement).mockReturnValue(mockLink as any);
+            mockCreateElement.mockReturnValue(mockLink);
 
             loadFont("Open Sans");
 
@@ -115,7 +117,7 @@ describe("Font Utilities", () => {
 
         it("includes font weights in href", () => {
             const mockLink = { id: "", rel: "", href: "" };
-            vi.mocked(document.createElement).mockReturnValue(mockLink as any);
+            mockCreateElement.mockReturnValue(mockLink);
 
             loadFont("Poppins");
 
@@ -124,18 +126,18 @@ describe("Font Utilities", () => {
 
         it("appends the link to document.head", () => {
             const mockLink = { id: "", rel: "", href: "" };
-            vi.mocked(document.createElement).mockReturnValue(mockLink as any);
+            mockCreateElement.mockReturnValue(mockLink);
 
             loadFont("Roboto");
 
-            expect(mockHead.appendChild).toHaveBeenCalledWith(mockLink);
+            expect(mockHead.appendChild).toHaveBeenCalledWith(mockLink as unknown as HTMLElement);
         });
 
         it("does not load a font that is already loaded", () => {
             mockElements.set("font-roboto", { id: "font-roboto" });
             loadFont("Roboto");
 
-            expect(document.createElement).not.toHaveBeenCalled();
+            expect(mockCreateElement).not.toHaveBeenCalled();
         });
     });
 });

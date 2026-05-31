@@ -120,7 +120,9 @@ describe("IsolatedStorage", () => {
             storage.setItem("second", "2");
             storage.setItem("third", "3");
 
-            const keys = Object.keys((storage as any).storage);
+            // Access internal storage record through known API shape
+            const internalStorage = (storage as unknown as { storage: Record<string, string> }).storage;
+            const keys = Object.keys(internalStorage);
             expect(storage.key(0)).toBe(keys[0]);
             expect(storage.key(1)).toBe(keys[1]);
             expect(storage.key(2)).toBe(keys[2]);

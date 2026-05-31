@@ -100,7 +100,6 @@ describe("LocalStorageAdapter", () => {
         const chat1: Chat = cloneDeep(exampleChatData);
         const chat2: Chat = cloneDeep(exampleChatData);
         chat2.id = "chat-2";
-        chat2.name = "Second Chat";
         await adapter.saveChat(chat1);
         await adapter.saveChat(chat2);
 
@@ -139,9 +138,9 @@ describe("LocalStorageAdapter", () => {
                 return tmp;
             }, new Uint8Array())
         );
-        const parsed = JSON.parse(json);
-        expect(parsed.characters).toBeInstanceOf(Array);
-        expect(parsed.characters.length).toBeGreaterThan(0);
+        const parsed = JSON.parse(json) as Record<string, unknown>;
+        expect(Array.isArray(parsed.characters)).toBe(true);
+        expect((parsed.characters as unknown[]).length).toBeGreaterThan(0);
     });
 
     it("should import valid data", async () => {

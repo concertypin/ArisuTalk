@@ -53,11 +53,11 @@ describe("characterState utilities", () => {
         it("deep clones nested properties", () => {
             const original = createMockCharacter();
             const updated = withCharacter(original, (draft) => {
-                (draft as any).nested = { deep: { value: 42 } };
+                (draft as unknown as Record<string, unknown>).nested = { deep: { value: 42 } };
             });
 
-            expect((updated as any).nested.deep.value).toBe(42);
-            expect((original as any).nested).toBeUndefined();
+            expect((updated as unknown as Record<string, unknown>).nested).toEqual({ deep: { value: 42 } });
+            expect((original as unknown as Record<string, unknown>).nested).toBeUndefined();
         });
 
         it("works with extended character types", () => {
