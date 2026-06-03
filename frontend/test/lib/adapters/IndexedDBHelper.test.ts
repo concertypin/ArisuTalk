@@ -1,7 +1,7 @@
 import "fake-indexeddb/auto";
 import { describe, it, expect, beforeEach } from "vitest";
 import { getArisuDB } from "@/lib/adapters/storage/IndexedDBHelper";
-import { CharacterSchema, type Character } from "@arisutalk/character-spec/v0/Character";
+import { CharacterSchema } from "@arisutalk/character-spec/v0/Character";
 import { apply } from "@arisutalk/character-spec/utils";
 
 describe("IndexedDBHelper (ArisuDB)", () => {
