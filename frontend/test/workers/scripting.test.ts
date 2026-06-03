@@ -122,10 +122,16 @@ describe("Scripting Worker Logic", () => {
 
         it("should return modified context after script execution", async () => {
             // ScriptContext passes through the sandbox boundary
-            const ctx: Record<string, unknown> = { message: "initial" };
+
             const response = await api.execute('global.context.message = "modified"', {
-                context: ctx,
-            } as unknown as Parameters<typeof api.execute>[1]);
+                context: {
+                    message: {
+                        content: "initial",
+                        metadata: {},
+                        role: "user",
+                    },
+                },
+            });
 
             if (response.modifiedContext) {
                 expect(response.modifiedContext.message).toBe("modified");

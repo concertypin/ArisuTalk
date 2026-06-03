@@ -33,7 +33,10 @@ describe("Persona and Chat interactions", () => {
             waitForSettings: () => Promise<void>;
         }
         vi.spyOn(
-            chatStore as unknown as ChatStoreWithWaitForSettings,
+            {
+                ...chatStore,
+                waitForSettings: chatStore["waitForSettings"],
+            } satisfies ChatStoreWithWaitForSettings,
             "waitForSettings"
         ).mockResolvedValue(undefined);
         await chatStore.initPromise;

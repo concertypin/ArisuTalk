@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { HookService } from "@/lib/services/HookService";
 import { CharacterSchema } from "@arisutalk/character-spec/v0/Character";
 import { apply } from "@arisutalk/character-spec/utils";
+import { mockScriptingWorker } from "@test/utils/mockWorkerApi";
 
 // Mock workers
 vi.mock("@/lib/workers/workerClient", () => ({
@@ -165,24 +166,23 @@ describe("HookService", () => {
         });
 
         // Mock scripting worker to return 'secret' only if role is 'assistant'
-        vi.mocked(await import("@/lib/workers/workerClient")).getScriptingWorker.mockResolvedValue({
-            terminate: vi.fn(),
-            execute: vi.fn(async (code: string, options) => {
-                // Check role in context
+        vi.mocked(await import("@/lib/workers/workerClient")).getScriptingWorker.mockResolvedValue(
+            mockScriptingWorker(
+                vi.fn(async (code: string, options) => {
+                    // Check role in context
 
-                // oxlint-disable-next-line typescript/no-unsafe-assignment typescript/no-unsafe-member-access
-                const ctx = options?.context;
+                    // oxlint-disable-next-line typescript/no-unsafe-assignment typescript/no-unsafe-member-access
+                    const ctx = options?.context;
 
-                // oxlint-disable-next-line typescript/no-unsafe-assignment typescript/no-unsafe-member-access
-                const role = ctx?.message?.role;
-                if (role === "assistant") {
-                    return { result: "secret", logs: [] };
-                }
-                return { result: "nomatch", logs: [] };
-            }),
-        } as unknown as import("@/lib/workers/workerClient").WorkerApi<
-            import("@worker/scripting/types").ScriptingWorkerApi
-        >);
+                    // oxlint-disable-next-line typescript/no-unsafe-assignment typescript/no-unsafe-member-access
+                    const role = ctx?.message?.role;
+                    if (role === "assistant") {
+                        return { result: "secret", logs: [] };
+                    }
+                    return { result: "nomatch", logs: [] };
+                })
+            )
+        );
 
         const result = await hookService.process("This is secret", character, "display");
         expect(result).toBe("This is hidden");
@@ -215,16 +215,15 @@ describe("HookService", () => {
         });
 
         // Mock scripting worker to return error
-        vi.mocked(await import("@/lib/workers/workerClient")).getScriptingWorker.mockResolvedValue({
-            terminate: vi.fn(),
-            execute: vi.fn(async () => ({
-                result: undefined,
-                error: "test error",
-                logs: [],
-            })),
-        } as unknown as import("@/lib/workers/workerClient").WorkerApi<
-            import("@worker/scripting/types").ScriptingWorkerApi
-        >);
+        vi.mocked(await import("@/lib/workers/workerClient")).getScriptingWorker.mockResolvedValue(
+            mockScriptingWorker(
+                vi.fn(async () => ({
+                    result: undefined,
+                    error: "test error",
+                    logs: [],
+                }))
+            )
+        );
 
         // Should not throw, just log error and skip the hook
         const result = await hookService.process("test content", character, "input");
@@ -431,16 +430,15 @@ describe("HookService", () => {
         });
 
         // Mock scripting worker to return error for output script
-        vi.mocked(await import("@/lib/workers/workerClient")).getScriptingWorker.mockResolvedValue({
-            terminate: vi.fn(),
-            execute: vi.fn(async () => ({
-                result: undefined,
-                error: "script error",
-                logs: [],
-            })),
-        } as unknown as import("@/lib/workers/workerClient").WorkerApi<
-            import("@worker/scripting/types").ScriptingWorkerApi
-        >);
+        vi.mocked(await import("@/lib/workers/workerClient")).getScriptingWorker.mockResolvedValue(
+            mockScriptingWorker(
+                vi.fn(async () => ({
+                    result: undefined,
+                    error: "script error",
+                    logs: [],
+                }))
+            )
+        );
 
         // Should use the original output as fallback when script fails
         const result = await hookService.process("test content", character, "output");
@@ -475,16 +473,15 @@ describe("HookService", () => {
         });
 
         // Mock scripting worker to return no result (error-like)
-        vi.mocked(await import("@/lib/workers/workerClient")).getScriptingWorker.mockResolvedValue({
-            terminate: vi.fn(),
-            execute: vi.fn(async () => ({
-                result: undefined,
-                // No error but no result either - should use original output
-                logs: [],
-            })),
-        } as unknown as import("@/lib/workers/workerClient").WorkerApi<
-            import("@worker/scripting/types").ScriptingWorkerApi
-        >);
+        vi.mocked(await import("@/lib/workers/workerClient")).getScriptingWorker.mockResolvedValue(
+            mockScriptingWorker(
+                vi.fn(async () => ({
+                    result: undefined,
+                    // No error but no result either - should use original output
+                    logs: [],
+                }))
+            )
+        );
 
         const result = await hookService.process("hello greeting world", character, "display");
         // Original replacement is used as fallback
@@ -523,15 +520,14 @@ describe("HookService", () => {
             // Mock scripting worker to return a bigint
             vi.mocked(
                 await import("@/lib/workers/workerClient")
-            ).getScriptingWorker.mockResolvedValue({
-                terminate: vi.fn(),
-                execute: vi.fn(async () => ({
-                    result: BigInt(42),
-                    logs: [],
-                })),
-            } as unknown as import("@/lib/workers/workerClient").WorkerApi<
-                import("@worker/scripting/types").ScriptingWorkerApi
-            >);
+            ).getScriptingWorker.mockResolvedValue(
+                mockScriptingWorker(
+                    vi.fn(async () => ({
+                        result: BigInt(42),
+                        logs: [],
+                    }))
+                )
+            );
 
             const result = await hookService.process("test content", character, "input");
             // bigint should be stringified via String()
@@ -567,15 +563,14 @@ describe("HookService", () => {
             // Mock scripting worker to return null
             vi.mocked(
                 await import("@/lib/workers/workerClient")
-            ).getScriptingWorker.mockResolvedValue({
-                terminate: vi.fn(),
-                execute: vi.fn(async () => ({
-                    result: null,
-                    logs: [],
-                })),
-            } as unknown as import("@/lib/workers/workerClient").WorkerApi<
-                import("@worker/scripting/types").ScriptingWorkerApi
-            >);
+            ).getScriptingWorker.mockResolvedValue(
+                mockScriptingWorker(
+                    vi.fn(async () => ({
+                        result: null,
+                        logs: [],
+                    }))
+                )
+            );
 
             const result = await hookService.process("test content", character, "input");
             // null should be replaced with "null" via JSON.stringify

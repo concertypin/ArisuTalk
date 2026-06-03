@@ -1,5 +1,6 @@
 import { describe, it, expect, expectTypeOf, vi, beforeEach, afterEach } from "vitest";
 import { SUPPORTED_FONTS, loadFont, type FontDefinition } from "@/lib/utils/fontUtils";
+import { strictMock } from "@test/utils/strictObject";
 
 describe("Font Utilities", () => {
     describe("SUPPORTED_FONTS", () => {
@@ -125,12 +126,12 @@ describe("Font Utilities", () => {
         });
 
         it("appends the link to document.head", () => {
-            const mockLink = { id: "", rel: "", href: "" };
+            const mockLink = strictMock<HTMLLinkElement>({ id: "", rel: "", href: "" });
             mockCreateElement.mockReturnValue(mockLink);
 
             loadFont("Roboto");
 
-            expect(mockHead.appendChild).toHaveBeenCalledWith(mockLink as unknown as HTMLElement);
+            expect(mockHead.appendChild).toHaveBeenCalledWith(mockLink);
         });
 
         it("does not load a font that is already loaded", () => {

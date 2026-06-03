@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { uiState } from "@/lib/stores/ui.svelte";
-import type { Character } from "@arisutalk/character-spec/v0/Character";
+import { exampleCharacter } from "@/const/example_data";
 
 describe("UI Store", () => {
     beforeEach(() => {
@@ -32,7 +32,7 @@ describe("UI Store", () => {
     });
 
     it("should open and close character settings for a character", () => {
-        const character = { id: "char-1", name: "Test" } as unknown as Character;
+        const character = exampleCharacter;
         expect(uiState.characterSettingsOpen).toBe(false);
         expect(uiState.characterSettingsTarget).toBeNull();
 
