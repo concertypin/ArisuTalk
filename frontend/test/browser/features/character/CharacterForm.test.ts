@@ -149,10 +149,11 @@ describe("CharacterForm Component", () => {
         });
 
         const fileInput = getByLabelText(/Import/i);
-        await expect.element(fileInput).toBeVisible();
+        await fileInput.upload(new File(['{"name":"Imported Char","specVersion":0}'], "character.json", { type: "application/json" }));
 
-        // Note: File upload testing is complex with vitest-browser-svelte
-        // Testing that the input exists is sufficient for component coverage
+        await vi.waitFor(() => {
+            expect(characterStore.importCharacter).toHaveBeenCalled();
+        });
     });
 
     test("shows import error when import fails", async () => {
@@ -167,9 +168,10 @@ describe("CharacterForm Component", () => {
         });
 
         const fileInput = getByLabelText(/Import/i);
-        await expect.element(fileInput).toBeVisible();
+        await fileInput.upload(new File(['{"name":"Bad Char"}'], "bad.json", { type: "application/json" }));
 
-        // Note: File upload error testing is complex with vitest-browser-svelte
-        // Testing that the file input exists is sufficient
+        await vi.waitFor(() => {
+            expect(characterStore.importCharacter).toHaveBeenCalled();
+        });
     });
 });

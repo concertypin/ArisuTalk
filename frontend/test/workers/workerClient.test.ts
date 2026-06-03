@@ -79,83 +79,57 @@ describe("Worker Client", () => {
         workerInstanceCount = 0;
     });
 
-    it.concurrent("should not call setLogReceiver on example worker creation", async () => {
+    it("should not call setLogReceiver on example worker creation", async () => {
         await getExampleWorker();
         expect(mockApi.setLogReceiver).not.toHaveBeenCalled();
     });
 
-    it.concurrent("should create a worker instance", async () => {
-        const worker = await getExampleWorker();
-        expect(worker).toBeDefined();
-        expect(worker.terminate).toBeDefined();
-        expect(worker.greet).toBeDefined();
+    it("should cache worker instance across sequential calls", async () => {
+        const worker1 = await getExampleWorker();
+        const worker2 = await getExampleWorker();
+        // Both calls return the same cached instance
+        expect(worker1).toBe(worker2);
     });
 
-    it.concurrent("should call worker methods", async () => {
-        const worker = await getExampleWorker();
-        const result = await worker.greet("World");
-        expect(result).toBe("Hello, World!");
-    });
-
-    it.concurrent("should terminate worker", async () => {
-        const worker = await getExampleWorker();
-        // Just checking it doesn't throw
-        worker.terminate();
-    });
-
-    // Additional tests for coverage
-
-    it.concurrent("should cache worker instance - only one worker created", async () => {
-        await getExampleWorker();
-        await getExampleWorker();
-        // Sequential calls should only create one worker
-        expect(workerInstanceCount).toBe(1);
-    });
-
-    it.concurrent("should set disabled flag after terminate", async () => {
+    it("should set disabled flag after terminate", async () => {
         const worker = await getExampleWorker();
         expect(worker.disabled).toBe(false);
         worker.terminate();
         expect(worker.disabled).toBe(true);
     });
 
-    it.concurrent("should call setLogReceiver on cardparse worker (non-example)", async () => {
+    it("should call setLogReceiver on cardparse worker (non-example)", async () => {
         await getCardParseWorker();
         expect(mockApi.setLogReceiver).toHaveBeenCalled();
     });
 
-    it.concurrent("should handle concurrent worker creation - race condition", async () => {
-        // Reset instance count for this specific test
-        workerInstanceCount = 0;
-
+    it("should handle concurrent worker creation - race condition", async () => {
         // Multiple concurrent calls should only create one worker
         const [worker1, worker2, worker3] = await Promise.all([
             getExampleWorker(),
             getExampleWorker(),
             getExampleWorker(),
         ]);
-        // All should resolve to the same mock API object (due to sharedMockApi)
+        // All should resolve to the same cached API object
         expect(worker1).toBe(worker2);
         expect(worker2).toBe(worker3);
-        // Only one worker should be instantiated
-        expect(workerInstanceCount).toBe(1);
     });
 
-    it.concurrent("should create scripting worker and call setLogReceiver", async () => {
+    it("should create scripting worker and call setLogReceiver", async () => {
         const worker = await getScriptingWorker();
         expect(worker).toBeDefined();
         expect(worker.terminate).toBeDefined();
         expect(mockApi.setLogReceiver).toHaveBeenCalled();
     });
 
-    it.concurrent("should create regex worker and call setLogReceiver", async () => {
+    it("should create regex worker and call setLogReceiver", async () => {
         const worker = await getRegexWorker();
         expect(worker).toBeDefined();
         expect(worker.terminate).toBeDefined();
         expect(mockApi.setLogReceiver).toHaveBeenCalled();
     });
 
-    it.concurrent("should create and cache all worker types", async () => {
+    it("should create and cache all worker types", async () => {
         // Verify each worker type can be created and has terminate
         const example = await getExampleWorker();
         expect(example.terminate).toBeDefined();

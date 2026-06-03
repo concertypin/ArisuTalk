@@ -140,7 +140,7 @@ describe("ChatList Component", () => {
         expect(chatStore.setActiveChat).toHaveBeenCalledWith("chat-1");
     });
 
-    test("deletes chat when delete button is clicked", async ({ annotate }) => {
+    test("deletes chat when delete button is clicked", async () => {
         // Mock window.confirm
         const originalConfirm = window.confirm;
         window.confirm = vi.fn(() => true);
@@ -157,19 +157,20 @@ describe("ChatList Component", () => {
             } satisfies LocalChat,
         ];
 
-        render(ChatList, {
+        const { getByRole, getByLabelText } = render(ChatList, {
             characterId: "char-1",
         });
 
-        // Hover to show delete button (in real browser, you'd need to simulate hover)
-        await annotate(
-            "Simulate hover to reveal delete button - " +
-                "this may require additional setup or a different testing approach, " +
-                "as hover states can be tricky to test in a headless environment. " +
-                "For now, we will assume the delete button is visible for testing purposes."
-        );
-        // For now, we'll just check if the delete function exists
-        expect(chatStore.deleteChat).toBeDefined();
+        // Hover over the chat item to reveal the delete button
+        const chatButton = getByRole("button", { name: "Chat 1" });
+        await chatButton.hover();
+
+        // Click the delete button
+        const deleteButton = getByLabelText("Delete");
+        await deleteButton.click();
+
+        expect(window.confirm).toHaveBeenCalled();
+        expect(chatStore.deleteChat).toHaveBeenCalledWith("chat-1");
 
         window.confirm = originalConfirm;
     });

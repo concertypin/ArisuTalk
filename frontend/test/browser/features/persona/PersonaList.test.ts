@@ -179,12 +179,14 @@ describe("PersonaList Component", () => {
     test("auto-selects first persona when none selected", async () => {
         personaStore.personas = mockPersonas;
         personaStore.activePersonaId = null;
+        personaStore.select = vi.fn();
 
         render(PersonaList, {
             onEdit: mockOnEdit,
         });
 
-        // The component should auto-select the first persona
-        // This is handled by an $effect in the component
+        await vi.waitFor(() => {
+            expect(personaStore.select).toHaveBeenCalledWith("persona-1");
+        });
     });
 });

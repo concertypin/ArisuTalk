@@ -157,13 +157,20 @@ describe("ChatList Component", () => {
             } satisfies LocalChat,
         ];
 
-        render(ChatList, {
+        const { getByRole, getByLabelText } = render(ChatList, {
             characterId: "char-1",
         });
 
-        // Hover to show delete button (in real browser, you'd need to simulate hover)
-        // For now, we'll just check if the delete function exists
-        expect(chatStore.deleteChat).toBeDefined();
+        // Hover over the chat item to reveal the delete button
+        const chatButton = getByRole("button", { name: "Chat 1" });
+        await chatButton.hover();
+
+        // Click the delete button
+        const deleteButton = getByLabelText("Delete");
+        await deleteButton.click();
+
+        expect(window.confirm).toHaveBeenCalled();
+        expect(chatStore.deleteChat).toHaveBeenCalledWith("chat-1");
 
         window.confirm = originalConfirm;
     });
