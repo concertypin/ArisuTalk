@@ -64,19 +64,19 @@ describe("SettingsModal Component", () => {
         await expect.element(getByRole("heading", { name: "General Settings" })).toBeVisible();
 
         // Switch to LLM
-        await getByText("Models").click();
+        await getByRole("button", { name: "LLM Configuration" }).click();
         await expect.element(getByRole("heading", { name: "LLM Configuration" })).toBeVisible();
 
         // Switch to Advanced
-        await getByText("Advanced").click();
+        await getByRole("button", { name: "Advanced Settings" }).click();
         await expect.element(getByRole("heading", { name: "Advanced Settings" })).toBeVisible();
         await expect.element(getByRole("combobox")).toBeVisible();
     });
 
     test("adds new LLM config", async () => {
-        const { getByText } = render(SettingsModal);
+        const { getByText, getByRole } = render(SettingsModal);
 
-        await getByText("Models").click();
+        await getByRole("button", { name: "LLM Configuration" }).click();
 
         // Before: no configs
         expect(settings.value.llmConfigs.length).toBe(0);

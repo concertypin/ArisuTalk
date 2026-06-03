@@ -149,7 +149,11 @@ describe("CharacterForm Component", () => {
         });
 
         const fileInput = getByLabelText(/Import/i);
-        await fileInput.upload(new File(['{"name":"Imported Char","specVersion":0}'], "character.json", { type: "application/json" }));
+        await fileInput.upload(
+            new File(['{"name":"Imported Char","specVersion":0}'], "character.json", {
+                type: "application/json",
+            })
+        );
 
         await vi.waitFor(() => {
             expect(characterStore.importCharacter).toHaveBeenCalled();
@@ -168,7 +172,9 @@ describe("CharacterForm Component", () => {
         });
 
         const fileInput = getByLabelText(/Import/i);
-        await fileInput.upload(new File(['{"name":"Bad Char"}'], "bad.json", { type: "application/json" }));
+        await fileInput.upload(
+            new File(['{"name":"Bad Char"}'], "bad.json", { type: "application/json" })
+        );
 
         await vi.waitFor(() => {
             expect(characterStore.importCharacter).toHaveBeenCalled();

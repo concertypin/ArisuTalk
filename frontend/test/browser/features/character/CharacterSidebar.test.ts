@@ -157,21 +157,16 @@ describe("CharacterSidebar Component", () => {
     });
 
     test("highlights selected character", async () => {
-        const { container } = render(CharacterSidebar, {
+        const { getByRole } = render(CharacterSidebar, {
             selectedCharacterId: "char-1",
             onSelect: mockOnSelect,
             onAdd: mockOnAdd,
             onPersona: mockOnPersona,
         });
 
-        //Wait for rendering
-        await vi.waitFor(() => {
-            const items = container.querySelectorAll('[role="option"]');
-            expect(items.length).toBeGreaterThan(0);
-        });
-
-        const selectedOption = container.querySelector('[aria-selected="true"]');
-        expect(selectedOption).toBeTruthy();
+        // Wait for rendering
+        const characterOption = getByRole("option", { selected: true });
+        await expect.element(characterOption).toBeVisible();
     });
 
     test("renders divider before action buttons", async () => {
