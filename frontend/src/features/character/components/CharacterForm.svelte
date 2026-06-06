@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { CloudUpload } from "@lucide/svelte";
-    import { characterStore } from "../stores/characterStore.svelte";
+    import CloudArrowUpIcon from "phosphor-svelte/lib/CloudArrowUpIcon";
+    import { characterStore } from "@/features/character/stores/characterStore.svelte";
     import { type Character } from "@arisutalk/character-spec/v0/Character";
 
     type Props = {
@@ -35,8 +35,8 @@
             assets: character?.assets || { assets: [] },
             specVersion: 0,
             id: character?.id || crypto.randomUUID(),
-            name: name,
-            description: description,
+            name,
+            description,
             prompt: character?.prompt || {
                 description: "",
                 authorsNote: "",
@@ -160,7 +160,7 @@
                         <div
                             class="mb-3 p-4 bg-primary/10 rounded-full text-primary group-hover:scale-110 transition-transform"
                         >
-                            <CloudUpload />
+                            <CloudArrowUpIcon />
                         </div>
                         <h4 class="font-bold text-lg mb-1">Click to Upload</h4>
                         <p class="text-sm opacity-60">

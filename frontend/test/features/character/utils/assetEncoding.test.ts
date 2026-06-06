@@ -4,6 +4,14 @@ import {
     blobToUint8Array,
     collectTransferableBuffers,
 } from "@/features/character/utils/assetEncoding";
+import { Logger } from "@common/logger/Logger";
+
+vi.mock("@common/logger/Logger", () => ({
+    Logger: {
+        warn: vi.fn(),
+        error: vi.fn(),
+    },
+}));
 import type { AssetEntity } from "@arisutalk/character-spec/v0/Character/Assets";
 import type { IAssetStorageAdapter } from "@/lib/interfaces";
 
@@ -51,12 +59,14 @@ describe("remapAssetToUint8Array", () => {
             getAssetBlob: vi.fn(),
             getAssetUrl: vi.fn(),
             saveAsset: vi.fn(),
+            deleteAsset: vi.fn(),
         };
     });
 
     describe("Uint8Array handling", () => {
         it("should leave Uint8Array data unchanged", async () => {
             const asset: AssetEntity = {
+                id: "test-id-1",
                 name: "test.bin",
                 mimeType: "application/octet-stream",
                 data: new Uint8Array([1, 2, 3]),
@@ -71,6 +81,7 @@ describe("remapAssetToUint8Array", () => {
 
         it("should handle empty Uint8Array", async () => {
             const asset: AssetEntity = {
+                id: "test-id-2",
                 name: "empty.bin",
                 mimeType: "application/octet-stream",
                 data: new Uint8Array([]),
@@ -85,6 +96,7 @@ describe("remapAssetToUint8Array", () => {
         it("should handle large Uint8Array (1MB)", async () => {
             const largeData = new Uint8Array(1024 * 1024);
             const asset: AssetEntity = {
+                id: "test-id-3",
                 name: "large.bin",
                 mimeType: "application/octet-stream",
                 data: largeData,
@@ -99,6 +111,7 @@ describe("remapAssetToUint8Array", () => {
     describe("Remote URL handling", () => {
         it("should leave http:// URLs unchanged", async () => {
             const asset: AssetEntity = {
+                id: "test-id-4",
                 name: "remote.png",
                 mimeType: "image/png",
                 data: "http://example.com/image.png",
@@ -113,6 +126,7 @@ describe("remapAssetToUint8Array", () => {
 
         it("should leave https:// URLs unchanged", async () => {
             const asset: AssetEntity = {
+                id: "test-id-5",
                 name: "secure.png",
                 mimeType: "image/png",
                 data: "https://example.com/image.png",
@@ -126,6 +140,7 @@ describe("remapAssetToUint8Array", () => {
 
         it("should handle URLs with query parameters", async () => {
             const asset: AssetEntity = {
+                id: "test-id-6",
                 name: "query.png",
                 mimeType: "image/png",
                 data: "https://example.com/image.png?size=large&format=webp",
@@ -144,6 +159,7 @@ describe("remapAssetToUint8Array", () => {
             (mockAssetStorage.getAssetBlob as Mock).mockResolvedValue(blob);
 
             const asset: AssetEntity = {
+                id: "test-id-7",
                 name: "local.png",
                 mimeType: "image/png",
                 data: "local://asset-id-123",
@@ -163,6 +179,7 @@ describe("remapAssetToUint8Array", () => {
             (mockAssetStorage.getAssetBlob as Mock).mockRejectedValue(new Error("File not found"));
 
             const asset: AssetEntity = {
+                id: "test-id-8",
                 name: "missing.png",
                 mimeType: "image/png",
                 data: "local://missing-id",
@@ -177,6 +194,7 @@ describe("remapAssetToUint8Array", () => {
             (mockAssetStorage.getAssetBlob as Mock).mockRejectedValue("String error");
 
             const asset: AssetEntity = {
+                id: "test-id-9",
                 name: "error.png",
                 mimeType: "image/png",
                 data: "local://error-id",
@@ -192,6 +210,7 @@ describe("remapAssetToUint8Array", () => {
         it("should convert valid base64 data URL to Uint8Array", async () => {
             // "Hello" in base64
             const asset: AssetEntity = {
+                id: "test-id-10",
                 name: "text.txt",
                 mimeType: "text/plain",
                 data: "data:text/plain;base64,SGVsbG8=",
@@ -209,6 +228,7 @@ describe("remapAssetToUint8Array", () => {
             const pngBase64 =
                 "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
             const asset: AssetEntity = {
+                id: "test-id-11",
                 name: "pixel.png",
                 mimeType: "image/png",
                 data: `data:image/png;base64,${pngBase64}`,
@@ -222,6 +242,7 @@ describe("remapAssetToUint8Array", () => {
 
         it("should handle data URL with charset parameter", async () => {
             const asset: AssetEntity = {
+                id: "test-id-12",
                 name: "utf8.txt",
                 mimeType: "text/plain",
                 data: "data:text/plain;charset=utf-8;base64,SGVsbG8gV29ybGQ=",
@@ -235,9 +256,8 @@ describe("remapAssetToUint8Array", () => {
         });
 
         it("should warn and leave malformed data URL (no comma) as is", async () => {
-            const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-
             const asset: AssetEntity = {
+                id: "test-id-13",
                 name: "malformed.txt",
                 mimeType: "text/plain",
                 data: "data:text/plain;base64SGVsbG8=", // Missing comma
@@ -246,18 +266,17 @@ describe("remapAssetToUint8Array", () => {
             const result = await remapAssetToUint8Array(asset, mockAssetStorage);
 
             expect(result.data).toBe("data:text/plain;base64SGVsbG8=");
-            expect(consoleWarnSpy).toHaveBeenCalledWith(
+            expect(result.data).toBe("data:text/plain;base64SGVsbG8=");
+            // Logger adds formatting prefix, so check that the warning was called
+            expect(Logger.warn).toHaveBeenCalledWith(
                 "Malformed data URL (no comma), leaving as is:",
-                expect.any(String)
+                expect.stringContaining("data:text/plain;base64SGVsbG8")
             );
-
-            consoleWarnSpy.mockRestore();
         });
 
         it("should handle invalid base64 gracefully", async () => {
-            const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-
             const asset: AssetEntity = {
+                id: "test-id-14",
                 name: "invalid.txt",
                 mimeType: "text/plain",
                 data: "data:text/plain;base64,!!!INVALID!!!",
@@ -266,16 +285,17 @@ describe("remapAssetToUint8Array", () => {
             const result = await remapAssetToUint8Array(asset, mockAssetStorage);
 
             expect(result.data).toBe("data:text/plain;base64,!!!INVALID!!!");
-            expect(consoleErrorSpy).toHaveBeenCalledWith(
+            expect(result.data).toBe("data:text/plain;base64,!!!INVALID!!!");
+            // Logger adds formatting prefix, so check that the error was called
+            expect(Logger.error).toHaveBeenCalledWith(
                 "Failed to decode base64 data URL:",
-                expect.any(Error)
+                expect.anything()
             );
-
-            consoleErrorSpy.mockRestore();
         });
 
         it("should handle empty base64 data", async () => {
             const asset: AssetEntity = {
+                id: "test-id-15",
                 name: "empty.txt",
                 mimeType: "text/plain",
                 data: "data:text/plain;base64,",
@@ -296,8 +316,10 @@ describe("remapAssetToUint8Array", () => {
                 "audio/mpeg",
             ];
 
+            let counter = 16;
             for (const mimeType of mimeTypes) {
                 const asset: AssetEntity = {
+                    id: `test-id-${counter++}`,
                     name: `file.${mimeType.split("/")[1]}`,
                     mimeType,
                     data: `data:${mimeType};base64,SGVsbG8=`,
@@ -314,6 +336,7 @@ describe("remapAssetToUint8Array", () => {
     describe("Edge cases", () => {
         it("should leave unknown format as is", async () => {
             const asset: AssetEntity = {
+                id: "test-id-edge-1",
                 name: "unknown.txt",
                 mimeType: "text/plain",
                 data: "file:///some/path",
@@ -327,6 +350,7 @@ describe("remapAssetToUint8Array", () => {
 
         it("should handle empty string data", async () => {
             const asset: AssetEntity = {
+                id: "test-id-edge-2",
                 name: "empty.txt",
                 mimeType: "text/plain",
                 data: "",
@@ -339,6 +363,7 @@ describe("remapAssetToUint8Array", () => {
 
         it("should preserve asset metadata", async () => {
             const asset: AssetEntity = {
+                id: "test-id-edge-3",
                 name: "test.png",
                 mimeType: "image/png",
                 data: "https://example.com/test.png",
@@ -356,11 +381,13 @@ describe("collectTransferableBuffers", () => {
     it("should collect ArrayBuffers from Uint8Array assets", () => {
         const assets: AssetEntity[] = [
             {
+                id: "test-id-buf-1",
                 name: "binary1.bin",
                 mimeType: "application/octet-stream",
                 data: new Uint8Array([1, 2, 3]),
             },
             {
+                id: "test-id-buf-2",
                 name: "binary2.bin",
                 mimeType: "application/octet-stream",
                 data: new Uint8Array([4, 5, 6]),
@@ -377,16 +404,19 @@ describe("collectTransferableBuffers", () => {
     it("should filter out non-Uint8Array assets", () => {
         const assets: AssetEntity[] = [
             {
+                id: "test-id-buf-3",
                 name: "binary.bin",
                 mimeType: "application/octet-stream",
                 data: new Uint8Array([1, 2, 3]),
             },
             {
+                id: "test-id-buf-4",
                 name: "url.png",
                 mimeType: "image/png",
                 data: "https://example.com/image.png",
             },
             {
+                id: "test-id-buf-5",
                 name: "data.txt",
                 mimeType: "text/plain",
                 data: "data:text/plain;base64,SGVsbG8=",
@@ -402,6 +432,7 @@ describe("collectTransferableBuffers", () => {
     it("should return empty array when no Uint8Array assets", () => {
         const assets: AssetEntity[] = [
             {
+                id: "test-id-buf-6",
                 name: "url.png",
                 mimeType: "image/png",
                 data: "https://example.com/image.png",
@@ -422,26 +453,31 @@ describe("collectTransferableBuffers", () => {
     it("should handle mixed asset types", () => {
         const assets: AssetEntity[] = [
             {
+                id: "test-id-mix-1",
                 name: "binary1.bin",
                 mimeType: "application/octet-stream",
                 data: new Uint8Array([1, 2, 3]),
             },
             {
+                id: "test-id-mix-2",
                 name: "http.png",
                 mimeType: "image/png",
                 data: "http://example.com/image.png",
             },
             {
+                id: "test-id-mix-3",
                 name: "binary2.bin",
                 mimeType: "application/octet-stream",
                 data: new Uint8Array([4, 5, 6]),
             },
             {
+                id: "test-id-mix-4",
                 name: "https.jpg",
                 mimeType: "image/jpeg",
                 data: "https://example.com/photo.jpg",
             },
             {
+                id: "test-id-mix-5",
                 name: "binary3.bin",
                 mimeType: "application/octet-stream",
                 data: new Uint8Array([7, 8, 9]),
