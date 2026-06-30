@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, expectTypeOf, beforeEach } from "vitest";
 import { OpenRouterChatProvider } from "@/lib/providers/chat/OpenRouterChatProvider";
-import { CommonChatSettings } from "@/lib/interfaces";
+import type { CommonChatSettings } from "@/lib/interfaces";
 import { HumanMessage } from "@langchain/core/messages";
 
 // Mock the dynamic import of @langchain/openai
@@ -271,7 +271,7 @@ describe("OpenRouterChatProvider Type Tests", () => {
         const messages = [new HumanMessage("test")];
 
         const result = provider.generate(messages);
-        expectTypeOf(result).toMatchTypeOf<Promise<string>>();
+        expectTypeOf(result).toExtend<Promise<string>>();
 
         const resolved = await result;
         expectTypeOf(resolved).toBeString();
@@ -287,7 +287,7 @@ describe("OpenRouterChatProvider Type Tests", () => {
         const messages = [new HumanMessage("test")];
 
         const stream = provider.stream(messages);
-        expectTypeOf(stream).toMatchTypeOf<AsyncGenerator<string, void, unknown>>();
+        expectTypeOf(stream).toExtend<AsyncGenerator<string, void, unknown>>();
     });
 
     it("isReady returns boolean", async () => {
@@ -311,7 +311,7 @@ describe("OpenRouterChatProvider Type Tests", () => {
         const provider = await OpenRouterChatProvider.factory.connect(commonSettings);
         const result = provider.disconnect();
 
-        expectTypeOf(result).toMatchTypeOf<Promise<void>>();
+        expectTypeOf(result).toExtend<Promise<void>>();
     });
 
     it("abort method returns void", async () => {

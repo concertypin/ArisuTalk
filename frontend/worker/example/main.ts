@@ -1,3 +1,17 @@
+/**
+ * @fileoverview Template reference worker — NOT used in production.
+ *
+ * This worker serves as a copy-paste template for creating new Web Workers.
+ * When adding a new worker type:
+ *   1. Copy this directory
+ *   2. Rename files and the API interface
+ *   3. Implement your logic
+ *   4. Add a factory in workerClient.ts
+ *
+ * It is excluded from coverage since it has no production usage.
+ * The tests for this worker test the Comlink infrastructure pattern.
+ */
+
 import * as Comlink from "comlink";
 import type { ExampleWorkerApi } from "./types";
 

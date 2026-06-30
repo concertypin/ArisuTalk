@@ -1,29 +1,28 @@
 {
-    "[javascript]": {
-        "editor.defaultFormatter": "prettier.prettier-vscode",
+    "[javascript][typescript][svelte][json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.tabSize": 4
     },
-    "[typescript]": {
-        "editor.defaultFormatter": "prettier.prettier-vscode",
-        "editor.tabSize": 4
+    "[github-actions-workflow]": {
+        "editor.tabSize": 2
     },
-    "[svelte]": {
-        "editor.tabSize": 4,
-        "editor.defaultFormatter": "prettier.prettier-vscode"
-    },
-    "[json]": {
-        "editor.defaultFormatter": "prettier.prettier-vscode",
-        "editor.tabSize": 4
-    },
-    "typescript.preferences.preferTypeOnlyAutoImports": true,
+    "js/ts.preferences.preferTypeOnlyAutoImports": true,
     "js/ts.implicitProjectConfig.target": "ESNext",
-    "typescript.preferences.importModuleSpecifier": "non-relative",
-    "javascript.preferences.importModuleSpecifier": "non-relative",
-    "javascript.preferences.importModuleSpecifierEnding": "minimal",
-    "typescript.preferences.importModuleSpecifierEnding": "minimal",
-    "vitest.nodeEnv": {
-        // Enabling browser test on VSC vitest,
-        // since it will not run browser tests by default
-        "npm_lifecycle_event": "coverage"
-    }
+    "js/ts.preferences.importModuleSpecifier": "non-relative",
+    "js/ts.preferences.importModuleSpecifierEnding": "minimal",
+    "oxc.typeAware": true,
+    "eslint.validate": [
+        "javascript",
+        "typescript",
+        "svelte"
+    ],
+    "files.exclude": {
+        "coverage": true
+    },
+    "typescript.native-preview.additionalTsdkLocations": [
+        "./frontend/node_modules/@typescript/native-preview"
+    ],
+    "typescript.native-preview.tsdk": "./frontend/node_modules/@typescript/native-preview",
+    "oxc.requireConfig": true,
+    "oxc.configPath": "./frontend/oxlint.config.ts"
 }

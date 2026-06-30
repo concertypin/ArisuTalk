@@ -1,33 +1,50 @@
 @import "tailwindcss";
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap");
 
+/* Dark mode annotation */
+:root {
+    color-scheme: light dark;
+}
+
 /* DaisyUI theme */
-@plugin "daisyui";
+@plugin "daisyui" {
+    themes: false;
+}
 @plugin "daisyui/theme" {
     name: "night";
     default: true;
-    prefersdark: false;
+    prefersdark: true;
     color-scheme: "dark";
-    --color-base-100: oklch(20.768% 0.039 265.754);
-    --color-base-200: oklch(19.314% 0.037 265.754);
-    --color-base-300: oklch(17.86% 0.034 265.754);
-    --color-base-content: oklch(84.153% 0.007 265.754);
-    --color-primary: oklch(75.351% 0.138 232.661);
-    --color-primary-content: oklch(15.07% 0.027 232.661);
-    --color-secondary: oklch(68.011% 0.158 276.934);
-    --color-secondary-content: oklch(13.602% 0.031 276.934);
-    --color-accent: oklch(72.36% 0.176 350.048);
-    --color-accent-content: oklch(14.472% 0.035 350.048);
-    --color-neutral: oklch(27.949% 0.036 260.03);
-    --color-neutral-content: oklch(85.589% 0.007 260.03);
-    --color-info: oklch(68.455% 0.148 237.251);
-    --color-info-content: oklch(0% 0 0);
-    --color-success: oklch(78.452% 0.132 181.911);
-    --color-success-content: oklch(15.69% 0.026 181.911);
-    --color-warning: oklch(83.242% 0.139 82.95);
-    --color-warning-content: oklch(16.648% 0.027 82.95);
-    --color-error: oklch(71.785% 0.17 13.118);
-    --color-error-content: oklch(14.357% 0.034 13.118);
+    /* Optimized backgrounds for good contrast without being too dark */
+    --color-base-100: oklch(19% 0.05 265.754);
+    --color-base-200: oklch(17% 0.048 265.754);
+    --color-base-300: oklch(15% 0.045 265.754);
+    /* Much brighter content for strong contrast (WCAG AAA) */
+    --color-base-content: oklch(96% 0.01 265.754);
+    /* Vibrant, high-saturation primary color */
+    --color-primary: oklch(72% 0.22 235);
+    --color-primary-content: oklch(98% 0.012 235);
+    /* Vibrant, high-saturation secondary color */
+    --color-secondary: oklch(70% 0.24 280);
+    --color-secondary-content: oklch(98% 0.014 280);
+    /* Vibrant, high-saturation accent color */
+    --color-accent: oklch(75% 0.26 350);
+    --color-accent-content: oklch(98% 0.015 350);
+    /* Darker neutral with high-contrast content */
+    --color-neutral: oklch(24% 0.045 260.03);
+    --color-neutral-content: oklch(96% 0.01 260.03);
+    /* High-contrast info color */
+    --color-info: oklch(72% 0.2 240);
+    --color-info-content: oklch(98% 0 0);
+    /* Vivid success color */
+    --color-success: oklch(76% 0.18 160);
+    --color-success-content: oklch(98% 0.012 160);
+    /* Vibrant warning color */
+    --color-warning: oklch(85% 0.19 85);
+    --color-warning-content: oklch(15% 0.04 85);
+    /* Strong error color */
+    --color-error: oklch(68% 0.23 15);
+    --color-error-content: oklch(98% 0.015 15);
     --radius-selector: 1rem;
     --radius-field: 0.5rem;
     --radius-box: 1rem;
@@ -45,8 +62,11 @@
         background-color: var(--color-base-100);
         color: var(--color-base-content);
         -webkit-font-smoothing: antialiased;
+        /* Default font size, overridden by --app-font-size */
+        font-size: var(--app-font-size, 16px);
+        /* Default font family, overridden by --app-font-family */
         font-family:
-            "Noto Sans KR",
+            var(--app-font-family, "Noto Sans KR"),
             system-ui,
             -apple-system,
             BlinkMacSystemFont,
@@ -54,10 +74,124 @@
             Roboto,
             sans-serif;
         font-weight: 400;
+        /* Smooth font transition */
+        transition:
+            font-size 0.2s ease,
+            font-family 0.2s ease;
     }
     #app {
         height: 100%;
         display: flex;
         overflow: hidden;
     }
+}
+
+/* Custom utilities - white mode ready via CSS variables */
+@layer utilities {
+    /* Glassmorphism effects */
+    .glass {
+        backdrop-filter: blur(10px);
+        background: oklch(from var(--color-base-200) l c h / 0.7);
+        border: 1px solid oklch(from var(--color-base-content) l c h / 0.1);
+    }
+
+    .glass-card {
+        backdrop-filter: blur(12px);
+        background: oklch(from var(--color-base-200) l c h / 0.8);
+        border: 1px solid oklch(from var(--color-base-content) l c h / 0.08);
+        border-radius: var(--radius-box);
+    }
+
+    .glass-subtle {
+        backdrop-filter: blur(6px);
+        background: oklch(from var(--color-base-100) l c h / 0.5);
+    }
+
+    /* Gradient accents */
+    .gradient-accent {
+        background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-secondary) 100%);
+    }
+
+    .gradient-primary {
+        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-info) 100%);
+    }
+
+    /* Text gradients */
+    .text-gradient-accent {
+        background: linear-gradient(
+            135deg,
+            var(--color-accent),
+            var(--color-secondary),
+            var(--color-accent),
+            var(--color-accent) /* more weight */
+        );
+
+        background-size: 300% 300%;
+        animation: curious-gaze-wild 20s ease-in-out infinite;
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+    }
+
+    @keyframes curious-gaze-wild {
+        0%,
+        75% {
+            background-position: 0% 0%;
+        }
+        78.75% {
+            background-position: 0% 0%;
+        }
+        83.75%,
+        87.5% {
+            background-position: 100% 100%;
+        }
+        91.25%,
+        95% {
+            background-position: 20% 80%;
+        }
+        100% {
+            background-position: 0% 0%;
+        }
+    }
+
+    /* Hover transitions */
+    .hover-lift {
+        transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+    }
+    .hover-lift:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px oklch(from var(--color-base-100) l c h / 0.4);
+    }
+
+    /* SNS-specific utilities */
+    .sns-card {
+        backdrop-filter: blur(10px);
+        background: oklch(from var(--color-neutral) l c h / 0.6);
+        border: 1px solid oklch(from var(--color-base-content) l c h / 0.1);
+        border-radius: var(--radius-box);
+        transition: background 0.2s ease;
+    }
+    .sns-card:hover {
+        background: oklch(from var(--color-neutral) l c h / 0.8);
+    }
+
+    /* Badge pill style */
+    .badge-pill {
+        border-radius: 9999px;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+}
+
+/* Native drag-and-drop styles */
+[draggable="true"] {
+    cursor: grab;
+    user-select: none;
+}
+
+[draggable="true"]:active {
+    cursor: grabbing;
 }

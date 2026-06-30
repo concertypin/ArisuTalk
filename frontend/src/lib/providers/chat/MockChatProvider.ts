@@ -43,7 +43,9 @@ export class MockChatProvider extends ChatProvider<"MOCK"> {
         // In a real implementation, we might create a new model instance if settings are provided
         // For mock, we just use the existing one or ignore settings
         const response = await this.model.invoke(messages);
-        return response.content as string;
+        return typeof response.content === "string"
+            ? response.content
+            : JSON.stringify(response.content);
     }
 
     async *stream(
@@ -57,7 +59,7 @@ export class MockChatProvider extends ChatProvider<"MOCK"> {
             if (this.aborted) {
                 break;
             }
-            yield chunk.content as string;
+            yield typeof chunk.content === "string" ? chunk.content : JSON.stringify(chunk.content);
         }
     }
 

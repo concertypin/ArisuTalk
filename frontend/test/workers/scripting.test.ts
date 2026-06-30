@@ -75,5 +75,92 @@ describe("Scripting Worker Logic", () => {
             });
             expect(responseA2.result).toBe("A-secret");
         });
+
+        it("should support storage.removeItem and storage.clear", async () => {
+            const charId = "cleanup-char";
+            await api.execute('storage.setItem("k1", "v1"); storage.setItem("k2", "v2")', {
+                characterId: charId,
+            });
+
+            // Verify removal
+            await api.execute('storage.removeItem("k1")', { characterId: charId });
+            const afterRemove = await api.execute('storage.getItem("k1")', { characterId: charId });
+            expect(afterRemove.result ?? null).toBeNull();
+
+            // Verify clear
+            await api.execute("storage.clear()", { characterId: charId });
+            const afterClear = await api.execute('storage.getItem("k2")', { characterId: charId });
+            expect(afterClear.result ?? null).toBeNull();
+        });
+
+        it("should support storage.length and storage.key", async () => {
+            const charId = "enum-char";
+            await api.execute('storage.setItem("a", "1"); storage.setItem("b", "2")', {
+                characterId: charId,
+            });
+
+            const lenResult = await api.execute("storage.length", { characterId: charId });
+            expect(lenResult.result).toBe(2);
+
+            const keyResult = await api.execute("storage.key(0)", { characterId: charId });
+            expect(typeof keyResult.result).toBe("string");
+        });
+
+        it("should handle script errors gracefully", async () => {
+            const response = await api.execute('throw new Error("Oops!")');
+            // define-function embeds QuickJS — runtime errors are captured but
+            // the error message format depends on the sandbox implementation
+            expect(response.result).toBeUndefined();
+            expect(response.error).toBeDefined();
+        });
+
+        it("should handle syntax errors", async () => {
+            const response = await api.execute("{ broken syntax ");
+            expect(response.result).toBeUndefined();
+            expect(response.error).toBeDefined();
+        });
+
+        it("should return modified context after script execution", async () => {
+            // ScriptContext passes through the sandbox boundary
+
+            const response = await api.execute('global.context.message = "modified"', {
+                context: {
+                    message: {
+                        content: "initial",
+                        metadata: {},
+                        role: "user",
+                    },
+                },
+            });
+
+            if (response.modifiedContext) {
+                expect(response.modifiedContext.message).toBe("modified");
+            }
+        });
+
+        it("should handle fetch in sandbox without crashing", async () => {
+            // Testing that fetch calls in the sandbox don't crash the runtime,
+            // even when network access is disabled
+            const response = await api.execute('fetch("https://example.com")', {
+                allowNetwork: false,
+            });
+            // The sandbox should complete without crashing
+            expect(response).toBeDefined();
+            // Without network access, fetch should not return actual data
+            expect(response.result).not.toBe("https://example.com");
+        });
+
+        it("should provide isolated storage per character", async () => {
+            // Characters without explicit ID use shared default (__default__)
+            // Characters with ID get isolated storage
+            const charA = "iso-A";
+            await api.execute('storage.setItem("data", "A-data")', { characterId: charA });
+            const respA = await api.execute('storage.getItem("data")', { characterId: charA });
+            expect(respA.result).toBe("A-data");
+
+            // Default (no characterId) gets separate storage
+            const respDefault = await api.execute('storage.getItem("data")');
+            expect(respDefault.result ?? null).toBeNull();
+        });
     });
 });

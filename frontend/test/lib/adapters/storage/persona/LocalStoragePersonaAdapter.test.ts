@@ -1,8 +1,8 @@
-// @vitest-environment happy-dom
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { LocalStoragePersonaAdapter } from "@/lib/adapters/storage/persona/LocalStoragePersonaAdapter";
 import { PersonaSchema, type Persona } from "@/features/persona/schema";
 import { apply } from "@arisutalk/character-spec/utils";
+import { createLocalStorageMock } from "@test/utils/localStorageMock";
 
 describe("LocalStoragePersonaAdapter", () => {
     let adapter: LocalStoragePersonaAdapter;
@@ -14,9 +14,12 @@ describe("LocalStoragePersonaAdapter", () => {
     });
 
     beforeEach(() => {
-        localStorage.clear();
+        // create localStorage mock
+        vi.stubGlobal("localStorage", createLocalStorageMock(vi));
         adapter = new LocalStoragePersonaAdapter();
-        vi.clearAllMocks();
+    });
+    afterEach(() => {
+        vi.unstubAllGlobals();
     });
 
     it("should initialize", async () => {

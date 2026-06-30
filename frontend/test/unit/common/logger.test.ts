@@ -3,11 +3,12 @@ import { describe, it, expect, beforeEach, expectTypeOf, vi } from "vitest";
 import { Logger } from "@common/logger/Logger";
 import { createLogBridgeSender, createLogBridgeReceiver } from "@common/logger/LogBridge";
 
+vi.unmock("@common/logger/Logger");
+
 describe("Logger Class", () => {
     beforeEach(() => {
-        Logger.clearListeners();
+        Logger.reset();
         localStorage.clear();
-        Logger.setLevel("info");
     });
 
     it("should have standard logging methods", () => {

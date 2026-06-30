@@ -1,12 +1,13 @@
 <script lang="ts">
     import CharacterSidebar from "./CharacterSidebar.svelte";
     import CharacterForm from "./CharacterForm.svelte";
-    import CharacterList from "./CharacterList.svelte";
-    import ChatList from "../../chat/components/ChatList.svelte";
-    import PersonaList from "../../persona/components/PersonaList.svelte";
-    import PersonaForm from "../../persona/components/PersonaForm.svelte";
-    import type { Persona } from "../../persona/schema";
-    import { characterStore } from "../stores/characterStore.svelte";
+    import CharacterSettingsModal from "./CharacterSettingsModal.svelte";
+    import ChatList from "@/features/chat/components/ChatList.svelte";
+    import PersonaList from "@/features/persona/components/PersonaList.svelte";
+    import PersonaForm from "@/features/persona/components/PersonaForm.svelte";
+    import type { Persona } from "@/features/persona/schema";
+    import { characterStore } from "@/features/character/stores/characterStore.svelte";
+    import { uiState } from "@/lib/stores/ui.svelte";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import { Logger } from "@common/logger/Logger";
 
@@ -14,37 +15,23 @@
         children?: import("svelte").Snippet;
     };
 
-    let { children }: Props = $props();
+    const { children }: Props = $props();
 
     let selectedCharacterId = $state<string | null>(null);
     let dialog = $state<HTMLDialogElement>();
     let personaDialog = $state<HTMLDialogElement>();
 
     // Character UI State
-    let editingIndex = $state<number | null>(null);
-    let editingCharacter = $derived(
-        editingIndex !== null ? characterStore.characters[editingIndex] : undefined
-    );
 
     // Persona UI State
     let editingPersona = $state<Persona | undefined>(undefined);
     let isPersonaFormOpen = $state(false);
 
-    function handleSelect(id: string) {
+    function handleSelect(id: string | null) {
         selectedCharacterId = id;
     }
 
     function handleAdd() {
-        editingIndex = null;
-        dialog?.showModal();
-        Logger.structured("modal.open", {
-            location: "characterLayout",
-            modalName: "CharacterForm",
-        });
-    }
-
-    function handleEdit(index: number) {
-        editingIndex = index;
         dialog?.showModal();
         Logger.structured("modal.open", {
             location: "characterLayout",
@@ -53,11 +40,7 @@
     }
 
     async function handleFormSubmit(char: Character) {
-        if (editingIndex !== null) {
-            await characterStore.update(editingIndex, char);
-        } else {
-            await characterStore.add(char);
-        }
+        await characterStore.add(char);
         dialog?.close();
         Logger.structured("modal.close", {
             location: "characterLayout",
@@ -106,19 +89,38 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="flex-1 flex flex-col min-w-0 bg-base-200 relative">
+    <main class="flex-1 flex flex-col min-w-0 bg-base-100 relative">
         {#if selectedCharacterId}
             {@render children?.()}
         {:else}
-            <div class="h-full overflow-y-auto w-full">
-                <div class="container mx-auto p-6 md:p-8 max-w-7xl">
-                    <div class="mb-8">
-                        <h1 class="text-3xl font-bold mb-2">My Characters</h1>
-                        <p class="text-base-content/60">
-                            Manage your AI characters, import cards, or create new ones.
-                        </p>
+            <!-- Welcome / No Character Selected -->
+            <div class="flex flex-col items-center justify-center h-full text-center p-8">
+                <div class="space-y-4 max-w-md">
+                    <h1
+                        class="text-4xl font-black tracking-tight flex items-center justify-center cursor-default"
+                    >
+                        <span
+                            class="text-gradient-accent flex items-center leading-none select-none"
+                        >
+                            ArisuTalk
+                        </span>
+                    </h1>
+                    <p class="text-base-content/60 text-lg">
+                        Select a character from the sidebar to start chatting
+                    </p>
+                    <div class="flex flex-wrap justify-center gap-3 mt-6">
+                        <button class="btn btn-primary gap-2" onclick={handleAdd}>
+                            <span class="text-lg">+</span> Create Character
+                        </button>
+                        <button class="btn btn-ghost gap-2" onclick={handlePersona}>
+                            Manage Personas
+                        </button>
                     </div>
-                    <CharacterList onEdit={handleEdit} />
+                    <p class="text-sm text-base-content/40 mt-8">
+                        {characterStore.characters.length === 0
+                            ? "No characters yet. Create your first one!"
+                            : `${characterStore.characters.length} character${characterStore.characters.length > 1 ? "s" : ""} available`}
+                    </p>
                 </div>
             </div>
         {/if}
@@ -128,7 +130,6 @@
     <dialog bind:this={dialog} id="character_form_modal" class="modal">
         <div class="modal-box p-0 border border-base-300 shadow-2xl">
             <CharacterForm
-                character={editingCharacter}
                 onSubmit={handleFormSubmit}
                 onSave={() => dialog?.close()}
                 onCancel={() => dialog?.close()}
@@ -175,4 +176,9 @@
             <button>close</button>
         </form>
     </dialog>
+
+    <!-- Character Settings Modal -->
+    {#if uiState.characterSettingsOpen}
+        <CharacterSettingsModal />
+    {/if}
 </div>

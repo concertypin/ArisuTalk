@@ -6,7 +6,7 @@ import Home from "@/routes/Home.svelte";
 describe("Home Component", () => {
     test("renders loading state initially", async () => {
         const { getByText } = render(Home);
-        await expect.element(getByText("Loading chat experience...")).toBeVisible();
+        await expect.element(getByText("Loading...")).toBeVisible();
     });
 
     test("loads and renders layout and chat area", async () => {

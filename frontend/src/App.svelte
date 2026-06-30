@@ -4,11 +4,14 @@
 -->
 <script lang="ts">
     import { initRouter, getCurrentPath } from "@/lib/router.svelte";
+    import { Logger } from "@common/logger/Logger";
     import { routes } from "@/lib/routeConfig";
     import { uiState } from "@/lib/stores/ui.svelte";
     import { settings } from "@/lib/stores/settings.svelte";
     import ToastContainer from "@/components/ToastContainer.svelte";
+    import IconContext from "phosphor-svelte/lib/IconContext";
     import type { Component } from "svelte";
+    import { loadFont } from "@/lib/utils/fontUtils";
 
     // Initialize router and settings on mount
     $effect(() => {
@@ -17,7 +20,7 @@
     });
 
     // Current route path (reactive)
-    let currentPath = $derived(getCurrentPath());
+    const currentPath = $derived(getCurrentPath());
 
     // Current component (lazy loaded)
     let CurrentComponent = $state<Component | null>(null);
@@ -35,7 +38,19 @@
             } finally {
                 isLoading = false;
             }
-        })().catch((err) => console.error("Failed to load route", err));
+        })().catch((err) => Logger.error("Failed to load route", err));
+    });
+
+    // Apply global font settings
+    $effect(() => {
+        const { fontSize, fontFamily } = settings.value;
+        if (fontFamily) {
+            loadFont(fontFamily);
+            document.documentElement.style.setProperty("--app-font-family", fontFamily);
+        }
+        if (fontSize) {
+            document.documentElement.style.setProperty("--app-font-size", `${fontSize}px`);
+        }
     });
 </script>
 
@@ -43,28 +58,39 @@
     <title>ArisuTalk</title>
 </svelte:head>
 
-{#if isLoading}
-    <div class="flex items-center justify-center w-full h-full text-base-content/50">
-        Loading...
-    </div>
-{:else if CurrentComponent}
-    <CurrentComponent />
-{/if}
-
-{#if uiState.settingsModalOpen}
-    {#await import("@/components/SettingsModal.svelte")}
+<IconContext values={{ weight: "bold", size: 24, mirrored: false }}>
+    {#if isLoading}
         <div class="flex items-center justify-center w-full h-full text-base-content/50">
-            Loading settings...
+            Loading...
         </div>
-    {:then { default: Component }}
-        <Component />
-    {:catch error}
-        <div
-            class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white"
-        >
-            Failed to load settings modal: {String(error)}
-        </div>
-    {/await}
-{/if}
+    {:else if CurrentComponent}
+        <CurrentComponent />
+    {/if}
 
-<ToastContainer />
+    {#if uiState.settingsModalOpen}
+        {#await import("@/components/SettingsModal.svelte")}
+            <div
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 text-base-content/70 backdrop-blur-sm"
+            >
+                <span class="loading loading-spinner loading-lg"></span>
+            </div>
+        {:then { default: Component }}
+            <Component />
+        {:catch error}
+            <div
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 text-error backdrop-blur-sm"
+            >
+                <div class="bg-base-100 p-8 rounded-xl shadow-xl border border-error/20">
+                    <h3 class="font-bold text-lg mb-2">Error Loading Settings</h3>
+                    <p>{String(error)}</p>
+                    <button
+                        class="btn btn-sm btn-ghost mt-4"
+                        onclick={() => uiState.closeSettingsModal()}>Close</button
+                    >
+                </div>
+            </div>
+        {/await}
+    {/if}
+
+    <ToastContainer />
+</IconContext>

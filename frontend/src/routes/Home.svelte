@@ -1,6 +1,6 @@
 <!--
   @component Home
-  Landing/chat page placeholder.
+  Landing/chat page with character layout.
 -->
 <script lang="ts">
     const characterLayoutPromise = import("@/features/character/components/CharacterLayout.svelte");
@@ -8,9 +8,7 @@
 </script>
 
 {#await Promise.all([characterLayoutPromise, chatAreaPromise])}
-    <div class="home-layout flex items-center justify-center text-base-content/50">
-        Loading chat experience...
-    </div>
+    <div class="home-layout flex items-center justify-center text-base-content/50">Loading...</div>
 {:then [{ default: CharacterLayout }, { default: ChatArea }]}
     <div class="home-layout">
         <CharacterLayout>

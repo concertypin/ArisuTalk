@@ -31,14 +31,14 @@ describe("MagicPatternParser", () => {
 
     describe("Type Tests", () => {
         it("MagicPatternContext has correct structure", () => {
-            expectTypeOf<MagicPatternContext>().toMatchTypeOf<{
+            expectTypeOf<MagicPatternContext>().toExtend<{
                 character: Character;
                 persona: { name: string };
             }>();
         });
 
         it("parseMagicPatterns returns Promise<string>", () => {
-            expectTypeOf(parseMagicPatterns).returns.toMatchTypeOf<Promise<string>>();
+            expectTypeOf(parseMagicPatterns).returns.toExtend<Promise<string>>();
         });
 
         it("chat function has correct signature", () => {

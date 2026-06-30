@@ -52,13 +52,14 @@ function touchHalfOfSvelteFiles(targetDir: string[] = ["src", "test"]): void {
         return;
     }
 
-    // 2. Randomly select half of the files using Fisher-Yates shuffle
+    // 2. Randomly select half of the files
+    // Fisher-Yates shuffle for uniform distribution
     const shuffled = [...allFiles];
     for (let i = shuffled.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
-    const halfCount = Math.ceil(allFiles.length / 2);
+    const halfCount = Math.ceil(shuffled.length / 2);
     const targetFiles = shuffled.slice(0, halfCount);
 
     const now = new Date();

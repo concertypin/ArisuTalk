@@ -49,4 +49,23 @@ describe("Settings Store", () => {
             expect.objectContaining({ theme: "light" })
         );
     });
+
+    it("should still mark as loaded even if init fails", async () => {
+        vi.mocked(mockAdapter.getSettings).mockRejectedValue(new Error("DB error"));
+
+        await settings.init();
+        expect(settings.isLoaded).toBe(true);
+        // Should keep default values
+        expect(settings.value.theme).toBe("system");
+    });
+
+    it("should not throw when save fails", async () => {
+        vi.mocked(mockAdapter.saveSettings).mockRejectedValue(new Error("Save failed"));
+
+        await settings.init();
+        settings.value.theme = "light";
+
+        // Should not throw
+        await expect(settings.save()).resolves.toBeUndefined();
+    });
 });

@@ -1,3 +1,6 @@
+// oxlint-disable no-console
+// It's logger, so we should use console
+
 import type { StandardLogEntry, LogLevel, StructuredLogEntry } from "./Logger";
 import type { StructuredLogLevel } from "./LogType";
 

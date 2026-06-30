@@ -54,6 +54,7 @@ export const exampleCharacter: Character = {
     assets: {
         assets: [
             {
+                id: "profile-image",
                 data: profileImageUrl,
                 mimeType: "image/png",
                 name: "profile.png",
@@ -65,7 +66,7 @@ export const exampleCharacter: Character = {
     specVersion: 0,
     id: "test-1db482ab-aefa-4d96-aa95-3544c8f04b80",
     prompt: {
-        description: description,
+        description,
         authorsNote: "", // No author's note provided
         lorebook: {
             config: {
@@ -140,7 +141,7 @@ export const exampleCharacter: Character = {
         },
     },
     avatarUrl: profileImageUrl,
-    metadata: metadata,
+    metadata,
 };
 
 export const exampleMessageData: Message[] = [

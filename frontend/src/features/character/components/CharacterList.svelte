@@ -1,23 +1,32 @@
 <script lang="ts">
-    import { characterStore } from "../stores/characterStore.svelte";
+    import { characterStore } from "@/features/character/stores/characterStore.svelte";
     import CharacterCard from "./CharacterCard.svelte";
     import { getCardParseWorker } from "@/lib/workers/workerClient";
-    import { OpFSAssetStorageAdapter } from "../adapters/assetStorage/OpFSAssetStorageAdapter";
+    import { OpFSAssetStorageAdapter } from "@/features/character/adapters/assetStorage/OpFSAssetStorageAdapter";
     import { transfer } from "comlink";
-    import { remapAssetToUint8Array, collectTransferableBuffers } from "../utils/assetEncoding";
+    import {
+        remapAssetToUint8Array,
+        collectTransferableBuffers,
+    } from "@/features/character/utils/assetEncoding";
     import { Logger } from "@common/logger/Logger";
+    import { cloneDeep } from "lodash-es";
 
     type Props = {
         onEdit: (index: number) => void;
     };
 
-    let { onEdit }: Props = $props();
-    let worker = getCardParseWorker();
+    const { onEdit }: Props = $props();
+    const worker = getCardParseWorker();
+
+    function getDeleteConfirmModal(): HTMLDialogElement | null {
+        const modal = document.getElementById("delete-confirm-modal");
+        return modal instanceof HTMLDialogElement ? modal : null;
+    }
 
     async function handleDelete(index: number) {
-        const modal = document.getElementById("delete-confirm-modal") as HTMLDialogElement;
+        const modal = getDeleteConfirmModal();
         if (!modal) {
-            console.error("Delete confirmation modal not found");
+            Logger.error("Delete confirmation modal not found");
             return;
         }
 
@@ -33,18 +42,18 @@
     }
 
     async function confirmDelete() {
-        const modal = document.getElementById("delete-confirm-modal") as HTMLDialogElement;
+        const modal = getDeleteConfirmModal();
         if (!modal) return;
 
         const idxStr = modal.dataset.deleteIndex;
         if (!idxStr) {
-            console.error("No delete index set on modal");
+            Logger.error("No delete index set on modal");
             modal.close();
             return;
         }
         const index = Number(idxStr);
         if (!Number.isFinite(index)) {
-            console.error("Invalid delete index on modal:", idxStr);
+            Logger.error("Invalid delete index on modal:", idxStr);
             modal.close();
             return;
         }
@@ -74,7 +83,7 @@
     async function handleExport(index: number) {
         // Export character at index
         // Cloning first to avoid mutating store data.
-        const char = structuredClone($state.snapshot(characterStore.characters[index]));
+        const char = cloneDeep($state.snapshot(characterStore.characters[index]));
 
         // Remap all assets to use Uint8Array for binary data
         const assetStorage = new OpFSAssetStorageAdapter();

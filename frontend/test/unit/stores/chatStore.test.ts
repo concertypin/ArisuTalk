@@ -1,43 +1,4 @@
-import { describe, test, expect, vi, beforeEach, afterEach } from "vitest";
-
-describe.concurrent("ChatStore Settings Loading", () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
-    });
-
-    afterEach(() => {
-        vi.useRealTimers();
-    });
-
-    test.concurrent("waits for settings to load with correct polling interval", async () => {
-        // This test verifies the constants are used correctly
-        const SETTINGS_POLL_TIMEOUT_MS = 5000;
-        const SETTINGS_POLL_INTERVAL_MS = 100;
-
-        // Calculate expected iterations
-        const expectedIterations = SETTINGS_POLL_TIMEOUT_MS / SETTINGS_POLL_INTERVAL_MS;
-
-        expect(expectedIterations).toBe(50);
-        expect(SETTINGS_POLL_INTERVAL_MS).toBe(100);
-        expect(SETTINGS_POLL_TIMEOUT_MS).toBe(5000);
-    });
-
-    test.concurrent("polling timeout is 5 seconds", async () => {
-        const TIMEOUT_MS = 5000;
-        const INTERVAL_MS = 100;
-
-        // Verify the math
-        expect(TIMEOUT_MS / INTERVAL_MS).toBe(50);
-    });
-
-    test.concurrent("polling interval is 100ms", async () => {
-        const INTERVAL_MS = 100;
-
-        // Verify interval is reasonable
-        expect(INTERVAL_MS).toBeGreaterThan(0);
-        expect(INTERVAL_MS).toBeLessThanOrEqual(1000);
-    });
-});
+import { describe, test, expect } from "vitest";
 
 describe.concurrent("ChatStore Provider Loading Logic", () => {
     test.concurrent("mapProviderType maps Gemini correctly", async () => {

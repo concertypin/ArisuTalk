@@ -1,7 +1,11 @@
 <script lang="ts">
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import { Trash2, Edit, Download, ChevronLeft, ChevronRight } from "@lucide/svelte";
-    import { opfsAdapter } from "../adapters/assetStorage/OpFSAssetStorageAdapter";
+    import TrashIcon from "phosphor-svelte/lib/TrashIcon";
+    import PencilSimpleIcon from "phosphor-svelte/lib/PencilSimpleIcon";
+    import DownloadSimpleIcon from "phosphor-svelte/lib/DownloadSimpleIcon";
+    import CaretLeftIcon from "phosphor-svelte/lib/CaretLeftIcon";
+    import CaretRightIcon from "phosphor-svelte/lib/CaretRightIcon";
+    import { opfsAdapter } from "@/features/character/adapters/assetStorage/OpFSAssetStorageAdapter";
     import { IfNotExistBehavior } from "@/lib/interfaces";
 
     type Props = {
@@ -13,7 +17,7 @@
         isFirst?: boolean;
         isLast?: boolean;
     };
-    let {
+    const {
         character,
         onEdit,
         onDelete,
@@ -103,7 +107,7 @@
                     onclick={() => onMove?.(-1)}
                     aria-label="Move Backward"
                 >
-                    <ChevronLeft size={16} />
+                    <CaretLeftIcon size={16} />
                 </button>
                 <button
                     class="btn btn-ghost btn-xs"
@@ -111,22 +115,22 @@
                     onclick={() => onMove?.(1)}
                     aria-label="Move Forward"
                 >
-                    <ChevronRight size={16} />
+                    <CaretRightIcon size={16} />
                 </button>
             </div>
             <div class="flex gap-1">
                 <button class="btn btn-ghost btn-xs" onclick={onExport} aria-label="Export">
-                    <Download size={16} />
+                    <DownloadSimpleIcon size={16} />
                 </button>
                 <button class="btn btn-ghost btn-xs" onclick={onEdit} aria-label="Edit">
-                    <Edit size={16} />
+                    <PencilSimpleIcon size={16} />
                 </button>
                 <button
                     class="btn btn-ghost btn-xs text-error"
                     onclick={onDelete}
                     aria-label="Delete"
                 >
-                    <Trash2 size={16} />
+                    <TrashIcon size={16} />
                 </button>
             </div>
         </div>

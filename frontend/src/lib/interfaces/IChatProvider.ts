@@ -1,5 +1,5 @@
 import type { BaseMessage } from "@langchain/core/messages";
-import type { LLMGenerationParameters } from "../types/IDataModel";
+import type { LLMGenerationParameters } from "@/lib/types/IDataModel";
 
 /**
  * Common settings shared across all chat providers.

@@ -20,7 +20,7 @@
         children: Snippet;
     };
 
-    let {
+    const {
         variant = "primary",
         size = "md",
         disabled = false,

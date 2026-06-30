@@ -1,15 +1,39 @@
 <script lang="ts">
-    import { chatStore } from "../stores/chatStore.svelte";
-    import { Plus, MessageSquare, Trash2 } from "@lucide/svelte";
+    import { chatStore } from "@/features/chat/stores/chatStore.svelte";
+    import PlusIcon from "phosphor-svelte/lib/PlusIcon";
+    import ChatTeardropTextIcon from "phosphor-svelte/lib/ChatTeardropTextIcon";
+    import TrashIcon from "phosphor-svelte/lib/TrashIcon";
 
     type Props = {
         characterId: string;
     };
 
-    let { characterId }: Props = $props();
+    const { characterId }: Props = $props();
 
-    let chats = $derived(chatStore.chats.filter((c) => c.characterId === characterId));
-    let activeChatId = $derived(chatStore.activeChatId);
+    const chats = $derived(chatStore.chats.filter((c) => c.characterId === characterId));
+    const activeChatId = $derived(chatStore.activeChatId);
+
+    // Automatically select the most recent chat when character changes
+    $effect(() => {
+        const characterChats = chats; // Use the derived chats
+        const currentActive = chatStore.activeChatId
+            ? chatStore.chats.find((c) => c.id === chatStore.activeChatId)
+            : null;
+
+        // If the active chat doesn't belong to the current character,
+        // switch to the most recent chat of this character
+        if (!currentActive || currentActive.characterId !== characterId) {
+            if (characterChats.length > 0) {
+                // Sort by lastMessage or updatedAt to get the most recent
+                const mostRecent = [...characterChats].sort(
+                    (a, b) => (b.lastMessage || 0) - (a.lastMessage || 0)
+                )[0];
+                void chatStore.setActiveChat(mostRecent.id);
+            } else {
+                void chatStore.setActiveChat(null);
+            }
+        }
+    });
 
     async function handleNewChat() {
         const id = await chatStore.createChat(characterId, `Chat ${chats.length + 1}`);
@@ -36,7 +60,7 @@
             onclick={() => void handleNewChat()}
             aria-label="New Chat"
         >
-            <Plus size={16} />
+            <PlusIcon size={16} />
         </button>
     </div>
 
@@ -49,13 +73,14 @@
                     : ''}"
                 onclick={() => handleSelect(chat.id)}
             >
-                <MessageSquare size={16} class="opacity-70" />
+                <ChatTeardropTextIcon size={16} class="opacity-70" />
                 <span class="truncate text-sm font-medium flex-1 text-left">{chat.name}</span>
 
                 <div class="opacity-0 group-hover:opacity-100 transition-opacity">
                     <div
                         role="button"
                         tabindex="0"
+                        aria-label="Delete"
                         class="p-1 hover:text-error rounded"
                         onclick={(e) => void handleDelete(e, chat.id)}
                         onkeydown={(e) => {
@@ -64,7 +89,7 @@
                             }
                         }}
                     >
-                        <Trash2 size={14} />
+                        <TrashIcon size={14} />
                     </div>
                 </div>
             </button>

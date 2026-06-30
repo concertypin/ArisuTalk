@@ -7,10 +7,13 @@
 			"path": "./tsconfig.worker.json"
 		},
 		{
-			"path": "./tsconfig.test.json"
+			"path": "./tsconfig.common.json"
 		},
 		{
-			"path": "./tsconfig.common.json"
+			"path": "./tsconfig.node.json"
+		},
+		{
+			"path": "./tsconfig.test.json"
 		}
 	],
 	"files": [] //Empty cause child config handles that

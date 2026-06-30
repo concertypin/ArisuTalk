@@ -2,6 +2,7 @@ import { defineConfig } from "oxlint";
 import oxlintEslintWarn from "./scripts/linter/oxlint-eslint-warn.js";
 import oxlintEslintError from "./scripts/linter/oxlint-eslint-error.js";
 export default defineConfig({
+    jsPlugins: ["eslint-plugin-zod"],
     extends: [oxlintEslintError, oxlintEslintWarn],
     ignorePatterns: [
         "**/node_modules/**",

@@ -1,22 +1,25 @@
 <script lang="ts">
-    import { personaStore } from "../stores/personaStore.svelte";
+    import { personaStore } from "@/features/persona/stores/personaStore.svelte";
     import { type IAssetStorageAdapter, IfNotExistBehavior } from "@/lib/interfaces";
     import { OpFSAssetStorageAdapter } from "@/features/character/adapters/assetStorage/OpFSAssetStorageAdapter";
-    import type { Persona } from "../schema";
-    import { Trash2, SquarePen, ChevronUp, ChevronDown } from "@lucide/svelte";
+    import type { Persona } from "@/features/persona/schema";
+    import TrashIcon from "phosphor-svelte/lib/TrashIcon";
+    import PencilSimpleIcon from "phosphor-svelte/lib/PencilSimpleIcon";
+    import CaretUpIcon from "phosphor-svelte/lib/CaretUpIcon";
+    import CaretDownIcon from "phosphor-svelte/lib/CaretDownIcon";
 
     type Props = {
         onEdit: (persona: Persona) => void;
     };
 
-    let { onEdit }: Props = $props();
+    const { onEdit }: Props = $props();
 
     function handleDelete(id: string) {
         if (confirm("Delete this persona?")) {
             personaStore.remove(id);
         }
     }
-    let personas = $derived(personaStore.personas);
+    const personas = $derived(personaStore.personas);
     $effect(() => {
         // Auto-select first persona if none selected
         if (!personaStore.activePersonaId && personaStore.personas.length > 0) {
@@ -92,7 +95,7 @@
                     onclick={() => personaStore.reorder(index, index - 1)}
                     aria-label="Move Up"
                 >
-                    <ChevronUp size={14} />
+                    <CaretUpIcon size={14} />
                 </button>
                 <button
                     class="btn btn-ghost btn-xs btn-square"
@@ -100,21 +103,21 @@
                     onclick={() => personaStore.reorder(index, index + 1)}
                     aria-label="Move Down"
                 >
-                    <ChevronDown size={14} />
+                    <CaretDownIcon size={14} />
                 </button>
                 <button
                     class="btn btn-ghost btn-xs btn-square"
                     onclick={() => onEdit(persona)}
                     aria-label="Edit"
                 >
-                    <SquarePen size={14} />
+                    <PencilSimpleIcon size={14} />
                 </button>
                 <button
                     class="btn btn-ghost btn-xs btn-square text-error"
                     onclick={() => handleDelete(persona.id)}
                     aria-label="Delete"
                 >
-                    <Trash2 size={14} />
+                    <TrashIcon size={14} />
                 </button>
             </div>
         </div>

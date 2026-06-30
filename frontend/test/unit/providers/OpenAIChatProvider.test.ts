@@ -249,7 +249,7 @@ describe("OpenAIChatProvider Type Tests", () => {
         const messages = [new HumanMessage("test")];
 
         const result = provider.generate(messages);
-        expectTypeOf(result).toMatchTypeOf<Promise<string>>();
+        expectTypeOf(result).toExtend<Promise<string>>();
 
         const resolved = await result;
         expectTypeOf(resolved).toBeString();
@@ -265,7 +265,7 @@ describe("OpenAIChatProvider Type Tests", () => {
         const messages = [new HumanMessage("test")];
 
         const stream = provider.stream(messages);
-        expectTypeOf(stream).toMatchTypeOf<AsyncGenerator<string, void, unknown>>();
+        expectTypeOf(stream).toExtend<AsyncGenerator<string, void, unknown>>();
     });
 
     it("isReady returns boolean", async () => {
@@ -289,7 +289,7 @@ describe("OpenAIChatProvider Type Tests", () => {
         const provider = await OpenAIChatProvider.factory.connect(commonSettings);
         const result = provider.disconnect();
 
-        expectTypeOf(result).toMatchTypeOf<Promise<void>>();
+        expectTypeOf(result).toExtend<Promise<void>>();
     });
 
     it("abort method returns void", async () => {

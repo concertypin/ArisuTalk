@@ -7,14 +7,19 @@
 
     let currentLevel = $state<LogLevel>(Logger.getLevel());
 
+    function isLogLevel(value: string): value is LogLevel {
+        return Object.hasOwn(LOG_LEVELS, value);
+    }
+
     function handleLevelChange(event: Event) {
-        const select = event.target as HTMLSelectElement;
-        const level = select.value as LogLevel;
+        if (!(event.currentTarget instanceof HTMLSelectElement)) return;
+        const level = event.currentTarget.value;
+        if (!isLogLevel(level)) return;
         currentLevel = level;
         Logger.setLevel(level);
     }
 
-    const levels = Object.keys(LOG_LEVELS) as LogLevel[];
+    const levels = Object.keys(LOG_LEVELS).filter(isLogLevel);
 </script>
 
 <div class="form-control w-full max-w-xs">

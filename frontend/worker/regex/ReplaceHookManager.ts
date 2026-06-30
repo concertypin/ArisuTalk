@@ -1,4 +1,5 @@
 import type { RegexRule } from "./types";
+import { Logger } from "@common/logger/Logger";
 
 /**
  * Manages and applies a collection of regex-based replacement hooks.
@@ -49,7 +50,7 @@ export class ReplaceHookManager {
                 const re = new RegExp(rule.pattern, rule.flags || "g");
                 result = result.replace(re, rule.replacement);
             } catch (e) {
-                console.error(`Failed to apply regex rule: ${rule.pattern}`, e);
+                Logger.error(`Failed to apply regex rule: ${rule.pattern}`, e);
             }
         }
         return result;

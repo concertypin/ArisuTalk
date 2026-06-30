@@ -26,23 +26,47 @@ export type WorkerApi<T> =
 
 function createWorkerApi<T>(worker: Worker): WorkerApi<T> {
     const api = Comlink.wrap<T>(worker);
+    let isDisabled = false;
 
-    // Automatically set up logging if the worker supports it
-    if ("setLogReceiver" in api && typeof api.setLogReceiver === "function") {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        void api.setLogReceiver(Comlink.proxy(logReceiver));
-    }
-
-    return {
-        ...api,
-        terminate(this) {
-            this.disabled = true;
-            worker.terminate();
+    const handler: ProxyHandler<Comlink.Remote<T>> = {
+        get: (target, prop) => {
+            if (prop === "terminate") {
+                return function () {
+                    isDisabled = true;
+                    worker.terminate();
+                };
+            }
+            if (prop === "disabled") {
+                return isDisabled;
+            }
+            if (typeof prop === "symbol") return Reflect.get(target, prop);
+            return Reflect.get(target, prop);
         },
     };
+
+    // Proxy's inferred return type (Comlink.Remote<T>) doesn't include terminate/disabled
+    // oxlint-disable-next-line typescript-eslint/consistent-type-assertions
+    return new Proxy(api, handler) as WorkerApi<T>;
 }
+
 // Used example's one, but actually all worker import have the same type.
-type WorkerImport = typeof import("@worker/example/main?worker");
+type WorkerImport = {
+    default: new () => Worker;
+};
+
+function isLogReceiverInvoker(
+    value: unknown
+): value is (receiver: typeof logReceiver) => Promise<void> {
+    return typeof value === "function";
+}
+
+function attachLogReceiver<T>(api: WorkerApi<T>) {
+    // Automatically set up logging if the worker supports it.
+    const setLogReceiver = Reflect.get(api, "setLogReceiver");
+    if (isLogReceiverInvoker(setLogReceiver)) {
+        void setLogReceiver(Comlink.proxy(logReceiver));
+    }
+}
 
 /**
  * Creates a reusable worker factory with caching functionality.
@@ -51,7 +75,10 @@ type WorkerImport = typeof import("@worker/example/main?worker");
  * @param workerImport The function to dynamically import the worker module.
  * @returns A function that returns a cached worker instance
  */
-function createCachedWorkerFactory<T>(workerImport: () => Promise<WorkerImport>) {
+function createCachedWorkerFactory<T>(
+    workerImport: () => Promise<WorkerImport>,
+    setup?: (api: WorkerApi<T>) => void
+) {
     let workerInstance: WorkerApi<T> | null = null;
     let initPromise: Promise<WorkerApi<T>> | null = null;
 
@@ -66,6 +93,7 @@ function createCachedWorkerFactory<T>(workerImport: () => Promise<WorkerImport>)
             const WorkerClass = (await workerImport()).default;
             const worker = new WorkerClass();
             const api = createWorkerApi<T>(worker);
+            setup?.(api);
             workerInstance = api;
             initPromise = null;
             return api;
@@ -85,12 +113,16 @@ export const getExampleWorker = createCachedWorkerFactory<ExampleWorkerApi>(
     () => import("@worker/example/main?worker")
 );
 
+function createLoggedCachedWorkerFactory<T>(workerImport: () => Promise<WorkerImport>) {
+    return createCachedWorkerFactory<T>(workerImport, attachLogReceiver);
+}
+
 /**
  * Factory for the Card Parse Worker with caching.
  * Reuses the same worker instance across calls for better performance.
  * Automatically cached using createCachedWorkerFactory.
  */
-export const getCardParseWorker = createCachedWorkerFactory<typeof CardParseWorkerApi>(
+export const getCardParseWorker = createLoggedCachedWorkerFactory<typeof CardParseWorkerApi>(
     () => import("@worker/cardparse/main?worker")
 );
 
@@ -99,7 +131,7 @@ export const getCardParseWorker = createCachedWorkerFactory<typeof CardParseWork
  * Provides a sandboxed environment for executing JavaScript.
  * Automatically cached using createCachedWorkerFactory.
  */
-export const getScriptingWorker = createCachedWorkerFactory<ScriptingWorkerApi>(
+export const getScriptingWorker = createLoggedCachedWorkerFactory<ScriptingWorkerApi>(
     () => import("@worker/scripting/main?worker")
 );
 
@@ -108,6 +140,6 @@ export const getScriptingWorker = createCachedWorkerFactory<ScriptingWorkerApi>(
  * Provides non-blocking text processing using native JS RegExp.
  * Automatically cached using createCachedWorkerFactory.
  */
-export const getRegexWorker = createCachedWorkerFactory<RegexWorkerApi>(
+export const getRegexWorker = createLoggedCachedWorkerFactory<RegexWorkerApi>(
     () => import("@worker/regex/main?worker")
 );

@@ -1,5 +1,6 @@
 import type { IPersonaStorageAdapter } from "@/lib/interfaces";
 import { PersonaSchema, type Persona } from "@/features/persona/schema";
+import { Logger } from "@common/logger/Logger";
 
 export class LocalStoragePersonaAdapter implements IPersonaStorageAdapter {
     private readonly PERSONAS_KEY = "arisutalk_personas";
@@ -18,7 +19,7 @@ export class LocalStoragePersonaAdapter implements IPersonaStorageAdapter {
             const result = PersonaSchema.array().safeParse(parsed);
             return result.success ? result.data : [];
         } catch (e) {
-            console.error("Failed to load personas", e);
+            Logger.error("Failed to load personas", e);
             return [];
         }
     }
@@ -27,7 +28,7 @@ export class LocalStoragePersonaAdapter implements IPersonaStorageAdapter {
         try {
             localStorage.setItem(this.PERSONAS_KEY, JSON.stringify(personas));
         } catch (e) {
-            console.error("Failed to save personas", e);
+            Logger.error("Failed to save personas", e);
         }
     }
 
@@ -74,7 +75,7 @@ export class LocalStoragePersonaAdapter implements IPersonaStorageAdapter {
         try {
             return localStorage.getItem(this.ACTIVE_KEY);
         } catch (e) {
-            console.error("Failed to get active persona", e);
+            Logger.error("Failed to get active persona", e);
             return null;
         }
     }
@@ -87,7 +88,7 @@ export class LocalStoragePersonaAdapter implements IPersonaStorageAdapter {
                 localStorage.removeItem(this.ACTIVE_KEY);
             }
         } catch (e) {
-            console.error("Failed to set active persona", e);
+            Logger.error("Failed to set active persona", e);
         }
     }
 }

@@ -1,6 +1,7 @@
 import type { ISettingsStorageAdapter } from "@/lib/interfaces";
-import { Settings, SettingsSchema } from "@/lib/types/IDataModel";
+import { type Settings, SettingsSchema } from "@/lib/types/IDataModel";
 import { apply } from "@arisutalk/character-spec/utils";
+import { Logger } from "@common/logger/Logger";
 
 /**
  * LocalStorage-based settings storage adapter.
@@ -11,7 +12,7 @@ export class LocalStorageSettingsAdapter implements ISettingsStorageAdapter {
 
     async init(): Promise<void> {
         if (!import.meta.env.DEV) {
-            console.warn("LocalStorageSettingsAdapter is for development/testing only.");
+            Logger.warn("LocalStorageSettingsAdapter is for development/testing only.");
         }
         return Promise.resolve();
     }

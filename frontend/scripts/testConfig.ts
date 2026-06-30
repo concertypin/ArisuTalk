@@ -1,4 +1,4 @@
-/// <reference types="vitest/config"/>
+import "vitest/config";
 import { type UserConfig } from "vite";
 import { playwright } from "@vitest/browser-playwright";
 import type { TestProjectInlineConfiguration as TestProject } from "vitest/config";
@@ -31,7 +31,17 @@ const coverage: TestConfig["coverage"] & { provider: "v8" } = {
     reportsDirectory: "./coverage",
     include: ["src/**/*.ts", "src/**/*.svelte", "common/**/*.ts", "worker/**/*.ts"],
     reportOnFailure: true,
-    exclude: ["node_modules/", "dist/", "test/", "**/*.d.ts", "**/*.config.*", "static/"],
+    exclude: [
+        "node_modules/",
+        "dist/",
+        "test/",
+        "**/*.d.ts",
+        "**/*.config.*",
+        "static/",
+        // Example worker is a template reference, not actual production code.
+        // Kept as a reference for creating new workers; excluded from coverage.
+        "worker/example/**",
+    ],
     enabled: true,
 };
 const noPluginTiming: TestProject["build"] = {

@@ -1,6 +1,7 @@
-import { type Persona, PersonaSchema } from "../schema";
+import { type Persona, PersonaSchema } from "@/features/persona/schema";
 import type { IPersonaStorageAdapter } from "@/lib/interfaces";
 import { StorageResolver } from "@/lib/adapters/storage/storageResolver";
+import { Logger } from "@common/logger/Logger";
 
 export class PersonaStore {
     personas = $state<Persona[]>([]);
@@ -47,7 +48,7 @@ export class PersonaStore {
             }
             this.activePersonaId = await this.adapter.getActivePersonaId();
         } catch (e) {
-            console.error("Failed to load personas", e);
+            Logger.error("Failed to load personas", e);
         }
     }
 
@@ -64,7 +65,7 @@ export class PersonaStore {
             const active = localStorage.getItem("arisutalk_active_persona");
             this.activePersonaId = active;
         } catch (e) {
-            console.error("Failed to synchronously load personas", e);
+            Logger.error("Failed to synchronously load personas", e);
         }
     }
 
@@ -82,7 +83,7 @@ export class PersonaStore {
         // Persist in background.
         void this.adapter
             .savePersona(persona)
-            .catch((e) => console.error("Failed to save persona", e));
+            .catch((e) => Logger.error("Failed to save persona", e));
     }
 
     update(id: string, updated: Persona) {
@@ -91,14 +92,14 @@ export class PersonaStore {
             this.personas[index] = updated;
             void this.adapter
                 .updatePersona(id, updated)
-                .catch((e) => console.error("Failed to update persona", e));
+                .catch((e) => Logger.error("Failed to update persona", e));
         }
     }
 
     remove(id: string) {
         void this.adapter
             .deletePersona(id)
-            .catch((e) => console.error("Failed to delete persona", e));
+            .catch((e) => Logger.error("Failed to delete persona", e));
         this.personas = this.personas.filter((p) => p.id !== id);
         if (this.activePersonaId === id) {
             this.activePersonaId = null;
@@ -110,12 +111,12 @@ export class PersonaStore {
     select(id: string | null) {
         void this.adapter
             .setActivePersonaId(id)
-            .catch((e) => console.error("Failed to set active persona", e));
+            .catch((e) => Logger.error("Failed to set active persona", e));
         this.activePersonaId = id;
     }
 
-    get activePersona() {
-        return this.personas.find((p) => p.id === this.activePersonaId);
+    get activePersona(): Persona | null {
+        return this.personas.find((p) => p.id === this.activePersonaId) || null;
     }
 
     // --- Reorder Support ---
@@ -125,7 +126,10 @@ export class PersonaStore {
         try {
             const stored = localStorage.getItem(this.ORDER_KEY);
             if (!stored) return [];
-            return JSON.parse(stored) as string[];
+            const parsed: unknown = JSON.parse(stored);
+            return Array.isArray(parsed) && parsed.every((value) => typeof value === "string")
+                ? parsed
+                : [];
         } catch {
             return [];
         }

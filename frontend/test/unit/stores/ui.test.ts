@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { uiState } from "@/lib/stores/ui.svelte";
+import { exampleCharacter } from "@/const/example_data";
 
 describe("UI Store", () => {
     beforeEach(() => {
@@ -28,5 +29,19 @@ describe("UI Store", () => {
         expect(uiState.settingsModalOpen).toBe(true);
         uiState.toggleSettingsModal();
         expect(uiState.settingsModalOpen).toBe(false);
+    });
+
+    it("should open and close character settings for a character", () => {
+        const character = exampleCharacter;
+        expect(uiState.characterSettingsOpen).toBe(false);
+        expect(uiState.characterSettingsTarget).toBeNull();
+
+        uiState.openCharacterSettings(character);
+        expect(uiState.characterSettingsOpen).toBe(true);
+        expect(uiState.characterSettingsTarget).toBe(character);
+
+        uiState.closeCharacterSettings();
+        expect(uiState.characterSettingsOpen).toBe(false);
+        expect(uiState.characterSettingsTarget).toBeNull();
     });
 });

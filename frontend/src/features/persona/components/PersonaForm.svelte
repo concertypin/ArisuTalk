@@ -1,7 +1,12 @@
 <script lang="ts">
-    import { personaStore } from "../stores/personaStore.svelte";
-    import { PersonaSchema, type Persona } from "../schema";
-    import { Plus, User, FileText, StickyNote, SquarePen, Shield } from "@lucide/svelte";
+    import { personaStore } from "@/features/persona/stores/personaStore.svelte";
+    import { PersonaSchema, type Persona } from "@/features/persona/schema";
+    import PlusIcon from "phosphor-svelte/lib/PlusIcon";
+    import UserIcon from "phosphor-svelte/lib/UserIcon";
+    import FileTextIcon from "phosphor-svelte/lib/FileTextIcon";
+    import NoteIcon from "phosphor-svelte/lib/NoteIcon";
+    import PencilSimpleIcon from "phosphor-svelte/lib/PencilSimpleIcon";
+    import ShieldIcon from "phosphor-svelte/lib/ShieldIcon";
     import { ZodError } from "zod";
 
     type Props = {
@@ -10,7 +15,7 @@
         onCancel: () => void;
     };
 
-    let { persona = undefined, onSave, onCancel }: Props = $props();
+    const { persona = undefined, onSave, onCancel }: Props = $props();
 
     let name = $state("");
     let description = $state("");
@@ -67,10 +72,10 @@
 <div class="flex flex-col h-full">
     <div class="flex items-center gap-2 mb-6 pb-2 border-b border-base-300">
         {#if persona}
-            <SquarePen class="w-5 h-5 text-primary" />
+            <PencilSimpleIcon class="w-5 h-5 text-primary" />
             <h3 class="font-bold text-lg">Edit Persona</h3>
         {:else}
-            <Plus class="w-5 h-5 text-primary" />
+            <PlusIcon class="w-5 h-5 text-primary" />
             <h3 class="font-bold text-lg">Create New Persona</h3>
         {/if}
     </div>
@@ -84,7 +89,7 @@
 
         <fieldset class="fieldset w-full">
             <label for="p_name" class="fieldset-legend flex items-center gap-2">
-                <User size={16} /> Name (Display Name)
+                <UserIcon size={16} /> Name (Display Name)
             </label>
             <input
                 type="text"
@@ -97,7 +102,7 @@
 
         <fieldset class="fieldset w-full">
             <label for="p_desc" class="fieldset-legend flex items-center gap-2">
-                <FileText size={16} /> Description (For AI)
+                <FileTextIcon size={16} /> Description (For AI)
                 <span class="text-xs opacity-60 ml-auto">Visible to character</span>
             </label>
             <textarea
@@ -110,7 +115,7 @@
 
         <fieldset class="fieldset w-full">
             <label for="p_note" class="fieldset-legend flex items-center gap-2">
-                <StickyNote size={16} /> Note (Private)
+                <NoteIcon size={16} /> Note (Private)
             </label>
             <textarea
                 id="p_note"
@@ -122,7 +127,7 @@
 
         <fieldset class="fieldset w-full">
             <label for="p_low_level" class="fieldset-legend flex items-center gap-2">
-                <Shield size={16} /> Low-Level Access
+                <ShieldIcon size={16} /> Low-Level Access
             </label>
             <div class="flex items-center gap-4 bg-base-200 p-3 rounded-lg border border-base-300">
                 <input

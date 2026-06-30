@@ -1,0 +1,245 @@
+name: Frontend CI
+on:
+  pull_request:
+    paths:
+      - "frontend/**"
+      - ".github/workflows/**"
+      - "pnpm-lock.yaml"
+
+jobs:
+  setup:
+    name: Setup Cache
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: frontend/package.json
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: frontend/package.json
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: frontend
+      - name: Cache Playwright
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ hashFiles('pnpm-lock.yaml') }}
+      - name: Install Playwright Chromium
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: timeout 300 pnpm exec playwright install chromium
+        working-directory: frontend
+      - name: Install system deps
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: timeout 120 pnpm exec playwright install-deps chromium
+        working-directory: frontend
+
+
+  lint:
+    name: Frontend Lint
+    needs: [setup]
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: frontend/package.json
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: frontend/package.json
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: frontend
+
+      - name: Lint
+        run: pnpm -F frontend run lint
+
+      - name: Type check
+        run: pnpm -F frontend run check:types
+
+
+  build:
+    name: Frontend Build
+    needs: [setup]
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: frontend/package.json
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: frontend/package.json
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: frontend
+
+      - name: Build
+        run: pnpm -F frontend run build
+  tests:
+    name: Frontend Tests
+    needs: [setup]
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shardIndex: [1, 2, 3, 4, 5]
+        shardTotal: [5]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: frontend/package.json
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: frontend/package.json
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: frontend
+
+      - name: Restore Playwright
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ hashFiles('pnpm-lock.yaml') }}
+      - name: Install Playwright system deps
+        run: pnpm exec playwright install-deps chromium
+        working-directory: frontend
+
+      - name: Run tests
+        continue-on-error: true
+        run: pnpm -F frontend run test --reporter=blob --coverage.enabled --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+
+      - name: Upload blob report
+        uses: actions/upload-artifact@v4
+        with:
+          name: blob-report-${{ matrix.shardIndex }}
+          path: frontend/.vitest-reports/*
+          include-hidden-files: true
+          retention-days: 1
+
+  merge-reports:
+    name: Merge Reports
+    if: ${{ !cancelled() }}
+    needs: [tests]
+    permissions:
+      pull-requests: write
+      statuses: write
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: frontend/package.json
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: frontend/package.json
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: frontend
+
+      - name: Download blob reports
+        uses: actions/download-artifact@v4
+        with:
+          path: frontend/.vitest-reports
+          pattern: blob-report-*
+          merge-multiple: true
+
+      - name: Check for reports
+        id: check-reports
+        run: |
+          if compgen -G "frontend/.vitest-reports/*" > /dev/null 2>&1; then
+            echo "has-reports=true" >> $GITHUB_OUTPUT
+          else
+            echo "has-reports=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Merge reports
+        if: steps.check-reports.outputs.has-reports == 'true'
+        run: pnpm -F frontend run test --merge-reports --reporter=github-actions --reporter=default --coverage.reporter=text --coverage.reporter=json-summary
+
+      - name: Update Coverage Status
+        if: ${{ github.event_name == 'pull_request' && always() }}
+        uses: actions/github-script@v7
+        env:
+          JSON_PATH: frontend/coverage/coverage-summary.json
+          THRESHOLD: "80"
+        with:
+          script: |
+            const fs = require('fs');
+            const jsonPath = process.env.JSON_PATH;
+            const threshold = parseFloat(process.env.THRESHOLD);
+            if (!fs.existsSync(jsonPath)) {
+              core.info(`Coverage file not found: ${jsonPath}, skipping`);
+              return;
+            }
+            function pct(v) {
+              const n = typeof v === "number" ? v : parseFloat(v);
+              return isNaN(n) ? 0 : parseFloat(n.toFixed(2));
+            }
+            const summary = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+            const { lines, statements, functions, branches } = summary.total;
+            const linePct = pct(lines.pct);
+            const pass = linePct >= threshold;
+            const desc = `Lines: ${linePct}% | Stmts: ${pct(statements.pct)}% | Funcs: ${pct(functions.pct)}% | Branches: ${pct(branches.pct)}% (>=${threshold}%)`;
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: pass ? 'success' : 'failure',
+              context: 'Coverage',
+              description: desc,
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+            });
+            core.info(`Coverage: ${desc}`);

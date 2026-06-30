@@ -1,6 +1,7 @@
 import type { Character } from "@arisutalk/character-spec/v0/Character";
-import { getArisuDB } from "../IndexedDBHelper";
+import { getArisuDB } from "@/lib/adapters/storage/IndexedDBHelper";
 import type { ICharacterStorageAdapter, CharacterMetadata } from "@/lib/interfaces";
+import { cloneDeep } from "lodash-es";
 
 export class IDBCharacterAdapter implements ICharacterStorageAdapter {
     private db = getArisuDB();
@@ -10,7 +11,11 @@ export class IDBCharacterAdapter implements ICharacterStorageAdapter {
     }
 
     async saveCharacter(character: Character): Promise<void> {
-        await this.db.characters.put(character);
+        // Remove Svelte proxy wrapper by serializing/deserializing
+        // IndexedDB uses structuredClone internally which can't handle proxies
+        // So use cloneDeep to remove proxy wrapper
+        const plainCharacter = cloneDeep(character);
+        await this.db.characters.put(plainCharacter);
     }
 
     async getCharacter(id: string): Promise<Character | undefined> {

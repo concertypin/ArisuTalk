@@ -21,6 +21,8 @@ import { hookService } from "@/lib/services/HookService";
 import { characterStore } from "@/features/character/stores/characterStore.svelte";
 import { personaStore } from "@/features/persona/stores/personaStore.svelte";
 import { Logger } from "@common/logger/Logger";
+import type { Persona } from "@/features/persona/schema";
+import type { Character } from "@arisutalk/character-spec/types/v0/index";
 
 export class ChatStore {
     chats = $state<LocalChat[]>([]);
@@ -40,7 +42,11 @@ export class ChatStore {
      * Gets the context for the active chat including character and persona.
      * Centralizes lookup logic to avoid repetition and potential desync.
      */
-    private get activeChatContext() {
+    private get activeChatContext(): {
+        activeChat: LocalChat | null;
+        character: Character | undefined;
+        persona: Persona | null;
+    } {
         const activeChat = this.activeChatId
             ? this.chats.find((c) => c.id === this.activeChatId)
             : null;
@@ -56,7 +62,7 @@ export class ChatStore {
         }
 
         const persona = personaStore.activePersona;
-        return { activeChat, character, persona };
+        return { activeChat: activeChat ?? null, character, persona };
     }
 
     constructor(adapter?: IChatStorageAdapter) {
@@ -157,9 +163,7 @@ export class ChatStore {
                 break;
             default: {
                 const _exhaustiveCheck: never = config;
-                Logger.warn(
-                    `ChatStore: Provider "${(config as LLMConfig).provider}" not supported yet, falling back to Mock`
-                );
+                Logger.warn("ChatStore: Provider not supported yet, falling back to Mock");
                 await this.setProvider("MOCK", {
                     mockDelay: 50,
                     responses: [`Provider is not implemented yet.`],
@@ -189,7 +193,7 @@ export class ChatStore {
 
     async setProvider<T extends ProviderType>(
         type: T,
-        settings: CommonChatSettings & ProviderSettings[T]
+        providerSettings: CommonChatSettings & ProviderSettings[T]
     ) {
         if (this.activeProvider) {
             await this.activeProvider.disconnect();
@@ -197,28 +201,29 @@ export class ChatStore {
 
         Logger.structured("llm.request.start", {
             provider: type,
-            model: settings.model || "default", // Should check if model is in settings type
+            model: providerSettings.model || "default", // Should check if model is in settings type
         });
 
         switch (type) {
             case "ANTHROPIC": {
-                this.activeProvider = await AnthropicChatProvider.factory.connect(settings);
+                this.activeProvider = await AnthropicChatProvider.factory.connect(providerSettings);
                 break;
             }
             case "GEMINI": {
-                this.activeProvider = await GeminiChatProvider.factory.connect(settings);
+                this.activeProvider = await GeminiChatProvider.factory.connect(providerSettings);
                 break;
             }
             case "MOCK": {
-                this.activeProvider = await MockChatProvider.factory.connect(settings);
+                this.activeProvider = await MockChatProvider.factory.connect(providerSettings);
                 break;
             }
             case "OPENAI": {
-                this.activeProvider = await OpenAIChatProvider.factory.connect(settings);
+                this.activeProvider = await OpenAIChatProvider.factory.connect(providerSettings);
                 break;
             }
             case "OPENROUTER": {
-                this.activeProvider = await OpenRouterChatProvider.factory.connect(settings);
+                this.activeProvider =
+                    await OpenRouterChatProvider.factory.connect(providerSettings);
                 break;
             }
             default: {
@@ -326,6 +331,7 @@ export class ChatStore {
             id: assistantMessageId,
             chatId,
             role: "assistant",
+            timestamp: this.getNextTimestamp(),
             content: { type: "text", data: "" },
         });
 
@@ -339,7 +345,12 @@ export class ChatStore {
 
         let processedContent = fullContent;
         if (character) {
-            processedContent = await hookService.process(fullContent, character, "output", persona);
+            processedContent = await hookService.process(
+                fullContent,
+                character,
+                "output",
+                persona ?? undefined
+            );
         }
 
         await this.finalizeMessage(chatId, assistantMessage, processedContent);
@@ -349,6 +360,22 @@ export class ChatStore {
             provider: this.activeProvider?.constructor.name || "unknown",
             latencyMs: Date.now() - startTime,
         });
+    }
+
+    /**
+     * Generates a monotonic timestamp.
+     * Ensures that new messages always have a timestamp > the last message effectively.
+     */
+    private getNextTimestamp(): number {
+        const now = Date.now();
+        const lastMsg = this.activeMessages[this.activeMessages.length - 1];
+
+        if (!lastMsg?.timestamp) {
+            return now;
+        }
+
+        // Ensure the new timestamp is strictly greater than the last one.
+        return Math.max(now, lastMsg.timestamp + 1);
     }
 
     async sendMessage(content: string) {
@@ -363,13 +390,19 @@ export class ChatStore {
 
             let processedContent = content;
             if (character) {
-                processedContent = await hookService.process(content, character, "input", persona);
+                processedContent = await hookService.process(
+                    content,
+                    character,
+                    "input",
+                    persona ?? undefined
+                );
             }
 
             const userMessage: Message = apply(MessageSchema, {
                 id: crypto.randomUUID(),
                 chatId,
                 role: "user",
+                timestamp: this.getNextTimestamp(),
                 content: { type: "text", data: processedContent },
             });
 

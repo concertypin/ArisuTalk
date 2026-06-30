@@ -1,14 +1,41 @@
 <script lang="ts">
     import { settings } from "@/lib/stores/settings.svelte";
     import { type LLMConfig } from "@/lib/types/IDataModel";
-    import { Trash2, Check, Power } from "@lucide/svelte";
+    import { GENERATION_DEFAULTS } from "@/const/generationDefaults";
+    import TrashIcon from "phosphor-svelte/lib/TrashIcon";
+    import CheckIcon from "phosphor-svelte/lib/CheckIcon";
+    import PowerIcon from "phosphor-svelte/lib/PowerIcon";
 
     type Props = {
         config: LLMConfig;
         id: number;
     };
 
-    let { config = $bindable(), id }: Props = $props();
+    const { config = $bindable(), id }: Props = $props();
+
+    type OptionalTextFieldKey = "apiKey" | "baseURL" | "model";
+
+    /**
+     * Creates a proxy object to bind a checkbox to an optional text field.
+     * When enabled, empty text is enough to make the input bindable.
+     * @param target The LLM config containing the optional text field.
+     * @param key The text field to bind.
+     * @return A proxy object with a 'checked' property for binding.
+     */
+    function createOptionalTextFieldProxy(target: LLMConfig, key: OptionalTextFieldKey) {
+        return {
+            get checked() {
+                return target[key] !== undefined;
+            },
+            set checked(v: boolean) {
+                if (v) {
+                    target[key] ??= "";
+                } else {
+                    delete target[key];
+                }
+            },
+        };
+    }
 
     /**
      * Creates a proxy object to bind a checkbox to the presence of a field in a target object.
@@ -22,14 +49,20 @@
     function createFieldProxy<T extends Record<string, unknown>, K extends keyof T>(
         target: T,
         key: K,
-        defaultValue: T[K] = "" as T[K]
+        defaultValue: Exclude<T[K], undefined>
     ) {
         return {
             get checked() {
                 return target[key] !== undefined;
             },
             set checked(v: boolean) {
-                target[key] = v ? (target[key] ?? defaultValue) : (undefined as T[K]);
+                if (v) {
+                    if (target[key] === undefined) {
+                        target[key] = defaultValue;
+                    }
+                } else {
+                    delete target[key];
+                }
             },
         };
     }
@@ -44,25 +77,51 @@
         settings.value.activeLLMConfigId = config.id;
     }
 
-    let isActive = $derived(settings.value.activeLLMConfigId === config.id);
+    const isActive = $derived(settings.value.activeLLMConfigId === config.id);
 
-    const modelProxy = $derived(createFieldProxy(config, "model"));
-    const keyProxy = $derived(createFieldProxy(config, "apiKey"));
-    const urlProxy = $derived(createFieldProxy(config, "baseURL"));
-    const tempProxy = $derived(createFieldProxy(config.generationParameters, "temperature", 1));
+    const modelProxy = $derived(createOptionalTextFieldProxy(config, "model"));
+    const keyProxy = $derived(createOptionalTextFieldProxy(config, "apiKey"));
+    const urlProxy = $derived(createOptionalTextFieldProxy(config, "baseURL"));
+    const tempProxy = $derived(
+        createFieldProxy(
+            config.generationParameters,
+            "temperature",
+            GENERATION_DEFAULTS.temperature
+        )
+    );
     const maxInProxy = $derived(
-        createFieldProxy(config.generationParameters, "maxInputTokens", 1024)
+        createFieldProxy(
+            config.generationParameters,
+            "maxInputTokens",
+            GENERATION_DEFAULTS.maxInputTokens
+        )
     );
     const maxOutProxy = $derived(
-        createFieldProxy(config.generationParameters, "maxOutputTokens", 1024)
+        createFieldProxy(
+            config.generationParameters,
+            "maxOutputTokens",
+            GENERATION_DEFAULTS.maxOutputTokens
+        )
     );
-    const topPProxy = $derived(createFieldProxy(config.generationParameters, "topP", 0.95));
-    const topKProxy = $derived(createFieldProxy(config.generationParameters, "topK", 40));
+    const topPProxy = $derived(
+        createFieldProxy(config.generationParameters, "topP", GENERATION_DEFAULTS.topP)
+    );
+    const topKProxy = $derived(
+        createFieldProxy(config.generationParameters, "topK", GENERATION_DEFAULTS.topK)
+    );
     const freqPenProxy = $derived(
-        createFieldProxy(config.generationParameters, "frequencyPenalty", 0)
+        createFieldProxy(
+            config.generationParameters,
+            "frequencyPenalty",
+            GENERATION_DEFAULTS.frequencyPenalty
+        )
     );
     const presPenProxy = $derived(
-        createFieldProxy(config.generationParameters, "presencePenalty", 0)
+        createFieldProxy(
+            config.generationParameters,
+            "presencePenalty",
+            GENERATION_DEFAULTS.presencePenalty
+        )
     );
 </script>
 
@@ -86,8 +145,8 @@
                         bind:checked={config.enabled}
                         aria-label="Toggle enabled"
                     />
-                    <Power size={16} class="swap-on text-success" />
-                    <Power size={16} class="swap-off text-base-content/30" />
+                    <PowerIcon size={16} class="swap-on text-success" />
+                    <PowerIcon size={16} class="swap-off text-base-content/30" />
                 </label>
                 <button
                     class="btn btn-ghost btn-xs"
@@ -96,14 +155,14 @@
                     title="Use this config"
                     aria-label="Use this config"
                 >
-                    <Check size={16} class={isActive ? "text-primary" : ""} />
+                    <CheckIcon size={16} class={isActive ? "text-primary" : ""} />
                 </button>
                 <button
                     class="btn btn-ghost btn-xs text-error"
                     onclick={removeLLMConfig}
                     aria-label="Delete config"
                 >
-                    <Trash2 size={16} />
+                    <TrashIcon size={16} />
                 </button>
             </div>
         </div>

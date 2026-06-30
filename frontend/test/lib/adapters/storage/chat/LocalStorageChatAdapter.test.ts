@@ -80,6 +80,116 @@ describe("LocalStorageChatAdapter", () => {
         expect(messages).toHaveLength(0);
     });
 
+    it("should return undefined for non-existent chat", async () => {
+        const chat = await adapter.getChat("non-existent");
+        expect(chat).toBeUndefined();
+    });
+
+    it("should save a new chat and update an existing one", async () => {
+        const chatId = await adapter.createChat("char-1", "Original");
+        const chat = await adapter.getChat(chatId);
+        expect(chat?.name).toBe("Original");
+
+        // Update existing chat
+        await adapter.saveChat({ ...chat!, name: "Updated" });
+        const updated = await adapter.getChat(chatId);
+        expect(updated?.name).toBe("Updated");
+
+        // Save a full chat object (new chat path)
+        const newChat = {
+            id: "new-chat-id",
+            characterId: "char-2",
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+            title: "Direct Save",
+            lastMessage: Date.now(),
+            name: "Direct Save",
+        };
+        await adapter.saveChat(newChat);
+        const saved = await adapter.getChat("new-chat-id");
+        expect(saved?.name).toBe("Direct Save");
+    });
+
+    it("should return all chats", async () => {
+        const allChats = await adapter.getAllChats();
+        expect(allChats).toEqual([]);
+
+        await adapter.createChat("char-1", "Chat A");
+        await adapter.createChat("char-2", "Chat B");
+
+        const chats = await adapter.getAllChats();
+        expect(chats).toHaveLength(2);
+    });
+
+    it("should do nothing when adding message to non-existent chat", async () => {
+        const message: Message = {
+            id: "orphan-msg",
+            chatId: "no-such-chat",
+            role: "user",
+            content: { type: "text", data: "Orphan" },
+            timestamp: Date.now(),
+            inlays: [],
+        };
+        await adapter.addMessage("no-such-chat", message);
+
+        const messages = await adapter.getMessages("no-such-chat");
+        expect(messages).toHaveLength(0);
+    });
+
+    it("should throw when updating non-existent message", async () => {
+        await expect(
+            adapter.updateMessage("chat-1", "no-such-msg", {
+                type: "text",
+                data: "Updated",
+            })
+        ).rejects.toThrow("Message not found: no-such-msg");
+    });
+
+    it("should throw when deleting non-existent message", async () => {
+        await expect(adapter.deleteMessage("chat-1", "no-such-msg")).rejects.toThrow(
+            "Message not found: no-such-msg"
+        );
+    });
+
+    it("should throw when importing corrupt data", async () => {
+        const corruptStream = new ReadableStream<Uint8Array>({
+            start(controller) {
+                controller.enqueue(new TextEncoder().encode("not valid json"));
+                controller.close();
+            },
+        });
+        await expect(adapter.importData(corruptStream)).rejects.toThrow("Invalid data format");
+    });
+
+    it("should handle import with empty chats and messages", async () => {
+        const emptyData = JSON.stringify({ chats: [], messages: [] });
+        const stream = new ReadableStream<Uint8Array>({
+            start(controller) {
+                controller.enqueue(new TextEncoder().encode(emptyData));
+                controller.close();
+            },
+        });
+        await adapter.importData(stream);
+
+        const chats = await adapter.getAllChats();
+        expect(chats).toHaveLength(0);
+    });
+
+    it("should handle import with invalid structure (non-object)", async () => {
+        // When data.root is not a Record, importData should return early (no-op)
+        const invalidData = JSON.stringify("just a string");
+        const stream = new ReadableStream<Uint8Array>({
+            start(controller) {
+                controller.enqueue(new TextEncoder().encode(invalidData));
+                controller.close();
+            },
+        });
+        await adapter.importData(stream);
+
+        const chats = await adapter.getAllChats();
+        expect(chats).toHaveLength(0);
+    });
+
     it("should export and import data", async () => {
         const charId = "char-export";
         const chatId = await adapter.createChat(charId, "Export Chat");
