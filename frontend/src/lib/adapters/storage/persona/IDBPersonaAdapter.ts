@@ -47,7 +47,7 @@ export class IDBPersonaAdapter implements IPersonaStorageAdapter {
                 activePersonaId: id,
             });
             // Remove Svelte proxy wrapper by serializing/deserializing
-            const plainDefaults = structuredClone({
+            const plainDefaults = cloneDeep({
                 ...defaults,
                 id: "singleton",
             });

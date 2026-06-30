@@ -99,7 +99,6 @@ describe("ChatArea Component", () => {
         await expect.element(getByText("Hello")).toBeVisible();
         await expect.element(getByText("Hi there!")).toBeVisible();
     });
-    //  something is h
     test("sends message when clicking send button", async () => {
         chatStore.activeChatId = "chat-1";
         chatStore.chats = [

@@ -86,8 +86,12 @@
                 draft.executables.replaceHooks[type].splice(index, 1);
             })
         );
-        if (expandedHookIndex === index) {
-            expandedHookIndex = null;
+        if (expandedHookIndex !== null) {
+            if (expandedHookIndex === index) {
+                expandedHookIndex = null;
+            } else if (expandedHookIndex > index) {
+                expandedHookIndex--;
+            }
         }
     }
 

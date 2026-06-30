@@ -64,8 +64,8 @@
             <input
                 id="font-size"
                 type="range"
-                min="12"
-                max="24"
+                min="10"
+                max="32"
                 value={settings.value.fontSize}
                 class="range range-primary range-sm"
                 step="1"

@@ -21,13 +21,13 @@ Fast linter for TypeScript and JavaScript, built on the Oxc compiler stack.
 - Custom file formats and parsers (Svelte, Vue, Angular templates)
 - Some HTML-superset code (only checks `<script>` blocks in `.svelte` files)
 
-**Configuration:** `.oxlintrc.json` and `scripts/linter/`
+**Configuration:** `oxlint.config.ts` and `scripts/linter/`
 
 #### Adding New Plugins
 
 When using new ESLint plugins, try oxlint's [JS Plugins compatibility](https://oxc.rs/docs/guide/usage/linter/js-plugins.html) first:
 
-1. Add the plugin to `jsPlugins` in `.oxlintrc.json`:
+1. Add the plugin to `jsPlugins` in `oxlint.config.ts`:
 
     ```json
     {
@@ -56,7 +56,7 @@ ESLint is used **only** for rules that oxlint doesn't support, primarily:
 
 **Configuration:** `eslint.config.js`
 
-The `eslint-plugin-oxlint` integration automatically disables ESLint rules that oxlint already handles, preventing duplicate warnings.
+The `eslint-plugin-oxlint` integration is planned but not yet active — once configured in `eslint.config.ts`, it will automatically disable ESLint rules that oxlint already handles, preventing duplicate warnings.
 
 ### Running Linters
 

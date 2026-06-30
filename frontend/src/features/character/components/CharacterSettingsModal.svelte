@@ -97,17 +97,21 @@
         saveTimeout = setTimeout(() => {
             // IIFE to suppress eslint complaint about ()=>Promise in setTimeout
             void (async () => {
-                const target = editingCharacter;
-                if (!target) return;
+                try {
+                    const target = editingCharacter;
+                    if (!target) return;
 
-                const index = characterStore.characters.findIndex((c) => c.id === target.id);
-                if (index !== -1) {
-                    // Extract ID before logging to avoid DataCloneError with Svelte proxies
-                    const characterId = target.id;
-                    await characterStore.update(index, target);
-                    Logger.structured("character.autosave", {
-                        characterId,
-                    });
+                    const index = characterStore.characters.findIndex((c) => c.id === target.id);
+                    if (index !== -1) {
+                        // Extract ID before logging to avoid DataCloneError with Svelte proxies
+                        const characterId = target.id;
+                        await characterStore.update(index, target);
+                        Logger.structured("character.autosave", {
+                            characterId,
+                        });
+                    }
+                } catch (error) {
+                    Logger.error(error, "CharacterSettingsModal: autosave failed");
                 }
             })();
         }, 300);

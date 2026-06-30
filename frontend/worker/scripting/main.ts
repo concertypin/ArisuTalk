@@ -167,7 +167,6 @@ function isScriptContext(value: unknown): value is ScriptContext {
     return (
         typeof value === "object" &&
         value !== null &&
-        "message" in value &&
-        "persona" in value
+        "message" in value
     );
 }

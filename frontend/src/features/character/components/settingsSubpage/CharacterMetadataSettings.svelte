@@ -30,6 +30,7 @@
     ) {
         onChange(
             withCharacter(character, (draft) => {
+                draft.metadata = draft.metadata ?? {};
                 draft.metadata[field] = value;
             })
         );

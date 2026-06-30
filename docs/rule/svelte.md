@@ -5,10 +5,10 @@ It describes Svelte rules for the project.
 
 - [TL;DR](#tldr)
   - [Detail](#detail)
-  - [Svelte 5 is alive](#svelte-5-is-alive)
-  - [Fly me to the `moon.ts`](#fly-me-to-the-moonts)
-  - [Don't Ship Elephant on Bicycle](#dont-ship-elephant-on-bicycle)
-  - [Documentation](#documentation)
+    - [Svelte 5 is alive](#svelte-5-is-alive)
+    - [Fly me to the `moon.ts`](#fly-me-to-the-moonts)
+    - [Don't Ship Elephant on Bicycle](#dont-ship-elephant-on-bicycle)
+    - [Documentation](#documentation)
 
 ## TL;DR
 
@@ -21,7 +21,7 @@ It describes Svelte rules for the project.
 ### Svelte 5 is alive
 > [!NOTE]
 > These rules are already enforced by tooling/config.
-> - `<script lang="ts">` is enforced by `svelte/block-lang` via [ESLint](../../frontend/scripts/linter/eslint-config.ts).
+> - `<script lang="ts">` is enforced by `svelte/block-lang` via [ESLint](../../frontend/eslint.config.ts).
 > - Svelte 4 syntax such as `export let` and `$:` is rejected by `runes: true` in [`svelte.config.js`](../../frontend/svelte.config.js).
 
 According to version number, Svelte 5 is 1.25 times better than Svelte 4!

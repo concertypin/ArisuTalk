@@ -22,10 +22,6 @@
     let personaDialog = $state<HTMLDialogElement>();
 
     // Character UI State
-    let editingIndex = $state<number | null>(null);
-    const editingCharacter = $derived(
-        editingIndex !== null ? characterStore.characters[editingIndex] : undefined
-    );
 
     // Persona UI State
     let editingPersona = $state<Persona | undefined>(undefined);
@@ -36,7 +32,6 @@
     }
 
     function handleAdd() {
-        editingIndex = null;
         dialog?.showModal();
         Logger.structured("modal.open", {
             location: "characterLayout",
@@ -45,11 +40,7 @@
     }
 
     async function handleFormSubmit(char: Character) {
-        if (editingIndex !== null) {
-            await characterStore.update(editingIndex, char);
-        } else {
-            await characterStore.add(char);
-        }
+        await characterStore.add(char);
         dialog?.close();
         Logger.structured("modal.close", {
             location: "characterLayout",
@@ -139,7 +130,6 @@
     <dialog bind:this={dialog} id="character_form_modal" class="modal">
         <div class="modal-box p-0 border border-base-300 shadow-2xl">
             <CharacterForm
-                character={editingCharacter}
                 onSubmit={handleFormSubmit}
                 onSave={() => dialog?.close()}
                 onCancel={() => dialog?.close()}
