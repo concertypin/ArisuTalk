@@ -37,9 +37,13 @@ jobs:
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ hashFiles('pnpm-lock.yaml') }}
-      - name: Install Playwright browsers
+      - name: Install Playwright Chromium
         if: steps.pw-cache.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install --with-deps chromium
+        run: timeout 300 pnpm exec playwright install chromium
+        working-directory: frontend
+      - name: Install system deps
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: timeout 120 pnpm exec playwright install-deps chromium
         working-directory: frontend
 
 
