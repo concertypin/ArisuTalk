@@ -8,13 +8,13 @@
     import { characterStore } from "@/features/character/stores/characterStore.svelte";
     import { Logger } from "@common/logger/Logger";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import XIcon from "phosphor-svelte/lib/XIcon";
-    import UserIcon from "phosphor-svelte/lib/UserIcon";
-    import ChatCircleTextIcon from "phosphor-svelte/lib/ChatCircleTextIcon";
-    import BookOpenIcon from "phosphor-svelte/lib/BookOpenIcon";
-    import FileTextIcon from "phosphor-svelte/lib/FileTextIcon";
-    import GearIcon from "phosphor-svelte/lib/GearIcon";
-    import ImageIcon from "phosphor-svelte/lib/ImageIcon";
+    import X from "phosphor-svelte/lib/X";
+    import User from "phosphor-svelte/lib/User";
+    import ChatCircleText from "phosphor-svelte/lib/ChatCircleText";
+    import BookOpen from "phosphor-svelte/lib/BookOpen";
+    import FileText from "phosphor-svelte/lib/FileText";
+    import Gear from "phosphor-svelte/lib/Gear";
+    import Image from "phosphor-svelte/lib/Image";
 
     // Subpage components
     import CharacterBasicSettings from "./settingsSubpage/CharacterBasicSettings.svelte";
@@ -35,23 +35,13 @@
     /** Debounce timer for autosave */
     let saveTimeout: ReturnType<typeof setTimeout> | null = null;
 
-    // Clear debounce timer on component unmount
-    $effect(() => {
-        return () => {
-            if (saveTimeout) {
-                clearTimeout(saveTimeout);
-                saveTimeout = null;
-            }
-        };
-    });
-
     // Effect to open modal when state is set AND dialog is bound
     $effect(() => {
         const dialogEl = dialog;
         if (!dialogEl) return;
 
         if (uiState.characterSettingsOpen && uiState.characterSettingsTarget && !dialogEl.open) {
-            // Deep clone using lodash cloneDeep to avoid Svelte proxy issues
+            // Deep clone using JSON to avoid Svelte proxy issues
             editingCharacter = cloneDeep(uiState.characterSettingsTarget);
             activeTab = "basic";
             dialogEl.showModal();
@@ -97,21 +87,18 @@
         saveTimeout = setTimeout(() => {
             // IIFE to suppress eslint complaint about ()=>Promise in setTimeout
             void (async () => {
-                try {
-                    const target = editingCharacter;
-                    if (!target) return;
+                if (!editingCharacter) return;
 
-                    const index = characterStore.characters.findIndex((c) => c.id === target.id);
-                    if (index !== -1) {
-                        // Extract ID before logging to avoid DataCloneError with Svelte proxies
-                        const characterId = target.id;
-                        await characterStore.update(index, target);
-                        Logger.structured("character.autosave", {
-                            characterId,
-                        });
-                    }
-                } catch (error) {
-                    Logger.error(error, "CharacterSettingsModal: autosave failed");
+                const index = characterStore.characters.findIndex(
+                    (c) => c.id === editingCharacter!.id
+                );
+                if (index !== -1) {
+                    // Extract ID before logging to avoid DataCloneError with Svelte proxies
+                    const characterId = editingCharacter.id;
+                    await characterStore.update(index, editingCharacter);
+                    Logger.structured("character.autosave", {
+                        characterId,
+                    });
                 }
             })();
         }, 300);
@@ -145,7 +132,7 @@
                 id="character-settings-title"
                 class="text-xl font-bold flex items-center gap-2 tracking-tight"
             >
-                <GearIcon size={24} />
+                <Gear size={24} />
                 {editingCharacter?.name || "Character"} Settings
             </h2>
             <button
@@ -153,7 +140,7 @@
                 onclick={close}
                 aria-label="Close"
             >
-                <XIcon size={20} />
+                <X size={20} />
             </button>
         </header>
 
@@ -169,7 +156,7 @@
                             onclick={() => (activeTab = "basic")}
                             aria-label="Basic Settings"
                         >
-                            <UserIcon size={18} /> Basic
+                            <User size={18} /> Basic
                         </button>
                     </li>
                     <li>
@@ -179,7 +166,7 @@
                             onclick={() => (activeTab = "prompt")}
                             aria-label="Prompt Settings"
                         >
-                            <ChatCircleTextIcon size={18} /> Prompt
+                            <ChatCircleText size={18} /> Prompt
                         </button>
                     </li>
                     <li>
@@ -189,7 +176,7 @@
                             onclick={() => (activeTab = "lorebook")}
                             aria-label="Lorebook Settings"
                         >
-                            <BookOpenIcon size={18} /> Lorebook
+                            <BookOpen size={18} /> Lorebook
                         </button>
                     </li>
                     <li>
@@ -199,7 +186,7 @@
                             onclick={() => (activeTab = "assets")}
                             aria-label="Assets Settings"
                         >
-                            <ImageIcon size={18} /> Assets
+                            <Image size={18} /> Assets
                         </button>
                     </li>
                     <li>
@@ -209,7 +196,7 @@
                             onclick={() => (activeTab = "metadata")}
                             aria-label="Metadata Settings"
                         >
-                            <FileTextIcon size={18} /> Metadata
+                            <FileText size={18} /> Metadata
                         </button>
                     </li>
                     <li>
@@ -219,7 +206,7 @@
                             onclick={() => (activeTab = "advanced")}
                             aria-label="Advanced Settings"
                         >
-                            <GearIcon size={18} /> Advanced
+                            <Gear size={18} /> Advanced
                         </button>
                     </li>
                 </ul>

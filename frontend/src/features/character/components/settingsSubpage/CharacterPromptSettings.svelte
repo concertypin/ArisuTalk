@@ -5,16 +5,16 @@
      * Features expandable textarea (small at first, large on click).
      */
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import CornersOutIcon from "phosphor-svelte/lib/CornersOutIcon";
-    import CornersInIcon from "phosphor-svelte/lib/CornersInIcon";
-    import { withCharacter } from "@/lib/utils/characterState";
+    import CornersOut from "phosphor-svelte/lib/CornersOut";
+    import CornersIn from "phosphor-svelte/lib/CornersIn";
+    import { merge } from "lodash-es";
 
     type Props = {
         character: Character;
         onChange: (character: Character) => void;
     };
 
-    const { character, onChange }: Props = $props();
+    let { character, onChange }: Props = $props();
 
     let isDescriptionExpanded = $state(false);
     let isAuthorsNoteExpanded = $state(false);
@@ -24,8 +24,8 @@
         value: Character["prompt"][K]
     ) {
         onChange(
-            withCharacter(character, (draft) => {
-                draft.prompt[field] = value;
+            merge({}, character, {
+                prompt: { [field]: value },
             })
         );
     }
@@ -44,9 +44,9 @@
                 aria-label={isDescriptionExpanded ? "Collapse" : "Expand"}
             >
                 {#if isDescriptionExpanded}
-                    <CornersInIcon size={14} />
+                    <CornersIn size={14} />
                 {:else}
-                    <CornersOutIcon size={14} />
+                    <CornersOut size={14} />
                 {/if}
             </button>
         </div>
@@ -78,9 +78,9 @@
                 aria-label={isAuthorsNoteExpanded ? "Collapse" : "Expand"}
             >
                 {#if isAuthorsNoteExpanded}
-                    <CornersInIcon size={14} />
+                    <CornersIn size={14} />
                 {:else}
-                    <CornersOutIcon size={14} />
+                    <CornersOut size={14} />
                 {/if}
             </button>
         </div>

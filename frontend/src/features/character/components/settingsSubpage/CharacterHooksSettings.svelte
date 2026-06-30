@@ -5,12 +5,12 @@
      * Fully editable hooks for display, input, output, request.
      */
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import PlusIcon from "phosphor-svelte/lib/PlusIcon";
-    import TrashIcon from "phosphor-svelte/lib/TrashIcon";
-    import CaretDownIcon from "phosphor-svelte/lib/CaretDownIcon";
-    import CaretUpIcon from "phosphor-svelte/lib/CaretUpIcon";
-    import WarningIcon from "phosphor-svelte/lib/WarningIcon";
-    import { withCharacter } from "@/lib/utils/characterState";
+    import Plus from "phosphor-svelte/lib/Plus";
+    import Trash from "phosphor-svelte/lib/Trash";
+    import CaretDown from "phosphor-svelte/lib/CaretDown";
+    import CaretUp from "phosphor-svelte/lib/CaretUp";
+    import Warning from "phosphor-svelte/lib/Warning";
+    import { merge, cloneDeep } from "lodash-es";
 
     type ReplaceHook = Character["executables"]["replaceHooks"];
     type HookType = keyof ReplaceHook;
@@ -21,7 +21,7 @@
         onChange: (character: Character) => void;
     };
 
-    const { character, onChange }: Props = $props();
+    let { character, onChange }: Props = $props();
 
     let activeHookType = $state<HookType>("display");
     let expandedHookIndex = $state<number | null>(null);
@@ -41,11 +41,9 @@
         field: K,
         value: Character["executables"]["runtimeSetting"][K]
     ) {
-        onChange(
-            withCharacter(character, (draft) => {
-                draft.executables.runtimeSetting[field] = value;
-            })
-        );
+        const newChar = cloneDeep(character);
+        newChar.executables.runtimeSetting[field] = value;
+        onChange(newChar);
     }
 
     function getHooks(type: HookType): HookEntity[] {
@@ -64,35 +62,24 @@
                 priority: 0,
             },
         };
-        onChange(
-            withCharacter(character, (draft) => {
-                draft.executables.replaceHooks[type].push(newHook);
-                expandedHookIndex = draft.executables.replaceHooks[type].length - 1;
-            })
-        );
+        const newChar = cloneDeep(character);
+        newChar.executables.replaceHooks[type].push(newHook);
+        onChange(newChar);
+        expandedHookIndex = character.executables.replaceHooks[type].length;
     }
 
-    function updateHook(type: HookType, index: number, newHook: HookEntity) {
-        onChange(
-            withCharacter(character, (draft) => {
-                draft.executables.replaceHooks[type][index] = newHook;
-            })
-        );
+    function updateHook(type: HookType, index: number, updates: Partial<HookEntity>) {
+        const newChar = cloneDeep(character);
+        const hook = newChar.executables.replaceHooks[type][index];
+        newChar.executables.replaceHooks[type][index] = merge(hook, updates) as HookEntity;
+        onChange(newChar);
     }
 
     function deleteHook(type: HookType, index: number) {
-        onChange(
-            withCharacter(character, (draft) => {
-                draft.executables.replaceHooks[type].splice(index, 1);
-            })
-        );
-        if (expandedHookIndex !== null) {
-            if (expandedHookIndex === index) {
-                expandedHookIndex = null;
-            } else if (expandedHookIndex > index) {
-                expandedHookIndex--;
-            }
-        }
+        const newChar = cloneDeep(character);
+        newChar.executables.replaceHooks[type].splice(index, 1);
+        onChange(newChar);
+        expandedHookIndex = null;
     }
 
     function toggleExpand(index: number) {
@@ -104,7 +91,7 @@
     <h3 class="text-lg font-semibold">Advanced Settings</h3>
 
     <div class="alert alert-warning">
-        <WarningIcon size={18} />
+        <Warning size={18} />
         <span
             >These are advanced settings. Incorrect configuration may affect character behavior.</span
         >
@@ -172,7 +159,7 @@
 
     <div class="flex justify-end">
         <button class="btn btn-sm btn-primary gap-1" onclick={() => addHook(activeHookType)}>
-            <PlusIcon size={16} /> Add Hook
+            <Plus size={16} /> Add Hook
         </button>
     </div>
 
@@ -196,9 +183,9 @@
                         </span>
                         <span class="badge badge-sm badge-ghost">{hook.meta.type}</span>
                         {#if expandedHookIndex === index}
-                            <CaretUpIcon size={16} />
+                            <CaretUp size={16} />
                         {:else}
-                            <CaretDownIcon size={16} />
+                            <CaretDown size={16} />
                         {/if}
                     </div>
 
@@ -215,7 +202,6 @@
                                     value={hook.input}
                                     oninput={(e) =>
                                         updateHook(activeHookType, index, {
-                                            ...hook,
                                             input: e.currentTarget.value,
                                         })}
                                     placeholder="Pattern to match..."
@@ -233,7 +219,6 @@
                                     value={hook.output}
                                     oninput={(e) =>
                                         updateHook(activeHookType, index, {
-                                            ...hook,
                                             output: e.currentTarget.value,
                                         })}
                                     placeholder="Replacement text..."
@@ -255,7 +240,6 @@
                                             if (newType === hook.meta.type) return;
                                             if (newType === "string") {
                                                 updateHook(activeHookType, index, {
-                                                    ...hook,
                                                     meta: {
                                                         ...hook.meta,
                                                         type: "string",
@@ -264,15 +248,10 @@
                                                 });
                                             } else {
                                                 updateHook(activeHookType, index, {
-                                                    ...hook,
                                                     meta: {
+                                                        ...hook.meta,
                                                         type: "regex",
                                                         flag: "g",
-                                                        isInputPatternScripted:
-                                                            hook.meta.isInputPatternScripted,
-                                                        isOutputScripted:
-                                                            hook.meta.isOutputScripted,
-                                                        priority: hook.meta.priority,
                                                     },
                                                 });
                                             }
@@ -294,7 +273,6 @@
                                         value={hook.meta.priority}
                                         oninput={(e) =>
                                             updateHook(activeHookType, index, {
-                                                ...hook,
                                                 meta: {
                                                     ...hook.meta,
                                                     priority: parseInt(e.currentTarget.value) || 0,
@@ -313,16 +291,9 @@
                                             checked={hook.meta.caseSensitive}
                                             onchange={(e) =>
                                                 updateHook(activeHookType, index, {
-                                                    ...hook,
-                                                    meta: {
-                                                        type: "string" as const,
+                                                    meta: merge({}, hook.meta, {
                                                         caseSensitive: e.currentTarget.checked,
-                                                        isInputPatternScripted:
-                                                            hook.meta.isInputPatternScripted,
-                                                        isOutputScripted:
-                                                            hook.meta.isOutputScripted,
-                                                        priority: hook.meta.priority,
-                                                    },
+                                                    }),
                                                 })}
                                         />
                                         <span class="label-text text-sm">Case Sensitive</span>
@@ -335,7 +306,6 @@
                                         checked={hook.meta.isOutputScripted}
                                         onchange={(e) =>
                                             updateHook(activeHookType, index, {
-                                                ...hook,
                                                 meta: {
                                                     ...hook.meta,
                                                     isOutputScripted: e.currentTarget.checked,
@@ -351,7 +321,7 @@
                                     class="btn btn-sm btn-error btn-outline gap-1"
                                     onclick={() => deleteHook(activeHookType, index)}
                                 >
-                                    <TrashIcon size={14} /> Delete
+                                    <Trash size={14} /> Delete
                                 </button>
                             </div>
                         </div>

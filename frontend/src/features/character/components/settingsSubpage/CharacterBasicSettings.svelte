@@ -9,17 +9,17 @@
     import { Logger } from "@common/logger/Logger";
     import { IfNotExistBehavior } from "@/lib/interfaces";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import { withCharacter } from "@/lib/utils/characterState";
+    import { merge } from "lodash-es";
 
     type Props = {
         character: Character;
         onChange: (character: Character) => void;
     };
 
-    const { character, onChange }: Props = $props();
+    let { character, onChange }: Props = $props();
 
     const assetStorage = getAssetStorage();
-    const assetPreviews = new SvelteMap<string, string>();
+    let assetPreviews = new SvelteMap<string, string>();
     let showManualUrl = $state(false);
 
     const imageAssets = $derived(
@@ -74,11 +74,7 @@
     });
 
     function updateField<const K extends keyof Character>(field: K, value: Character[K]) {
-        onChange(
-            withCharacter(character, (draft) => {
-                draft[field] = value;
-            })
-        );
+        onChange(merge({}, character, { [field]: value }));
     }
 </script>
 
@@ -130,11 +126,9 @@
                             src={avatarPreviewSrc}
                             alt="Avatar preview"
                             class="object-cover"
-                            onerror={(e) => {
-                                if (e.currentTarget instanceof HTMLImageElement) {
-                                    e.currentTarget.src = `https://api.dicebear.com/7.x/initials/svg?seed=${character?.name ?? "unknown"}`;
-                                }
-                            }}
+                            onerror={(e) =>
+                                ((e.currentTarget as HTMLImageElement).src =
+                                    `https://api.dicebear.com/7.x/initials/svg?seed=${character?.name ?? "unknown"}`)}
                         />
                     </div>
                 </div>

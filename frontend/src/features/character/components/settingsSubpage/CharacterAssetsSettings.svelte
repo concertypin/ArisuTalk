@@ -3,20 +3,15 @@
      * @component CharacterAssetsSettings
      * Asset management: upload, preview, naming, delete, and reorder.
      */
-    import { SvelteMap, SvelteSet } from "svelte/reactivity";
+    import { SvelteMap } from "svelte/reactivity";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import type { AssetEntity } from "@arisutalk/character-spec/v0/Character/Assets";
-    import {
-        withCharacter,
-        replaceArrayItem,
-        moveArrayItem,
-        appendArrayItem,
-    } from "@/lib/utils/characterState";
-    import UploadSimpleIcon from "phosphor-svelte/lib/UploadSimpleIcon";
-    import TrashIcon from "phosphor-svelte/lib/TrashIcon";
-    import CaretDownIcon from "phosphor-svelte/lib/CaretDownIcon";
-    import CaretUpIcon from "phosphor-svelte/lib/CaretUpIcon";
-    import DotsSixVerticalIcon from "phosphor-svelte/lib/DotsSixVerticalIcon";
+    import { merge } from "lodash-es";
+    import UploadSimple from "phosphor-svelte/lib/UploadSimple";
+    import Trash from "phosphor-svelte/lib/Trash";
+    import CaretDown from "phosphor-svelte/lib/CaretDown";
+    import CaretUp from "phosphor-svelte/lib/CaretUp";
+    import DotsSixVertical from "phosphor-svelte/lib/DotsSixVertical";
     import { getAssetStorage } from "@/features/character/adapters/assetStorage/assetStorageResolver";
     import { Logger } from "@common/logger/Logger";
 
@@ -25,35 +20,25 @@
         onChange: (character: Character) => void;
     };
 
-    const { character, onChange }: Props = $props();
+    let { character, onChange }: Props = $props();
 
     let fileInput = $state<HTMLInputElement>();
     let expandOtherAssets = $state(false);
     let duplicateNameError = $state<string | null>(null);
     let draggedIndex = $state<number | null>(null);
-    const assetPreviews = new SvelteMap<string, string>();
+    let assetPreviews = new SvelteMap<string, string>();
 
     const assetStorage = getAssetStorage();
 
     // Load asset preview URLs
     $effect(() => {
-        let isCancelled = false;
-        const createdUrls = new SvelteSet<string>();
-
         const loadPreviews = async () => {
             for (const asset of character.assets.assets) {
-                if (isCancelled) break;
                 if (typeof asset.data === "string" && asset.data.startsWith("local:")) {
                     try {
                         await assetStorage.init();
-                        if (isCancelled) break;
                         const url = await assetStorage.getAssetUrl(new URL(asset.data));
-                        if (isCancelled) {
-                            URL.revokeObjectURL(url);
-                            break;
-                        }
                         assetPreviews.set(asset.id, url);
-                        createdUrls.add(url);
                     } catch (e) {
                         Logger.error("Failed to load asset preview:", asset.id, e);
                     }
@@ -61,15 +46,6 @@
             }
         };
         void loadPreviews();
-        return () => {
-            isCancelled = true;
-            for (const url of createdUrls) {
-                URL.revokeObjectURL(url);
-            }
-            // Clear previews so template doesn't render revoked blob URLs
-            // while the new effect's async loading is in-flight
-            assetPreviews.clear();
-        };
     });
 
     const imageAssets = $derived(
@@ -79,9 +55,8 @@
         character.assets.assets.filter((a) => !a.mimeType.startsWith("image/"))
     );
 
-    async function handleFileUpload(ev: Event) {
-        if (!(ev.target instanceof HTMLInputElement)) return;
-        const target = ev.target;
+    async function handleFileUpload(e: Event) {
+        const target = e.target as HTMLInputElement;
         const files = target.files;
         if (!files || files.length === 0) return;
 
@@ -107,8 +82,10 @@
             };
 
             onChange(
-                withCharacter(character, (draft) => {
-                    draft.assets.assets = appendArrayItem(draft.assets.assets, newAsset);
+                merge({}, character, {
+                    assets: {
+                        assets: [...character.assets.assets, newAsset],
+                    },
                 })
             );
 
@@ -124,40 +101,30 @@
 
     function updateAssetName(index: number, newName: string) {
         // No duplicate check needed as per new spec (v0.0.17)
+        const updatedAssets = [...character.assets.assets];
+        updatedAssets[index] = { ...updatedAssets[index], name: newName };
+
         onChange(
-            withCharacter(character, (draft) => {
-                draft.assets.assets = replaceArrayItem(draft.assets.assets, index, {
-                    ...draft.assets.assets[index],
-                    name: newName,
-                });
+            merge({}, character, {
+                assets: { assets: updatedAssets },
             })
         );
     }
 
     async function deleteAsset(index: number) {
         const asset = character.assets.assets[index];
-        if (!asset) return;
 
         // Cleanup storage in background
         if (typeof asset.data === "string" && asset.data.startsWith("local:")) {
-            try {
-                const url = new URL(asset.data);
-                // Skip deletion for non-OPFS URLs (e.g. bare "local:" with no path)
-                if (url.hostname !== "opfs") {
-                    Logger.warn("Skipping storage deletion for non-OPFS asset:", url.href);
-                } else {
-                    void assetStorage.deleteAsset(url).catch((e) => {
-                        Logger.error("Failed to delete asset from storage:", e);
-                    });
-                }
-            } catch (e) {
-                Logger.error("Invalid asset URL, skipping storage deletion:", asset.data, e);
-            }
+            void assetStorage.deleteAsset(new URL(asset.data)).catch((e) => {
+                Logger.error("Failed to delete asset from storage:", e);
+            });
         }
 
+        const updatedAssets = character.assets.assets.filter((_, i) => i !== index);
         onChange(
-            withCharacter(character, (draft) => {
-                draft.assets.assets = draft.assets.assets.filter((_, i) => i !== index);
+            merge({}, character, {
+                assets: { assets: updatedAssets },
             })
         );
 
@@ -170,16 +137,19 @@
 
     function handleDragOver(e: DragEvent, targetIndex: number) {
         e.preventDefault();
-        const fromIndex = draggedIndex;
-        if (fromIndex === null || fromIndex === targetIndex) return;
+        if (draggedIndex === null || draggedIndex === targetIndex) return;
 
-        onChange(
-            withCharacter(character, (draft) => {
-                draft.assets.assets = moveArrayItem(draft.assets.assets, fromIndex, targetIndex);
-            })
-        );
+        const updatedAssets = [...character.assets.assets];
+        const [draggedItem] = updatedAssets.splice(draggedIndex, 1);
+        updatedAssets.splice(targetIndex, 0, draggedItem);
 
         draggedIndex = targetIndex;
+
+        onChange(
+            merge({}, character, {
+                assets: { assets: updatedAssets },
+            })
+        );
     }
 
     function handleDragEnd() {
@@ -206,7 +176,7 @@
                 onclick={() => fileInput?.click()}
                 aria-label="Upload Asset"
             >
-                <UploadSimpleIcon size={18} />
+                <UploadSimple size={18} />
                 Upload
             </button>
         </div>
@@ -237,7 +207,7 @@
                         tabindex="0"
                     >
                         <div class="flex items-start gap-2 mb-2">
-                            <DotsSixVerticalIcon size={16} class="text-base-content/50 mt-1" />
+                            <DotsSixVertical size={16} class="text-base-content/50 mt-1" />
                             <div class="flex-1 min-w-0">
                                 <input
                                     type="text"
@@ -253,7 +223,7 @@
                                 onclick={() => deleteAsset(globalIndex)}
                                 aria-label="Delete asset"
                             >
-                                <TrashIcon size={16} />
+                                <Trash size={16} />
                             </button>
                         </div>
                         {#if previewUrl}
@@ -288,9 +258,9 @@
             >
                 <h4 class="font-medium">Other Assets ({otherAssets.length})</h4>
                 {#if expandOtherAssets}
-                    <CaretUpIcon size={16} />
+                    <CaretUp size={16} />
                 {:else}
-                    <CaretDownIcon size={16} />
+                    <CaretDown size={16} />
                 {/if}
             </div>
 
@@ -307,7 +277,7 @@
                             role="button"
                             tabindex="0"
                         >
-                            <DotsSixVerticalIcon size={16} class="text-base-content/50" />
+                            <DotsSixVertical size={16} class="text-base-content/50" />
                             <div class="flex-1 min-w-0">
                                 <input
                                     type="text"
@@ -324,7 +294,7 @@
                                 onclick={() => deleteAsset(globalIndex)}
                                 aria-label="Delete asset"
                             >
-                                <TrashIcon size={16} />
+                                <Trash size={16} />
                             </button>
                         </div>
                     {/each}

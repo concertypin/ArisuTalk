@@ -3,8 +3,8 @@
 <script lang="ts">
     import { settings } from "@/lib/stores/settings.svelte";
     import { LLMConfigSchema } from "@/lib/types/IDataModel";
-    import PlusIcon from "phosphor-svelte/lib/PlusIcon";
-    import InfoIcon from "phosphor-svelte/lib/InfoIcon";
+    import Plus from "phosphor-svelte/lib/Plus";
+    import Info from "phosphor-svelte/lib/Info";
     import GenerationParameters from "./LLMSetting/GenerationParameters.svelte";
     import { apply } from "@arisutalk/character-spec/utils";
 
@@ -21,13 +21,13 @@
     <div class="flex justify-between items-center">
         <h3 class="text-lg font-semibold">LLM Configuration</h3>
         <button class="btn btn-sm btn-primary" onclick={addLLMConfig}>
-            <PlusIcon size={16} /> Add Model
+            <Plus size={16} /> Add Model
         </button>
     </div>
 
     {#if settings.value.llmConfigs.length === 0}
         <div class="alert alert-info">
-            <InfoIcon size={20} />
+            <Info size={20} />
             <span>No models configured. Add one to get started.</span>
         </div>
     {/if}

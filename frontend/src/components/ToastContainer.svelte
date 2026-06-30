@@ -5,7 +5,7 @@
 -->
 <script lang="ts">
     import { toastStore } from "@/lib/stores/toast.svelte";
-    import XIcon from "phosphor-svelte/lib/XIcon";
+    import X from "phosphor-svelte/lib/X";
 
     const alertClass: Record<string, string> = {
         info: "alert-info",
@@ -23,7 +23,7 @@
                 class="btn btn-ghost btn-xs btn-circle"
                 onclick={() => toastStore.dismiss(toast.id)}
             >
-                <XIcon class="w-4 h-4" size={16} />
+                <X class="w-4 h-4" size={16} />
             </button>
         </div>
     {/each}

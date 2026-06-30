@@ -2,11 +2,11 @@
     import CharacterSidebar from "./CharacterSidebar.svelte";
     import CharacterForm from "./CharacterForm.svelte";
     import CharacterSettingsModal from "./CharacterSettingsModal.svelte";
-    import ChatList from "@/features/chat/components/ChatList.svelte";
-    import PersonaList from "@/features/persona/components/PersonaList.svelte";
-    import PersonaForm from "@/features/persona/components/PersonaForm.svelte";
-    import type { Persona } from "@/features/persona/schema";
-    import { characterStore } from "@/features/character/stores/characterStore.svelte";
+    import ChatList from "../../chat/components/ChatList.svelte";
+    import PersonaList from "../../persona/components/PersonaList.svelte";
+    import PersonaForm from "../../persona/components/PersonaForm.svelte";
+    import type { Persona } from "../../persona/schema";
+    import { characterStore } from "../stores/characterStore.svelte";
     import { uiState } from "@/lib/stores/ui.svelte";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import { Logger } from "@common/logger/Logger";
@@ -15,13 +15,17 @@
         children?: import("svelte").Snippet;
     };
 
-    const { children }: Props = $props();
+    let { children }: Props = $props();
 
     let selectedCharacterId = $state<string | null>(null);
     let dialog = $state<HTMLDialogElement>();
     let personaDialog = $state<HTMLDialogElement>();
 
     // Character UI State
+    let editingIndex = $state<number | null>(null);
+    let editingCharacter = $derived(
+        editingIndex !== null ? characterStore.characters[editingIndex] : undefined
+    );
 
     // Persona UI State
     let editingPersona = $state<Persona | undefined>(undefined);
@@ -32,6 +36,7 @@
     }
 
     function handleAdd() {
+        editingIndex = null;
         dialog?.showModal();
         Logger.structured("modal.open", {
             location: "characterLayout",
@@ -40,7 +45,11 @@
     }
 
     async function handleFormSubmit(char: Character) {
-        await characterStore.add(char);
+        if (editingIndex !== null) {
+            await characterStore.update(editingIndex, char);
+        } else {
+            await characterStore.add(char);
+        }
         dialog?.close();
         Logger.structured("modal.close", {
             location: "characterLayout",
@@ -130,6 +139,7 @@
     <dialog bind:this={dialog} id="character_form_modal" class="modal">
         <div class="modal-box p-0 border border-base-300 shadow-2xl">
             <CharacterForm
+                character={editingCharacter}
                 onSubmit={handleFormSubmit}
                 onSave={() => dialog?.close()}
                 onCancel={() => dialog?.close()}
@@ -143,7 +153,7 @@
     <!-- Persona Modal -->
     <dialog bind:this={personaDialog} id="persona_modal" class="modal">
         <div
-            class="modal-box w-11/12 max-w-2xl min-h-[500px] flex flex-col border border-base-300 shadow-2xl"
+            class="modal-box w-11/12 max-w-2xl min-h-125 flex flex-col border border-base-300 shadow-2xl"
         >
             <h3 class="font-bold text-lg mb-4">Manage Personas</h3>
 

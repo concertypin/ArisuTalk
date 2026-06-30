@@ -13,17 +13,17 @@
     import MessageActions from "@/components/MessageActions.svelte";
     import { toastStore } from "@/lib/stores/toast.svelte";
     import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
-    import GearIcon from "phosphor-svelte/lib/GearIcon";
+    import Gear from "phosphor-svelte/lib/Gear";
 
     let inputValue = $state("");
     let messagesContainer = $state<HTMLElement | null>(null);
-    const isTyping = $derived(chatStore.isGenerating);
+    let isTyping = $derived(chatStore.isGenerating);
 
-    const activeChat = $derived(chatStore.chats.find((c) => c.id === chatStore.activeChatId));
-    const messages = $derived(chatStore.activeMessages);
+    let activeChat = $derived(chatStore.chats.find((c) => c.id === chatStore.activeChatId));
+    let messages = $derived(chatStore.activeMessages);
 
     /** Get the current character for this chat */
-    const currentCharacter = $derived(
+    let currentCharacter = $derived(
         activeChat
             ? characterStore.characters.find((c) => c.id === activeChat.characterId)
             : undefined
@@ -140,7 +140,7 @@
                 aria-label="Character Settings"
                 title="Character Settings"
             >
-                <GearIcon size={18} />
+                <Gear size={18} />
             </button>
         {/if}
     </header>

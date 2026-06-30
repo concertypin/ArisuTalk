@@ -39,7 +39,5 @@ interface SharedArrayBuffer {
     readonly [Symbol.toStringTag]: "SharedArrayBuffer";
 }
 type ArrayBufferLike = ArrayBuffer;
-
-// lib.dom.d.ts declared as var
-// oxlint-disable-next-line no-var
+// eslint-disable-next-line no-var
 declare var SharedArrayBuffer: never;

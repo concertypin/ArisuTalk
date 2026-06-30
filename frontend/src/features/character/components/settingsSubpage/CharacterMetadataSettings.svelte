@@ -4,14 +4,14 @@
      * Metadata fields: author, license (with autocomplete), version, distribution URL.
      */
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import { withCharacter } from "@/lib/utils/characterState";
+    import { merge } from "lodash-es";
 
     type Props = {
         character: Character;
         onChange: (character: Character) => void;
     };
 
-    const { character, onChange }: Props = $props();
+    let { character, onChange }: Props = $props();
 
     /** Common license options for autocomplete */
     const licenseOptions = [
@@ -29,9 +29,8 @@
         value: NonNullable<Character["metadata"]>[K]
     ) {
         onChange(
-            withCharacter(character, (draft) => {
-                draft.metadata = draft.metadata ?? {};
-                draft.metadata[field] = value;
+            merge({}, character, {
+                metadata: { [field]: value },
             })
         );
     }

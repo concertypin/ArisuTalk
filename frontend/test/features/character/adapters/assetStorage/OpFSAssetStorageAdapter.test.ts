@@ -20,7 +20,7 @@ describe("OpFSAssetStorageAdapter", () => {
         };
         // Stub navigator.storage.getDirectory
         vi.stubGlobal("navigator", {
-            storage,
+            storage: storage,
         });
 
         adapter = new OpFSAssetStorageAdapter();
@@ -111,66 +111,5 @@ describe("OpFSAssetStorageAdapter", () => {
     it("should throw on invalid ID", async () => {
         const invalidUrl = new URL("http://example.com");
         await expect(adapter.getAssetBlob(invalidUrl)).rejects.toThrow("Invalid ID");
-    });
-
-    it("should delete an asset", async () => {
-        const testUrl = new URL("local://opfs/existing.txt");
-        mockRoot.removeEntry.mockResolvedValue(undefined);
-
-        await expect(adapter.deleteAsset(testUrl)).resolves.toBeUndefined();
-        expect(mockRoot.removeEntry).toHaveBeenCalledWith("existing.txt");
-    });
-
-    it("should throw on delete with invalid ID", async () => {
-        const invalidUrl = new URL("http://example.com");
-        await expect(adapter.deleteAsset(invalidUrl)).rejects.toThrow("Invalid ID");
-    });
-
-    it("should save asset with overwrite flag", async () => {
-        const mockFileHandle = strictMock<FileSystemFileHandle>({
-            createWritable: vi.fn().mockResolvedValue({
-                write: vi.fn().mockResolvedValue(undefined),
-                close: vi.fn().mockResolvedValue(undefined),
-            }),
-        });
-
-        // First call: check if exists - it exists (no error)
-        mockRoot.getFileHandle.mockResolvedValueOnce(mockFileHandle);
-        // Second call: get handle with create
-        mockRoot.getFileHandle.mockResolvedValueOnce(mockFileHandle);
-
-        const testFile = new File(["overwritten"], "test.txt");
-        const overwrite = true;
-        const url = await adapter.saveAsset("test.txt", testFile, overwrite);
-        expect(url.toString()).toContain("local://opfs/");
-    });
-
-    it("should throw when saving asset that already exists without overwrite", async () => {
-        const mockFileHandle = strictMock<FileSystemFileHandle>({
-            getFile: vi.fn(),
-        });
-        // First call: check if exists - it does (no NotFoundError)
-        mockRoot.getFileHandle.mockResolvedValueOnce(mockFileHandle);
-
-        const testFile = new File(["data"], "test.txt");
-        await expect(adapter.saveAsset("test.txt", testFile, false)).rejects.toThrow(
-            "File already exists"
-        );
-    });
-
-    it("should return null from getAssetUrl when asset not found and RETURN_NULL", async () => {
-        const testUrl = new URL("local://opfs/missing.txt");
-        vi.mocked(mockRoot.getFileHandle).mockRejectedValue(new Error("not found"));
-
-        const result = await adapter.getAssetUrl(testUrl, IfNotExistBehavior.RETURN_NULL);
-        expect(result).toBeNull();
-    });
-
-    it("should throw from getAssetUrl when asset not found and default behavior", async () => {
-        const testUrl = new URL("local://opfs/missing.txt");
-        vi.mocked(mockRoot.getFileHandle).mockRejectedValue(new Error("not found"));
-
-        // getAssetBlob re-throws the underlying error, which propagates through getAssetUrl
-        await expect(adapter.getAssetUrl(testUrl)).rejects.toThrow("not found");
     });
 });

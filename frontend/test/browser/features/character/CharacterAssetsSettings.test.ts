@@ -66,7 +66,7 @@ describe("CharacterAssetsSettings Component", () => {
     });
 
     test("renders upload section", async () => {
-        const { container } = render(CharacterAssetsSettings, {
+        const { getByRole, container } = render(CharacterAssetsSettings, {
             character: mockCharacter,
             onChange: onChangeSpy,
         });
@@ -74,8 +74,8 @@ describe("CharacterAssetsSettings Component", () => {
         const uploadInput = container.querySelector("#asset-upload");
         expect(uploadInput).toBeTruthy();
 
-        const uploadButton = container.querySelector('button[aria-label="Upload Asset"]');
-        expect(uploadButton).toBeTruthy();
+        const uploadButton = getByRole("button", { name: "Upload Asset" });
+        await expect.element(uploadButton).toBeVisible();
     });
 
     test("shows image assets section when image exists", async () => {

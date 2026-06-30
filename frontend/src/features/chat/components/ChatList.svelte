@@ -1,17 +1,17 @@
 <script lang="ts">
-    import { chatStore } from "@/features/chat/stores/chatStore.svelte";
-    import PlusIcon from "phosphor-svelte/lib/PlusIcon";
-    import ChatTeardropTextIcon from "phosphor-svelte/lib/ChatTeardropTextIcon";
-    import TrashIcon from "phosphor-svelte/lib/TrashIcon";
+    import { chatStore } from "../stores/chatStore.svelte";
+    import Plus from "phosphor-svelte/lib/Plus";
+    import ChatTeardropText from "phosphor-svelte/lib/ChatTeardropText";
+    import Trash from "phosphor-svelte/lib/Trash";
 
     type Props = {
         characterId: string;
     };
 
-    const { characterId }: Props = $props();
+    let { characterId }: Props = $props();
 
-    const chats = $derived(chatStore.chats.filter((c) => c.characterId === characterId));
-    const activeChatId = $derived(chatStore.activeChatId);
+    let chats = $derived(chatStore.chats.filter((c) => c.characterId === characterId));
+    let activeChatId = $derived(chatStore.activeChatId);
 
     // Automatically select the most recent chat when character changes
     $effect(() => {
@@ -60,7 +60,7 @@
             onclick={() => void handleNewChat()}
             aria-label="New Chat"
         >
-            <PlusIcon size={16} />
+            <Plus size={16} />
         </button>
     </div>
 
@@ -73,14 +73,13 @@
                     : ''}"
                 onclick={() => handleSelect(chat.id)}
             >
-                <ChatTeardropTextIcon size={16} class="opacity-70" />
+                <ChatTeardropText size={16} class="opacity-70" />
                 <span class="truncate text-sm font-medium flex-1 text-left">{chat.name}</span>
 
                 <div class="opacity-0 group-hover:opacity-100 transition-opacity">
                     <div
                         role="button"
                         tabindex="0"
-                        aria-label="Delete"
                         class="p-1 hover:text-error rounded"
                         onclick={(e) => void handleDelete(e, chat.id)}
                         onkeydown={(e) => {
@@ -89,7 +88,7 @@
                             }
                         }}
                     >
-                        <TrashIcon size={14} />
+                        <Trash size={14} />
                     </div>
                 </div>
             </button>

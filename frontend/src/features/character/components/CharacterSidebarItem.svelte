@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import PencilSimpleIcon from "phosphor-svelte/lib/PencilSimpleIcon";
+    import PencilSimple from "phosphor-svelte/lib/PencilSimple";
     import { uiState } from "@/lib/stores/ui.svelte";
 
     type Props = {
@@ -9,13 +9,13 @@
         onClick: () => void;
     };
 
-    const { character, active, onClick }: Props = $props();
+    let { character, active, onClick }: Props = $props();
 
     // Generate initials from name
-    const initials = $derived(character.name.substring(0, 2).toUpperCase());
+    let initials = $derived(character.name.substring(0, 2).toUpperCase());
 
     // Check for avatar in this order: top-level property -> assets 'portrait-default' -> any image asset
-    const avatarUrl = $derived(character.avatarUrl || "");
+    let avatarUrl = $derived(character.avatarUrl || "");
 
     function handleButtonClick(e: MouseEvent) {
         if (active) {
@@ -70,7 +70,7 @@
         >
             <!-- Start State: Settings Icon (when active & hovered) -->
             <div class="swap-on flex items-center justify-center w-full h-full">
-                <PencilSimpleIcon size={20} />
+                <PencilSimple size={20} />
             </div>
 
             <!-- End State: Avatar (when inactive OR not hovered) -->

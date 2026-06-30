@@ -28,7 +28,7 @@ export class LocalStorageAdapter {
         const item = localStorage.getItem(key);
         if (!item) return [];
         try {
-            const parsed: unknown = JSON.parse(item);
+            const parsed = JSON.parse(item) as unknown;
             if (!Array.isArray(parsed)) return [];
             return parsed.filter((entry): entry is T => this.hasId(entry));
         } catch {
@@ -130,7 +130,7 @@ export class LocalStorageAdapter {
         try {
             const buffer = await new Response(stream).arrayBuffer();
             const json = new TextDecoder().decode(buffer);
-            const parsed: unknown = JSON.parse(json);
+            const parsed = JSON.parse(json) as unknown;
             if (!this.isRecord(parsed)) {
                 throw new Error("Invalid data format");
             }
@@ -154,7 +154,7 @@ export class LocalStorageAdapter {
             }
         } catch (e) {
             Logger.error("Failed to import data", e);
-            throw new Error("Invalid data format", { cause: e });
+            throw new Error("Invalid data format");
         }
     }
 }

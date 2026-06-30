@@ -1,7 +1,7 @@
 /// <reference types="vitest/browser" />
 import { test, expect, describe, vi, afterEach } from "vitest";
 import { render } from "vitest-browser-svelte";
-import CharacterLayoutTestWrapper from "@test/browser/wrappers/CharacterLayoutTestWrapper.svelte";
+import CharacterLayoutTestWrapper from "../wrappers/CharacterLayoutTestWrapper.svelte";
 
 describe("Persona and Chat interactions", () => {
     afterEach(() => {
@@ -27,15 +27,9 @@ describe("Persona and Chat interactions", () => {
         // Mock chatStore.waitForSettings to avoid delays
 
         const { chatStore } = await import("@/features/chat/stores/chatStore.svelte");
-
-        // Spy on waitForSettings to avoid delays during testing
-        interface ChatStoreWithWaitForSettings {
-            waitForSettings: () => Promise<void>;
-        }
-        vi.spyOn(
-            chatStore as unknown as ChatStoreWithWaitForSettings,
-            "waitForSettings"
-        ).mockResolvedValue(undefined);
+        // Cast chatStore to access all private members
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        vi.spyOn(chatStore as any, "waitForSettings").mockResolvedValue(undefined);
         await chatStore.initPromise;
         await chatStore.setProvider("MOCK", {
             mockDelay: 50,

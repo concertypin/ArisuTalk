@@ -19,11 +19,6 @@ export function strictObject<const Target extends object>(obj: NoInfer<Partial<T
             if (prop === "then") {
                 return undefined;
             }
-            // Symbol properties (e.g., Symbol.iterator, Symbol.toStringTag)
-            // are accessed by DOM engines internally and shouldn't trigger failures.
-            if (typeof prop === "symbol") {
-                return undefined;
-            }
             expect
                 .soft(false, `Property ${String(prop)} is not implemented on strict object.`)
                 .toBeTruthy();

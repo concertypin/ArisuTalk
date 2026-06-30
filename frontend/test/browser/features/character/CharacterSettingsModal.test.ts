@@ -135,15 +135,15 @@ describe("CharacterSettingsModal Component", () => {
         const nameInput = getByLabelText(/Name/i);
         await nameInput.fill("Updated Name");
 
-        // Wait for debounce (300ms) to resolve
-        await vi.waitFor(() => {
-            expect(characterStore.update).toHaveBeenCalledWith(
-                0,
-                expect.objectContaining({
-                    name: "Updated Name",
-                })
-            );
-        });
+        // Wait for debounce (300ms) + buffer
+        await new Promise((r) => setTimeout(r, 600));
+
+        expect(characterStore.update).toHaveBeenCalledWith(
+            0,
+            expect.objectContaining({
+                name: "Updated Name",
+            })
+        );
 
         expect(Logger.structured).toHaveBeenCalledWith("character.autosave", expect.anything());
     });
