@@ -7,9 +7,9 @@ on:
       - "pnpm-lock.yaml"
 
 env:
-  PNPM_STORE_PATH: ~/.local/share/pnpm/store
-  PLAYWRIGHT_CACHE_KEY: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
-  PNPM_CACHE_KEY: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+  PNPM_STORE: ~/.local/share/pnpm/store
+  PNPM_KEY: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+  PW_KEY: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
 
 jobs:
   setup:
@@ -19,47 +19,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
         with:
           package_json_file: frontend/package.json
           run_install: false
-
-      - name: Install Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version-file: frontend/package.json
-
-      - name: Restore pnpm store (with fallback)
+      - name: Cache pnpm store
         id: pnpm-cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache@v4
         with:
-          path: ${{ env.PNPM_STORE_PATH }}
-          key: ${{ env.PNPM_CACHE_KEY }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
-
+          path: ${{ env.PNPM_STORE }}
+          key: ${{ env.PNPM_KEY }}
+          restore-keys: ${{ runner.os }}-pnpm-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
         working-directory: frontend
-
-      - name: Save pnpm store (exact key)
-        if: steps.pnpm-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
-        with:
-          path: ${{ env.PNPM_STORE_PATH }}
-          key: ${{ env.PNPM_CACHE_KEY }}
-
-      - name: Cache Playwright browsers
-        id: playwright-cache
+      - name: Cache Playwright
+        id: pw-cache
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ env.PLAYWRIGHT_CACHE_KEY }}
-
+          key: ${{ env.PW_KEY }}
       - name: Install Playwright browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        if: steps.pw-cache.outputs.cache-hit != 'true'
         run: pnpm exec playwright install
         working-directory: frontend
 
@@ -80,10 +64,11 @@ jobs:
           node-version-file: frontend/package.json
       - uses: actions/cache/restore@v4
         with:
-          path: ${{ env.PNPM_STORE_PATH }}
-          key: ${{ env.PNPM_CACHE_KEY }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
+          path: ${{ env.PNPM_STORE }}
+          key: ${{ env.PNPM_KEY }}
+          restore-keys: ${{ runner.os }}-pnpm-
+      - run: pnpm install --frozen-lockfile
+        working-directory: frontend
       - run: pnpm -F frontend run lint
       - run: pnpm -F frontend run check:types
 
@@ -104,10 +89,11 @@ jobs:
           node-version-file: frontend/package.json
       - uses: actions/cache/restore@v4
         with:
-          path: ${{ env.PNPM_STORE_PATH }}
-          key: ${{ env.PNPM_CACHE_KEY }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
+          path: ${{ env.PNPM_STORE }}
+          key: ${{ env.PNPM_KEY }}
+          restore-keys: ${{ runner.os }}-pnpm-
+      - run: pnpm install --frozen-lockfile
+        working-directory: frontend
       - run: pnpm -F frontend run build
 
   tests:
@@ -132,14 +118,15 @@ jobs:
           node-version-file: frontend/package.json
       - uses: actions/cache/restore@v4
         with:
-          path: ${{ env.PNPM_STORE_PATH }}
-          key: ${{ env.PNPM_CACHE_KEY }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
+          path: ${{ env.PNPM_STORE }}
+          key: ${{ env.PNPM_KEY }}
+          restore-keys: ${{ runner.os }}-pnpm-
+      - run: pnpm install --frozen-lockfile
+        working-directory: frontend
       - uses: actions/cache/restore@v4
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ env.PLAYWRIGHT_CACHE_KEY }}
+          key: ${{ env.PW_KEY }}
       - run: pnpm exec playwright install-deps
         working-directory: frontend
       - name: Run tests
@@ -172,10 +159,11 @@ jobs:
           node-version-file: frontend/package.json
       - uses: actions/cache/restore@v4
         with:
-          path: ${{ env.PNPM_STORE_PATH }}
-          key: ${{ env.PNPM_CACHE_KEY }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
+          path: ${{ env.PNPM_STORE }}
+          key: ${{ env.PNPM_KEY }}
+          restore-keys: ${{ runner.os }}-pnpm-
+      - run: pnpm install --frozen-lockfile
+        working-directory: frontend
       - uses: actions/download-artifact@v4
         with:
           path: frontend/.vitest-reports
@@ -199,15 +187,14 @@ jobs:
           THRESHOLD: "80"
         with:
           script: |
-            const fs = require('fs');
-            const jp = process.env.JSON_PATH, t = parseFloat(process.env.THRESHOLD);
-            if (!fs.existsSync(jp)) { core.info('no coverage file'); return; }
-            function p(v) { const n=typeof v==='number'?v:parseFloat(v); return isNaN(n)?0:+n.toFixed(2); }
+            const fs=require('fs'), jp=process.env.JSON_PATH, t=parseFloat(process.env.THRESHOLD);
+            if(!fs.existsSync(jp)){core.info('no coverage');return;}
+            function p(v){const n=typeof v==='number'?v:parseFloat(v);return isNaN(n)?0:+n.toFixed(2);}
             const s=JSON.parse(fs.readFileSync(jp,'utf8')), l=p(s.total.lines.pct), ok=l>=t;
             const d=`Lines: ${l}% | Stmts: ${p(s.total.statements.pct)}% | Funcs: ${p(s.total.functions.pct)}% | Branches: ${p(s.total.branches.pct)}% (>=${t}%)`;
             await github.rest.repos.createCommitStatus({
-              owner:context.repo.owner, repo:context.repo.repo, sha:context.sha,
-              state:ok?'success':'failure', context:'Coverage', description:d,
+              owner:context.repo.owner,repo:context.repo.repo,sha:context.sha,
+              state:ok?'success':'failure',context:'Coverage',description:d,
               target_url:`${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
             });
             core.info(`Coverage: ${d}`);
