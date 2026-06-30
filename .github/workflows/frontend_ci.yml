@@ -32,17 +32,6 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: frontend
 
-      - name: Cache Playwright browsers
-        id: playwright-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-browsers-${{ hashFiles('pnpm-lock.yaml') }}
-
-      - name: Install Playwright browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install
-        working-directory: frontend
 
   lint:
     name: Frontend Lint
@@ -136,13 +125,18 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: frontend
 
-      - name: Restore Playwright browsers
-        uses: actions/cache/restore@v4
+      - name: Cache & install Playwright
+        id: pw-cache
+        uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-browsers-${{ hashFiles('pnpm-lock.yaml') }}
-
-      - name: Install Playwright system dependencies
+      - name: Install Playwright browsers
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps
+        working-directory: frontend
+      - name: Install Playwright system deps
+        if: steps.pw-cache.outputs.cache-hit == 'true'
         run: pnpm exec playwright install-deps
         working-directory: frontend
 
