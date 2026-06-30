@@ -34,7 +34,9 @@ describe("Button Component (advanced)", () => {
         });
 
         const button = getByRole("button", { name: "Disabled" });
-        await button.click();
+        // Use force:true because Playwright waits for element to be enabled
+        // before clicking, but we're testing that disabled buttons reject clicks.
+        await button.click({ force: true });
 
         expect(handler).not.toHaveBeenCalled();
     });

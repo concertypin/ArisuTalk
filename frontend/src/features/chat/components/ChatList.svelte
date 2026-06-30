@@ -80,6 +80,7 @@
                     <div
                         role="button"
                         tabindex="0"
+                        aria-label="Delete"
                         class="p-1 hover:text-error rounded"
                         onclick={(e) => void handleDelete(e, chat.id)}
                         onkeydown={(e) => {

@@ -153,6 +153,7 @@
                     >
                         <input
                             type="file"
+                            aria-label="Character file input"
                             onchange={handleFileChange}
                             class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                             accept=".arisc,.arisp"

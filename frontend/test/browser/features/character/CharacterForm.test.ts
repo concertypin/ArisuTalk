@@ -133,7 +133,11 @@ describe("CharacterForm Component", () => {
             onCancel: mockOnCancel,
         });
 
-        const fileInput = getByLabelText(/Import/i);
+        // Switch to the Import Card tab first, file input is inside that tab panel
+        const importTab = getByLabelText("Import Card");
+        await importTab.click();
+
+        const fileInput = getByLabelText("Character file input");
         await expect.element(fileInput).toBeVisible();
     });
 
@@ -148,9 +152,13 @@ describe("CharacterForm Component", () => {
             onCancel: mockOnCancel,
         });
 
-        const fileInput = getByLabelText(/Import/i);
+        // Switch to the Import Card tab first
+        const importTab = getByLabelText("Import Card");
+        await importTab.click();
+
+        const fileInput = getByLabelText("Character file input");
         await fileInput.upload(
-            new File(['{"name":"Imported Char","specVersion":0}'], "character.json", {
+            new File(['{"name":"Imported Char","specVersion":0}'], "character.arisc", {
                 type: "application/json",
             })
         );
@@ -171,9 +179,13 @@ describe("CharacterForm Component", () => {
             onCancel: mockOnCancel,
         });
 
-        const fileInput = getByLabelText(/Import/i);
+        // Switch to the Import Card tab first
+        const importTab = getByLabelText("Import Card");
+        await importTab.click();
+
+        const fileInput = getByLabelText("Character file input");
         await fileInput.upload(
-            new File(['{"name":"Bad Char"}'], "bad.json", { type: "application/json" })
+            new File(['{"name":"Bad Char"}'], "bad.arisc", { type: "application/json" })
         );
 
         await vi.waitFor(() => {

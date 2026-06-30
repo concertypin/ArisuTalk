@@ -51,7 +51,7 @@
         if (!dialogEl) return;
 
         if (uiState.characterSettingsOpen && uiState.characterSettingsTarget && !dialogEl.open) {
-            // Deep clone using JSON to avoid Svelte proxy issues
+            // Deep clone using lodash cloneDeep to avoid Svelte proxy issues
             editingCharacter = cloneDeep(uiState.characterSettingsTarget);
             activeTab = "basic";
             dialogEl.showModal();
@@ -97,15 +97,14 @@
         saveTimeout = setTimeout(() => {
             // IIFE to suppress eslint complaint about ()=>Promise in setTimeout
             void (async () => {
-                if (!editingCharacter) return;
+                const target = editingCharacter;
+                if (!target) return;
 
-                const index = characterStore.characters.findIndex(
-                    (c) => c.id === editingCharacter!.id
-                );
+                const index = characterStore.characters.findIndex((c) => c.id === target.id);
                 if (index !== -1) {
                     // Extract ID before logging to avoid DataCloneError with Svelte proxies
-                    const characterId = editingCharacter.id;
-                    await characterStore.update(index, editingCharacter);
+                    const characterId = target.id;
+                    await characterStore.update(index, target);
                     Logger.structured("character.autosave", {
                         characterId,
                     });

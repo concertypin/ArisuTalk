@@ -37,13 +37,21 @@
 
     // Load asset preview URLs
     $effect(() => {
+        let isCancelled = false;
         const createdUrls = new SvelteSet<string>();
+
         const loadPreviews = async () => {
             for (const asset of character.assets.assets) {
+                if (isCancelled) break;
                 if (typeof asset.data === "string" && asset.data.startsWith("local:")) {
                     try {
                         await assetStorage.init();
+                        if (isCancelled) break;
                         const url = await assetStorage.getAssetUrl(new URL(asset.data));
+                        if (isCancelled) {
+                            URL.revokeObjectURL(url);
+                            break;
+                        }
                         assetPreviews.set(asset.id, url);
                         createdUrls.add(url);
                     } catch (e) {
@@ -54,9 +62,13 @@
         };
         void loadPreviews();
         return () => {
+            isCancelled = true;
             for (const url of createdUrls) {
                 URL.revokeObjectURL(url);
             }
+            // Clear previews so template doesn't render revoked blob URLs
+            // while the new effect's async loading is in-flight
+            assetPreviews.clear();
         };
     });
 
@@ -124,12 +136,23 @@
 
     async function deleteAsset(index: number) {
         const asset = character.assets.assets[index];
+        if (!asset) return;
 
         // Cleanup storage in background
         if (typeof asset.data === "string" && asset.data.startsWith("local:")) {
-            void assetStorage.deleteAsset(new URL(asset.data)).catch((e) => {
-                Logger.error("Failed to delete asset from storage:", e);
-            });
+            try {
+                const url = new URL(asset.data);
+                // Skip deletion for non-OPFS URLs (e.g. bare "local:" with no path)
+                if (url.hostname !== "opfs") {
+                    Logger.warn("Skipping storage deletion for non-OPFS asset:", url.href);
+                } else {
+                    void assetStorage.deleteAsset(url).catch((e) => {
+                        Logger.error("Failed to delete asset from storage:", e);
+                    });
+                }
+            } catch (e) {
+                Logger.error("Invalid asset URL, skipping storage deletion:", asset.data, e);
+            }
         }
 
         onChange(
@@ -147,19 +170,16 @@
 
     function handleDragOver(e: DragEvent, targetIndex: number) {
         e.preventDefault();
-        if (draggedIndex === null || draggedIndex === targetIndex) return;
-
-        draggedIndex = targetIndex;
+        const fromIndex = draggedIndex;
+        if (fromIndex === null || fromIndex === targetIndex) return;
 
         onChange(
             withCharacter(character, (draft) => {
-                draft.assets.assets = moveArrayItem(
-                    draft.assets.assets,
-                    draggedIndex!,
-                    targetIndex
-                );
+                draft.assets.assets = moveArrayItem(draft.assets.assets, fromIndex, targetIndex);
             })
         );
+
+        draggedIndex = targetIndex;
     }
 
     function handleDragEnd() {
