@@ -55,12 +55,7 @@ vi.mock("@/lib/providers/chat/OpenRouterChatProvider", () => {
         },
     };
 });
-vi.spyOn(
-    ChatStore.prototype,
-
-    // oxlint-disable-next-line typescript/no-explicit-any
-    "waitForSettings" in ChatStore.prototype ? "waitForSettings" : ("" as any)
-).mockResolvedValue(undefined);
+vi.spyOn(ChatStore.prototype, "waitForSettings").mockResolvedValue(undefined);
 
 describe("ChatStore", () => {
     let store: ChatStore;

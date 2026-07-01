@@ -16,12 +16,17 @@
     import { loadFont } from "@/lib/utils/fontUtils";
     import AuthGate from "@/features/auth/components/AuthGate.svelte";
     import { versionInfo } from "@/lib/stores/versionInfo.svelte";
+    import { registerPlugin, initializePlugins } from "@/lib/plugins/types";
+    import { memoryPlugin } from "@/features/memory/memoryPlugin";
 
-    // Initialize router and settings on mount
+    // Register first-party plugins before initialisation.
+    registerPlugin(memoryPlugin);
+    // Initialize on mount
     $effect(() => {
         initRouter();
         void settings.init();
         void registerServiceWorker();
+        void initializePlugins();
     });
 
     // Apply theme when settings are loaded or theme changes

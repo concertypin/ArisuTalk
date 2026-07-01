@@ -2,52 +2,52 @@
  * @fileoverview Tests for the token counter utility.
  */
 import { describe, it, expect, expectTypeOf } from "vitest";
-import { countTokens, estimateTokenCost } from "@/lib/utils/tokenCounter";
+import { estimateTokens, estimateTokenCost } from "@/lib/utils/tokenCounter";
 
 describe("Token Counter", () => {
-    describe("countTokens()", () => {
+    describe("estimateTokens()", () => {
         it("returns 0 for empty string", () => {
-            expect(countTokens("")).toBe(0);
+            expect(estimateTokens("")).toBe(0);
         });
 
         it("returns 0 for nullish/undefined", () => {
             // @ts-expect-error - testing with undefined (non-null assertion)
-            expect(countTokens(undefined)).toBe(0);
+            expect(estimateTokens(undefined)).toBe(0);
         });
 
         it("returns correct count for empty string variants", () => {
-            expect(countTokens("   ")).toBe(1);
+            expect(estimateTokens("   ")).toBe(1);
         });
 
         it("returns positive number for non-empty text", () => {
-            expect(countTokens("hello world")).toBeGreaterThan(0);
+            expect(estimateTokens("hello world")).toBeGreaterThan(0);
         });
 
         it("produces approximately 1 token per 4 characters for ASCII text", () => {
             const text = "The quick brown fox jumps over the lazy dog";
             // 44 chars / 4 = 11 tokens
-            expect(countTokens(text)).toBe(11);
+            expect(estimateTokens(text)).toBe(11);
         });
 
         it("handles Unicode/multi-byte characters", () => {
             // CJK characters are 3 bytes each
             const cjk = "你好世界";
-            expect(countTokens(cjk)).toBe(3); // 12 bytes / 4 = 3
+            expect(estimateTokens(cjk)).toBe(3); // 12 bytes / 4 = 3
         });
 
         it("handles mixed ASCII and Unicode", () => {
             const mixed = "hello 世界";
-            expect(countTokens(mixed)).toBe(3); // 11 bytes / 4 = 2.75 → ceil 3
+            expect(estimateTokens(mixed)).toBe(3); // 11 bytes / 4 = 2.75 → ceil 3
         });
 
         it("handles long texts", () => {
             const long = "a".repeat(400);
-            expect(countTokens(long)).toBe(100); // 400 / 4 = 100
+            expect(estimateTokens(long)).toBe(100); // 400 / 4 = 100
         });
 
         it("handles text with newlines and special characters", () => {
             const text = "line1\nline2\nline3\t!@#$%";
-            expect(countTokens(text)).toBeGreaterThan(0);
+            expect(estimateTokens(text)).toBeGreaterThan(0);
         });
     });
 

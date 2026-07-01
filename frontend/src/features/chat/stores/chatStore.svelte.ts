@@ -107,8 +107,9 @@ export class ChatStore {
 
     /**
      * Waits for settings to finish loading.
+     * @internal Visible for test mocking; not part of the public API.
      */
-    private async waitForSettings(): Promise<void> {
+    async waitForSettings(): Promise<void> {
         // Poll until settings are loaded (max 5 seconds)
         const SETTINGS_POLL_TIMEOUT_MS = 5000;
         const SETTINGS_POLL_INTERVAL_MS = 100;

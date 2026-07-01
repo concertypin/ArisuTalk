@@ -31,31 +31,11 @@ export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
 // Auth token management
 // ---------------------------------------------------------------------------
 
-/**
- * A function that returns a Promise resolving to an auth token string (or null).
- * Consumers (e.g. a Clerk initialisation routine) call `setTokenProvider` once
- * to wire up authentication.
- */
 let tokenProvider: (() => Promise<string | null>) | null = null;
 
 /**
  * Register a function that supplies a bearer token for API requests.
  * The token provider is called right before every authenticated request.
- *
- * @example
- * ```ts
- * import { setTokenProvider } from "@/lib/api/client";
- *
- * // After Clerk has loaded:
- * setTokenProvider(async () => {
- *     try {
- *         const token = await window.Clerk.session?.getToken();
- *         return token ?? null;
- *     } catch {
- *         return null;
- *     }
- * });
- * ```
  */
 export function setTokenProvider(provider: (() => Promise<string | null>) | null): void {
     tokenProvider = provider;
@@ -67,7 +47,6 @@ export function setTokenProvider(provider: (() => Promise<string | null>) | null
 
 const DEFAULT_BASE_URL = "https://phonebook.back.arisutalk.moe";
 
-/** Resolve the phonebook API base URL from env or fallback. */
 function resolveBaseUrl(): string {
     return import.meta.env.VITE_PHONEBOOK_BASE_URL || DEFAULT_BASE_URL;
 }
@@ -76,10 +55,6 @@ function resolveBaseUrl(): string {
 // Helpers
 // ---------------------------------------------------------------------------
 
-/**
- * Try to extract a human-readable "message" string from an unknown response
- * body.  Uses runtime narrowing so no unchecked cast is needed.
- */
 function tryExtractErrorMessage(value: unknown): string | null {
     if (typeof value !== "object" || value === null) return null;
     if (!("message" in value)) return null;
@@ -91,23 +66,29 @@ function tryExtractErrorMessage(value: unknown): string | null {
 // Core request
 // ---------------------------------------------------------------------------
 
-/**
- * Internal low-level request helper.
- * Handles URL construction, auth header injection, JSON parsing, and error
- * normalisation.
- */
+type RequestOptions = {
+    body?: unknown;
+    formData?: FormData;
+    headers?: Record<string, string>;
+    raw?: boolean;
+};
+
+// Overload 1: raw mode returns Response
+async function request(
+    method: string,
+    path: string,
+    options: { raw: true } & RequestOptions
+): Promise<ApiSuccessResponse<Response> | ApiErrorResponse>;
+// Overload 2: normal mode parses JSON as T
 async function request<T>(
     method: string,
     path: string,
-    options?: {
-        body?: unknown;
-        /** FormData body — exclusive with `body`. */
-        formData?: FormData;
-        /** Additional headers to merge. */
-        headers?: Record<string, string>;
-        /** When `true` the response is returned as-is instead of being parsed. */
-        raw?: boolean;
-    }
+    options?: RequestOptions
+): Promise<ApiResponse<T>>;
+async function request<T>(
+    method: string,
+    path: string,
+    options?: RequestOptions
 ): Promise<ApiResponse<T>> {
     const baseUrl = resolveBaseUrl();
     const url = `${baseUrl}${path}`;
@@ -116,7 +97,6 @@ async function request<T>(
         ...options?.headers,
     };
 
-    // Attach auth token when available
     if (tokenProvider) {
         try {
             const token = await tokenProvider();
@@ -128,7 +108,6 @@ async function request<T>(
         }
     }
 
-    // Set JSON content-type unless we're sending FormData
     if (!options?.formData && options?.body !== undefined) {
         headers["Content-Type"] = "application/json";
     }
@@ -149,14 +128,20 @@ async function request<T>(
         return { ok: false, status: 0, error: message };
     }
 
-    // Raw mode – return the Response object wrapped in ApiSuccessResponse
+    // Raw mode – the overload guarantees callers see ApiSuccessResponse<Response>
     if (options?.raw) {
-        return { ok: true, status: response.status, data: response as unknown as T };
+        const rawResult: ApiSuccessResponse<Response> = {
+            ok: true,
+            status: response.status,
+            data: response,
+        };
+        return rawResult;
     }
 
     // No-content (204) – return ok with null data
     if (response.status === 204) {
-        return { ok: true, status: 204, data: null as unknown as T };
+        const noContent: ApiSuccessResponse<null> = { ok: true, status: 204, data: null };
+        return noContent;
     }
 
     // Try to parse JSON body
@@ -165,7 +150,6 @@ async function request<T>(
     try {
         parsed = JSON.parse(textBody);
     } catch {
-        // Response is not JSON – treat as error with the raw text
         return {
             ok: false,
             status: response.status,
@@ -186,37 +170,26 @@ async function request<T>(
 // Public HTTP-method shorthands
 // ---------------------------------------------------------------------------
 
-/** GET request. */
 export async function get<T = unknown>(path: string): Promise<ApiResponse<T>> {
     return request<T>("GET", path);
 }
 
-/** POST request with optional JSON body. */
 export async function post<T = unknown>(path: string, body?: unknown): Promise<ApiResponse<T>> {
     return request<T>("POST", path, { body });
 }
 
-/** PATCH request with optional JSON body. */
 export async function patch<T = unknown>(path: string, body?: unknown): Promise<ApiResponse<T>> {
     return request<T>("PATCH", path, { body });
 }
 
-/** DELETE request. */
 export async function del<T = unknown>(path: string): Promise<ApiResponse<T>> {
     return request<T>("DELETE", path);
 }
 
-/**
- * Raw GET request – returns the Response object without JSON parsing.
- * Useful for downloading blobs or streaming.
- */
 export async function getRaw(path: string): Promise<ApiResponse<Response>> {
     return request<Response>("GET", path, { raw: true });
 }
 
-/**
- * Upload a file via multipart/form-data (POST).
- */
 export async function uploadBlob<T = unknown>(
     path: string,
     blob: Blob,

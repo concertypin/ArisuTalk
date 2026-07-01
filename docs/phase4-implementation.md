@@ -13,6 +13,8 @@
 `frontend/src/lib/migration/storageMigration.ts` (신규)
 
 - **`exportAllData()`**: 모든 IndexedDB 테이블(chats, characters, settings, personas, messages, stickers, memories)을 JSON 직렬화 객체로 내보내기
+> [!NOTE]
+> CBOR 추천, 최소한 압축이라도 할 것
 - **`importBackup(backup)`**: 백업 JSON에서 IndexedDB로 데이터 복원 (기존 데이터 클리어 후 bulk add)
 - **`checkStoredSchemaVersion()`**: localStorage에 저장된 스키마 버전 확인
 - **`markSchemaMigrated()`**: 현재 스키마 버전을 localStorage에 마킹
@@ -59,8 +61,12 @@
 `frontend/src/lib/utils/tokenCounter.ts` (신규, DevTools agent)
 
 - **`countTokens(text)`**: TextEncoder 기반 바이트 길이 측정 → 4바이트당 1토큰 근사
+> [!NOTE]
+> 근사치 말고 실제 계산할 것, 안 되면 근사 provider로 사용자가 선택 가능하게 할 것
 - **`estimateTokenCost(text, model?)`**: 모델별 가격표로 예상 비용 계산
 - 지원 모델: GPT-4o, GPT-4o-mini, GPT-4, Claude 3, Gemini 1.5 등
+> [!NOTE]
+> 그 모델 죽은 지가 언젠데... 코드에 직접 모델명 넣지 말고, 동적 모델 가격표를 가져오거나 최소한 유저 입력으로라도 할 것
 
 `frontend/src/features/character/components/settingsSubpage/CharacterPromptSettings.svelte` (수정)
 
@@ -179,12 +185,12 @@
 
 ## 6. 검증
 
-| 검증 항목 | 결과 |
-|-----------|------|
-| **Build** | 0 에러, 0 경고 |
-| **Unit Tests** | 83개 파일 통과 |
+| 검증 항목         | 결과                                     |
+| ----------------- | ---------------------------------------- |
+| **Build**         | 0 에러, 0 경고                           |
+| **Unit Tests**    | 83개 파일 통과                           |
 | **Browser Tests** | 전체 통과 (기존 650+ 테스트 + 신규 16개) |
-| **Lint** | Prettier, ESLint 정상 |
+| **Lint**          | Prettier, ESLint 정상                    |
 
 ### 서브에이전트 리뷰 결과
 

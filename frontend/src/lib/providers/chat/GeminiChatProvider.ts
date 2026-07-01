@@ -32,15 +32,10 @@ export class GeminiChatProvider extends LangChainBaseProvider<"GEMINI"> {
                 apiKey: settings.apiKey,
                 model: settings.model,
                 temperature: settings.generationParameters?.temperature,
-                maxOutputTokens: settings.generationParameters?.maxOutputTokens,
-                safetySettings: settings.safetySettings?.map(
-                    (i): SafetySetting => ({
-                        // oxlint-disable-next-line typescript-eslint/consistent-type-assertions -- external SDK types do not line up exactly here.
-                        category: i.category as unknown as SafetySetting["category"],
-                        // oxlint-disable-next-line typescript-eslint/consistent-type-assertions -- external SDK types do not line up exactly here.
-                        threshold: i.threshold as unknown as SafetySetting["threshold"],
-                    })
-                ),
+                safetySettings: settings.safetySettings?.map((i): SafetySetting => ({
+                    category: i.category as SafetySetting["category"],
+                    threshold: i.threshold as SafetySetting["threshold"],
+                })),
                 thinkingConfig: {
                     includeThoughts: true,
                 },
@@ -48,9 +43,8 @@ export class GeminiChatProvider extends LangChainBaseProvider<"GEMINI"> {
             if (typeof settings.generationParameters?.thinkingLevel === "string") {
                 modelConfig.thinkingConfig = {
                     ...modelConfig.thinkingConfig,
-                    // oxlint-disable-next-line typescript-eslint/consistent-type-assertions -- external SDK type alias differs from our config union.
                     thinkingLevel: settings.generationParameters
-                        .thinkingLevel as unknown as Required<ClientOption>["thinkingConfig"]["thinkingLevel"],
+                        .thinkingLevel as Required<ClientOption>["thinkingConfig"]["thinkingLevel"],
                 };
             } else if (typeof settings.generationParameters?.thinkingLevel === "number") {
                 modelConfig.thinkingConfig = {

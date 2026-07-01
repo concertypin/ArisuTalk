@@ -12,9 +12,10 @@
     import { uiState } from "@/lib/stores/ui.svelte";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import { Logger } from "@common/logger/Logger";
+    import type { Snippet } from "svelte";
 
     type Props = {
-        children?: import("svelte").Snippet;
+        children?: Snippet;
     };
 
     let { children }: Props = $props();
