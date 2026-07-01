@@ -7,7 +7,8 @@
     import DownloadSimple from "phosphor-svelte/lib/DownloadSimpleIcon";
     import UploadSimple from "phosphor-svelte/lib/UploadSimpleIcon";
     import {
-        exportAllData,
+        exportDataAsBlob,
+        parseBackupFile,
         importBackup,
         markSchemaMigrated,
     } from "@/lib/migration/storageMigration";
@@ -20,17 +21,11 @@
     async function handleExport() {
         isExporting = true;
         try {
-            const backup = await exportAllData();
-            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+            const blob = await exportDataAsBlob();
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = `arisutalk-backup-${new Date().toISOString().slice(0, 10)}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            toastStore.success("Data exported successfully");
+            a.download = `arisutalk-backup-${new Date().toISOString().slice(0, 10)}.aribackup`;
         } catch (e) {
             toastStore.error("Failed to export data");
             Logger.error("Export failed", e);
@@ -42,18 +37,13 @@
     function handleImportClick() {
         const input = document.createElement("input");
         input.type = "file";
-        input.accept = ".json";
+        input.accept = ".aribackup,.json";
         input.onchange = async () => {
             const file = input.files?.[0];
             if (!file) return;
             isImporting = true;
             try {
-                const text = await file.text();
-                const backup = JSON.parse(text);
-                if (!backup.data || typeof backup.data !== "object") {
-                    toastStore.error("Invalid backup file");
-                    return;
-                }
+                const backup = await parseBackupFile(file);
                 await importBackup(backup);
                 toastStore.success("Data imported successfully. Please reload the page.");
                 markSchemaMigrated();

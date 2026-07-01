@@ -13,7 +13,7 @@
     import Eye from "phosphor-svelte/lib/EyeIcon";
     import X from "phosphor-svelte/lib/XIcon";
     import Copy from "phosphor-svelte/lib/CopyIcon";
-    import { countTokens } from "@/lib/utils/tokenCounter";
+    import { estimateTokens } from "@/lib/utils/tokenCounter";
     import { Logger } from "@common/logger/Logger";
 
     type Props = {
@@ -40,9 +40,9 @@
     });
     let isFormValid = $derived(formName.trim().length > 0);
 
-    let formSystemTokens = $derived(countTokens(formPrompts.system));
-    let formGenerationTokens = $derived(countTokens(formPrompts.generation));
-    let formLoreTokens = $derived(countTokens(formPrompts.lore ?? ""));
+    let formSystemTokens = $derived(estimateTokens(formPrompts.system));
+    let formGenerationTokens = $derived(estimateTokens(formPrompts.generation));
+    let formLoreTokens = $derived(estimateTokens(formPrompts.lore ?? ""));
     let isEditing = $derived(editingTemplate !== null);
 
     function openCreate() {

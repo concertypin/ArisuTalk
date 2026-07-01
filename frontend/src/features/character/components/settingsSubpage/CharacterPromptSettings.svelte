@@ -9,7 +9,7 @@
     import CornersIn from "phosphor-svelte/lib/CornersInIcon";
     import BookOpen from "phosphor-svelte/lib/BookOpenIcon";
     import { merge } from "lodash-es";
-    import { countTokens } from "@/lib/utils/tokenCounter";
+    import { estimateTokens } from "@/lib/utils/tokenCounter";
     type Props = {
         character: Character;
         onChange: (character: Character) => void;
@@ -17,8 +17,8 @@
 
     let { character, onChange }: Props = $props();
 
-    let descriptionTokens = $derived(countTokens(character.prompt.description));
-    let authorsNoteTokens = $derived(countTokens(character.prompt.authorsNote ?? ""));
+    let descriptionTokens = $derived(estimateTokens(character.prompt.description));
+    let authorsNoteTokens = $derived(estimateTokens(character.prompt.authorsNote ?? ""));
 
     let isDescriptionExpanded = $state(false);
     let showTemplateManager = $state(false);
