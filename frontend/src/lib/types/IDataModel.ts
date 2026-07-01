@@ -242,9 +242,9 @@ export type PromptConfig = z.infer<typeof PromptConfigSchema>;
 export type AdvancedConfig = z.infer<typeof AdvancedConfigSchema>;
 
 /**
- * Known NovelAI diffusion models for image generation.
+ * Known image generation diffusion models.
  */
-export const NovelAIModelSchema = z.enum([
+export const ImageGenModelSchema = z.enum([
     "nai-diffusion-4",
     "nai-diffusion-3",
     "nai-diffusion-2",
@@ -257,14 +257,14 @@ export const NovelAIModelSchema = z.enum([
 ]);
 
 /**
- * Configuration for NovelAI image generation.
+ * Configuration for image generation.
  * Stored as a settings block alongside LLM configs.
  */
-export const NovelAIConfigSchema = z.object({
-    /** API key for NovelAI authentication. */
+export const ImageGenConfigSchema = z.object({
+    /** API key for image generation service authentication. */
     apiKey: z.string().min(1, "API key is required"),
     /** Model name to use for generation. */
-    model: NovelAIModelSchema.default("nai-diffusion-4"),
+    model: ImageGenModelSchema.default("nai-diffusion-4"),
     /** Image width in pixels (64–2048, multiples of 64). */
     width: z.number().int().min(64).max(2048).default(1024),
     /** Image height in pixels (64–2048, multiples of 64). */
@@ -277,5 +277,5 @@ export const NovelAIConfigSchema = z.object({
     seed: z.number().int().optional(),
 });
 
-export type NovelAIModel = z.infer<typeof NovelAIModelSchema>;
-export type NovelAIConfig = z.infer<typeof NovelAIConfigSchema>;
+export type ImageGenModel = z.infer<typeof ImageGenModelSchema>;
+export type ImageGenConfig = z.infer<typeof ImageGenConfigSchema>;

@@ -1,17 +1,15 @@
 /**
- * @fileoverview Service for NovelAI image generation API.
- * Communicates with the NovelAI REST API to generate images from text prompts.
- *
- * @see https://docs.novelai.net/image/novelai-image-generation.html
+ * @fileoverview Service for AI image generation API.
+ * Communicates with an image generation API (e.g. NovelAI) to generate images from text prompts.
  */
 
 import { Logger } from "@common/logger/Logger";
-import type { NovelAIConfig } from "@/lib/types/IDataModel";
+import type { ImageGenConfig } from "@/lib/types/IDataModel";
 
 /**
- * Request payload sent to the NovelAI `/ai/generate-image` endpoint.
+ * Request payload sent to the image generation `/ai/generate-image` endpoint.
  */
-interface NovelAIGenerationRequest {
+interface ImageGenRequest {
     input: string;
     model: string;
     parameters: {
@@ -23,23 +21,23 @@ interface NovelAIGenerationRequest {
     };
 }
 
-const NOVELAI_API_BASE = "https://api.novelai.net";
+const API_BASE = "https://api.novelai.net";
 const GENERATE_IMAGE_ENDPOINT = "/ai/generate-image";
 
 /**
- * Generates an image from a text prompt using the NovelAI API.
+ * Generates an image from a text prompt using the image generation API.
  *
  * @param prompt - The text description of the image to generate.
  * @param settings - Configuration for generation (API key, model, dimensions, etc.).
  * @returns A Blob containing the generated image (typically PNG).
  * @throws If the API key is missing, the request fails, or the response is not image data.
  */
-export async function generateImage(prompt: string, settings: NovelAIConfig): Promise<Blob> {
+export async function generateImage(prompt: string, settings: ImageGenConfig): Promise<Blob> {
     if (!settings.apiKey) {
-        throw new Error("NovelAI API key is required");
+        throw new Error("Image generation API key is required");
     }
 
-    const payload: NovelAIGenerationRequest = {
+    const payload: ImageGenRequest = {
         input: prompt,
         model: settings.model || "nai-diffusion-4",
         parameters: {
@@ -55,12 +53,12 @@ export async function generateImage(prompt: string, settings: NovelAIConfig): Pr
         payload.parameters.seed = settings.seed;
     }
 
-    Logger.debug("[NovelAI] Generating image", {
+    Logger.debug("[ImageGen] Generating image", {
         model: payload.model,
         dimensions: `${payload.parameters.width}x${payload.parameters.height}`,
     });
 
-    const response = await fetch(`${NOVELAI_API_BASE}${GENERATE_IMAGE_ENDPOINT}`, {
+    const response = await fetch(`${API_BASE}${GENERATE_IMAGE_ENDPOINT}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -71,21 +69,21 @@ export async function generateImage(prompt: string, settings: NovelAIConfig): Pr
 
     if (!response.ok) {
         const errorText = await response.text().catch(() => "Unknown error");
-        Logger.error("[NovelAI] Generation failed", {
+        Logger.error("[ImageGen] Generation failed", {
             status: response.status,
             error: errorText,
         });
-        throw new Error(`NovelAI image generation failed (${response.status}): ${errorText}`);
+        throw new Error(`Image generation failed (${response.status}): ${errorText}`);
     }
 
     const contentType = response.headers.get("content-type") || "image/png";
     const blob = await response.blob();
 
     if (!blob || blob.size === 0) {
-        throw new Error("NovelAI returned an empty response");
+        throw new Error("Image generation returned an empty response");
     }
 
-    Logger.debug("[NovelAI] Image generated successfully", {
+    Logger.debug("[ImageGen] Image generated successfully", {
         size: blob.size,
         type: contentType,
     });

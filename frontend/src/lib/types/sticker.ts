@@ -2,15 +2,14 @@
  * Source of a sticker's image data.
  * - `'emoji'`: Rendered from an emoji character.
  * - `'upload'`: User-uploaded image.
- * - `'novelai'`: Generated via NovelAI image generation.
+ * - `'generated'`: Generated via AI image generation.
  */
-export type StickerSource = "emoji" | "upload" | "novelai";
+export type StickerSource = "emoji" | "upload" | "generated";
 
 /**
  * Represents a single sticker within a pack.
  * The sticker's visual content is determined by one of:
- * - `emoji` — rendered from the emoji string in `emoji`
- * - `upload` / `novelai` — resolved via `imageUrl`, with optional raw data in `data`
+ * - `upload` / `generated` — resolved via `imageUrl`, with optional raw data in `data`
  */
 export interface Sticker {
     /** Unique identifier for this sticker. */
@@ -19,8 +18,7 @@ export interface Sticker {
     name: string;
     /** Emoji character used when `source` is `'emoji'`. */
     emoji?: string;
-    /** URL to the sticker image (for `upload` or `novelai` sources). */
-    imageUrl?: string;
+    /** URL to the sticker image (for `upload` or `generated` sources). */
     /** Origin of the sticker visual data. */
     source: StickerSource;
     /**

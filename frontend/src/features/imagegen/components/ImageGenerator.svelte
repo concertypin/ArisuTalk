@@ -1,6 +1,6 @@
 <!--
-@component NovelAIGenerator
-Image generation panel with prompt input, NovelAI settings, preview, and save-to-sticker-pack.
+@component ImageGenerator
+Image generation panel with prompt input, generation settings, preview, and save-to-sticker-pack.
 -->
 <script lang="ts">
     import ImageIcon from "phosphor-svelte/lib/ImageIcon";
@@ -8,11 +8,11 @@ Image generation panel with prompt input, NovelAI settings, preview, and save-to
     import PaletteIcon from "phosphor-svelte/lib/PaletteIcon";
     import DownloadSimpleIcon from "phosphor-svelte/lib/DownloadSimpleIcon";
 
-    import { novelaiStore } from "../stores/novelaiStore.svelte";
-    import type { NovelAIModel } from "@/lib/types/IDataModel";
+    import { imageGenStore } from "../stores/imageGenStore.svelte";
+    import type { ImageGenModel } from "@/lib/types/IDataModel";
 
-    /** Available NovelAI diffusion models. */
-    const models: { value: NovelAIModel; label: string }[] = [
+    /** Available image generation diffusion models. */
+    const models: { value: ImageGenModel; label: string }[] = [
         { value: "nai-diffusion-4", label: "NAI Diffusion v4" },
         { value: "nai-diffusion-3", label: "NAI Diffusion v3" },
         { value: "nai-diffusion-2", label: "NAI Diffusion v2" },
@@ -33,7 +33,7 @@ Image generation panel with prompt input, NovelAI settings, preview, and save-to
     <!-- Header -->
     <div class="flex items-center gap-2">
         <SparkleIcon size={22} class="text-primary" />
-        <h2 class="text-lg font-bold">NovelAI Image Generator</h2>
+        <h2 class="text-lg font-bold">Image Generator</h2>
     </div>
 
     <!-- Tabs: Generate / Settings -->
@@ -69,8 +69,8 @@ Image generation panel with prompt input, NovelAI settings, preview, and save-to
                     <input
                         type="password"
                         class="input input-sm input-bordered w-full"
-                        placeholder="Enter NovelAI API key"
-                        bind:value={novelaiStore.config.apiKey}
+                        placeholder="Enter API key"
+                        bind:value={imageGenStore.config.apiKey}
                     />
                 </label>
 
@@ -79,7 +79,7 @@ Image generation panel with prompt input, NovelAI settings, preview, and save-to
                     <span class="label-text text-xs">Model</span>
                     <select
                         class="select select-sm select-bordered w-full"
-                        bind:value={novelaiStore.config.model}
+                        bind:value={imageGenStore.config.model}
                     >
                         {#each models as m (m.value)}
                             <option value={m.value}>{m.label}</option>
@@ -97,7 +97,7 @@ Image generation panel with prompt input, NovelAI settings, preview, and save-to
                             min="64"
                             max="2048"
                             step="64"
-                            bind:value={novelaiStore.config.width}
+                            bind:value={imageGenStore.config.width}
                         />
                     </label>
                     <label class="form-control">
@@ -108,7 +108,7 @@ Image generation panel with prompt input, NovelAI settings, preview, and save-to
                             min="64"
                             max="2048"
                             step="64"
-                            bind:value={novelaiStore.config.height}
+                            bind:value={imageGenStore.config.height}
                         />
                     </label>
                 </div>
@@ -116,25 +116,25 @@ Image generation panel with prompt input, NovelAI settings, preview, and save-to
                 <!-- Scale & Steps -->
                 <div class="grid grid-cols-2 gap-2">
                     <label class="form-control">
-                        <span class="label-text text-xs">Scale ({novelaiStore.config.scale})</span>
+                        <span class="label-text text-xs">Scale ({imageGenStore.config.scale})</span>
                         <input
                             type="range"
                             class="range range-sm"
                             min="1"
                             max="30"
                             step="0.5"
-                            bind:value={novelaiStore.config.scale}
+                            bind:value={imageGenStore.config.scale}
                         />
                     </label>
                     <label class="form-control">
-                        <span class="label-text text-xs">Steps ({novelaiStore.config.steps})</span>
+                        <span class="label-text text-xs">Steps ({imageGenStore.config.steps})</span>
                         <input
                             type="range"
                             class="range range-sm"
                             min="1"
                             max="100"
                             step="1"
-                            bind:value={novelaiStore.config.steps}
+                            bind:value={imageGenStore.config.steps}
                         />
                     </label>
                 </div>
@@ -152,19 +152,19 @@ Image generation panel with prompt input, NovelAI settings, preview, and save-to
             ></textarea>
 
             <!-- Error Display -->
-            {#if novelaiStore.error}
+            {#if imageGenStore.error}
                 <div class="alert alert-error py-2 text-sm">
-                    <span>{novelaiStore.error}</span>
+                    <span>{imageGenStore.error}</span>
                 </div>
             {/if}
 
             <!-- Generate Button -->
             <button
                 class="btn btn-primary"
-                onclick={() => novelaiStore.generate(prompt)}
-                disabled={novelaiStore.isGenerating || !prompt.trim()}
+                onclick={() => imageGenStore.generate(prompt)}
+                disabled={imageGenStore.isGenerating || !prompt.trim()}
             >
-                {#if novelaiStore.isGenerating}
+                {#if imageGenStore.isGenerating}
                     <span class="loading loading-spinner loading-sm"></span>
                     Generating...
                 {:else}
@@ -175,11 +175,11 @@ Image generation panel with prompt input, NovelAI settings, preview, and save-to
         </div>
 
         <!-- Preview Area -->
-        {#if novelaiStore.previewUrl}
+        {#if imageGenStore.previewUrl}
             <div class="card bg-base-200 overflow-hidden">
                 <figure class="flex justify-center p-2 bg-base-300">
                     <img
-                        src={novelaiStore.previewUrl}
+                        src={imageGenStore.previewUrl}
                         alt="Generated image preview"
                         class="max-w-full h-auto rounded-lg"
                     />
@@ -189,7 +189,7 @@ Image generation panel with prompt input, NovelAI settings, preview, and save-to
                         <h3 class="card-title text-sm">Generated Image</h3>
                         <button
                             class="btn btn-ghost btn-xs"
-                            onclick={() => novelaiStore.resetImage()}
+                            onclick={() => imageGenStore.resetImage()}
                             title="Clear preview"
                         >
                             <span class="text-lg leading-none">&times;</span>
@@ -209,14 +209,14 @@ Image generation panel with prompt input, NovelAI settings, preview, and save-to
                             onclick={async () => {
                                 if (!stickerName.trim()) return;
                                 try {
-                                    await novelaiStore.saveToStickers(stickerName.trim());
+                                    await imageGenStore.saveToStickers(stickerName.trim());
                                     stickerName = "";
-                                    novelaiStore.resetImage();
+                                    imageGenStore.resetImage();
                                 } catch {
                                     // Error is handled internally
                                 }
                             }}
-                            disabled={!stickerName.trim() || novelaiStore.isGenerating}
+                            disabled={!stickerName.trim() || imageGenStore.isGenerating}
                         >
                             <DownloadSimpleIcon size={16} />
                             Save to Sticker Pack

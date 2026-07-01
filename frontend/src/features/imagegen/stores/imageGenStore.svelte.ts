@@ -1,9 +1,9 @@
 /**
- * @fileoverview Store managing NovelAI image generation state and operations.
+ * @fileoverview Store managing image generation state and operations.
  * Handles config persistence, image generation, and saving results to sticker packs.
  */
 
-import type { NovelAIConfig } from "@/lib/types/IDataModel";
+import type { ImageGenConfig } from "@/lib/types/IDataModel";
 import type { Sticker, StickerPack } from "@/lib/types/sticker";
 import type { IStickerStorageAdapter } from "@/lib/interfaces";
 import { IDBStickerAdapter } from "@/lib/adapters/storage/sticker/IDBStickerAdapter";
@@ -29,9 +29,9 @@ function uid(): string {
     return crypto.randomUUID();
 }
 
-class NovelaiStore {
-    /** Current NovelAI configuration (API key, model, parameters). */
-    config = $state<NovelAIConfig>({
+class ImageGenStore {
+    /** Current image generation configuration (API key, model, parameters). */
+    config = $state<ImageGenConfig>({
         apiKey: "",
         model: "nai-diffusion-4",
         width: 1024,
@@ -72,7 +72,7 @@ class NovelaiStore {
             return;
         }
         if (!this.config.apiKey) {
-            this.error = "NovelAI API key is not configured";
+            this.error = "Image generation API key is not configured";
             return;
         }
 
@@ -81,7 +81,7 @@ class NovelaiStore {
 
         try {
             // Dynamic import to avoid pulling in the fetch-heavy module eagerly
-            const { generateImage } = await import("@/lib/services/NovelAIService");
+            const { generateImage } = await import("@/lib/services/ImageGenService");
             const blob = await generateImage(prompt, { ...this.config });
 
             // Revoke the previous preview URL to avoid memory leaks
@@ -91,11 +91,11 @@ class NovelaiStore {
 
             this.generatedImage = blob;
             this.previewUrl = URL.createObjectURL(blob);
-            Logger.info("[NovelAI] Image generated successfully");
+            Logger.info("[ImageGen] Image generated successfully");
         } catch (e) {
             const message = e instanceof Error ? e.message : String(e);
             this.error = message;
-            Logger.error("[NovelAI] Generation failed", message);
+            Logger.error("[ImageGen] Generation failed", message);
         } finally {
             this.isGenerating = false;
         }
@@ -103,11 +103,11 @@ class NovelaiStore {
 
     /**
      * Save the currently generated image as a sticker in the specified pack.
-     * Creates a new pack if `packId` is not provided.
      *
-     * @param name - Display name for the sticker.
-     * @param packId - Optional ID of an existing pack to add the sticker to.
-     * @returns The ID of the sticker pack the sticker was saved to.
+     * @param name - Name for the new sticker.
+     * @param packId - Optional pack ID to add to. Creates a new pack if omitted.
+     * @returns The pack ID the sticker was saved to.
+     * @throws If no image has been generated, or if the specified pack doesn't exist.
      */
     async saveToStickers(name: string, packId?: string): Promise<string> {
         const blob = this.generatedImage;
@@ -128,8 +128,8 @@ class NovelaiStore {
         } else {
             pack = {
                 id: uid(),
-                name: "NovelAI Generations",
-                description: "Images generated with NovelAI",
+                name: "Generated Images",
+                description: "Images generated with AI",
                 stickers: [],
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
@@ -142,7 +142,7 @@ class NovelaiStore {
         const sticker: Sticker = {
             id: uid(),
             name,
-            source: "novelai",
+            source: "generated",
             data: dataUrl,
             imageUrl: this.previewUrl ?? undefined,
         };
@@ -151,7 +151,7 @@ class NovelaiStore {
         pack.updatedAt = new Date().toISOString();
 
         await adapter.savePack(pack);
-        Logger.info("[NovelAI] Sticker saved to pack", { packId: pack.id, sticker: sticker.id });
+        Logger.info("[ImageGen] Sticker saved to pack", { packId: pack.id, sticker: sticker.id });
 
         return pack.id;
     }
@@ -190,12 +190,12 @@ class NovelaiStore {
  * Converts a Blob to a base64 data URL string.
  */
 async function blobToDataUrl(blob: Blob): Promise<string> {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = () => reject(new Error("Failed to read blob as data URL"));
-        reader.readAsDataURL(blob);
-    });
+    const { promise, resolve, reject } = Promise.withResolvers<string>();
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(new Error("Failed to read blob as data URL"));
+    reader.readAsDataURL(blob);
+    return promise;
 }
 
-export const novelaiStore = new NovelaiStore();
+export const imageGenStore = new ImageGenStore();
