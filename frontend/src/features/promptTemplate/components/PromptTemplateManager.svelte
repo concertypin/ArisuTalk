@@ -13,6 +13,7 @@
     import Eye from "phosphor-svelte/lib/EyeIcon";
     import X from "phosphor-svelte/lib/XIcon";
     import Copy from "phosphor-svelte/lib/CopyIcon";
+    import { countTokens } from "@/lib/utils/tokenCounter";
     import { Logger } from "@common/logger/Logger";
 
     type Props = {
@@ -38,6 +39,10 @@
         lore: "",
     });
     let isFormValid = $derived(formName.trim().length > 0);
+
+    let formSystemTokens = $derived(countTokens(formPrompts.system));
+    let formGenerationTokens = $derived(countTokens(formPrompts.generation));
+    let formLoreTokens = $derived(countTokens(formPrompts.lore ?? ""));
     let isEditing = $derived(editingTemplate !== null);
 
     function openCreate() {
@@ -177,6 +182,9 @@
                         placeholder="System prompt / character description..."
                         bind:value={formPrompts.system}
                     ></textarea>
+                    <span class="label-text-alt badge badge-ghost badge-xs"
+                        >~{formSystemTokens} tokens</span
+                    >
                 </fieldset>
 
                 <!-- Generation prompt -->
@@ -187,9 +195,11 @@
                     <textarea
                         id="template-generation"
                         class="textarea w-full h-20"
-                        placeholder="Generation prompt (e.g. 'You are a helpful assistant')..."
                         bind:value={formPrompts.generation}
                     ></textarea>
+                    <span class="label-text-alt badge badge-ghost badge-xs"
+                        >~{formGenerationTokens} tokens</span
+                    >
                 </fieldset>
 
                 <!-- Lore / Author's note -->
@@ -203,6 +213,9 @@
                         placeholder="Optional lore entries or author's note..."
                         bind:value={formPrompts.lore}
                     ></textarea>
+                    <span class="label-text-alt badge badge-ghost badge-xs"
+                        >~{formLoreTokens} tokens</span
+                    >
                 </fieldset>
             </div>
 

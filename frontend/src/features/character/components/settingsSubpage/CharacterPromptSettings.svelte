@@ -9,13 +9,16 @@
     import CornersIn from "phosphor-svelte/lib/CornersInIcon";
     import BookOpen from "phosphor-svelte/lib/BookOpenIcon";
     import { merge } from "lodash-es";
-    import PromptTemplateManager from "@/features/promptTemplate/components/PromptTemplateManager.svelte";
+    import { countTokens } from "@/lib/utils/tokenCounter";
     type Props = {
         character: Character;
         onChange: (character: Character) => void;
     };
 
     let { character, onChange }: Props = $props();
+
+    let descriptionTokens = $derived(countTokens(character.prompt.description));
+    let authorsNoteTokens = $derived(countTokens(character.prompt.authorsNote ?? ""));
 
     let isDescriptionExpanded = $state(false);
     let showTemplateManager = $state(false);
@@ -78,6 +81,9 @@
                 >Detailed character description sent to the AI. Include personality, background, and
                 behavior instructions.</span
             >
+            <span class="label-text-alt badge badge-ghost badge-sm"
+                >~{descriptionTokens} tokens</span
+            >
         </div>
     </fieldset>
 
@@ -110,6 +116,9 @@
         <div class="label">
             <span class="label-text-alt"
                 >Inserted as a mocked user message. Use for directing the AI's focus or style.</span
+            >
+            <span class="label-text-alt badge badge-ghost badge-sm"
+                >~{authorsNoteTokens} tokens</span
             >
         </div>
     </fieldset>
