@@ -116,7 +116,9 @@
     }
     html {
         /* Theme transition on the root element for smooth dark/light switching */
-        transition: background-color 0.3s ease, color 0.3s ease;
+        transition:
+            background-color 0.3s ease,
+            color 0.3s ease;
     }
     #app {
         height: 100%;

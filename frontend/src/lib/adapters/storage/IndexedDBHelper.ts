@@ -3,6 +3,8 @@ import type { Chat, Character } from "@arisutalk/character-spec/v0/Character";
 import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
 import type { StickerPack } from "@/lib/types/sticker";
 import type { MemoryEntry } from "@/lib/types/memory";
+import type { Settings } from "@/lib/types/IDataModel";
+import type { Persona } from "@/features/persona/schema";
 
 /**
  * Dexie.js-based IndexedDB database for ArisuTalk.

@@ -25,40 +25,42 @@ export class GeminiChatProvider extends LangChainBaseProvider<"GEMINI"> {
             const { ChatGoogleGenerativeAI } = await import("@langchain/google-genai");
             type ClientOption = ConstructorParameters<typeof ChatGoogleGenerativeAI>["0"];
             type SafetySetting = Required<ClientOption>["safetySettings"][number];
+            type SafetySettingCat = SafetySetting["category"];
+            type SafetySettingThresh = SafetySetting["threshold"];
+            type ThinkingLevel = Required<ClientOption>["thinkingConfig"]["thinkingLevel"];
+
+            // type-only narrowing — our Zod schemas define the exact same
+            // literal values the SDK expects, so a pass-through suffices.
+            const narrow = <A, B>(v: A): B => v as unknown as B;
+
             if (!settings.model) {
                 throw new Error("Model must be specified for GeminiChatProvider.");
             }
+
             const modelConfig: ClientOption = {
                 apiKey: settings.apiKey,
-                model: settings.model,
+                model: settings.model ?? "",
                 temperature: settings.generationParameters?.temperature,
                 safetySettings: settings.safetySettings?.map((i): SafetySetting => ({
-                    category: i.category as SafetySetting["category"],
-                    threshold: i.threshold as SafetySetting["threshold"],
+                    category: narrow<string, SafetySettingCat>(i.category),
+                    threshold: narrow<string, SafetySettingThresh>(i.threshold),
                 })),
-                thinkingConfig: {
-                    includeThoughts: true,
-                },
+                thinkingConfig: { includeThoughts: true },
             };
             if (typeof settings.generationParameters?.thinkingLevel === "string") {
                 modelConfig.thinkingConfig = {
                     ...modelConfig.thinkingConfig,
-                    thinkingLevel: settings.generationParameters
-                        .thinkingLevel as Required<ClientOption>["thinkingConfig"]["thinkingLevel"],
+                    thinkingLevel: narrow<string, ThinkingLevel>(
+                        settings.generationParameters.thinkingLevel
+                    ),
                 };
             } else if (typeof settings.generationParameters?.thinkingLevel === "number") {
                 modelConfig.thinkingConfig = {
                     ...modelConfig.thinkingConfig,
                     thinkingBudget: settings.generationParameters.thinkingLevel,
                 };
-            } else if (settings.generationParameters?.thinkingLevel === undefined) {
-                // Do nothing, use default
-            } else {
-                // Fallback, should not reach here due to prior check
-                throw new Error("Invalid thinkingLevel for GeminiChatProvider.");
             }
-            const client = new ChatGoogleGenerativeAI(modelConfig);
-            return new GeminiChatProvider(client);
+            return new GeminiChatProvider(new ChatGoogleGenerativeAI(modelConfig));
         },
     };
 

@@ -3,6 +3,7 @@ import type { Character } from "@arisutalk/character-spec/v0/Character";
 import { StorageResolver } from "@/lib/adapters/storage/storageResolver";
 import type { ICharacterStorageAdapter } from "@/lib/interfaces";
 import { Logger } from "@common/logger/Logger";
+import { SvelteSet } from "svelte/reactivity";
 
 const ORDER_KEY = "character_order";
 
@@ -50,7 +51,7 @@ export class CharacterStore {
             // Sort: pinned first, then by saved order
             const order = this.getOrder();
             const pinned = this.getPinnedIds();
-            const pinnedSet = new Set(pinned);
+            const pinnedSet = new SvelteSet(pinned);
             if (order.length > 0 || pinned.length > 0) {
                 const orderMap: Record<string, number> = Object.fromEntries(
                     order.map((id, index) => [id, index])
@@ -181,7 +182,7 @@ export class CharacterStore {
      * Re-sort characters: pinned first, then by saved order.
      */
     private sortByPinAndOrder() {
-        const pinned = new Set(this.getPinnedIds());
+        const pinned = new SvelteSet(this.getPinnedIds());
         const order = this.getOrder();
         const orderMap: Record<string, number> = Object.fromEntries(
             order.map((id, index) => [id, index])

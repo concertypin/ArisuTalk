@@ -9,6 +9,7 @@
     import CornersIn from "phosphor-svelte/lib/CornersInIcon";
     import BookOpen from "phosphor-svelte/lib/BookOpenIcon";
     import { merge } from "lodash-es";
+    import PromptTemplateManager from "@/features/promptTemplate/components/PromptTemplateManager.svelte";
     import { estimateTokens } from "@/lib/utils/tokenCounter";
     type Props = {
         character: Character;

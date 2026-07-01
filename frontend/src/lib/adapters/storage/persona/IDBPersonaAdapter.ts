@@ -47,12 +47,9 @@ export class IDBPersonaAdapter implements IPersonaStorageAdapter {
                 activePersonaId: id,
             });
             // Remove Svelte proxy wrapper by serializing/deserializing
-            const plainDefaults = JSON.parse(
-                JSON.stringify({
-                    ...defaults,
-                    id: "singleton",
-                })
-            ) as typeof defaults & { id: string };
+            const serialized = JSON.stringify({ ...defaults, id: "singleton" });
+            const raw: unknown = JSON.parse(serialized);
+            const plainDefaults = raw as typeof defaults & { id: string };
             await this.db.settings.put(plainDefaults);
         }
     }

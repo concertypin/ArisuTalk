@@ -5,7 +5,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // Mock IndexedDB via Dexie
-const mockTables: Record<string, { name: string; toArray: () => Promise<unknown[]>; clear: () => Promise<void>; bulkAdd: () => Promise<void> }> = {};
+const mockTables: Record<
+    string,
+    {
+        name: string;
+        toArray: () => Promise<unknown[]>;
+        clear: () => Promise<void>;
+        bulkAdd: () => Promise<void>;
+    }
+> = {};
 
 vi.mock("@/lib/adapters/storage/IndexedDBHelper", () => ({
     getArisuDB: () => ({
@@ -25,19 +33,33 @@ vi.mock("@/lib/adapters/storage/IndexedDBHelper", () => ({
     }),
 }));
 
-import { exportAllData, importBackup, checkStoredSchemaVersion, markSchemaMigrated } from "@/lib/migration/storageMigration";
+import {
+    exportAllData,
+    importBackup,
+    checkStoredSchemaVersion,
+    markSchemaMigrated,
+} from "@/lib/migration/storageMigration";
 
 describe("storageMigration", () => {
     beforeEach(() => {
-        vi.stubGlobal("localStorage", (() => {
-            let store: Record<string, string> = {};
-            return {
-                getItem: (key: string) => store[key] ?? null,
-                setItem: (key: string, value: string) => { store[key] = value; },
-                removeItem: (key: string) => { delete store[key]; },
-                clear: () => { store = {}; },
-            };
-        })());
+        vi.stubGlobal(
+            "localStorage",
+            (() => {
+                let store: Record<string, string> = {};
+                return {
+                    getItem: (key: string) => store[key] ?? null,
+                    setItem: (key: string, value: string) => {
+                        store[key] = value;
+                    },
+                    removeItem: (key: string) => {
+                        delete store[key];
+                    },
+                    clear: () => {
+                        store = {};
+                    },
+                };
+            })()
+        );
 
         // Reset mock tables
         Object.keys(mockTables).forEach((k) => delete mockTables[k]);
@@ -96,8 +118,14 @@ describe("storageMigration", () => {
             mockTables["chats"] = {
                 name: "chats",
                 toArray: () => Promise.resolve([]),
-                clear: () => { cleared.push("chats"); return Promise.resolve(); },
-                bulkAdd: () => { imported.push("chats"); return Promise.resolve(); },
+                clear: () => {
+                    cleared.push("chats");
+                    return Promise.resolve();
+                },
+                bulkAdd: () => {
+                    imported.push("chats");
+                    return Promise.resolve();
+                },
             };
 
             await importBackup({

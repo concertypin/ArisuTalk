@@ -163,8 +163,10 @@ describe("ChatStore Streaming", () => {
             name: "Mock",
             description: "",
 
-            async *stream () {
-                if (false) yield "";
+            async *stream() {
+                // Make this an async generator — the yield satisfies the
+                // AsyncGenerator return type required by IChatProvider.
+                yield "" as unknown as string;
                 throw new Error("Simulated failure");
             },
             abort() {},

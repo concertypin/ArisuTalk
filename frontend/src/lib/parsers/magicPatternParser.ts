@@ -172,7 +172,17 @@ export async function parseMagicPatterns(
                 Logger.error(`[MagicPattern] Script error in "${fullMatch}": ${execResult.error}`);
                 parts.push(fullMatch);
             } else {
-                parts.push(execResult.result !== undefined ? String(execResult.result) : "");
+                const raw = execResult.result;
+                let display: string;
+                if (raw === undefined) {
+                    display = "";
+                } else if (typeof raw === "object") {
+                    display = JSON.stringify(raw);
+                } else {
+                    // oxlint-disable-next-line typescript/no-base-to-string -- guarded by typeof checks above
+                    display = String(raw);
+                }
+                parts.push(display);
             }
         } catch (err) {
             Logger.error(`[MagicPattern] Execution error: ${String(err)}`);

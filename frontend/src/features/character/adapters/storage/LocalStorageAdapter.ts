@@ -28,7 +28,7 @@ export class LocalStorageAdapter {
         const item = localStorage.getItem(key);
         if (!item) return [];
         try {
-            const parsed = JSON.parse(item) as unknown;
+            const parsed: unknown = JSON.parse(item);
             if (!Array.isArray(parsed)) return [];
             return parsed.filter((entry): entry is T => this.hasId(entry));
         } catch {
@@ -130,7 +130,7 @@ export class LocalStorageAdapter {
         try {
             const buffer = await new Response(stream).arrayBuffer();
             const json = new TextDecoder().decode(buffer);
-            const parsed = JSON.parse(json) as unknown;
+            const parsed: unknown = JSON.parse(json);
             if (!this.isRecord(parsed)) {
                 throw new Error("Invalid data format");
             }

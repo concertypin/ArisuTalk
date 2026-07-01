@@ -32,6 +32,14 @@ interface ImportMetaEnv {
      * "false" on non-testing or node mode.
      */
     readonly VITEST_BROWSER_MODE: "true" | "false";
+    /**
+     * Git commit hash injected at build time.
+     */
+    readonly VITE_COMMIT_HASH?: string;
+    /**
+     * Clerk publishable key for authentication.
+     */
+    readonly VITE_CLERK_PUBLISHABLE_KEY?: string;
 }
 
 interface ImportMeta {

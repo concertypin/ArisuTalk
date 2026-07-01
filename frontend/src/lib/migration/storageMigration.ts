@@ -9,8 +9,7 @@ import { getArisuDB } from "@/lib/adapters/storage/IndexedDBHelper";
 /** MIME type for CBOR-encoded backup files. */
 const CBOR_MIME = "application/octet-stream";
 /** File extension for backup files. */
-const BACKUP_EXT = ".aribackup";
-/** First byte of a CBOR map (definite-length, size 0–23). All JSON text starts with `{` (0x7B) or `[` (0x5B). */
+export const BACKUP_EXT = ".aribackup";
 const CBOR_MAP_START_MIN = 0xa0;
 const CBOR_MAP_START_MAX = 0xbf;
 
@@ -114,24 +113,38 @@ export async function parseBackupFile(file: File): Promise<{ data: Record<string
     if (firstByte === 0x7b || firstByte === 0x5b) {
         // Legacy JSON format
         const text = new TextDecoder().decode(buffer);
-        const parsed = JSON.parse(text);
-        if (!parsed.data || typeof parsed.data !== "object") {
+        const parsed: unknown = JSON.parse(text);
+        const result = parsed as { data?: unknown };
+        if (
+            !result ||
+            typeof result !== "object" ||
+            !result.data ||
+            typeof result.data !== "object"
+        ) {
             throw new Error("Invalid backup file: missing 'data' property");
         }
         Logger.structured("migration.importFormat", { format: "json" });
-        return parsed;
+        return { data: result.data as Record<string, unknown[]> };
     }
 
     // CBOR format
     if (firstByte >= CBOR_MAP_START_MIN && firstByte <= CBOR_MAP_START_MAX) {
-        const parsed = decode(buffer) as { data: Record<string, unknown[]> };
-        if (!parsed.data || typeof parsed.data !== "object") {
+        const bytes = new Uint8Array(buffer);
+        const decoded: unknown = decode(bytes);
+        const result = decoded as { data?: unknown };
+        if (
+            !result ||
+            typeof result !== "object" ||
+            !result.data ||
+            typeof result.data !== "object"
+        ) {
             throw new Error("Invalid backup file: missing 'data' property");
         }
         Logger.structured("migration.importFormat", { format: "cbor" });
-        return parsed;
+        return { data: result.data as Record<string, unknown[]> };
     }
 
+    // Unknown format
     throw new Error(
         `Unknown backup format (first byte: 0x${firstByte.toString(16)}). Expected CBOR or JSON.`
     );

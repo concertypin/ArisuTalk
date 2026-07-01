@@ -49,7 +49,6 @@ describe("ChatList Component", () => {
 
         const emptyMessage = getByText("No chats yet.");
         await expect.element(emptyMessage).toBeVisible();
-
     });
 
     test("displays chats filtered by characterId", async () => {

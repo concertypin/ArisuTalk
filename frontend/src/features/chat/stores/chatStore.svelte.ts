@@ -35,7 +35,8 @@ export class ChatStore {
     /** Per-character affection values (persisted across sessions). */
     affectionMap = $state<Record<string, number>>({});
     isGenerating = $state(false);
-
+    /** Currently active LLM config ID. */
+    activeConfigId = $state<string | null>(null);
     private adapter!: IChatStorageAdapter;
     private activeProvider: ChatProvider<ProviderType> | null = null;
     public readonly initPromise: Promise<void>;

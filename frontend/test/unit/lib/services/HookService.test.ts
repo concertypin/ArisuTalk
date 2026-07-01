@@ -16,7 +16,7 @@ vi.mock("@/lib/workers/workerClient", () => ({
     getScriptingWorker: vi.fn(async () => ({
         execute: vi.fn(async (code: string) => ({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, no-implied-eval
-            result: new Function(code.includes("return") ? code : `return ${  code}`)(),
+            result: new Function(code.includes("return") ? code : `return ${code}`)(),
             logs: [],
         })),
     })),
