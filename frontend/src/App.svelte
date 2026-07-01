@@ -1,6 +1,6 @@
 <!--
   @component App
-  Root Svelte 5 component with hash-based router.
+  Root Svelte 5 component with hash-based router, PWA support, and theming.
 -->
 <script lang="ts">
     import { initRouter, getCurrentPath } from "@/lib/router.svelte";
@@ -8,16 +8,27 @@
     import { routes } from "@/lib/routeConfig";
     import { uiState } from "@/lib/stores/ui.svelte";
     import { settings } from "@/lib/stores/settings.svelte";
+    import { applyTheme } from "@/lib/theme.svelte";
+    import { registerServiceWorker } from "@/lib/serviceWorker";
     import ToastContainer from "@/components/ToastContainer.svelte";
     import IconContext from "phosphor-svelte/lib/IconContext";
     import type { Component } from "svelte";
     import { loadFont } from "@/lib/utils/fontUtils";
     import AuthGate from "@/features/auth/components/AuthGate.svelte";
+    import { versionInfo } from "@/lib/stores/versionInfo.svelte";
 
     // Initialize router and settings on mount
     $effect(() => {
         initRouter();
         void settings.init();
+        void registerServiceWorker();
+    });
+
+    // Apply theme when settings are loaded or theme changes
+    $effect(() => {
+        if (settings.isLoaded) {
+            applyTheme(settings.value.theme);
+        }
     });
 
     // Current route path (reactive)
@@ -56,7 +67,7 @@
 </script>
 
 <svelte:head>
-    <title>ArisuTalk</title>
+    <title>{versionInfo.displayLabel}</title>
 </svelte:head>
 
 <AuthGate>
