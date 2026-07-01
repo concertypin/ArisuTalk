@@ -1,0 +1,21 @@
+{
+    "name": "ArisuTalk",
+    "short_name": "ArisuTalk",
+    "description": "AI Character Chat Platform",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#1e1e2e",
+    "theme_color": "#1e1e2e",
+    "icons": [
+        {
+            "src": "/icon_192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/icon_512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
