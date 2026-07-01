@@ -13,9 +13,13 @@
     import MessageActions from "@/components/MessageActions.svelte";
     import { toastStore } from "@/lib/stores/toast.svelte";
     import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
-    import Gear from "phosphor-svelte/lib/Gear";
+    import GearIcon from "phosphor-svelte/lib/GearIcon";
+    import StickerIcon from "phosphor-svelte/lib/StickerIcon";
+    import type { Sticker } from "@/features/sticker";
+    import StickerPicker from "@/features/sticker/components/StickerPicker.svelte";
 
     let inputValue = $state("");
+    let showStickerPicker = $state(false);
     let messagesContainer = $state<HTMLElement | null>(null);
     let isTyping = $derived(chatStore.isGenerating);
 
@@ -121,6 +125,15 @@
         }
     }
 
+    function handleStickerSelect(sticker: Sticker & { packId?: string }): void {
+        if (sticker.emoji) {
+            inputValue += sticker.emoji;
+        } else {
+            inputValue += `[${sticker.name}] `;
+        }
+        showStickerPicker = false;
+    }
+
     function openCharacterSettings() {
         if (currentCharacter) {
             uiState.openCharacterSettings(currentCharacter);
@@ -140,7 +153,7 @@
                 aria-label="Character Settings"
                 title="Character Settings"
             >
-                <Gear size={18} />
+                <GearIcon size={18} />
             </button>
         {/if}
     </header>
@@ -212,10 +225,26 @@
                 disabled={!activeChat}
             />
             <button
+                class="btn btn-ghost btn-sm btn-square hover:bg-base-300/50"
+                onclick={() => (showStickerPicker = true)}
+                disabled={!activeChat}
+                aria-label="Pick sticker or emoji"
+                title="Stickers & Emoji"
+            >
+                <StickerIcon size={20} />
+            </button>
+            <button
                 class="btn btn-primary shadow-md hover:shadow-lg transition-shadow"
                 onclick={() => void sendMessage()}
                 disabled={!inputValue.trim() || !activeChat}>Send</button
             >
         </div>
+
+        {#if showStickerPicker}
+            <StickerPicker
+                onSelect={(s: Sticker & { packId?: string }) => handleStickerSelect(s)}
+                onClose={() => (showStickerPicker = false)}
+            />
+        {/if}
     </footer>
 </main>

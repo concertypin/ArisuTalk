@@ -1,7 +1,9 @@
 <script lang="ts">
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import PencilSimple from "phosphor-svelte/lib/PencilSimple";
+    import PencilSimple from "phosphor-svelte/lib/PencilSimpleIcon";
     import { uiState } from "@/lib/stores/ui.svelte";
+    import { opfsAdapter } from "../adapters/assetStorage/OpFSAssetStorageAdapter";
+    import { IfNotExistBehavior } from "@/lib/interfaces";
 
     type Props = {
         character: Character;
@@ -14,8 +16,45 @@
     // Generate initials from name
     let initials = $derived(character.name.substring(0, 2).toUpperCase());
 
-    // Check for avatar in this order: top-level property -> assets 'portrait-default' -> any image asset
-    let avatarUrl = $derived(character.avatarUrl || "");
+    // Resolve avatar URL (handles local:// OpFS URLs)
+    let resolvedAvatarUrl = $state("");
+
+    $effect(() => {
+        const url = character.avatarUrl;
+        if (!url) {
+            resolvedAvatarUrl = "";
+            return;
+        }
+
+        let revoked = false;
+        let blobUrl: string | null = null;
+
+        if (url.startsWith("local:")) {
+            void (async () => {
+                try {
+                    const res = await opfsAdapter.getAssetUrl(
+                        new URL(url),
+                        IfNotExistBehavior.RETURN_NULL
+                    );
+                    if (!revoked) {
+                        blobUrl = res;
+                        resolvedAvatarUrl = res || "";
+                    } else if (res) {
+                        URL.revokeObjectURL(res);
+                    }
+                } catch {
+                    if (!revoked) resolvedAvatarUrl = "";
+                }
+            })();
+        } else {
+            resolvedAvatarUrl = url;
+        }
+
+        return () => {
+            revoked = true;
+            if (blobUrl) URL.revokeObjectURL(blobUrl);
+        };
+    });
 
     function handleButtonClick(e: MouseEvent) {
         if (active) {
@@ -30,8 +69,8 @@
 </script>
 
 {#snippet CharacterIcon()}
-    {#if avatarUrl}
-        <img src={avatarUrl} alt={character.name} class="w-full h-full object-cover" />
+    {#if resolvedAvatarUrl}
+        <img src={resolvedAvatarUrl} alt={character.name} class="w-full h-full object-cover" />
     {:else}
         <span class="font-bold text-sm select-none">{initials}</span>
     {/if}

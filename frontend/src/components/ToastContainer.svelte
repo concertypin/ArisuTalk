@@ -5,7 +5,7 @@
 -->
 <script lang="ts">
     import { toastStore } from "@/lib/stores/toast.svelte";
-    import X from "phosphor-svelte/lib/X";
+    import X from "phosphor-svelte/lib/XIcon";
 
     const alertClass: Record<string, string> = {
         info: "alert-info",

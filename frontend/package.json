@@ -41,7 +41,9 @@
         "dexie": "^4.4.2",
         "lodash-es": "^4.18.1",
         "phosphor-svelte": "^3.1.0",
+        "sv-agentation": "^0.4.0",
         "svelte": "^5.55.5",
+        "svelte-clerk": "^1.1.10",
         "zod": "^4.4.2"
     },
     "devDependencies": {

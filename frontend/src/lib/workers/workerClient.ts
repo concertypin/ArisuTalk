@@ -26,6 +26,7 @@ export type WorkerApi<T> =
 
 function createWorkerApi<T>(worker: Worker): WorkerApi<T> {
     const api = Comlink.wrap<T>(worker);
+    let disabled = false;
 
     // Automatically set up logging if the worker supports it
     if ("setLogReceiver" in api && typeof api.setLogReceiver === "function") {
@@ -33,18 +34,16 @@ function createWorkerApi<T>(worker: Worker): WorkerApi<T> {
         void api.setLogReceiver(Comlink.proxy(logReceiver));
     }
 
-    // Proxy api again
-
     return new Proxy<WorkerApi<T>>(api as WorkerApi<T>, {
         get: (target, prop) => {
             if (prop === "terminate") {
-                return function (this: WorkerApi<T>) {
-                    this.disabled = true;
+                return function () {
+                    disabled = true;
                     worker.terminate();
                 };
             }
             if (prop === "disabled") {
-                return false;
+                return disabled;
             }
             if (typeof prop == "symbol") return Reflect.get(target, prop);
             return target[prop as keyof T];

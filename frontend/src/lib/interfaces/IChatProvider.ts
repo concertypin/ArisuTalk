@@ -44,11 +44,10 @@ export type ProviderSettings = {
     /**
      * Anthropic settings
      */
+    /** Anthropic settings */
     ANTHROPIC: {};
-    /** OpenRouter settings */
-    OPENROUTER: {
-        baseUrl?: string;
-    };
+    /** Grok (xAI) settings */
+    GROK: {};
     /** Mock provider settings for testing */
     MOCK: {
         /**

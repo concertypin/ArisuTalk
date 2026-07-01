@@ -1,10 +1,10 @@
 <script lang="ts">
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import Trash from "phosphor-svelte/lib/Trash";
-    import PencilSimple from "phosphor-svelte/lib/PencilSimple";
-    import DownloadSimple from "phosphor-svelte/lib/DownloadSimple";
-    import CaretLeft from "phosphor-svelte/lib/CaretLeft";
-    import CaretRight from "phosphor-svelte/lib/CaretRight";
+    import Trash from "phosphor-svelte/lib/TrashIcon";
+    import PencilSimple from "phosphor-svelte/lib/PencilSimpleIcon";
+    import DownloadSimple from "phosphor-svelte/lib/DownloadSimpleIcon";
+    import CaretLeft from "phosphor-svelte/lib/CaretLeftIcon";
+    import CaretRight from "phosphor-svelte/lib/CaretRightIcon";
     import { opfsAdapter } from "../adapters/assetStorage/OpFSAssetStorageAdapter";
     import { IfNotExistBehavior } from "@/lib/interfaces";
 

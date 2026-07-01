@@ -1,6 +1,6 @@
 import type { Chat, Message } from "@arisutalk/character-spec/v0/Character";
 import { getArisuDB } from "@/lib/adapters/storage/IndexedDBHelper";
-import type { IChatStorageAdapter, LocalChat } from "@/lib/interfaces";
+import type { IChatStorageAdapter, LocalChat, ChatType } from "@/lib/interfaces";
 import { cloneDeep } from "lodash-es";
 
 export class IDBChatAdapter implements IChatStorageAdapter {
@@ -37,9 +37,19 @@ export class IDBChatAdapter implements IChatStorageAdapter {
     private toLocalChat(chat: Chat): LocalChat {
         return {
             ...chat,
-            name: chat.title || "",
+            name:
+                ((chat as Record<string, unknown>).name as string | undefined) || chat.title || "",
             lastMessage: chat.updatedAt || chat.createdAt || 0,
             characterId: chat.characterId,
+            chatType:
+                ((chat as Record<string, unknown>).chatType as ChatType | undefined) || "direct",
+            participantIds:
+                ((chat as Record<string, unknown>).participantIds as string[] | undefined) || [],
+            creatorId: (chat as Record<string, unknown>).creatorId as string | undefined,
+            parentChatId: (chat as Record<string, unknown>).parentChatId as string | undefined,
+            branchRootId: (chat as Record<string, unknown>).branchRootId as string | undefined,
+            affection: (chat as Record<string, unknown>).affection as
+                LocalChat["affection"] | undefined,
         };
     }
 
@@ -62,25 +72,71 @@ export class IDBChatAdapter implements IChatStorageAdapter {
         ]);
     }
 
-    async createChat(characterId: string, title?: string): Promise<string> {
+    async createChat(
+        characterId: string,
+        title?: string,
+        chatType: ChatType = "direct",
+        participantIds?: string[]
+    ): Promise<string> {
         const id = crypto.randomUUID();
         const now = Date.now();
-        const chat: Chat = {
+
+        // Build the chat record with base + extended fields
+        const chatRecord = {
             id,
             characterId,
             title: title || "",
             createdAt: now,
             updatedAt: now,
+            chatType,
+            participantIds: participantIds || [],
         };
+
         // Anti-proxy
-        const plainChat = cloneDeep(chat);
+        const plainChat = cloneDeep(chatRecord);
         await this.db.chats.put(plainChat);
         return id;
     }
 
     async getChatsByCharacter(characterId: string): Promise<LocalChat[]> {
-        const arr = await this.db.chats.where("characterId").equals(characterId).toArray();
+        const arr = await this.db.chats
+            .filter(
+                (c) =>
+                    c.characterId === characterId ||
+                    (Array.isArray((c as Record<string, unknown>).participantIds) &&
+                        ((c as Record<string, unknown>).participantIds as string[]).includes(
+                            characterId
+                        ))
+            )
+            .toArray();
         return arr.map((c) => this.toLocalChat(c));
+    }
+
+    async getChatsByParticipant(characterId: string): Promise<LocalChat[]> {
+        const arr = await this.db.chats
+            .filter(
+                (c) =>
+                    c.characterId === characterId ||
+                    (Array.isArray((c as Record<string, unknown>).participantIds) &&
+                        ((c as Record<string, unknown>).participantIds as string[]).includes(
+                            characterId
+                        ))
+            )
+            .toArray();
+        return arr.map((c) => this.toLocalChat(c));
+    }
+
+    async updateChat(chatId: string, updates: Partial<LocalChat>): Promise<void> {
+        const chat = await this.db.chats.get(chatId);
+        if (!chat) throw new Error(`Chat not found: ${chatId}`);
+
+        const updated = {
+            ...chat,
+            ...updates,
+            updatedAt: Date.now(),
+        };
+        const plainChat = cloneDeep(updated);
+        await this.db.chats.put(plainChat);
     }
 
     async addMessage(chatId: string, message: Message): Promise<void> {

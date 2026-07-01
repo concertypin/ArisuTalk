@@ -17,6 +17,10 @@ interface ImportMetaEnv {
      * The version url of the app.
      */
     readonly VITE_VERSION_URL: string;
+    /**
+     * Backend phonebook API base URL.
+     */
+    readonly VITE_PHONEBOOK_BASE_URL?: string;
 
     // Vitest environment variable
     /**

@@ -7,11 +7,11 @@
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import type { AssetEntity } from "@arisutalk/character-spec/v0/Character/Assets";
     import { merge } from "lodash-es";
-    import UploadSimple from "phosphor-svelte/lib/UploadSimple";
-    import Trash from "phosphor-svelte/lib/Trash";
-    import CaretDown from "phosphor-svelte/lib/CaretDown";
-    import CaretUp from "phosphor-svelte/lib/CaretUp";
-    import DotsSixVertical from "phosphor-svelte/lib/DotsSixVertical";
+    import UploadSimple from "phosphor-svelte/lib/UploadSimpleIcon";
+    import Trash from "phosphor-svelte/lib/TrashIcon";
+    import CaretDown from "phosphor-svelte/lib/CaretDownIcon";
+    import CaretUp from "phosphor-svelte/lib/CaretUpIcon";
+    import DotsSixVertical from "phosphor-svelte/lib/DotsSixVerticalIcon";
     import { getAssetStorage } from "@/features/character/adapters/assetStorage/assetStorageResolver";
     import { Logger } from "@common/logger/Logger";
 

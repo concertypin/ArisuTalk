@@ -59,7 +59,7 @@ describe("Persona and Chat interactions", () => {
         await charBtn.click();
 
         // Create a new chat for the character so ChatArea becomes active
-        const newChatBtn = getByLabelText("New Chat");
+        const newChatBtn = getByLabelText("New Direct Chat");
         await expect.element(newChatBtn).toBeVisible();
         await newChatBtn.click();
 

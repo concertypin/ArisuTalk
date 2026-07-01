@@ -3,10 +3,10 @@
     import { type IAssetStorageAdapter, IfNotExistBehavior } from "@/lib/interfaces";
     import { OpFSAssetStorageAdapter } from "@/features/character/adapters/assetStorage/OpFSAssetStorageAdapter";
     import type { Persona } from "../schema";
-    import Trash from "phosphor-svelte/lib/Trash";
-    import PencilSimple from "phosphor-svelte/lib/PencilSimple";
-    import CaretUp from "phosphor-svelte/lib/CaretUp";
-    import CaretDown from "phosphor-svelte/lib/CaretDown";
+    import Trash from "phosphor-svelte/lib/TrashIcon";
+    import PencilSimple from "phosphor-svelte/lib/PencilSimpleIcon";
+    import CaretUp from "phosphor-svelte/lib/CaretUpIcon";
+    import CaretDown from "phosphor-svelte/lib/CaretDownIcon";
 
     type Props = {
         onEdit: (persona: Persona) => void;

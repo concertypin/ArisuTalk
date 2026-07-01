@@ -3,12 +3,12 @@
     import { Logger } from "@common/logger/Logger";
 
     import { settings } from "@/lib/stores/settings.svelte";
-    import X from "phosphor-svelte/lib/X";
-    import Gear from "phosphor-svelte/lib/Gear";
-    import ChatCircleText from "phosphor-svelte/lib/ChatCircleText";
-    import Cpu from "phosphor-svelte/lib/Cpu";
-    import Info from "phosphor-svelte/lib/Info";
-    import SlidersHorizontal from "phosphor-svelte/lib/SlidersHorizontal";
+    import X from "phosphor-svelte/lib/XIcon";
+    import Gear from "phosphor-svelte/lib/GearIcon";
+    import ChatCircleText from "phosphor-svelte/lib/ChatCircleTextIcon";
+    import Cpu from "phosphor-svelte/lib/CpuIcon";
+    import Info from "phosphor-svelte/lib/InfoIcon";
+    import SlidersHorizontal from "phosphor-svelte/lib/SlidersHorizontalIcon";
 
     // Subpage components
     import GeneralSettings from "./settingSubpage/GeneralSettings.svelte";

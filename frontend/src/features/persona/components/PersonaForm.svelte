@@ -1,12 +1,12 @@
 <script lang="ts">
     import { personaStore } from "../stores/personaStore.svelte";
     import { PersonaSchema, type Persona } from "../schema";
-    import Plus from "phosphor-svelte/lib/Plus";
-    import User from "phosphor-svelte/lib/User";
-    import FileText from "phosphor-svelte/lib/FileText";
-    import Note from "phosphor-svelte/lib/Note";
-    import PencilSimple from "phosphor-svelte/lib/PencilSimple";
-    import Shield from "phosphor-svelte/lib/Shield";
+    import Plus from "phosphor-svelte/lib/PlusIcon";
+    import User from "phosphor-svelte/lib/UserIcon";
+    import FileText from "phosphor-svelte/lib/FileTextIcon";
+    import Note from "phosphor-svelte/lib/NoteIcon";
+    import PencilSimple from "phosphor-svelte/lib/PencilSimpleIcon";
+    import Shield from "phosphor-svelte/lib/ShieldIcon";
     import { ZodError } from "zod";
 
     type Props = {

@@ -79,9 +79,9 @@ describe("Worker Client", () => {
         workerInstanceCount = 0;
     });
 
-    it("should not call setLogReceiver on example worker creation", async () => {
+    it("should call setLogReceiver on example worker creation", async () => {
         await getExampleWorker();
-        expect(mockApi.setLogReceiver).not.toHaveBeenCalled();
+        expect(mockApi.setLogReceiver).toHaveBeenCalled();
     });
 
     it("should cache worker instance across sequential calls", async () => {

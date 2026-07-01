@@ -8,25 +8,27 @@
     import { characterStore } from "@/features/character/stores/characterStore.svelte";
     import { Logger } from "@common/logger/Logger";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import X from "phosphor-svelte/lib/X";
-    import User from "phosphor-svelte/lib/User";
-    import ChatCircleText from "phosphor-svelte/lib/ChatCircleText";
-    import BookOpen from "phosphor-svelte/lib/BookOpen";
-    import FileText from "phosphor-svelte/lib/FileText";
-    import Gear from "phosphor-svelte/lib/Gear";
-    import Image from "phosphor-svelte/lib/Image";
+    import X from "phosphor-svelte/lib/XIcon";
+    import User from "phosphor-svelte/lib/UserIcon";
+    import ChatCircleText from "phosphor-svelte/lib/ChatCircleTextIcon";
+    import BookOpen from "phosphor-svelte/lib/BookOpenIcon";
+    import FileText from "phosphor-svelte/lib/FileTextIcon";
+    import Gear from "phosphor-svelte/lib/GearIcon";
+    import MagicWand from "phosphor-svelte/lib/MagicWandIcon";
+    import ImageIcon from "phosphor-svelte/lib/ImageIcon";
 
     // Subpage components
     import CharacterBasicSettings from "./settingsSubpage/CharacterBasicSettings.svelte";
     import CharacterPromptSettings from "./settingsSubpage/CharacterPromptSettings.svelte";
     import CharacterLorebookSettings from "./settingsSubpage/CharacterLorebookSettings.svelte";
+    import CharacterAssetsSettings from "./settingsSubpage/CharacterAssetsSettings.svelte";
     import CharacterMetadataSettings from "./settingsSubpage/CharacterMetadataSettings.svelte";
     import CharacterHooksSettings from "./settingsSubpage/CharacterHooksSettings.svelte";
-    import CharacterAssetsSettings from "./settingsSubpage/CharacterAssetsSettings.svelte";
+    import CharacterMagicSettings from "./settingsSubpage/CharacterMagicSettings.svelte";
     import { cloneDeep } from "lodash-es";
 
     let dialog = $state<HTMLDialogElement>();
-    type ActiveTab = "basic" | "prompt" | "lorebook" | "assets" | "metadata" | "advanced";
+    type ActiveTab = "basic" | "prompt" | "lorebook" | "assets" | "metadata" | "advanced" | "magic";
     let activeTab = $state<ActiveTab>("basic");
 
     /** Local copy of character being edited (for autosave) */
@@ -186,7 +188,7 @@
                             onclick={() => (activeTab = "assets")}
                             aria-label="Assets Settings"
                         >
-                            <Image size={18} /> Assets
+                            <ImageIcon size={18} /> Assets
                         </button>
                     </li>
                     <li>
@@ -197,6 +199,16 @@
                             aria-label="Metadata Settings"
                         >
                             <FileText size={18} /> Metadata
+                        </button>
+                    </li>
+                    <li>
+                        <button
+                            class="flex gap-2 rounded-lg"
+                            class:active={activeTab === "magic"}
+                            onclick={() => (activeTab = "magic")}
+                            aria-label="Magic Patterns"
+                        >
+                            <MagicWand size={18} /> Magic
                         </button>
                     </li>
                     <li>
@@ -237,6 +249,11 @@
                         />
                     {:else if activeTab === "metadata"}
                         <CharacterMetadataSettings
+                            character={editingCharacter}
+                            onChange={handleCharacterChange}
+                        />
+                    {:else if activeTab === "magic"}
+                        <CharacterMagicSettings
                             character={editingCharacter}
                             onChange={handleCharacterChange}
                         />

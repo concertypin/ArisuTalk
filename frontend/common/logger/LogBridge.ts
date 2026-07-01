@@ -3,6 +3,7 @@
 
 import type { StandardLogEntry, LogLevel, StructuredLogEntry } from "./Logger";
 import type { StructuredLogLevel } from "./LogType";
+import { Logger } from "./Logger";
 
 /**
  * Interface for the main thread's log receiver.
@@ -126,30 +127,25 @@ export function createLogBridgeSender(receiver: LogBridgeReceiver): LogBridgeSen
 export function createLogBridgeReceiver(): LogBridgeReceiver {
     return {
         receiveLog(entry: StandardLogEntry): void {
-            void import("./Logger").then(({ Logger }) => {
-                switch (entry.level) {
-                    case "info":
-                    case "warn":
-                    case "error":
-                    case "debug":
-                    case "verbose":
-                    case "trace":
-                    case "log":
-                        Logger[entry.level](entry.message, ...(entry.data ?? []));
-                        break;
-                    default:
-                        // exhaustiveness check
-                        entry.level satisfies never;
-                        Logger.log(entry.message, ...(entry.data ?? []));
-                }
-            });
+            switch (entry.level) {
+                case "info":
+                case "warn":
+                case "error":
+                case "debug":
+                case "verbose":
+                case "trace":
+                case "log":
+                    Logger[entry.level](entry.message, ...(entry.data ?? []));
+                    break;
+                default:
+                    entry.level satisfies never;
+                    Logger.log(entry.message, ...(entry.data ?? []));
+            }
         },
         receiveStructuredLog<K extends keyof StructuredLogLevel>(
             entry: StructuredLogEntry<K>
         ): void {
-            void import("./Logger").then(({ Logger }) => {
-                Logger.structured(entry.level, entry.data);
-            });
+            Logger.structured(entry.level, entry.data);
         },
     };
 }

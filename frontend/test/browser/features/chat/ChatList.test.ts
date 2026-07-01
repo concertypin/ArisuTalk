@@ -38,7 +38,7 @@ describe("ChatList Component", () => {
         const heading = getByRole("heading", { name: "Chats", level: 3 });
         await expect.element(heading).toBeVisible();
 
-        const newChatButton = getByLabelText("New Chat");
+        const newChatButton = getByLabelText("New Direct Chat");
         await expect.element(newChatButton).toBeVisible();
     });
 
@@ -50,8 +50,7 @@ describe("ChatList Component", () => {
         const emptyMessage = getByText("No chats yet.");
         await expect.element(emptyMessage).toBeVisible();
 
-        const createLink = getByText("Create one?");
-        await expect.element(createLink).toBeVisible();
+        const createLink = getByText("Create a direct chat");
     });
 
     test("displays chats filtered by characterId", async () => {
@@ -111,7 +110,7 @@ describe("ChatList Component", () => {
             characterId: "char-1",
         });
 
-        const newChatButton = getByLabelText("New Chat");
+        const newChatButton = getByLabelText("New Direct Chat");
         await newChatButton.click();
 
         expect(chatStore.createChat).toHaveBeenCalledWith("char-1", "Chat 1");
@@ -192,7 +191,7 @@ describe("ChatList Component", () => {
             characterId: "char-1",
         });
 
-        const newChatButton = getByLabelText("New Chat");
+        const newChatButton = getByLabelText("New Direct Chat");
         await newChatButton.click();
 
         expect(chatStore.createChat).toHaveBeenCalledWith("char-1", "Chat 2");

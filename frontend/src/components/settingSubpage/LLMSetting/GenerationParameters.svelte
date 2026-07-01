@@ -1,9 +1,9 @@
 <script lang="ts">
     import { settings } from "@/lib/stores/settings.svelte";
     import { type LLMConfig } from "@/lib/types/IDataModel";
-    import Trash from "phosphor-svelte/lib/Trash";
-    import Check from "phosphor-svelte/lib/Check";
-    import Power from "phosphor-svelte/lib/Power";
+    import Trash from "phosphor-svelte/lib/TrashIcon";
+    import Check from "phosphor-svelte/lib/CheckIcon";
+    import Power from "phosphor-svelte/lib/PowerIcon";
 
     type Props = {
         config: LLMConfig;
@@ -124,11 +124,11 @@
                     <option value="OpenAI-compatible">OpenAI-compatible</option>
                     <option value="Anthropic">Anthropic</option>
                     <option value="Gemini">Gemini</option>
+                    <option value="Grok">Grok</option>
                     <option value="OpenRouter">OpenRouter</option>
                     <option value="Mock">Mock</option>
                 </select>
             </div>
-
             <div class="form-control">
                 <label class="label p-1" for={"model-" + id}>
                     <span class="label-text">Model</span>

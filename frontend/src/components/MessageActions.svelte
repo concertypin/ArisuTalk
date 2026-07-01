@@ -4,11 +4,11 @@
   Shows on hover and provides controls for message manipulation.
 -->
 <script lang="ts">
-    import Pencil from "phosphor-svelte/lib/Pencil";
-    import Trash from "phosphor-svelte/lib/Trash";
-    import ArrowClockwise from "phosphor-svelte/lib/ArrowClockwise";
-    import Check from "phosphor-svelte/lib/Check";
-    import X from "phosphor-svelte/lib/X";
+    import Pencil from "phosphor-svelte/lib/PencilIcon";
+    import Trash from "phosphor-svelte/lib/TrashIcon";
+    import ArrowClockwise from "phosphor-svelte/lib/ArrowClockwiseIcon";
+    import Check from "phosphor-svelte/lib/CheckIcon";
+    import X from "phosphor-svelte/lib/XIcon";
     import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
 
     type Props = {

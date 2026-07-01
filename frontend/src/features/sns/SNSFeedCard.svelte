@@ -3,9 +3,9 @@
   Individual post card for SNS feed display (UI only).
 -->
 <script lang="ts">
-    import Heart from "phosphor-svelte/lib/Heart";
-    import ChatCircleText from "phosphor-svelte/lib/ChatCircleText";
-    import BookmarkSimple from "phosphor-svelte/lib/BookmarkSimple";
+    import Heart from "phosphor-svelte/lib/HeartIcon";
+    import ChatCircleText from "phosphor-svelte/lib/ChatCircleTextIcon";
+    import BookmarkSimple from "phosphor-svelte/lib/BookmarkSimpleIcon";
 
     type Props = {
         /** Post content text */

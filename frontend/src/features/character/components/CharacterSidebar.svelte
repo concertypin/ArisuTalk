@@ -1,8 +1,8 @@
 <script lang="ts">
-    import Plus from "phosphor-svelte/lib/Plus";
-    import User from "phosphor-svelte/lib/User";
-    import Gear from "phosphor-svelte/lib/Gear";
-    import House from "phosphor-svelte/lib/House";
+    import Plus from "phosphor-svelte/lib/PlusIcon";
+    import User from "phosphor-svelte/lib/UserIcon";
+    import Gear from "phosphor-svelte/lib/GearIcon";
+    import House from "phosphor-svelte/lib/HouseIcon";
     import { flip } from "svelte/animate";
     import CharacterSidebarItem from "./CharacterSidebarItem.svelte";
     import { characterStore } from "../stores/characterStore.svelte";

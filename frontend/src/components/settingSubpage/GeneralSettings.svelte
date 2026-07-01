@@ -1,8 +1,8 @@
 <script lang="ts">
     import { settings } from "@/lib/stores/settings.svelte";
     import NoopIcon from "@/components/Snippets/NoopIcon.svelte";
-    import TextT from "phosphor-svelte/lib/TextT";
-    import Palette from "phosphor-svelte/lib/Palette";
+    import TextT from "phosphor-svelte/lib/TextTIcon";
+    import Palette from "phosphor-svelte/lib/PaletteIcon";
     import { SUPPORTED_FONTS } from "@/lib/utils/fontUtils";
 </script>
 

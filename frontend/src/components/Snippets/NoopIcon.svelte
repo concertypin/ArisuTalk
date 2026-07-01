@@ -1,5 +1,5 @@
 <script lang="ts">
-    import Warning from "phosphor-svelte/lib/Warning";
+    import Warning from "phosphor-svelte/lib/WarningIcon";
 </script>
 
 <!--When hover, shows small  this is a noop-->

@@ -3,8 +3,8 @@
   SNS profile view with header, tabs, and feed (UI only - no functionality).
 -->
 <script lang="ts">
-    import User from "phosphor-svelte/lib/User";
-    import Lock from "phosphor-svelte/lib/Lock";
+    import User from "phosphor-svelte/lib/UserIcon";
+    import Lock from "phosphor-svelte/lib/LockIcon";
     import SNSFeedCard from "./SNSFeedCard.svelte";
 
     type TabName = "posts" | "secrets" | "tags";

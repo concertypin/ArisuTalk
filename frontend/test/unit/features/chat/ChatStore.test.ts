@@ -120,7 +120,12 @@ describe("ChatStore", () => {
 
         const resultId = await store.createChat("char-1", "New Chat");
 
-        expect(mockAdapter.createChat).toHaveBeenCalledWith("char-1", "New Chat");
+        expect(mockAdapter.createChat).toHaveBeenCalledWith(
+            "char-1",
+            "New Chat",
+            "direct",
+            undefined
+        );
         expect(resultId).toBe(newChatId);
         expect(store.chats).toContainEqual(newChat);
 

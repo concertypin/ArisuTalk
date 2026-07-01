@@ -5,10 +5,10 @@
      * Each entry has name, content, conditions, priority, and enabled toggle.
      */
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import Plus from "phosphor-svelte/lib/Plus";
-    import Trash from "phosphor-svelte/lib/Trash";
-    import CaretDown from "phosphor-svelte/lib/CaretDown";
-    import CaretUp from "phosphor-svelte/lib/CaretUp";
+    import Plus from "phosphor-svelte/lib/PlusIcon";
+    import Trash from "phosphor-svelte/lib/TrashIcon";
+    import CaretDown from "phosphor-svelte/lib/CaretDownIcon";
+    import CaretUp from "phosphor-svelte/lib/CaretUpIcon";
     import { merge } from "lodash-es";
 
     type LorebookEntry = Character["prompt"]["lorebook"]["data"][number];

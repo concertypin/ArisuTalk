@@ -1,5 +1,5 @@
 <script lang="ts">
-    import CloudArrowUp from "phosphor-svelte/lib/CloudArrowUp";
+    import CloudArrowUp from "phosphor-svelte/lib/CloudArrowUpIcon";
     import { characterStore } from "../stores/characterStore.svelte";
     import { type Character } from "@arisutalk/character-spec/v0/Character";
 
@@ -156,6 +156,7 @@
                             onchange={handleFileChange}
                             class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                             accept=".arisc,.arisp"
+                            aria-label="Character file input"
                         />
                         <div
                             class="mb-3 p-4 bg-primary/10 rounded-full text-primary group-hover:scale-110 transition-transform"

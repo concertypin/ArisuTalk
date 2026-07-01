@@ -5,10 +5,11 @@
      * Features expandable textarea (small at first, large on click).
      */
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import CornersOut from "phosphor-svelte/lib/CornersOut";
-    import CornersIn from "phosphor-svelte/lib/CornersIn";
+    import CornersOut from "phosphor-svelte/lib/CornersOutIcon";
+    import CornersIn from "phosphor-svelte/lib/CornersInIcon";
+    import BookOpen from "phosphor-svelte/lib/BookOpenIcon";
     import { merge } from "lodash-es";
-
+    import PromptTemplateManager from "@/features/promptTemplate/components/PromptTemplateManager.svelte";
     type Props = {
         character: Character;
         onChange: (character: Character) => void;
@@ -17,6 +18,18 @@
     let { character, onChange }: Props = $props();
 
     let isDescriptionExpanded = $state(false);
+    let showTemplateManager = $state(false);
+
+    function onApplyTemplate(prompts: { system: string; generation: string; lore?: string }) {
+        onChange(
+            merge({}, character, {
+                prompt: {
+                    description: prompts.system,
+                    authorsNote: prompts.lore || undefined,
+                },
+            })
+        );
+    }
     let isAuthorsNoteExpanded = $state(false);
 
     function updatePromptField<K extends keyof Character["prompt"]>(
@@ -100,4 +113,26 @@
             >
         </div>
     </fieldset>
+
+    {#if showTemplateManager}
+        <div class="border-t border-base-300 pt-4">
+            <PromptTemplateManager
+                onApply={onApplyTemplate}
+                currentPrompts={{
+                    system: character.prompt.description,
+                    generation: "",
+                    lore: character.prompt.authorsNote,
+                }}
+            />
+        </div>
+    {/if}
+
+    <button
+        type="button"
+        class="btn btn-ghost btn-sm"
+        onclick={() => (showTemplateManager = !showTemplateManager)}
+    >
+        <BookOpen size={16} />
+        {showTemplateManager ? "Hide Templates" : "Load Template"}
+    </button>
 </div>

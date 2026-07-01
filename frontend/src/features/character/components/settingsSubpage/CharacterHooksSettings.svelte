@@ -5,11 +5,11 @@
      * Fully editable hooks for display, input, output, request.
      */
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import Plus from "phosphor-svelte/lib/Plus";
-    import Trash from "phosphor-svelte/lib/Trash";
-    import CaretDown from "phosphor-svelte/lib/CaretDown";
-    import CaretUp from "phosphor-svelte/lib/CaretUp";
-    import Warning from "phosphor-svelte/lib/Warning";
+    import Plus from "phosphor-svelte/lib/PlusIcon";
+    import Trash from "phosphor-svelte/lib/TrashIcon";
+    import CaretDown from "phosphor-svelte/lib/CaretDownIcon";
+    import CaretUp from "phosphor-svelte/lib/CaretUpIcon";
+    import Warning from "phosphor-svelte/lib/WarningIcon";
     import { merge, cloneDeep } from "lodash-es";
 
     type ReplaceHook = Character["executables"]["replaceHooks"];
@@ -71,7 +71,7 @@
     function updateHook(type: HookType, index: number, updates: Partial<HookEntity>) {
         const newChar = cloneDeep(character);
         const hook = newChar.executables.replaceHooks[type][index];
-        newChar.executables.replaceHooks[type][index] = merge(hook, updates) as HookEntity;
+        newChar.executables.replaceHooks[type][index] = merge(hook, updates);
         onChange(newChar);
     }
 
