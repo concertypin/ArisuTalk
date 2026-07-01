@@ -54,6 +54,40 @@
     --depth: 0;
     --noise: 0;
 }
+@plugin "daisyui/theme" {
+    name: "winter";
+    default: false;
+    prefersdark: false;
+    color-scheme: "light";
+    --color-base-100: oklch(98% 0.005 265.754);
+    --color-base-200: oklch(95% 0.01 265.754);
+    --color-base-300: oklch(90% 0.015 265.754);
+    --color-base-content: oklch(20% 0.04 265.754);
+    --color-primary: oklch(55% 0.22 235);
+    --color-primary-content: oklch(98% 0.012 235);
+    --color-secondary: oklch(60% 0.24 280);
+    --color-secondary-content: oklch(98% 0.014 280);
+    --color-accent: oklch(65% 0.26 350);
+    --color-accent-content: oklch(98% 0.015 350);
+    --color-neutral: oklch(30% 0.04 260.03);
+    --color-neutral-content: oklch(96% 0.01 260.03);
+    --color-info: oklch(65% 0.2 240);
+    --color-info-content: oklch(20% 0 0);
+    --color-success: oklch(60% 0.18 160);
+    --color-success-content: oklch(98% 0.012 160);
+    --color-warning: oklch(80% 0.19 85);
+    --color-warning-content: oklch(20% 0.04 85);
+    --color-error: oklch(60% 0.23 15);
+    --color-error-content: oklch(98% 0.015 15);
+    --radius-selector: 1rem;
+    --radius-field: 0.5rem;
+    --radius-box: 1rem;
+    --size-selector: 0.25rem;
+    --size-field: 0.25rem;
+    --border: 1px;
+    --depth: 0;
+    --noise: 0;
+}
 
 @layer base {
     html,
@@ -74,10 +108,15 @@
             Roboto,
             sans-serif;
         font-weight: 400;
-        /* Smooth font transition */
         transition:
             font-size 0.2s ease,
-            font-family 0.2s ease;
+            font-family 0.2s ease,
+            background-color 0.3s ease,
+            color 0.3s ease;
+    }
+    html {
+        /* Theme transition on the root element for smooth dark/light switching */
+        transition: background-color 0.3s ease, color 0.3s ease;
     }
     #app {
         height: 100%;
@@ -194,4 +233,11 @@
 
 [draggable="true"]:active {
     cursor: grabbing;
+}
+
+/* Ensure tooltips render above modal overlays */
+[role="dialog"] .tooltip,
+.modal .tooltip,
+dialog .tooltip {
+    z-index: 100 !important;
 }
