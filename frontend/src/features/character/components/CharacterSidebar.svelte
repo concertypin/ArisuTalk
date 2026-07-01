@@ -99,7 +99,9 @@
                 <CharacterSidebarItem
                     {character}
                     active={selected}
+                    isPinned={characterStore.isPinned(character.id)}
                     onClick={() => onSelect(character.id)}
+                    onTogglePin={() => characterStore.togglePin(character.id)}
                 />
             </div>
         {/each}

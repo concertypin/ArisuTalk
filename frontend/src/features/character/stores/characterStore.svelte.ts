@@ -6,6 +6,8 @@ import { Logger } from "@common/logger/Logger";
 
 const ORDER_KEY = "character_order";
 
+const PINNED_KEY = "pinned_characters";
+
 export class CharacterStore {
     characters = $state<Character[]>([]);
     private adapter!: ICharacterStorageAdapter;
@@ -45,22 +47,23 @@ export class CharacterStore {
             await this.adapter.init();
             const chars = await this.adapter.getAllCharacters();
 
-            // Sort by saved order
+            // Sort: pinned first, then by saved order
             const order = this.getOrder();
-            if (order.length > 0) {
+            const pinned = this.getPinnedIds();
+            const pinnedSet = new Set(pinned);
+            if (order.length > 0 || pinned.length > 0) {
                 const orderMap: Record<string, number> = Object.fromEntries(
                     order.map((id, index) => [id, index])
                 );
                 chars.sort((a, b) => {
+                    const aPinned = pinnedSet.has(a.id) ? 0 : 1;
+                    const bPinned = pinnedSet.has(b.id) ? 0 : 1;
+                    if (aPinned !== bPinned) return aPinned - bPinned;
                     const idxA = orderMap[a.id];
                     const idxB = orderMap[b.id];
-                    // If both present, sort by index
                     if (idxA !== undefined && idxB !== undefined) return idxA - idxB;
-                    // If only one present, present goes first? Or last?
-                    // Usually appended items go last.
                     if (idxA !== undefined) return -1;
                     if (idxB !== undefined) return 1;
-                    // Neither present, keep original order (or name sort?)
                     return 0;
                 });
             }
@@ -120,6 +123,80 @@ export class CharacterStore {
         const item = this.characters.splice(fromIndex, 1)[0];
         this.characters.splice(toIndex, 0, item);
         this.saveOrder();
+    }
+
+    // -- Pin / Unpin --------------------------------------------------------
+
+    /**
+     * Get list of pinned character IDs from localStorage.
+     */
+    private getPinnedIds(): string[] {
+        if (typeof localStorage === "undefined") return [];
+        try {
+            const item = localStorage.getItem(PINNED_KEY);
+            if (!item) return [];
+            const parsed: unknown = JSON.parse(item);
+            return Array.isArray(parsed) && parsed.every((v) => typeof v === "string")
+                ? parsed
+                : [];
+        } catch {
+            return [];
+        }
+    }
+
+    /**
+     * Save pinned IDs to localStorage.
+     */
+    private savePinnedIds(ids: string[]) {
+        if (typeof localStorage === "undefined") return;
+        localStorage.setItem(PINNED_KEY, JSON.stringify(ids));
+    }
+
+    /**
+     * Check if a character is pinned.
+     * @param characterId The character ID to check.
+     */
+    isPinned(characterId: string): boolean {
+        return this.getPinnedIds().includes(characterId);
+    }
+
+    /**
+     * Toggle pin status for a character.
+     * @param characterId The character ID to toggle.
+     */
+    togglePin(characterId: string): void {
+        const pinned = this.getPinnedIds();
+        const idx = pinned.indexOf(characterId);
+        if (idx >= 0) {
+            pinned.splice(idx, 1);
+        } else {
+            pinned.unshift(characterId);
+        }
+        this.savePinnedIds(pinned);
+        // Re-sort to reflect pinning
+        this.sortByPinAndOrder();
+    }
+
+    /**
+     * Re-sort characters: pinned first, then by saved order.
+     */
+    private sortByPinAndOrder() {
+        const pinned = new Set(this.getPinnedIds());
+        const order = this.getOrder();
+        const orderMap: Record<string, number> = Object.fromEntries(
+            order.map((id, index) => [id, index])
+        );
+        this.characters = [...this.characters].sort((a, b) => {
+            const aPinned = pinned.has(a.id) ? 0 : 1;
+            const bPinned = pinned.has(b.id) ? 0 : 1;
+            if (aPinned !== bPinned) return aPinned - bPinned;
+            const idxA = orderMap[a.id];
+            const idxB = orderMap[b.id];
+            if (idxA !== undefined && idxB !== undefined) return idxA - idxB;
+            if (idxA !== undefined) return -1;
+            if (idxB !== undefined) return 1;
+            return 0;
+        });
     }
 
     async importCharacter(file: File) {
