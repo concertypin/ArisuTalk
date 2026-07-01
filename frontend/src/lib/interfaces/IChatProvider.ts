@@ -48,6 +48,8 @@ export type ProviderSettings = {
     ANTHROPIC: {};
     /** Grok (xAI) settings */
     GROK: {};
+    /** OpenRouter settings */
+    OPENROUTER: {};
     /** Mock provider settings for testing */
     MOCK: {
         /**

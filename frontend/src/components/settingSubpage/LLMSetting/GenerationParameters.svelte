@@ -24,14 +24,18 @@
     function createFieldProxy<T extends Record<string, unknown>, K extends keyof T>(
         target: T,
         key: K,
-        defaultValue: T[K] = "" as T[K]
+        defaultValue?: T[K]
     ) {
         return {
             get checked() {
                 return target[key] !== undefined;
             },
             set checked(v: boolean) {
-                target[key] = v ? (target[key] ?? defaultValue) : (undefined as T[K]);
+                if (v) {
+                    target[key] = target[key] ?? defaultValue;
+                } else {
+                    delete target[key];
+                }
             },
         };
     }

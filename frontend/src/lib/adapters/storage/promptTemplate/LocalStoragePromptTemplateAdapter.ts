@@ -22,14 +22,12 @@ export class LocalStoragePromptTemplateAdapter implements IPromptTemplateStorage
         try {
             const parsed: unknown = JSON.parse(item);
             if (!Array.isArray(parsed)) return [];
-            // Basic structural validation
-            return parsed.filter(
-                (t: unknown): t is PromptTemplate =>
-                    typeof t === "object" &&
-                    t !== null &&
-                    typeof (t as PromptTemplate).id === "string" &&
-                    typeof (t as PromptTemplate).name === "string"
-            );
+            // Basic structural validation using in-narrowing to avoid type assertions
+            return parsed.filter((t: unknown): t is PromptTemplate => {
+                if (typeof t !== "object" || t === null) return false;
+                if (!("id" in t) || !("name" in t)) return false;
+                return typeof t.id === "string" && typeof t.name === "string";
+            });
         } catch {
             return [];
         }

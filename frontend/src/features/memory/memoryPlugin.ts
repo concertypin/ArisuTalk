@@ -34,12 +34,12 @@ export const memoryPlugin: CharacterPlugin = {
 
     async onInitialize(): Promise<void> {
         // MemoryStore is already initialised as a singleton.
-        Logger.structured("plugin.memory.initialized", {});
+        Logger.info("[MemoryPlugin] Initialized");
     },
 
     async onCharacterActivate(character: Character): Promise<void> {
         await memoryStore.loadMemories(character.id);
-        Logger.structured("plugin.memory.characterActivated", {
+        Logger.info("[MemoryPlugin] Character activated", {
             characterId: character.id,
             memoryCount: memoryStore.memoryCount,
         });
@@ -49,7 +49,7 @@ export const memoryPlugin: CharacterPlugin = {
         await memoryStore.loadMemories(character.id);
     },
 
-    async onAIResponse(response: string, context: { character: Character }): Promise<void> {
+    async onAIResponse(response: string, _context: { character: Character }): Promise<void> {
         // Store AI responses as conversation memories automatically.
         await memoryStore.addMemory(response, "conversation", 0.5);
     },

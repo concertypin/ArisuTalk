@@ -159,11 +159,11 @@ describe("ChatStore Streaming", () => {
             throw new Error("Active provider is not set");
         }
         chatStore["activeProvider"] = {
-            ...chatStore["activeProvider"],
+            id: "mock",
+            name: "Mock",
+            description: "",
 
-            stream: async function* () {
-                // Dummy yield to satisfy generator requirement
-                // eslint-disable-next-line no-constant-condition
+            async *stream () {
                 if (false) yield "";
                 throw new Error("Simulated failure");
             },
@@ -171,13 +171,13 @@ describe("ChatStore Streaming", () => {
             disconnect() {
                 throw new Error("Function not implemented.");
             },
-            generate(_msg, _setting) {
+            generate(_msg: unknown, _setting?: unknown) {
                 throw new Error("Function not implemented.");
             },
             isReady() {
                 throw new Error("Function not implemented.");
             },
-        } satisfies (typeof chatStore)["activeProvider"];
+        } satisfies NonNullable<(typeof chatStore)["activeProvider"]>;
 
         const chatId = await chatStore.createChat("test-fail", "Test Fail");
         //Suppress Logger.error

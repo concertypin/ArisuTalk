@@ -20,7 +20,7 @@ describe("OpFSAssetStorageAdapter", () => {
         };
         // Stub navigator.storage.getDirectory
         vi.stubGlobal("navigator", {
-            storage: storage,
+            storage,
         });
 
         adapter = new OpFSAssetStorageAdapter();

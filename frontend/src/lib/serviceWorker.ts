@@ -25,6 +25,7 @@ export async function registerServiceWorker(): Promise<void> {
             state: registration.active?.state,
         });
     } catch (error) {
-        Logger.warn("Service Worker registration failed", error as Error);
+        const cause = error instanceof Error ? error : new Error(String(error));
+        Logger.warn("Service Worker registration failed", cause);
     }
 }

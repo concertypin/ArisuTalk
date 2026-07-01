@@ -10,7 +10,9 @@ describe("api client shorthands", () => {
         vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("fetch failed"));
         const result = await apiClient.get("/foo");
         expect(result.ok).toBe(false);
-        expect(result.error).toBeTruthy();
+        if (!result.ok) {
+            expect(result.error).toBeTruthy();
+        }
     });
 
     test("post stringifies body when provided", async () => {
@@ -47,6 +49,8 @@ describe("api client shorthands", () => {
         vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("network error"));
         const result = await apiClient.get("/x");
         expect(result.ok).toBe(false);
-        expect(result.error).toBe("network error");
+        if (!result.ok) {
+            expect(result.error).toBe("network error");
+        }
     });
 });

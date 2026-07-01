@@ -85,11 +85,12 @@ async function request<T>(
     path: string,
     options?: RequestOptions
 ): Promise<ApiResponse<T>>;
-async function request<T>(
+// Implementation with widened return type to satisfy all overload branches
+async function request(
     method: string,
     path: string,
     options?: RequestOptions
-): Promise<ApiResponse<T>> {
+): Promise<ApiResponse<unknown>> {
     const baseUrl = resolveBaseUrl();
     const url = `${baseUrl}${path}`;
 
@@ -130,18 +131,16 @@ async function request<T>(
 
     // Raw mode – the overload guarantees callers see ApiSuccessResponse<Response>
     if (options?.raw) {
-        const rawResult: ApiSuccessResponse<Response> = {
+        return {
             ok: true,
             status: response.status,
             data: response,
         };
-        return rawResult;
     }
 
     // No-content (204) – return ok with null data
     if (response.status === 204) {
-        const noContent: ApiSuccessResponse<null> = { ok: true, status: 204, data: null };
-        return noContent;
+        return { ok: true, status: 204, data: null };
     }
 
     // Try to parse JSON body
@@ -163,7 +162,7 @@ async function request<T>(
         return { ok: false, status: response.status, error: errorMsg };
     }
 
-    return { ok: true, status: response.status, data: parsed as T };
+    return { ok: true, status: response.status, data: parsed };
 }
 
 // ---------------------------------------------------------------------------

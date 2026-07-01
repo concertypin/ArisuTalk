@@ -67,5 +67,5 @@ export function applyTheme(mode: ThemeMode): void {
         mediaQuery.addEventListener("change", systemPreferenceHandler);
     }
 
-    Logger.structured("theme.applied", { mode, resolvedTheme: theme });
+    Logger.info("Theme applied", { mode, resolvedTheme: theme });
 }

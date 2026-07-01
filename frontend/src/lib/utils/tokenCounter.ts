@@ -35,7 +35,7 @@ export interface TokenCountProvider {
  * @remarks The list is intentionally minimal — model pricing changes frequently.
  * Users should configure custom costs via settings or `setModelCost()`.
  */
-let MODEL_COST_PER_1K: Record<string, number> = {
+const MODEL_COST_PER_1K: Record<string, number> = {
     // OpenAI
     "gpt-4o": 0.0025,
     "gpt-4o-mini": 0.00015,

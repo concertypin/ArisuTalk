@@ -59,6 +59,8 @@ type StructuredLogSettings = {
         chatId: string;
         /** Length of the message in characters */
         messageLength: number;
+        /** Chat type (direct/group/open) */
+        chatType?: string;
     };
     /**
      * AI response received.
@@ -79,6 +81,10 @@ type StructuredLogSettings = {
         chatId: string;
         /** Optional character ID */
         characterId?: string;
+        /** Chat type (direct/group/open) */
+        chatType?: string;
+        /** Number of participants */
+        participantCount?: number;
     };
     /**
      * Chat session ended.
@@ -90,6 +96,15 @@ type StructuredLogSettings = {
         messageCount: number;
         /** Session duration in milliseconds */
         durationMs: number;
+    };
+    /**
+     * Affection value updated for a character.
+     */
+    "chat.affection.update": {
+        /** Character ID */
+        characterId: string;
+        /** New affection value */
+        value: number;
     };
 };
 type StructuredLogCharacter = {
@@ -118,6 +133,24 @@ type StructuredLogCharacter = {
      * Character settings autosaved.
      */
     "character.autosave": {
+        /** Character ID */
+        characterId: string;
+    };
+    /**
+     * Character published to Phonebook.
+     */
+    "phonebook.character.publish": {
+        /** Character ID */
+        characterId: string;
+        /** Character name */
+        name: string;
+    };
+    /**
+     * Character imported from Phonebook.
+     */
+    "phonebook.character.import": {
+        /** Phonebook entry ID */
+        entryId: string;
         /** Character ID */
         characterId: string;
     };
@@ -241,6 +274,39 @@ type StructuredLogStorage = {
     "storage.quota_exceeded": {
         storageType: "localStorage" | "IndexedDB" | "OpFS";
         errorMessage: string;
+    };
+    // ─── Migration Events ───────────────────────────────────────
+    /**
+     * Schema version migrated.
+     */
+    "migration.schemaVersion": {
+        version: number;
+    };
+    /**
+     * Data export completed.
+     */
+    "migration.export": {
+        tableCount: number;
+    };
+    /**
+     * Export blob created.
+     */
+    "migration.exportBlob": {
+        rawBytes: number;
+        cborBytes: number;
+        ratio: string;
+    };
+    /**
+     * Backup import format detected.
+     */
+    "migration.importFormat": {
+        format: "json" | "cbor";
+    };
+    /**
+     * Data import completed.
+     */
+    "migration.import": {
+        tableCount: number;
     };
 };
 type StructuredLogPerf = {

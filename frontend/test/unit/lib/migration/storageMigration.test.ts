@@ -13,7 +13,7 @@ vi.mock("@/lib/adapters/storage/IndexedDBHelper", () => ({
             name: t.name,
             toArray: () => t.toArray(),
             clear: () => t.clear(),
-            bulkAdd: (data: never[]) => t.bulkAdd(),
+            bulkAdd: (_data: never[]) => t.bulkAdd(),
         })),
         chats: { toArray: () => Promise.resolve([]) },
         characters: { toArray: () => Promise.resolve([]) },

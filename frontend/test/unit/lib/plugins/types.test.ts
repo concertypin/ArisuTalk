@@ -2,7 +2,7 @@
  * @fileoverview Tests for the plugin system.
  */
 
-import { describe, it, expect, vi } from "vitest";
+import { afterEach, describe, it, expect, vi } from "vitest";
 import {
     registerPlugin,
     unregisterPlugin,
@@ -16,6 +16,8 @@ import {
     dispatchAIResponse,
 } from "@/lib/plugins/types";
 import type { CharacterPlugin, PluginMeta } from "@/lib/plugins/types";
+import type { Character } from "@arisutalk/character-spec/v0/Character";
+import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -41,21 +43,30 @@ function createMockPlugin(overrides: Partial<CharacterPlugin> = {}): CharacterPl
     };
 }
 
-const emptyCharacter = {
+const emptyCharacter: Character = {
     id: "char-1",
     name: "Test",
     description: "",
-    specVersion: "v0",
-    assets: { avatar: [], assets: [] },
-    prompt: { description: "", authorsNote: "" },
-    meta: {
-        created: Date.now(),
-        updated: Date.now(),
+    specVersion: 0,
+    prompt: {
+        description: "",
+        lorebook: { config: {}, data: [] },
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-} as any;
-
-const emptyMessage = { id: "msg-1", chatId: "chat-1", role: "user" as const, content: "Hello", timestamp: Date.now() };
+    executables: {
+        runtimeSetting: { timeout: 30000 },
+        replaceHooks: { display: [], input: [], output: [], request: [] },
+    },
+    metadata: { license: "" },
+    assets: { assets: [] },
+};
+const emptyMessage: Message = {
+    id: "msg-1",
+    chatId: "chat-1",
+    role: "user",
+    content: { type: "text", data: "Hello" },
+    timestamp: Date.now(),
+    inlays: [],
+};
 
 // ---------------------------------------------------------------------------
 // Tests

@@ -2,9 +2,9 @@
  * @fileoverview Tests for the memory plugin.
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { CharacterPlugin } from "@/lib/plugins/types";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
-import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
 
 const mockAddMemory = vi.fn();
 const mockLoadMemories = vi.fn();
@@ -19,7 +19,7 @@ vi.mock("@/features/memory/stores/memoryStore.svelte", () => ({
 }));
 
 describe("memoryPlugin", () => {
-    let plugin: import("@/features/memory/memoryPlugin").CharacterPlugin;
+    let plugin: CharacterPlugin;
 
     beforeEach(async () => {
         vi.clearAllMocks();

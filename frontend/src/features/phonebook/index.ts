@@ -1,3 +1,1 @@
-{
-    export { phonebookStore } from "./stores/phonebookStore.svelte";
-}
+export { phonebookStore } from "./stores/phonebookStore.svelte";

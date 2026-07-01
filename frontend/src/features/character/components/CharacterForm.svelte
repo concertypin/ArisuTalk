@@ -35,8 +35,8 @@
             assets: character?.assets || { assets: [] },
             specVersion: 0,
             id: character?.id || crypto.randomUUID(),
-            name: name,
-            description: description,
+            name,
+            description,
             prompt: character?.prompt || {
                 description: "",
                 authorsNote: "",

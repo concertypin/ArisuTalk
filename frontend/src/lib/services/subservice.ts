@@ -7,7 +7,7 @@
  * can handle failures gracefully without try/catch.
  */
 
-import { get, patch, post, type ApiResponse } from "@/lib/api/client";
+import { get, post, type ApiResponse } from "@/lib/api/client";
 import { Logger } from "@common/logger/Logger";
 
 // ---------------------------------------------------------------------------

@@ -144,7 +144,6 @@ class ImageGenStore {
             name,
             source: "generated",
             data: dataUrl,
-            imageUrl: this.previewUrl ?? undefined,
         };
 
         pack.stickers = [...pack.stickers, sticker];
@@ -192,7 +191,14 @@ class ImageGenStore {
 async function blobToDataUrl(blob: Blob): Promise<string> {
     const { promise, resolve, reject } = Promise.withResolvers<string>();
     const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
+    reader.onload = () => {
+        const result = reader.result;
+        if (typeof result === "string") {
+            resolve(result);
+        } else {
+            reject(new Error("Failed to read blob as data URL"));
+        }
+    };
     reader.onerror = () => reject(new Error("Failed to read blob as data URL"));
     reader.readAsDataURL(blob);
     return promise;

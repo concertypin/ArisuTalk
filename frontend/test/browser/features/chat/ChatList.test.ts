@@ -50,7 +50,6 @@ describe("ChatList Component", () => {
         const emptyMessage = getByText("No chats yet.");
         await expect.element(emptyMessage).toBeVisible();
 
-        const createLink = getByText("Create a direct chat");
     });
 
     test("displays chats filtered by characterId", async () => {

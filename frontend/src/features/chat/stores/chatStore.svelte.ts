@@ -158,6 +158,9 @@ export class ChatStore {
             case "Gemini":
                 await this.setProvider("GEMINI", config);
                 break;
+            case "Anthropic":
+                await this.setProvider("ANTHROPIC", config);
+                break;
             case "OpenAI":
             case "OpenAI-compatible":
                 await this.setProvider("OPENAI", config);

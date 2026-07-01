@@ -101,11 +101,9 @@ class PhonebookStore {
                     this.connection = "connected";
                     this.error = null;
                 }
-            } else {
-                if (this.connection === "connected") {
-                    this.connection = "error";
-                    this.error = res.error ?? "Connection lost";
-                }
+            } else if (this.connection === "connected") {
+                this.connection = "error";
+                this.error = res.error ?? "Connection lost";
             }
         } catch (err) {
             if (this.connection === "connected") {
@@ -125,7 +123,10 @@ class PhonebookStore {
 
         await this.checkConnectivity();
 
-        if (this.connection !== "connected") {
+        // checkConnectivity transitions to "connected" or "error" from "connecting"
+        // Use String() to widen the type and avoid TS2367 from property narrowing
+        const state = String(this.connection);
+        if (state !== "connected") {
             this.connection = "error";
             this.error = this.error || "Failed to connect";
         }
@@ -222,8 +223,11 @@ class PhonebookStore {
         }
 
         const res = await get<{ character: Character }>(`/api/characters/${entryId}/download`);
-        if (!res.ok || !res.data) {
+        if (!res.ok) {
             throw new Error(String(res.error ?? "Failed to download character"));
+        }
+        if (!res.data) {
+            throw new Error("Failed to download character");
         }
 
         await characterStore.add(res.data.character);

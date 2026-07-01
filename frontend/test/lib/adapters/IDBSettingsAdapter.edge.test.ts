@@ -35,7 +35,6 @@ describe("DexieSettingsAdapter (edge)", () => {
     it("rejects malformed data at insertion time (data integrity)", async () => {
         // Dexie properly validates data at insertion - malformed data is rejected
         // This is better than silently accepting corrupted data
-        // @ts-expect-error allow malformed test data
-        await expect(db.settings.put("not-a-record", "singleton")).rejects.toThrow();
+        await expect(db.settings.put("not-a-record" as never, "singleton")).rejects.toThrow();
     });
 });

@@ -46,11 +46,18 @@ export function markSchemaMigrated(): void {
     Logger.structured("migration.schemaVersion", { version: CURRENT_SCHEMA_VERSION });
 }
 
+type ExportAllDataResult = {
+    _exportedAt: string;
+    _schemaVersion: number;
+    _appVersion: string;
+    data: Record<string, unknown[]>;
+};
+
 /**
  * Export all IndexedDB data as a JSON-serializable backup object.
  * @returns A promise that resolves to a backup object containing all tables.
  */
-export async function exportAllData(): Promise<Record<string, unknown[]>> {
+export async function exportAllData(): Promise<ExportAllDataResult> {
     const db = getArisuDB();
     const tables = db.tables;
     const backup: Record<string, unknown[]> = {};

@@ -12,9 +12,15 @@
     let activeTab = $state<TabName>("posts");
 
     // Mock profile data
-    const profile = {
+    const profile: {
+        name: string;
+        avatar: string | null;
+        isSecret: boolean;
+        stats: { posts: number; followers: number; following: number };
+        frequentTags: string[];
+    } = {
         name: "Han Jieyon",
-        avatar: null as string | null,
+        avatar: null,
         isSecret: true,
         stats: {
             posts: 12,

@@ -56,8 +56,9 @@
     );
 
     async function handleFileUpload(e: Event) {
-        const target = e.target as HTMLInputElement;
-        const files = target.files;
+        const input = e.target;
+        if (!(input instanceof HTMLInputElement)) return;
+        const files = input.files;
         if (!files || files.length === 0) return;
 
         const file = files[0];
@@ -90,13 +91,13 @@
             );
 
             Logger.info("Asset uploaded:", baseName, file.type);
-        } catch (e) {
-            Logger.error("Failed to upload asset:", e);
+        } catch (err) {
+            Logger.error("Failed to upload asset:", err);
             duplicateNameError = "Failed to upload asset. Please try again.";
             setTimeout(() => (duplicateNameError = null), 3000);
         }
 
-        target.value = "";
+        input.value = "";
     }
 
     function updateAssetName(index: number, newName: string) {

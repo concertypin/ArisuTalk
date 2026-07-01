@@ -82,7 +82,10 @@
         const childrenMap = new SvelteMap<string | null, BranchNode[]>();
 
         for (const msg of messages) {
-            const branchMsg = msg as ChatMessage;
+            const branchMsg: ChatMessage = Object.assign(msg, {
+                branchFromId: undefined,
+                branchRootId: undefined,
+            });
             const node: BranchNode = {
                 id: msg.id,
                 content:
@@ -115,7 +118,7 @@
     /** Truncate message content for display */
     function truncate(text: string, maxLen: number = 60): string {
         if (text.length <= maxLen) return text;
-        return text.substring(0, maxLen) + "…";
+        return `${text.substring(0, maxLen)}…`;
     }
 
     /** Format a timestamp for display */

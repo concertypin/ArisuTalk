@@ -35,7 +35,7 @@ self.addEventListener("fetch", (event) => {
     const url = new URL(event.request.url);
     if (url.origin === self.location.origin) {
         const ext = url.pathname.match(/\.(\w+)$/)?.[1];
-        if (ext && STATIC_EXTENSIONS.includes("." + ext)) {
+        if (ext && STATIC_EXTENSIONS.includes(`.${  ext}`)) {
             event.respondWith(
                 (async () => {
                     const cached = await caches.match(event.request);

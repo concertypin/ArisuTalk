@@ -12,6 +12,7 @@
 
 import type { Character } from "@arisutalk/character-spec/v0/Character";
 import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
+import { Logger } from "@common/logger/Logger";
 
 // ---------------------------------------------------------------------------
 // Plugin definition
@@ -167,7 +168,7 @@ export async function initializePlugins(): Promise<void> {
 
     for (const result of results) {
         if (result.status === "rejected") {
-            console.warn("[Plugins] Plugin initialisation failed", result.reason);
+            Logger.warn("[Plugins] Plugin initialisation failed", result.reason);
         }
     }
 }

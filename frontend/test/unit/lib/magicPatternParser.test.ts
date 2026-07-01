@@ -42,9 +42,8 @@ describe("MagicPatternParser", () => {
         chat: (_a: number, _b: number) => [],
     };
 
-    beforeEach(() => {
-        vi.resetAllMocks();
-    });
+    // Reset mocks before each test
+    vi.resetAllMocks();
 
     describe("Type Tests", () => {
         it("MagicPatternContext has correct structure", () => {
@@ -59,7 +58,6 @@ describe("MagicPatternParser", () => {
         });
 
         it("chat function has correct signature", () => {
-            // eslint-disable-next-line @typescript-eslint/unbound-method
             const chatFn = mockContext.chat;
             expectTypeOf(chatFn).parameters.toEqualTypeOf<[number, number]>();
         });

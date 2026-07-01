@@ -34,7 +34,8 @@ function createWorkerApi<T>(worker: Worker): WorkerApi<T> {
         void api.setLogReceiver(Comlink.proxy(logReceiver));
     }
 
-    return new Proxy<WorkerApi<T>>(api as WorkerApi<T>, {
+    // @ts-expect-error -- Proxy adds terminate/disabled at runtime; Remote<T> → WorkerApi<T>
+    return new Proxy(api, {
         get: (target, prop) => {
             if (prop === "terminate") {
                 return function () {
@@ -45,13 +46,13 @@ function createWorkerApi<T>(worker: Worker): WorkerApi<T> {
             if (prop === "disabled") {
                 return disabled;
             }
-            if (typeof prop == "symbol") return Reflect.get(target, prop);
-            return target[prop as keyof T];
+            if (typeof prop === "symbol") return Reflect.get(target, prop);
+            return Reflect.get(target, prop);
         },
     });
 }
-// Used example's one, but actually all worker import have the same type.
-type WorkerImport = typeof import("@worker/example/main?worker");
+/** Module type returned by Vite `?worker` dynamic imports. */
+type WorkerModule = { default: new (...args: never[]) => Worker };
 
 /**
  * Creates a reusable worker factory with caching functionality.
@@ -60,7 +61,7 @@ type WorkerImport = typeof import("@worker/example/main?worker");
  * @param workerImport The function to dynamically import the worker module.
  * @returns A function that returns a cached worker instance
  */
-function createCachedWorkerFactory<T>(workerImport: () => Promise<WorkerImport>) {
+function createCachedWorkerFactory<T>(workerImport: () => Promise<WorkerModule>) {
     let workerInstance: WorkerApi<T> | null = null;
     let initPromise: Promise<WorkerApi<T>> | null = null;
 

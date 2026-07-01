@@ -165,9 +165,16 @@ importing emoji or uploading custom images, and reordering stickers.
     }
 
     function fileToBase64(file: File): Promise<string> {
-        return new Promise((resolve, reject) => {
+        return new Promise<string>((resolve, reject) => {
             const reader = new FileReader();
-            reader.onload = () => resolve(reader.result as string);
+            reader.onload = () => {
+                const result = reader.result;
+                if (typeof result === "string") {
+                    resolve(result);
+                } else {
+                    reject(new Error("Failed to read file as data URL"));
+                }
+            };
             reader.onerror = () => reject(new Error("Failed to read file"));
             reader.readAsDataURL(file);
         });

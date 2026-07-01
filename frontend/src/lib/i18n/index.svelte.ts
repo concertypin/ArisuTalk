@@ -119,7 +119,7 @@ class LocaleStore {
         if (typeof window !== "undefined") {
             localStorage.setItem("arisutalk:locale", locale);
         }
-        Logger.structured("i18n.localeChanged", { locale });
+        Logger.info("Locale changed", { locale });
     }
 }
 

@@ -150,6 +150,8 @@ describe("End-to-End Hook Integration", () => {
             deleteChat: vi.fn(),
             updateMessage: vi.fn(),
             deleteMessage: vi.fn(),
+            getChatsByParticipant: vi.fn(),
+            updateChat: vi.fn(),
         };
 
         // Use ChatStore's constructor with injected adapter

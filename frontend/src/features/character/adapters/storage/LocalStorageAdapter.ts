@@ -154,7 +154,7 @@ export class LocalStorageAdapter {
             }
         } catch (e) {
             Logger.error("Failed to import data", e);
-            throw new Error("Invalid data format");
+            throw new Error("Invalid data format", { cause: e });
         }
     }
 }

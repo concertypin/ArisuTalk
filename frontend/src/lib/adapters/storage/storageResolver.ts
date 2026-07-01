@@ -5,7 +5,6 @@ import type {
     ISettingsStorageAdapter,
 } from "@/lib/interfaces";
 
-type AdapterPromise<T> = Promise<{ default: new () => T }>;
 /**
  * Storage resolver that provides the appropriate storage adapters.
  * Uses dynamic imports for tree-shaking and code splitting.
@@ -23,17 +22,12 @@ export class StorageResolver {
      * Uses dynamic import for code splitting.
      */
     static async getCharacterAdapter(): Promise<ICharacterStorageAdapter> {
-        if (this.characterAdapter) {
-            return this.characterAdapter;
-        }
-        let adapterPromise: AdapterPromise<ICharacterStorageAdapter>;
-        if (import.meta.env.VITEST) {
-            // Use localStorage adapter in testing environment
-            adapterPromise = import("./character/LocalStorageCharacterAdapter");
-        } else {
-            adapterPromise = import("./character/IDBCharacterAdapter");
-        }
-        this.characterAdapter = new (await adapterPromise).default();
+        if (this.characterAdapter) return this.characterAdapter;
+
+        const mod = import.meta.env.VITEST
+            ? await import("./character/LocalStorageCharacterAdapter")
+            : await import("./character/IDBCharacterAdapter");
+        this.characterAdapter = new mod.default();
         return this.characterAdapter;
     }
 
@@ -42,17 +36,12 @@ export class StorageResolver {
      * Uses dynamic import for code splitting.
      */
     static async getChatAdapter(): Promise<IChatStorageAdapter> {
-        if (this.chatAdapter) {
-            return this.chatAdapter;
-        }
-        let adapterPromise: AdapterPromise<IChatStorageAdapter>;
-        if (import.meta.env.VITEST) {
-            // Use localStorage adapter in testing environment
-            adapterPromise = import("./chat/LocalStorageChatAdapter");
-        } else {
-            adapterPromise = import("./chat/IDBChatAdapter");
-        }
-        this.chatAdapter = new (await adapterPromise).default();
+        if (this.chatAdapter) return this.chatAdapter;
+
+        const mod = import.meta.env.VITEST
+            ? await import("./chat/LocalStorageChatAdapter")
+            : await import("./chat/IDBChatAdapter");
+        this.chatAdapter = new mod.default();
         return this.chatAdapter;
     }
 
@@ -61,18 +50,12 @@ export class StorageResolver {
      * Uses dynamic import for code splitting.
      */
     static async getPersonaAdapter(): Promise<IPersonaStorageAdapter> {
-        if (this.personaAdapter) {
-            return this.personaAdapter;
-        }
+        if (this.personaAdapter) return this.personaAdapter;
 
-        let adapterPromise: AdapterPromise<IPersonaStorageAdapter>;
-        if (import.meta.env.VITEST) {
-            // Use localStorage adapter in testing environment
-            adapterPromise = import("./persona/LocalStoragePersonaAdapter");
-        } else {
-            adapterPromise = import("./persona/IDBPersonaAdapter");
-        }
-        this.personaAdapter = new (await adapterPromise).default();
+        const mod = import.meta.env.VITEST
+            ? await import("./persona/LocalStoragePersonaAdapter")
+            : await import("./persona/IDBPersonaAdapter");
+        this.personaAdapter = new mod.default();
         return this.personaAdapter;
     }
 
@@ -81,18 +64,12 @@ export class StorageResolver {
      * Uses dynamic import for code splitting.
      */
     static async getSettingsAdapter(): Promise<ISettingsStorageAdapter> {
-        if (this.settingsAdapter) {
-            return this.settingsAdapter;
-        }
+        if (this.settingsAdapter) return this.settingsAdapter;
 
-        let adapterPromise: AdapterPromise<ISettingsStorageAdapter>;
-        if (import.meta.env.VITEST) {
-            // Use localStorage adapter in testing environment
-            adapterPromise = import("./settings/LocalStorageSettingsAdapter");
-        } else {
-            adapterPromise = import("./settings/IDBSettingsAdapter");
-        }
-        this.settingsAdapter = new (await adapterPromise).default();
+        const mod = import.meta.env.VITEST
+            ? await import("./settings/LocalStorageSettingsAdapter")
+            : await import("./settings/IDBSettingsAdapter");
+        this.settingsAdapter = new mod.default();
         return this.settingsAdapter;
     }
 
