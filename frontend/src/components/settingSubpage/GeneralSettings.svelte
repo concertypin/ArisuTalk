@@ -1,8 +1,10 @@
 <script lang="ts">
     import { settings } from "@/lib/stores/settings.svelte";
+    import { localeStore, type Locale } from "@/lib/i18n/index";
     import NoopIcon from "@/components/Snippets/NoopIcon.svelte";
     import TextT from "phosphor-svelte/lib/TextTIcon";
     import Palette from "phosphor-svelte/lib/PaletteIcon";
+    import GlobeHemisphereWest from "phosphor-svelte/lib/GlobeHemisphereWestIcon";
     import { SUPPORTED_FONTS } from "@/lib/utils/fontUtils";
 </script>
 
@@ -22,6 +24,23 @@
                 <option value="system">System</option>
                 <option value="light">Light</option>
                 <option value="dark">Dark</option>
+            </select>
+            <NoopIcon />
+        </div>
+    </fieldset>
+    <fieldset class="fieldset w-full max-w-md bg-base-100 p-4 rounded-box border border-base-200">
+        <legend class="fieldset-legend font-medium flex items-center gap-2 text-base-content/70">
+            <GlobeHemisphereWest size={16} />
+            Language
+        </legend>
+        <div class="flex items-center justify-between">
+            <select
+                id="general-language"
+                class="select select-bordered w-full"
+                bind:value={localeStore.current}
+            >
+                <option value="en">English</option>
+                <option value="ko">한국어</option>
             </select>
             <NoopIcon />
         </div>
