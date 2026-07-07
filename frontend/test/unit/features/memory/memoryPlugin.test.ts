@@ -18,7 +18,7 @@ vi.mock("@/features/memory/stores/memoryStore.svelte", () => ({
     },
 }));
 
-describe("memoryPlugin", () => {
+describe.concurrent("memoryPlugin", () => {
     let plugin: CharacterPlugin;
 
     beforeEach(async () => {

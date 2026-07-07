@@ -19,7 +19,7 @@ vi.mock("@langchain/openai", async () => {
     };
 });
 
-describe("OpenAIChatProvider", () => {
+describe.concurrent("OpenAIChatProvider", () => {
     beforeEach(() => {
         vi.clearAllMocks();
     });

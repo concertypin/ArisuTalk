@@ -3,7 +3,7 @@ import { MockChatProvider } from "@/lib/providers/chat/MockChatProvider";
 import type { CommonChatSettings } from "@/lib/interfaces";
 import { HumanMessage } from "@langchain/core/messages";
 
-describe("MockChatProvider", () => {
+describe.concurrent("MockChatProvider", () => {
     const commonSettings: CommonChatSettings = {
         apiKey: "mock-key",
         model: "mock-model",

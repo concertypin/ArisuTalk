@@ -29,7 +29,7 @@ describe("HookService", () => {
         hookService = new HookService();
     });
 
-    it("should apply a simple regex hook", async () => {
+    it.concurrent("should apply a simple regex hook", async () => {
         const character = apply(CharacterSchema, {
             description: "",
             prompt: {
@@ -61,7 +61,7 @@ describe("HookService", () => {
         expect(result).toBe("I have an orange");
     });
 
-    it("should respect priorities", async () => {
+    it.concurrent("should respect priorities", async () => {
         const character = apply(CharacterSchema, {
             description: "",
             prompt: {
@@ -105,7 +105,7 @@ describe("HookService", () => {
         expect(result).toBe("banana");
     });
 
-    it("should handle scripted patterns", async () => {
+    it.concurrent("should handle scripted patterns", async () => {
         const character = apply(CharacterSchema, {
             description: "",
             prompt: {
@@ -228,7 +228,7 @@ describe("HookService", () => {
         expect(result).toBe("test content");
     });
 
-    it("should handle scripted output for regex hooks", async () => {
+    it.concurrent("should handle scripted output for regex hooks", async () => {
         const character = apply(CharacterSchema, {
             description: "",
             prompt: { description: "" },
@@ -259,7 +259,7 @@ describe("HookService", () => {
         expect(result).toBe("I have 'NUMBER' apples");
     });
 
-    it("should handle scripted output for string hooks", async () => {
+    it.concurrent("should handle scripted output for string hooks", async () => {
         const character = apply(CharacterSchema, {
             description: "",
             prompt: { description: "" },
@@ -290,7 +290,7 @@ describe("HookService", () => {
         expect(result).toBe("'GREETING' world");
     });
 
-    it("should handle string replacement with case sensitivity", async () => {
+    it.concurrent("should handle string replacement with case sensitivity", async () => {
         const character = apply(CharacterSchema, {
             description: "",
             prompt: { description: "" },
@@ -321,7 +321,7 @@ describe("HookService", () => {
         expect(result).toBe("Hi world, hello again");
     });
 
-    it("should handle string replacement without case sensitivity", async () => {
+    it.concurrent("should handle string replacement without case sensitivity", async () => {
         const character = apply(CharacterSchema, {
             description: "",
             prompt: { description: "" },
@@ -352,7 +352,7 @@ describe("HookService", () => {
         expect(result).toBe("Hi world, Hi again");
     });
 
-    it("should return content unchanged when no hooks are defined", async () => {
+    it.concurrent("should return content unchanged when no hooks are defined", async () => {
         const character = apply(CharacterSchema, {
             description: "",
             prompt: { description: "" },
@@ -370,7 +370,7 @@ describe("HookService", () => {
         expect(result).toBe("test content");
     });
 
-    it("should escape special regex characters in string replacement", async () => {
+    it.concurrent("should escape special regex characters in string replacement", async () => {
         const character = apply(CharacterSchema, {
             description: "",
             prompt: { description: "" },

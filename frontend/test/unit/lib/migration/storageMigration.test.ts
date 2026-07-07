@@ -20,7 +20,7 @@ vi.mock("@/lib/adapters/storage/IndexedDBHelper", () => ({
 
 import { checkStoredSchemaVersion, markSchemaMigrated } from "@/lib/migration/storageMigration";
 
-describe("storageMigration", () => {
+describe.concurrent("storageMigration", () => {
     beforeEach(() => {
         vi.stubGlobal(
             "localStorage",
@@ -42,7 +42,7 @@ describe("storageMigration", () => {
         vi.unstubAllGlobals();
     });
 
-    describe("checkStoredSchemaVersion", () => {
+    describe.concurrent("checkStoredSchemaVersion", () => {
         it("should return 0 when no version is stored", () => {
             expect(checkStoredSchemaVersion()).toBe(0);
         });
@@ -52,7 +52,7 @@ describe("storageMigration", () => {
         });
     });
 
-    describe("markSchemaMigrated", () => {
+    describe.concurrent("markSchemaMigrated", () => {
         it("should set the schema version in localStorage", () => {
             markSchemaMigrated();
             expect(localStorage.getItem("arisutalk_schema_version")).toBe("3");

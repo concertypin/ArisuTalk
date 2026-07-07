@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import * as apiClient from "../../../../src/lib/api/client";
 
-describe("api client shorthands", () => {
+describe.concurrent("api client shorthands", () => {
     afterEach(() => {
         vi.restoreAllMocks();
     });

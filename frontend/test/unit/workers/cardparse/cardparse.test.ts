@@ -58,7 +58,7 @@ function createTestCharacter(
     }) as import("@arisutalk/character-spec/v0/Character").Character;
 }
 
-describe("CardParse Worker — parseCharacter", () => {
+describe.concurrent("CardParse Worker — parseCharacter", () => {
     it("should parse a valid exported character", async () => {
         const original = createTestCharacter({
             name: "Round Trip",
@@ -210,8 +210,8 @@ describe("CardParse Worker — parseCharacter", () => {
     });
 });
 
-describe("CardParse Worker — shared utilities", () => {
-    describe("iterableToStream", () => {
+describe.concurrent("CardParse Worker — shared utilities", () => {
+    describe.concurrent("iterableToStream", () => {
         it("should convert Uint8Array iterable to ReadableStream", async () => {
             const chunks = [
                 new Uint8Array([1, 2, 3]),
@@ -243,7 +243,7 @@ describe("CardParse Worker — shared utilities", () => {
         });
     });
 
-    describe("readAll", () => {
+    describe.concurrent("readAll", () => {
         it("should read entire stream into single Uint8Array", async () => {
             const stream = new ReadableStream<Uint8Array<ArrayBuffer>>({
                 start(controller) {
@@ -268,7 +268,7 @@ describe("CardParse Worker — shared utilities", () => {
         });
     });
 
-    describe("setLogger", () => {
+    describe.concurrent("setLogger", () => {
         it("should set and return the logger", () => {
             const mockLogger = {
                 debug: vi.fn(),

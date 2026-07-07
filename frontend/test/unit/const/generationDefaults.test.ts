@@ -1,7 +1,7 @@
 import { describe, it, expect, expectTypeOf } from "vitest";
 import { GENERATION_DEFAULTS } from "@/const/generationDefaults";
 
-describe("GENERATION_DEFAULTS", () => {
+describe.concurrent("GENERATION_DEFAULTS", () => {
     it("is a readonly constant (as const)", () => {
         // as const makes properties readonly at the type level,
         // but does not freeze the object at runtime

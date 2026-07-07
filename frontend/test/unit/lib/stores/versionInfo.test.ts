@@ -8,7 +8,7 @@
 import { describe, it, expect } from "vitest";
 import { versionInfo } from "@/lib/stores/versionInfo.svelte";
 
-describe("versionInfo", () => {
+describe.concurrent("versionInfo", () => {
     it("should have the expected shape", () => {
         expect(versionInfo.value).toHaveProperty("version");
         expect(versionInfo.value).toHaveProperty("channel");

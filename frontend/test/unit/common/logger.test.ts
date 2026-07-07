@@ -8,6 +8,7 @@ vi.unmock("@common/logger/Logger");
 describe("Logger Class", () => {
     beforeEach(() => {
         Logger.reset();
+        Logger.clearListeners();
         localStorage.clear();
     });
 

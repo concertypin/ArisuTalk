@@ -4,8 +4,8 @@
 import { describe, it, expect, expectTypeOf } from "vitest";
 import { estimateTokens, estimateTokenCost } from "@/lib/utils/tokenCounter";
 
-describe("Token Counter", () => {
-    describe("estimateTokens()", () => {
+describe.concurrent("Token Counter", () => {
+    describe.concurrent("estimateTokens()", () => {
         it("returns 0 for empty string", () => {
             expect(estimateTokens("")).toBe(0);
         });
@@ -51,7 +51,7 @@ describe("Token Counter", () => {
         });
     });
 
-    describe("estimateTokenCost()", () => {
+    describe.concurrent("estimateTokenCost()", () => {
         it("returns object with tokens and cost", () => {
             const result = estimateTokenCost("hello world");
             expect(result).toHaveProperty("tokens");

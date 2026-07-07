@@ -15,7 +15,7 @@ vi.mock("@/lib/workers/workerClient", () => ({
     ),
 }));
 
-describe("magicPatternParser", () => {
+describe.concurrent("magicPatternParser", () => {
     const mockContext: MagicPatternContext = {
         character: {
             id: "char-1",
