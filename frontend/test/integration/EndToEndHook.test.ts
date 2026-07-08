@@ -47,6 +47,7 @@ vi.mock("@/lib/stores/settings.svelte", () => ({
         value: {
             activeLLMConfigId: "default",
             llmConfigs: [{ id: "default", provider: "Mock", enabled: true }],
+            prompt: { generationPrompt: "Test system prompt" },
         },
     },
 }));

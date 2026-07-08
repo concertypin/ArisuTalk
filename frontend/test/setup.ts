@@ -20,6 +20,25 @@ beforeEach(() => {
             localStorage.removeItem("arisutalk_active_persona");
             localStorage.removeItem("arisutalk_persona_order");
         }
+
+        // Prevent native dialogs that block thread and degrade UX
+        if (typeof window !== "undefined") {
+            window.alert = () => {
+                throw new Error(
+                    "strict mode violation: window.alert() is banned as it degrades UX. Use custom Modal or Toast UI instead."
+                );
+            };
+            window.confirm = () => {
+                throw new Error(
+                    "strict mode violation: window.confirm() is banned as it degrades UX. Use custom Modal or Toast UI instead."
+                );
+            };
+            window.prompt = () => {
+                throw new Error(
+                    "strict mode violation: window.prompt() is banned as it degrades UX. Use custom Modal or Toast UI instead."
+                );
+            };
+        }
     } catch {
         // ignore in non-browser environments
     }

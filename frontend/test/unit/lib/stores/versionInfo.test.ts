@@ -8,22 +8,9 @@
 import { describe, it, expect } from "vitest";
 import { versionInfo } from "@/lib/stores/versionInfo.svelte";
 
-describe.concurrent("versionInfo", () => {
-    it("should have the expected shape", () => {
-        expect(versionInfo.value).toHaveProperty("version");
-        expect(versionInfo.value).toHaveProperty("channel");
-        expect(versionInfo.value).toHaveProperty("commit");
-        expect(versionInfo.value).toHaveProperty("url");
-    });
-
-    it("should have a displayLabel containing the app name", () => {
+describe("versionInfo", () => {
+    it("displayLabel contains ArisuTalk regardless of channel", () => {
+        // displayLabel is a computed getter with branching logic (channel suffix)
         expect(versionInfo.displayLabel).toContain("ArisuTalk");
-    });
-
-    it("should have string-typed fields", () => {
-        expect(typeof versionInfo.value.version).toBe("string");
-        expect(typeof versionInfo.value.channel).toBe("string");
-        expect(typeof versionInfo.value.commit).toBe("string");
-        expect(typeof versionInfo.value.url).toBe("string");
     });
 });

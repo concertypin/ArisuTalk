@@ -20,6 +20,7 @@ export default defineConfig(async (ctx) => {
             compilerOptions: {
                 dev: mode !== "production",
             },
+            inspector: process.env.VITEST ? false : undefined,
         }),
     ];
     /*

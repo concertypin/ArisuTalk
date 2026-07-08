@@ -159,6 +159,10 @@ export const LLMConfigSchema = z.discriminatedUnion("provider", [
 /**
  * Configuration for system prompts to guide assistant behavior.
  * ChatML format. All prompts are required.
+ *
+ * Sections can be individually enabled/disabled and reordered via
+ * `promptSections`. When a section is disabled, it is omitted from
+ * the assembled system prompt sent to the LLM.
  */
 export const PromptConfigSchema = z
     .object({
@@ -166,6 +170,20 @@ export const PromptConfigSchema = z
          * The general prompt to guide the behavior of the assistant.
          */
         generationPrompt: z.string().default("You are a helpful assistant."),
+        /**
+         * Controls which prompt sections are included and their order
+         * in the assembled system prompt.
+         * Each entry: { key, enabled }.
+         * Missing keys default to enabled.
+         */
+        promptSections: z
+            .array(
+                z.object({
+                    key: z.enum(["system", "character", "persona", "lore"]),
+                    enabled: z.boolean(),
+                })
+            )
+            .optional(),
     })
     .default({
         generationPrompt: "You are a helpful assistant.",

@@ -70,7 +70,6 @@ export abstract class LangChainBaseProvider<
             const stream = await this.client.stream(messages, {
                 signal: this.abortController.signal,
             });
-
             for await (const chunk of stream) {
                 // Try chunk.content first (standard for most LangChain models)
                 if (typeof chunk.content === "string") {

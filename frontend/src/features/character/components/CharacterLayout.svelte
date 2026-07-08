@@ -153,7 +153,7 @@
                     <p class="text-base-content/60 text-lg">
                         Select a character from the sidebar to start chatting
                     </p>
-                    <div class="flex flex-wrap justify-center gap-3 mt-6">
+                    <div class="flex flex-nowrap justify-center gap-3 mt-6">
                         <button class="btn btn-primary gap-2" onclick={handleAdd}>
                             <span class="text-lg">+</span> Create Character
                         </button>

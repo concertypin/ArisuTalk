@@ -1,13 +1,24 @@
 /**
- * @fileoverview Tests for the storage migration utilities.
- * Core logic tests only — CBOR format tests require browser environment.
+ * Round-trip test: export → serialize → parse → compare.
+ * Exercises the CBOR encode/decode logic and format detection.
  */
-
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+
+// Minimal cbor-x mock: encode wraps JSON in a CBOR-like prefix (0xA1 + JSON bytes)
+// decode strips the prefix and JSON-parses the rest.
+vi.mock("cbor-x", () => {
+    const PREFIX = 0xa1;
+    return {
+        encode: (data: unknown) =>
+            new Uint8Array([PREFIX, ...new TextEncoder().encode(JSON.stringify(data))]),
+        decode: (buf: Uint8Array) => JSON.parse(new TextDecoder().decode(buf.slice(1))) as unknown,
+    };
+});
 
 vi.mock("@/lib/adapters/storage/IndexedDBHelper", () => ({
     getArisuDB: () => ({
         tables: [],
+        // Provide empty arrays for all table lookups
         chats: { toArray: () => Promise.resolve([]) },
         characters: { toArray: () => Promise.resolve([]) },
         settings: { toArray: () => Promise.resolve([]) },
@@ -18,9 +29,9 @@ vi.mock("@/lib/adapters/storage/IndexedDBHelper", () => ({
     }),
 }));
 
-import { checkStoredSchemaVersion, markSchemaMigrated } from "@/lib/migration/storageMigration";
+import { exportAllData, exportDataAsBlob, parseBackupFile } from "@/lib/migration/storageMigration";
 
-describe.concurrent("storageMigration", () => {
+describe("storageMigration round-trip", () => {
     beforeEach(() => {
         vi.stubGlobal(
             "localStorage",
@@ -42,20 +53,16 @@ describe.concurrent("storageMigration", () => {
         vi.unstubAllGlobals();
     });
 
-    describe.concurrent("checkStoredSchemaVersion", () => {
-        it("should return 0 when no version is stored", () => {
-            expect(checkStoredSchemaVersion()).toBe(0);
-        });
-        it("should return the stored version number", () => {
-            localStorage.setItem("arisutalk_schema_version", "3");
-            expect(checkStoredSchemaVersion()).toBe(3);
-        });
+    it("export → serialize → parse round-trips correctly", async () => {
+        const exported = await exportAllData();
+        const blob = await exportDataAsBlob();
+        const file = new File([blob], "test.aribackup", { type: "application/octet-stream" });
+        const parsed = await parseBackupFile(file);
+        expect(parsed.data).toEqual(exported.data);
     });
 
-    describe.concurrent("markSchemaMigrated", () => {
-        it("should set the schema version in localStorage", () => {
-            markSchemaMigrated();
-            expect(localStorage.getItem("arisutalk_schema_version")).toBe("3");
-        });
+    it("rejects JSON without data property", async () => {
+        const file = new File([JSON.stringify({ notData: true })], "bad.json");
+        await expect(parseBackupFile(file)).rejects.toThrow("missing 'data' property");
     });
 });

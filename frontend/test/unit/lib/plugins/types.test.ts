@@ -169,6 +169,20 @@ describe("Plugin System", () => {
 
             expect(plugin.onInitialize).not.toHaveBeenCalled();
         });
+
+        it("should not block other plugins when one rejects during initialization", async () => {
+            const good = createMockPlugin({ meta: { ...testMeta, id: "test.good" } });
+            const bad = createMockPlugin({
+                meta: { ...testMeta, id: "test.bad" },
+                onInitialize: vi.fn(() => Promise.reject(new Error("Boom"))),
+            });
+            registerPlugin(good);
+            registerPlugin(bad);
+
+            await expect(initializePlugins()).resolves.toBeUndefined();
+            expect(good.onInitialize).toHaveBeenCalledOnce();
+            expect(bad.onInitialize).toHaveBeenCalledOnce();
+        });
     });
 
     describe("dispatchCharacterActivate", () => {
@@ -236,6 +250,30 @@ describe("Plugin System", () => {
 
             // p1 runs first, then p2 gets p1's output
             expect(result).toBe("[B][A]hello");
+        });
+
+        it("should stop the chain when a plugin throws", async () => {
+            const p1 = createMockPlugin({
+                meta: { ...testMeta, id: "test.one" },
+                onBeforeMessageSend: vi.fn((_msg: string) => {
+                    throw new Error("P1 crash");
+                }),
+            });
+            const p2 = createMockPlugin({
+                meta: { ...testMeta, id: "test.two" },
+                onBeforeMessageSend: vi.fn((msg: string) => Promise.resolve(`[B]${msg}`)),
+            });
+            registerPlugin(p1);
+            registerPlugin(p2);
+
+            await expect(
+                dispatchBeforeMessageSend("hello", {
+                    character: emptyCharacter,
+                    history: [emptyMessage],
+                })
+            ).rejects.toThrow("P1 crash");
+
+            expect(p2.onBeforeMessageSend).not.toHaveBeenCalled();
         });
     });
 

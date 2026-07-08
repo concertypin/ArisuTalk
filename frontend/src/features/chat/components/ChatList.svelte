@@ -131,7 +131,7 @@
                     <div
                         role="button"
                         tabindex="0"
-                        class="p-1 hover:text-info rounded"
+                        class="p-1 hover:text-info rounded flex items-center justify-center"
                         onclick={(e) => {
                             e.stopPropagation();
                             handleShowBranchViewer(chat.id);
@@ -148,7 +148,7 @@
                     <div
                         role="button"
                         tabindex="0"
-                        class="p-1 hover:text-error rounded"
+                        class="p-1 hover:text-error rounded flex items-center justify-center"
                         onclick={(e) => void handleDelete(e, chat.id)}
                         onkeydown={(e) => {
                             if (e.key === "Enter") {
@@ -196,7 +196,7 @@
                         <div
                             role="button"
                             tabindex="0"
-                            class="p-1 hover:text-info rounded"
+                            class="p-1 hover:text-info rounded flex items-center justify-center"
                             onclick={(e) => {
                                 e.stopPropagation();
                                 handleShowBranchViewer(chat.id);
@@ -213,7 +213,7 @@
                         <div
                             role="button"
                             tabindex="0"
-                            class="p-1 hover:text-error rounded"
+                            class="p-1 hover:text-error rounded flex items-center justify-center"
                             onclick={(e) => void handleDelete(e, chat.id)}
                             onkeydown={(e) => {
                                 if (e.key === "Enter") {
@@ -232,11 +232,17 @@
         {#if directChats.length === 0 && groupChats.length === 0}
             <div class="text-center p-4 opacity-70 text-sm">
                 No chats yet.
-                <button class="link link-info" onclick={() => void handleNewChat()}>
+                <button
+                    class="btn btn-ghost btn-xs px-1 text-info inline-flex"
+                    onclick={() => void handleNewChat()}
+                >
                     Create a direct chat
                 </button>
                 <span class="opacity-50 ml-1">or</span>
-                <button class="link link-secondary" onclick={() => void handleNewGroupChat()}>
+                <button
+                    class="btn btn-ghost btn-xs px-1 text-secondary inline-flex"
+                    onclick={() => void handleNewGroupChat()}
+                >
                     start a group chat
                 </button>
             </div>

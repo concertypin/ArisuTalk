@@ -1,3 +1,10 @@
+/** Resolved context for the currently active chat. */
+interface ActiveChatContext {
+    activeChat: LocalChat | null;
+    character: Character | undefined;
+    participants: Character[];
+    persona: Persona | null;
+}
 import type {
     LocalChat,
     IChatStorageAdapter,
@@ -16,7 +23,7 @@ import { GeminiChatProvider } from "@/lib/providers/chat/GeminiChatProvider";
 import { OpenAIChatProvider } from "@/lib/providers/chat/OpenAIChatProvider";
 import { GrokChatProvider } from "@/lib/providers/chat/GrokChatProvider";
 import { AnthropicChatProvider } from "@/lib/providers/chat/AnthropicChatProvider";
-import { HumanMessage, AIMessage } from "@langchain/core/messages";
+import { HumanMessage, AIMessage, SystemMessage } from "@langchain/core/messages";
 import { OpenRouterChatProvider } from "@/lib/providers/chat/OpenRouterChatProvider";
 import { settings } from "@/lib/stores/settings.svelte";
 import { apply } from "@arisutalk/character-spec/utils";
@@ -26,6 +33,7 @@ import { personaStore } from "@/features/persona/stores/personaStore.svelte";
 import { Logger } from "@common/logger/Logger";
 import type { Persona } from "@/features/persona/schema";
 import type { Character } from "@arisutalk/character-spec/types/v0/index";
+import { buildSystemPrompt } from "@/lib/prompts/systemPromptBuilder";
 
 export class ChatStore {
     chats = $state<LocalChat[]>([]);
@@ -40,17 +48,8 @@ export class ChatStore {
     private adapter!: IChatStorageAdapter;
     private activeProvider: ChatProvider<ProviderType> | null = null;
     public readonly initPromise: Promise<void>;
-    /**
-     * Gets the context for the active chat including character and persona.
-     * For group chats, provides the primary character and all participant characters.
-     * Centralizes lookup logic to avoid repetition and potential desync.
-     */
-    private get activeChatContext(): {
-        activeChat: LocalChat | null;
-        character: Character | undefined;
-        participants: Character[];
-        persona: Persona | null;
-    } {
+    /** Resolved context for the currently active chat. */
+    private get activeChatContext(): ActiveChatContext {
         const activeChat = this.activeChatId
             ? this.chats.find((c) => c.id === this.activeChatId)
             : null;
@@ -433,7 +432,7 @@ export class ChatStore {
      * Helper to process an LLM stream and update a message ref.
      */
     private async processStream(
-        langChainMessages: (HumanMessage | AIMessage)[],
+        langChainMessages: (HumanMessage | AIMessage | SystemMessage)[],
         assistantMessageId: string
     ) {
         const stream = this.activeProvider!.stream(langChainMessages);
@@ -470,7 +469,7 @@ export class ChatStore {
      */
     private async _streamAndSaveResponse(
         chatId: string,
-        langChainMessages: (HumanMessage | AIMessage)[]
+        langChainMessages: (HumanMessage | AIMessage | SystemMessage)[]
     ) {
         const startTime = Date.now();
         const assistantMessageId = crypto.randomUUID();
@@ -485,7 +484,15 @@ export class ChatStore {
         // Optimistically add to UI
         this.activeMessages.push(assistantMessage);
 
-        const fullContent = await this.processStream(langChainMessages, assistantMessageId);
+        let fullContent: string;
+        try {
+            fullContent = await this.processStream(langChainMessages, assistantMessageId);
+        } catch (error) {
+            // Remove the optimistic empty message on failure
+            const idx = this.activeMessages.findIndex((m) => m.id === assistantMessageId);
+            if (idx !== -1) this.activeMessages.splice(idx, 1);
+            throw error;
+        }
 
         // Apply output hooks using centralized context getter
         const { character, persona } = this.activeChatContext;
@@ -524,6 +531,53 @@ export class ChatStore {
         // Ensure the new timestamp is strictly greater than the last one.
         return Math.max(now, lastMsg.timestamp + 1);
     }
+    /**
+     * Builds the system prompt and group-chat context messages.
+     * Returns LangChain messages to be prepended to the conversation history.
+     *
+     * Shared between `sendMessage` and `regenerateMessage` to ensure both
+     * paths deliver the same system context to the LLM.
+     *
+     * @param ctx - Pre-resolved active chat context (caller should pass the
+     *   result of `this.activeChatContext` to avoid redundant store lookups).
+     */
+    private async _buildSystemContext(
+        ctx: ActiveChatContext
+    ): Promise<(SystemMessage | HumanMessage)[]> {
+        const { activeChat, character, participants, persona } = ctx;
+
+        const systemPrompt = await buildSystemPrompt(
+            {
+                generationPrompt: settings.value.prompt.generationPrompt,
+                character: character ?? undefined,
+                persona: persona
+                    ? { name: persona.name, description: persona.description }
+                    : undefined,
+            },
+            settings.value.prompt.promptSections,
+            this.activeMessages
+        );
+
+        const context: (SystemMessage | HumanMessage)[] = [];
+
+        if (systemPrompt) {
+            context.push(new SystemMessage(systemPrompt));
+        }
+
+        const isGroupChat = activeChat?.chatType === "group" || activeChat?.chatType === "open";
+        if (isGroupChat && participants.length > 0) {
+            context.push(
+                new HumanMessage(
+                    `[Context: This is a ${activeChat?.chatType} chat. ` +
+                        `Primary character: ${character?.name ?? activeChat?.characterId}. ` +
+                        `Other participants: ${participants.map((p) => p.name ?? p.id).join(", ")}. ` +
+                        `The primary character should respond.]`
+                )
+            );
+        }
+
+        return context;
+    }
 
     async sendMessage(content: string) {
         if (!this.activeChatId || !this.activeProvider) return;
@@ -532,8 +586,10 @@ export class ChatStore {
         const chatId = this.activeChatId;
 
         try {
-            // Use centralized context getter for character/persona lookup
-            const { activeChat, character, participants, persona } = this.activeChatContext;
+            // Read full context once; _buildSystemContext will reuse it
+            // to avoid redundant store lookups (perf).
+            const ctx = this.activeChatContext;
+            const { activeChat, character, persona } = ctx;
 
             let processedContent = content;
             if (character) {
@@ -567,20 +623,12 @@ export class ChatStore {
                 return m.role === "user" ? new HumanMessage(text) : new AIMessage(text);
             });
 
-            // For group/open chats, prepend participant context so the LLM knows who is present
-            const isGroupChat = activeChat?.chatType === "group" || activeChat?.chatType === "open";
-            const langChainMessages =
-                isGroupChat && participants.length > 0
-                    ? [
-                          new HumanMessage(
-                              `[Context: This is a ${activeChat?.chatType} chat. ` +
-                                  `Primary character: ${character?.name ?? activeChat?.characterId}. ` +
-                                  `Other participants: ${participants.map((p) => p.name ?? p.id).join(", ")}. ` +
-                                  `The primary character should respond.]`
-                          ),
-                          ...baseMessages,
-                      ]
-                    : baseMessages;
+            // Prepend system prompt and group-chat context
+            const systemContext = await this._buildSystemContext(ctx);
+            const langChainMessages: (HumanMessage | AIMessage | SystemMessage)[] = [
+                ...systemContext,
+                ...baseMessages,
+            ];
 
             await this._streamAndSaveResponse(chatId, langChainMessages);
         } catch (error) {
@@ -816,10 +864,19 @@ export class ChatStore {
             );
 
             // Prepare LangChain messages from remaining history
-            const langChainMessages = this.activeMessages.map((m) => {
+            const baseMessages = this.activeMessages.map((m) => {
                 const text = typeof m.content.data === "string" ? m.content.data : "";
                 return m.role === "user" ? new HumanMessage(text) : new AIMessage(text);
             });
+
+            // Re-inject system prompt and group-chat context so regeneration
+            // receives the same context as the original send (regression defense)
+            const ctx = this.activeChatContext;
+            const systemContext = await this._buildSystemContext(ctx);
+            const langChainMessages: (HumanMessage | AIMessage | SystemMessage)[] = [
+                ...systemContext,
+                ...baseMessages,
+            ];
 
             await this._streamAndSaveResponse(chatId, langChainMessages);
         } catch (error) {

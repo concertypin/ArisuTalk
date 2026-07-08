@@ -1,9 +1,22 @@
 /// <reference types="vitest/browser" />
-import { test, expect, describe, vi, afterEach } from "vitest";
+import { test, expect, describe, vi, afterEach, beforeEach } from "vitest";
 import { render } from "vitest-browser-svelte";
 import CharacterLayoutTestWrapper from "../wrappers/CharacterLayoutTestWrapper.svelte";
 
 describe("Persona and Chat interactions", () => {
+    beforeEach(async () => {
+        // Reset chatStore state so each test starts clean
+        try {
+            const { chatStore } = await import("@/features/chat/stores/chatStore.svelte");
+            if (chatStore["activeProvider"]) {
+                chatStore["activeProvider"].disconnect = vi.fn().mockResolvedValue(undefined);
+            }
+            chatStore["activeProvider"] = null;
+            chatStore.isGenerating = false;
+        } catch {
+            // chatStore may not load in all environments
+        }
+    });
     afterEach(() => {
         vi.restoreAllMocks();
         vi.useRealTimers();

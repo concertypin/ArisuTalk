@@ -148,6 +148,32 @@ it('updates UI when shared rune changes', async () => {
 });
 
 ```
+## 4. Advanced Testing & Mocking Guidelines
+
+### 4.1. Avoid Early Fake Timers with Async Store Init Promises
+If your stores rely on async initialization (`await store.initPromise`), do NOT use `vi.useFakeTimers()` early in `beforeEach` or before stores resolve. Doing so pauses microtask queues, preventing promises from resolving and triggering a test timeout.
+- **Rule**: Safe loading defaults to real timers first. Enable `vi.useFakeTimers()` only *after* all stores have resolved their init promises.
+
+### 4.2. Preserve Svelte 5 Runes Reactivity on Arrays
+When injecting mock data into reactive array stores (e.g. `chatStore.chats`), do NOT reassign the array (e.g. `store.chats = [newObj]`), as it breaks the reactivity bind.
+- **Rule**: Use array mutation to preserve reactivity:
+  ```typescript
+  store.chats.length = 0;
+  store.chats.push(mockObj);
+  ```
+
+### 4.3. Mocking Singleton Class Private Caches
+If a resolver class caches adapter instances internally (e.g. `StorageResolver.chatAdapter`), simple function spies (`vi.spyOn`) will be bypassed if initialization has already run once.
+- **Rule**: Overwrite the private cached static property directly before importing or initializing dependent stores:
+  ```typescript
+  StorageResolver["chatAdapter"] = mockAdapter;
+  ```
+
+### 4.4. Native Blocking Dialogs Prohibition (UX Protection)
+To prevent degrading UX and blocking the browser main thread, native blocking dialogs (`window.alert()`, `window.confirm()`, and `window.prompt()`) are blocked by default in [setup.ts](file:///c:/Users/PC/Projects/etc/ArisuTalk/frontend/test/setup.ts).
+- **Rule**: Native dialog calls without explicit test mocks will throw strict mode violations. Always implement high-quality custom Modal or Toast UI components instead.
+
+---
 
 ## Documentation
 - [Svelte testing docs](https://svelte.dev/docs/svelte/testing/llms.txt)
