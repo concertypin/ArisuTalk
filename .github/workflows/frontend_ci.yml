@@ -117,8 +117,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shardIndex: [1, 2, 3, 4]
-        shardTotal: [4]
+        shardIndex: [1, 2, 3, 4, 5]
+        shardTotal: [5]
+    steps:
       - uses: actions/checkout@v4
 
       - name: Install pnpm
