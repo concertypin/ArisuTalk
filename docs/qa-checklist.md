@@ -50,6 +50,19 @@ The core change: `chatStore.sendMessage` now builds a `SystemMessage` from chara
 - [ ] **Verify**: each toggle announces only the section label (e.g., "System Prompt"), NOT the description
 - [ ] **Verify**: pressing Space toggles the switch
 
+### 1.7 Section Reorder Persistence
+- [ ] Go to **Settings → Prompts → Prompt Sections**
+- [ ] **Reorder sections** (change the order of toggles)
+- [ ] **Reload the page**
+- [ ] **Verify**: section order is preserved after reload
+
+### 1.8 Lore Section Content
+- [ ] Set up a character with **lorebook entries** marked as "always-on" (`condition.type === "always"`)
+- [ ] Send a message
+- [ ] **Verify**: lore content appears in the assembled system prompt (check console log)
+- [ ] **Disable "Lore" section** toggle
+- [ ] **Verify**: lore content is excluded from the system prompt
+
 ---
 
 ## 2. Magic Patterns in Prompts
@@ -159,6 +172,11 @@ First visit seeds 3 default templates. Subsequent visits don't re-seed.
 - [ ] Try a model name that the API key doesn't have access to
 - [ ] **Verify**: error message shows which models are allowed (from API response)
 
+### 6.4 Generation Parameters Editing
+- [ ] Open **Settings → Models** → edit an LLM config
+- [ ] **Verify**: all parameter fields (temperature, topP, maxTokens, etc.) are editable
+- [ ] **Toggle** a parameter off → **Verify**: the field disappears / disables correctly
+- [ ] **Change** a value → **Save** → **Reopen** → **Verify**: value persisted
 ---
 
 ## 7. Regression Checks
@@ -185,6 +203,12 @@ First visit seeds 3 default templates. Subsequent visits don't re-seed.
 - [ ] Run `pnpm vitest run --project unit` — all 542+ tests pass
 - [ ] Run `pnpm vitest run --project browser` — all browser tests pass
 - [ ] Run `pnpm run check:types` — no new type errors (PhonebookPanel error is pre-existing)
+
+### 7.5 Regeneration Preserves System Context
+- [ ] Send a message with character + persona + generation prompt active
+- [ ] **Regenerate** the AI response
+- [ ] **Verify**: regenerated response still reflects character persona AND generation prompt (same system context as original)
+- [ ] **Check console**: verify `[SystemPromptBuilder]` log appears during regeneration too
 
 ## 8. Performance
 
@@ -227,13 +251,12 @@ For rapid manual testing, paste this into browser console to seed a complete tes
             id: cid, name: 'WASAPI DeepSeek V4', generationParameters: {},
             enabled: true, provider: 'OpenAI-compatible',
             model: 'go/deepseek-v4-flash',
-            apiKey: 'sk-2OFeeb5MrPs7CcWKB1MpxA',
+            apiKey: 'YOUR_API_KEY_HERE',
             baseURL: 'https://llm.wasapi.xyz/v1'
         }],
         activeLLMConfigId: cid,
         prompt: { generationPrompt: 'You are a helpful AI assistant.' },
-        advanced: { debug: false, experimental: false }
-    });
+        advanced: { debug: false, experimental: false },
 
     tx.objectStore('characters').put({
         id: 'char-arisu', name: 'Arisu', description: 'A cute maid',
