@@ -27,7 +27,7 @@
         { label: "Character name", code: "{| return character.name |}" },
         { label: "Character description", code: "{| return character.description |}" },
         { label: "Persona name", code: "{| return persona.name |}" },
-        { label: "Expression (math)", code: "The answer is {| 21 + 21 |}." },
+        { label: "Expression (math)", code: "The answer is {| return 21 + 21 |}." },
     ] as const;
 
     async function runTest() {
