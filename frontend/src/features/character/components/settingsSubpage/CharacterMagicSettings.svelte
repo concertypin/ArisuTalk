@@ -82,7 +82,7 @@
     <fieldset class="fieldset">
         <legend class="fieldset-legend text-sm font-medium">Quick Examples</legend>
         <div class="flex flex-wrap gap-2">
-            {#each examples as example (example.pattern)}
+            {#each examples as example (example.label)}
                 <button
                     class="btn btn-outline btn-xs"
                     onclick={() => applyExample(example.code)}
