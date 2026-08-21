@@ -89,6 +89,8 @@ export function setTokenProvider(provider: TokenCountProvider): void {
  * - Code, numbers, and special tokens (e.g. `<|endoftext|>`) are not handled.
  * - For accurate counts, provide a real tokenizer via {@link setTokenProvider}.
  *
+ * @todo Should be actual tokenization.
+ *
  * @param text - The text to estimate tokens for.
  * @returns Estimated number of tokens.
  */

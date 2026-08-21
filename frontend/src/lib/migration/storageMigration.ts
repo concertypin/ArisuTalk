@@ -113,12 +113,11 @@ export async function parseBackupFile(file: File): Promise<{ data: Record<string
     if (firstByte === 0x7b || firstByte === 0x5b) {
         // Legacy JSON format
         const text = new TextDecoder().decode(buffer);
-        const parsed: unknown = JSON.parse(text);
-        const result = parsed as { data?: unknown };
+        const result: unknown = JSON.parse(text);
         if (
             !result ||
             typeof result !== "object" ||
-            !result.data ||
+            !("data" in result) ||
             typeof result.data !== "object"
         ) {
             throw new Error("Invalid backup file: missing 'data' property");

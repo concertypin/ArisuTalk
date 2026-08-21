@@ -54,6 +54,7 @@ const SECTION_LABELS: Record<PromptSection["key"], string> = {
 /**
  * Resolves which sections are enabled and their order.
  *
+ * @pure
  * @param overrides - User-configured section overrides from settings.
  *                    Entries not present default to enabled, appearing
  *                    in canonical order.
@@ -89,6 +90,7 @@ function resolveSectionOrder(
 
 /**
  * Assembles a single prompt section from context.
+ * @pure
  */
 function assembleSection(key: PromptSection["key"], ctx: SystemPromptContext): string | null {
     switch (key) {
@@ -110,6 +112,9 @@ function assembleSection(key: PromptSection["key"], ctx: SystemPromptContext): s
             const parts: string[] = [];
 
             // Character-level lorebook entries (always-on)
+            /**
+             * @todo Only handles `always` type.
+             */
             const charLore = ctx.character?.prompt?.lorebook?.data;
             if (charLore) {
                 for (const entry of charLore) {
@@ -140,6 +145,8 @@ function assembleSection(key: PromptSection["key"], ctx: SystemPromptContext): s
  * Magic pattern syntax (`{| ... |}`) in any section is executed in a
  * sandboxed context with access to `character`, `persona`, and `chat`.
  *
+ * @todo Too strict prompt shape. Should be more flexible(ideally, arbitrary shape user wants to define).
+ *  For now, we just assemble the sections in order.
  * @param ctx - Context with all prompt sources.
  * @param sectionOverrides - User-configured section order/enable state.
  * @param chatHistory - Chat message history for magic pattern `chat()` calls.

@@ -178,6 +178,7 @@ Image generation panel with prompt input, generation settings, preview, and save
         {#if imageGenStore.previewUrl}
             <div class="card bg-base-200 overflow-hidden">
                 <figure class="flex justify-center p-2 bg-base-300">
+                    <!-- svelte-ignore a11y_img_redundant_alt -->
                     <img
                         src={imageGenStore.previewUrl}
                         alt="Generated image preview"

@@ -1,4 +1,5 @@
 {
+    "$schema": "https://www.schemastore.org/web-manifest",
     "name": "ArisuTalk",
     "short_name": "ArisuTalk",
     "description": "AI Character Chat Platform",

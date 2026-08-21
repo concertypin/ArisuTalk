@@ -73,6 +73,7 @@ export async function checkHealth(): Promise<ApiResponse<HealthStatus>> {
  * The backend does not yet expose a dedicated profile endpoint, so this
  * currently queries the data list filtering for a profile entry. When a
  * dedicated `/api/profile` endpoint is added, this method will switch to it.
+ * @todo
  */
 export async function getUserProfile(): Promise<ApiResponse<UserProfile>> {
     // The backend's /api/check endpoint validates the session and returns 204
@@ -101,6 +102,8 @@ export async function getUserProfile(): Promise<ApiResponse<UserProfile>> {
  * Currently a placeholder until a dedicated `PATCH /api/profile` endpoint is
  * available on the backend.  When present it will send the serialised profile
  * fields and return the updated profile.
+ *
+ * @todo
  */
 export async function updateUserProfile(
     _data: UserProfileUpdate

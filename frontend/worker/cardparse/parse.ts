@@ -20,7 +20,7 @@ export async function parseCharacter(rawData: ArrayBuffer): Promise<ParseResult<
             id: result.data.id,
             name: result.data.name,
         });
-        const transferables = (result.data as Character).assets.assets
+        const transferables = result.data.assets.assets
             .map((i) => i.data)
             .filter((i) => i instanceof Uint8Array);
         return transfer(

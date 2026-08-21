@@ -3,6 +3,8 @@ import type { Sticker, StickerPack } from "@/lib/types/sticker";
 /**
  * Interface for sticker storage adapters.
  * Handles persistence of sticker packs and their stickers.
+ *
+ * @todo Should be merged with `inlay assets` concept, to match character-spec.
  */
 export interface IStickerStorageAdapter {
     /**

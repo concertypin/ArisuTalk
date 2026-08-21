@@ -6,7 +6,7 @@
      * the currently selected character, with inline editing and deletion.
      */
     import Star from "phosphor-svelte/lib/StarIcon";
-    import StarFill from "phosphor-svelte/lib/StarFillIcon";
+    import Star from "phosphor-svelte/lib/StarIcon";
     import Plus from "phosphor-svelte/lib/PlusIcon";
     import Trash from "phosphor-svelte/lib/TrashIcon";
     import ClockClockwise from "phosphor-svelte/lib/ClockClockwiseIcon";
@@ -88,6 +88,10 @@
     }
 </script>
 
+<!-- Typescript hack to autocomplete props -->
+{#snippet StarFill(argv: Parameters<NonNullable<Star["$set"]>>[0])}
+    <Star weight="fill" {...argv}></Star>
+{/snippet}
 <div class="space-y-6">
     <h3 class="text-lg font-semibold">Character Memory</h3>
 
@@ -179,7 +183,10 @@
                             title="Importance: {entry.importance.toFixed(2)}"
                         >
                             {#each Array(importanceStars(entry.importance)) as _, idx (idx)}
-                                <StarFill size={12} class="text-warning" />
+                                {@render StarFill({
+                                    size: 12,
+                                    class: "text-warning",
+                                })}
                             {/each}
                             {#each Array(5 - importanceStars(entry.importance)) as _, idx (idx)}
                                 <Star size={12} class="text-base-content/30" />
