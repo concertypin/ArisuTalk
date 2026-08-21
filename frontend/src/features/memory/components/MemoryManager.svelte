@@ -6,7 +6,6 @@
      * the currently selected character, with inline editing and deletion.
      */
     import Star from "phosphor-svelte/lib/StarIcon";
-    import Star from "phosphor-svelte/lib/StarIcon";
     import Plus from "phosphor-svelte/lib/PlusIcon";
     import Trash from "phosphor-svelte/lib/TrashIcon";
     import ClockClockwise from "phosphor-svelte/lib/ClockClockwiseIcon";
