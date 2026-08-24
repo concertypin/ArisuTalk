@@ -9,7 +9,8 @@ Phonebook is a platform for sharing and discovering character cards.
     import CloudSlash from "phosphor-svelte/lib/CloudSlashIcon";
     import CircleNotch from "phosphor-svelte/lib/CircleNotchIcon";
     import WarningCircle from "phosphor-svelte/lib/WarningCircleIcon";
-    import PlugsConnecting from "phosphor-svelte/lib/PlugsConnectingIcon";
+    import Plugs from "phosphor-svelte/lib/PlugsIcon";
+    import PlugsConnected from "phosphor-svelte/lib/PlugsConnectedIcon";
     import UploadSimple from "phosphor-svelte/lib/UploadSimpleIcon";
     import MagnifyingGlass from "phosphor-svelte/lib/MagnifyingGlassIcon";
 
@@ -79,7 +80,7 @@ Phonebook is a platform for sharing and discovering character cards.
     <div class="card bg-base-200">
         <div class="card-body p-4 gap-3">
             <h3 class="card-title text-sm font-semibold flex items-center gap-2">
-                <PlugsConnecting size={18} />
+                <PlugsConnected size={18} />
                 Connection
             </h3>
 
@@ -111,16 +112,16 @@ Phonebook is a platform for sharing and discovering character cards.
 
             {#if phonebookStore.connection === "connected"}
                 <button class="btn btn-outline btn-sm" onclick={() => phonebookStore.disconnect()}>
-                    <PlugsConnecting size={16} />
+                    <Plugs size={16} />
                     Disconnect
                 </button>
-            {:else if phonebookStore.connection === "idle" || phonebookStore.connection === "error"}
+            {:else}
                 <button
                     class="btn btn-primary btn-sm"
                     onclick={() => phonebookStore.connect()}
                     disabled={phonebookStore.connection === "connecting"}
                 >
-                    <PlugsConnecting size={16} />
+                    <PlugsConnected size={16} />
                     Connect
                 </button>
             {/if}
