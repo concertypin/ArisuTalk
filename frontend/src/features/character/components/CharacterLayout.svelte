@@ -65,9 +65,11 @@
         selectedCharacterId = primaryId;
         void chatStore.setActiveChat(id);
         groupChatDialog?.close();
-        Logger.structured("groupChat.created", {
+        Logger.structured("chat.session.start", {
             chatId: id,
-            characterIds: groupChatSelectedIds,
+            characterId: primaryId,
+            chatType: "group",
+            participantCount: participantIds.length,
         });
     }
 
