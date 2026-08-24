@@ -6,8 +6,9 @@
   @todo
 -->
 <script lang="ts">
-    import type { Component } from "svelte";
-    let props: { children: Component } = $props();
+    import type { Snippet } from "svelte";
+
+    let props: { children: Snippet } = $props();
 </script>
 
-<props.children />
+{@render props.children()}
