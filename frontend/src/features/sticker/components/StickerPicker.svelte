@@ -92,9 +92,6 @@ Emits `onSelect` with the chosen Sticker object.
         close();
     }
 
-    /** Raw, Unfiltered Data */
-    type EmojiData = { char: string; name: string };
-
     let groupedEmojis: EmojiGroup[] = $state([]);
 
     $effect(() => {
