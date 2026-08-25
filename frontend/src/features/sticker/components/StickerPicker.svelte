@@ -1,3 +1,31 @@
+<script module lang="ts">
+    type EmojiClass = {
+        emoji: string;
+        skin_tone_support: boolean;
+        name: string;
+        slug: string;
+        unicode_version: string;
+        emoji_version: string;
+    };
+
+    type EmojiGroup = {
+        name: string;
+        slug: string;
+        emojis: EmojiClass[];
+    };
+
+    let BUILTIN_EMOJIS: EmojiGroup[];
+
+    async function loadBuiltinEmojis() {
+        if (BUILTIN_EMOJIS) return BUILTIN_EMOJIS;
+
+        const module = await import("unicode-emoji-json/data-by-group.json");
+        BUILTIN_EMOJIS = module.default;
+
+        return BUILTIN_EMOJIS;
+    }
+</script>
+
 <!--
 @component StickerPicker
 Modal/panel for selecting stickers from packs, or picking emoji characters.
@@ -5,7 +33,7 @@ Emits `onSelect` with the chosen Sticker object.
 -->
 <script lang="ts">
     import { stickerStore } from "@/features/sticker/stores/stickerStore.svelte";
-    import type { Sticker } from "@/features/sticker";
+    import type { Sticker, StickerPack } from "@/features/sticker";
     import StickerIcon from "phosphor-svelte/lib/StickerIcon";
     import EmojiIcon from "phosphor-svelte/lib/SmileyIcon";
     import XIcon from "phosphor-svelte/lib/XIcon";
@@ -22,6 +50,9 @@ Emits `onSelect` with the chosen Sticker object.
 
     let dialog = $state<HTMLDialogElement | null>(null);
     let searchQuery = $state("");
+
+    /** Query is valid? */
+    let isFiltered = $derived(!!searchQuery.trim());
 
     // Tabs: index 0 is always "Emoji", then each sticker pack gets a tab
     let activeTab = $state<number>(0);
@@ -52,7 +83,7 @@ Emits `onSelect` with the chosen Sticker object.
     /** Called when the user clicks an emoji from the emoji grid. */
     function selectEmoji(emojiChar: string, emojiName: string): void {
         const sticker: Sticker = {
-            id: crypto.randomUUID(),
+            id: crypto.randomUUID(), // WHAT?
             name: emojiName,
             emoji: emojiChar,
             source: "emoji",
@@ -61,268 +92,43 @@ Emits `onSelect` with the chosen Sticker object.
         close();
     }
 
-    /** Set of unique emoji categories shown in the emoji picker tab. */
-    const EMOJI_CATEGORIES: Array<{
-        label: string;
-        emojis: Array<{ char: string; name: string }>;
-    }> = [
-        {
-            label: "Smileys & People",
-            emojis: [
-                { char: "😀", name: "Grinning Face" },
-                { char: "😁", name: "Beaming Face" },
-                { char: "😂", name: "Tears of Joy" },
-                { char: "🤣", name: "Rolling on Floor" },
-                { char: "😃", name: "Big Smile" },
-                { char: "😄", name: "Smiling Eyes" },
-                { char: "😅", name: "Grinning Sweat" },
-                { char: "😆", name: "Squinting Grin" },
-                { char: "😉", name: "Winking Face" },
-                { char: "😊", name: "Smiling Blush" },
-                { char: "😋", name: "Yummy Face" },
-                { char: "😎", name: "Cool Sunglasses" },
-                { char: "😍", name: "Heart Eyes" },
-                { char: "🥰", name: "Smiling Hearts" },
-                { char: "😘", name: "Face Blowing Kiss" },
-                { char: "🤗", name: "Hugging Face" },
-                { char: "🤩", name: "Star-Struck" },
-                { char: "🤔", name: "Thinking Face" },
-                { char: "🙄", name: "Eye Roll" },
-                { char: "😏", name: "Smirking Face" },
-                { char: "😣", name: "Persevering" },
-                { char: "😮", name: "Face with Open Mouth" },
-                { char: "😐", name: "Neutral Face" },
-                { char: "😑", name: "Expressionless" },
-                { char: "😶", name: "Without Mouth" },
-                { char: "😛", name: "Face with Tongue" },
-                { char: "😜", name: "Winking Tongue" },
-                { char: "😝", name: "Squinting Tongue" },
-                { char: "😒", name: "Unamused" },
-                { char: "😓", name: "Cold Sweat" },
-                { char: "😔", name: "Pensive" },
-                { char: "😕", name: "Confused" },
-                { char: "🙃", name: "Upside-Down" },
-                { char: "😲", name: "Astonished" },
-                { char: "😢", name: "Crying Face" },
-                { char: "😭", name: "Loudly Crying" },
-                { char: "😤", name: "Steaming Face" },
-                { char: "😡", name: "Pouting Face" },
-                { char: "😠", name: "Angry Face" },
-                { char: "🤬", name: "Face with Symbols" },
-                { char: "😳", name: "Flushed Face" },
-                { char: "🤪", name: "Zany Face" },
-                { char: "😵", name: "Dizzy Face" },
-                { char: "🥺", name: "Pleading Face" },
-                { char: "😴", name: "Sleeping Face" },
-                { char: "🤤", name: "Drooling Face" },
-                { char: "🥳", name: "Partying Face" },
-                { char: "🥶", name: "Cold Face" },
-                { char: "🥵", name: "Hot Face" },
-                { char: "🤯", name: "Exploding Head" },
-            ],
-        },
-        {
-            label: "Gestures & Hands",
-            emojis: [
-                { char: "👍", name: "Thumbs Up" },
-                { char: "👎", name: "Thumbs Down" },
-                { char: "👌", name: "OK Hand" },
-                { char: "✌️", name: "Victory Hand" },
-                { char: "🤞", name: "Crossed Fingers" },
-                { char: "🤟", name: "Love-You Gesture" },
-                { char: "🤘", name: "Horn Sign" },
-                { char: "🤙", name: "Call Me Hand" },
-                { char: "👋", name: "Waving Hand" },
-                { char: "🤚", name: "Raised Back of Hand" },
-                { char: "🖐️", name: "Hand with Fingers Splayed" },
-                { char: "✋", name: "Raised Hand" },
-                { char: "🖖", name: "Vulcan Salute" },
-                { char: "👏", name: "Clapping Hands" },
-                { char: "🙌", name: "Raising Hands" },
-                { char: "🤝", name: "Handshake" },
-                { char: "🙏", name: "Folded Hands" },
-                { char: "✊", name: "Raised Fist" },
-                { char: "👊", name: "Oncoming Fist" },
-                { char: "🤛", name: "Left-Facing Fist" },
-                { char: "🤜", name: "Right-Facing Fist" },
-                { char: "👆", name: "Pointing Up" },
-                { char: "👇", name: "Pointing Down" },
-                { char: "👉", name: "Pointing Right" },
-                { char: "👈", name: "Pointing Left" },
-                { char: "☝️", name: "Index Pointing Up" },
-                { char: "💪", name: "Flexed Biceps" },
-                { char: "🫶", name: "Heart Hands" },
-                { char: "👐", name: "Open Hands" },
-                { char: "🤲", name: "Palms Up Together" },
-                { char: "💅", name: "Nail Polish" },
-                { char: "🤳", name: "Selfie" },
-            ],
-        },
-        {
-            label: "Hearts & Emotions",
-            emojis: [
-                { char: "❤️", name: "Red Heart" },
-                { char: "🧡", name: "Orange Heart" },
-                { char: "💛", name: "Yellow Heart" },
-                { char: "💚", name: "Green Heart" },
-                { char: "💙", name: "Blue Heart" },
-                { char: "💜", name: "Purple Heart" },
-                { char: "🖤", name: "Black Heart" },
-                { char: "🤍", name: "White Heart" },
-                { char: "🤎", name: "Brown Heart" },
-                { char: "💔", name: "Broken Heart" },
-                { char: "❣️", name: "Heart Exclamation" },
-                { char: "💕", name: "Two Hearts" },
-                { char: "💞", name: "Revolving Hearts" },
-                { char: "💓", name: "Beating Heart" },
-                { char: "💗", name: "Growing Heart" },
-                { char: "💖", name: "Sparkling Heart" },
-                { char: "💘", name: "Heart with Arrow" },
-                { char: "💝", name: "Heart with Ribbon" },
-                { char: "💟", name: "Heart Decoration" },
-                { char: "✨", name: "Sparkles" },
-                { char: "⭐", name: "Star" },
-                { char: "🌟", name: "Glowing Star" },
-                { char: "💫", name: "Dizzy Star" },
-                { char: "🔥", name: "Fire" },
-                { char: "💯", name: "Hundred Points" },
-                { char: "💢", name: "Anger Symbol" },
-                { char: "💬", name: "Speech Balloon" },
-                { char: "💭", name: "Thought Balloon" },
-                { char: "🎉", name: "Party Popper" },
-                { char: "🎊", name: "Confetti Ball" },
-                { char: "🎈", name: "Balloon" },
-                { char: "🎁", name: "Wrapped Gift" },
-            ],
-        },
-        {
-            label: "Animals & Nature",
-            emojis: [
-                { char: "🐶", name: "Dog Face" },
-                { char: "🐱", name: "Cat Face" },
-                { char: "🐭", name: "Mouse Face" },
-                { char: "🐹", name: "Hamster" },
-                { char: "🐰", name: "Rabbit Face" },
-                { char: "🦊", name: "Fox" },
-                { char: "🐻", name: "Bear" },
-                { char: "🐼", name: "Panda" },
-                { char: "🐨", name: "Koala" },
-                { char: "🐯", name: "Tiger Face" },
-                { char: "🦁", name: "Lion" },
-                { char: "🐮", name: "Cow Face" },
-                { char: "🐷", name: "Pig Face" },
-                { char: "🐸", name: "Frog" },
-                { char: "🐵", name: "Monkey Face" },
-                { char: "🐔", name: "Chicken" },
-                { char: "🐧", name: "Penguin" },
-                { char: "🐦", name: "Bird" },
-                { char: "🐤", name: "Baby Chick" },
-                { char: "🦆", name: "Duck" },
-                { char: "🦅", name: "Eagle" },
-                { char: "🦉", name: "Owl" },
-                { char: "🦇", name: "Bat" },
-                { char: "🐺", name: "Wolf" },
-                { char: "🐴", name: "Horse Face" },
-                { char: "🦄", name: "Unicorn" },
-                { char: "🐝", name: "Honeybee" },
-                { char: "🐛", name: "Bug" },
-                { char: "🦋", name: "Butterfly" },
-                { char: "🐌", name: "Snail" },
-                { char: "🐞", name: "Lady Beetle" },
-                { char: "🐢", name: "Turtle" },
-                { char: "🐍", name: "Snake" },
-                { char: "🐙", name: "Octopus" },
-                { char: "🐠", name: "Tropical Fish" },
-                { char: "🐟", name: "Fish" },
-                { char: "🐬", name: "Dolphin" },
-                { char: "🐳", name: "Spouting Whale" },
-                { char: "🦋", name: "Butterfly" },
-                { char: "🌸", name: "Cherry Blossom" },
-                { char: "🌺", name: "Hibiscus" },
-                { char: "🌻", name: "Sunflower" },
-                { char: "🌹", name: "Rose" },
-                { char: "🌷", name: "Tulip" },
-                { char: "🌵", name: "Cactus" },
-                { char: "🌲", name: "Evergreen" },
-                { char: "🌳", name: "Deciduous Tree" },
-                { char: "🌴", name: "Palm Tree" },
-                { char: "🌈", name: "Rainbow" },
-                { char: "🌊", name: "Water Wave" },
-                { char: "☀️", name: "Sun" },
-                { char: "🌙", name: "Moon" },
-                { char: "⭐", name: "Star" },
-                { char: "🌟", name: "Glowing Star" },
-                { char: "☁️", name: "Cloud" },
-                { char: "⛅", name: "Sun Behind Cloud" },
-                { char: "🌧️", name: "Rain Cloud" },
-                { char: "❄️", name: "Snowflake" },
-                { char: "⚡", name: "High Voltage" },
-                { char: "🔥", name: "Fire" },
-            ],
-        },
-        {
-            label: "Food & Drink",
-            emojis: [
-                { char: "🍎", name: "Red Apple" },
-                { char: "🍐", name: "Pear" },
-                { char: "🍊", name: "Tangerine" },
-                { char: "🍋", name: "Lemon" },
-                { char: "🍌", name: "Banana" },
-                { char: "🍉", name: "Watermelon" },
-                { char: "🍇", name: "Grapes" },
-                { char: "🍓", name: "Strawberry" },
-                { char: "🫐", name: "Blueberries" },
-                { char: "🍈", name: "Melon" },
-                { char: "🍒", name: "Cherries" },
-                { char: "🍑", name: "Peach" },
-                { char: "🥭", name: "Mango" },
-                { char: "🍍", name: "Pineapple" },
-                { char: "🥝", name: "Kiwi" },
-                { char: "🍅", name: "Tomato" },
-                { char: "🥑", name: "Avocado" },
-                { char: "🍔", name: "Hamburger" },
-                { char: "🍟", name: "French Fries" },
-                { char: "🍕", name: "Pizza" },
-                { char: "🌭", name: "Hot Dog" },
-                { char: "🥪", name: "Sandwich" },
-                { char: "🌮", name: "Taco" },
-                { char: "🌯", name: "Burrito" },
-                { char: "🥗", name: "Green Salad" },
-                { char: "🍿", name: "Popcorn" },
-                { char: "🧁", name: "Cupcake" },
-                { char: "🍰", name: "Shortcake" },
-                { char: "🎂", name: "Birthday Cake" },
-                { char: "🍦", name: "Soft Ice Cream" },
-                { char: "🍩", name: "Doughnut" },
-                { char: "🍪", name: "Cookie" },
-                { char: "☕", name: "Hot Beverage" },
-                { char: "🍵", name: "Teacup" },
-                { char: "🥤", name: "Cup with Straw" },
-                { char: "🍺", name: "Beer" },
-                { char: "🍻", name: "Clinking Beers" },
-                { char: "🥂", name: "Clinking Glasses" },
-            ],
-        },
-    ];
+    /** Raw, Unfiltered Data */
+    type EmojiData = { char: string; name: string };
+
+    let groupedEmojis: EmojiGroup[] = $state([]);
+
+    $effect(() => {
+        loadBuiltinEmojis().then((data) => (groupedEmojis = data));
+    });
 
     /** Flattened emoji items for search. */
-    let allEmojis = $derived(
-        EMOJI_CATEGORIES.flatMap((cat) => cat.emojis.map((e) => ({ ...e, category: cat.label })))
-    );
+    let flattenedEmojis = $derived.by(() => {
+        const t: EmojiClass[] = [];
+
+        // for EmojiGroup
+        for (const eg of groupedEmojis) {
+            // for EmojiClass
+            for (const ec of eg.emojis) {
+                t.push(ec);
+            }
+        }
+
+        return t;
+    });
+
+    function isQueryMatched(e: EmojiClass): boolean {
+        return (
+            e.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            e.emoji.includes(searchQuery)
+        );
+    }
 
     /** Emoji items matching the search query. */
-    let filteredEmojis = $derived(
-        searchQuery
-            ? allEmojis.filter(
-                  (e) =>
-                      e.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                      e.char.includes(searchQuery)
-              )
-            : allEmojis
-    );
+    let filteredEmojis = $derived.by(() => {
+        if (!isFiltered) return flattenedEmojis;
 
-    /** Filtered emoji categories for the grid (only non-empty). */
-    let filteredCategories = $derived(searchQuery ? [] : EMOJI_CATEGORIES);
+        return flattenedEmojis.filter(isQueryMatched);
+    });
 
     /** Stickers across all packs, filtered by search. */
     let allPackStickers = $derived(
@@ -333,7 +139,7 @@ Emits `onSelect` with the chosen Sticker object.
 
     /** Filtered pack stickers matching search. */
     let filteredPackStickers = $derived(
-        searchQuery
+        isFiltered
             ? allPackStickers.filter(
                   (s) =>
                       s.sticker.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -352,6 +158,82 @@ Emits `onSelect` with the chosen Sticker object.
         <span class="w-12 h-12 flex items-center justify-center text-base-content/30 text-xs">
             No preview
         </span>
+    {/if}
+{/snippet}
+
+{#snippet drawEmojiContainer(
+    emojis: EmojiClass[],
+    onSelect: (emojiChar: string, emojiName: string) => void
+)}
+    <div class="grid grid-cols-8 sm:grid-cols-10 gap-1">
+        {#each emojis as c}
+            <button
+                class="btn btn-ghost btn-sm p-0 h-10 w-10 text-xl flex items-center justify-center rounded-lg hover:bg-base-300/50"
+                title={c.name}
+                onclick={() => onSelect(c.emoji, c.name)}
+            >
+                {c.emoji}
+            </button>
+        {/each}
+    </div>
+{/snippet}
+
+{#snippet drawEmojiGrid(filtered: boolean)}
+    {#if filtered}
+        <!-- Search results -->
+        {@render drawEmojiContainer(filteredEmojis, selectEmoji)}
+
+        <!-- If not found, -->
+        {#if filteredEmojis.length === 0}
+            <p class="text-center text-base-content/40 py-8 text-sm">No emoji found</p>
+        {/if}
+    {:else}
+        <!-- Categorized emoji grid -->
+        {#each groupedEmojis as group (group.name)}
+            <div class="mb-3">
+                <h4
+                    class="text-xs font-semibold text-base-content/50 mb-1.5 uppercase tracking-wider"
+                >
+                    {group.name}
+                </h4>
+                {@render drawEmojiContainer(group.emojis, selectEmoji)}
+            </div>
+        {/each}
+    {/if}
+{/snippet}
+
+{#snippet drawStickerPackGrid(filtered: boolean, activePack: StickerPack)}
+    {#if filtered}
+        <div class="grid grid-cols-4 sm:grid-cols-5 gap-2">
+            {#each filteredPackStickers.filter((s) => s.packId === activePack.id) as entry (entry.sticker.id)}
+                {@render drawSticker(entry.sticker)}
+            {/each}
+        </div>
+        {#if filteredPackStickers.length === 0}
+            <p class="text-center text-base-content/40 py-8 text-sm">No stickers found</p>
+        {/if}
+    {:else}
+        <div class="grid grid-cols-4 sm:grid-cols-5 gap-2">
+            {#each activePack.stickers as sticker (sticker.id)}
+                <button
+                    class="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-base-300/40 transition-colors"
+                    title={sticker.name}
+                    onclick={() => selectPackSticker(sticker, activePack.id)}
+                >
+                    {@render drawSticker(sticker)}
+                    <span
+                        class="text-[10px] text-base-content/60 truncate w-full text-center leading-tight"
+                    >
+                        {sticker.name}
+                    </span>
+                </button>
+            {/each}
+        </div>
+        {#if activePack.stickers.length === 0}
+            <p class="text-center text-base-content/40 py-8 text-sm">
+                This pack is empty — add stickers in the manager.
+            </p>
+        {/if}
     {/if}
 {/snippet}
 
@@ -428,85 +310,16 @@ Emits `onSelect` with the chosen Sticker object.
         <!-- Content -->
         <div class="flex-1 overflow-y-auto p-3">
             {#if activeTab === 0}
+                <!-- FIXME: This will not be able to find the emoji whose name is the blank character. -->
                 <!-- Emoji Grid -->
-                {#if searchQuery}
-                    <!-- Search results -->
-                    <div class="grid grid-cols-8 sm:grid-cols-10 gap-1">
-                        {#each filteredEmojis as emoji}
-                            <button
-                                class="btn btn-ghost btn-sm p-0 h-10 w-10 text-xl flex items-center justify-center rounded-lg hover:bg-base-300/50"
-                                title={emoji.name}
-                                onclick={() => selectEmoji(emoji.char, emoji.name)}
-                            >
-                                {emoji.char}
-                            </button>
-                        {/each}
-                    </div>
-                    {#if filteredEmojis.length === 0}
-                        <p class="text-center text-base-content/40 py-8 text-sm">No emoji found</p>
-                    {/if}
-                {:else}
-                    <!-- Categorized emoji grid -->
-                    {#each filteredCategories as category (category.label)}
-                        <div class="mb-3">
-                            <h4
-                                class="text-xs font-semibold text-base-content/50 mb-1.5 uppercase tracking-wider"
-                            >
-                                {category.label}
-                            </h4>
-                            <div class="grid grid-cols-8 sm:grid-cols-10 gap-1">
-                                {#each category.emojis as emoji}
-                                    <button
-                                        class="btn btn-ghost btn-sm p-0 h-10 w-10 text-xl flex items-center justify-center rounded-lg hover:bg-base-300/50"
-                                        title={emoji.name}
-                                        onclick={() => selectEmoji(emoji.char, emoji.name)}
-                                    >
-                                        {emoji.char}
-                                    </button>
-                                {/each}
-                            </div>
-                        </div>
-                    {/each}
-                {/if}
+                {@render drawEmojiGrid(isFiltered)}
             {:else}
                 <!-- Sticker Pack Grid -->
                 {@const packIndex = activeTab - 1}
                 {@const activePack = stickerStore.packs[packIndex]}
+
                 {#if activePack}
-                    {#if searchQuery}
-                        <div class="grid grid-cols-4 sm:grid-cols-5 gap-2">
-                            {#each filteredPackStickers.filter((s) => s.packId === activePack.id) as entry (entry.sticker.id)}
-                                {@render drawSticker(entry.sticker)}
-                            {/each}
-                        </div>
-                        {#if filteredPackStickers.length === 0}
-                            <p class="text-center text-base-content/40 py-8 text-sm">
-                                No stickers found
-                            </p>
-                        {/if}
-                    {:else}
-                        <div class="grid grid-cols-4 sm:grid-cols-5 gap-2">
-                            {#each activePack.stickers as sticker (sticker.id)}
-                                <button
-                                    class="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-base-300/40 transition-colors"
-                                    title={sticker.name}
-                                    onclick={() => selectPackSticker(sticker, activePack.id)}
-                                >
-                                    {@render drawSticker(sticker)}
-                                    <span
-                                        class="text-[10px] text-base-content/60 truncate w-full text-center leading-tight"
-                                    >
-                                        {sticker.name}
-                                    </span>
-                                </button>
-                            {/each}
-                        </div>
-                        {#if activePack.stickers.length === 0}
-                            <p class="text-center text-base-content/40 py-8 text-sm">
-                                This pack is empty — add stickers in the manager.
-                            </p>
-                        {/if}
-                    {/if}
+                    {@render drawStickerPackGrid(isFiltered, activePack)}
                 {/if}
             {/if}
         </div>

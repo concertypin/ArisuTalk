@@ -44,6 +44,7 @@
         "sv-agentation": "^0.4.0",
         "svelte": "^5.55.5",
         "svelte-clerk": "^1.1.10",
+        "unicode-emoji-json": "^0.9.0",
         "zod": "^4.4.2"
     },
     "devDependencies": {
