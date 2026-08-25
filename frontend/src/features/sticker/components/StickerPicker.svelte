@@ -343,6 +343,18 @@ Emits `onSelect` with the chosen Sticker object.
     );
 </script>
 
+{#snippet drawSticker(sticker: Sticker)}
+    {#if sticker.emoji}
+        <span class="text-3xl">{sticker.emoji}</span>
+    {:else if sticker.imageUrl}
+        <img src={sticker.imageUrl} alt={sticker.name} class="w-12 h-12 object-contain rounded" />
+    {:else}
+        <span class="w-12 h-12 flex items-center justify-center text-base-content/30 text-xs">
+            No preview
+        </span>
+    {/if}
+{/snippet}
+
 <dialog
     bind:this={dialog}
     class="modal"
@@ -420,7 +432,7 @@ Emits `onSelect` with the chosen Sticker object.
                 {#if searchQuery}
                     <!-- Search results -->
                     <div class="grid grid-cols-8 sm:grid-cols-10 gap-1">
-                        {#each filteredEmojis as emoji (emoji.char)}
+                        {#each filteredEmojis as emoji}
                             <button
                                 class="btn btn-ghost btn-sm p-0 h-10 w-10 text-xl flex items-center justify-center rounded-lg hover:bg-base-300/50"
                                 title={emoji.name}
@@ -443,7 +455,7 @@ Emits `onSelect` with the chosen Sticker object.
                                 {category.label}
                             </h4>
                             <div class="grid grid-cols-8 sm:grid-cols-10 gap-1">
-                                {#each category.emojis as emoji (emoji.char)}
+                                {#each category.emojis as emoji}
                                     <button
                                         class="btn btn-ghost btn-sm p-0 h-10 w-10 text-xl flex items-center justify-center rounded-lg hover:bg-base-300/50"
                                         title={emoji.name}
@@ -464,32 +476,7 @@ Emits `onSelect` with the chosen Sticker object.
                     {#if searchQuery}
                         <div class="grid grid-cols-4 sm:grid-cols-5 gap-2">
                             {#each filteredPackStickers.filter((s) => s.packId === activePack.id) as entry (entry.sticker.id)}
-                                <button
-                                    class="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-base-300/40 transition-colors"
-                                    title={entry.sticker.name}
-                                    onclick={() => selectPackSticker(entry.sticker, entry.packId)}
-                                >
-                                    {#if entry.sticker.emoji}
-                                        <span class="text-3xl">{entry.sticker.emoji}</span>
-                                    {:else if entry.sticker.imageUrl}
-                                        <img
-                                            src={entry.sticker.imageUrl}
-                                            alt={entry.sticker.name}
-                                            class="w-12 h-12 object-contain rounded"
-                                        />
-                                    {:else}
-                                        <span
-                                            class="w-12 h-12 flex items-center justify-center text-base-content/30 text-xs"
-                                        >
-                                            No preview
-                                        </span>
-                                    {/if}
-                                    <span
-                                        class="text-[10px] text-base-content/60 truncate w-full text-center leading-tight"
-                                    >
-                                        {entry.sticker.name}
-                                    </span>
-                                </button>
+                                {@render drawSticker(entry.sticker)}
                             {/each}
                         </div>
                         {#if filteredPackStickers.length === 0}
@@ -505,21 +492,7 @@ Emits `onSelect` with the chosen Sticker object.
                                     title={sticker.name}
                                     onclick={() => selectPackSticker(sticker, activePack.id)}
                                 >
-                                    {#if sticker.emoji}
-                                        <span class="text-3xl">{sticker.emoji}</span>
-                                    {:else if sticker.imageUrl}
-                                        <img
-                                            src={sticker.imageUrl}
-                                            alt={sticker.name}
-                                            class="w-12 h-12 object-contain rounded"
-                                        />
-                                    {:else}
-                                        <span
-                                            class="w-12 h-12 flex items-center justify-center text-base-content/30 text-xs"
-                                        >
-                                            No preview
-                                        </span>
-                                    {/if}
+                                    {@render drawSticker(sticker)}
                                     <span
                                         class="text-[10px] text-base-content/60 truncate w-full text-center leading-tight"
                                     >
