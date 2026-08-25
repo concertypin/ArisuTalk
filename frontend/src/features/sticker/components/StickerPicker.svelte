@@ -38,6 +38,7 @@ Emits `onSelect` with the chosen Sticker object.
     import EmojiIcon from "phosphor-svelte/lib/SmileyIcon";
     import XIcon from "phosphor-svelte/lib/XIcon";
     import MagnifyingGlassIcon from "phosphor-svelte/lib/MagnifyingGlassIcon";
+    import { Logger } from "@common/logger/Logger";
 
     interface Props {
         /** Callback invoked when a sticker or emoji is selected. */
@@ -95,7 +96,14 @@ Emits `onSelect` with the chosen Sticker object.
     let groupedEmojis: EmojiGroup[] = $state([]);
 
     $effect(() => {
-        loadBuiltinEmojis().then((data) => (groupedEmojis = data));
+        loadBuiltinEmojis()
+            .then((data) => {
+                groupedEmojis = data;
+            })
+            .catch((e) => {
+                Logger.error("Failed to load emojis: ", e);
+                return null;
+            });
     });
 
     /** Flattened emoji items for search. */
@@ -163,7 +171,7 @@ Emits `onSelect` with the chosen Sticker object.
     onSelect: (emojiChar: string, emojiName: string) => void
 )}
     <div class="grid grid-cols-8 sm:grid-cols-10 gap-1">
-        {#each emojis as c}
+        {#each emojis as c (c.slug)}
             <button
                 class="btn btn-ghost btn-sm p-0 h-10 w-10 text-xl flex items-center justify-center rounded-lg hover:bg-base-300/50"
                 title={c.slug}
