@@ -430,24 +430,24 @@ importing emoji or uploading custom images, and reordering stickers.
                         <div class="form-control mb-3">
                             <label class="label py-1">
                                 <span class="label-text text-sm">Pack Name</span>
+                                <input
+                                    type="text"
+                                    class="input input-bordered input-sm"
+                                    placeholder="e.g. Cute Reactions"
+                                    bind:value={editName}
+                                />
                             </label>
-                            <input
-                                type="text"
-                                class="input input-bordered input-sm"
-                                placeholder="e.g. Cute Reactions"
-                                bind:value={editName}
-                            />
                         </div>
                         <div class="form-control mb-4">
                             <label class="label py-1">
                                 <span class="label-text text-sm">Description (optional)</span>
+                                <input
+                                    type="text"
+                                    class="input input-bordered input-sm"
+                                    placeholder="What's this pack about?"
+                                    bind:value={editDescription}
+                                />
                             </label>
-                            <input
-                                type="text"
-                                class="input input-bordered input-sm"
-                                placeholder="What's this pack about?"
-                                bind:value={editDescription}
-                            />
                         </div>
                         <div class="flex gap-2">
                             <button
