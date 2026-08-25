@@ -1,4 +1,4 @@
-<script module lang="ts">
+<script lang="ts" module>
     type EmojiClass = {
         emoji: string;
         skin_tone_support: boolean;
