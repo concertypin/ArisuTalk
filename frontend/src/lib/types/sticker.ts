@@ -18,7 +18,6 @@ export interface Sticker {
     name: string;
     /** Emoji character used when `source` is `'emoji'`. */
     emoji?: string;
-    /** URL to the sticker image (for `upload` or `generated` sources). */
     /** Origin of the sticker visual data. */
     source: StickerSource;
     /**
@@ -26,6 +25,9 @@ export interface Sticker {
      * Contents depend on `source`.
      */
     data?: string;
+    // FIXME: Added to align with existing file comments and fix type errors.
+    /** URL to the sticker image (for `upload` or `generated` sources). */
+    imageUrl?: string;
 }
 
 /**
