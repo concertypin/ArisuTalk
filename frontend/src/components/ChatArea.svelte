@@ -169,15 +169,16 @@
             </div>
         {:else}
             {#each messages as msg (msg.id)}
+                {@const isEditing = editingMessageId === msg.id}
                 <div class="chat group {msg.role === 'user' ? 'chat-end' : 'chat-start'}">
                     <div
                         class="chat-bubble {msg.role === 'user'
                             ? 'chat-bubble-primary'
                             : 'chat-bubble-neutral'}"
                     >
-                        {#if editingMessageId === msg.id}
+                        {#if isEditing}
                             <textarea
-                                class="textarea textarea-bordered w-full min-h-16"
+                                class="textarea textarea-bordered w-full min-h-16 text-base-content bg-base-100"
                                 bind:value={editContent}
                                 onkeydown={handleEditKeydown}
                             ></textarea>
@@ -190,7 +191,7 @@
                             </span>
                             <MessageActions
                                 message={msg}
-                                isEditing={editingMessageId === msg.id}
+                                {isEditing}
                                 onEdit={() => startEdit(msg.id, getMessageText(msg))}
                                 onDelete={() => void handleDelete(msg.id)}
                                 onRegenerate={() => void handleRegenerate(msg.id)}
