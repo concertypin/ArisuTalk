@@ -169,8 +169,8 @@ Emits `onSelect` with the chosen Sticker object.
         {#each emojis as c}
             <button
                 class="btn btn-ghost btn-sm p-0 h-10 w-10 text-xl flex items-center justify-center rounded-lg hover:bg-base-300/50"
-                title={c.name}
-                onclick={() => onSelect(c.emoji, c.name)}
+                title={c.slug}
+                onclick={() => onSelect(c.emoji, c.slug)}
             >
                 {c.emoji}
             </button>
