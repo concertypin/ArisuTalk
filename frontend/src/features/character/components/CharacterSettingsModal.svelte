@@ -253,10 +253,7 @@
                             onChange={handleCharacterChange}
                         />
                     {:else if activeTab === "magic"}
-                        <CharacterMagicSettings
-                            character={editingCharacter}
-                            onChange={handleCharacterChange}
-                        />
+                        <CharacterMagicSettings character={editingCharacter} />
                     {:else if activeTab === "advanced"}
                         <CharacterHooksSettings
                             character={editingCharacter}

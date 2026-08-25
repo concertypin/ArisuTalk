@@ -169,7 +169,7 @@
                     </div>
                     <button
                         class="btn btn-ghost btn-xs btn-square shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onclick={() => void handleBranchFromMessage(node.id)}
+                        onclick={() => void handleBranchFromMessage()}
                         aria-label="Branch from this message"
                         title="Branch from this message"
                     >
