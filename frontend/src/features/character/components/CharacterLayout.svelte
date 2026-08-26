@@ -2,26 +2,37 @@
     import CharacterSidebar from "./CharacterSidebar.svelte";
     import CharacterForm from "./CharacterForm.svelte";
     import CharacterSettingsModal from "./CharacterSettingsModal.svelte";
-    import ChatList from "@/features/chat/components/ChatList.svelte";
-    import PersonaList from "@/features/persona/components/PersonaList.svelte";
-    import PersonaForm from "@/features/persona/components/PersonaForm.svelte";
-    import type { Persona } from "@/features/persona/schema";
-    import { characterStore } from "@/features/character/stores/characterStore.svelte";
+    import ChatList from "../../chat/components/ChatList.svelte";
+    import GroupChatManager from "../../chat/components/GroupChatManager.svelte";
+    import PersonaList from "../../persona/components/PersonaList.svelte";
+    import PersonaForm from "../../persona/components/PersonaForm.svelte";
+    import type { Persona } from "../../persona/schema";
+    import { characterStore } from "../stores/characterStore.svelte";
+    import { chatStore } from "../../chat/stores/chatStore.svelte";
     import { uiState } from "@/lib/stores/ui.svelte";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import { Logger } from "@common/logger/Logger";
+    import type { Snippet } from "svelte";
 
     type Props = {
-        children?: import("svelte").Snippet;
+        children?: Snippet;
     };
 
-    const { children }: Props = $props();
+    let { children }: Props = $props();
 
     let selectedCharacterId = $state<string | null>(null);
     let dialog = $state<HTMLDialogElement>();
     let personaDialog = $state<HTMLDialogElement>();
+    let groupChatDialog = $state<HTMLDialogElement>();
 
     // Character UI State
+    let editingIndex = $state<number | null>(null);
+    let editingCharacter = $derived(
+        editingIndex !== null ? characterStore.characters[editingIndex] : undefined
+    );
+
+    // Group chat creation state
+    let groupChatSelectedIds = $state<string[]>([]);
 
     // Persona UI State
     let editingPersona = $state<Persona | undefined>(undefined);
@@ -32,6 +43,7 @@
     }
 
     function handleAdd() {
+        editingIndex = null;
         dialog?.showModal();
         Logger.structured("modal.open", {
             location: "characterLayout",
@@ -39,8 +51,43 @@
         });
     }
 
+    function handleGroupChat() {
+        groupChatSelectedIds = [];
+        groupChatDialog?.showModal();
+    }
+
+    async function handleCreateGroupChat() {
+        if (groupChatSelectedIds.length === 0) return;
+        const primaryId = groupChatSelectedIds[0];
+        const participantIds = groupChatSelectedIds.slice(1);
+        const title = `Group Chat (${groupChatSelectedIds.length})`;
+        const id = await chatStore.createChat(primaryId, title, "group", participantIds);
+        selectedCharacterId = primaryId;
+        void chatStore.setActiveChat(id);
+        groupChatDialog?.close();
+        Logger.structured("chat.session.start", {
+            chatId: id,
+            characterId: primaryId,
+            chatType: "group",
+            participantCount: participantIds.length,
+        });
+    }
+
+    function toggleGroupChatCharacter(characterId: string) {
+        const index = groupChatSelectedIds.indexOf(characterId);
+        if (index !== -1) {
+            groupChatSelectedIds.splice(index, 1);
+        } else {
+            groupChatSelectedIds.push(characterId);
+        }
+    }
+
     async function handleFormSubmit(char: Character) {
-        await characterStore.add(char);
+        if (editingIndex !== null) {
+            await characterStore.update(editingIndex, char);
+        } else {
+            await characterStore.add(char);
+        }
         dialog?.close();
         Logger.structured("modal.close", {
             location: "characterLayout",
@@ -108,12 +155,18 @@
                     <p class="text-base-content/60 text-lg">
                         Select a character from the sidebar to start chatting
                     </p>
-                    <div class="flex flex-wrap justify-center gap-3 mt-6">
+                    <div class="flex flex-nowrap justify-center gap-3 mt-6">
                         <button class="btn btn-primary gap-2" onclick={handleAdd}>
                             <span class="text-lg">+</span> Create Character
                         </button>
                         <button class="btn btn-ghost gap-2" onclick={handlePersona}>
                             Manage Personas
+                        </button>
+                        <button
+                            class="btn btn-outline btn-secondary gap-2"
+                            onclick={handleGroupChat}
+                        >
+                            Create Group Chat
                         </button>
                     </div>
                     <p class="text-sm text-base-content/40 mt-8">
@@ -130,6 +183,7 @@
     <dialog bind:this={dialog} id="character_form_modal" class="modal">
         <div class="modal-box p-0 border border-base-300 shadow-2xl">
             <CharacterForm
+                character={editingCharacter}
                 onSubmit={handleFormSubmit}
                 onSave={() => dialog?.close()}
                 onCancel={() => dialog?.close()}
@@ -143,7 +197,7 @@
     <!-- Persona Modal -->
     <dialog bind:this={personaDialog} id="persona_modal" class="modal">
         <div
-            class="modal-box w-11/12 max-w-2xl min-h-[500px] flex flex-col border border-base-300 shadow-2xl"
+            class="modal-box w-11/12 max-w-2xl min-h-125 flex flex-col border border-base-300 shadow-2xl"
         >
             <h3 class="font-bold text-lg mb-4">Manage Personas</h3>
 
@@ -177,6 +231,20 @@
         </form>
     </dialog>
 
+    <!-- Group Chat Modal -->
+    <dialog bind:this={groupChatDialog} id="group_chat_modal" class="modal">
+        <div class="modal-box w-11/12 max-w-xl border border-base-300 shadow-2xl">
+            <GroupChatManager
+                selectedIds={groupChatSelectedIds}
+                onToggle={toggleGroupChatCharacter}
+                onCreate={handleCreateGroupChat}
+                onClose={() => groupChatDialog?.close()}
+            />
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    </dialog>
     <!-- Character Settings Modal -->
     {#if uiState.characterSettingsOpen}
         <CharacterSettingsModal />

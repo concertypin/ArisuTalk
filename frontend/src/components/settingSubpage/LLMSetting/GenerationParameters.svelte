@@ -1,41 +1,83 @@
 <script lang="ts">
     import { settings } from "@/lib/stores/settings.svelte";
     import { type LLMConfig } from "@/lib/types/IDataModel";
-    import { GENERATION_DEFAULTS } from "@/const/generationDefaults";
-    import TrashIcon from "phosphor-svelte/lib/TrashIcon";
-    import CheckIcon from "phosphor-svelte/lib/CheckIcon";
-    import PowerIcon from "phosphor-svelte/lib/PowerIcon";
+    import Trash from "phosphor-svelte/lib/TrashIcon";
+    import Check from "phosphor-svelte/lib/CheckIcon";
+    import Power from "phosphor-svelte/lib/PowerIcon";
 
     type Props = {
         config: LLMConfig;
         id: number;
     };
 
-    const { config = $bindable(), id }: Props = $props();
-
-    type OptionalTextFieldKey = "apiKey" | "baseURL" | "model";
+    let { config = $bindable(), id }: Props = $props();
 
     /**
-     * Creates a proxy object to bind a checkbox to an optional text field.
-     * When enabled, empty text is enough to make the input bindable.
-     * @param target The LLM config containing the optional text field.
-     * @param key The text field to bind.
-     * @return A proxy object with a 'checked' property for binding.
+     * Local reactive shadow of the config prop. All template bindings target
+     * this shadow so Svelte's reactive tracking works for nested properties
+     * (avoiding the `binding_property_non_reactive` compile-time warning).
+     *
+     * Two `$effect` blocks keep `localConfig` in lock-step with `config`:
+     *  - The first effect mirrors UI edits back to the parent prop.
+     *  - The second effect (defensive) syncs any external mutation of the
+     *    parent prop into the local shadow. In production the keyed `{#each}`
+     *    in `LLMSettings.svelte` already remounts on array replacement, so
+     *    this effect rarely fires — but it ensures correctness if a caller
+     *    mutates the prop in place.
+     *
+     * Each effect reads + writes individual primitive fields rather than
+     * replacing whole objects, so Svelte 5's `===` equality check prevents
+     * the two effects from triggering each other in a loop.
      */
-    function createOptionalTextFieldProxy(target: LLMConfig, key: OptionalTextFieldKey) {
-        return {
-            get checked() {
-                return target[key] !== undefined;
-            },
-            set checked(v: boolean) {
-                if (v) {
-                    target[key] ??= "";
-                } else {
-                    delete target[key];
-                }
-            },
-        };
-    }
+    let localConfig = $state(structuredClone($state.snapshot(config)));
+
+    // Local → parent: persists UI edits back to the parent prop.
+    $effect(() => {
+        config.name = localConfig.name;
+        config.enabled = localConfig.enabled;
+        config.provider = localConfig.provider;
+
+        if (localConfig.model !== undefined) config.model = localConfig.model;
+        else delete config.model;
+        if (localConfig.apiKey !== undefined) config.apiKey = localConfig.apiKey;
+        else delete config.apiKey;
+        if (localConfig.baseURL !== undefined) config.baseURL = localConfig.baseURL;
+        else delete config.baseURL;
+
+        config.generationParameters.temperature = localConfig.generationParameters.temperature;
+        config.generationParameters.maxInputTokens =
+            localConfig.generationParameters.maxInputTokens;
+        config.generationParameters.maxOutputTokens =
+            localConfig.generationParameters.maxOutputTokens;
+        config.generationParameters.topP = localConfig.generationParameters.topP;
+        config.generationParameters.topK = localConfig.generationParameters.topK;
+        config.generationParameters.frequencyPenalty =
+            localConfig.generationParameters.frequencyPenalty;
+        config.generationParameters.presencePenalty =
+            localConfig.generationParameters.presencePenalty;
+    });
+
+    // Parent → local: catches external mutations of the parent prop.
+    $effect(() => {
+        localConfig.name = config.name;
+        localConfig.enabled = config.enabled;
+        localConfig.provider = config.provider;
+        localConfig.model = config.model;
+        localConfig.apiKey = config.apiKey;
+        localConfig.baseURL = config.baseURL;
+
+        localConfig.generationParameters.temperature = config.generationParameters.temperature;
+        localConfig.generationParameters.maxInputTokens =
+            config.generationParameters.maxInputTokens;
+        localConfig.generationParameters.maxOutputTokens =
+            config.generationParameters.maxOutputTokens;
+        localConfig.generationParameters.topP = config.generationParameters.topP;
+        localConfig.generationParameters.topK = config.generationParameters.topK;
+        localConfig.generationParameters.frequencyPenalty =
+            config.generationParameters.frequencyPenalty;
+        localConfig.generationParameters.presencePenalty =
+            config.generationParameters.presencePenalty;
+    });
 
     /**
      * Creates a proxy object to bind a checkbox to the presence of a field in a target object.
@@ -49,7 +91,7 @@
     function createFieldProxy<T extends Record<string, unknown>, K extends keyof T>(
         target: T,
         key: K,
-        defaultValue: Exclude<T[K], undefined>
+        defaultValue: T[K]
     ) {
         return {
             get checked() {
@@ -57,9 +99,7 @@
             },
             set checked(v: boolean) {
                 if (v) {
-                    if (target[key] === undefined) {
-                        target[key] = defaultValue;
-                    }
+                    target[key] = target[key] ?? defaultValue;
                 } else {
                     delete target[key];
                 }
@@ -77,51 +117,27 @@
         settings.value.activeLLMConfigId = config.id;
     }
 
-    const isActive = $derived(settings.value.activeLLMConfigId === config.id);
+    let isActive = $derived(settings.value.activeLLMConfigId === config.id);
 
-    const modelProxy = $derived(createOptionalTextFieldProxy(config, "model"));
-    const keyProxy = $derived(createOptionalTextFieldProxy(config, "apiKey"));
-    const urlProxy = $derived(createOptionalTextFieldProxy(config, "baseURL"));
+    const modelProxy = $derived(createFieldProxy(localConfig, "model", ""));
+    const keyProxy = $derived(createFieldProxy(localConfig, "apiKey", ""));
+    const urlProxy = $derived(createFieldProxy(localConfig, "baseURL", ""));
     const tempProxy = $derived(
-        createFieldProxy(
-            config.generationParameters,
-            "temperature",
-            GENERATION_DEFAULTS.temperature
-        )
+        createFieldProxy(localConfig.generationParameters, "temperature", 1)
     );
     const maxInProxy = $derived(
-        createFieldProxy(
-            config.generationParameters,
-            "maxInputTokens",
-            GENERATION_DEFAULTS.maxInputTokens
-        )
+        createFieldProxy(localConfig.generationParameters, "maxInputTokens", 1024)
     );
     const maxOutProxy = $derived(
-        createFieldProxy(
-            config.generationParameters,
-            "maxOutputTokens",
-            GENERATION_DEFAULTS.maxOutputTokens
-        )
+        createFieldProxy(localConfig.generationParameters, "maxOutputTokens", 1024)
     );
-    const topPProxy = $derived(
-        createFieldProxy(config.generationParameters, "topP", GENERATION_DEFAULTS.topP)
-    );
-    const topKProxy = $derived(
-        createFieldProxy(config.generationParameters, "topK", GENERATION_DEFAULTS.topK)
-    );
+    const topPProxy = $derived(createFieldProxy(localConfig.generationParameters, "topP", 0.95));
+    const topKProxy = $derived(createFieldProxy(localConfig.generationParameters, "topK", 40));
     const freqPenProxy = $derived(
-        createFieldProxy(
-            config.generationParameters,
-            "frequencyPenalty",
-            GENERATION_DEFAULTS.frequencyPenalty
-        )
+        createFieldProxy(localConfig.generationParameters, "frequencyPenalty", 0)
     );
     const presPenProxy = $derived(
-        createFieldProxy(
-            config.generationParameters,
-            "presencePenalty",
-            GENERATION_DEFAULTS.presencePenalty
-        )
+        createFieldProxy(localConfig.generationParameters, "presencePenalty", 0)
     );
 </script>
 
@@ -132,7 +148,7 @@
                 <input
                     type="text"
                     class="input input-sm input-bordered w-full font-bold"
-                    bind:value={config.name}
+                    bind:value={localConfig.name}
                 />
                 {#if isActive}
                     <span class="badge badge-primary badge-sm">Active</span>
@@ -142,27 +158,27 @@
                 <label class="swap swap-rotate btn btn-ghost btn-xs" title="Enable/Disable">
                     <input
                         type="checkbox"
-                        bind:checked={config.enabled}
+                        bind:checked={localConfig.enabled}
                         aria-label="Toggle enabled"
                     />
-                    <PowerIcon size={16} class="swap-on text-success" />
-                    <PowerIcon size={16} class="swap-off text-base-content/30" />
+                    <Power size={16} class="swap-on text-success" />
+                    <Power size={16} class="swap-off text-base-content/30" />
                 </label>
                 <button
                     class="btn btn-ghost btn-xs"
                     onclick={setAsActive}
-                    disabled={isActive || !config.enabled}
+                    disabled={isActive || !localConfig.enabled}
                     title="Use this config"
                     aria-label="Use this config"
                 >
-                    <CheckIcon size={16} class={isActive ? "text-primary" : ""} />
+                    <Check size={16} class={isActive ? "text-primary" : ""} />
                 </button>
                 <button
                     class="btn btn-ghost btn-xs text-error"
                     onclick={removeLLMConfig}
                     aria-label="Delete config"
                 >
-                    <TrashIcon size={16} />
+                    <Trash size={16} />
                 </button>
             </div>
         </div>
@@ -175,17 +191,17 @@
                 <select
                     id={"provider-" + id}
                     class="select select-bordered select-sm"
-                    bind:value={config.provider}
+                    bind:value={localConfig.provider}
                 >
                     <option value="OpenAI">OpenAI</option>
                     <option value="OpenAI-compatible">OpenAI-compatible</option>
                     <option value="Anthropic">Anthropic</option>
                     <option value="Gemini">Gemini</option>
+                    <option value="Grok">Grok</option>
                     <option value="OpenRouter">OpenRouter</option>
                     <option value="Mock">Mock</option>
                 </select>
             </div>
-
             <div class="form-control">
                 <label class="label p-1" for={"model-" + id}>
                     <span class="label-text">Model</span>
@@ -199,7 +215,7 @@
                     id={"model-" + id}
                     type="text"
                     class="input input-sm input-bordered"
-                    bind:value={config.model}
+                    bind:value={localConfig.model}
                     disabled={!modelProxy.checked}
                     placeholder="claude-4.5-opus-20251101"
                 />
@@ -218,7 +234,7 @@
                     id={"key-" + id}
                     type="password"
                     class="input input-sm input-bordered"
-                    bind:value={config.apiKey}
+                    bind:value={localConfig.apiKey}
                     disabled={!keyProxy.checked}
                     placeholder="sk-..."
                 />
@@ -237,7 +253,7 @@
                     id={"url-" + id}
                     type="text"
                     class="input input-sm input-bordered"
-                    bind:value={config.baseURL}
+                    bind:value={localConfig.baseURL}
                     disabled={!urlProxy.checked}
                     placeholder="https://..."
                 />
@@ -246,7 +262,7 @@
             <div class="form-control">
                 <label class="label p-1">
                     <span class="label-text"
-                        >Temperature ({config.generationParameters.temperature ?? "Off"})</span
+                        >Temperature ({localConfig.generationParameters.temperature ?? "Off"})</span
                     >
                     <input
                         type="checkbox"
@@ -261,7 +277,7 @@
                         max="2"
                         step="0.05"
                         class="range range-xs range-primary mt-2"
-                        bind:value={config.generationParameters.temperature}
+                        bind:value={localConfig.generationParameters.temperature}
                         aria-label="Temperature value"
                     />
                 {:else}
@@ -281,7 +297,7 @@
                 <input
                     type="number"
                     class="input input-sm input-bordered"
-                    bind:value={config.generationParameters.maxInputTokens}
+                    bind:value={localConfig.generationParameters.maxInputTokens}
                     disabled={!maxInProxy.checked}
                     placeholder="1024"
                     aria-label="Max Input Tokens value"
@@ -300,7 +316,7 @@
                 <input
                     type="number"
                     class="input input-sm input-bordered"
-                    bind:value={config.generationParameters.maxOutputTokens}
+                    bind:value={localConfig.generationParameters.maxOutputTokens}
                     disabled={!maxOutProxy.checked}
                     placeholder="1024"
                     aria-label="Max Output Tokens value"
@@ -316,7 +332,7 @@
                     <div class="form-control">
                         <label class="label p-1">
                             <span class="label-text"
-                                >Top P ({config.generationParameters.topP ?? "Off"})</span
+                                >Top P ({localConfig.generationParameters.topP ?? "Off"})</span
                             >
                             <input
                                 type="checkbox"
@@ -331,7 +347,7 @@
                                 max="1"
                                 step="0.01"
                                 class="range range-xs range-primary mt-2"
-                                bind:value={config.generationParameters.topP}
+                                bind:value={localConfig.generationParameters.topP}
                                 aria-label="Top P value"
                             />
                         {:else}
@@ -351,7 +367,7 @@
                         <input
                             type="number"
                             class="input input-sm input-bordered"
-                            bind:value={config.generationParameters.topK}
+                            bind:value={localConfig.generationParameters.topK}
                             disabled={!topKProxy.checked}
                             placeholder="40"
                             aria-label="Top K value"
@@ -361,8 +377,8 @@
                     <div class="form-control">
                         <label class="label p-1">
                             <span class="label-text"
-                                >Frequency Penalty ({config.generationParameters.frequencyPenalty ??
-                                    "Off"})</span
+                                >Frequency Penalty ({localConfig.generationParameters
+                                    .frequencyPenalty ?? "Off"})</span
                             >
                             <input
                                 type="checkbox"
@@ -377,7 +393,7 @@
                                 max="2"
                                 step="0.1"
                                 class="range range-xs range-primary mt-2"
-                                bind:value={config.generationParameters.frequencyPenalty}
+                                bind:value={localConfig.generationParameters.frequencyPenalty}
                                 aria-label="Frequency Penalty value"
                             />
                         {:else}
@@ -388,8 +404,8 @@
                     <div class="form-control">
                         <label class="label p-1">
                             <span class="label-text"
-                                >Presence Penalty ({config.generationParameters.presencePenalty ??
-                                    "Off"})</span
+                                >Presence Penalty ({localConfig.generationParameters
+                                    .presencePenalty ?? "Off"})</span
                             >
                             <input
                                 type="checkbox"
@@ -404,7 +420,7 @@
                                 max="2"
                                 step="0.1"
                                 class="range range-xs range-primary mt-2"
-                                bind:value={config.generationParameters.presencePenalty}
+                                bind:value={localConfig.generationParameters.presencePenalty}
                                 aria-label="Presence Penalty value"
                             />
                         {:else}

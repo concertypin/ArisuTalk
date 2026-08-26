@@ -21,7 +21,7 @@ class TestProvider extends LangChainBaseProvider<"MOCK"> {
     }
 }
 
-describe("LangChainBaseProvider", () => {
+describe.concurrent("LangChainBaseProvider", () => {
     beforeEach(() => {
         vi.spyOn(Logger, "structured").mockImplementation(() => {});
     });

@@ -32,8 +32,8 @@ function createMockArray(): MockIdentifiable[] {
     ];
 }
 
-describe("characterState utilities", () => {
-    describe("withCharacter", () => {
+describe.concurrent("characterState utilities", () => {
+    describe.concurrent("withCharacter", () => {
         it("creates a deep clone and applies mutations", () => {
             const original = createMockCharacter({ name: "Original" });
             const updated = withCharacter(original, (draft) => {
@@ -81,7 +81,7 @@ describe("characterState utilities", () => {
         });
     });
 
-    describe("updateArrayItem", () => {
+    describe.concurrent("updateArrayItem", () => {
         it("updates an item by id with shallow merge", () => {
             const arr = createMockArray();
             const result = updateArrayItem(arr, "2", { name: "Updated" });
@@ -122,7 +122,7 @@ describe("characterState utilities", () => {
         });
     });
 
-    describe("removeArrayItem", () => {
+    describe.concurrent("removeArrayItem", () => {
         it("removes an item by id", () => {
             const arr = createMockArray();
             const result = removeArrayItem(arr, "2");
@@ -151,7 +151,7 @@ describe("characterState utilities", () => {
         });
     });
 
-    describe("replaceArrayItem", () => {
+    describe.concurrent("replaceArrayItem", () => {
         it("replaces an item at the specified index", () => {
             const arr = createMockArray();
             const newItem: MockIdentifiable = { id: "99", name: "New", value: 99 };
@@ -186,7 +186,7 @@ describe("characterState utilities", () => {
         });
     });
 
-    describe("moveArrayItem", () => {
+    describe.concurrent("moveArrayItem", () => {
         it("moves an item from one index to another", () => {
             const arr = createMockArray();
             const result = moveArrayItem(arr, 0, 2);
@@ -231,7 +231,7 @@ describe("characterState utilities", () => {
         });
     });
 
-    describe("appendArrayItem", () => {
+    describe.concurrent("appendArrayItem", () => {
         it("appends an item to the end of the array", () => {
             const arr = createMockArray();
             const newItem: MockIdentifiable = { id: "4", name: "Fourth", value: 40 };

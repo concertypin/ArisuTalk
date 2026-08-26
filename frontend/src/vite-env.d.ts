@@ -17,6 +17,10 @@ interface ImportMetaEnv {
      * The version url of the app.
      */
     readonly VITE_VERSION_URL: string;
+    /**
+     * Backend phonebook API base URL.
+     */
+    readonly VITE_PHONEBOOK_BASE_URL?: string;
 
     // Vitest environment variable
     /**
@@ -28,6 +32,14 @@ interface ImportMetaEnv {
      * "false" on non-testing or node mode.
      */
     readonly VITEST_BROWSER_MODE: "true" | "false";
+    /**
+     * Git commit hash injected at build time.
+     */
+    readonly VITE_COMMIT_HASH?: string;
+    /**
+     * Clerk publishable key for authentication.
+     */
+    readonly VITE_CLERK_PUBLISHABLE_KEY?: string;
 }
 
 interface ImportMeta {
@@ -39,7 +51,5 @@ interface SharedArrayBuffer {
     readonly [Symbol.toStringTag]: "SharedArrayBuffer";
 }
 type ArrayBufferLike = ArrayBuffer;
-
-// lib.dom.d.ts declared as var
-// oxlint-disable-next-line no-var
+// eslint-disable-next-line no-var
 declare var SharedArrayBuffer: never;

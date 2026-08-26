@@ -1,38 +1,63 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { parseMagicPatterns, type MagicPatternContext } from "@/lib/parsers/magicPatternParser";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
 
-describe("magicPatternParser", () => {
+// Mock the scripting worker
+const mockExecute = vi.fn();
+vi.mock("@/lib/workers/workerClient", () => ({
+    getScriptingWorker: vi.fn(() =>
+        Promise.resolve({
+            execute: mockExecute,
+            setLogReceiver: vi.fn(),
+            terminate: vi.fn(),
+            disabled: false,
+        })
+    ),
+}));
+
+describe.concurrent("magicPatternParser", () => {
     const mockContext: MagicPatternContext = {
-        character: {} as Character,
+        character: {
+            id: "char-1",
+            name: "Test Character",
+            specVersion: 0,
+            description: "A test character",
+            assets: { assets: [] },
+            prompt: {
+                description: "",
+                lorebook: { config: {}, data: [] },
+            },
+            executables: {
+                runtimeSetting: { timeout: 30000 },
+                replaceHooks: { display: [], input: [], output: [], request: [] },
+            },
+            metadata: { license: "" },
+        } satisfies Character,
         persona: { name: "Test User" },
-        chat: vi.fn(),
+        chat: () => [],
     };
+
+    beforeEach(() => {
+        vi.resetAllMocks();
+    });
 
     it("returns text unchanged if no patterns found", async () => {
         const input = "Hello world";
         const result = await parseMagicPatterns(input, mockContext);
         expect(result).toBe(input);
+        expect(mockExecute).not.toHaveBeenCalled();
     });
 
-    it("logs error and returns text unchanged if pattern found (placeholder behavior)", async () => {
-        const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    it("evaluates pattern and replaces it with result", async () => {
+        mockExecute.mockResolvedValue({
+            result: "test",
+            logs: [],
+        });
+
         const input = "Hello {| return 'test' |} world";
         const result = await parseMagicPatterns(input, mockContext);
 
-        expect(result).toBe(input);
-        // adze logger calls console.error differently in Node vs Browser:
-        // - Node: [" Error     ", "[ArisuTalk] ", "message"]
-        // - Browser: ["%c Error", "CSS styles...", "message"]
-        // So we just verify it was called and check the last argument contains our message
-        expect(consoleSpy).toHaveBeenCalled();
-        const lastCall = consoleSpy.mock.calls[0] as unknown[];
-        const messageArg = lastCall?.find(
-            (arg): arg is string =>
-                typeof arg === "string" && arg.includes("Parser not implemented yet")
-        );
-        expect(messageArg).toBeDefined();
-
-        consoleSpy.mockRestore();
+        expect(result).toBe("Hello test world");
+        expect(mockExecute).toHaveBeenCalled();
     });
 });

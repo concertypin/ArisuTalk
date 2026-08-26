@@ -20,9 +20,9 @@ export async function parseCharacter(rawData: ArrayBuffer): Promise<ParseResult<
             id: result.data.id,
             name: result.data.name,
         });
-        const transferables = result.data.assets.assets.flatMap((i) =>
-            i.data instanceof Uint8Array ? [i.data.buffer] : []
-        );
+        const transferables = result.data.assets.assets
+            .map((i) => i.data)
+            .filter((i) => i instanceof Uint8Array);
         return transfer(
             { success: true, data: result.data } satisfies ParseResult<Character>,
             transferables

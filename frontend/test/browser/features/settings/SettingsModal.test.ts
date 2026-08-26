@@ -58,25 +58,25 @@ describe("SettingsModal Component", () => {
     });
 
     test("switches tabs", async () => {
-        const { getByRole } = render(SettingsModal);
+        const { getByText, getByRole } = render(SettingsModal);
 
         // Initial tab is General
         await expect.element(getByRole("heading", { name: "General Settings" })).toBeVisible();
 
         // Switch to LLM
-        await getByRole("button", { name: "LLM Configuration" }).click();
+        await getByText("Models").click();
         await expect.element(getByRole("heading", { name: "LLM Configuration" })).toBeVisible();
 
         // Switch to Advanced
-        await getByRole("button", { name: "Advanced Settings" }).click();
+        await getByText("Advanced").click();
         await expect.element(getByRole("heading", { name: "Advanced Settings" })).toBeVisible();
         await expect.element(getByRole("combobox")).toBeVisible();
     });
 
     test("adds new LLM config", async () => {
-        const { getByText, getByRole } = render(SettingsModal);
+        const { getByText } = render(SettingsModal);
 
-        await getByRole("button", { name: "LLM Configuration" }).click();
+        await getByText("Models").click();
 
         // Before: no configs
         expect(settings.value.llmConfigs.length).toBe(0);

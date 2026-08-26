@@ -4,6 +4,7 @@ export const LLMProviderSchema = z.enum([
     "OpenAI",
     "Anthropic",
     "Gemini",
+    "Grok",
     "OpenAI-compatible",
     "OpenRouter",
     "Mock",
@@ -132,17 +133,21 @@ export const OpenRouterLLMConfigSchema = BaseLLMConfigSchema.extend({
     provider: z.literal("OpenRouter"),
 });
 
+export const GrokLLMConfigSchema = BaseLLMConfigSchema.extend({
+    provider: z.literal("Grok"),
+});
+
 export const MockLLMConfigSchema = BaseLLMConfigSchema.extend({
     provider: z.literal("Mock"),
     mockDelay: z.number().optional(),
     responses: z.array(z.string()).optional(),
 });
-
 export const LLMConfigSchema = z.discriminatedUnion("provider", [
     OpenAILLMConfigSchema,
     OpenAICompatibleLLMConfigSchema,
     AnthropicLLMConfigSchema,
     GeminiLLMConfigSchema,
+    GrokLLMConfigSchema,
     OpenRouterLLMConfigSchema,
     MockLLMConfigSchema,
 ] as const satisfies Array<
@@ -154,6 +159,10 @@ export const LLMConfigSchema = z.discriminatedUnion("provider", [
 /**
  * Configuration for system prompts to guide assistant behavior.
  * ChatML format. All prompts are required.
+ *
+ * Sections can be individually enabled/disabled and reordered via
+ * `promptSections`. When a section is disabled, it is omitted from
+ * the assembled system prompt sent to the LLM.
  */
 export const PromptConfigSchema = z
     .object({
@@ -161,6 +170,20 @@ export const PromptConfigSchema = z
          * The general prompt to guide the behavior of the assistant.
          */
         generationPrompt: z.string().default("You are a helpful assistant."),
+        /**
+         * Controls which prompt sections are included and their order
+         * in the assembled system prompt.
+         * Each entry: { key, enabled }.
+         * Missing keys default to enabled.
+         */
+        promptSections: z
+            .array(
+                z.object({
+                    key: z.enum(["system", "character", "persona", "lore"]),
+                    enabled: z.boolean(),
+                })
+            )
+            .optional(),
     })
     .default({
         generationPrompt: "You are a helpful assistant.",
@@ -235,3 +258,42 @@ export type LLMProvider = z.infer<typeof LLMProviderSchema>;
 export type LLMGenerationParameters = z.infer<typeof LLMGenerationParametersSchema>;
 export type PromptConfig = z.infer<typeof PromptConfigSchema>;
 export type AdvancedConfig = z.infer<typeof AdvancedConfigSchema>;
+
+/**
+ * Known image generation diffusion models.
+ */
+export const ImageGenModelSchema = z.enum([
+    "nai-diffusion-4",
+    "nai-diffusion-3",
+    "nai-diffusion-2",
+    "nai-diffusion-1",
+    "anime-full",
+    "anime-curated",
+    "furry-v3",
+    "furry-v2",
+    "furry-v1",
+]);
+
+/**
+ * Configuration for image generation.
+ * Stored as a settings block alongside LLM configs.
+ */
+export const ImageGenConfigSchema = z.object({
+    /** API key for image generation service authentication. */
+    apiKey: z.string().min(1, "API key is required"),
+    /** Model name to use for generation. */
+    model: ImageGenModelSchema.default("nai-diffusion-4"),
+    /** Image width in pixels (64–2048, multiples of 64). */
+    width: z.number().int().min(64).max(2048).default(1024),
+    /** Image height in pixels (64–2048, multiples of 64). */
+    height: z.number().int().min(64).max(2048).default(1024),
+    /** Prompt guidance scale (1.0–30.0). Higher = stricter adherence to prompt. */
+    scale: z.number().min(1).max(30).default(7),
+    /** Number of inference steps (1–100). Higher = more detail but slower. */
+    steps: z.number().int().min(1).max(100).default(28),
+    /** Seed for reproducible generation. Undefined = random. */
+    seed: z.number().int().optional(),
+});
+
+export type ImageGenModel = z.infer<typeof ImageGenModelSchema>;
+export type ImageGenConfig = z.infer<typeof ImageGenConfigSchema>;

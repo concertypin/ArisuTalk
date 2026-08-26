@@ -55,12 +55,7 @@ vi.mock("@/lib/providers/chat/OpenRouterChatProvider", () => {
         },
     };
 });
-vi.spyOn(
-    ChatStore.prototype,
-
-    // oxlint-disable-next-line typescript/no-explicit-any
-    "waitForSettings" in ChatStore.prototype ? "waitForSettings" : ("" as any)
-).mockResolvedValue(undefined);
+vi.spyOn(ChatStore.prototype, "waitForSettings").mockResolvedValue(undefined);
 
 describe("ChatStore", () => {
     let store: ChatStore;
@@ -82,6 +77,8 @@ describe("ChatStore", () => {
             getMessages: vi.fn().mockResolvedValue([]),
             updateMessage: vi.fn().mockResolvedValue(undefined),
             deleteMessage: vi.fn().mockResolvedValue(undefined),
+            getChatsByParticipant: vi.fn().mockResolvedValue([]),
+            updateChat: vi.fn().mockResolvedValue(undefined),
         };
 
         // Mock default provider connection
@@ -120,7 +117,12 @@ describe("ChatStore", () => {
 
         const resultId = await store.createChat("char-1", "New Chat");
 
-        expect(mockAdapter.createChat).toHaveBeenCalledWith("char-1", "New Chat");
+        expect(mockAdapter.createChat).toHaveBeenCalledWith(
+            "char-1",
+            "New Chat",
+            "direct",
+            undefined
+        );
         expect(resultId).toBe(newChatId);
         expect(store.chats).toContainEqual(newChat);
 

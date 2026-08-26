@@ -4,30 +4,97 @@
      * Multi-tab modal for editing detailed character preferences.
      * Follows the SettingsModal pattern with autosave functionality.
      */
+    import type { Component } from "svelte";
     import { uiState } from "@/lib/stores/ui.svelte";
     import { characterStore } from "@/features/character/stores/characterStore.svelte";
     import { Logger } from "@common/logger/Logger";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import XIcon from "phosphor-svelte/lib/XIcon";
+    import X from "phosphor-svelte/lib/XIcon";
+
+    // Tab Icons
     import UserIcon from "phosphor-svelte/lib/UserIcon";
     import ChatCircleTextIcon from "phosphor-svelte/lib/ChatCircleTextIcon";
     import BookOpenIcon from "phosphor-svelte/lib/BookOpenIcon";
-    import FileTextIcon from "phosphor-svelte/lib/FileTextIcon";
-    import GearIcon from "phosphor-svelte/lib/GearIcon";
     import ImageIcon from "phosphor-svelte/lib/ImageIcon";
+    import FileTextIcon from "phosphor-svelte/lib/FileTextIcon";
+    import MagicWandIcon from "phosphor-svelte/lib/MagicWandIcon";
+    import GearIcon from "phosphor-svelte/lib/GearIcon";
 
     // Subpage components
     import CharacterBasicSettings from "./settingsSubpage/CharacterBasicSettings.svelte";
     import CharacterPromptSettings from "./settingsSubpage/CharacterPromptSettings.svelte";
     import CharacterLorebookSettings from "./settingsSubpage/CharacterLorebookSettings.svelte";
-    import CharacterMetadataSettings from "./settingsSubpage/CharacterMetadataSettings.svelte";
-    import CharacterHooksSettings from "./settingsSubpage/CharacterHooksSettings.svelte";
     import CharacterAssetsSettings from "./settingsSubpage/CharacterAssetsSettings.svelte";
+    import CharacterMetadataSettings from "./settingsSubpage/CharacterMetadataSettings.svelte";
+    import CharacterMagicSettings from "./settingsSubpage/CharacterMagicSettings.svelte";
+    import CharacterHooksSettings from "./settingsSubpage/CharacterHooksSettings.svelte";
     import { cloneDeep } from "lodash-es";
 
     let dialog = $state<HTMLDialogElement>();
-    type ActiveTab = "basic" | "prompt" | "lorebook" | "assets" | "metadata" | "advanced";
+    type ActiveTab = "basic" | "prompt" | "lorebook" | "assets" | "metadata" | "advanced" | "magic";
     let activeTab = $state<ActiveTab>("basic");
+
+    /** Type definition for a tab configuration */
+    type CharacterSettingsTab = {
+        kind: ActiveTab;
+        label: string;
+        text: string;
+        icon: Component;
+        onclick: () => void;
+    };
+
+    /** Factory function to create a tab object */
+    function defineTab(
+        kind: ActiveTab,
+        label: string,
+        text: string,
+        icon: Component
+    ): CharacterSettingsTab {
+        return {
+            kind,
+            label,
+            text,
+            icon,
+            onclick: () => (activeTab = kind),
+        };
+    }
+
+    /** Declarative tab list for Svelte {#each} iteration */
+    const tabList: CharacterSettingsTab[] = [
+        defineTab("basic", "Basic Settings", "Basic", UserIcon),
+        defineTab("prompt", "Prompt Settings", "Prompt", ChatCircleTextIcon),
+        defineTab("lorebook", "Lorebook Settings", "Lorebook", BookOpenIcon),
+        defineTab("assets", "Assets Settings", "Assets", ImageIcon),
+        defineTab("metadata", "Metadata Settings", "Metadata", FileTextIcon),
+        defineTab("magic", "Magic Patterns", "Magic", MagicWandIcon),
+        defineTab("advanced", "Advanced Settings", "Advanced", GearIcon),
+    ];
+
+    /** Panel component map corresponding to each active tab */
+    const panelList = {
+        ["basic"]: {
+            component: CharacterBasicSettings,
+        },
+        ["prompt"]: {
+            component: CharacterPromptSettings,
+        },
+        ["lorebook"]: {
+            component: CharacterLorebookSettings,
+        },
+        ["assets"]: {
+            component: CharacterAssetsSettings,
+        },
+        ["metadata"]: {
+            component: CharacterMetadataSettings,
+        },
+        ["magic"]: {
+            component: CharacterMagicSettings,
+            isReadonly: true,
+        },
+        ["advanced"]: {
+            component: CharacterHooksSettings,
+        },
+    };
 
     /** Local copy of character being edited (for autosave) */
     let editingCharacter = $state<Character | null>(null);
@@ -35,23 +102,13 @@
     /** Debounce timer for autosave */
     let saveTimeout: ReturnType<typeof setTimeout> | null = null;
 
-    // Clear debounce timer on component unmount
-    $effect(() => {
-        return () => {
-            if (saveTimeout) {
-                clearTimeout(saveTimeout);
-                saveTimeout = null;
-            }
-        };
-    });
-
     // Effect to open modal when state is set AND dialog is bound
     $effect(() => {
         const dialogEl = dialog;
         if (!dialogEl) return;
 
         if (uiState.characterSettingsOpen && uiState.characterSettingsTarget && !dialogEl.open) {
-            // Deep clone using lodash cloneDeep to avoid Svelte proxy issues
+            // Deep clone using JSON to avoid Svelte proxy issues
             editingCharacter = cloneDeep(uiState.characterSettingsTarget);
             activeTab = "basic";
             dialogEl.showModal();
@@ -97,21 +154,18 @@
         saveTimeout = setTimeout(() => {
             // IIFE to suppress eslint complaint about ()=>Promise in setTimeout
             void (async () => {
-                try {
-                    const target = editingCharacter;
-                    if (!target) return;
+                if (!editingCharacter) return;
 
-                    const index = characterStore.characters.findIndex((c) => c.id === target.id);
-                    if (index !== -1) {
-                        // Extract ID before logging to avoid DataCloneError with Svelte proxies
-                        const characterId = target.id;
-                        await characterStore.update(index, target);
-                        Logger.structured("character.autosave", {
-                            characterId,
-                        });
-                    }
-                } catch (error) {
-                    Logger.error(error, "CharacterSettingsModal: autosave failed");
+                const index = characterStore.characters.findIndex(
+                    (c) => c.id === editingCharacter!.id
+                );
+                if (index !== -1) {
+                    // Extract ID before logging to avoid DataCloneError with Svelte proxies
+                    const characterId = editingCharacter.id;
+                    await characterStore.update(index, editingCharacter);
+                    Logger.structured("character.autosave", {
+                        characterId,
+                    });
                 }
             })();
         }, 300);
@@ -153,7 +207,7 @@
                 onclick={close}
                 aria-label="Close"
             >
-                <XIcon size={20} />
+                <X size={20} />
             </button>
         </header>
 
@@ -162,102 +216,32 @@
             <!-- Sidebar -->
             <aside class="w-56 bg-base-200/60 p-3 overflow-y-auto border-r border-base-300/50">
                 <ul class="menu w-full p-0 gap-1">
-                    <li>
-                        <button
-                            class="flex gap-2 rounded-lg"
-                            class:active={activeTab === "basic"}
-                            onclick={() => (activeTab = "basic")}
-                            aria-label="Basic Settings"
-                        >
-                            <UserIcon size={18} /> Basic
-                        </button>
-                    </li>
-                    <li>
-                        <button
-                            class="flex gap-2 rounded-lg"
-                            class:active={activeTab === "prompt"}
-                            onclick={() => (activeTab = "prompt")}
-                            aria-label="Prompt Settings"
-                        >
-                            <ChatCircleTextIcon size={18} /> Prompt
-                        </button>
-                    </li>
-                    <li>
-                        <button
-                            class="flex gap-2 rounded-lg"
-                            class:active={activeTab === "lorebook"}
-                            onclick={() => (activeTab = "lorebook")}
-                            aria-label="Lorebook Settings"
-                        >
-                            <BookOpenIcon size={18} /> Lorebook
-                        </button>
-                    </li>
-                    <li>
-                        <button
-                            class="flex gap-2 rounded-lg"
-                            class:active={activeTab === "assets"}
-                            onclick={() => (activeTab = "assets")}
-                            aria-label="Assets Settings"
-                        >
-                            <ImageIcon size={18} /> Assets
-                        </button>
-                    </li>
-                    <li>
-                        <button
-                            class="flex gap-2 rounded-lg"
-                            class:active={activeTab === "metadata"}
-                            onclick={() => (activeTab = "metadata")}
-                            aria-label="Metadata Settings"
-                        >
-                            <FileTextIcon size={18} /> Metadata
-                        </button>
-                    </li>
-                    <li>
-                        <button
-                            class="flex gap-2 rounded-lg"
-                            class:active={activeTab === "advanced"}
-                            onclick={() => (activeTab = "advanced")}
-                            aria-label="Advanced Settings"
-                        >
-                            <GearIcon size={18} /> Advanced
-                        </button>
-                    </li>
+                    {#each tabList as tab (tab.kind)}
+                        <li>
+                            <button
+                                class="flex gap-2 rounded-lg"
+                                class:active={activeTab === tab.kind}
+                                onclick={tab.onclick}
+                                aria-label={tab.label}
+                            >
+                                <tab.icon size={18} />
+                                {tab.text}
+                            </button>
+                        </li>
+                    {/each}
                 </ul>
             </aside>
 
             <!-- Main Panel -->
             <main class="flex-1 p-6 overflow-y-auto bg-base-100">
                 {#if editingCharacter}
-                    {#if activeTab === "basic"}
-                        <CharacterBasicSettings
-                            character={editingCharacter}
-                            onChange={handleCharacterChange}
-                        />
-                    {:else if activeTab === "prompt"}
-                        <CharacterPromptSettings
-                            character={editingCharacter}
-                            onChange={handleCharacterChange}
-                        />
-                    {:else if activeTab === "lorebook"}
-                        <CharacterLorebookSettings
-                            character={editingCharacter}
-                            onChange={handleCharacterChange}
-                        />
-                    {:else if activeTab === "assets"}
-                        <CharacterAssetsSettings
-                            character={editingCharacter}
-                            onChange={handleCharacterChange}
-                        />
-                    {:else if activeTab === "metadata"}
-                        <CharacterMetadataSettings
-                            character={editingCharacter}
-                            onChange={handleCharacterChange}
-                        />
-                    {:else if activeTab === "advanced"}
-                        <CharacterHooksSettings
-                            character={editingCharacter}
-                            onChange={handleCharacterChange}
-                        />
+                    {@const panel = panelList[activeTab]}
+                    {#if "isReadonly" in panel}
+                        {@const Comp = panel.component}
+                        <Comp character={editingCharacter} />
+                    {:else}
+                        {@const Comp = panel.component}
+                        <Comp character={editingCharacter} onChange={handleCharacterChange} />
                     {/if}
                 {/if}
             </main>

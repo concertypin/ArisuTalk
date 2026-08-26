@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { getTablesSchema, applySchema } from "@/lib/adapters/storage/schematizer";
 
-describe("schematizer", () => {
+describe.concurrent("schematizer", () => {
     it("getTablesSchema returns a schema object", () => {
         const schema = getTablesSchema();
         expect(schema).toBeDefined();

@@ -1,25 +1,25 @@
 <script lang="ts">
-    import { personaStore } from "@/features/persona/stores/personaStore.svelte";
+    import { personaStore } from "../stores/personaStore.svelte";
     import { type IAssetStorageAdapter, IfNotExistBehavior } from "@/lib/interfaces";
     import { OpFSAssetStorageAdapter } from "@/features/character/adapters/assetStorage/OpFSAssetStorageAdapter";
-    import type { Persona } from "@/features/persona/schema";
-    import TrashIcon from "phosphor-svelte/lib/TrashIcon";
-    import PencilSimpleIcon from "phosphor-svelte/lib/PencilSimpleIcon";
-    import CaretUpIcon from "phosphor-svelte/lib/CaretUpIcon";
-    import CaretDownIcon from "phosphor-svelte/lib/CaretDownIcon";
+    import type { Persona } from "../schema";
+    import Trash from "phosphor-svelte/lib/TrashIcon";
+    import PencilSimple from "phosphor-svelte/lib/PencilSimpleIcon";
+    import CaretUp from "phosphor-svelte/lib/CaretUpIcon";
+    import CaretDown from "phosphor-svelte/lib/CaretDownIcon";
 
     type Props = {
         onEdit: (persona: Persona) => void;
     };
 
-    const { onEdit }: Props = $props();
+    let { onEdit }: Props = $props();
 
     function handleDelete(id: string) {
         if (confirm("Delete this persona?")) {
             personaStore.remove(id);
         }
     }
-    const personas = $derived(personaStore.personas);
+    let personas = $derived(personaStore.personas);
     $effect(() => {
         // Auto-select first persona if none selected
         if (!personaStore.activePersonaId && personaStore.personas.length > 0) {
@@ -95,7 +95,7 @@
                     onclick={() => personaStore.reorder(index, index - 1)}
                     aria-label="Move Up"
                 >
-                    <CaretUpIcon size={14} />
+                    <CaretUp size={14} />
                 </button>
                 <button
                     class="btn btn-ghost btn-xs btn-square"
@@ -103,21 +103,21 @@
                     onclick={() => personaStore.reorder(index, index + 1)}
                     aria-label="Move Down"
                 >
-                    <CaretDownIcon size={14} />
+                    <CaretDown size={14} />
                 </button>
                 <button
                     class="btn btn-ghost btn-xs btn-square"
                     onclick={() => onEdit(persona)}
                     aria-label="Edit"
                 >
-                    <PencilSimpleIcon size={14} />
+                    <PencilSimple size={14} />
                 </button>
                 <button
                     class="btn btn-ghost btn-xs btn-square text-error"
                     onclick={() => handleDelete(persona.id)}
                     aria-label="Delete"
                 >
-                    <TrashIcon size={14} />
+                    <Trash size={14} />
                 </button>
             </div>
         </div>

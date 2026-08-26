@@ -164,9 +164,5 @@ export const api: ScriptingWorkerApi = {
 Comlink.expose(api);
 
 function isScriptContext(value: unknown): value is ScriptContext {
-    return (
-        typeof value === "object" &&
-        value !== null &&
-        "message" in value
-    );
+    return typeof value === "object" && value !== null && "message" in value;
 }

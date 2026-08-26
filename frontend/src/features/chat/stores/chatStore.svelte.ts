@@ -1,3 +1,10 @@
+/** Resolved context for the currently active chat. */
+interface ActiveChatContext {
+    activeChat: LocalChat | null;
+    character: Character | undefined;
+    participants: Character[];
+    persona: Persona | null;
+}
 import type {
     LocalChat,
     IChatStorageAdapter,
@@ -5,6 +12,8 @@ import type {
     ProviderType,
     ProviderSettings,
     CommonChatSettings,
+    ChatType,
+    ChatMessage,
 } from "@/lib/interfaces";
 import { MessageSchema, type Message } from "@arisutalk/character-spec/v0/Character/Message";
 import type { LLMConfig } from "@/lib/types/IDataModel";
@@ -12,8 +21,9 @@ import { StorageResolver } from "@/lib/adapters/storage/storageResolver";
 import { MockChatProvider } from "@/lib/providers/chat/MockChatProvider";
 import { GeminiChatProvider } from "@/lib/providers/chat/GeminiChatProvider";
 import { OpenAIChatProvider } from "@/lib/providers/chat/OpenAIChatProvider";
+import { GrokChatProvider } from "@/lib/providers/chat/GrokChatProvider";
 import { AnthropicChatProvider } from "@/lib/providers/chat/AnthropicChatProvider";
-import { HumanMessage, AIMessage } from "@langchain/core/messages";
+import { HumanMessage, AIMessage, SystemMessage } from "@langchain/core/messages";
 import { OpenRouterChatProvider } from "@/lib/providers/chat/OpenRouterChatProvider";
 import { settings } from "@/lib/stores/settings.svelte";
 import { apply } from "@arisutalk/character-spec/utils";
@@ -23,36 +33,35 @@ import { personaStore } from "@/features/persona/stores/personaStore.svelte";
 import { Logger } from "@common/logger/Logger";
 import type { Persona } from "@/features/persona/schema";
 import type { Character } from "@arisutalk/character-spec/types/v0/index";
+import { buildSystemPrompt } from "@/lib/prompts/systemPromptBuilder";
 
 export class ChatStore {
     chats = $state<LocalChat[]>([]);
     activeChatId = $state<string | null>(null);
     /** Messages for the currently active chat */
     activeMessages = $state<Message[]>([]);
+    /** Per-character affection values (persisted across sessions). */
+    affectionMap = $state<Record<string, number>>({});
     isGenerating = $state(false);
-
+    /** Currently active LLM config ID. */
+    activeConfigId = $state<string | null>(null);
     private adapter!: IChatStorageAdapter;
     private activeProvider: ChatProvider<ProviderType> | null = null;
     public readonly initPromise: Promise<void>;
-
-    /** Currently active LLM config ID from settings */
-    private activeConfigId: string | null = null;
-
-    /**
-     * Gets the context for the active chat including character and persona.
-     * Centralizes lookup logic to avoid repetition and potential desync.
-     */
-    private get activeChatContext(): {
-        activeChat: LocalChat | null;
-        character: Character | undefined;
-        persona: Persona | null;
-    } {
+    /** Resolved context for the currently active chat. */
+    private get activeChatContext(): ActiveChatContext {
         const activeChat = this.activeChatId
             ? this.chats.find((c) => c.id === this.activeChatId)
             : null;
         const character = activeChat
             ? characterStore.characters.find((c) => c.id === activeChat.characterId)
             : undefined;
+
+        // For group/open chats, resolve all participant characters
+        const participantIds = activeChat?.participantIds ?? [];
+        const participants = participantIds
+            .map((pid) => characterStore.characters.find((c) => c.id === pid))
+            .filter((c): c is Character => c !== undefined);
 
         if (activeChat && !character) {
             // This can happen if characters are still loading. Hooks will be skipped.
@@ -62,7 +71,7 @@ export class ChatStore {
         }
 
         const persona = personaStore.activePersona;
-        return { activeChat: activeChat ?? null, character, persona };
+        return { activeChat: activeChat ?? null, character, participants, persona };
     }
 
     constructor(adapter?: IChatStorageAdapter) {
@@ -98,8 +107,9 @@ export class ChatStore {
 
     /**
      * Waits for settings to finish loading.
+     * @internal Visible for test mocking; not part of the public API.
      */
-    private async waitForSettings(): Promise<void> {
+    async waitForSettings(): Promise<void> {
         // Poll until settings are loaded (max 5 seconds)
         const SETTINGS_POLL_TIMEOUT_MS = 5000;
         const SETTINGS_POLL_INTERVAL_MS = 100;
@@ -148,15 +158,18 @@ export class ChatStore {
             case "Gemini":
                 await this.setProvider("GEMINI", config);
                 break;
+            case "Anthropic":
+                await this.setProvider("ANTHROPIC", config);
+                break;
             case "OpenAI":
             case "OpenAI-compatible":
                 await this.setProvider("OPENAI", config);
                 break;
-            case "Anthropic":
-                await this.setProvider("ANTHROPIC", config);
-                break;
             case "OpenRouter":
                 await this.setProvider("OPENROUTER", config);
+                break;
+            case "Grok":
+                await this.setProvider("GROK", config);
                 break;
             case "Mock":
                 await this.setProvider("MOCK", config);
@@ -226,14 +239,23 @@ export class ChatStore {
                     await OpenRouterChatProvider.factory.connect(providerSettings);
                 break;
             }
+            case "GROK": {
+                this.activeProvider = await GrokChatProvider.factory.connect(providerSettings);
+                break;
+            }
             default: {
                 const _exhaustiveCheck: never = type;
             }
         }
     }
 
-    async createChat(characterId: string, title: string = "New Chat") {
-        const chatId = await this.adapter.createChat(characterId, title);
+    async createChat(
+        characterId: string,
+        title: string = "New Chat",
+        chatType: ChatType = "direct",
+        participantIds?: string[]
+    ) {
+        const chatId = await this.adapter.createChat(characterId, title, chatType, participantIds);
         const newChat = await this.adapter.getChat(chatId);
 
         if (newChat) {
@@ -243,13 +265,137 @@ export class ChatStore {
         Logger.structured("chat.session.start", {
             chatId,
             characterId,
+            chatType,
+            participantCount: participantIds?.length ?? 0,
         });
 
         return chatId;
     }
 
+    /**
+     * Retrieves chats that include a specific character as a participant (group/open chats).
+     * @param characterId - The ID of the character.
+     * @returns Promise resolving to an array of chats.
+     */
+    async getChatsByParticipant(characterId: string): Promise<LocalChat[]> {
+        return await this.adapter.getChatsByParticipant(characterId);
+    }
+
+    /**
+     * Retrieves chats for a specific character (direct chats).
+     * @param characterId - The ID of the character.
+     * @returns Promise resolving to an array of chats.
+     */
     async getChats(characterId: string) {
         return await this.adapter.getChatsByCharacter(characterId);
+    }
+
+    /**
+     * Updates a chat's metadata fields.
+     * @param chatId - The ID of the chat to update.
+     * @param updates - Partial chat fields to apply.
+     */
+    async updateChat(chatId: string, updates: Partial<LocalChat>) {
+        await this.adapter.updateChat(chatId, updates);
+        const index = this.chats.findIndex((c) => c.id === chatId);
+        if (index !== -1) {
+            Object.assign(this.chats[index], updates);
+        }
+    }
+
+    /**
+     * Creates a group chat with multiple characters.
+     * The first character in the array is the primary character; the rest become participants.
+     * @param characterIds - Array of character IDs to include in the group chat.
+     * @param name - Optional name for the group chat.
+     * @returns Promise resolving to the ID of the created chat.
+     */
+    async createGroupChat(characterIds: string[], name?: string): Promise<string> {
+        const [primaryId, ...restIds] = characterIds;
+        const title = name ?? `Group Chat (${characterIds.length} participants)`;
+        const chatId = await this.adapter.createChat(primaryId, title, "group", restIds);
+        const newChat = await this.adapter.getChat(chatId);
+
+        if (newChat) {
+            this.chats.push(newChat);
+        }
+
+        Logger.structured("chat.session.start", {
+            chatId,
+            characterId: primaryId,
+            chatType: "group",
+            participantCount: restIds.length,
+        });
+
+        return chatId;
+    }
+
+    /**
+     * Creates an open chat with a character.
+     * Open chats allow other participants to join later.
+     * @param characterId - The ID of the primary character.
+     * @param title - Optional title for the open chat.
+     * @returns Promise resolving to the ID of the created chat.
+     */
+    async createOpenChat(characterId: string, title?: string): Promise<string> {
+        const chatId = await this.adapter.createChat(characterId, title, "open");
+        const newChat = await this.adapter.getChat(chatId);
+
+        if (newChat) {
+            this.chats.push(newChat);
+        }
+
+        Logger.structured("chat.session.start", {
+            chatId,
+            characterId,
+            chatType: "open",
+        });
+
+        return chatId;
+    }
+
+    /**
+     * Adds a character as a participant to an existing group or open chat.
+     * @param chatId - The ID of the chat.
+     * @param characterId - The ID of the character to add.
+     */
+    async addParticipant(chatId: string, characterId: string): Promise<void> {
+        const chat = await this.adapter.getChat(chatId);
+        if (!chat) throw new Error(`Chat ${chatId} not found`);
+
+        const participants = chat.participantIds ?? [];
+        if (participants.includes(characterId)) return; // Already a participant
+
+        const updatedParticipants = [...participants, characterId];
+        await this.adapter.updateChat(chatId, { participantIds: updatedParticipants });
+
+        // Update local state
+        const localChat = this.chats.find((c) => c.id === chatId);
+        if (localChat) {
+            localChat.participantIds = updatedParticipants;
+        }
+    }
+
+    /**
+     * Removes a character from a group or open chat.
+     * @param chatId - The ID of the chat.
+     * @param characterId - The ID of the character to remove.
+     */
+    async removeParticipant(chatId: string, characterId: string): Promise<void> {
+        const chat = await this.adapter.getChat(chatId);
+        if (!chat) throw new Error(`Chat ${chatId} not found`);
+
+        const participants = chat.participantIds ?? [];
+        if (!participants.includes(characterId)) return; // Not a participant
+
+        const updatedParticipants = participants.filter((id) => id !== characterId);
+        await this.adapter.updateChat(chatId, { participantIds: updatedParticipants });
+
+        // Update local state
+        const localChat = this.chats.find((c) => c.id === chatId);
+        if (localChat) {
+            localChat.participantIds = updatedParticipants;
+        }
     }
 
     async getChat(chatId: string) {
@@ -286,7 +432,7 @@ export class ChatStore {
      * Helper to process an LLM stream and update a message ref.
      */
     private async processStream(
-        langChainMessages: (HumanMessage | AIMessage)[],
+        langChainMessages: (HumanMessage | AIMessage | SystemMessage)[],
         assistantMessageId: string
     ) {
         const stream = this.activeProvider!.stream(langChainMessages);
@@ -323,7 +469,7 @@ export class ChatStore {
      */
     private async _streamAndSaveResponse(
         chatId: string,
-        langChainMessages: (HumanMessage | AIMessage)[]
+        langChainMessages: (HumanMessage | AIMessage | SystemMessage)[]
     ) {
         const startTime = Date.now();
         const assistantMessageId = crypto.randomUUID();
@@ -338,7 +484,15 @@ export class ChatStore {
         // Optimistically add to UI
         this.activeMessages.push(assistantMessage);
 
-        const fullContent = await this.processStream(langChainMessages, assistantMessageId);
+        let fullContent: string;
+        try {
+            fullContent = await this.processStream(langChainMessages, assistantMessageId);
+        } catch (error) {
+            // Remove the optimistic empty message on failure
+            const idx = this.activeMessages.findIndex((m) => m.id === assistantMessageId);
+            if (idx !== -1) this.activeMessages.splice(idx, 1);
+            throw error;
+        }
 
         // Apply output hooks using centralized context getter
         const { character, persona } = this.activeChatContext;
@@ -377,6 +531,53 @@ export class ChatStore {
         // Ensure the new timestamp is strictly greater than the last one.
         return Math.max(now, lastMsg.timestamp + 1);
     }
+    /**
+     * Builds the system prompt and group-chat context messages.
+     * Returns LangChain messages to be prepended to the conversation history.
+     *
+     * Shared between `sendMessage` and `regenerateMessage` to ensure both
+     * paths deliver the same system context to the LLM.
+     *
+     * @param ctx - Pre-resolved active chat context (caller should pass the
+     *   result of `this.activeChatContext` to avoid redundant store lookups).
+     */
+    private async _buildSystemContext(
+        ctx: ActiveChatContext
+    ): Promise<(SystemMessage | HumanMessage)[]> {
+        const { activeChat, character, participants, persona } = ctx;
+
+        const systemPrompt = await buildSystemPrompt(
+            {
+                generationPrompt: settings.value.prompt.generationPrompt,
+                character: character ?? undefined,
+                persona: persona
+                    ? { name: persona.name, description: persona.description }
+                    : undefined,
+            },
+            settings.value.prompt.promptSections,
+            this.activeMessages
+        );
+
+        const context: (SystemMessage | HumanMessage)[] = [];
+
+        if (systemPrompt) {
+            context.push(new SystemMessage(systemPrompt));
+        }
+
+        const isGroupChat = activeChat?.chatType === "group" || activeChat?.chatType === "open";
+        if (isGroupChat && participants.length > 0) {
+            context.push(
+                new HumanMessage(
+                    `[Context: This is a ${activeChat?.chatType} chat. ` +
+                        `Primary character: ${character?.name ?? activeChat?.characterId}. ` +
+                        `Other participants: ${participants.map((p) => p.name ?? p.id).join(", ")}. ` +
+                        `The primary character should respond.]`
+                )
+            );
+        }
+
+        return context;
+    }
 
     async sendMessage(content: string) {
         if (!this.activeChatId || !this.activeProvider) return;
@@ -385,8 +586,10 @@ export class ChatStore {
         const chatId = this.activeChatId;
 
         try {
-            // Use centralized context getter for character/persona lookup
-            const { character, persona } = this.activeChatContext;
+            // Read full context once; _buildSystemContext will reuse it
+            // to avoid redundant store lookups (perf).
+            const ctx = this.activeChatContext;
+            const { activeChat, character, persona } = ctx;
 
             let processedContent = content;
             if (character) {
@@ -410,14 +613,22 @@ export class ChatStore {
 
             Logger.structured("chat.message.send", {
                 chatId,
+                chatType: activeChat?.chatType ?? "direct",
                 messageLength: content.length,
             });
 
-            // Prepare LangChain messages from history
-            const langChainMessages = this.activeMessages.map((m) => {
+            // Build LangChain messages from history
+            const baseMessages = this.activeMessages.map((m) => {
                 const text = typeof m.content.data === "string" ? m.content.data : "";
                 return m.role === "user" ? new HumanMessage(text) : new AIMessage(text);
             });
+
+            // Prepend system prompt and group-chat context
+            const systemContext = await this._buildSystemContext(ctx);
+            const langChainMessages: (HumanMessage | AIMessage | SystemMessage)[] = [
+                ...systemContext,
+                ...baseMessages,
+            ];
 
             await this._streamAndSaveResponse(chatId, langChainMessages);
         } catch (error) {
@@ -450,6 +661,129 @@ export class ChatStore {
                 this.activeMessages = [];
             }
         }
+    }
+
+    /**
+     * Creates a new chat branched from a specific message in the active chat.
+     * Copies all messages up to and including the branch point into the new chat.
+     * @param fromMessageId - The ID of the message to branch from.
+     * @returns Promise resolving to the ID of the new branched chat.
+     */
+    async branchChat(fromMessageId: string): Promise<string> {
+        if (!this.activeChatId) throw new Error("No active chat to branch from");
+
+        const sourceChat = await this.adapter.getChat(this.activeChatId);
+        if (!sourceChat) throw new Error("Source chat not found");
+
+        // Create a new chat based on the source chat's properties
+        const branchName = `${sourceChat.name || sourceChat.title || "Chat"} (branch)`;
+        const chatId = await this.adapter.createChat(
+            sourceChat.characterId,
+            branchName,
+            sourceChat.chatType,
+            sourceChat.participantIds
+        );
+        const branchRoot = sourceChat.branchRootId ?? fromMessageId;
+
+        // Store branching metadata on the new chat
+        await this.adapter.updateChat(chatId, {
+            parentChatId: this.activeChatId,
+            branchRootId: branchRoot,
+        });
+        // Copy all messages from the source chat up to and including the branch message
+        const messages = await this.adapter.getMessages(this.activeChatId);
+        const branchIndex = messages.findIndex((m) => m.id === fromMessageId);
+        const messagesToCopy = branchIndex >= 0 ? messages.slice(0, branchIndex + 1) : messages;
+
+        for (const msg of messagesToCopy) {
+            const branchedMsg: ChatMessage = {
+                ...msg,
+                chatId,
+                branchFromId: fromMessageId,
+                branchRootId: branchRoot,
+            };
+            await this.adapter.addMessage(chatId, branchedMsg);
+        }
+
+        // Add to local state
+        const newChat = await this.adapter.getChat(chatId);
+        if (newChat) {
+            this.chats.push(newChat);
+        }
+
+        return chatId;
+    }
+
+    /**
+     * Gets all chats that were branched from the specified chat.
+     * @param chatId - The ID of the parent chat.
+     * @returns Promise resolving to an array of branched chats.
+     */
+    async getBranches(chatId: string): Promise<LocalChat[]> {
+        const allChats = await this.adapter.getAllChats();
+        return allChats.filter((c) => c.parentChatId === chatId);
+    }
+
+    /**
+     * Updates the affection value for a character.
+     * Values are clamped between -100 and 100.
+     * @param characterId - The ID of the character.
+     * @param value - The new affection value.
+     */
+    async updateAffection(characterId: string, value: number): Promise<void> {
+        const clamped = Math.max(-100, Math.min(100, value));
+        this.affectionMap[characterId] = clamped;
+
+        // Persist affection to the active chat if there is one
+        if (this.activeChatId) {
+            const chat = this.chats.find((c) => c.id === this.activeChatId);
+            if (chat) {
+                const existingAffection = chat.affection ?? [];
+                const existingIndex = existingAffection.findIndex(
+                    (a) => a.characterId === characterId
+                );
+                const updated = {
+                    characterId,
+                    value: clamped,
+                    lastUpdated: Date.now(),
+                };
+
+                if (existingIndex >= 0) {
+                    existingAffection[existingIndex] = updated;
+                } else {
+                    existingAffection.push(updated);
+                }
+
+                await this.adapter.updateChat(this.activeChatId, {
+                    affection: existingAffection,
+                });
+            }
+        }
+
+        Logger.structured("chat.affection.update", {
+            characterId,
+            value: clamped,
+        });
+    }
+
+    /**
+     * Gets the current affection value for a character.
+     * Returns 0 if no affection value has been set.
+     * @param characterId - The ID of the character.
+     * @returns The current affection value (clamped between -100 and 100).
+     */
+    getAffection(characterId: string): number {
+        // Check active chat's affection states first
+        if (this.activeChatId) {
+            const chat = this.chats.find((c) => c.id === this.activeChatId);
+            if (chat?.affection) {
+                const state = chat.affection.find((a) => a.characterId === characterId);
+                if (state) return state.value;
+            }
+        }
+
+        // Fall back to global affection map
+        return this.affectionMap[characterId] ?? 0;
     }
 
     async setActiveChat(chatId: string | null) {
@@ -530,10 +864,19 @@ export class ChatStore {
             );
 
             // Prepare LangChain messages from remaining history
-            const langChainMessages = this.activeMessages.map((m) => {
+            const baseMessages = this.activeMessages.map((m) => {
                 const text = typeof m.content.data === "string" ? m.content.data : "";
                 return m.role === "user" ? new HumanMessage(text) : new AIMessage(text);
             });
+
+            // Re-inject system prompt and group-chat context so regeneration
+            // receives the same context as the original send (regression defense)
+            const ctx = this.activeChatContext;
+            const systemContext = await this._buildSystemContext(ctx);
+            const langChainMessages: (HumanMessage | AIMessage | SystemMessage)[] = [
+                ...systemContext,
+                ...baseMessages,
+            ];
 
             await this._streamAndSaveResponse(chatId, langChainMessages);
         } catch (error) {

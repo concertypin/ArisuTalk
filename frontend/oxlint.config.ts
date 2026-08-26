@@ -5,6 +5,7 @@ export default defineConfig({
     jsPlugins: ["eslint-plugin-zod"],
     extends: [oxlintEslintError, oxlintEslintWarn],
     ignorePatterns: [
+        "**/static/**",
         "**/node_modules/**",
         "**/dist/**",
         "**/coverage/**",
@@ -12,16 +13,12 @@ export default defineConfig({
         "**/.svelte-check/**",
         "**/dist-ts/**",
     ],
-    // oxlint does not support ESLint-style rule options (e.g. assertionStyle).
-    // The @typescript-eslint/consistent-type-assertions rule below will use oxlint defaults.
-    // For strict "never" assertion style enforcement, use ESLint on Svelte files.
     overrides: [
         {
             files: ["**/*.svelte"],
             jsPlugins: ["eslint-plugin-phosphor-svelte"],
             rules: {
                 "phosphor-svelte/optimize-imports": "warn",
-                // Reactivity-related false positives.
                 "prefer-const": "off",
                 "no-unassigned-vars": "off",
             },
@@ -39,6 +36,21 @@ export default defineConfig({
                 "jest/expect-expect": "off",
                 "@typescript-eslint/consistent-type-assertions": "off",
                 "@typescript-eslint/consistent-type-imports": "off",
+            },
+        },
+        // SDK/worker boundary files where type assertions bridge
+        // structurally identical but nominally incompatible types.
+        {
+            files: [
+                "src/lib/providers/chat/GeminiChatProvider.ts",
+                "src/lib/migration/storageMigration.ts",
+                "worker/cardparse/parse.ts",
+                "src/features/character/adapters/storage/LocalStorageAdapter.ts",
+                "src/lib/adapters/storage/persona/IDBPersonaAdapter.ts",
+                "src/lib/adapters/storage/chat/IDBChatAdapter.ts",
+            ],
+            rules: {
+                "@typescript-eslint/consistent-type-assertions": "off",
             },
         },
         {

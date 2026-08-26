@@ -4,11 +4,11 @@
   Shows on hover and provides controls for message manipulation.
 -->
 <script lang="ts">
-    import PencilIcon from "phosphor-svelte/lib/PencilIcon";
-    import TrashIcon from "phosphor-svelte/lib/TrashIcon";
-    import ArrowClockwiseIcon from "phosphor-svelte/lib/ArrowClockwiseIcon";
-    import CheckIcon from "phosphor-svelte/lib/CheckIcon";
-    import XIcon from "phosphor-svelte/lib/XIcon";
+    import Pencil from "phosphor-svelte/lib/PencilIcon";
+    import Trash from "phosphor-svelte/lib/TrashIcon";
+    import ArrowClockwise from "phosphor-svelte/lib/ArrowClockwiseIcon";
+    import Check from "phosphor-svelte/lib/CheckIcon";
+    import X from "phosphor-svelte/lib/XIcon";
     import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
 
     type Props = {
@@ -28,7 +28,7 @@
         onCancelEdit?: () => void;
     };
 
-    const {
+    let {
         message,
         isEditing = false,
         onEdit,
@@ -84,14 +84,14 @@
             onclick={onConfirmEdit}
             title="Save edit (Ctrl+Enter)"
         >
-            <CheckIcon class="w-3.5 h-3.5 text-success" />
+            <Check class="w-3.5 h-3.5 text-success" />
         </button>
         <button
             class="btn btn-xs btn-ghost btn-circle"
             onclick={onCancelEdit}
             title="Cancel edit (Esc)"
         >
-            <XIcon class="w-3.5 h-3.5 text-error" />
+            <X class="w-3.5 h-3.5 text-error" />
         </button>
     {:else if isConfirmingDelete}
         <button
@@ -99,25 +99,25 @@
             onclick={handleDeleteClick}
             title="Click again to confirm delete"
         >
-            <TrashIcon class="w-3.5 h-3.5" />
+            <Trash class="w-3.5 h-3.5" />
         </button>
         <button
             class="btn btn-xs btn-ghost btn-circle"
             onclick={cancelDelete}
             title="Cancel delete"
         >
-            <XIcon class="w-3.5 h-3.5" />
+            <X class="w-3.5 h-3.5" />
         </button>
     {:else}
         <button class="btn btn-xs btn-ghost btn-circle" onclick={onEdit} title="Edit message">
-            <PencilIcon class="w-3.5 h-3.5" />
+            <Pencil class="w-3.5 h-3.5" />
         </button>
         <button
             class="btn btn-xs btn-ghost btn-circle"
             onclick={handleDeleteClick}
             title="Delete message"
         >
-            <TrashIcon class="w-3.5 h-3.5" />
+            <Trash class="w-3.5 h-3.5" />
         </button>
         {#if isAssistant}
             <button
@@ -125,7 +125,7 @@
                 onclick={onRegenerate}
                 title="Regenerate response"
             >
-                <ArrowClockwiseIcon class="w-3.5 h-3.5" />
+                <ArrowClockwise class="w-3.5 h-3.5" />
             </button>
         {/if}
     {/if}

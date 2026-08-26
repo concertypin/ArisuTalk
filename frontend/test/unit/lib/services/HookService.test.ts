@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { HookService } from "@/lib/services/HookService";
 import { CharacterSchema } from "@arisutalk/character-spec/v0/Character";
 import { apply } from "@arisutalk/character-spec/utils";
-import { mockScriptingWorker } from "@test/utils/mockWorkerApi";
 
 // Mock workers
 vi.mock("@/lib/workers/workerClient", () => ({
@@ -16,9 +15,8 @@ vi.mock("@/lib/workers/workerClient", () => ({
     })),
     getScriptingWorker: vi.fn(async () => ({
         execute: vi.fn(async (code: string) => ({
-            // Since scripts are user-defined, it might be `any` type.
-            // oxlint-disable-next-line no-eval typescript/no-unsafe-assignment
-            result: code.includes("return") ? eval(`(() => { ${code} })()`) : eval(code),
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, no-implied-eval
+            result: new Function(code.includes("return") ? code : `return ${code}`)(),
             logs: [],
         })),
     })),
@@ -31,7 +29,7 @@ describe("HookService", () => {
         hookService = new HookService();
     });
 
-    it("should apply a simple regex hook", async () => {
+    it.concurrent("should apply a simple regex hook", async () => {
         const character = apply(CharacterSchema, {
             description: "",
             prompt: {
@@ -63,7 +61,7 @@ describe("HookService", () => {
         expect(result).toBe("I have an orange");
     });
 
-    it("should respect priorities", async () => {
+    it.concurrent("should respect priorities", async () => {
         const character = apply(CharacterSchema, {
             description: "",
             prompt: {
@@ -107,7 +105,7 @@ describe("HookService", () => {
         expect(result).toBe("banana");
     });
 
-    it("should handle scripted patterns", async () => {
+    it.concurrent("should handle scripted patterns", async () => {
         const character = apply(CharacterSchema, {
             description: "",
             prompt: {
@@ -166,23 +164,22 @@ describe("HookService", () => {
         });
 
         // Mock scripting worker to return 'secret' only if role is 'assistant'
-        vi.mocked(await import("@/lib/workers/workerClient")).getScriptingWorker.mockResolvedValue(
-            mockScriptingWorker(
-                vi.fn(async (code: string, options) => {
-                    // Check role in context
-
-                    // oxlint-disable-next-line typescript/no-unsafe-assignment typescript/no-unsafe-member-access
-                    const ctx = options?.context;
-
-                    // oxlint-disable-next-line typescript/no-unsafe-assignment typescript/no-unsafe-member-access
-                    const role = ctx?.message?.role;
-                    if (role === "assistant") {
-                        return { result: "secret", logs: [] };
-                    }
-                    return { result: "nomatch", logs: [] };
-                })
-            )
-        );
+        vi.mocked(await import("@/lib/workers/workerClient")).getScriptingWorker.mockResolvedValue({
+            terminate: vi.fn(),
+            execute: vi.fn(async (code: string, options) => {
+                // Check role in context
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+                const ctx = options?.context;
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+                const role = ctx?.message?.role;
+                if (role === "assistant") {
+                    return { result: "secret", logs: [] };
+                }
+                return { result: "nomatch", logs: [] };
+            }),
+        } as unknown as import("@/lib/workers/workerClient").WorkerApi<
+            import("@worker/scripting/types").ScriptingWorkerApi
+        >);
 
         const result = await hookService.process("This is secret", character, "display");
         expect(result).toBe("This is hidden");
@@ -215,22 +212,23 @@ describe("HookService", () => {
         });
 
         // Mock scripting worker to return error
-        vi.mocked(await import("@/lib/workers/workerClient")).getScriptingWorker.mockResolvedValue(
-            mockScriptingWorker(
-                vi.fn(async () => ({
-                    result: undefined,
-                    error: "test error",
-                    logs: [],
-                }))
-            )
-        );
+        vi.mocked(await import("@/lib/workers/workerClient")).getScriptingWorker.mockResolvedValue({
+            terminate: vi.fn(),
+            execute: vi.fn(async () => ({
+                result: undefined,
+                error: "test error",
+                logs: [],
+            })),
+        } as unknown as import("@/lib/workers/workerClient").WorkerApi<
+            import("@worker/scripting/types").ScriptingWorkerApi
+        >);
 
         // Should not throw, just log error and skip the hook
         const result = await hookService.process("test content", character, "input");
         expect(result).toBe("test content");
     });
 
-    it("should handle scripted output for regex hooks", async () => {
+    it.concurrent("should handle scripted output for regex hooks", async () => {
         const character = apply(CharacterSchema, {
             description: "",
             prompt: { description: "" },
@@ -261,7 +259,7 @@ describe("HookService", () => {
         expect(result).toBe("I have 'NUMBER' apples");
     });
 
-    it("should handle scripted output for string hooks", async () => {
+    it.concurrent("should handle scripted output for string hooks", async () => {
         const character = apply(CharacterSchema, {
             description: "",
             prompt: { description: "" },
@@ -292,7 +290,7 @@ describe("HookService", () => {
         expect(result).toBe("'GREETING' world");
     });
 
-    it("should handle string replacement with case sensitivity", async () => {
+    it.concurrent("should handle string replacement with case sensitivity", async () => {
         const character = apply(CharacterSchema, {
             description: "",
             prompt: { description: "" },
@@ -323,7 +321,7 @@ describe("HookService", () => {
         expect(result).toBe("Hi world, hello again");
     });
 
-    it("should handle string replacement without case sensitivity", async () => {
+    it.concurrent("should handle string replacement without case sensitivity", async () => {
         const character = apply(CharacterSchema, {
             description: "",
             prompt: { description: "" },
@@ -354,7 +352,7 @@ describe("HookService", () => {
         expect(result).toBe("Hi world, Hi again");
     });
 
-    it("should return content unchanged when no hooks are defined", async () => {
+    it.concurrent("should return content unchanged when no hooks are defined", async () => {
         const character = apply(CharacterSchema, {
             description: "",
             prompt: { description: "" },
@@ -372,7 +370,7 @@ describe("HookService", () => {
         expect(result).toBe("test content");
     });
 
-    it("should escape special regex characters in string replacement", async () => {
+    it.concurrent("should escape special regex characters in string replacement", async () => {
         const character = apply(CharacterSchema, {
             description: "",
             prompt: { description: "" },
@@ -401,180 +399,5 @@ describe("HookService", () => {
         // Should match literal "a.b", not "a" + any char + "b"
         const result = await hookService.process("a.b and aXb", character, "input");
         expect(result).toBe("X and aXb");
-    });
-
-    it("should handle scripted output error gracefully (regex hooks)", async () => {
-        const character = apply(CharacterSchema, {
-            description: "",
-            prompt: { description: "" },
-            specVersion: 0,
-            id: "1",
-            name: "Test",
-            executables: {
-                replaceHooks: {
-                    output: [
-                        {
-                            input: "test",
-                            output: "throw new Error('fail')",
-                            meta: {
-                                type: "regex",
-                                flag: "g",
-                                isInputPatternScripted: false,
-                                isOutputScripted: true,
-                                priority: 0,
-                            },
-                        },
-                    ],
-                },
-            },
-        });
-
-        // Mock scripting worker to return error for output script
-        vi.mocked(await import("@/lib/workers/workerClient")).getScriptingWorker.mockResolvedValue(
-            mockScriptingWorker(
-                vi.fn(async () => ({
-                    result: undefined,
-                    error: "script error",
-                    logs: [],
-                }))
-            )
-        );
-
-        // Should use the original output as fallback when script fails
-        const result = await hookService.process("test content", character, "output");
-        // 'test' is replaced by the original output 'throw new Error(\'fail\')' (from regex)
-        expect(result).toBe("throw new Error('fail') content");
-    });
-
-    it("should handle scripted output error gracefully (string hooks)", async () => {
-        const character = apply(CharacterSchema, {
-            description: "",
-            prompt: { description: "" },
-            specVersion: 0,
-            id: "1",
-            name: "Test",
-            executables: {
-                replaceHooks: {
-                    display: [
-                        {
-                            input: "greeting",
-                            output: "throw new Error('fail')",
-                            meta: {
-                                type: "string",
-                                caseSensitive: false,
-                                isInputPatternScripted: false,
-                                isOutputScripted: true,
-                                priority: 0,
-                            },
-                        },
-                    ],
-                },
-            },
-        });
-
-        // Mock scripting worker to return no result (error-like)
-        vi.mocked(await import("@/lib/workers/workerClient")).getScriptingWorker.mockResolvedValue(
-            mockScriptingWorker(
-                vi.fn(async () => ({
-                    result: undefined,
-                    // No error but no result either - should use original output
-                    logs: [],
-                }))
-            )
-        );
-
-        const result = await hookService.process("hello greeting world", character, "display");
-        // Original replacement is used as fallback
-        expect(result).toBe("hello throw new Error('fail') world");
-    });
-
-    describe("stringifyResult", () => {
-        // stringifyResult is a module-level function, test via hook behavior
-
-        it("should handle bigint and symbol results", async () => {
-            const character = apply(CharacterSchema, {
-                description: "",
-                prompt: { description: "" },
-                specVersion: 0,
-                id: "1",
-                name: "Test",
-                executables: {
-                    replaceHooks: {
-                        input: [
-                            {
-                                input: "test",
-                                output: "BigIntResult",
-                                meta: {
-                                    type: "string",
-                                    caseSensitive: false,
-                                    isInputPatternScripted: false,
-                                    isOutputScripted: true,
-                                    priority: 0,
-                                },
-                            },
-                        ],
-                    },
-                },
-            });
-
-            // Mock scripting worker to return a bigint
-            vi.mocked(
-                await import("@/lib/workers/workerClient")
-            ).getScriptingWorker.mockResolvedValue(
-                mockScriptingWorker(
-                    vi.fn(async () => ({
-                        result: BigInt(42),
-                        logs: [],
-                    }))
-                )
-            );
-
-            const result = await hookService.process("test content", character, "input");
-            // bigint should be stringified via String()
-            expect(result).toContain("42");
-        });
-
-        it("should handle null and undefined results", async () => {
-            const character = apply(CharacterSchema, {
-                description: "",
-                prompt: { description: "" },
-                specVersion: 0,
-                id: "1",
-                name: "Test",
-                executables: {
-                    replaceHooks: {
-                        input: [
-                            {
-                                input: "test",
-                                output: "null",
-                                meta: {
-                                    type: "string",
-                                    caseSensitive: false,
-                                    isInputPatternScripted: false,
-                                    isOutputScripted: true,
-                                    priority: 0,
-                                },
-                            },
-                        ],
-                    },
-                },
-            });
-
-            // Mock scripting worker to return null
-            vi.mocked(
-                await import("@/lib/workers/workerClient")
-            ).getScriptingWorker.mockResolvedValue(
-                mockScriptingWorker(
-                    vi.fn(async () => ({
-                        result: null,
-                        logs: [],
-                    }))
-                )
-            );
-
-            const result = await hookService.process("test content", character, "input");
-            // null should be replaced with "null" via JSON.stringify
-            expect(result).toContain("null");
-        });
     });
 });

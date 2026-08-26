@@ -14,14 +14,8 @@ export function strictObject<const Target extends object>(obj: NoInfer<Partial<T
             if (prop in target) {
                 return Reflect.get(target, prop, receiver);
             }
-            // Allow 'then' property access for proper Promise/await behavior
-            // JavaScript checks for 'then' to determine if an object is thenable
-            if (prop === "then") {
-                return undefined;
-            }
-            // Symbol properties (e.g., Symbol.iterator, Symbol.toStringTag)
-            // are accessed by DOM engines internally and shouldn't trigger failures.
-            if (typeof prop === "symbol") {
+            // Allow common Symbol and protocol properties for runtime compatibility
+            if (typeof prop === "symbol" || prop === "then" || prop === "toJSON") {
                 return undefined;
             }
             expect

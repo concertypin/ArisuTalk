@@ -1,6 +1,6 @@
 <!--
   @component App
-  Root Svelte 5 component with hash-based router.
+  Root Svelte 5 component with hash-based router, PWA support, and theming.
 -->
 <script lang="ts">
     import { initRouter, getCurrentPath } from "@/lib/router.svelte";
@@ -8,19 +8,36 @@
     import { routes } from "@/lib/routeConfig";
     import { uiState } from "@/lib/stores/ui.svelte";
     import { settings } from "@/lib/stores/settings.svelte";
+    import { applyTheme } from "@/lib/theme.svelte";
+    import { registerServiceWorker } from "@/lib/serviceWorker";
     import ToastContainer from "@/components/ToastContainer.svelte";
     import IconContext from "phosphor-svelte/lib/IconContext";
     import type { Component } from "svelte";
     import { loadFont } from "@/lib/utils/fontUtils";
+    import AuthGate from "@/features/auth/components/AuthGate.svelte";
+    import { versionInfo } from "@/lib/stores/versionInfo.svelte";
+    import { registerPlugin, initializePlugins } from "@/lib/plugins/types";
+    import { memoryPlugin } from "@/features/memory/memoryPlugin";
 
-    // Initialize router and settings on mount
+    // Register first-party plugins before initialisation.
+    registerPlugin(memoryPlugin);
+    // Initialize on mount
     $effect(() => {
         initRouter();
         void settings.init();
+        void registerServiceWorker();
+        void initializePlugins();
+    });
+
+    // Apply theme when settings are loaded or theme changes
+    $effect(() => {
+        if (settings.isLoaded) {
+            applyTheme(settings.value.theme);
+        }
     });
 
     // Current route path (reactive)
-    const currentPath = $derived(getCurrentPath());
+    let currentPath = $derived(getCurrentPath());
 
     // Current component (lazy loaded)
     let CurrentComponent = $state<Component | null>(null);
@@ -55,42 +72,50 @@
 </script>
 
 <svelte:head>
-    <title>ArisuTalk</title>
+    <title>{versionInfo.displayLabel}</title>
 </svelte:head>
 
-<IconContext values={{ weight: "bold", size: 24, mirrored: false }}>
-    {#if isLoading}
-        <div class="flex items-center justify-center w-full h-full text-base-content/50">
-            Loading...
-        </div>
-    {:else if CurrentComponent}
-        <CurrentComponent />
-    {/if}
-
-    {#if uiState.settingsModalOpen}
-        {#await import("@/components/SettingsModal.svelte")}
-            <div
-                class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 text-base-content/70 backdrop-blur-sm"
-            >
-                <span class="loading loading-spinner loading-lg"></span>
+<AuthGate>
+    <IconContext values={{ weight: "bold", size: 24, mirrored: false }}>
+        {#if isLoading}
+            <div class="flex items-center justify-center w-full h-full text-base-content/50">
+                Loading...
             </div>
-        {:then { default: Component }}
-            <Component />
-        {:catch error}
-            <div
-                class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 text-error backdrop-blur-sm"
-            >
-                <div class="bg-base-100 p-8 rounded-xl shadow-xl border border-error/20">
-                    <h3 class="font-bold text-lg mb-2">Error Loading Settings</h3>
-                    <p>{String(error)}</p>
-                    <button
-                        class="btn btn-sm btn-ghost mt-4"
-                        onclick={() => uiState.closeSettingsModal()}>Close</button
-                    >
+        {:else if CurrentComponent}
+            <CurrentComponent />
+        {/if}
+
+        {#if uiState.settingsModalOpen}
+            {#await import("@/components/SettingsModal.svelte")}
+                <div
+                    class="fixed inset-0 z-50 flex items-center justify-center bg-base-content/50 text-base-content/70 backdrop-blur-sm"
+                >
+                    <span class="loading loading-spinner loading-lg"></span>
                 </div>
-            </div>
-        {/await}
-    {/if}
-
-    <ToastContainer />
-</IconContext>
+            {:then { default: Component }}
+                <Component />
+            {:catch error}
+                <div
+                    class="fixed inset-0 z-50 flex items-center justify-center bg-base-content/50 text-error backdrop-blur-sm"
+                >
+                    <div class="bg-base-100 p-8 rounded-xl shadow-xl border border-error/20">
+                        <h3 class="font-bold text-lg mb-2">Error Loading Settings</h3>
+                        <p>{String(error)}</p>
+                        <button
+                            class="btn btn-sm btn-ghost mt-4"
+                            onclick={() => uiState.closeSettingsModal()}>Close</button
+                        >
+                    </div>
+                </div>
+            {/await}
+        {/if}
+        <ToastContainer />
+        {#if import.meta.env.DEV}
+            {#await import("sv-agentation") then { Agentation }}
+                <div style="position:relative;z-index:9999">
+                    <Agentation toolbarPosition="top-right" />
+                </div>
+            {/await}
+        {/if}
+    </IconContext>
+</AuthGate>

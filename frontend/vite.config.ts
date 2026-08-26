@@ -20,6 +20,7 @@ export default defineConfig(async (ctx) => {
             compilerOptions: {
                 dev: mode !== "production",
             },
+            inspector: process.env.VITEST ? false : undefined,
         }),
     ];
     /*
@@ -61,20 +62,21 @@ export default defineConfig(async (ctx) => {
                 "Cross-Origin-Embedder-Policy": "require-corp",
                 "Cross-Origin-Opener-Policy": "same-origin",
             },
-            open: "index.html",
+            open: false,
             allowedHosts: process.env.npm_lifecycle_event?.includes("dev") ? true : undefined,
         },
         define,
         build: {
             outDir: "dist",
             sourcemap: true,
+            chunkSizeWarningLimit: 600,
             rolldownOptions: {
                 checks: {
                     circularDependency: true,
                     pluginTimings: false,
                 },
                 output: {
-                    sourcemapIgnoreList(relativeSourcePath) {
+                    sourcemapIgnoreList(relativeSourcePath: string) {
                         if (relativeSourcePath.includes("node_modules")) return true;
                         if (relativeSourcePath.includes(".pnpm")) return true;
                         return false;
@@ -83,7 +85,7 @@ export default defineConfig(async (ctx) => {
             },
         },
         worker: {
-            format: "es", // Force ES module workers
+            format: "es",
         },
         clearScreen: false,
         publicDir: "static",

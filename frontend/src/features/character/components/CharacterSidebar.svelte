@@ -1,11 +1,11 @@
 <script lang="ts">
-    import PlusIcon from "phosphor-svelte/lib/PlusIcon";
-    import UserIcon from "phosphor-svelte/lib/UserIcon";
-    import GearIcon from "phosphor-svelte/lib/GearIcon";
-    import HouseIcon from "phosphor-svelte/lib/HouseIcon";
+    import Plus from "phosphor-svelte/lib/PlusIcon";
+    import User from "phosphor-svelte/lib/UserIcon";
+    import Gear from "phosphor-svelte/lib/GearIcon";
+    import House from "phosphor-svelte/lib/HouseIcon";
     import { flip } from "svelte/animate";
     import CharacterSidebarItem from "./CharacterSidebarItem.svelte";
-    import { characterStore } from "@/features/character/stores/characterStore.svelte";
+    import { characterStore } from "../stores/characterStore.svelte";
     import { uiState } from "@/lib/stores/ui.svelte";
 
     type Props = {
@@ -15,7 +15,7 @@
         onPersona: () => void;
     };
 
-    const { selectedCharacterId, onSelect, onAdd, onPersona }: Props = $props();
+    let { selectedCharacterId, onSelect, onAdd, onPersona }: Props = $props();
 
     const flipDurationMs = 200;
 
@@ -59,7 +59,7 @@
 </script>
 
 <div
-    class="flex flex-col items-center w-[72px] bg-base-300 py-3 overflow-y-auto overflow-x-hidden h-full scrollbar-none"
+    class="flex flex-col items-center w-18 bg-base-300 py-3 overflow-y-auto overflow-x-hidden h-full scrollbar-none"
 >
     <!-- Home Button -->
     <div class="mb-2 tooltip tooltip-right z-50" data-tip="Home">
@@ -68,7 +68,7 @@
             onclick={() => onSelect(null)}
             aria-label="Home"
         >
-            <HouseIcon size={24} weight={selectedCharacterId === null ? "fill" : "bold"} />
+            <House size={24} weight={selectedCharacterId === null ? "fill" : "bold"} />
         </button>
     </div>
 
@@ -99,7 +99,9 @@
                 <CharacterSidebarItem
                     {character}
                     active={selected}
+                    isPinned={characterStore.isPinned(character.id)}
                     onClick={() => onSelect(character.id)}
+                    onTogglePin={() => characterStore.togglePin(character.id)}
                 />
             </div>
         {/each}
@@ -113,7 +115,7 @@
             onclick={onAdd}
             aria-label="Add Character"
         >
-            <PlusIcon size={24} />
+            <Plus size={24} />
         </button>
     </div>
 
@@ -124,7 +126,7 @@
                 onclick={() => uiState.openSettingsModal()}
                 aria-label="Settings"
             >
-                <GearIcon size={24} />
+                <Gear size={24} />
             </button>
         </div>
         <div class="tooltip tooltip-right z-50" data-tip="Personas">
@@ -133,7 +135,7 @@
                 onclick={onPersona}
                 aria-label="Manage Personas"
             >
-                <UserIcon size={24} />
+                <User size={24} />
             </button>
         </div>
     </div>

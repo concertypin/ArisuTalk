@@ -3,12 +3,12 @@
     import { Logger } from "@common/logger/Logger";
 
     import { settings } from "@/lib/stores/settings.svelte";
-    import XIcon from "phosphor-svelte/lib/XIcon";
-    import GearIcon from "phosphor-svelte/lib/GearIcon";
-    import ChatCircleTextIcon from "phosphor-svelte/lib/ChatCircleTextIcon";
-    import CpuIcon from "phosphor-svelte/lib/CpuIcon";
-    import InfoIcon from "phosphor-svelte/lib/InfoIcon";
-    import SlidersHorizontalIcon from "phosphor-svelte/lib/SlidersHorizontalIcon";
+    import X from "phosphor-svelte/lib/XIcon";
+    import Gear from "phosphor-svelte/lib/GearIcon";
+    import ChatCircleText from "phosphor-svelte/lib/ChatCircleTextIcon";
+    import Cpu from "phosphor-svelte/lib/CpuIcon";
+    import Info from "phosphor-svelte/lib/InfoIcon";
+    import SlidersHorizontal from "phosphor-svelte/lib/SlidersHorizontalIcon";
 
     // Subpage components
     import GeneralSettings from "./settingSubpage/GeneralSettings.svelte";
@@ -71,14 +71,14 @@
                 id="settings-title"
                 class="text-xl font-bold flex items-center gap-2 tracking-tight"
             >
-                <GearIcon size={24} /> Settings
+                <Gear size={24} /> Settings
             </h2>
             <button
                 class="btn btn-ghost btn-sm btn-square hover:bg-base-300/50"
                 onclick={close}
                 aria-label="Close"
             >
-                <XIcon size={20} />
+                <X size={20} />
             </button>
         </header>
 
@@ -94,7 +94,7 @@
                             onclick={() => (activeTab = "general")}
                             aria-label="General Settings"
                         >
-                            <GearIcon size={18} /> General
+                            <Gear size={18} /> General
                         </button>
                     </li>
                     <li>
@@ -104,7 +104,7 @@
                             onclick={() => (activeTab = "llm")}
                             aria-label="LLM Configuration"
                         >
-                            <CpuIcon size={18} /> Models
+                            <Cpu size={18} /> Models
                         </button>
                     </li>
                     <li>
@@ -114,7 +114,7 @@
                             onclick={() => (activeTab = "prompt")}
                             aria-label="Prompt Settings"
                         >
-                            <ChatCircleTextIcon size={18} /> Prompts
+                            <ChatCircleText size={18} /> Prompts
                         </button>
                     </li>
                     <li>
@@ -124,7 +124,7 @@
                             onclick={() => (activeTab = "advanced")}
                             aria-label="Advanced Settings"
                         >
-                            <SlidersHorizontalIcon size={18} /> Advanced
+                            <SlidersHorizontal size={18} /> Advanced
                         </button>
                     </li>
                     <li>
@@ -134,7 +134,7 @@
                             onclick={() => (activeTab = "about")}
                             aria-label="About"
                         >
-                            <InfoIcon size={18} /> About
+                            <Info size={18} /> About
                         </button>
                     </li>
                 </ul>

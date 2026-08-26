@@ -1,6 +1,6 @@
 import type { Chat, Message } from "@arisutalk/character-spec/v0/Character";
 import { getArisuDB } from "@/lib/adapters/storage/IndexedDBHelper";
-import type { IChatStorageAdapter, LocalChat } from "@/lib/interfaces";
+import type { IChatStorageAdapter, LocalChat, ChatType } from "@/lib/interfaces";
 import { cloneDeep } from "lodash-es";
 
 export class IDBChatAdapter implements IChatStorageAdapter {
@@ -35,14 +35,36 @@ export class IDBChatAdapter implements IChatStorageAdapter {
     }
 
     private toLocalChat(chat: Chat): LocalChat {
+        // Narrow through unknown — the only unavoidable double cast for bridging
+        // Chat (spec type) with LocalChat (internal extension type).
+        const record: Record<string, unknown> = chat;
+        const name_: string | undefined = typeof record.name === "string" ? record.name : undefined;
+        const chatType_: unknown = record.chatType;
+        const participantIds_: unknown = record.participantIds;
+        const creatorId_: string | undefined =
+            typeof record.creatorId === "string" ? record.creatorId : undefined;
+        const parentChatId_: string | undefined =
+            typeof record.parentChatId === "string" ? record.parentChatId : undefined;
+        const branchRootId_: string | undefined =
+            typeof record.branchRootId === "string" ? record.branchRootId : undefined;
+        const affection_: unknown = record.affection;
+
         return {
             ...chat,
-            name: chat.title || "",
+            name: name_ || chat.title || "",
             lastMessage: chat.updatedAt || chat.createdAt || 0,
             characterId: chat.characterId,
+            chatType:
+                chatType_ === "direct" || chatType_ === "group" || chatType_ === "open"
+                    ? chatType_
+                    : "direct",
+            participantIds: Array.isArray(participantIds_) ? participantIds_ : [],
+            creatorId: creatorId_,
+            parentChatId: parentChatId_,
+            branchRootId: branchRootId_,
+            affection: Array.isArray(affection_) ? affection_ : undefined,
         };
     }
-
     async getChat(id: string): Promise<LocalChat | undefined> {
         const c = await this.db.chats.get(id);
         return c ? this.toLocalChat(c) : undefined;
@@ -62,25 +84,69 @@ export class IDBChatAdapter implements IChatStorageAdapter {
         ]);
     }
 
-    async createChat(characterId: string, title?: string): Promise<string> {
+    async createChat(
+        characterId: string,
+        title?: string,
+        chatType: ChatType = "direct",
+        participantIds?: string[]
+    ): Promise<string> {
         const id = crypto.randomUUID();
         const now = Date.now();
-        const chat: Chat = {
+
+        // Build the chat record with base + extended fields
+        const chatRecord = {
             id,
             characterId,
             title: title || "",
             createdAt: now,
             updatedAt: now,
+            chatType,
+            participantIds: participantIds || [],
         };
+
         // Anti-proxy
-        const plainChat = cloneDeep(chat);
+        const plainChat = cloneDeep(chatRecord);
         await this.db.chats.put(plainChat);
         return id;
     }
-
     async getChatsByCharacter(characterId: string): Promise<LocalChat[]> {
-        const arr = await this.db.chats.where("characterId").equals(characterId).toArray();
-        return arr.map((c) => this.toLocalChat(c));
+        const all = await this.db.chats.toArray();
+        return all
+            .filter((c) => {
+                const record: Record<string, unknown> = c;
+                const participants: unknown = record.participantIds;
+                return (
+                    c.characterId === characterId ||
+                    (Array.isArray(participants) && participants.includes(characterId))
+                );
+            })
+            .map((c) => this.toLocalChat(c));
+    }
+
+    async getChatsByParticipant(characterId: string): Promise<LocalChat[]> {
+        const all = await this.db.chats.toArray();
+        return all
+            .filter((c) => {
+                const record: Record<string, unknown> = c;
+                const participants: unknown = record.participantIds;
+                return Array.isArray(participants) && participants.includes(characterId);
+            })
+            .map((c) => this.toLocalChat(c));
+    }
+    async updateChat(chatId: string, updates: Partial<LocalChat>): Promise<void> {
+        const chat = await this.db.chats.get(chatId);
+        // Strip LocalChat-only fields before persisting
+        const {
+            chatType: _chatType,
+            participantIds: _participantIds,
+            creatorId: _creatorId,
+            parentChatId: _parentChatId,
+            branchRootId: _branchRootId,
+            affection: _affection,
+            ...core
+        } = { ...chat, ...updates, updatedAt: Date.now() };
+        const plainChat: Chat = cloneDeep(core) as Chat;
+        await this.db.chats.put(plainChat);
     }
 
     async addMessage(chatId: string, message: Message): Promise<void> {

@@ -103,3 +103,21 @@ Worker logic should be tested via unit tests in `test/workers/`. Note that real 
 - DaisyUI: https://daisyui.com/llms.txt
 - Svelte: https://svelte.dev/llms.txt
 - Vitest: https://vitest.dev/llms.txt
+
+## AI Coding Agent Setup
+
+### Svelte Agentation (MCP)
+
+[sv-agentation](https://sv-agentation.com) is recommended for AI-assisted UI development.
+It allows annotating UI elements to generate structured context (CSS selectors, source paths,
+component hierarchy) for AI agents.
+
+The agentation-mcp server is registered in `.omp/mcp.json` for Oh My Pi users.
+For other environments, configure the MCP server manually:
+
+```bash
+npx agentation-mcp server
+```
+
+The Agentation toolbar is active in dev mode (`import.meta.env.DEV`).
+Press `i` to activate/deactivate it, then click elements to add annotations.

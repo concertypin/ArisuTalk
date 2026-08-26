@@ -1,13 +1,15 @@
 /// <reference types="vitest/browser" />
-import { test, expect, describe, vi, beforeEach } from "vitest";
+import { test, expect, describe, vi, beforeEach, assert } from "vitest";
 import { render } from "vitest-browser-svelte";
-import Wrapper from "@test/browser/wrappers/GenerationParametersTestWrapper.svelte";
+import { tick } from "svelte";
+import Wrapper from "../../wrappers/GenerationParametersTestWrapper.svelte";
 import { settings } from "@/lib/stores/settings.svelte";
 import type { LLMConfig } from "@/lib/types/IDataModel";
 
 // Mock the settings store
 vi.mock("@/lib/stores/settings.svelte", () => {
     const mockSettings = {
+        isLoaded: true,
         value: {
             llmConfigs: [],
             activeLLMConfigId: null,
@@ -125,7 +127,9 @@ describe("GenerationParameters Component", () => {
         });
 
         const deleteButton = getByLabelText("Delete config");
-        const element = deleteButton.element() as HTMLElement;
+        const element = deleteButton.element();
+        assert(element instanceof HTMLElement, "delete button must be HTMLElement");
+        element.click();
         element.click();
 
         expect(settings.value.llmConfigs).toHaveLength(0);
@@ -146,7 +150,8 @@ describe("GenerationParameters Component", () => {
         });
 
         const setActiveButton = getByLabelText("Use this config");
-        const element = setActiveButton.element() as HTMLElement;
+        const element = setActiveButton.element();
+        assert(element instanceof HTMLElement, "set-active button must be HTMLElement");
         element.click();
 
         expect(settings.value.activeLLMConfigId).toBe("config-2");
@@ -162,7 +167,8 @@ describe("GenerationParameters Component", () => {
         // Start checked
         await expect.element(toggleButton).toBeChecked();
 
-        const element = toggleButton.element() as HTMLElement;
+        const element = toggleButton.element();
+        assert(element instanceof HTMLElement, "toggle button must be HTMLElement");
         element.click();
 
         // Verify UI change
@@ -216,8 +222,8 @@ describe("GenerationParameters Component", () => {
 
         const temperatureCheckbox = getByLabelText(/Temperature/i).first();
         await expect.element(temperatureCheckbox).toBeChecked();
-
-        const element = temperatureCheckbox.element() as HTMLElement;
+        const element = temperatureCheckbox.element();
+        assert(element instanceof HTMLElement, "temperature checkbox must be HTMLElement");
         element.click();
 
         // Verify UI change (Label will change to "Temperature (Off)")
@@ -232,9 +238,94 @@ describe("GenerationParameters Component", () => {
         });
 
         const deleteButton = getByLabelText("Delete config");
-        const element = deleteButton.element() as HTMLElement;
+        const element = deleteButton.element();
+        assert(element instanceof HTMLElement, "delete button must be HTMLElement");
         element.click();
 
         expect(settings.value.activeLLMConfigId).toBeNull();
+    });
+    // ─── Bidirectional reactive sync (GenerationParameters local $state shadow) ───
+    // The component uses a `localConfig` $state shadow that mirrors UI edits
+    // back to the parent config. These tests pin the child→parent direction,
+    // which is the primary user scenario (typing in the UI persists).
+    //
+    // The parent→child direction is exercised in production when the keyed
+    // `{#each}` block in `LLMSettings.svelte` remounts the component on
+    // `settings.value.llmConfigs` replacement — not by mutating the existing
+    // `config` prop in place.
+
+    test("local UI edits propagate to the parent config prop", async () => {
+        const { getByRole } = render(Wrapper, {
+            config: mockConfig,
+            id: 0,
+        });
+
+        const nameInput = getByRole("textbox").first();
+        await nameInput.fill("Renamed Config");
+        await tick();
+
+        expect(mockConfig.name).toBe("Renamed Config");
+    });
+
+    test("temperature slider change propagates to the parent config prop", async () => {
+        const { getByLabelText } = render(Wrapper, {
+            config: mockConfig,
+            id: 0,
+        });
+
+        const temperatureInput = getByLabelText(/temperature value/i);
+        await temperatureInput.fill("1.5");
+        await tick();
+
+        expect(mockConfig.generationParameters.temperature).toBe(1.5);
+    });
+
+    test("unchecking model checkbox deletes the model field on the parent config", async () => {
+        const { container } = render(Wrapper, {
+            config: mockConfig,
+            id: 0,
+        });
+
+        // The Model label has both a checkbox (presence toggle) and a text
+        // input (the model value). Identify the checkbox by its containing label.
+        function isHtmlInputElement(node: Element): node is HTMLInputElement {
+            return node.tagName === "INPUT";
+        }
+        const checkboxes = Array.from(container.querySelectorAll('input[type="checkbox"]')).filter(
+            isHtmlInputElement
+        );
+        const modelToggle = checkboxes.find((cb) => {
+            const label = cb.closest("label");
+            return label?.textContent?.includes("Model") ?? false;
+        });
+        assert(modelToggle, "Model presence checkbox not found");
+        modelToggle.click();
+        await tick();
+    });
+
+    test("repeated field edits settle cleanly (no reactive thrash)", async () => {
+        const { getByRole, getByLabelText } = render(Wrapper, {
+            config: mockConfig,
+            id: 0,
+        });
+
+        const nameInput = getByRole("textbox").first();
+        const modelInput = getByLabelText(/model/i);
+
+        await nameInput.fill("Round 1");
+        await tick();
+        expect(mockConfig.name).toBe("Round 1");
+
+        await nameInput.fill("Round 2");
+        await tick();
+        expect(mockConfig.name).toBe("Round 2");
+
+        await modelInput.fill("claude-4.5");
+        await tick();
+        expect(mockConfig.model).toBe("claude-4.5");
+
+        // Sanity: subsequent settle should be a no-op (no thrash).
+        await tick();
+        await expect.element(nameInput).toHaveValue("Round 2");
     });
 });

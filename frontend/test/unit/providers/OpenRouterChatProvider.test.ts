@@ -21,7 +21,7 @@ vi.mock("@langchain/openai", async () => {
     };
 });
 
-describe("OpenRouterChatProvider", () => {
+describe.concurrent("OpenRouterChatProvider", () => {
     beforeEach(() => {
         vi.clearAllMocks();
     });

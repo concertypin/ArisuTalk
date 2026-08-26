@@ -4,7 +4,7 @@ import { routes } from "@/lib/routeConfig";
 // Mock the component to avoid loading the actual Svelte file and its dependencies
 vi.mock("@/routes/Home.svelte", () => ({ default: {} }));
 
-describe("routeConfig", () => {
+describe.concurrent("routeConfig", () => {
     it("exports a routes object", () => {
         expect(routes).toBeDefined();
         expect(typeof routes).toBe("object");

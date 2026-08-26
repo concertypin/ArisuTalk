@@ -1,21 +1,63 @@
 <script lang="ts">
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import PencilSimpleIcon from "phosphor-svelte/lib/PencilSimpleIcon";
+    import PencilSimple from "phosphor-svelte/lib/PencilSimpleIcon";
+    import PushPin from "phosphor-svelte/lib/PushPinIcon";
     import { uiState } from "@/lib/stores/ui.svelte";
+    import { opfsAdapter } from "../adapters/assetStorage/OpFSAssetStorageAdapter";
+    import { IfNotExistBehavior } from "@/lib/interfaces";
 
     type Props = {
         character: Character;
         active: boolean;
+        isPinned?: boolean;
         onClick: () => void;
+        onTogglePin?: () => void;
     };
 
-    const { character, active, onClick }: Props = $props();
+    let { character, active, isPinned = false, onClick, onTogglePin }: Props = $props();
 
     // Generate initials from name
-    const initials = $derived(character.name.substring(0, 2).toUpperCase());
+    let initials = $derived(character.name.substring(0, 2).toUpperCase());
 
-    // Check for avatar in this order: top-level property -> assets 'portrait-default' -> any image asset
-    const avatarUrl = $derived(character.avatarUrl || "");
+    // Resolve avatar URL (handles local:// OpFS URLs)
+    let resolvedAvatarUrl = $state("");
+
+    $effect(() => {
+        const url = character.avatarUrl;
+        if (!url) {
+            resolvedAvatarUrl = "";
+            return;
+        }
+
+        let revoked = false;
+        let blobUrl: string | null = null;
+
+        if (url.startsWith("local:")) {
+            void (async () => {
+                try {
+                    const res = await opfsAdapter.getAssetUrl(
+                        new URL(url),
+                        IfNotExistBehavior.RETURN_NULL
+                    );
+                    if (!revoked) {
+                        blobUrl = res;
+                        resolvedAvatarUrl = res || "";
+                    } else if (res) {
+                        URL.revokeObjectURL(res);
+                    }
+                } catch {
+                    if (!revoked) resolvedAvatarUrl = "";
+                }
+            })();
+        } else {
+            resolvedAvatarUrl = url;
+        }
+
+        return () => {
+            revoked = true;
+            if (blobUrl) URL.revokeObjectURL(blobUrl);
+        };
+    });
 
     function handleButtonClick(e: MouseEvent) {
         if (active) {
@@ -30,14 +72,17 @@
 </script>
 
 {#snippet CharacterIcon()}
-    {#if avatarUrl}
-        <img src={avatarUrl} alt={character.name} class="w-full h-full object-cover" />
+    {#if resolvedAvatarUrl}
+        <img src={resolvedAvatarUrl} alt={character.name} class="w-full h-full object-cover" />
     {:else}
         <span class="font-bold text-sm select-none">{initials}</span>
     {/if}
 {/snippet}
 
-<div class="tooltip tooltip-right z-50" data-tip={active ? "Settings" : character.name}>
+<div
+    class="tooltip tooltip-right z-50 relative group"
+    data-tip={active ? "Settings" : character.name}
+>
     <button
         class="group relative flex items-center justify-center w-12 h-12 mb-2 transition-all duration-200 ease-out focus:outline-none"
         onclick={handleButtonClick}
@@ -70,7 +115,7 @@
         >
             <!-- Start State: Settings Icon (when active & hovered) -->
             <div class="swap-on flex items-center justify-center w-full h-full">
-                <PencilSimpleIcon size={20} />
+                <PencilSimple size={20} />
             </div>
 
             <!-- End State: Avatar (when inactive OR not hovered) -->
@@ -79,4 +124,17 @@
             </div>
         </div>
     </button>
+    <!-- Pin Toggle (visible on hover) -->
+    {#if onTogglePin}
+        <button
+            class="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-base-300 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-accent z-10"
+            onclick={(e) => {
+                e.stopPropagation();
+                onTogglePin?.();
+            }}
+            aria-label={isPinned ? "Unpin character" : "Pin character"}
+        >
+            <PushPin size={10} weight={isPinned ? "fill" : "regular"} />
+        </button>
+    {/if}
 </div>

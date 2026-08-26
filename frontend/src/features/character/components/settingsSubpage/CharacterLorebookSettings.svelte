@@ -5,16 +5,11 @@
      * Each entry has name, content, conditions, priority, and enabled toggle.
      */
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import PlusIcon from "phosphor-svelte/lib/PlusIcon";
-    import TrashIcon from "phosphor-svelte/lib/TrashIcon";
-    import CaretDownIcon from "phosphor-svelte/lib/CaretDownIcon";
-    import CaretUpIcon from "phosphor-svelte/lib/CaretUpIcon";
-    import {
-        withCharacter,
-        updateArrayItem,
-        removeArrayItem,
-        appendArrayItem,
-    } from "@/lib/utils/characterState";
+    import Plus from "phosphor-svelte/lib/PlusIcon";
+    import Trash from "phosphor-svelte/lib/TrashIcon";
+    import CaretDown from "phosphor-svelte/lib/CaretDownIcon";
+    import CaretUp from "phosphor-svelte/lib/CaretUpIcon";
+    import { merge } from "lodash-es";
 
     type LorebookEntry = Character["prompt"]["lorebook"]["data"][number];
     type ConditionType = LorebookEntry["condition"][number]["type"];
@@ -24,14 +19,18 @@
         onChange: (character: Character) => void;
     };
 
-    const { character, onChange }: Props = $props();
+    let { character, onChange }: Props = $props();
 
     let expandedEntryId = $state<string | null>(null);
 
     function updateTokenLimit(limit: number) {
         onChange(
-            withCharacter(character, (draft) => {
-                draft.prompt.lorebook.config.tokenLimit = limit;
+            merge({}, character, {
+                prompt: {
+                    lorebook: {
+                        config: { tokenLimit: limit },
+                    },
+                },
             })
         );
     }
@@ -47,29 +46,37 @@
             priority: 0,
         };
         onChange(
-            withCharacter(character, (draft) => {
-                draft.prompt.lorebook.data = appendArrayItem(draft.prompt.lorebook.data, newEntry);
+            merge({}, character, {
+                prompt: {
+                    lorebook: {
+                        data: [...character.prompt.lorebook.data, newEntry],
+                    },
+                },
             })
         );
         expandedEntryId = newEntry.id;
     }
 
     function updateEntry(entryId: string, updates: Partial<LorebookEntry>) {
+        const data = character.prompt.lorebook.data.map((e) =>
+            e.id === entryId ? merge({}, e, updates) : e
+        );
         onChange(
-            withCharacter(character, (draft) => {
-                draft.prompt.lorebook.data = updateArrayItem(
-                    draft.prompt.lorebook.data,
-                    entryId,
-                    updates
-                );
+            merge({}, character, {
+                prompt: {
+                    lorebook: { data },
+                },
             })
         );
     }
 
     function deleteEntry(entryId: string) {
+        const data = character.prompt.lorebook.data.filter((e) => e.id !== entryId);
         onChange(
-            withCharacter(character, (draft) => {
-                draft.prompt.lorebook.data = removeArrayItem(draft.prompt.lorebook.data, entryId);
+            merge({}, character, {
+                prompt: {
+                    lorebook: { data },
+                },
             })
         );
     }
@@ -111,7 +118,7 @@
     <div class="flex items-center justify-between">
         <h4 class="font-medium">Entries ({character.prompt.lorebook.data.length})</h4>
         <button class="btn btn-sm btn-primary gap-1" onclick={addEntry}>
-            <PlusIcon size={16} /> Add Entry
+            <Plus size={16} /> Add Entry
         </button>
     </div>
 
@@ -146,9 +153,9 @@
                         </span>
                         <span class="text-xs text-base-content/50">P: {entry.priority}</span>
                         {#if expandedEntryId === entry.id}
-                            <CaretUpIcon size={16} />
+                            <CaretUp size={16} />
                         {:else}
-                            <CaretDownIcon size={16} />
+                            <CaretDown size={16} />
                         {/if}
                     </div>
 
@@ -251,7 +258,7 @@
                                     class="btn btn-sm btn-error btn-outline gap-1"
                                     onclick={() => deleteEntry(entry.id)}
                                 >
-                                    <TrashIcon size={14} /> Delete
+                                    <Trash size={14} /> Delete
                                 </button>
                             </div>
                         </div>

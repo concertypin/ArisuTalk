@@ -1,4 +1,4 @@
-import { getArisuDB } from "@/lib/adapters/storage/IndexedDBHelper";
+import { getArisuDB } from "../IndexedDBHelper";
 import type { IPersonaStorageAdapter } from "@/lib/interfaces";
 import type { Persona } from "@/features/persona/schema";
 import { SettingsSchema } from "@/lib/types/IDataModel";
@@ -47,10 +47,9 @@ export class IDBPersonaAdapter implements IPersonaStorageAdapter {
                 activePersonaId: id,
             });
             // Remove Svelte proxy wrapper by serializing/deserializing
-            const plainDefaults = cloneDeep({
-                ...defaults,
-                id: "singleton",
-            });
+            const serialized = JSON.stringify({ ...defaults, id: "singleton" });
+            const raw: unknown = JSON.parse(serialized);
+            const plainDefaults = raw as typeof defaults & { id: string };
             await this.db.settings.put(plainDefaults);
         }
     }

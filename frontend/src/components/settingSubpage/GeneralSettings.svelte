@@ -1,16 +1,18 @@
 <script lang="ts">
     import { settings } from "@/lib/stores/settings.svelte";
+    import { localeStore } from "@/lib/i18n/index.svelte";
     import NoopIcon from "@/components/Snippets/NoopIcon.svelte";
-    import PaletteIcon from "phosphor-svelte/lib/PaletteIcon";
+    import TextT from "phosphor-svelte/lib/TextTIcon";
+    import Palette from "phosphor-svelte/lib/PaletteIcon";
+    import GlobeHemisphereWest from "phosphor-svelte/lib/GlobeHemisphereWestIcon";
     import { SUPPORTED_FONTS } from "@/lib/utils/fontUtils";
-    import TextTIcon from "phosphor-svelte/lib/TextTIcon";
 </script>
 
 <div class="space-y-6">
     <h3 class="text-lg font-semibold">General Settings</h3>
     <fieldset class="fieldset w-full max-w-md bg-base-100 p-4 rounded-box border border-base-200">
         <legend class="fieldset-legend font-medium flex items-center gap-2 text-base-content/70">
-            <PaletteIcon size={16} />
+            <Palette size={16} />
             Theme
         </legend>
         <div class="flex items-center justify-between">
@@ -26,13 +28,30 @@
             <NoopIcon />
         </div>
     </fieldset>
+    <fieldset class="fieldset w-full max-w-md bg-base-100 p-4 rounded-box border border-base-200">
+        <legend class="fieldset-legend font-medium flex items-center gap-2 text-base-content/70">
+            <GlobeHemisphereWest size={16} />
+            Language
+        </legend>
+        <div class="flex items-center justify-between">
+            <select
+                id="general-language"
+                class="select select-bordered w-full"
+                bind:value={localeStore.current}
+            >
+                <option value="en">English</option>
+                <option value="ko">한국어</option>
+            </select>
+            <NoopIcon />
+        </div>
+    </fieldset>
 
     <h3 class="text-lg font-semibold pt-2">Typography</h3>
     <fieldset
         class="fieldset w-full max-w-md bg-base-100 p-4 rounded-box border border-base-200 space-y-4"
     >
         <legend class="fieldset-legend font-medium flex items-center gap-2 text-base-content/70">
-            <TextTIcon size={16} />
+            <TextT size={16} />
             Font Settings
         </legend>
 
@@ -64,8 +83,8 @@
             <input
                 id="font-size"
                 type="range"
-                min="10"
-                max="32"
+                min="12"
+                max="24"
                 value={settings.value.fontSize}
                 class="range range-primary range-sm"
                 step="1"
