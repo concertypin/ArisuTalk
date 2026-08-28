@@ -9,7 +9,7 @@
     import { characterStore } from "@/features/character/stores/characterStore.svelte";
     import { Logger } from "@common/logger/Logger";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import X from "phosphor-svelte/lib/XIcon";
+    import XIcon from "phosphor-svelte/lib/XIcon";
 
     // Tab Icons
     import UserIcon from "phosphor-svelte/lib/UserIcon";
@@ -207,7 +207,7 @@
                 onclick={close}
                 aria-label="Close"
             >
-                <X size={20} />
+                <XIcon size={20} />
             </button>
         </header>
 
