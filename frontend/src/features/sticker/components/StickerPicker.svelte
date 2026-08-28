@@ -39,6 +39,7 @@ Emits `onSelect` with the chosen Sticker object.
     import XIcon from "phosphor-svelte/lib/XIcon";
     import MagnifyingGlassIcon from "phosphor-svelte/lib/MagnifyingGlassIcon";
     import { Logger } from "@common/logger/Logger";
+    import type { AssetEntity } from "@arisutalk/character-spec/v0/Character";
 
     interface Props {
         /** Callback invoked when a sticker or emoji is selected. */
@@ -315,7 +316,6 @@ Emits `onSelect` with the chosen Sticker object.
         <!-- Content -->
         <div class="flex-1 overflow-y-auto p-3">
             {#if activeTab === 0}
-                <!-- FIXME: This will not be able to find the emoji whose name is the blank character. -->
                 <!-- Emoji Grid -->
                 {@render drawEmojiGrid(isFiltered)}
             {:else}
