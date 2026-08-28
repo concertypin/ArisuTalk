@@ -14,8 +14,11 @@ export class CharacterStore {
     private adapter!: ICharacterStorageAdapter;
     public readonly initPromise: Promise<void>;
 
+    private pinnedIds: string[] = $state([]);
+
     constructor(adapter?: ICharacterStorageAdapter) {
         this.initPromise = this.initialize(adapter);
+        this.pinnedIds = [];
     }
 
     private async initialize(adapter?: ICharacterStorageAdapter) {
@@ -50,7 +53,7 @@ export class CharacterStore {
 
             // Sort: pinned first, then by saved order
             const order = this.getOrder();
-            const pinned = this.getPinnedIds();
+            const pinned = this.updatePinnedIds();
             const pinnedSet = new SvelteSet(pinned);
             if (order.length > 0 || pinned.length > 0) {
                 const orderMap: Record<string, number> = Object.fromEntries(
@@ -130,27 +133,31 @@ export class CharacterStore {
 
     /**
      * Get list of pinned character IDs from localStorage.
+     * and... Save pinned IDs to localStorage.
      */
-    private getPinnedIds(): string[] {
-        if (typeof localStorage === "undefined") return [];
+    private updatePinnedIds(ids?: string[]): string[] {
+        if (ids != null) {
+            this.pinnedIds = ids;
+
+            if (typeof localStorage !== "undefined") {
+                localStorage.setItem(PINNED_KEY, JSON.stringify(ids));
+            }
+
+            return ids;
+        }
+
         try {
             const item = localStorage.getItem(PINNED_KEY);
-            if (!item) return [];
+            if (!item) return this.updatePinnedIds([]);
             const parsed: unknown = JSON.parse(item);
-            return Array.isArray(parsed) && parsed.every((v) => typeof v === "string")
-                ? parsed
-                : [];
-        } catch {
-            return [];
-        }
-    }
+            const isValid = Array.isArray(parsed) && parsed.every((v) => typeof v === "string");
 
-    /**
-     * Save pinned IDs to localStorage.
-     */
-    private savePinnedIds(ids: string[]) {
-        if (typeof localStorage === "undefined") return;
-        localStorage.setItem(PINNED_KEY, JSON.stringify(ids));
+            this.pinnedIds = isValid ? parsed : [];
+        } catch {
+            this.pinnedIds = [];
+        }
+
+        return this.pinnedIds;
     }
 
     /**
@@ -158,7 +165,8 @@ export class CharacterStore {
      * @param characterId The character ID to check.
      */
     isPinned(characterId: string): boolean {
-        return this.getPinnedIds().includes(characterId);
+        // return this.getPinnedIds().includes(characterId);
+        return this.pinnedIds.includes(characterId);
     }
 
     /**
@@ -166,14 +174,15 @@ export class CharacterStore {
      * @param characterId The character ID to toggle.
      */
     togglePin(characterId: string): void {
-        const pinned = this.getPinnedIds();
+        const pinned = this.pinnedIds;
         const idx = pinned.indexOf(characterId);
         if (idx >= 0) {
             pinned.splice(idx, 1);
         } else {
             pinned.unshift(characterId);
         }
-        this.savePinnedIds(pinned);
+        // this.savePinnedIds(pinned);
+        this.updatePinnedIds(pinned);
         // Re-sort to reflect pinning
         this.sortByPinAndOrder();
     }
@@ -182,7 +191,7 @@ export class CharacterStore {
      * Re-sort characters: pinned first, then by saved order.
      */
     private sortByPinAndOrder() {
-        const pinned = new SvelteSet(this.getPinnedIds());
+        const pinned = new SvelteSet(this.pinnedIds);
         const order = this.getOrder();
         const orderMap: Record<string, number> = Object.fromEntries(
             order.map((id, index) => [id, index])
