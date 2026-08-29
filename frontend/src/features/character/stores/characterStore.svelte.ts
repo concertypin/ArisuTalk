@@ -114,6 +114,13 @@ export class CharacterStore {
         }
     }
 
+    isReorderable(fromIndex: number, toIndex: number): boolean {
+        const fromChar = characterStore.characters[fromIndex];
+        const toChar = characterStore.characters[toIndex];
+
+        return characterStore.isPinned(fromChar.id) === characterStore.isPinned(toChar.id);
+    }
+
     reorder(fromIndex: number, toIndex: number) {
         if (
             fromIndex < 0 ||
@@ -123,6 +130,8 @@ export class CharacterStore {
         ) {
             return;
         }
+
+        if (!this.isReorderable(fromIndex, toIndex)) return;
 
         const item = this.characters.splice(fromIndex, 1)[0];
         this.characters.splice(toIndex, 0, item);
