@@ -32,18 +32,15 @@ Modal/panel for selecting stickers from packs, or picking emoji characters.
 Emits `onSelect` with the chosen Sticker object.
 -->
 <script lang="ts">
-    import { stickerStore } from "@/features/sticker/stores/stickerStore.svelte";
-    import type { Sticker, StickerPack } from "@/features/sticker";
     import StickerIcon from "phosphor-svelte/lib/StickerIcon";
-    import EmojiIcon from "phosphor-svelte/lib/SmileyIcon";
     import XIcon from "phosphor-svelte/lib/XIcon";
     import MagnifyingGlassIcon from "phosphor-svelte/lib/MagnifyingGlassIcon";
     import { Logger } from "@common/logger/Logger";
-    import type { AssetEntity } from "@arisutalk/character-spec/v0/Character";
+    import { type AssetEntity } from "@arisutalk/character-spec/v0/Character";
 
     interface Props {
         /** Callback invoked when a sticker or emoji is selected. */
-        onSelect: (sticker: Sticker & { packId?: string }) => void;
+        onSelect: (sticker: AssetEntity) => void;
         /** Called when the modal is dismissed. */
         onClose: () => void;
     }
@@ -76,21 +73,16 @@ Emits `onSelect` with the chosen Sticker object.
         onClose();
     }
 
-    /** Called when the user selects a sticker from a pack. */
-    function selectPackSticker(sticker: Sticker, packId: string): void {
-        onSelect({ ...sticker, packId });
-        close();
-    }
-
     /** Called when the user clicks an emoji from the emoji grid. */
     function selectEmoji(emojiChar: string, emojiName: string): void {
-        const sticker: Sticker = {
-            id: crypto.randomUUID(), // WHAT?
+        const emoji: AssetEntity = {
+            id: crypto.randomUUID(),
+            mimeType: "text/plain",
             name: emojiName,
-            emoji: emojiChar,
-            source: "emoji",
+            data: emojiChar,
         };
-        onSelect(sticker);
+
+        onSelect(emoji);
         close();
     }
 
@@ -135,37 +127,7 @@ Emits `onSelect` with the chosen Sticker object.
 
         return flattenedEmojis.filter(isQueryMatched);
     });
-
-    /** Stickers across all packs, filtered by search. */
-    let allPackStickers = $derived(
-        stickerStore.packs.flatMap((p) =>
-            p.stickers.map((s) => ({ sticker: s, packId: p.id, packName: p.name }))
-        )
-    );
-
-    /** Filtered pack stickers matching search. */
-    let filteredPackStickers = $derived(
-        isFiltered
-            ? allPackStickers.filter(
-                  (s) =>
-                      s.sticker.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                      s.sticker.emoji?.includes(searchQuery)
-              )
-            : allPackStickers
-    );
 </script>
-
-{#snippet drawSticker(sticker: Sticker)}
-    {#if sticker.emoji}
-        <span class="text-3xl">{sticker.emoji}</span>
-    {:else if sticker.imageUrl}
-        <img src={sticker.imageUrl} alt={sticker.name} class="w-12 h-12 object-contain rounded" />
-    {:else}
-        <span class="w-12 h-12 flex items-center justify-center text-base-content/30 text-xs">
-            No preview
-        </span>
-    {/if}
-{/snippet}
 
 {#snippet drawEmojiContainer(
     emojis: EmojiClass[],
@@ -205,41 +167,6 @@ Emits `onSelect` with the chosen Sticker object.
                 {@render drawEmojiContainer(group.emojis, selectEmoji)}
             </div>
         {/each}
-    {/if}
-{/snippet}
-
-{#snippet drawStickerPackGrid(filtered: boolean, activePack: StickerPack)}
-    {#if filtered}
-        <div class="grid grid-cols-4 sm:grid-cols-5 gap-2">
-            {#each filteredPackStickers.filter((s) => s.packId === activePack.id) as entry (entry.sticker.id)}
-                {@render drawSticker(entry.sticker)}
-            {/each}
-        </div>
-        {#if filteredPackStickers.length === 0}
-            <p class="text-center text-base-content/40 py-8 text-sm">No stickers found</p>
-        {/if}
-    {:else}
-        <div class="grid grid-cols-4 sm:grid-cols-5 gap-2">
-            {#each activePack.stickers as sticker (sticker.id)}
-                <button
-                    class="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-base-300/40 transition-colors"
-                    title={sticker.name}
-                    onclick={() => selectPackSticker(sticker, activePack.id)}
-                >
-                    {@render drawSticker(sticker)}
-                    <span
-                        class="text-[10px] text-base-content/60 truncate w-full text-center leading-tight"
-                    >
-                        {sticker.name}
-                    </span>
-                </button>
-            {/each}
-        </div>
-        {#if activePack.stickers.length === 0}
-            <p class="text-center text-base-content/40 py-8 text-sm">
-                This pack is empty — add stickers in the manager.
-            </p>
-        {/if}
     {/if}
 {/snippet}
 
@@ -285,47 +212,11 @@ Emits `onSelect` with the chosen Sticker object.
             </div>
         </div>
 
-        <!-- Tabs -->
-        <div
-            class="flex gap-1 px-3 pt-2 pb-1 overflow-x-auto bg-base-200/30 border-b border-base-300/30 shrink-0"
-        >
-            <!-- Emoji tab (always present) -->
-            <button
-                class="btn btn-xs {activeTab === 0 ? 'btn-primary' : 'btn-ghost'} gap-1.5 shrink-0"
-                onclick={() => (activeTab = 0)}
-            >
-                <EmojiIcon size={14} /> Emoji
-            </button>
-
-            <!-- Sticker pack tabs -->
-            {#each stickerStore.packs as pack, i (pack.id)}
-                {#if pack.stickers.length > 0}
-                    <button
-                        class="btn btn-xs {activeTab === i + 1
-                            ? 'btn-primary'
-                            : 'btn-ghost'} gap-1.5 shrink-0"
-                        onclick={() => (activeTab = i + 1)}
-                    >
-                        <StickerIcon size={14} />
-                        {pack.name}
-                    </button>
-                {/if}
-            {/each}
-        </div>
-
         <!-- Content -->
         <div class="flex-1 overflow-y-auto p-3">
             {#if activeTab === 0}
                 <!-- Emoji Grid -->
                 {@render drawEmojiGrid(isFiltered)}
-            {:else}
-                <!-- Sticker Pack Grid -->
-                {@const packIndex = activeTab - 1}
-                {@const activePack = stickerStore.packs[packIndex]}
-
-                {#if activePack}
-                    {@render drawStickerPackGrid(isFiltered, activePack)}
-                {/if}
             {/if}
         </div>
     </div>
