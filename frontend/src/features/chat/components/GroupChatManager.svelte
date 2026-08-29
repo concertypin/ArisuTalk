@@ -1,5 +1,6 @@
 <script lang="ts">
     import { characterStore } from "../../character/stores/characterStore.svelte";
+    import { XCircleIcon } from "phosphor-svelte";
 
     type Props = {
         selectedIds: string[];
@@ -51,7 +52,7 @@
                             onclick={() => onToggle(char.id)}
                             aria-label="Remove {char.name}"
                         >
-                            ✕
+                            <XCircleIcon size={16} />
                         </button>
                     </div>
                 {/each}
