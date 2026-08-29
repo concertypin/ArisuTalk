@@ -126,11 +126,7 @@
     }
 
     function handleStickerSelect(sticker: Sticker & { packId?: string }): void {
-        if (sticker.emoji) {
-            inputValue += sticker.emoji;
-        } else {
-            inputValue += `[${sticker.name}] `;
-        }
+        inputValue += sticker.emoji ? sticker.emoji : `[${sticker.name}]`;
         showStickerPicker = false;
     }
 
