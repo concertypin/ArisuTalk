@@ -15,8 +15,8 @@
     import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
     import GearIcon from "phosphor-svelte/lib/GearIcon";
     import StickerIcon from "phosphor-svelte/lib/StickerIcon";
-    import type { Sticker } from "@/features/sticker";
     import StickerPicker from "@/features/sticker/components/StickerPicker.svelte";
+    import type { AssetEntity } from "@arisutalk/character-spec/v0/Character";
 
     let inputValue = $state("");
     let showStickerPicker = $state(false);
@@ -125,8 +125,11 @@
         }
     }
 
-    function handleStickerSelect(sticker: Sticker & { packId?: string }): void {
-        inputValue += sticker.emoji ?? `[${sticker.name}]`;
+    function handleStickerSelect(sticker: AssetEntity): void {
+        if (sticker.mimeType === "text/plain") {
+            inputValue += sticker.data;
+        }
+
         showStickerPicker = false;
     }
 
@@ -239,7 +242,7 @@
 
         {#if showStickerPicker}
             <StickerPicker
-                onSelect={(s: Sticker & { packId?: string }) => handleStickerSelect(s)}
+                onSelect={(s: AssetEntity) => handleStickerSelect(s)}
                 onClose={() => (showStickerPicker = false)}
             />
         {/if}
