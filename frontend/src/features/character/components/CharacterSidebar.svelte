@@ -7,6 +7,7 @@
     import CharacterSidebarItem from "./CharacterSidebarItem.svelte";
     import { characterStore } from "../stores/characterStore.svelte";
     import { uiState } from "@/lib/stores/ui.svelte";
+    import { Logger } from "@common/logger/Logger";
 
     type Props = {
         selectedCharacterId: string | null;
@@ -77,11 +78,19 @@
             {@const dragged = draggedIndex === index}
             {@const dropTarget = dropTargetIndex === index}
             {@const selected = selectedCharacterId === character.id}
+            {@const isReorderable =
+                draggedIndex !== null ? characterStore.isReorderable(draggedIndex, index) : false}
             <div
                 class="relative"
                 class:opacity-50={dragged}
-                class:border-t-2={dropTarget && draggedIndex !== null && draggedIndex > index}
-                class:border-b-2={dropTarget && draggedIndex !== null && draggedIndex < index}
+                class:border-t-2={dropTarget &&
+                    draggedIndex !== null &&
+                    draggedIndex > index &&
+                    isReorderable}
+                class:border-b-2={dropTarget &&
+                    draggedIndex !== null &&
+                    draggedIndex < index &&
+                    isReorderable}
                 class:border-primary={dropTarget}
                 role="option"
                 tabindex="0"
