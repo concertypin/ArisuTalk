@@ -39,7 +39,7 @@ export default defineConfig(async (ctx) => {
                 "@langchain/core/language_models/chat_models",
                 "@langchain/core/messages",
                 "@langchain/core/outputs",
-                "phosphor-svelte/lib/*",
+                "phosphor-svelte",
             ],
             rolldownOptions: {
                 checks: {
