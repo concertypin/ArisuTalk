@@ -9,14 +9,14 @@
     import { chatStore } from "@/features/chat/stores/chatStore.svelte";
     import { characterStore } from "@/features/character/stores/characterStore.svelte";
     import { uiState } from "@/lib/stores/ui.svelte";
-    import MarkdownRenderer from "@/components/MarkdownRenderer.svelte";
-    import MessageActions from "@/components/MessageActions.svelte";
     import { toastStore } from "@/lib/stores/toast.svelte";
     import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
     import GearIcon from "phosphor-svelte/lib/GearIcon";
     import StickerIcon from "phosphor-svelte/lib/StickerIcon";
     import StickerPicker from "@/features/sticker/components/StickerPicker.svelte";
     import type { AssetEntity } from "@arisutalk/character-spec/v0/Character";
+    import ChatBubble from "@/component/chat/ChatBubble.svelte";
+    import TextArea from "@/component/input/TextArea.svelte";
 
     let inputValue = $state("");
     let showStickerPicker = $state(false);
@@ -167,35 +167,19 @@
                 <p>No messages yet. Say hello!</p>
             </div>
         {:else}
-            {#each messages as msg (msg.id)}
-                {@const isEditing = editingMessageId === msg.id}
-                <div class="chat group {msg.role === 'user' ? 'chat-end' : 'chat-start'}">
-                    <div class="chat-bubble shadow-lg max-w-[80ch]">
-                        {#if isEditing}
-                            <textarea
-                                class="textarea textarea-bordered w-full min-h-16 text-base-content bg-base-100"
-                                bind:value={editContent}
-                                onkeydown={handleEditKeydown}
-                            ></textarea>
-                        {:else}
-                            <MarkdownRenderer source={getMessageText(msg)} />
-                        {/if}
-                        <div class="flex items-center justify-between mt-1">
-                            <span class="text-xs opacity-60">
-                                {new Date(msg.timestamp || Date.now()).toLocaleTimeString()}
-                            </span>
-                            <MessageActions
-                                message={msg}
-                                {isEditing}
-                                onEdit={() => startEdit(msg.id, getMessageText(msg))}
-                                onDelete={() => void handleDelete(msg.id)}
-                                onRegenerate={() => void handleRegenerate(msg.id)}
-                                onConfirmEdit={() => void confirmEdit()}
-                                onCancelEdit={cancelEdit}
-                            />
-                        </div>
-                    </div>
-                </div>
+            {#each messages as message (message.id)}
+                {@const isEditing = editingMessageId === message.id}
+                <ChatBubble
+                    {message}
+                    {isEditing}
+                    bind:editContent
+                    onKeyDown={handleEditKeydown}
+                    onEdit={() => startEdit(message.id, getMessageText(message))}
+                    onDelete={() => void handleDelete(message.id)}
+                    onRegenerate={() => void handleRegenerate(message.id)}
+                    onConfirmEdit={() => void confirmEdit()}
+                    onCancelEdit={cancelEdit}
+                />
             {/each}
         {/if}
 
@@ -212,14 +196,13 @@
 
     <footer class="p-4 border-t border-base-300/50 bg-base-200/80">
         <div class="flex gap-2">
-            <textarea
-                class="textarea textarea-primary flex-1 min-h-[1em] field-sizing-content resize-none"
+            <TextArea
                 bind:value={inputValue}
                 placeholder="Type a message..."
-                onkeydown={handleKeydown}
+                onKeyDown={handleKeydown}
                 disabled={!activeChat}
-            >
-            </textarea>
+                color={null}
+            />
             <button
                 class="btn btn-ghost btn-sm btn-square hover:bg-base-300/50"
                 onclick={() => (showStickerPicker = true)}
