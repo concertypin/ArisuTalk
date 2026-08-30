@@ -7,11 +7,12 @@
     import { SvelteMap, SvelteSet } from "svelte/reactivity";
     import { getAssetStorage } from "@/features/character/adapters/assetStorage/assetStorageResolver";
     import { Logger } from "@common/logger/Logger";
-    import { IfNotExistBehavior } from "@/lib/interfaces";
+    import { IfNotExistBehavior, type IAssetStorageAdapter } from "@/lib/interfaces";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import { merge } from "lodash-es";
     import WarningIcon from "phosphor-svelte/lib/WarningIcon";
     import { characterStore } from "@/features/character/stores/characterStore.svelte";
+    import type { AssetEntity } from "@arisutalk/character-spec/v0/Character";
 
     type Props = {
         character: Character;
@@ -28,42 +29,42 @@
         character.assets.assets.filter((a) => a.mimeType.startsWith("image/"))
     );
 
+    async function getImage(
+        asset: AssetEntity,
+        assetStorage: IAssetStorageAdapter,
+        blobUrls: SvelteSet<string>
+    ) {
+        if (!(typeof asset.data === "string" && asset.data.startsWith("local:"))) return;
+
+        try {
+            const url = await assetStorage.getAssetUrl(
+                new URL(asset.data),
+                IfNotExistBehavior.RETURN_NULL
+            );
+            if (url) {
+                assetPreviews.set(asset.id, url);
+                blobUrls.add(url);
+            }
+        } catch (e) {
+            Logger.error("Failed to load asset preview for avatar picker:", asset.id, e);
+        }
+    }
+
     // Load image previews
     $effect(() => {
-        let revoked = false;
-        const blobUrls = new SvelteSet<string | Uint8Array<ArrayBuffer>>();
+        const blobUrls = new SvelteSet<string>();
 
         const loadPreviews = async () => {
             await assetStorage.init();
             for (const asset of imageAssets) {
-                if (typeof asset.data === "string" && asset.data.startsWith("local:")) {
-                    try {
-                        const url = await assetStorage.getAssetUrl(
-                            new URL(asset.data),
-                            IfNotExistBehavior.RETURN_NULL
-                        );
-                        if (url && !revoked) {
-                            assetPreviews.set(asset.id, url);
-                            blobUrls.add(url);
-                        }
-                    } catch (e) {
-                        Logger.error(
-                            "Failed to load asset preview for avatar picker:",
-                            asset.id,
-                            e
-                        );
-                    }
-                }
+                await getImage(asset, assetStorage, blobUrls);
             }
         };
 
         void loadPreviews();
 
         return () => {
-            revoked = true;
-            for (const url of blobUrls) {
-                if (typeof url === "string") URL.revokeObjectURL(url);
-            }
+            for (const url of blobUrls) URL.revokeObjectURL(url);
         };
     });
 
