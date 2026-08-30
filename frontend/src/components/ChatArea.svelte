@@ -170,11 +170,7 @@
             {#each messages as msg (msg.id)}
                 {@const isEditing = editingMessageId === msg.id}
                 <div class="chat group {msg.role === 'user' ? 'chat-end' : 'chat-start'}">
-                    <div
-                        class="chat-bubble {msg.role === 'user'
-                            ? 'chat-bubble-primary'
-                            : 'chat-bubble-neutral'}"
-                    >
+                    <div class="chat-bubble shadow-lg max-w-[80ch]">
                         {#if isEditing}
                             <textarea
                                 class="textarea textarea-bordered w-full min-h-16 text-base-content bg-base-100"
@@ -216,14 +212,14 @@
 
     <footer class="p-4 border-t border-base-300/50 bg-base-200/80">
         <div class="flex gap-2">
-            <input
-                type="text"
-                class="input flex-1 bg-base-100/50 border-base-300/50 focus:border-primary/50"
-                placeholder="Type a message..."
+            <textarea
+                class="textarea textarea-primary flex-1 min-h-[1em] field-sizing-content resize-none"
                 bind:value={inputValue}
+                placeholder="Type a message..."
                 onkeydown={handleKeydown}
                 disabled={!activeChat}
-            />
+            >
+            </textarea>
             <button
                 class="btn btn-ghost btn-sm btn-square hover:bg-base-300/50"
                 onclick={() => (showStickerPicker = true)}
