@@ -11,6 +11,7 @@
     import CaretUp from "phosphor-svelte/lib/CaretUpIcon";
     import Warning from "phosphor-svelte/lib/WarningIcon";
     import { merge, cloneDeep } from "lodash-es";
+    import CharacterSettings from "./CharacterSettings.svelte";
 
     type ReplaceHook = Character["executables"]["replaceHooks"];
     type HookType = keyof ReplaceHook;
@@ -87,9 +88,7 @@
     }
 </script>
 
-<div class="space-y-6">
-    <h3 class="text-lg font-semibold">Advanced Settings</h3>
-
+<CharacterSettings subpageName="Advanced Settings">
     <div class="alert alert-warning">
         <Warning size={18} />
         <span
@@ -330,4 +329,4 @@
             {/each}
         </div>
     {/if}
-</div>
+</CharacterSettings>

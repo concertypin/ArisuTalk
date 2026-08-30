@@ -14,6 +14,7 @@
     import DotsSixVertical from "phosphor-svelte/lib/DotsSixVerticalIcon";
     import { getAssetStorage } from "@/features/character/adapters/assetStorage/assetStorageResolver";
     import { Logger } from "@common/logger/Logger";
+    import CharacterSettings from "./CharacterSettings.svelte";
 
     type Props = {
         character: Character;
@@ -158,9 +159,7 @@
     }
 </script>
 
-<div class="space-y-6">
-    <h3 class="text-lg font-semibold">Assets</h3>
-
+<CharacterSettings subpageName="Assets">
     <!-- Upload Section -->
     <fieldset class="fieldset w-full">
         <label for="asset-upload" class="fieldset-legend">Upload Asset</label>
@@ -311,4 +310,4 @@
             <p class="text-sm">Upload images or other files to embed in your character.</p>
         </div>
     {/if}
-</div>
+</CharacterSettings>
