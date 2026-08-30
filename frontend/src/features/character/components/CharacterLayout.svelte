@@ -247,6 +247,6 @@
     </dialog>
     <!-- Character Settings Modal -->
     {#if uiState.characterSettingsOpen}
-        <CharacterSettingsModal />
+        <CharacterSettingsModal selectCharacter={handleSelect} />
     {/if}
 </div>

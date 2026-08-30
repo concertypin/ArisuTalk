@@ -30,6 +30,12 @@
     import CharacterHooksSettings from "./settingsSubpage/CharacterHooksSettings.svelte";
     import { cloneDeep } from "lodash-es";
 
+    type Props = {
+        selectCharacter: (charId: string | null) => void;
+    };
+
+    let { selectCharacter }: Props = $props();
+
     let dialog = $state<HTMLDialogElement>();
     type ActiveTab = "basic" | "prompt" | "lorebook" | "assets" | "metadata" | "advanced" | "magic";
     let activeTab = $state<ActiveTab>("basic");
@@ -121,9 +127,9 @@
     });
 
     function close() {
-        dialog?.close();
-        uiState.closeCharacterSettings();
         editingCharacter = null;
+        uiState.closeCharacterSettings();
+
         if (saveTimeout) {
             clearTimeout(saveTimeout);
             saveTimeout = null;
@@ -133,6 +139,10 @@
             modalName: "CharacterSettingsModal",
         });
     }
+
+    $effect(() => {
+        if (editingCharacter === null) close();
+    });
 
     function handleBackdropClick(e: MouseEvent) {
         if (e.target === dialog) {
@@ -175,8 +185,15 @@
      * Handle character update from subpages.
      * Triggers autosave automatically.
      */
-    function handleCharacterChange(updatedCharacter: Character) {
+    function handleCharacterChange(updatedCharacter: Character | null) {
+        if (updatedCharacter === null) {
+            selectCharacter(null);
+            close();
+            return;
+        }
+
         editingCharacter = updatedCharacter;
+
         triggerAutosave();
     }
 </script>
