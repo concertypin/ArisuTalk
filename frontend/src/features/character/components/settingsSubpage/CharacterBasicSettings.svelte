@@ -10,10 +10,12 @@
     import { IfNotExistBehavior } from "@/lib/interfaces";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import { merge } from "lodash-es";
+    import WarningIcon from "phosphor-svelte/lib/WarningIcon";
+    import { characterStore } from "@/features/character/stores/characterStore.svelte";
 
     type Props = {
         character: Character;
-        onChange: (character: Character) => void;
+        onChange: (character: Character | null) => void;
     };
 
     let { character, onChange }: Props = $props();
@@ -76,6 +78,21 @@
     function updateField<const K extends keyof Character>(field: K, value: Character[K]) {
         onChange(merge({}, character, { [field]: value }));
     }
+
+    const findCharacter = (c: Character) => c.id === character.id;
+
+    function onCharacterRemove() {
+        const index = characterStore.characters.findIndex(findCharacter);
+
+        if (index < 0) return;
+
+        characterStore.remove(index);
+
+        onChange(null);
+    }
+
+    let inputCharName = $state("");
+    let isValidCharName = $derived(inputCharName.trim() ? character.name === inputCharName : true);
 </script>
 
 <div class="space-y-6">
@@ -215,6 +232,38 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </fieldset>
+
+    <fieldset class="fieldset w-full">
+        <h4 class="inline-flex items-center gap-2 m-0 text-lg font-semibold">
+            <span class="text-warning"><WarningIcon /></span>
+            <span>Remove Character</span>
+        </h4>
+        <label for="remove-character" class="fieldset-legend">
+            Enter the character's name exactly
+        </label>
+        <input
+            type="text"
+            id="remove-character"
+            bind:value={inputCharName}
+            class="input input-sm w-full bg-base-100 {isValidCharName ? '' : 'input-error'}"
+            placeholder={character.name}
+            onkeydown={(e) => {
+                if (e.key !== "Enter") return;
+
+                if (e.currentTarget?.value === character.name) {
+                    onCharacterRemove();
+                }
+            }}
+        />
+        {#if !isValidCharName}
+            <div class="label">
+                <span class="label-text-alt text-error">Incorrect character name</span>
+            </div>
+        {/if}
+        <div class="label">
+            <span class="label-text-alt">All data will be removed. It cannot be recovered!</span>
         </div>
     </fieldset>
 </div>
