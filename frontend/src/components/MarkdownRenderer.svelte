@@ -22,7 +22,7 @@
 {:then module}
     {#if module?.default}
         {@const SvelteMarkdown = module.default}
-        <div class="prose prose-invert prose-sm prose-gray max-w-[80ch]">
+        <div class="prose prose-invert prose-sm prose-gray max-w-[80ch] whitespace-pre-line">
             <SvelteMarkdown {source} />
         </div>
     {:else}
