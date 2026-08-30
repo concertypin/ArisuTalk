@@ -13,6 +13,7 @@
     import WarningIcon from "phosphor-svelte/lib/WarningIcon";
     import { characterStore } from "@/features/character/stores/characterStore.svelte";
     import type { AssetEntity } from "@arisutalk/character-spec/v0/Character";
+    import CharacterSettings from "./CharacterSettings.svelte";
 
     type Props = {
         character: Character;
@@ -96,9 +97,7 @@
     let isValidCharName = $derived(inputCharName.trim() ? character.name === inputCharName : true);
 </script>
 
-<div class="space-y-6">
-    <h3 class="text-lg font-semibold">Basic Information</h3>
-
+<CharacterSettings subpageName="Basic Information">
     <fieldset class="fieldset w-full">
         <label for="char-name" class="fieldset-legend">Name</label>
         <input
@@ -267,4 +266,4 @@
             <span class="label-text-alt">All data will be removed. It cannot be recovered!</span>
         </div>
     </fieldset>
-</div>
+</CharacterSettings>

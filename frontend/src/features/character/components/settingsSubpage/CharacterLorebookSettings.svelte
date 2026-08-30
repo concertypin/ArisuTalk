@@ -10,6 +10,7 @@
     import CaretDown from "phosphor-svelte/lib/CaretDownIcon";
     import CaretUp from "phosphor-svelte/lib/CaretUpIcon";
     import { merge } from "lodash-es";
+    import CharacterSettings from "./CharacterSettings.svelte";
 
     type LorebookEntry = Character["prompt"]["lorebook"]["data"][number];
     type ConditionType = LorebookEntry["condition"][number]["type"];
@@ -95,9 +96,7 @@
     }
 </script>
 
-<div class="space-y-6">
-    <h3 class="text-lg font-semibold">Lorebook</h3>
-
+<CharacterSettings subpageName="Lorebook">
     <fieldset class="fieldset w-full">
         <label for="lorebook-token-limit" class="fieldset-legend">Token Limit</label>
         <input
@@ -267,4 +266,4 @@
             {/each}
         </div>
     {/if}
-</div>
+</CharacterSettings>

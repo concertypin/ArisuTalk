@@ -11,6 +11,8 @@
     import { merge } from "lodash-es";
     import PromptTemplateManager from "@/features/promptTemplate/components/PromptTemplateManager.svelte";
     import { estimateTokens } from "@/lib/utils/tokenCounter";
+    import CharacterSettings from "./CharacterSettings.svelte";
+
     type Props = {
         character: Character;
         onChange: (character: Character) => void;
@@ -48,9 +50,7 @@
     }
 </script>
 
-<div class="space-y-6">
-    <h3 class="text-lg font-semibold">Prompt Configuration</h3>
-
+<CharacterSettings subpageName="Prompt Configuration">
     <fieldset class="fieldset w-full">
         <div class="flex items-center justify-between">
             <label for="prompt-desc" class="fieldset-legend">Character Prompt Description</label>
@@ -145,4 +145,4 @@
         <BookOpen size={16} />
         {showTemplateManager ? "Hide Templates" : "Load Template"}
     </button>
-</div>
+</CharacterSettings>

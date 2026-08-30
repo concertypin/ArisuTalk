@@ -11,6 +11,7 @@
     import { parseMagicPatterns } from "@/lib/parsers/magicPatternParser";
     import Play from "phosphor-svelte/lib/PlayIcon";
     import Warning from "phosphor-svelte/lib/WarningIcon";
+    import CharacterSettings from "./CharacterSettings.svelte";
 
     type Props = {
         character: Character;
@@ -59,9 +60,7 @@
     }
 </script>
 
-<div class="space-y-6">
-    <h3 class="text-lg font-semibold">Magic Patterns</h3>
-
+<CharacterSettings subpageName="Magic Patterns">
     <div class="alert bg-base-200/70 border border-base-300/50">
         <Warning size={20} class="shrink-0 text-warning" />
         <div class="text-sm space-y-1">
@@ -187,4 +186,4 @@
             </div>
         </div>
     </details>
-</div>
+</CharacterSettings>

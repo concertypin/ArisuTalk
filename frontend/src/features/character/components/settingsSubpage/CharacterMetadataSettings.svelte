@@ -5,6 +5,7 @@
      */
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import { merge } from "lodash-es";
+    import CharacterSettings from "./CharacterSettings.svelte";
 
     type Props = {
         character: Character;
@@ -36,9 +37,7 @@
     }
 </script>
 
-<div class="space-y-6">
-    <h3 class="text-lg font-semibold">Metadata</h3>
-
+<CharacterSettings subpageName="Metadata">
     <fieldset class="fieldset w-full">
         <label for="meta-author" class="fieldset-legend">Author</label>
         <input
@@ -120,4 +119,4 @@
             <span class="label-text-alt">Extra information, credits, or notes.</span>
         </div>
     </fieldset>
-</div>
+</CharacterSettings>
