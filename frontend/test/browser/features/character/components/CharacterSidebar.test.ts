@@ -167,7 +167,7 @@ describe("CharacterSidebar Component", () => {
         //Wait for rendering
         await vi.waitFor(() => {
             const items = container.querySelectorAll('[role="option"]');
-            expect(items.length).toBeGreaterThan(0);
+            expect(items.length).toEqual(1);
         });
 
         const selectedOption = container.querySelector('[aria-selected="true"]');
