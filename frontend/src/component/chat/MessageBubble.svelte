@@ -8,7 +8,7 @@
         message: Message;
         isEditing: boolean;
         editContent: string;
-        onKeyDown: (e: KeyboardEvent) => void;
+        onSubmit: (s: string) => void;
         onEdit: () => void;
         onDelete: () => void;
         onRegenerate: () => void;
@@ -20,7 +20,7 @@
         message,
         isEditing,
         editContent = $bindable(),
-        onKeyDown,
+        onSubmit,
         onEdit,
         onDelete,
         onRegenerate,
@@ -36,7 +36,7 @@
 <div class="chat group {message.role === 'user' ? 'chat-end' : 'chat-start'}">
     <div class="chat-bubble shadow-lg max-w-[80ch]">
         {#if isEditing}
-            <TextArea bind:value={editContent} {onKeyDown} />
+            <TextArea bind:value={editContent} {onSubmit} />
         {:else}
             <MarkdownRenderer source={getMessageText(message)} />
         {/if}
