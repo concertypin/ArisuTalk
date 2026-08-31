@@ -43,7 +43,7 @@
 <textarea
     class="textarea {color ? 'textarea-' + color : ''} flex-1 min-h-[1em] {autosize
         ? 'field-sizing-content'
-        : ''} resize-none"
+        : ''} resize-none outline-none"
     bind:value
     {placeholder}
     onkeydown={onKeyDown}
