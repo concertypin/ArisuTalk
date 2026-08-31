@@ -1,7 +1,8 @@
 <script lang="ts">
     type Props = {
         value: string;
-        onKeyDown: (e: KeyboardEvent) => void;
+        onSubmit?: (s: string) => void;
+        onCancel?: () => void;
         disabled?: boolean;
         placeholder?: string | null;
         color?: Color;
@@ -21,12 +22,22 @@
 
     let {
         value = $bindable(),
-        onKeyDown,
+        onSubmit = (_: any) => undefined,
+        onCancel = () => undefined,
         disabled,
         placeholder,
         color,
         autosize = true,
     }: Props = $props();
+
+    function onKeyDown(event: KeyboardEvent) {
+        if (event.key === "Enter" && !event.shiftKey) {
+            event.preventDefault();
+            onSubmit(value);
+        } else if (event.key === "Escape") {
+            onCancel();
+        }
+    }
 </script>
 
 <textarea
