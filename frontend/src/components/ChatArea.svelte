@@ -17,6 +17,7 @@
     import type { AssetEntity } from "@arisutalk/character-spec/v0/Character";
     import MessageBubble from "@/component/chat/MessageBubble.svelte";
     import TextArea from "@/component/input/TextArea.svelte";
+    import MessageContainer from "@/component/chat/MessageContainer.svelte";
 
     let inputValue = $state("");
     let showStickerPicker = $state(false);
@@ -117,22 +118,6 @@
         cancelEdit();
     }
 
-    async function handleDelete(messageId: string) {
-        try {
-            await chatStore.deleteMessage(messageId);
-        } catch (error) {
-            toastStore.error(`Failed to delete message: ${String(error)}`);
-        }
-    }
-
-    async function handleRegenerate(messageId: string) {
-        try {
-            await chatStore.regenerateMessage(messageId);
-        } catch (error) {
-            toastStore.error(`Failed to regenerate message: ${String(error)}`);
-        }
-    }
-
     function handleStickerSelect(sticker: AssetEntity): void {
         if (sticker.mimeType === "text/plain") {
             inputValue += sticker.data;
@@ -165,42 +150,7 @@
         {/if}
     </header>
 
-    <section class="flex-1 overflow-y-auto p-6 space-y-4" bind:this={messagesContainer}>
-        {#if !activeChat}
-            <div class="flex items-center justify-center h-full text-base-content/50">
-                <p>Select a chat or create a new one to start messaging.</p>
-            </div>
-        {:else if messages.length === 0}
-            <div class="flex items-center justify-center h-full text-base-content/50">
-                <p>No messages yet. Say hello!</p>
-            </div>
-        {:else}
-            {#each messages as message (message.id)}
-                {@const isEditing = editingMessageId === message.id}
-                <MessageBubble
-                    {message}
-                    {isEditing}
-                    bind:editContent
-                    {onSubmit}
-                    onEdit={() => startEdit(message.id, getMessageText(message))}
-                    onDelete={() => void handleDelete(message.id)}
-                    onRegenerate={() => void handleRegenerate(message.id)}
-                    onConfirmEdit={() => void confirmEdit()}
-                    onCancelEdit={cancelEdit}
-                />
-            {/each}
-        {/if}
-
-        {#if isTyping}
-            <div class="chat chat-start">
-                <div
-                    class="chat-bubble chat-bubble-neutral flex items-center justify-center min-w-12 min-h-10"
-                >
-                    <span class="loading loading-dots loading-sm"></span>
-                </div>
-            </div>
-        {/if}
-    </section>
+    <MessageContainer {messages} bind:container={messagesContainer} />
 
     <footer class="p-4 border-t border-base-300/50 bg-base-200/80">
         <div class="flex gap-2">

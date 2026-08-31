@@ -24,7 +24,7 @@
         value = $bindable(),
         onSubmit = (_: any) => undefined,
         onCancel = () => undefined,
-        disabled,
+        disabled = false,
         placeholder,
         color,
         autosize = true,
