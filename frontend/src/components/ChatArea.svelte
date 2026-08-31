@@ -15,7 +15,7 @@
     import StickerIcon from "phosphor-svelte/lib/StickerIcon";
     import StickerPicker from "@/features/sticker/components/StickerPicker.svelte";
     import type { AssetEntity } from "@arisutalk/character-spec/v0/Character";
-    import ChatBubble from "@/component/chat/ChatBubble.svelte";
+    import MessageBubble from "@/component/chat/MessageBubble.svelte";
     import TextArea from "@/component/input/TextArea.svelte";
 
     let inputValue = $state("");
@@ -67,6 +67,10 @@
         }
     }
 
+    function onSubmit(_: any) {
+        void sendMessage();
+    }
+
     /**
      * Extracts text content from a message safely.
      */
@@ -107,6 +111,10 @@
             e.preventDefault();
             cancelEdit();
         }
+    }
+
+    function onCancel() {
+        cancelEdit();
     }
 
     async function handleDelete(messageId: string) {
@@ -169,11 +177,11 @@
         {:else}
             {#each messages as message (message.id)}
                 {@const isEditing = editingMessageId === message.id}
-                <ChatBubble
+                <MessageBubble
                     {message}
                     {isEditing}
                     bind:editContent
-                    onKeyDown={handleEditKeydown}
+                    {onSubmit}
                     onEdit={() => startEdit(message.id, getMessageText(message))}
                     onDelete={() => void handleDelete(message.id)}
                     onRegenerate={() => void handleRegenerate(message.id)}
@@ -199,7 +207,8 @@
             <TextArea
                 bind:value={inputValue}
                 placeholder="Type a message..."
-                onKeyDown={handleKeydown}
+                {onSubmit}
+                {onCancel}
                 disabled={!activeChat}
                 color={null}
             />
