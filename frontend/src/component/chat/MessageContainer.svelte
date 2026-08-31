@@ -4,21 +4,38 @@
     import MessageBubble from "./MessageBubble.svelte";
     import { chatStore } from "@/features/chat/stores/chatStore.svelte";
     import { toastStore } from "@/lib/stores/toast.svelte";
+    import { tick } from "svelte";
     import { Logger } from "@common/logger/Logger";
+    import type { LocalChat } from "@/lib/interfaces";
 
     type Props = {
         children?: Snippet;
         messages: Message[];
-        container: HTMLElement | null;
+        activeChat?: LocalChat;
     };
 
-    let { children, messages, container = $bindable() }: Props = $props();
+    let { children, messages, activeChat }: Props = $props();
 
     // Edit mode state
     let editingMessageId = $state<string | null>(null);
 
-    let activeChat = $derived(chatStore.chats.find((c) => c.id === chatStore.activeChatId));
     let isTyping = $derived(chatStore.isGenerating);
+
+    let container = $state<HTMLElement | null>(null);
+
+    // Auto-scroll when messages change
+    $effect(() => {
+        if (messages.length) {
+            void scrollToBottom().catch((err) => Logger.error("Scroll failed", err));
+        }
+    });
+
+    async function scrollToBottom() {
+        await tick();
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
+    }
 
     async function onMessageUpdate(messageId: string, editingContent: string) {
         if (editingMessageId !== messageId) return;

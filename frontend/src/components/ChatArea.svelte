@@ -3,26 +3,12 @@
   Main chat content area.
 -->
 <script lang="ts">
-    import { tick } from "svelte";
-    import { Logger } from "@common/logger/Logger";
-
     import { chatStore } from "@/features/chat/stores/chatStore.svelte";
     import { characterStore } from "@/features/character/stores/characterStore.svelte";
     import { uiState } from "@/lib/stores/ui.svelte";
-    import { toastStore } from "@/lib/stores/toast.svelte";
-    import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
     import GearIcon from "phosphor-svelte/lib/GearIcon";
-    import StickerIcon from "phosphor-svelte/lib/StickerIcon";
-    import StickerPicker from "@/features/sticker/components/StickerPicker.svelte";
-    import type { AssetEntity } from "@arisutalk/character-spec/v0/Character";
-    import MessageBubble from "@/component/chat/MessageBubble.svelte";
-    import TextArea from "@/component/input/TextArea.svelte";
     import MessageContainer from "@/component/chat/MessageContainer.svelte";
-
-    let inputValue = $state("");
-    let showStickerPicker = $state(false);
-    let messagesContainer = $state<HTMLElement | null>(null);
-    let isTyping = $derived(chatStore.isGenerating);
+    import MessageInput from "@/component/chat/MessageInput.svelte";
 
     let activeChat = $derived(chatStore.chats.find((c) => c.id === chatStore.activeChatId));
     let messages = $derived(chatStore.activeMessages);
@@ -34,96 +20,14 @@
             : undefined
     );
 
-    // Edit mode state
-    let editingMessageId = $state<string | null>(null);
-    let editContent = $state("");
+    async function sendMessage(s: string) {
+        if (!s.trim() || !activeChat) return;
 
-    // Auto-scroll when messages change
-    $effect(() => {
-        if (messages.length) {
-            void scrollToBottom().catch((err) => Logger.error("Scroll failed", err));
-        }
-    });
-
-    async function sendMessage() {
-        if (!inputValue.trim() || !activeChat) return;
-
-        const content = inputValue;
-        inputValue = ""; // Clear input immediately for better UX
-
-        await chatStore.sendMessage(content);
+        await chatStore.sendMessage(s);
     }
 
-    async function scrollToBottom() {
-        await tick();
-        if (messagesContainer) {
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-    }
-
-    function handleKeydown(e: KeyboardEvent) {
-        if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            void sendMessage();
-        }
-    }
-
-    function onSubmit(_: any) {
-        void sendMessage();
-    }
-
-    /**
-     * Extracts text content from a message safely.
-     */
-    function getMessageText(msg: Message): string {
-        return typeof msg.content.data === "string" ? msg.content.data : "";
-    }
-
-    function startEdit(messageId: string, content: string) {
-        editingMessageId = messageId;
-        editContent = content;
-    }
-
-    async function confirmEdit() {
-        if (!editingMessageId) return;
-        try {
-            await chatStore.updateMessage(editingMessageId, editContent);
-            editingMessageId = null;
-            editContent = "";
-        } catch (error) {
-            toastStore.error(`Failed to update message: ${String(error)}`);
-        }
-    }
-
-    function cancelEdit() {
-        editingMessageId = null;
-        editContent = "";
-    }
-
-    /**
-     * Handles keydown in edit textarea.
-     * Ctrl+Enter = submit, Esc = cancel.
-     */
-    function handleEditKeydown(e: KeyboardEvent) {
-        if (e.key === "Enter" && e.ctrlKey) {
-            e.preventDefault();
-            void confirmEdit();
-        } else if (e.key === "Escape") {
-            e.preventDefault();
-            cancelEdit();
-        }
-    }
-
-    function onCancel() {
-        cancelEdit();
-    }
-
-    function handleStickerSelect(sticker: AssetEntity): void {
-        if (sticker.mimeType === "text/plain") {
-            inputValue += sticker.data;
-        }
-
-        showStickerPicker = false;
+    function onSubmit(s: string) {
+        void sendMessage(s);
     }
 
     function openCharacterSettings() {
@@ -150,39 +54,7 @@
         {/if}
     </header>
 
-    <MessageContainer {messages} bind:container={messagesContainer} />
+    <MessageContainer {messages} {activeChat} />
 
-    <footer class="p-4 border-t border-base-300/50 bg-base-200/80">
-        <div class="flex gap-2">
-            <TextArea
-                bind:value={inputValue}
-                placeholder="Type a message..."
-                {onSubmit}
-                {onCancel}
-                disabled={!activeChat}
-                color={null}
-            />
-            <button
-                class="btn btn-ghost btn-sm btn-square hover:bg-base-300/50"
-                onclick={() => (showStickerPicker = true)}
-                disabled={!activeChat}
-                aria-label="Pick sticker or emoji"
-                title="Stickers & Emoji"
-            >
-                <StickerIcon size={20} />
-            </button>
-            <button
-                class="btn btn-primary shadow-md hover:shadow-lg transition-shadow"
-                onclick={() => void sendMessage()}
-                disabled={!inputValue.trim() || !activeChat}>Send</button
-            >
-        </div>
-
-        {#if showStickerPicker}
-            <StickerPicker
-                onSelect={(s: AssetEntity) => handleStickerSelect(s)}
-                onClose={() => (showStickerPicker = false)}
-            />
-        {/if}
-    </footer>
+    <MessageInput {onSubmit} disabled={!activeChat} />
 </main>
