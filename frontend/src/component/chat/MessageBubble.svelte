@@ -41,6 +41,7 @@
 
     function onConfirmEdit() {
         onMessageUpdate(message.id, editingContent);
+        editingContent = "";
     }
 
     function onDelete() {

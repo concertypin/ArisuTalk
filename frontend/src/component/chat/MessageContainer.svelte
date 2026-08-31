@@ -4,6 +4,7 @@
     import MessageBubble from "./MessageBubble.svelte";
     import { chatStore } from "@/features/chat/stores/chatStore.svelte";
     import { toastStore } from "@/lib/stores/toast.svelte";
+    import { Logger } from "@common/logger/Logger";
 
     type Props = {
         children?: Snippet;
@@ -15,22 +16,15 @@
 
     // Edit mode state
     let editingMessageId = $state<string | null>(null);
-    let editContent = $state("");
 
     let activeChat = $derived(chatStore.chats.find((c) => c.id === chatStore.activeChatId));
     let isTyping = $derived(chatStore.isGenerating);
 
-    function startEdit(messageId: string, content: string) {
-        editingMessageId = messageId;
-        editContent = content;
-    }
-
     async function onMessageUpdate(messageId: string, editingContent: string) {
-        if (editingMessageId === messageId) return;
+        if (editingMessageId !== messageId) return;
         try {
             await chatStore.updateMessage(messageId, editingContent);
             editingMessageId = null;
-            editContent = "";
         } catch (error) {
             toastStore.error(`Failed to update message: ${String(error)}`);
         }
@@ -68,7 +62,7 @@
             <MessageBubble
                 {message}
                 {isEditing}
-                {editingMessageId}
+                bind:editingMessageId
                 {onMessageUpdate}
                 {onMessageDelete}
                 {onMessageRegenerate}
