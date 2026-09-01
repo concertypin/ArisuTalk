@@ -66,7 +66,7 @@
         editingContent = "";
     }
 
-    const html = $derived(marked.parse(getMessageText(message), { async: false }));
+    let html = $derived(marked.parse(getMessageText(message), { async: false }));
 </script>
 
 <div class="chat group {message.role === 'user' ? 'chat-end' : 'chat-start'}">
