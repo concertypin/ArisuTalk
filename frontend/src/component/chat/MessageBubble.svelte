@@ -1,9 +1,18 @@
-<script lang="ts">
-    import MarkdownRenderer from "@/components/MarkdownRenderer.svelte";
+<script module>
     import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
     import MessageActions from "./MessageActions.svelte";
     import TextArea from "@/component/input/TextArea.svelte";
 
+    import { marked } from "marked";
+    import DOMPurify from "dompurify";
+
+    marked.setOptions({
+        gfm: true,
+        breaks: true,
+    });
+</script>
+
+<script lang="ts">
     type Props = {
         message: Message;
         isEditing: boolean;
@@ -56,6 +65,8 @@
         editingMessageId = null;
         editingContent = "";
     }
+
+    const html = $derived(marked.parse(getMessageText(message), { async: false }));
 </script>
 
 <div class="chat group {message.role === 'user' ? 'chat-end' : 'chat-start'}">
@@ -63,7 +74,9 @@
         {#if isEditing}
             <TextArea bind:value={editingContent} onSubmit={onConfirmEdit} />
         {:else}
-            <MarkdownRenderer source={getMessageText(message)} />
+            <div class="prose prose-compact prose-invert prose-sm prose-gray max-w-[80ch]">
+                {@html DOMPurify.sanitize(html)}
+            </div>
         {/if}
         <div class="flex items-center justify-between mt-1">
             <span class="text-xs opacity-60">

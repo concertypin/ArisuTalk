@@ -1,8 +1,4 @@
-<!--
-  @component App
-  Root Svelte 5 component with hash-based router, PWA support, and theming.
--->
-<script lang="ts">
+<script module>
     import { initRouter, getCurrentPath } from "@/lib/router.svelte";
     import { Logger } from "@common/logger/Logger";
     import { routes } from "@/lib/routeConfig";
@@ -19,6 +15,15 @@
     import { registerPlugin, initializePlugins } from "@/lib/plugins/types";
     import { memoryPlugin } from "@/features/memory/memoryPlugin";
 
+    const generalSettingsModalPromise = import("@/components/GeneralSettingsModal.svelte");
+    const svAgentationPromise = import("sv-agentation");
+</script>
+
+<!--
+  @component App
+  Root Svelte 5 component with hash-based router, PWA support, and theming.
+-->
+<script lang="ts">
     // Register first-party plugins before initialisation.
     registerPlugin(memoryPlugin);
     // Initialize on mount
@@ -69,9 +74,6 @@
             document.documentElement.style.setProperty("--app-font-size", `${fontSize}px`);
         }
     });
-
-    const generalSettingsModalPromise = import("@/components/GeneralSettingsModal.svelte");
-    const svAgentationPromise = import("sv-agentation");
 </script>
 
 <svelte:head>

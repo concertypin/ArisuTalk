@@ -2,6 +2,11 @@
     import EmptySettings from "./EmptySettings.svelte";
     import PlaceholderIcon from "phosphor-svelte/lib/PlaceholderIcon";
 
+    import GearIcon from "phosphor-svelte/lib/GearIcon";
+    import XIcon from "phosphor-svelte/lib/XIcon";
+
+    import type { Component } from "svelte";
+
     export function declareTab<T extends Record<string, any>>(
         kind: string,
         panel: Component<T>,
@@ -30,14 +35,14 @@
     };
 
     export function tabEntry<T extends Record<string, any>>({
-        kind,
+        kind = "unknown",
         panel = EmptySettings,
         icon = PlaceholderIcon,
         title,
         label,
         text,
     }: {
-        kind: string;
+        kind?: string;
         panel?: Component<T>;
         icon?: Component;
         title?: string;
@@ -51,21 +56,11 @@
             icon,
             title: title ?? upperCaseKind,
             label: label ?? upperCaseKind,
-            text: text ?? "Empty Settings: " + upperCaseKind,
+            text: text ?? upperCaseKind,
         };
     }
-</script>
 
-<script lang="ts" generics="TContext = never">
-    // DO NOT REMOVE
-    type TProps = { context: () => TContext };
-
-    import GearIcon from "phosphor-svelte/lib/GearIcon";
-    import XIcon from "phosphor-svelte/lib/XIcon";
-
-    import type { Component } from "svelte";
-
-    function processTab(subpages: Subpage<TProps>[]) {
+    export function processTab<T extends Record<string, any>>(subpages: Subpage<T>[]) {
         const tabList: {
             kind: string;
             title: string;
@@ -73,9 +68,10 @@
             icon: Component;
             text: string;
         }[] = [];
-        const pageMap: Record<string, Component<TProps>> = {};
+        const pageMap: Record<string, Component<T>> = {};
 
         for (const subpage of subpages) {
+            pageMap[subpage.kind] = subpage.panel;
             tabList.push({
                 kind: subpage.kind,
                 title: subpage.title,
@@ -83,37 +79,48 @@
                 icon: subpage.icon,
                 text: subpage.text,
             });
-            pageMap[subpage.kind] = subpage.panel;
         }
 
         return { tabList, pageMap };
     }
+</script>
+
+<script lang="ts" generics="TContext = never">
+    // DO NOT REMOVE
+    type TProps = { context: () => TContext };
 
     let {
         id = "untitled-" + crypto.randomUUID(),
         title = "Untitled",
-        subpages = [],
+        subpages,
         onOpen = () => null,
         onClose = () => null,
         onTabChange,
         activeTab,
         settingsModalContext,
-        isOpened = false,
         self = $bindable(),
     }: {
         id?: string;
         title?: string;
-        subpages: Subpage<TProps>[];
+        subpages: {
+            tabList: {
+                kind: string;
+                title: string;
+                label: string;
+                icon: Component;
+                text: string;
+            }[];
+            pageMap: Record<string, Component<TProps>>;
+        };
         onOpen?: () => void;
         onClose?: () => void;
         onTabChange: (kind: string) => void;
         activeTab: string;
         settingsModalContext: () => TContext;
-        isOpened?: boolean;
         self?: HTMLDialogElement;
     } = $props();
 
-    let { tabList, pageMap } = $derived(processTab(subpages));
+    let { tabList, pageMap } = $derived(subpages);
 
     function handleBackdropClick(e: MouseEvent) {
         if (e.target === self) {

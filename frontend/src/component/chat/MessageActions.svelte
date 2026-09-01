@@ -1,9 +1,4 @@
-<!--
-  @component MessageActions
-  Action buttons for message edit/delete/regenerate.
-  Shows on hover and provides controls for message manipulation.
--->
-<script lang="ts">
+<script module>
     import PencilIcon from "phosphor-svelte/lib/PencilIcon";
     import TrashIcon from "phosphor-svelte/lib/TrashIcon";
     import ArrowClockwiseIcon from "phosphor-svelte/lib/ArrowClockwiseIcon";
@@ -11,7 +6,24 @@
     import XIcon from "phosphor-svelte/lib/XIcon";
     import type { Component } from "svelte";
 
-    type Props = {
+    const noOp = () => undefined;
+</script>
+
+<!--
+  @component MessageActions
+  Action buttons for message edit/delete/regenerate.
+  Shows on hover and provides controls for message manipulation.
+-->
+<script lang="ts">
+    let {
+        isEditing = false,
+        isAssistant = false,
+        onEdit = noOp,
+        onDelete = noOp,
+        onRegenerate = noOp,
+        onConfirmEdit = noOp,
+        onCancelEdit = noOp,
+    }: {
         /** Whether this message is currently being edited */
         isEditing?: boolean;
         /** is AI Assistant's message? */
@@ -26,17 +38,7 @@
         onConfirmEdit?: () => void;
         /** Callback when edit is cancelled */
         onCancelEdit?: () => void;
-    };
-
-    let {
-        isEditing = false,
-        isAssistant = false,
-        onEdit = () => null,
-        onDelete = () => null,
-        onRegenerate = () => null,
-        onConfirmEdit = () => null,
-        onCancelEdit = () => null,
-    }: Props = $props();
+    } = $props();
 
     // Delete confirmation state
     let isConfirmingDelete = $state(false);

@@ -2,6 +2,7 @@
   @component MarkdownRenderer
   Renders markdown content safely using @humanspeak/svelte-markdown.
   Uses dynamic import for code-splitting with {#await} block.
+  Deprecated. Use `marked` and must use `DOMPurify`.
 -->
 <script module>
     import { Logger } from "@common/logger/Logger";
