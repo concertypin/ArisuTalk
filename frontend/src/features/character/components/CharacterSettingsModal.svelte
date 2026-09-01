@@ -85,9 +85,6 @@
             "Advanced Settings",
             "Advanced"
         ),
-        tabEntry({
-            kind: "empty",
-        }),
     ]);
 </script>
 
