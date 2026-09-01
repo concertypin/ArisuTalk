@@ -69,6 +69,9 @@
             document.documentElement.style.setProperty("--app-font-size", `${fontSize}px`);
         }
     });
+
+    const generalSettingsModalPromise = import("@/components/GeneralSettingsModal.svelte");
+    const svAgentationPromise = import("sv-agentation");
 </script>
 
 <svelte:head>
@@ -86,7 +89,7 @@
         {/if}
 
         {#if uiState.settingsModalOpen}
-            {#await import("@/components/SettingsModal.svelte")}
+            {#await generalSettingsModalPromise}
                 <div
                     class="fixed inset-0 z-50 flex items-center justify-center bg-base-content/50 text-base-content/70 backdrop-blur-sm"
                 >
@@ -111,7 +114,7 @@
         {/if}
         <ToastContainer />
         {#if import.meta.env.DEV}
-            {#await import("sv-agentation") then { Agentation }}
+            {#await svAgentationPromise then { Agentation }}
                 <div style="position:relative;z-index:9999">
                     <Agentation toolbarPosition="top-right" />
                 </div>
