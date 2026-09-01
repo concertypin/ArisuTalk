@@ -13,6 +13,7 @@
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import { Logger } from "@common/logger/Logger";
     import type { Snippet } from "svelte";
+    import { cloneDeep } from "lodash-es";
 
     type Props = {
         children?: Snippet;
@@ -31,6 +32,9 @@
         editingIndex !== null ? characterStore.characters[editingIndex] : undefined
     );
 
+    $effect(() => {
+        if (uiState.characterSettingsOpen) console.log("Open");
+    });
     // Group chat creation state
     let groupChatSelectedIds = $state<string[]>([]);
 
@@ -247,6 +251,9 @@
     </dialog>
     <!-- Character Settings Modal -->
     {#if uiState.characterSettingsOpen}
-        <CharacterSettingsModal selectCharacter={handleSelect} />
+        {@const character = cloneDeep(uiState.characterSettingsTarget)}
+        {#if character}
+            <CharacterSettingsModal selectCharacter={handleSelect} {character} />
+        {/if}
     {/if}
 </div>

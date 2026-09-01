@@ -5,6 +5,7 @@
     import { uiState } from "@/lib/stores/ui.svelte";
     import { opfsAdapter } from "../adapters/assetStorage/OpFSAssetStorageAdapter";
     import { IfNotExistBehavior } from "@/lib/interfaces";
+    import { Logger } from "@common/logger/Logger";
 
     type Props = {
         character: Character;
@@ -63,6 +64,7 @@
         if (active) {
             e.stopPropagation();
             uiState.openCharacterSettings(character);
+            Logger.debug("CharacterSettings Opened!");
         } else {
             onClick();
         }

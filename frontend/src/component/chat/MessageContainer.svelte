@@ -14,7 +14,7 @@
         activeChat?: LocalChat;
     };
 
-    let { children, messages, activeChat }: Props = $props();
+    let { messages, activeChat }: Props = $props();
 
     // Edit mode state
     let editingMessageId = $state<string | null>(null);

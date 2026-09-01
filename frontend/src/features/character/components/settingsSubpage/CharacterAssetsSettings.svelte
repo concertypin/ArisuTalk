@@ -4,7 +4,6 @@
      * Asset management: upload, preview, naming, delete, and reorder.
      */
     import { SvelteMap } from "svelte/reactivity";
-    import type { Character } from "@arisutalk/character-spec/v0/Character";
     import type { AssetEntity } from "@arisutalk/character-spec/v0/Character/Assets";
     import { merge } from "lodash-es";
     import UploadSimple from "phosphor-svelte/lib/UploadSimpleIcon";
@@ -15,13 +14,13 @@
     import { getAssetStorage } from "@/features/character/adapters/assetStorage/assetStorageResolver";
     import { Logger } from "@common/logger/Logger";
     import CharacterSettings from "./CharacterSettings.svelte";
+    import type { TContext, TProps } from "./types.ts";
 
-    type Props = {
-        character: Character;
-        onChange: (character: Character) => void;
-    };
+    let { context }: TProps<TContext> = $props();
 
-    let { character, onChange }: Props = $props();
+    let { getCharacter, onCharacterChange } = $derived(context());
+
+    let character = $derived(getCharacter());
 
     let fileInput = $state<HTMLInputElement>();
     let expandOtherAssets = $state(false);
@@ -34,6 +33,8 @@
     // Load asset preview URLs
     $effect(() => {
         const loadPreviews = async () => {
+            if (!character) return;
+
             for (const asset of character.assets.assets) {
                 if (typeof asset.data === "string" && asset.data.startsWith("local:")) {
                     try {
@@ -50,13 +51,15 @@
     });
 
     const imageAssets = $derived(
-        character.assets.assets.filter((a) => a.mimeType.startsWith("image/"))
+        character?.assets.assets.filter((a) => a.mimeType.startsWith("image/"))
     );
     const otherAssets = $derived(
-        character.assets.assets.filter((a) => !a.mimeType.startsWith("image/"))
+        character?.assets.assets.filter((a) => !a.mimeType.startsWith("image/"))
     );
 
     async function handleFileUpload(e: Event) {
+        if (!character) return;
+
         const input = e.target;
         if (!(input instanceof HTMLInputElement)) return;
         const files = input.files;
@@ -83,7 +86,7 @@
                 data: localUrl.toString(),
             };
 
-            onChange(
+            onCharacterChange(
                 merge({}, character, {
                     assets: {
                         assets: [...character.assets.assets, newAsset],
@@ -102,11 +105,13 @@
     }
 
     function updateAssetName(index: number, newName: string) {
+        if (!character) return;
+
         // No duplicate check needed as per new spec (v0.0.17)
         const updatedAssets = [...character.assets.assets];
         updatedAssets[index] = { ...updatedAssets[index], name: newName };
 
-        onChange(
+        onCharacterChange(
             merge({}, character, {
                 assets: { assets: updatedAssets },
             })
@@ -114,6 +119,8 @@
     }
 
     async function deleteAsset(index: number) {
+        if (!character) return;
+
         const asset = character.assets.assets[index];
 
         // Cleanup storage in background
@@ -124,7 +131,7 @@
         }
 
         const updatedAssets = character.assets.assets.filter((_, i) => i !== index);
-        onChange(
+        onCharacterChange(
             merge({}, character, {
                 assets: { assets: updatedAssets },
             })
@@ -139,6 +146,8 @@
 
     function handleDragOver(e: DragEvent, targetIndex: number) {
         e.preventDefault();
+        if (!character) return;
+
         if (draggedIndex === null || draggedIndex === targetIndex) return;
 
         const updatedAssets = [...character.assets.assets];
@@ -147,7 +156,7 @@
 
         draggedIndex = targetIndex;
 
-        onChange(
+        onCharacterChange(
             merge({}, character, {
                 assets: { assets: updatedAssets },
             })
