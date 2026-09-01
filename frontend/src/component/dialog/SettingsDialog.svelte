@@ -1,4 +1,7 @@
 <script module>
+    import EmptySettings from "./EmptySettings.svelte";
+    import PlaceholderIcon from "phosphor-svelte/lib/PlaceholderIcon";
+
     export function declareTab<T extends Record<string, any>>(
         kind: string,
         panel: Component<T>,
@@ -25,6 +28,32 @@
         label: string;
         text: string;
     };
+
+    export function tabEntry<T extends Record<string, any>>({
+        kind,
+        panel = EmptySettings,
+        icon = PlaceholderIcon,
+        title,
+        label,
+        text,
+    }: {
+        kind: string;
+        panel?: Component<T>;
+        icon?: Component;
+        title?: string;
+        label?: string;
+        text?: string;
+    }) {
+        const upperCaseKind = kind.toUpperCase();
+        return {
+            kind,
+            panel,
+            icon,
+            title: title ?? upperCaseKind,
+            label: label ?? upperCaseKind,
+            text: text ?? "Empty Settings: " + upperCaseKind,
+        };
+    }
 </script>
 
 <script lang="ts" generics="TContext = never">
@@ -35,7 +64,6 @@
     import XIcon from "phosphor-svelte/lib/XIcon";
 
     import type { Component } from "svelte";
-    import EmptyPage from "./EmptyPage.svelte";
 
     function processTab(subpages: Subpage<TProps>[]) {
         const tabList: {
@@ -113,8 +141,7 @@
     </li>
 {/snippet}
 
-{#snippet Panel(currentTab: string)}
-    {@const Comp = pageMap[currentTab] ?? EmptyPage}
+{#snippet Panel(Comp: Component<TProps>)}
     <div class="space-y-6">
         <h3 class="text-lg font-semibold">{title}</h3>
 
@@ -166,7 +193,7 @@
 
             <!-- Main Panel -->
             <main class="flex-1 p-6 overflow-y-auto bg-base-100">
-                {@render Panel(activeTab)}
+                {@render Panel(pageMap[activeTab] ?? EmptySettings)}
             </main>
         </div>
 
