@@ -1,9 +1,4 @@
-<script lang="ts">
-    /**
-     * @component CharacterSettingsModal
-     * Multi-tab modal for editing detailed character preferences.
-     * Follows the SettingsModal pattern with autosave functionality.
-     */
+<script module>
     import { uiState } from "@/lib/stores/ui.svelte";
     import { characterStore } from "@/features/character/stores/characterStore.svelte";
     import { Logger } from "@common/logger/Logger";
@@ -27,20 +22,11 @@
     import CharacterMetadataSettings from "./settingsSubpage/CharacterMetadataSettings.svelte";
     import CharacterMagicSettings from "./settingsSubpage/CharacterMagicSettings.svelte";
     import CharacterHooksSettings from "./settingsSubpage/CharacterHooksSettings.svelte";
-    import { cloneDeep } from "lodash-es";
 
-    import { declareTab } from "@/component/settings/SettingsModal.svelte";
-    import SettingsModal from "@/component/settings/SettingsModal.svelte";
+    import { declareTab } from "@/component/dialog/SettingsDialog.svelte";
+    import SettingsDialog from "@/component/dialog/SettingsDialog.svelte";
 
     import type { TContext } from "./settingsSubpage/types.ts";
-
-    type Props = {
-        selectCharacter: (charId: string | null) => void;
-        character: Character;
-        isOpened?: boolean;
-    };
-
-    let { selectCharacter, character, isOpened = false }: Props = $props();
 
     const subpages = [
         declareTab(
@@ -100,22 +86,36 @@
             "Advanced"
         ),
     ];
+</script>
+
+<script lang="ts">
+    /**
+     * @component CharacterSettingsModal
+     * Multi-tab modal for editing detailed character preferences.
+     * Follows the SettingsModal pattern with autosave functionality.
+     */
+
+    let {
+        selectCharacter,
+        character,
+        isOpened = false,
+    }: {
+        selectCharacter: (charId: string | null) => void;
+        character: Character;
+        isOpened?: boolean;
+    } = $props();
 
     let activeTab = $state(subpages[0].kind ?? "");
-
-    $effect(() => {
-        console.log(activeTab);
-    });
 
     /** Local copy of character being edited (for autosave) */
     let editingCharacter: Character = $derived(character);
 
     let title = $derived.by(() => {
         if (editingCharacter) {
-            return `${editingCharacter.name} Settings`;
+            return `${editingCharacter.name}`;
         }
 
-        return "Character Settings";
+        return "Character";
     });
 
     /** Debounce timer for autosave */
@@ -143,7 +143,6 @@
     function onOpen() {
         isOpened = true;
 
-        Logger.debug("Open");
         Logger.structured("modal.open", {
             location: "characterSettings",
             modalName: "CharacterSettingsModal",
@@ -158,8 +157,9 @@
             clearTimeout(saveTimeout);
             saveTimeout = null;
         }
+
         uiState.closeCharacterSettings();
-        Logger.debug("Close");
+
         Logger.structured("modal.close", {
             location: "characterSettings",
             modalName: "CharacterSettingsModal",
@@ -226,7 +226,7 @@
     const settingsModalContext = () => getContext();
 </script>
 
-<SettingsModal
+<SettingsDialog
     id="character"
     bind:self={dialog}
     {title}
