@@ -6,18 +6,19 @@
      * Allows testing {| javascript code |} patterns against the current
      * character and persona context without leaving the settings modal.
      */
-    import type { Character } from "@arisutalk/character-spec/v0/Character";
     import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
     import { parseMagicPatterns } from "@/lib/parsers/magicPatternParser";
     import Play from "phosphor-svelte/lib/PlayIcon";
     import Warning from "phosphor-svelte/lib/WarningIcon";
     import CharacterSettings from "./CharacterSettings.svelte";
 
-    type Props = {
-        character: Character;
-    };
+    import type { TContext, TProps } from "./types.ts";
 
-    let { character }: Props = $props();
+    let { context }: TProps<TContext> = $props();
+
+    let { getCharacter } = $derived(context());
+
+    let character = $derived(getCharacter());
 
     let testInput = $state("Hello {| return character.name |}!");
     let testOutput = $state("");

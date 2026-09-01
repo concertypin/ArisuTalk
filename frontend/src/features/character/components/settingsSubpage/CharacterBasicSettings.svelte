@@ -14,13 +14,13 @@
     import { characterStore } from "@/features/character/stores/characterStore.svelte";
     import type { AssetEntity } from "@arisutalk/character-spec/v0/Character";
     import CharacterSettings from "./CharacterSettings.svelte";
+    import type { TContext, TProps } from "./types.ts";
 
-    type Props = {
-        character: Character;
-        onChange: (character: Character | null) => void;
-    };
+    let { context }: TProps<TContext> = $props();
 
-    let { character, onChange }: Props = $props();
+    let { getCharacter, onCharacterChange } = $derived(context());
+
+    let character = $derived(getCharacter());
 
     const assetStorage = getAssetStorage();
     let assetPreviews = new SvelteMap<string, string>();
@@ -78,7 +78,7 @@
     });
 
     function updateField<const K extends keyof Character>(field: K, value: Character[K]) {
-        onChange(merge({}, character, { [field]: value }));
+        onCharacterChange(merge({}, character, { [field]: value }));
     }
 
     const findCharacter = (c: Character) => c.id === character.id;
@@ -90,7 +90,7 @@
 
         characterStore.remove(index);
 
-        onChange(null);
+        onCharacterChange(null);
     }
 
     let inputCharName = $state("");

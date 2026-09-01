@@ -1,12 +1,25 @@
-<script lang="ts">
-    import type { Snippet } from "svelte";
-
-    type Props = {
-        subpageName: string;
-        children: Snippet;
+<script module>
+    export type TContext = {
+        getCharacter: () => Character;
+        onCharacterChange: (updatedCharacter: Character | null) => void;
     };
 
-    let { subpageName, children }: Props = $props();
+    export type TProps<T> = {
+        context: () => T;
+    };
+</script>
+
+<script lang="ts">
+    import type { Snippet } from "svelte";
+    import type { Character } from "@arisutalk/character-spec/types/v0/index";
+
+    let {
+        subpageName,
+        children,
+    }: {
+        subpageName: string;
+        children: Snippet;
+    } = $props();
 </script>
 
 <div class="space-y-6">

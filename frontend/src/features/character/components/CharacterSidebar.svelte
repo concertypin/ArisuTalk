@@ -7,7 +7,6 @@
     import CharacterSidebarItem from "./CharacterSidebarItem.svelte";
     import { characterStore } from "../stores/characterStore.svelte";
     import { uiState } from "@/lib/stores/ui.svelte";
-    import { Logger } from "@common/logger/Logger";
 
     type Props = {
         selectedCharacterId: string | null;

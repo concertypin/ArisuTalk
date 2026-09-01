@@ -13,12 +13,13 @@
     import { estimateTokens } from "@/lib/utils/tokenCounter";
     import CharacterSettings from "./CharacterSettings.svelte";
 
-    type Props = {
-        character: Character;
-        onChange: (character: Character) => void;
-    };
+    import type { TContext, TProps } from "./types.ts";
 
-    let { character, onChange }: Props = $props();
+    let { context }: TProps<TContext> = $props();
+
+    let { getCharacter, onCharacterChange } = $derived(context());
+
+    let character = $derived(getCharacter());
 
     let descriptionTokens = $derived(estimateTokens(character.prompt.description));
     let authorsNoteTokens = $derived(estimateTokens(character.prompt.authorsNote ?? ""));
@@ -27,7 +28,7 @@
     let showTemplateManager = $state(false);
 
     function onApplyTemplate(prompts: { system: string; generation: string; lore?: string }) {
-        onChange(
+        onCharacterChange(
             merge({}, character, {
                 prompt: {
                     description: prompts.system,
@@ -42,7 +43,7 @@
         field: K,
         value: Character["prompt"][K]
     ) {
-        onChange(
+        onCharacterChange(
             merge({}, character, {
                 prompt: { [field]: value },
             })
