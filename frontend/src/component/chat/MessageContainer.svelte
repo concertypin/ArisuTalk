@@ -1,4 +1,4 @@
-<script lang="ts">
+<script module>
     import type { Snippet } from "svelte";
     import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
     import MessageBubble from "./MessageBubble.svelte";
@@ -7,14 +7,17 @@
     import { tick } from "svelte";
     import { Logger } from "@common/logger/Logger";
     import type { LocalChat } from "@/lib/interfaces";
+</script>
 
-    type Props = {
+<script lang="ts">
+    let {
+        messages,
+        activeChat,
+    }: {
         children?: Snippet;
         messages: Message[];
         activeChat?: LocalChat;
-    };
-
-    let { messages, activeChat }: Props = $props();
+    } = $props();
 
     // Edit mode state
     let editingMessageId = $state<string | null>(null);

@@ -23,12 +23,12 @@
     import CharacterMagicSettings from "./settingsSubpage/CharacterMagicSettings.svelte";
     import CharacterHooksSettings from "./settingsSubpage/CharacterHooksSettings.svelte";
 
-    import { declareTab } from "@/component/dialog/SettingsDialog.svelte";
+    import { declareTab, tabEntry, processTab } from "@/component/dialog/SettingsDialog.svelte";
     import SettingsDialog from "@/component/dialog/SettingsDialog.svelte";
 
     import type { TContext } from "./settingsSubpage/types.ts";
 
-    const subpages = [
+    const subpages = processTab([
         declareTab(
             "basic",
             CharacterBasicSettings,
@@ -85,7 +85,10 @@
             "Advanced Settings",
             "Advanced"
         ),
-    ];
+        tabEntry({
+            kind: "empty",
+        }),
+    ]);
 </script>
 
 <script lang="ts">
@@ -105,7 +108,7 @@
         isOpened?: boolean;
     } = $props();
 
-    let activeTab = $state(subpages[0].kind ?? "");
+    let activeTab = $state(subpages.tabList[0].kind ?? "");
 
     /** Local copy of character being edited (for autosave) */
     let editingCharacter: Character = $derived(character);
@@ -234,7 +237,6 @@
     {onTabChange}
     {activeTab}
     {settingsModalContext}
-    {isOpened}
     {onOpen}
     {onClose}
 />

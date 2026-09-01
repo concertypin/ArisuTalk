@@ -1,4 +1,10 @@
-<script lang="ts" module>
+<script module>
+    import StickerIcon from "phosphor-svelte/lib/StickerIcon";
+    import XIcon from "phosphor-svelte/lib/XIcon";
+    import MagnifyingGlassIcon from "phosphor-svelte/lib/MagnifyingGlassIcon";
+    import { Logger } from "@common/logger/Logger";
+    import { type AssetEntity } from "@arisutalk/character-spec/v0/Character";
+
     type EmojiClass = {
         emoji: string;
         skin_tone_support: boolean;
@@ -14,16 +20,9 @@
         emojis: EmojiClass[];
     };
 
-    let BUILTIN_EMOJIS: EmojiGroup[];
+    let BUILTIN_EMOJIS = $state<EmojiGroup[]>([]);
 
-    async function loadBuiltinEmojis() {
-        if (BUILTIN_EMOJIS) return BUILTIN_EMOJIS;
-
-        const module = await import("unicode-emoji-json/data-by-group.json");
-        BUILTIN_EMOJIS = module.default;
-
-        return BUILTIN_EMOJIS;
-    }
+    const emojisLoadPromise = import("unicode-emoji-json/data-by-group.json");
 </script>
 
 <!--
@@ -32,20 +31,15 @@ Modal/panel for selecting stickers from packs, or picking emoji characters.
 Emits `onSelect` with the chosen Sticker object.
 -->
 <script lang="ts">
-    import StickerIcon from "phosphor-svelte/lib/StickerIcon";
-    import XIcon from "phosphor-svelte/lib/XIcon";
-    import MagnifyingGlassIcon from "phosphor-svelte/lib/MagnifyingGlassIcon";
-    import { Logger } from "@common/logger/Logger";
-    import { type AssetEntity } from "@arisutalk/character-spec/v0/Character";
-
-    interface Props {
+    let {
+        onSelect,
+        onClose,
+    }: {
         /** Callback invoked when a sticker or emoji is selected. */
         onSelect: (sticker: AssetEntity) => void;
         /** Called when the modal is dismissed. */
         onClose: () => void;
-    }
-
-    let { onSelect, onClose }: Props = $props();
+    } = $props();
 
     let dialog = $state<HTMLDialogElement | null>(null);
     let searchQuery = $state("");
@@ -86,25 +80,20 @@ Emits `onSelect` with the chosen Sticker object.
         close();
     }
 
-    let groupedEmojis: EmojiGroup[] = $state([]);
-
-    $effect(() => {
-        loadBuiltinEmojis()
-            .then((data) => {
-                groupedEmojis = data;
-            })
-            .catch((e) => {
-                Logger.error("Failed to load emojis: ", e);
-                return null;
-            });
-    });
+    emojisLoadPromise
+        .then((v) => {
+            BUILTIN_EMOJIS = v.default;
+        })
+        .catch((e) => {
+            Logger.error("Failed to load emoji data.", e);
+        });
 
     /** Flattened emoji items for search. */
     let flattenedEmojis = $derived.by(() => {
         const t: EmojiClass[] = [];
 
         // for EmojiGroup
-        for (const eg of groupedEmojis) {
+        for (const eg of BUILTIN_EMOJIS) {
             // for EmojiClass
             for (const ec of eg.emojis) {
                 t.push(ec);
@@ -157,7 +146,7 @@ Emits `onSelect` with the chosen Sticker object.
         {/if}
     {:else}
         <!-- Categorized emoji grid -->
-        {#each groupedEmojis as group (group.name)}
+        {#each BUILTIN_EMOJIS as group (group.name)}
             <div class="mb-3">
                 <h4
                     class="text-xs font-semibold text-base-content/50 mb-1.5 uppercase tracking-wider"

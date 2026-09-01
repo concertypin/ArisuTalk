@@ -1,15 +1,18 @@
-<script lang="ts">
+<script module>
     import TextArea from "@/component/input/TextArea.svelte";
     import StickerIcon from "phosphor-svelte/lib/StickerIcon";
     import StickerPicker from "@/features/sticker/components/StickerPicker.svelte";
     import type { AssetEntity } from "@arisutalk/character-spec/v0/Character";
+</script>
 
-    type Props = {
+<script lang="ts">
+    let {
+        onSubmit,
+        disabled = false,
+    }: {
         onSubmit: (s: string) => void;
         disabled?: boolean;
-    };
-
-    let { onSubmit, disabled = false }: Props = $props();
+    } = $props();
 
     let inputValue = $state("");
     let showStickerPicker = $state(false);

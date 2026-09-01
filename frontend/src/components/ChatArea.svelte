@@ -1,15 +1,17 @@
-<!--
-  @component ChatArea
-  Main chat content area.
--->
-<script lang="ts">
+<script module>
     import { chatStore } from "@/features/chat/stores/chatStore.svelte";
     import { characterStore } from "@/features/character/stores/characterStore.svelte";
     import { uiState } from "@/lib/stores/ui.svelte";
     import GearIcon from "phosphor-svelte/lib/GearIcon";
     import MessageContainer from "@/component/chat/MessageContainer.svelte";
     import MessageInput from "@/component/chat/MessageInput.svelte";
+</script>
 
+<!--
+  @component ChatArea
+  Main chat content area.
+-->
+<script lang="ts">
     let activeChat = $derived(chatStore.chats.find((c) => c.id === chatStore.activeChatId));
     let messages = $derived(chatStore.activeMessages);
 
