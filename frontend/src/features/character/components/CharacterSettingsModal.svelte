@@ -23,68 +23,77 @@
     import CharacterMagicSettings from "./settingsSubpage/CharacterMagicSettings.svelte";
     import CharacterHooksSettings from "./settingsSubpage/CharacterHooksSettings.svelte";
 
-    import { declareTab, tabEntry, processTab } from "@/component/dialog/SettingsDialog.svelte";
+    import { preload } from "@/component/dialog/SettingsDialog.svelte";
     import SettingsDialog from "@/component/dialog/SettingsDialog.svelte";
+
+    import testMd from "./qa-checklist.md?raw";
 
     import type { TContext } from "./settingsSubpage/types.ts";
 
-    const subpages = processTab([
-        declareTab(
-            "basic",
-            CharacterBasicSettings,
-            UserIcon,
-            "Basic Settings",
-            "Basic Settings",
-            "Basic"
-        ),
-        declareTab(
-            "prompt",
-            CharacterPromptSettings,
-            ChatCircleTextIcon,
-            "Prompt Settings",
-            "Prompt Settings",
-            "Prompt"
-        ),
-        declareTab(
-            "lorebook",
-            CharacterLorebookSettings,
-            BookOpenIcon,
-            "Lorebook Settings",
-            "Lorebook Settings",
-            "Lorebook"
-        ),
-        declareTab(
-            "assets",
-            CharacterAssetsSettings,
-            ImageIcon,
-            "Assets Settings",
-            "Assets Settings",
-            "Assets"
-        ),
-        declareTab(
-            "metadata",
-            CharacterMetadataSettings,
-            FileTextIcon,
-            "Metadata Settings",
-            "Metadata Settings",
-            "Metadata"
-        ),
-        declareTab(
-            "magic",
-            CharacterMagicSettings,
-            MagicWandIcon,
-            "Magic Patterns",
-            "Magic Patterns",
-            "Magic"
-        ),
-        declareTab(
-            "advanced",
-            CharacterHooksSettings,
-            GearIcon,
-            "Advanced Settings",
-            "Advanced Settings",
-            "Advanced"
-        ),
+    const preloaded = preload([
+        {
+            contents: {
+                type: "component",
+                component: CharacterBasicSettings,
+            },
+            icon: UserIcon,
+            label: "Basic",
+        },
+        {
+            contents: {
+                type: "component",
+                component: CharacterPromptSettings,
+            },
+            icon: ChatCircleTextIcon,
+            label: "Prompt",
+        },
+        {
+            contents: {
+                type: "component",
+                component: CharacterLorebookSettings,
+            },
+            icon: BookOpenIcon,
+            label: "Lorebook",
+        },
+        {
+            contents: {
+                type: "component",
+                component: CharacterAssetsSettings,
+            },
+            icon: ImageIcon,
+            label: "Assets",
+        },
+        {
+            contents: {
+                type: "component",
+                component: CharacterMetadataSettings,
+            },
+            icon: FileTextIcon,
+            label: "Metadata",
+        },
+        {
+            contents: {
+                type: "component",
+                component: CharacterMagicSettings,
+            },
+            icon: MagicWandIcon,
+            label: "Magic",
+        },
+        {
+            contents: {
+                type: "component",
+                component: CharacterHooksSettings,
+            },
+            icon: GearIcon,
+            label: "Advanced",
+        },
+        {
+            contents: {
+                type: "markdown",
+                text: testMd,
+            },
+            label: "QA Checklist",
+        },
     ]);
 </script>
 
@@ -105,7 +114,7 @@
         isOpened?: boolean;
     } = $props();
 
-    let activeTab = $state(subpages.tabList[0].kind ?? "");
+    let activeTab = $state(preloaded.tabList[0]?.id ?? "");
 
     /** Local copy of character being edited (for autosave) */
     let editingCharacter: Character = $derived(character);
@@ -135,10 +144,6 @@
     }
 
     let dialog = $state<HTMLDialogElement>();
-
-    $effect(() => {
-        if (editingCharacter === null) close();
-    });
 
     function onOpen() {
         isOpened = true;
@@ -230,7 +235,7 @@
     id="character"
     bind:self={dialog}
     {title}
-    {subpages}
+    {preloaded}
     {onTabChange}
     {activeTab}
     {settingsModalContext}
