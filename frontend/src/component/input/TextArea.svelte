@@ -1,14 +1,9 @@
-<script lang="ts">
-    type Props = {
-        value: string;
-        onSubmit?: (s: string) => void;
-        onCancel?: () => void;
-        disabled?: boolean;
-        placeholder?: string | null;
-        color?: Color;
-        autosize?: boolean;
-    };
+<script module>
+    import type { FormEventHandler } from "svelte/elements";
+    import { Logger } from "@common/logger/Logger";
+</script>
 
+<script lang="ts">
     type Color =
         | "neutral"
         | "primary"
@@ -21,32 +16,68 @@
         | null;
 
     let {
-        value = $bindable(),
+        onInput = () => undefined,
         onSubmit = (_: any) => undefined,
         onCancel = () => undefined,
         disabled = false,
         placeholder,
         color,
         autosize = true,
-    }: Props = $props();
+    }: {
+        onInput?: (text: string) => void;
+        onSubmit?: (s: string) => void;
+        onCancel?: () => void;
+        disabled?: boolean;
+        placeholder?: string | null;
+        color?: Color;
+        autosize?: boolean;
+    } = $props();
+
+    let value = $state("");
+
+    let isShiftPressing = false;
+
+    function onKeyUp(event: KeyboardEvent) {
+        if (event.key === "Shift") {
+            isShiftPressing = false;
+        }
+    }
 
     function onKeyDown(event: KeyboardEvent) {
-        if (event.key === "Enter" && !event.shiftKey) {
+        if (event.key === "Shift") {
+            isShiftPressing = true;
+        } else if (event.key === "Enter" && !isShiftPressing) {
             event.preventDefault();
-            onSubmit(value);
+            const s = value;
+            value = "";
+            onSubmit(s);
         } else if (event.key === "Escape") {
             onCancel();
         }
     }
+
+    function onBlur(_: any) {
+        isShiftPressing = false;
+    }
+
+    const textareaOnInput: FormEventHandler<HTMLTextAreaElement> = (event) => {
+        value = event.currentTarget.value;
+
+        onInput(value);
+    };
 </script>
 
 <textarea
-    class="textarea {color ? 'textarea-' + color : ''} flex-1 min-h-[1em] {autosize
-        ? 'field-sizing-content'
-        : ''} resize-none outline-none"
     bind:value
+    class="font-sans textarea {color ? 'textarea-' + color : ''} flex-1 min-h-[1em] {autosize
+        ? 'field-sizing-content'
+        : ''} resize-none outline-none overflow-hidden contain-layout text-optimize-speed break-all line-clamp-none"
+    oninput={textareaOnInput}
+    spellcheck="false"
     {placeholder}
+    onkeyup={onKeyUp}
     onkeydown={onKeyDown}
+    onblur={onBlur}
     {disabled}
 >
 </textarea>
