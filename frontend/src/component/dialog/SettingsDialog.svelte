@@ -1,29 +1,10 @@
 <script module>
-    import EmptySettings from "./EmptySettings.svelte";
     import PlaceholderIcon from "phosphor-svelte/lib/PlaceholderIcon";
 
     import GearIcon from "phosphor-svelte/lib/GearIcon";
     import XIcon from "phosphor-svelte/lib/XIcon";
 
     import type { Component } from "svelte";
-
-    export function declareTab<T extends Record<string, any>>(
-        kind: string,
-        panel: Component<T>,
-        icon: Component,
-        title: string,
-        label: string,
-        text: string
-    ) {
-        return {
-            kind,
-            panel,
-            icon,
-            title,
-            label,
-            text,
-        };
-    }
 
     export type Subpage<Props extends Record<string, any>> = {
         kind: string;
@@ -34,50 +15,76 @@
         text: string;
     };
 
-    export function tabEntry<T extends Record<string, any>>({
-        kind = "unknown",
-        panel = EmptySettings,
-        icon = PlaceholderIcon,
-        title,
-        label,
-        text,
-    }: {
-        kind?: string;
-        panel?: Component<T>;
-        icon?: Component;
-        title?: string;
-        label?: string;
-        text?: string;
-    }) {
-        const upperCaseKind = kind.toUpperCase();
-        return {
-            kind,
-            panel,
-            icon,
-            title: title ?? upperCaseKind,
-            label: label ?? upperCaseKind,
-            text: text ?? upperCaseKind,
-        };
+    import { marked } from "marked";
+    import DOMPurify from "dompurify";
+
+    const markedOption: { async: false } = { async: false };
+
+    function compileMarkdown(text: string) {
+        return DOMPurify.sanitize(marked.parse(text, markedOption));
     }
 
-    export function processTab<T extends Record<string, any>>(subpages: Subpage<T>[]) {
+    type PreloadTemplate<T extends Record<string, any>> = {
+        contents?:
+            | {
+                  type: "none";
+              }
+            | {
+                  type: "markdown";
+                  text: string;
+              }
+            | {
+                  type: "component";
+                  component: Component<T>;
+              };
+        icon?: Component;
+        label?: string;
+    };
+
+    export function preload<T extends Record<string, any>>(templates: PreloadTemplate<T>[]) {
         const tabList: {
-            kind: string;
-            title: string;
+            id: string;
             label: string;
             icon: Component;
-            text: string;
         }[] = [];
-        const pageMap: Record<string, Component<T>> = {};
 
-        for (const subpage of subpages) {
-            pageMap[subpage.kind] = subpage.panel;
+        type Page = (
+            | {
+                  type: "none";
+              }
+            | {
+                  type: "markdown";
+                  text: string;
+              }
+            | {
+                  type: "component";
+                  component: Component<T>;
+              }
+        ) & {
+            id: string;
+            index: number;
+        };
+
+        const pageMap: Record<string, Page> = {};
+
+        for (const template of templates) {
+            const id = crypto.randomUUID();
+
+            const contents = template.contents;
+            const index = tabList.length;
+
+            if (!contents) {
+                pageMap[id] = { id, index, type: "none" };
+            } else if (contents.type === "markdown") {
+                pageMap[id] = { id, index, type: "markdown", text: compileMarkdown(contents.text) };
+            } else if (contents.type === "component") {
+                pageMap[id] = { id, index, type: "component", component: contents.component };
+            }
+
             tabList.push({
-                kind: subpage.kind,
-                title: subpage.title,
-                label: subpage.label,
-                icon: subpage.icon,
-                text: subpage.text,
+                id,
+                label: template.label ?? "Empty",
+                icon: template.icon ?? PlaceholderIcon,
             });
         }
 
@@ -92,7 +99,7 @@
     let {
         id = "untitled-" + crypto.randomUUID(),
         title = "Untitled",
-        subpages,
+        preloaded,
         onOpen = () => null,
         onClose = () => null,
         onTabChange,
@@ -102,15 +109,31 @@
     }: {
         id?: string;
         title?: string;
-        subpages: {
+        preloaded: {
             tabList: {
-                kind: string;
-                title: string;
+                id: string;
                 label: string;
                 icon: Component;
-                text: string;
             }[];
-            pageMap: Record<string, Component<TProps>>;
+            pageMap: Record<
+                string,
+                (
+                    | {
+                          type: "none";
+                      }
+                    | {
+                          type: "markdown";
+                          text: string;
+                      }
+                    | {
+                          type: "component";
+                          component: Component<TProps>;
+                      }
+                ) & {
+                    id: string;
+                    index: number;
+                }
+            >;
         };
         onOpen?: () => void;
         onClose?: () => void;
@@ -120,7 +143,7 @@
         self?: HTMLDialogElement;
     } = $props();
 
-    let { tabList, pageMap } = $derived(subpages);
+    let { tabList, pageMap } = $derived(preloaded);
 
     function handleBackdropClick(e: MouseEvent) {
         if (e.target === self) {
@@ -134,16 +157,16 @@
     }
 </script>
 
-{#snippet Tab(kind: string, Icon: Component, isActive: boolean, label: string, text: string)}
+{#snippet Tab(id: string, Icon: Component, label: string, isActive: boolean)}
     <li>
         <button
             class="flex gap-2 rounded-lg"
             class:active={isActive}
-            onclick={() => onTabChange(kind)}
+            onclick={() => onTabChange(id)}
             aria-label={label}
         >
             <Icon size={18} />
-            {text}
+            {label}
         </button>
     </li>
 {/snippet}
@@ -191,16 +214,24 @@
             <!-- Sidebar -->
             <aside class="w-56 bg-base-200/60 p-3 overflow-y-auto border-r border-base-300/50">
                 <ul class="menu w-full p-0 gap-1">
-                    {#each tabList as tab (tab.kind)}
-                        {@const isActive = tab.kind === activeTab}
-                        {@render Tab(tab.kind, tab.icon, isActive, tab.label, tab.text)}
+                    {#each tabList as tab (tab.id)}
+                        {@const isActive = tab.id === activeTab}
+                        {@render Tab(tab.id, tab.icon, tab.label, isActive)}
                     {/each}
                 </ul>
             </aside>
 
             <!-- Main Panel -->
             <main class="flex-1 p-6 overflow-y-auto bg-base-100">
-                {@render Panel(pageMap[activeTab] ?? EmptySettings)}
+                {#if pageMap[activeTab].type === "none"}
+                    <div></div>
+                {:else if pageMap[activeTab].type === "markdown"}
+                    <div class="prose prose-compact prose-invert prose-sm prose-gray max-w-[80ch]">
+                        {@html pageMap[activeTab].text}
+                    </div>
+                {:else if pageMap[activeTab].type === "component"}
+                    {@render Panel(pageMap[activeTab].component)}
+                {/if}
             </main>
         </div>
 
