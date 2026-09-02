@@ -87,13 +87,6 @@
             icon: GearIcon,
             label: "Advanced",
         },
-        {
-            contents: {
-                type: "markdown",
-                text: testMd,
-            },
-            label: "QA Checklist",
-        },
     ]);
 </script>
 
