@@ -1,21 +1,34 @@
-<script lang="ts">
+<script module>
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import PencilSimple from "phosphor-svelte/lib/PencilSimpleIcon";
     import PushPin from "phosphor-svelte/lib/PushPinIcon";
-    import { uiState } from "@/lib/stores/ui.svelte";
     import { opfsAdapter } from "../adapters/assetStorage/OpFSAssetStorageAdapter";
     import { IfNotExistBehavior } from "@/lib/interfaces";
-    import { Logger } from "@common/logger/Logger";
 
-    type Props = {
+    import { getAppContext } from "@/context";
+</script>
+
+<script lang="ts">
+    let {
+        character,
+        active,
+        isPinned = false,
+        onClick,
+        onTogglePin,
+    }: {
+        /** Character object referenced by the UI element */
         character: Character;
+        /** Specifies whether the element is enabled. This primarily affects its visual appearance. */
         active: boolean;
+        /** Whether the element is pinned. This primarily affects its visual appearance and updates the aria-label to reflect the available action. */
         isPinned?: boolean;
+        /** Event handler called when the element is clicked. */
         onClick: () => void;
+        /** Specifies the event handler to run when the toggle pin button is clicked. Defaults to no action. */
         onTogglePin?: () => void;
-    };
+    } = $props();
 
-    let { character, active, isPinned = false, onClick, onTogglePin }: Props = $props();
+    let appContext = getAppContext();
 
     // Generate initials from name
     let initials = $derived(character.name.substring(0, 2).toUpperCase());
@@ -60,11 +73,15 @@
         };
     });
 
+    function openCharacterSettings(character: Character) {
+        appContext.editingCharacter = character;
+        appContext.characterSettingsOpen = true;
+    }
+
     function handleButtonClick(e: MouseEvent) {
         if (active) {
             e.stopPropagation();
-            uiState.openCharacterSettings(character);
-            Logger.debug("CharacterSettings Opened!");
+            openCharacterSettings(character);
         } else {
             onClick();
         }
