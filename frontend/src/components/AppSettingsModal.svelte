@@ -16,16 +16,10 @@
     import AdvancedSettings from "./settingSubpage/AdvancedSettings.svelte";
     import AboutPage from "./settingSubpage/AboutPage.svelte";
 
-    import { createContext } from "svelte";
-
     import { preload } from "@/component/dialog/SettingsDialog.svelte";
     import SettingsDialog from "@/component/dialog/SettingsDialog.svelte";
 
     import { getAppContext } from "@/context";
-
-    export type TProps<T> = {
-        context: () => T;
-    };
 
     const preloaded = preload([
         {
@@ -102,11 +96,7 @@
         activeId = id;
     }
 
-    const [getContext, setContext] = createContext<{}>();
-
-    setContext({});
-
-    const settingsModalContext = () => getContext();
+    const settingsModalContext = () => {};
 </script>
 
 <SettingsDialog
