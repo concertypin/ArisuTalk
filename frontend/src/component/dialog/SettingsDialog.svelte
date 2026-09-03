@@ -41,6 +41,23 @@
         label?: string;
     };
 
+    type Page<Props extends Record<string, any>> = (
+        | {
+              type: "none";
+          }
+        | {
+              type: "markdown";
+              text: string;
+          }
+        | {
+              type: "component";
+              component: Component<Props>;
+          }
+    ) & {
+        id: string;
+        index: number;
+    };
+
     export function preload<T extends Record<string, any>>(templates: PreloadTemplate<T>[]) {
         const tabList: {
             id: string;
@@ -48,24 +65,7 @@
             icon: Component;
         }[] = [];
 
-        type Page = (
-            | {
-                  type: "none";
-              }
-            | {
-                  type: "markdown";
-                  text: string;
-              }
-            | {
-                  type: "component";
-                  component: Component<T>;
-              }
-        ) & {
-            id: string;
-            index: number;
-        };
-
-        const pageMap: Record<string, Page> = {};
+        const pageMap: Record<string, Page<T>> = {};
 
         for (const template of templates) {
             const id = crypto.randomUUID();
@@ -73,7 +73,7 @@
             const contents = template.contents;
             const index = tabList.length;
 
-            if (!contents) {
+            if (!contents || contents.type === "none") {
                 pageMap[id] = { id, index, type: "none" };
             } else if (contents.type === "markdown") {
                 pageMap[id] = { id, index, type: "markdown", text: compileMarkdown(contents.text) };
@@ -103,7 +103,7 @@
         onOpen = () => null,
         onClose = () => null,
         onTabChange,
-        activeTab,
+        activeId,
         settingsModalContext,
         self = $bindable(),
     }: {
@@ -115,30 +115,12 @@
                 label: string;
                 icon: Component;
             }[];
-            pageMap: Record<
-                string,
-                (
-                    | {
-                          type: "none";
-                      }
-                    | {
-                          type: "markdown";
-                          text: string;
-                      }
-                    | {
-                          type: "component";
-                          component: Component<TProps>;
-                      }
-                ) & {
-                    id: string;
-                    index: number;
-                }
-            >;
+            pageMap: Record<string, Page<TProps>>;
         };
         onOpen?: () => void;
         onClose?: () => void;
         onTabChange: (kind: string) => void;
-        activeTab: string;
+        activeId: string;
         settingsModalContext: () => TContext;
         self?: HTMLDialogElement;
     } = $props();
@@ -215,7 +197,7 @@
             <aside class="w-56 bg-base-200/60 p-3 overflow-y-auto border-r border-base-300/50">
                 <ul class="menu w-full p-0 gap-1">
                     {#each tabList as tab (tab.id)}
-                        {@const isActive = tab.id === activeTab}
+                        {@const isActive = tab.id === activeId}
                         {@render Tab(tab.id, tab.icon, tab.label, isActive)}
                     {/each}
                 </ul>
@@ -223,14 +205,14 @@
 
             <!-- Main Panel -->
             <main class="flex-1 p-6 overflow-y-auto bg-base-100">
-                {#if pageMap[activeTab].type === "none"}
+                {#if pageMap[activeId].type === "none"}
                     <div></div>
-                {:else if pageMap[activeTab].type === "markdown"}
+                {:else if pageMap[activeId].type === "markdown"}
                     <div class="prose prose-compact prose-invert prose-sm prose-gray max-w-[80ch]">
-                        {@html pageMap[activeTab].text}
+                        {@html pageMap[activeId].text}
                     </div>
-                {:else if pageMap[activeTab].type === "component"}
-                    {@render Panel(pageMap[activeTab].component)}
+                {:else if pageMap[activeId].type === "component"}
+                    {@render Panel(pageMap[activeId].component)}
                 {/if}
             </main>
         </div>
