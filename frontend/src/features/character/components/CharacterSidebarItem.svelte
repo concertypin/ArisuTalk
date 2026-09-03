@@ -14,7 +14,7 @@
         active,
         isPinned = false,
         onClick,
-        onTogglePin,
+        onTogglePin = () => null,
     }: {
         /** Character object referenced by the UI element */
         character: Character;
