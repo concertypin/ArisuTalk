@@ -18,13 +18,15 @@
     let showStickerPicker = $state(false);
 
     function onClick(_: any) {
-        onSend();
+        onSend(inputValue);
     }
 
-    function onSend() {
-        const s = inputValue;
-        inputValue = "";
+    function onSend(s: string) {
         onSubmit(s);
+    }
+
+    function onInput(text: string) {
+        inputValue = text;
     }
 
     function onSelect(sticker: AssetEntity): void {
@@ -43,8 +45,8 @@
 <footer class="p-4 border-t border-base-300/50 bg-base-200/80">
     <div class="flex gap-2">
         <TextArea
-            bind:value={inputValue}
             placeholder="Type a message..."
+            {onInput}
             onSubmit={onSend}
             {disabled}
             color={null}
