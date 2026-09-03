@@ -1,5 +1,4 @@
 <script module>
-    import { uiState } from "@/lib/stores/ui.svelte";
     import { characterStore } from "@/features/character/stores/characterStore.svelte";
     import { Logger } from "@common/logger/Logger";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
@@ -26,7 +25,7 @@
     import { preload } from "@/component/dialog/SettingsDialog.svelte";
     import SettingsDialog from "@/component/dialog/SettingsDialog.svelte";
 
-    import testMd from "./qa-checklist.md?raw";
+    import { getAppContext } from "@/context";
 
     import type { TContext } from "./settingsSubpage/types.ts";
 
@@ -100,14 +99,14 @@
     let {
         selectCharacter,
         character,
-        isOpened = false,
     }: {
         selectCharacter: (charId: string | null) => void;
         character: Character;
-        isOpened?: boolean;
     } = $props();
 
-    let activeTab = $state(preloaded.tabList[0]?.id ?? "");
+    let appContext = getAppContext();
+
+    let activeId = $state(preloaded.tabList[0]?.id ?? "");
 
     /** Local copy of character being edited (for autosave) */
     let editingCharacter: Character = $derived(character);
@@ -123,24 +122,9 @@
     /** Debounce timer for autosave */
     let saveTimeout: ReturnType<typeof setTimeout> | null = null;
 
-    function close() {
-        uiState.closeCharacterSettings();
-
-        if (saveTimeout) {
-            clearTimeout(saveTimeout);
-            saveTimeout = null;
-        }
-        Logger.structured("modal.close", {
-            location: "characterSettings",
-            modalName: "CharacterSettingsModal",
-        });
-    }
-
     let dialog = $state<HTMLDialogElement>();
 
     function onOpen() {
-        isOpened = true;
-
         Logger.structured("modal.open", {
             location: "characterSettings",
             modalName: "CharacterSettingsModal",
@@ -149,14 +133,13 @@
     }
 
     function onClose() {
-        isOpened = false;
-
         if (saveTimeout) {
             clearTimeout(saveTimeout);
             saveTimeout = null;
         }
 
-        uiState.closeCharacterSettings();
+        appContext.characterSettingsOpen = false;
+        appContext.editingCharacter = null;
 
         Logger.structured("modal.close", {
             location: "characterSettings",
@@ -196,7 +179,7 @@
     }
 
     function onTabChange(kind: string) {
-        activeTab = kind;
+        activeId = kind;
         Logger.debug("Tab Changed: " + kind);
     }
 
@@ -211,7 +194,7 @@
         onCharacterChange: (updatedCharacter: Character | null) => {
             if (updatedCharacter === null) {
                 selectCharacter(null);
-                close();
+                onClose();
                 return;
             }
 
@@ -230,8 +213,8 @@
     {title}
     {preloaded}
     {onTabChange}
-    {activeTab}
-    {settingsModalContext}
+    {activeId}
     {onOpen}
     {onClose}
+    {settingsModalContext}
 />

@@ -1,4 +1,4 @@
-<script lang="ts">
+<script module>
     import CharacterSidebar from "./CharacterSidebar.svelte";
     import CharacterForm from "./CharacterForm.svelte";
     import CharacterSettingsModal from "./CharacterSettingsModal.svelte";
@@ -9,17 +9,21 @@
     import type { Persona } from "../../persona/schema";
     import { characterStore } from "../stores/characterStore.svelte";
     import { chatStore } from "../../chat/stores/chatStore.svelte";
-    import { uiState } from "@/lib/stores/ui.svelte";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import { Logger } from "@common/logger/Logger";
     import type { Snippet } from "svelte";
     import { cloneDeep } from "lodash-es";
+    import { getAppContext } from "@/context";
+</script>
 
-    type Props = {
+<script lang="ts">
+    let {
+        children,
+    }: {
         children?: Snippet;
-    };
+    } = $props();
 
-    let { children }: Props = $props();
+    let appContext = getAppContext();
 
     let selectedCharacterId = $state<string | null>(null);
     let dialog = $state<HTMLDialogElement>();
@@ -32,9 +36,6 @@
         editingIndex !== null ? characterStore.characters[editingIndex] : undefined
     );
 
-    $effect(() => {
-        if (uiState.characterSettingsOpen) console.log("Open");
-    });
     // Group chat creation state
     let groupChatSelectedIds = $state<string[]>([]);
 
@@ -250,8 +251,8 @@
         </form>
     </dialog>
     <!-- Character Settings Modal -->
-    {#if uiState.characterSettingsOpen}
-        {@const character = cloneDeep(uiState.characterSettingsTarget)}
+    {#if appContext.characterSettingsOpen}
+        {@const character = cloneDeep(appContext.editingCharacter)}
         {#if character}
             <CharacterSettingsModal selectCharacter={handleSelect} {character} />
         {/if}
