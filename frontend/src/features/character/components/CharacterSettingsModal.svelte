@@ -2,7 +2,6 @@
     import { characterStore } from "@/features/character/stores/characterStore.svelte";
     import { Logger } from "@common/logger/Logger";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import { createContext } from "svelte";
 
     // Tab Icons
     import UserIcon from "phosphor-svelte/lib/UserIcon";
@@ -26,8 +25,6 @@
     import SettingsDialog from "@/component/dialog/SettingsDialog.svelte";
 
     import { getAppContext } from "@/context";
-
-    import type { TContext } from "./settingsSubpage/types.ts";
 
     const preloaded = preload([
         {
@@ -180,12 +177,9 @@
 
     function onTabChange(kind: string) {
         activeId = kind;
-        Logger.debug("Tab Changed: " + kind);
     }
 
-    const [getContext, setContext] = createContext<TContext>();
-
-    setContext({
+    let context = $state({
         getCharacter: () => editingCharacter,
         /**
          * Handle character update from subpages.
@@ -204,7 +198,7 @@
         },
     });
 
-    const settingsModalContext = () => getContext();
+    const settingsModalContext = () => context;
 </script>
 
 <SettingsDialog
