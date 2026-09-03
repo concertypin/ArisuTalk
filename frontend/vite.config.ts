@@ -64,6 +64,9 @@ export default defineConfig(async (ctx) => {
             },
             open: false,
             allowedHosts: process.env.npm_lifecycle_event?.includes("dev") ? true : undefined,
+            watch: {
+                ignored: /\.kate-swp$/,
+            },
         },
         define,
         build: {
