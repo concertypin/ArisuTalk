@@ -72,7 +72,7 @@
 <div class="chat group {message.role === 'user' ? 'chat-end' : 'chat-start'}">
     <div class="chat-bubble shadow-lg max-w-[80ch]">
         {#if isEditing}
-            <TextArea bind:value={editingContent} onSubmit={onConfirmEdit} />
+            <TextArea onSubmit={onConfirmEdit} />
         {:else}
             <div class="prose prose-compact prose-invert prose-sm prose-gray max-w-[80ch]">
                 {@html DOMPurify.sanitize(html)}
