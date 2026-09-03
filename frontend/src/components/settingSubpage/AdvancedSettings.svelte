@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" module>
     import { settings } from "@/lib/stores/settings.svelte";
     import LogLevelSelector from "../ui/LogLevelSelector.svelte";
     import NoopIcon from "@/components/Snippets/NoopIcon.svelte";
@@ -56,6 +56,10 @@
         };
         input.click();
     }
+</script>
+
+<script lang="ts">
+    let {}: {} = $props();
 </script>
 
 <div class="space-y-6">
