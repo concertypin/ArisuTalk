@@ -1,5 +1,4 @@
 <script module>
-    import { uiState } from "@/lib/stores/ui.svelte";
     import { Logger } from "@common/logger/Logger";
 
     import { settings } from "@/lib/stores/settings.svelte";
@@ -21,6 +20,8 @@
 
     import { preload } from "@/component/dialog/SettingsDialog.svelte";
     import SettingsDialog from "@/component/dialog/SettingsDialog.svelte";
+
+    import { getAppContext } from "@/context";
 
     export type TProps<T> = {
         context: () => T;
@@ -71,28 +72,34 @@
 </script>
 
 <script lang="ts">
-    let activeTab = $state(preloaded.tabList[0]?.id ?? "");
+    let activeId = $state(preloaded.tabList[0]?.id ?? "");
+
+    let appContext = getAppContext();
+
+    function closeAppSettings() {
+        appContext.appSettingsOpen = false;
+    }
 
     function onOpen() {
         Logger.structured("modal.open", {
             location: window.location.pathname,
-            modalName: "GeneralSettingsModal",
+            modalName: "AppSettingsModal",
         });
     }
 
     function onClose() {
         void settings.save();
 
-        uiState.closeSettingsModal();
+        closeAppSettings();
 
         Logger.structured("modal.close", {
             location: "characterSettings",
-            modalName: "GeneralSettingsModal",
+            modalName: "AppSettingsModal",
         });
     }
 
     function onTabChange(id: string) {
-        activeTab = id;
+        activeId = id;
     }
 
     const [getContext, setContext] = createContext<{}>();
@@ -107,7 +114,7 @@
     {preloaded}
     {onOpen}
     {onClose}
-    {activeTab}
+    {activeId}
     {onTabChange}
     {settingsModalContext}
 />

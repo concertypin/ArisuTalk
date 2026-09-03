@@ -2,7 +2,6 @@
     import { initRouter, getCurrentPath } from "@/lib/router.svelte";
     import { Logger } from "@common/logger/Logger";
     import { routes } from "@/lib/routeConfig";
-    import { uiState } from "@/lib/stores/ui.svelte";
     import { settings } from "@/lib/stores/settings.svelte";
     import { applyTheme } from "@/lib/theme.svelte";
     import { registerServiceWorker } from "@/lib/serviceWorker";
@@ -14,8 +13,9 @@
     import { versionInfo } from "@/lib/stores/versionInfo.svelte";
     import { registerPlugin, initializePlugins } from "@/lib/plugins/types";
     import { memoryPlugin } from "@/features/memory/memoryPlugin";
+    import { setAppContext, type AppContext } from "@/context";
 
-    const generalSettingsModalPromise = import("@/components/GeneralSettingsModal.svelte");
+    const appSettingsModalPromise = import("@/components/AppSettingsModal.svelte");
     const svAgentationPromise = import("sv-agentation");
 </script>
 
@@ -24,6 +24,14 @@
   Root Svelte 5 component with hash-based router, PWA support, and theming.
 -->
 <script lang="ts">
+    let appContext: AppContext = $state({
+        appSettingsOpen: false,
+        characterSettingsOpen: false,
+        editingCharacter: null,
+    });
+
+    setAppContext(appContext);
+
     // Register first-party plugins before initialisation.
     registerPlugin(memoryPlugin);
     // Initialize on mount
@@ -74,6 +82,14 @@
             document.documentElement.style.setProperty("--app-font-size", `${fontSize}px`);
         }
     });
+
+    function isAppSettingsOpen() {
+        return appContext.appSettingsOpen;
+    }
+
+    function closeAppSettings() {
+        appContext.appSettingsOpen = false;
+    }
 </script>
 
 <svelte:head>
@@ -90,8 +106,8 @@
             <CurrentComponent />
         {/if}
 
-        {#if uiState.settingsModalOpen}
-            {#await generalSettingsModalPromise}
+        {#if isAppSettingsOpen()}
+            {#await appSettingsModalPromise}
                 <div
                     class="fixed inset-0 z-50 flex items-center justify-center bg-base-content/50 text-base-content/70 backdrop-blur-sm"
                 >
@@ -106,9 +122,8 @@
                     <div class="bg-base-100 p-8 rounded-xl shadow-xl border border-error/20">
                         <h3 class="font-bold text-lg mb-2">Error Loading Settings</h3>
                         <p>{String(error)}</p>
-                        <button
-                            class="btn btn-sm btn-ghost mt-4"
-                            onclick={() => uiState.closeSettingsModal()}>Close</button
+                        <button class="btn btn-sm btn-ghost mt-4" onclick={closeAppSettings}
+                            >Close</button
                         >
                     </div>
                 </div>
