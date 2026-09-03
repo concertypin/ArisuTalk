@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" module>
     import { settings } from "@/lib/stores/settings.svelte";
     import { localeStore } from "@/lib/i18n/index.svelte";
     import NoopIcon from "@/components/Snippets/NoopIcon.svelte";
@@ -6,6 +6,10 @@
     import Palette from "phosphor-svelte/lib/PaletteIcon";
     import GlobeHemisphereWest from "phosphor-svelte/lib/GlobeHemisphereWestIcon";
     import { SUPPORTED_FONTS } from "@/lib/utils/fontUtils";
+</script>
+
+<script lang="ts">
+    let {}: {} = $props();
 </script>
 
 <div class="space-y-6">

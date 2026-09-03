@@ -1,3 +1,7 @@
+<script lang="ts">
+    let {}: {} = $props();
+</script>
+
 <div class="space-y-6 text-center pt-10">
     <div class="avatar placeholder">
         <div class="bg-neutral text-neutral-content rounded-full w-24">
