@@ -1,10 +1,10 @@
 <script module>
     import { chatStore } from "@/features/chat/stores/chatStore.svelte";
     import { characterStore } from "@/features/character/stores/characterStore.svelte";
-    import { uiState } from "@/lib/stores/ui.svelte";
     import GearIcon from "phosphor-svelte/lib/GearIcon";
     import MessageContainer from "@/component/chat/MessageContainer.svelte";
     import MessageInput from "@/component/chat/MessageInput.svelte";
+    import { getAppContext } from "@/context";
 </script>
 
 <!--
@@ -22,6 +22,8 @@
             : undefined
     );
 
+    let appContext = getAppContext();
+
     async function sendMessage(s: string) {
         if (!s.trim() || !activeChat) return;
 
@@ -34,7 +36,8 @@
 
     function openCharacterSettings() {
         if (currentCharacter) {
-            uiState.openCharacterSettings(currentCharacter);
+            appContext.editingCharacter = currentCharacter;
+            appContext.characterSettingsOpen = true;
         }
     }
 </script>

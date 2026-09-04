@@ -62,7 +62,7 @@
      */
     function handleDeleteClick() {
         if (isConfirmingDelete) {
-            onDelete?.();
+            onDelete();
             isConfirmingDelete = false;
         } else {
             isConfirmingDelete = true;

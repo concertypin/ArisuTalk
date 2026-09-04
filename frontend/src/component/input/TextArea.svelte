@@ -1,6 +1,5 @@
 <script module>
     import type { FormEventHandler } from "svelte/elements";
-    import { Logger } from "@common/logger/Logger";
 </script>
 
 <script lang="ts">
@@ -16,6 +15,7 @@
         | null;
 
     let {
+        value = $bindable(""),
         onInput = () => undefined,
         onSubmit = (_: any) => undefined,
         onCancel = () => undefined,
@@ -24,6 +24,7 @@
         color,
         autosize = true,
     }: {
+        value?: string;
         onInput?: (text: string) => void;
         onSubmit?: (s: string) => void;
         onCancel?: () => void;
@@ -32,8 +33,6 @@
         color?: Color;
         autosize?: boolean;
     } = $props();
-
-    let value = $state("");
 
     let isShiftPressing = false;
 

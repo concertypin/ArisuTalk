@@ -18,11 +18,7 @@
     let showStickerPicker = $state(false);
 
     function onClick(_: any) {
-        onSend(inputValue);
-    }
-
-    function onSend(s: string) {
-        onSubmit(s);
+        onSubmit(inputValue);
     }
 
     function onInput(text: string) {
@@ -45,9 +41,10 @@
 <footer class="p-4 border-t border-base-300/50 bg-base-200/80">
     <div class="flex gap-2">
         <TextArea
+            bind:value={inputValue}
             placeholder="Type a message..."
             {onInput}
-            onSubmit={onSend}
+            {onSubmit}
             {disabled}
             color={null}
         />
