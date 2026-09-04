@@ -49,8 +49,7 @@
     }
 
     function onConfirmEdit() {
-        onMessageUpdate(message.id, editingContent);
-        editingContent = "";
+        onSubmit(editingContent);
     }
 
     function onDelete() {
@@ -66,13 +65,18 @@
         editingContent = "";
     }
 
+    function onSubmit(s: string) {
+        onMessageUpdate(message.id, s);
+        editingContent = "";
+    }
+
     let html = $derived(marked.parse(getMessageText(message), { async: false }));
 </script>
 
 <div class="chat group {message.role === 'user' ? 'chat-end' : 'chat-start'}">
     <div class="chat-bubble shadow-lg max-w-[80ch]">
         {#if isEditing}
-            <TextArea onSubmit={onConfirmEdit} />
+            <TextArea bind:value={editingContent} {onSubmit} />
         {:else}
             <div class="prose prose-compact prose-invert prose-sm prose-gray max-w-[80ch]">
                 {@html DOMPurify.sanitize(html)}
