@@ -1,7 +1,7 @@
 <script module>
     import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
     import MessageActions from "./MessageActions.svelte";
-    import TextArea from "@/component/input/TextArea.svelte";
+    import TextArea from "@/components/input/TextArea.svelte";
 
     import { marked } from "marked";
     import DOMPurify from "dompurify";

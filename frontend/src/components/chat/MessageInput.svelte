@@ -1,5 +1,5 @@
 <script module>
-    import TextArea from "@/component/input/TextArea.svelte";
+    import TextArea from "@/components/input/TextArea.svelte";
     import StickerIcon from "phosphor-svelte/lib/StickerIcon";
     import StickerPicker from "@/features/sticker/components/StickerPicker.svelte";
     import type { AssetEntity } from "@arisutalk/character-spec/v0/Character";
