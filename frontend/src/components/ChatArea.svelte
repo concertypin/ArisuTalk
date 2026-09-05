@@ -2,8 +2,8 @@
     import { chatStore } from "@/features/chat/stores/chatStore.svelte";
     import { characterStore } from "@/features/character/stores/characterStore.svelte";
     import GearIcon from "phosphor-svelte/lib/GearIcon";
-    import MessageContainer from "@/component/chat/MessageContainer.svelte";
-    import MessageInput from "@/component/chat/MessageInput.svelte";
+    import MessageContainer from "@/components/chat/MessageContainer.svelte";
+    import MessageInput from "@/components/chat/MessageInput.svelte";
     import { getAppContext } from "@/context";
 </script>
 

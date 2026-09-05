@@ -21,8 +21,8 @@
     import CharacterMagicSettings from "./settingsSubpage/CharacterMagicSettings.svelte";
     import CharacterHooksSettings from "./settingsSubpage/CharacterHooksSettings.svelte";
 
-    import { preload } from "@/component/dialog/SettingsDialog.svelte";
-    import SettingsDialog from "@/component/dialog/SettingsDialog.svelte";
+    import { preload } from "@/components/dialog/SettingsDialog.svelte";
+    import SettingsDialog from "@/components/dialog/SettingsDialog.svelte";
 
     import { getAppContext } from "@/context";
 
