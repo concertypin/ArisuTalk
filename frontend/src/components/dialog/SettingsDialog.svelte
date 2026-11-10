@@ -119,7 +119,7 @@
                     <div></div>
                 {:else if page.type === "markdown"}
                     <SanitizedHtml
-                        class="prose prose-compact prose-invert prose-sm prose-gray max-w-[80ch]"
+                        class="prose prose-compact prose-sm max-w-[80ch]"
                         html={page.text}
                     />
                 {:else if page.type === "component"}

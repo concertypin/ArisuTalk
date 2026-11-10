@@ -164,7 +164,7 @@ describe("CharacterList Component", () => {
         });
 
         const exportButton = getByLabelText("Export").nth(0);
-        expect(exportButton).not.toBeDisabled()
+        expect(exportButton).not.toBeDisabled();
         await exportButton.click({ force: true });
 
         // Verify download link was created

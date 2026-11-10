@@ -125,7 +125,8 @@
             {/await}
         {/if}
         <ToastContainer />
-        {#if import.meta.env.DEV}
+        <!-- Dev-only annotation tool. Not loaded under Vitest: it adds an overlay and its late import reloads the browser test runner. -->
+        {#if import.meta.env.DEV && import.meta.env.MODE !== "test"}
             {#await import("sv-agentation") then { Agentation }}
                 <div style="position:relative;z-index:9999">
                     <Agentation toolbarPosition="top-right" />

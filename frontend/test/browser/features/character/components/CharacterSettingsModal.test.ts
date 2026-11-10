@@ -1,6 +1,6 @@
 /// <reference types="vitest/browser" />
 
-import { test, expect, describe, vi, beforeEach, afterEach } from "vitest";
+import { test, expect, describe, vi, beforeEach } from "vitest";
 import { createTestAppContext, renderWithAppContext } from "@test/utils/appContext.svelte";
 import CharacterSettingsModal from "@/features/character/components/CharacterSettingsModal.svelte";
 import { characterStore } from "@/features/character/stores/characterStore.svelte";
@@ -87,18 +87,14 @@ describe("CharacterSettingsModal Component", () => {
         characterStore.characters = [mockCharacter];
     });
 
-    // Ensure timers are cleaned up even if test fails
-    // This prevents pollution of other tests like ChatPersion.test.ts
-    afterEach(() => {
-        vi.useRealTimers();
-    });
-
     test("renders modal when open", async () => {
         const { getByRole } = renderModal();
 
         // Check header
         await expect
-            .element(getByRole("heading", { level: 2, name: "Test Character Settings", exact: true }))
+            .element(
+                getByRole("heading", { level: 2, name: "Test Character Settings", exact: true })
+            )
             .toBeInTheDocument();
 
         // Check sidebar tabs
@@ -172,6 +168,8 @@ describe("CharacterSettingsModal Component", () => {
         await addButton.click();
 
         // Check if new entry appears
-        await expect.element(getByRole("heading", { level: 4, name: /Entries \(2\)/i })).toBeInTheDocument();
+        await expect
+            .element(getByRole("heading", { level: 4, name: /Entries \(2\)/i }))
+            .toBeInTheDocument();
     });
 });

@@ -46,13 +46,19 @@
         editingMessageId = null;
     }
 
-    async function onMessageUpdate(messageId: string, editingContent: string) {
-        if (editingMessageId !== messageId) return;
+    /**
+     * Persists an edited message and leaves edit mode on success.
+     * @returns `true` if the message was saved; `false` if it was not (the editing state is kept).
+     */
+    async function onMessageUpdate(messageId: string, editingContent: string): Promise<boolean> {
+        if (editingMessageId !== messageId) return false;
         try {
             await chatStore.updateMessage(messageId, editingContent);
             editingMessageId = null;
+            return true;
         } catch (error) {
             toastStore.error(`Failed to update message: ${String(error)}`);
+            return false;
         }
     }
 

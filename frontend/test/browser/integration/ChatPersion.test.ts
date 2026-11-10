@@ -19,7 +19,6 @@ describe("Persona and Chat interactions", () => {
     });
     afterEach(() => {
         vi.restoreAllMocks();
-        vi.useRealTimers();
     });
 
     test("Manage Personas opens persona modal", async () => {
@@ -36,7 +35,6 @@ describe("Persona and Chat interactions", () => {
 
     test("Create character and send chat message", async () => {
         // Import and configure chatStore with Mock provider for testing
-        // Must happen BEFORE fake timers are enabled
         // Mock chatStore.waitForSettings to avoid delays
 
         const { chatStore } = await import("@/features/chat/stores/chatStore.svelte");
@@ -44,15 +42,16 @@ describe("Persona and Chat interactions", () => {
         vi.spyOn(chatStore, "waitForSettings").mockResolvedValue(undefined);
         await chatStore.initPromise;
         await chatStore.setProvider("MOCK", {
-            mockDelay: 50,
+            // No per-character stream delay, so replies render within the expect.element poll timeout.
+            mockDelay: 0,
             responses: ["Response 1", "Response 2"],
             generationParameters: {},
         });
 
-        // Enable fake timers AFTER async initialization completes
-        vi.useFakeTimers();
-
-        const { getByLabelText, getByText, getByRole } = renderWithAppContext(CharacterLayoutTestWrapper, {});
+        const { getByLabelText, getByText, getByRole } = renderWithAppContext(
+            CharacterLayoutTestWrapper,
+            {}
+        );
 
         // Open Add Character modal
         const addCharButton = getByLabelText("Add Character");
@@ -90,8 +89,7 @@ describe("Persona and Chat interactions", () => {
         const userMsg = getByText("Hello there");
         await expect.element(userMsg).toBeVisible();
 
-        // Wait for the mocked bot response (the app uses a 1s delay)
-        await vi.advanceTimersByTimeAsync(1200);
+        // Wait for the mocked bot response (real timers; expect.element polls until it renders)
         const botMsg = getByText("Response 1");
         await expect.element(botMsg).toBeVisible();
     });

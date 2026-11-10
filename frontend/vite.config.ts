@@ -40,6 +40,8 @@ export default defineConfig(async (ctx) => {
                 "@langchain/core/messages",
                 "@langchain/core/outputs",
                 "phosphor-svelte/lib/*",
+                // Dev-only tool imported lazily by App.svelte; pre-bundle it so the dev server does not reload on first use
+                "sv-agentation",
             ],
             rolldownOptions: {
                 checks: {

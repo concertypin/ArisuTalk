@@ -74,21 +74,15 @@ describe("AppSettingsModal Component", () => {
         const { getByRole } = renderModal();
 
         // Initial tab is General
-        await expect
-            .element(getByRole("heading", { name: "General Settings" }))
-            .toBeVisible();
+        await expect.element(getByRole("heading", { name: "General Settings" })).toBeVisible();
 
         // Switch to LLM
         await getByRole("button", { name: "LLM Configuration" }).click();
-        await expect
-            .element(getByRole("heading", { name: "LLM Configuration" }))
-            .toBeVisible();
+        await expect.element(getByRole("heading", { name: "LLM Configuration" })).toBeVisible();
 
         // Switch to Advanced
         await getByRole("button", { name: "Advanced", exact: true }).click();
-        await expect
-            .element(getByRole("heading", { name: "Advanced Settings" }))
-            .toBeVisible();
+        await expect.element(getByRole("heading", { name: "Advanced Settings" })).toBeVisible();
         await expect.element(getByRole("combobox")).toBeVisible();
     });
 

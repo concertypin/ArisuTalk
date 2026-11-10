@@ -153,6 +153,7 @@ it('updates UI when shared rune changes', async () => {
 ### 4.1. Avoid Early Fake Timers with Async Store Init Promises
 If your stores rely on async initialization (`await store.initPromise`), do NOT use `vi.useFakeTimers()` early in `beforeEach` or before stores resolve. Doing so pauses microtask queues, preventing promises from resolving and triggering a test timeout.
 - **Rule**: Safe loading defaults to real timers first. Enable `vi.useFakeTimers()` only *after* all stores have resolved their init promises.
+- **Browser tests**: do not combine fake timers with `expect.element` or locator polling. Polling retries on timers, so with fake timers it stalls until the test timeout on slow runners (as in CI). To make a mocked LLM reply fast, pass `mockDelay: 0` to the `MOCK` provider (the delay is per streamed character) instead of advancing fake timers.
 
 ### 4.2. Preserve Svelte 5 Runes Reactivity on Arrays
 When injecting mock data into reactive array stores (e.g. `chatStore.chats`), do NOT reassign the array (e.g. `store.chats = [newObj]`), as it breaks the reactivity bind.
