@@ -2,6 +2,8 @@
 import { test, expect, describe, vi } from "vitest";
 import { render } from "vitest-browser-svelte";
 import MarkdownRenderer from "@/components/MarkdownRenderer.svelte";
+import { applyTheme } from "@/lib/theme.svelte";
+import { contrastRatio } from "@test/utils/color";
 
 describe("MarkdownRenderer Component", () => {
     test("renders markdown content", async () => {
@@ -58,4 +60,30 @@ describe("MarkdownRenderer Component", () => {
             expect(codeElement).toBeTruthy();
         });
     });
+
+    test.each(["light", "dark"] as const)(
+        "text is readable on the %s theme background",
+        async (mode) => {
+            applyTheme(mode);
+            try {
+                const { container } = render(MarkdownRenderer, { source: "Hello **World**" });
+
+                await vi.waitFor(() => expect(container.querySelector(".prose")).toBeTruthy());
+                const prose = container.querySelector(".prose");
+                if (!prose) throw new Error("markdown element missing");
+
+                // <body> animates its background when the theme changes, so wait for it to settle.
+                await vi.waitFor(() => {
+                    const ratio = contrastRatio(
+                        getComputedStyle(prose).color,
+                        getComputedStyle(document.body).backgroundColor
+                    );
+                    expect(ratio).toBeGreaterThan(4.5);
+                });
+            } finally {
+                document.documentElement.removeAttribute("data-theme");
+                document.documentElement.style.colorScheme = "";
+            }
+        }
+    );
 });

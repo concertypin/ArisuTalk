@@ -1,51 +1,24 @@
 import { describe, test, expect } from "vitest";
+import {
+    LLMConfigSchema,
+    LLMGenerationParametersSchema,
+    LLMProviderSchema,
+    SettingsSchema,
+} from "@/lib/types/IDataModel";
 
 describe.concurrent("ChatStore Provider Loading Logic", () => {
-    test.concurrent("mapProviderType maps Gemini correctly", async () => {
-        const { LLMProviderSchema } = await import("@/lib/types/IDataModel");
-
-        const geminiProvider = LLMProviderSchema.parse("Gemini");
-        expect(geminiProvider).toBe("Gemini");
+    test.concurrent.for([
+        "Gemini",
+        "OpenRouter",
+        "Mock",
+        "OpenAI",
+        "OpenAI-compatible",
+        "Anthropic",
+    ])("LLMProviderSchema accepts %s", (provider) => {
+        expect(LLMProviderSchema.parse(provider)).toBe(provider);
     });
 
-    test.concurrent("mapProviderType maps OpenRouter correctly", async () => {
-        const { LLMProviderSchema } = await import("@/lib/types/IDataModel");
-
-        const openRouterProvider = LLMProviderSchema.parse("OpenRouter");
-        expect(openRouterProvider).toBe("OpenRouter");
-    });
-
-    test.concurrent("mapProviderType maps Mock correctly", async () => {
-        const { LLMProviderSchema } = await import("@/lib/types/IDataModel");
-
-        const mockProvider = LLMProviderSchema.parse("Mock");
-        expect(mockProvider).toBe("Mock");
-    });
-
-    test.concurrent("mapProviderType maps OpenAI correctly", async () => {
-        const { LLMProviderSchema } = await import("@/lib/types/IDataModel");
-
-        const openAIProvider = LLMProviderSchema.parse("OpenAI");
-        expect(openAIProvider).toBe("OpenAI");
-    });
-
-    test.concurrent("mapProviderType maps OpenAI-compatible correctly", async () => {
-        const { LLMProviderSchema } = await import("@/lib/types/IDataModel");
-
-        const openAICompatible = LLMProviderSchema.parse("OpenAI-compatible");
-        expect(openAICompatible).toBe("OpenAI-compatible");
-    });
-
-    test.concurrent("mapProviderType maps Anthropic correctly", async () => {
-        const { LLMProviderSchema } = await import("@/lib/types/IDataModel");
-
-        const anthropicProvider = LLMProviderSchema.parse("Anthropic");
-        expect(anthropicProvider).toBe("Anthropic");
-    });
-
-    test.concurrent("LLMConfig schema has required fields", async () => {
-        const { LLMConfigSchema } = await import("@/lib/types/IDataModel");
-
+    test.concurrent("LLMConfig schema has required fields", () => {
         const config = LLMConfigSchema.parse({
             name: "Test Config",
             provider: "Mock",
@@ -58,9 +31,7 @@ describe.concurrent("ChatStore Provider Loading Logic", () => {
         expect(config).toHaveProperty("generationParameters");
     });
 
-    test.concurrent("LLMConfig defaults to enabled=true", async () => {
-        const { LLMConfigSchema } = await import("@/lib/types/IDataModel");
-
+    test.concurrent("LLMConfig defaults to enabled=true", () => {
         const config = LLMConfigSchema.parse({
             name: "Test",
             provider: "Mock",
@@ -69,9 +40,7 @@ describe.concurrent("ChatStore Provider Loading Logic", () => {
         expect(config.enabled).toBe(true);
     });
 
-    test.concurrent("LLMConfig can be disabled", async () => {
-        const { LLMConfigSchema } = await import("@/lib/types/IDataModel");
-
+    test.concurrent("LLMConfig can be disabled", () => {
         const config = LLMConfigSchema.parse({
             name: "Test",
             provider: "Mock",
@@ -81,18 +50,14 @@ describe.concurrent("ChatStore Provider Loading Logic", () => {
         expect(config.enabled).toBe(false);
     });
 
-    test.concurrent("Settings schema has activeLLMConfigId field", async () => {
-        const { SettingsSchema } = await import("@/lib/types/IDataModel");
-
+    test.concurrent("Settings schema has activeLLMConfigId field", () => {
         const settings = SettingsSchema.parse({});
 
         expect(settings).toHaveProperty("activeLLMConfigId");
         expect(settings.activeLLMConfigId).toBeNull();
     });
 
-    test.concurrent("Settings can have activeLLMConfigId set", async () => {
-        const { SettingsSchema } = await import("@/lib/types/IDataModel");
-
+    test.concurrent("Settings can have activeLLMConfigId set", () => {
         const settings = SettingsSchema.parse({
             activeLLMConfigId: "test-id-123",
         });
@@ -100,9 +65,7 @@ describe.concurrent("ChatStore Provider Loading Logic", () => {
         expect(settings.activeLLMConfigId).toBe("test-id-123");
     });
 
-    test.concurrent("LLMConfig generates unique IDs", async () => {
-        const { LLMConfigSchema } = await import("@/lib/types/IDataModel");
-
+    test.concurrent("LLMConfig generates unique IDs", () => {
         const config1 = LLMConfigSchema.parse({ name: "Config 1", provider: "Mock" });
         const config2 = LLMConfigSchema.parse({ name: "Config 2", provider: "Mock" });
 
@@ -111,9 +74,7 @@ describe.concurrent("ChatStore Provider Loading Logic", () => {
         expect(config2.id).toMatch(/^LLMconfig-/);
     });
 
-    test.concurrent("generationParameters has all optional fields", async () => {
-        const { LLMGenerationParametersSchema } = await import("@/lib/types/IDataModel");
-
+    test.concurrent("generationParameters has all optional fields", () => {
         const params = LLMGenerationParametersSchema.parse({});
 
         expect(params).toBeDefined();
@@ -126,9 +87,7 @@ describe.concurrent("ChatStore Provider Loading Logic", () => {
         expect(params.presencePenalty).toBeUndefined();
     });
 
-    test.concurrent("generationParameters validates temperature range", async () => {
-        const { LLMGenerationParametersSchema } = await import("@/lib/types/IDataModel");
-
+    test.concurrent("generationParameters validates temperature range", () => {
         const params = LLMGenerationParametersSchema.parse({
             temperature: 1.5,
         });
@@ -136,9 +95,7 @@ describe.concurrent("ChatStore Provider Loading Logic", () => {
         expect(params.temperature).toBe(1.5);
     });
 
-    test.concurrent("generationParameters validates topP range", async () => {
-        const { LLMGenerationParametersSchema } = await import("@/lib/types/IDataModel");
-
+    test.concurrent("generationParameters validates topP range", () => {
         const params = LLMGenerationParametersSchema.parse({
             topP: 0.95,
         });
@@ -148,9 +105,7 @@ describe.concurrent("ChatStore Provider Loading Logic", () => {
         expect(params.topP).toBeLessThanOrEqual(1);
     });
 
-    test.concurrent("generationParameters validates penalties range", async () => {
-        const { LLMGenerationParametersSchema } = await import("@/lib/types/IDataModel");
-
+    test.concurrent("generationParameters validates penalties range", () => {
         const params = LLMGenerationParametersSchema.parse({
             frequencyPenalty: 0.5,
             presencePenalty: -0.5,

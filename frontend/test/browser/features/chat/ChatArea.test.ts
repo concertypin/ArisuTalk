@@ -1,5 +1,5 @@
 import { test, expect, describe, vi, beforeEach } from "vitest";
-import { render } from "vitest-browser-svelte";
+import { renderWithAppContext } from "@test/utils/appContext.svelte";
 import ChatArea from "@/components/ChatArea.svelte";
 import { chatStore } from "@/features/chat/stores/chatStore.svelte";
 import type { LocalChat } from "@/lib/interfaces";
@@ -39,7 +39,7 @@ describe("ChatArea Component", () => {
 
     test("renders select chat prompt when no chat is active", async () => {
         chatStore.activeChatId = null;
-        const { getByText } = render(ChatArea);
+        const { getByText } = renderWithAppContext(ChatArea, {});
         await expect
             .element(getByText("Select a chat or create a new one to start messaging."))
             .toBeVisible();
@@ -60,7 +60,7 @@ describe("ChatArea Component", () => {
         ] satisfies LocalChat[];
         chatStore.activeMessages = [];
 
-        const { getByText, getByRole } = render(ChatArea);
+        const { getByText, getByRole } = renderWithAppContext(ChatArea, {});
 
         await expect.element(getByRole("heading", { name: "Test Chat" })).toBeVisible();
         await expect.element(getByText("No messages yet. Say hello!")).toBeVisible();
@@ -94,7 +94,7 @@ describe("ChatArea Component", () => {
             }),
         ] satisfies Message[]; // Casting partially correct objects
 
-        const { getByText } = render(ChatArea);
+        const { getByText } = renderWithAppContext(ChatArea, {});
 
         await expect.element(getByText("Hello")).toBeVisible();
         await expect.element(getByText("Hi there!")).toBeVisible();
@@ -113,7 +113,7 @@ describe("ChatArea Component", () => {
             } satisfies LocalChat,
         ];
 
-        const { getByRole } = render(ChatArea);
+        const { getByRole } = renderWithAppContext(ChatArea, {});
 
         const input = getByRole("textbox");
         await input.fill("Hello World");
@@ -139,7 +139,7 @@ describe("ChatArea Component", () => {
         ];
         chatStore.isGenerating = true;
 
-        const { container } = render(ChatArea);
+        const { container } = renderWithAppContext(ChatArea, {});
 
         // DaisyUI loading-dots class on span element
         const loader = container.querySelector(".loading-dots");
@@ -168,7 +168,7 @@ describe("ChatArea Component", () => {
             }),
         ] satisfies Message[];
 
-        const { getByTitle } = render(ChatArea);
+        const { getByTitle } = renderWithAppContext(ChatArea, {});
 
         // Action buttons should exist (hidden until hover via CSS)
         await expect.element(getByTitle("Edit message")).toBeInTheDocument();
@@ -197,7 +197,7 @@ describe("ChatArea Component", () => {
             }),
         ] satisfies Message[];
 
-        const { getByTitle } = render(ChatArea);
+        const { getByTitle } = renderWithAppContext(ChatArea, {});
 
         // First click shows confirm button
         const deleteBtn = getByTitle("Delete message");
@@ -238,7 +238,7 @@ describe("ChatArea Component", () => {
             }),
         ] satisfies Message[];
 
-        const { getByTitle } = render(ChatArea);
+        const { getByTitle } = renderWithAppContext(ChatArea, {});
 
         // Should have 2 messages, only assistant should have regenerate button
         // getByTitle returns the single element, if multiple exist it would throw
@@ -273,7 +273,7 @@ describe("ChatArea Component", () => {
             }),
         ] satisfies Message[];
 
-        const { getByTitle } = render(ChatArea);
+        const { getByTitle } = renderWithAppContext(ChatArea, {});
 
         const regenerateBtn = getByTitle("Regenerate response");
         await regenerateBtn.click();

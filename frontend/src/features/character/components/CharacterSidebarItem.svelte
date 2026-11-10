@@ -1,20 +1,34 @@
-<script lang="ts">
+<script lang="ts" module>
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import PencilSimple from "phosphor-svelte/lib/PencilSimpleIcon";
     import PushPin from "phosphor-svelte/lib/PushPinIcon";
-    import { uiState } from "@/lib/stores/ui.svelte";
     import { opfsAdapter } from "../adapters/assetStorage/OpFSAssetStorageAdapter";
     import { IfNotExistBehavior } from "@/lib/interfaces";
 
-    type Props = {
-        character: Character;
-        active: boolean;
-        isPinned?: boolean;
-        onClick: () => void;
-        onTogglePin?: () => void;
-    };
+    import { getAppContext } from "@/context";
+</script>
 
-    let { character, active, isPinned = false, onClick, onTogglePin }: Props = $props();
+<script lang="ts">
+    let {
+        character,
+        active,
+        isPinned = false,
+        onClick,
+        onTogglePin = () => undefined,
+    }: {
+        /** Character object referenced by the UI element */
+        character: Character;
+        /** Specifies whether the element is enabled. This primarily affects its visual appearance. */
+        active: boolean;
+        /** Whether the element is pinned. This primarily affects its visual appearance and updates the aria-label to reflect the available action. */
+        isPinned?: boolean;
+        /** Event handler called when the element is clicked. */
+        onClick: () => void;
+        /** Specifies the event handler to run when the toggle pin button is clicked. Defaults to no action. */
+        onTogglePin?: () => void;
+    } = $props();
+
+    let appContext = getAppContext();
 
     // Generate initials from name
     let initials = $derived(character.name.substring(0, 2).toUpperCase());
@@ -59,10 +73,15 @@
         };
     });
 
+    function openCharacterSettings(target: Character) {
+        appContext.editingCharacter = target;
+        appContext.characterSettingsOpen = true;
+    }
+
     function handleButtonClick(e: MouseEvent) {
         if (active) {
             e.stopPropagation();
-            uiState.openCharacterSettings(character);
+            openCharacterSettings(character);
         } else {
             onClick();
         }

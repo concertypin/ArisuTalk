@@ -6,7 +6,6 @@
     import { initRouter, getCurrentPath } from "@/lib/router.svelte";
     import { Logger } from "@common/logger/Logger";
     import { routes } from "@/lib/routeConfig";
-    import { uiState } from "@/lib/stores/ui.svelte";
     import { settings } from "@/lib/stores/settings.svelte";
     import { applyTheme } from "@/lib/theme.svelte";
     import { registerServiceWorker } from "@/lib/serviceWorker";
@@ -18,6 +17,15 @@
     import { versionInfo } from "@/lib/stores/versionInfo.svelte";
     import { registerPlugin, initializePlugins } from "@/lib/plugins/types";
     import { memoryPlugin } from "@/features/memory/memoryPlugin";
+    import { setAppContext, type AppContext } from "@/context";
+
+    let appContext: AppContext = $state({
+        appSettingsOpen: false,
+        characterSettingsOpen: false,
+        editingCharacter: null,
+    });
+
+    setAppContext(appContext);
 
     // Register first-party plugins before initialisation.
     registerPlugin(memoryPlugin);
@@ -69,6 +77,14 @@
             document.documentElement.style.setProperty("--app-font-size", `${fontSize}px`);
         }
     });
+
+    function isAppSettingsOpen() {
+        return appContext.appSettingsOpen;
+    }
+
+    function closeAppSettings() {
+        appContext.appSettingsOpen = false;
+    }
 </script>
 
 <svelte:head>
@@ -85,8 +101,8 @@
             <CurrentComponent />
         {/if}
 
-        {#if uiState.settingsModalOpen}
-            {#await import("@/components/SettingsModal.svelte")}
+        {#if isAppSettingsOpen()}
+            {#await import("@/components/AppSettingsModal.svelte")}
                 <div
                     class="fixed inset-0 z-50 flex items-center justify-center bg-base-content/50 text-base-content/70 backdrop-blur-sm"
                 >
@@ -101,16 +117,16 @@
                     <div class="bg-base-100 p-8 rounded-xl shadow-xl border border-error/20">
                         <h3 class="font-bold text-lg mb-2">Error Loading Settings</h3>
                         <p>{String(error)}</p>
-                        <button
-                            class="btn btn-sm btn-ghost mt-4"
-                            onclick={() => uiState.closeSettingsModal()}>Close</button
+                        <button class="btn btn-sm btn-ghost mt-4" onclick={closeAppSettings}
+                            >Close</button
                         >
                     </div>
                 </div>
             {/await}
         {/if}
         <ToastContainer />
-        {#if import.meta.env.DEV}
+        <!-- Dev-only annotation tool. Not loaded under Vitest: it adds an overlay and its late import reloads the browser test runner. -->
+        {#if import.meta.env.DEV && import.meta.env.MODE !== "test"}
             {#await import("sv-agentation") then { Agentation }}
                 <div style="position:relative;z-index:9999">
                     <Agentation toolbarPosition="top-right" />

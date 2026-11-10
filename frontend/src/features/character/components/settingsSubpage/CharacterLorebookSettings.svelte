@@ -10,21 +10,23 @@
     import CaretDown from "phosphor-svelte/lib/CaretDownIcon";
     import CaretUp from "phosphor-svelte/lib/CaretUpIcon";
     import { merge } from "lodash-es";
+    import CharacterSettings from "./CharacterSettings.svelte";
 
     type LorebookEntry = Character["prompt"]["lorebook"]["data"][number];
     type ConditionType = LorebookEntry["condition"][number]["type"];
 
-    type Props = {
-        character: Character;
-        onChange: (character: Character) => void;
-    };
+    import type { TContext, TProps } from "./types.ts";
 
-    let { character, onChange }: Props = $props();
+    let { context }: TProps<TContext> = $props();
+
+    let { getCharacter, onCharacterChange } = $derived(context());
+
+    let character = $derived(getCharacter());
 
     let expandedEntryId = $state<string | null>(null);
 
     function updateTokenLimit(limit: number) {
-        onChange(
+        onCharacterChange(
             merge({}, character, {
                 prompt: {
                     lorebook: {
@@ -45,7 +47,7 @@
             enabled: true,
             priority: 0,
         };
-        onChange(
+        onCharacterChange(
             merge({}, character, {
                 prompt: {
                     lorebook: {
@@ -61,7 +63,7 @@
         const data = character.prompt.lorebook.data.map((e) =>
             e.id === entryId ? merge({}, e, updates) : e
         );
-        onChange(
+        onCharacterChange(
             merge({}, character, {
                 prompt: {
                     lorebook: { data },
@@ -72,7 +74,7 @@
 
     function deleteEntry(entryId: string) {
         const data = character.prompt.lorebook.data.filter((e) => e.id !== entryId);
-        onChange(
+        onCharacterChange(
             merge({}, character, {
                 prompt: {
                     lorebook: { data },
@@ -95,9 +97,7 @@
     }
 </script>
 
-<div class="space-y-6">
-    <h3 class="text-lg font-semibold">Lorebook</h3>
-
+<CharacterSettings subpageName="Lorebook">
     <fieldset class="fieldset w-full">
         <label for="lorebook-token-limit" class="fieldset-legend">Token Limit</label>
         <input
@@ -267,4 +267,4 @@
             {/each}
         </div>
     {/if}
-</div>
+</CharacterSettings>

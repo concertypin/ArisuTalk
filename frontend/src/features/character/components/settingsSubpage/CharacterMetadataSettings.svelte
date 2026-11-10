@@ -5,13 +5,15 @@
      */
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import { merge } from "lodash-es";
+    import CharacterSettings from "./CharacterSettings.svelte";
 
-    type Props = {
-        character: Character;
-        onChange: (character: Character) => void;
-    };
+    import type { TContext, TProps } from "./types.ts";
 
-    let { character, onChange }: Props = $props();
+    let { context }: TProps<TContext> = $props();
+
+    let { getCharacter, onCharacterChange } = $derived(context());
+
+    let character = $derived(getCharacter());
 
     /** Common license options for autocomplete */
     const licenseOptions = [
@@ -28,7 +30,7 @@
         field: K,
         value: NonNullable<Character["metadata"]>[K]
     ) {
-        onChange(
+        onCharacterChange(
             merge({}, character, {
                 metadata: { [field]: value },
             })
@@ -36,9 +38,7 @@
     }
 </script>
 
-<div class="space-y-6">
-    <h3 class="text-lg font-semibold">Metadata</h3>
-
+<CharacterSettings subpageName="Metadata">
     <fieldset class="fieldset w-full">
         <label for="meta-author" class="fieldset-legend">Author</label>
         <input
@@ -120,4 +120,4 @@
             <span class="label-text-alt">Extra information, credits, or notes.</span>
         </div>
     </fieldset>
-</div>
+</CharacterSettings>

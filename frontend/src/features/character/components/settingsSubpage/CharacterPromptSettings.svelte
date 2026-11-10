@@ -11,12 +11,15 @@
     import { merge } from "lodash-es";
     import PromptTemplateManager from "@/features/promptTemplate/components/PromptTemplateManager.svelte";
     import { estimateTokens } from "@/lib/utils/tokenCounter";
-    type Props = {
-        character: Character;
-        onChange: (character: Character) => void;
-    };
+    import CharacterSettings from "./CharacterSettings.svelte";
 
-    let { character, onChange }: Props = $props();
+    import type { TContext, TProps } from "./types.ts";
+
+    let { context }: TProps<TContext> = $props();
+
+    let { getCharacter, onCharacterChange } = $derived(context());
+
+    let character = $derived(getCharacter());
 
     let descriptionTokens = $derived(estimateTokens(character.prompt.description));
     let authorsNoteTokens = $derived(estimateTokens(character.prompt.authorsNote ?? ""));
@@ -25,7 +28,7 @@
     let showTemplateManager = $state(false);
 
     function onApplyTemplate(prompts: { system: string; generation: string; lore?: string }) {
-        onChange(
+        onCharacterChange(
             merge({}, character, {
                 prompt: {
                     description: prompts.system,
@@ -40,7 +43,7 @@
         field: K,
         value: Character["prompt"][K]
     ) {
-        onChange(
+        onCharacterChange(
             merge({}, character, {
                 prompt: { [field]: value },
             })
@@ -48,9 +51,7 @@
     }
 </script>
 
-<div class="space-y-6">
-    <h3 class="text-lg font-semibold">Prompt Configuration</h3>
-
+<CharacterSettings subpageName="Prompt Configuration">
     <fieldset class="fieldset w-full">
         <div class="flex items-center justify-between">
             <label for="prompt-desc" class="fieldset-legend">Character Prompt Description</label>
@@ -145,4 +146,4 @@
         <BookOpen size={16} />
         {showTemplateManager ? "Hide Templates" : "Load Template"}
     </button>
-</div>
+</CharacterSettings>

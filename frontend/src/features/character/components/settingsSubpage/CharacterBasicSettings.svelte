@@ -4,19 +4,25 @@
      * Basic character info: name, description, avatar.
      * Fields include helper text based on character-spec JSDoc.
      */
+    import { untrack } from "svelte";
     import { SvelteMap, SvelteSet } from "svelte/reactivity";
     import { getAssetStorage } from "@/features/character/adapters/assetStorage/assetStorageResolver";
     import { Logger } from "@common/logger/Logger";
-    import { IfNotExistBehavior } from "@/lib/interfaces";
+    import { IfNotExistBehavior, type IAssetStorageAdapter } from "@/lib/interfaces";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import { merge } from "lodash-es";
+    import { toastStore } from "@/lib/stores/toast.svelte";
+    import WarningIcon from "phosphor-svelte/lib/WarningIcon";
+    import { characterStore } from "@/features/character/stores/characterStore.svelte";
+    import type { AssetEntity } from "@arisutalk/character-spec/v0/Character";
+    import CharacterSettings from "./CharacterSettings.svelte";
+    import type { TContext, TProps } from "./types.ts";
 
-    type Props = {
-        character: Character;
-        onChange: (character: Character) => void;
-    };
+    let { context }: TProps<TContext> = $props();
 
-    let { character, onChange }: Props = $props();
+    let { getCharacter, onCharacterChange } = $derived(context());
+
+    let character = $derived(getCharacter());
 
     const assetStorage = getAssetStorage();
     let assetPreviews = new SvelteMap<string, string>();
@@ -26,42 +32,55 @@
         character.assets.assets.filter((a) => a.mimeType.startsWith("image/"))
     );
 
+    async function getImage(
+        asset: AssetEntity,
+        storage: IAssetStorageAdapter,
+        blobUrls: SvelteSet<string>,
+        signal: AbortSignal
+    ) {
+        if (!(typeof asset.data === "string" && asset.data.startsWith("local:"))) return;
+
+        try {
+            const url = await storage.getAssetUrl(
+                new URL(asset.data),
+                IfNotExistBehavior.RETURN_NULL
+            );
+            if (!url) return;
+
+            // The effect was cleaned up while loading: nobody will revoke this URL later.
+            if (signal.aborted) {
+                URL.revokeObjectURL(url);
+                return;
+            }
+
+            assetPreviews.set(asset.id, url);
+            blobUrls.add(url);
+        } catch (e) {
+            Logger.error("Failed to load asset preview for avatar picker:", asset.id, e);
+        }
+    }
+
     // Load image previews
     $effect(() => {
-        let revoked = false;
-        const blobUrls = new SvelteSet<string | Uint8Array<ArrayBuffer>>();
+        const blobUrls = new SvelteSet<string>();
+        const abortController = new AbortController();
+
+        // Read synchronously: a derived must not be read after this effect may have been destroyed.
+        const assets = untrack(() => imageAssets);
 
         const loadPreviews = async () => {
             await assetStorage.init();
-            for (const asset of imageAssets) {
-                if (typeof asset.data === "string" && asset.data.startsWith("local:")) {
-                    try {
-                        const url = await assetStorage.getAssetUrl(
-                            new URL(asset.data),
-                            IfNotExistBehavior.RETURN_NULL
-                        );
-                        if (url && !revoked) {
-                            assetPreviews.set(asset.id, url);
-                            blobUrls.add(url);
-                        }
-                    } catch (e) {
-                        Logger.error(
-                            "Failed to load asset preview for avatar picker:",
-                            asset.id,
-                            e
-                        );
-                    }
-                }
+            for (const asset of assets) {
+                if (abortController.signal.aborted) return;
+                await getImage(asset, assetStorage, blobUrls, abortController.signal);
             }
         };
 
         void loadPreviews();
 
         return () => {
-            revoked = true;
-            for (const url of blobUrls) {
-                if (typeof url === "string") URL.revokeObjectURL(url);
-            }
+            abortController.abort();
+            for (const url of blobUrls) URL.revokeObjectURL(url);
         };
     });
 
@@ -73,14 +92,51 @@
         return asset ? assetPreviews.get(asset.id) || "" : character.avatarUrl;
     });
 
-    function updateField<const K extends keyof Character>(field: K, value: Character[K]) {
-        onChange(merge({}, character, { [field]: value }));
+    /**
+     * Falls back to a generated avatar when the preview fails to load.
+     * A load can fail after the component was torn down; reading state then would be stale.
+     */
+    function onAvatarError(e: Event) {
+        const img = e.currentTarget;
+        if (!(img instanceof HTMLImageElement) || !img.isConnected) return;
+        img.src = `https://api.dicebear.com/7.x/initials/svg?seed=${character.name}`;
     }
+
+    function updateField<const K extends keyof Character>(field: K, value: Character[K]) {
+        onCharacterChange(merge({}, character, { [field]: value }));
+    }
+
+    const findCharacter = (c: Character) => c.id === character.id;
+
+    /** Blocks re-entry while a deletion is in flight (a second call would splice the same index again). */
+    let isRemoving = $state(false);
+
+    async function onCharacterRemove() {
+        if (isRemoving) return;
+
+        const index = characterStore.characters.findIndex(findCharacter);
+
+        if (index < 0) return;
+
+        isRemoving = true;
+        try {
+            await characterStore.remove(index);
+        } catch (e) {
+            Logger.error("Failed to remove character", e);
+            toastStore.error(`Failed to remove character: ${String(e)}`);
+            isRemoving = false;
+            return;
+        }
+
+        isRemoving = false;
+        onCharacterChange(null);
+    }
+
+    let inputCharName = $state("");
+    let isValidCharName = $derived(inputCharName.trim() ? character.name === inputCharName : true);
 </script>
 
-<div class="space-y-6">
-    <h3 class="text-lg font-semibold">Basic Information</h3>
-
+<CharacterSettings subpageName="Basic Information">
     <fieldset class="fieldset w-full">
         <label for="char-name" class="fieldset-legend">Name</label>
         <input
@@ -126,9 +182,7 @@
                             src={avatarPreviewSrc}
                             alt="Avatar preview"
                             class="object-cover"
-                            onerror={(e) =>
-                                ((e.currentTarget as HTMLImageElement).src =
-                                    `https://api.dicebear.com/7.x/initials/svg?seed=${character?.name ?? "unknown"}`)}
+                            onerror={onAvatarError}
                         />
                     </div>
                 </div>
@@ -217,4 +271,37 @@
             </div>
         </div>
     </fieldset>
-</div>
+
+    <fieldset class="fieldset w-full">
+        <h4 class="inline-flex items-center gap-2 m-0 text-lg font-semibold">
+            <span class="text-warning"><WarningIcon /></span>
+            <span>Remove Character</span>
+        </h4>
+        <label for="remove-character" class="fieldset-legend">
+            Enter the character's name exactly
+        </label>
+        <input
+            type="text"
+            id="remove-character"
+            bind:value={inputCharName}
+            class="input input-sm w-full bg-base-100 {isValidCharName ? '' : 'input-error'}"
+            placeholder={character.name}
+            disabled={isRemoving}
+            onkeydown={(e) => {
+                if (e.key !== "Enter") return;
+
+                if (e.currentTarget?.value === character.name) {
+                    void onCharacterRemove();
+                }
+            }}
+        />
+        {#if !isValidCharName}
+            <div class="label">
+                <span class="label-text-alt text-error">Incorrect character name</span>
+            </div>
+        {/if}
+        <div class="label">
+            <span class="label-text-alt">All data will be removed. It cannot be recovered!</span>
+        </div>
+    </fieldset>
+</CharacterSettings>

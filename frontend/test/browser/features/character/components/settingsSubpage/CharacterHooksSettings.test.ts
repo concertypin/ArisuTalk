@@ -7,7 +7,7 @@ import type { Character } from "@arisutalk/character-spec/v0/Character";
 
 describe("CharacterHooksSettings Component", () => {
     let mockCharacter: Character;
-    let onChangeSpy: Mock<(character: Character) => void>;
+    let onChangeSpy: Mock<(character: Character | null) => void>;
 
     beforeEach(() => {
         onChangeSpy = vi.fn(() => {});
@@ -44,8 +44,12 @@ describe("CharacterHooksSettings Component", () => {
 
     test("renders runtime settings correctly", async () => {
         const screen = render(CharacterHooksSettings, {
-            character: mockCharacter,
-            onChange: onChangeSpy,
+            props: {
+                context: () => ({
+                    getCharacter: () => mockCharacter,
+                    onCharacterChange: onChangeSpy,
+                }),
+            },
         });
 
         // Expand Runtime Settings - DaisyUI collapse uses a hidden checkbox
@@ -66,8 +70,12 @@ describe("CharacterHooksSettings Component", () => {
 
     test("updates runtime settings", async () => {
         const screen = render(CharacterHooksSettings, {
-            character: mockCharacter,
-            onChange: onChangeSpy,
+            props: {
+                context: () => ({
+                    getCharacter: () => mockCharacter,
+                    onCharacterChange: onChangeSpy,
+                }),
+            },
         });
 
         // Expand Runtime Settings - DaisyUI collapse uses a hidden checkbox
@@ -111,8 +119,12 @@ describe("CharacterHooksSettings Component", () => {
         ];
 
         const { getByRole, getByText } = render(CharacterHooksSettings, {
-            character: mockCharacter,
-            onChange: onChangeSpy,
+            props: {
+                context: () => ({
+                    getCharacter: () => mockCharacter,
+                    onCharacterChange: onChangeSpy,
+                }),
+            },
         });
 
         await expect.element(getByText("No display hooks.")).toBeVisible();
@@ -125,15 +137,19 @@ describe("CharacterHooksSettings Component", () => {
 
     test("adds a new hook", async () => {
         const { getByRole } = render(CharacterHooksSettings, {
-            character: mockCharacter,
-            onChange: onChangeSpy,
+            props: {
+                context: () => ({
+                    getCharacter: () => mockCharacter,
+                    onCharacterChange: onChangeSpy,
+                }),
+            },
         });
 
         await getByRole("button", { name: /Add Hook/i }).click();
 
         expect(onChangeSpy).toHaveBeenCalled();
         const calledArg = onChangeSpy.mock.calls[0][0];
-        expect(calledArg.executables.replaceHooks.display).toHaveLength(1);
+        expect(calledArg?.executables.replaceHooks.display).toHaveLength(1);
     });
 
     test("edits a hook", async () => {
@@ -152,8 +168,12 @@ describe("CharacterHooksSettings Component", () => {
         ];
 
         const { getByText, getByLabelText } = render(CharacterHooksSettings, {
-            character: mockCharacter,
-            onChange: onChangeSpy,
+            props: {
+                context: () => ({
+                    getCharacter: () => mockCharacter,
+                    onCharacterChange: onChangeSpy,
+                }),
+            },
         });
 
         await getByText("foo → bar").click();
@@ -192,8 +212,12 @@ describe("CharacterHooksSettings Component", () => {
         ];
 
         const { getByText, getByRole } = render(CharacterHooksSettings, {
-            character: mockCharacter,
-            onChange: onChangeSpy,
+            props: {
+                context: () => ({
+                    getCharacter: () => mockCharacter,
+                    onCharacterChange: onChangeSpy,
+                }),
+            },
         });
 
         await getByText("hookToRemove → (empty)").click();
@@ -231,8 +255,12 @@ describe("CharacterHooksSettings Component", () => {
         ];
 
         const { getByText, getByLabelText } = render(CharacterHooksSettings, {
-            character: mockCharacter,
-            onChange: onChangeSpy,
+            props: {
+                context: () => ({
+                    getCharacter: () => mockCharacter,
+                    onCharacterChange: onChangeSpy,
+                }),
+            },
         });
 
         await getByText("test → (empty)").click();

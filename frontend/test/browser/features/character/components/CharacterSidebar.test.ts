@@ -1,17 +1,9 @@
 /// <reference types="vitest/browser" />
 import { test, expect, describe, vi, beforeEach } from "vitest";
-import { render } from "vitest-browser-svelte";
+import { renderWithAppContext } from "@test/utils/appContext.svelte";
 import CharacterSidebar from "@/features/character/components/CharacterSidebar.svelte";
 import { characterStore } from "@/features/character/stores/characterStore.svelte";
-import { uiState } from "@/lib/stores/ui.svelte";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
-
-// Mock uiState
-vi.mock("@/lib/stores/ui.svelte", () => ({
-    uiState: {
-        openSettingsModal: vi.fn() satisfies () => void,
-    },
-}));
 
 describe("CharacterSidebar Component", () => {
     let mockCharacters: Character[];
@@ -20,7 +12,10 @@ describe("CharacterSidebar Component", () => {
     let mockOnAdd: () => void;
     let mockOnPersona: () => void;
 
-    beforeEach(() => {
+    beforeEach(async () => {
+        // The store loads from storage asynchronously and would overwrite the characters set below.
+        await characterStore.initPromise;
+
         vi.clearAllMocks();
         mockOnSelect = vi.fn();
         mockOnAdd = vi.fn();
@@ -81,7 +76,7 @@ describe("CharacterSidebar Component", () => {
     });
 
     test("renders all character items", async () => {
-        const { getByLabelText } = render(CharacterSidebar, {
+        const { getByLabelText } = renderWithAppContext(CharacterSidebar, {
             selectedCharacterId: null,
             onSelect: mockOnSelect,
             onAdd: mockOnAdd,
@@ -93,7 +88,7 @@ describe("CharacterSidebar Component", () => {
     });
 
     test("calls onSelect when character is clicked", async () => {
-        const { container } = render(CharacterSidebar, {
+        const { container } = renderWithAppContext(CharacterSidebar, {
             selectedCharacterId: null,
             onSelect: mockOnSelect,
             onAdd: mockOnAdd,
@@ -115,7 +110,7 @@ describe("CharacterSidebar Component", () => {
     });
 
     test("calls onAdd when add character button is clicked", async () => {
-        const { getByLabelText } = render(CharacterSidebar, {
+        const { getByLabelText } = renderWithAppContext(CharacterSidebar, {
             selectedCharacterId: null,
             onSelect: mockOnSelect,
             onAdd: mockOnAdd,
@@ -129,21 +124,23 @@ describe("CharacterSidebar Component", () => {
     });
 
     test("opens settings modal when settings button is clicked", async () => {
-        const { getByLabelText } = render(CharacterSidebar, {
+        const { getByLabelText, appContext } = renderWithAppContext(CharacterSidebar, {
             selectedCharacterId: null,
             onSelect: mockOnSelect,
             onAdd: mockOnAdd,
             onPersona: mockOnPersona,
         });
 
+        expect(appContext.appSettingsOpen).toBe(false);
+
         const settingsButton = getByLabelText("Settings");
         await settingsButton.click();
 
-        expect(uiState.openSettingsModal).toHaveBeenCalled();
+        expect(appContext.appSettingsOpen).toBe(true);
     });
 
     test("calls onPersona when personas button is clicked", async () => {
-        const { getByLabelText } = render(CharacterSidebar, {
+        const { getByLabelText } = renderWithAppContext(CharacterSidebar, {
             selectedCharacterId: null,
             onSelect: mockOnSelect,
             onAdd: mockOnAdd,
@@ -157,25 +154,26 @@ describe("CharacterSidebar Component", () => {
     });
 
     test("highlights selected character", async () => {
-        const { container } = render(CharacterSidebar, {
+        const { container } = renderWithAppContext(CharacterSidebar, {
             selectedCharacterId: "char-1",
             onSelect: mockOnSelect,
             onAdd: mockOnAdd,
             onPersona: mockOnPersona,
         });
 
-        //Wait for rendering
+        // Wait for rendering
         await vi.waitFor(() => {
-            const items = container.querySelectorAll('[role="option"]');
-            expect(items.length).toBeGreaterThan(0);
+            expect(container.querySelectorAll('[role="option"]').length).toEqual(2);
         });
 
-        const selectedOption = container.querySelector('[aria-selected="true"]');
-        expect(selectedOption).toBeTruthy();
+        const options = container.querySelectorAll('[role="option"]');
+        const selectedOptions = container.querySelectorAll('[aria-selected="true"]');
+        expect(selectedOptions.length).toEqual(1);
+        expect(selectedOptions[0]).toBe(options[0]);
     });
 
     test("renders divider before action buttons", async () => {
-        const { container } = render(CharacterSidebar, {
+        const { container } = renderWithAppContext(CharacterSidebar, {
             selectedCharacterId: null,
             onSelect: mockOnSelect,
             onAdd: mockOnAdd,
@@ -193,7 +191,7 @@ describe("CharacterSidebar Component", () => {
         ];
         characterStore.characters = charNoAvatar;
 
-        const { getByLabelText } = render(CharacterSidebar, {
+        const { getByLabelText } = renderWithAppContext(CharacterSidebar, {
             selectedCharacterId: null,
             onSelect: mockOnSelect,
             onAdd: mockOnAdd,

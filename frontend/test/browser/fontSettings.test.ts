@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { render } from "vitest-browser-svelte";
-import GeneralSettings from "../../src/components/settingSubpage/GeneralSettings.svelte";
-import { settings } from "../../src/lib/stores/settings.svelte";
+import GeneralSettings from "@/components/settingSubpage/GeneralSettings.svelte";
+import { settings } from "@/lib/stores/settings.svelte";
 
 test("changes font size and family", async () => {
     const screen = render(GeneralSettings);

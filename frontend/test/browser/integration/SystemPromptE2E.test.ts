@@ -10,6 +10,7 @@
 /// <reference types="vitest/browser" />
 import { test, expect, describe, vi, afterEach, beforeEach } from "vitest";
 import { render } from "vitest-browser-svelte";
+import { renderWithAppContext } from "@test/utils/appContext.svelte";
 import { apply } from "@arisutalk/character-spec/utils";
 import type { BaseMessage } from "@langchain/core/messages";
 import CharacterLayoutTestWrapper from "../wrappers/CharacterLayoutTestWrapper.svelte";
@@ -26,7 +27,8 @@ describe("System Prompt E2E", () => {
 
         // Set up a mock provider that captures the messages it receives
         await chatStore.setProvider("MOCK", {
-            mockDelay: 50,
+            // No per-character stream delay, so replies render within the expect.element poll timeout.
+            mockDelay: 0,
             responses: ["I am Arisu the maid. 御主人様, how can I help?"],
             generationParameters: {},
         });
@@ -42,7 +44,6 @@ describe("System Prompt E2E", () => {
     });
     afterEach(() => {
         vi.restoreAllMocks();
-        vi.useRealTimers();
         // Reset chatStore singleton state to prevent leaking to next test
         if (chatStore && chatStore["activeProvider"]) {
             chatStore["activeProvider"].disconnect = vi.fn().mockResolvedValue(undefined);
@@ -96,8 +97,10 @@ describe("System Prompt E2E", () => {
         settings.value.prompt.generationPrompt = "You are a helpful assistant.";
 
         // Create a chat for the character
-        vi.useFakeTimers();
-        const { getByLabelText, getByText, getByRole } = render(CharacterLayoutTestWrapper);
+        const { getByLabelText, getByText, getByRole } = renderWithAppContext(
+            CharacterLayoutTestWrapper,
+            {}
+        );
 
         // Select the character
         const charBtn = getByRole("button", { name: "Arisu" });
@@ -116,15 +119,11 @@ describe("System Prompt E2E", () => {
         const sendBtn = getByRole("button", { name: "Send" });
         await sendBtn.click();
 
-        // Advance timers for the mock response
-        await vi.advanceTimersByTimeAsync(200);
-
         // Verify the user message appears
         const userMsg = getByText("Hello");
         await expect.element(userMsg).toBeVisible();
 
-        // Verify the AI response appears
-        await vi.advanceTimersByTimeAsync(2000);
+        // Verify the AI response appears (real timers; expect.element polls until it renders)
         const aiResponse = getByText("御主人様");
         await expect.element(aiResponse).toBeVisible();
 

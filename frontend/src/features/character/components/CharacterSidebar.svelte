@@ -6,7 +6,8 @@
     import { flip } from "svelte/animate";
     import CharacterSidebarItem from "./CharacterSidebarItem.svelte";
     import { characterStore } from "../stores/characterStore.svelte";
-    import { uiState } from "@/lib/stores/ui.svelte";
+
+    import { getAppContext } from "@/context";
 
     type Props = {
         selectedCharacterId: string | null;
@@ -56,6 +57,12 @@
         draggedIndex = null;
         dropTargetIndex = null;
     }
+
+    let appContext = getAppContext();
+
+    function openAppSettings() {
+        appContext.appSettingsOpen = true;
+    }
 </script>
 
 <div
@@ -77,11 +84,19 @@
             {@const dragged = draggedIndex === index}
             {@const dropTarget = dropTargetIndex === index}
             {@const selected = selectedCharacterId === character.id}
+            {@const isReorderable =
+                draggedIndex !== null ? characterStore.isReorderable(draggedIndex, index) : false}
             <div
                 class="relative"
                 class:opacity-50={dragged}
-                class:border-t-2={dropTarget && draggedIndex !== null && draggedIndex > index}
-                class:border-b-2={dropTarget && draggedIndex !== null && draggedIndex < index}
+                class:border-t-2={dropTarget &&
+                    draggedIndex !== null &&
+                    draggedIndex > index &&
+                    isReorderable}
+                class:border-b-2={dropTarget &&
+                    draggedIndex !== null &&
+                    draggedIndex < index &&
+                    isReorderable}
                 class:border-primary={dropTarget}
                 role="option"
                 tabindex="0"
@@ -123,7 +138,7 @@
         <div class="tooltip tooltip-right z-50" data-tip="Settings">
             <button
                 class="group flex items-center justify-center w-12 h-12 rounded-3xl hover:rounded-xl bg-base-200 hover:bg-secondary text-secondary hover:text-white transition-all duration-200"
-                onclick={() => uiState.openSettingsModal()}
+                onclick={openAppSettings}
                 aria-label="Settings"
             >
                 <Gear size={24} />

@@ -11,17 +11,19 @@
     import CaretUp from "phosphor-svelte/lib/CaretUpIcon";
     import Warning from "phosphor-svelte/lib/WarningIcon";
     import { merge, cloneDeep } from "lodash-es";
+    import CharacterSettings from "./CharacterSettings.svelte";
 
     type ReplaceHook = Character["executables"]["replaceHooks"];
     type HookType = keyof ReplaceHook;
     type HookEntity = ReplaceHook[HookType][number];
 
-    type Props = {
-        character: Character;
-        onChange: (character: Character) => void;
-    };
+    import type { TContext, TProps } from "./types.ts";
 
-    let { character, onChange }: Props = $props();
+    let { context }: TProps<TContext> = $props();
+
+    let { getCharacter, onCharacterChange } = $derived(context());
+
+    let character = $derived(getCharacter());
 
     let activeHookType = $state<HookType>("display");
     let expandedHookIndex = $state<number | null>(null);
@@ -43,7 +45,7 @@
     ) {
         const newChar = cloneDeep(character);
         newChar.executables.runtimeSetting[field] = value;
-        onChange(newChar);
+        onCharacterChange(newChar);
     }
 
     function getHooks(type: HookType): HookEntity[] {
@@ -64,7 +66,7 @@
         };
         const newChar = cloneDeep(character);
         newChar.executables.replaceHooks[type].push(newHook);
-        onChange(newChar);
+        onCharacterChange(newChar);
         expandedHookIndex = character.executables.replaceHooks[type].length;
     }
 
@@ -72,13 +74,13 @@
         const newChar = cloneDeep(character);
         const hook = newChar.executables.replaceHooks[type][index];
         newChar.executables.replaceHooks[type][index] = merge(hook, updates);
-        onChange(newChar);
+        onCharacterChange(newChar);
     }
 
     function deleteHook(type: HookType, index: number) {
         const newChar = cloneDeep(character);
         newChar.executables.replaceHooks[type].splice(index, 1);
-        onChange(newChar);
+        onCharacterChange(newChar);
         expandedHookIndex = null;
     }
 
@@ -87,9 +89,7 @@
     }
 </script>
 
-<div class="space-y-6">
-    <h3 class="text-lg font-semibold">Advanced Settings</h3>
-
+<CharacterSettings subpageName="Advanced Settings">
     <div class="alert alert-warning">
         <Warning size={18} />
         <span
@@ -330,4 +330,4 @@
             {/each}
         </div>
     {/if}
-</div>
+</CharacterSettings>

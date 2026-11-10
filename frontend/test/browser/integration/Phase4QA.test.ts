@@ -7,7 +7,7 @@
 
 /// <reference types="vitest/browser" />
 import { test, expect, describe, vi, afterEach, beforeEach } from "vitest";
-import { render } from "vitest-browser-svelte";
+import { renderWithAppContext } from "@test/utils/appContext.svelte";
 import { apply } from "@arisutalk/character-spec/utils";
 import CharacterLayoutTestWrapper from "../wrappers/CharacterLayoutTestWrapper.svelte";
 import { StorageResolver } from "@/lib/adapters/storage/storageResolver";
@@ -172,7 +172,7 @@ describe("Phase 4 E2E & Visual Verification (Sequential Suite)", () => {
         // Let the store resolve its init promise safely
         await chatStore.initPromise;
 
-        const { getByRole, getByText } = render(CharacterLayoutTestWrapper);
+        const { getByRole, getByText } = renderWithAppContext(CharacterLayoutTestWrapper, {});
 
         // --- SCENARIO 3: Empty state UI styling verification ---
         const emptyStateText = getByText("Select a character from the sidebar to start chatting");
