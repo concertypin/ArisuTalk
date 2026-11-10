@@ -1,4 +1,4 @@
-<script lang="ts" module>
+<script lang="ts">
     import { settings } from "@/lib/stores/settings.svelte";
     import BookOpen from "phosphor-svelte/lib/BookOpenIcon";
     import PromptTemplateManager from "@/features/promptTemplate/components/PromptTemplateManager.svelte";
@@ -52,10 +52,6 @@
             prompts.generation || settings.value.prompt.generationPrompt;
         void settings.save();
     }
-</script>
-
-<script lang="ts">
-    let {}: {} = $props();
 </script>
 
 <div class="space-y-6">

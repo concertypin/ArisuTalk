@@ -21,7 +21,7 @@ vi.mock("@/features/character/adapters/assetStorage/assetStorageResolver", () =>
 
 describe("CharacterAssetsSettings Component", () => {
     let mockCharacter: Character;
-    let onChangeSpy: Mock<(character: Character) => void>;
+    let onChangeSpy: Mock<(character: Character | null) => void>;
 
     beforeEach(() => {
         onChangeSpy = vi.fn(() => {});
@@ -58,8 +58,12 @@ describe("CharacterAssetsSettings Component", () => {
 
     test("renders empty state correctly", async () => {
         const { getByText } = render(CharacterAssetsSettings, {
-            character: mockCharacter,
-            onChange: onChangeSpy,
+            props: {
+                context: () => ({
+                    getCharacter: () => mockCharacter,
+                    onCharacterChange: onChangeSpy,
+                }),
+            },
         });
 
         await expect.element(getByText("No assets yet.")).toBeVisible();
@@ -67,8 +71,12 @@ describe("CharacterAssetsSettings Component", () => {
 
     test("renders upload section", async () => {
         const { container } = render(CharacterAssetsSettings, {
-            character: mockCharacter,
-            onChange: onChangeSpy,
+            props: {
+                context: () => ({
+                    getCharacter: () => mockCharacter,
+                    onCharacterChange: onChangeSpy,
+                }),
+            },
         });
 
         const uploadInput = container.querySelector("#asset-upload");
@@ -89,8 +97,12 @@ describe("CharacterAssetsSettings Component", () => {
         ];
 
         const { getByText } = render(CharacterAssetsSettings, {
-            character: mockCharacter,
-            onChange: onChangeSpy,
+            props: {
+                context: () => ({
+                    getCharacter: () => mockCharacter,
+                    onCharacterChange: onChangeSpy,
+                }),
+            },
         });
 
         await expect.element(getByText("Images")).toBeVisible();
@@ -107,8 +119,12 @@ describe("CharacterAssetsSettings Component", () => {
         ];
 
         const { getByText } = render(CharacterAssetsSettings, {
-            character: mockCharacter,
-            onChange: onChangeSpy,
+            props: {
+                context: () => ({
+                    getCharacter: () => mockCharacter,
+                    onCharacterChange: onChangeSpy,
+                }),
+            },
         });
 
         await expect.element(getByText("Other Assets (1)")).toBeVisible();
@@ -125,8 +141,12 @@ describe("CharacterAssetsSettings Component", () => {
         ];
 
         const { container } = render(CharacterAssetsSettings, {
-            character: mockCharacter,
-            onChange: onChangeSpy,
+            props: {
+                context: () => ({
+                    getCharacter: () => mockCharacter,
+                    onCharacterChange: onChangeSpy,
+                }),
+            },
         });
 
         // Find the delete button (should be only one since we have only one asset)
@@ -162,8 +182,12 @@ describe("CharacterAssetsSettings Component", () => {
         ];
 
         const { container } = render(CharacterAssetsSettings, {
-            character: mockCharacter,
-            onChange: onChangeSpy,
+            props: {
+                context: () => ({
+                    getCharacter: () => mockCharacter,
+                    onCharacterChange: onChangeSpy,
+                }),
+            },
         });
 
         await vi.waitFor(() => {

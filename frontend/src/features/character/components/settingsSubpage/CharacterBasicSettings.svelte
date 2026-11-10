@@ -4,12 +4,14 @@
      * Basic character info: name, description, avatar.
      * Fields include helper text based on character-spec JSDoc.
      */
+    import { untrack } from "svelte";
     import { SvelteMap, SvelteSet } from "svelte/reactivity";
     import { getAssetStorage } from "@/features/character/adapters/assetStorage/assetStorageResolver";
     import { Logger } from "@common/logger/Logger";
     import { IfNotExistBehavior, type IAssetStorageAdapter } from "@/lib/interfaces";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import { merge } from "lodash-es";
+    import { toastStore } from "@/lib/stores/toast.svelte";
     import WarningIcon from "phosphor-svelte/lib/WarningIcon";
     import { characterStore } from "@/features/character/stores/characterStore.svelte";
     import type { AssetEntity } from "@arisutalk/character-spec/v0/Character";
@@ -32,20 +34,27 @@
 
     async function getImage(
         asset: AssetEntity,
-        assetStorage: IAssetStorageAdapter,
-        blobUrls: SvelteSet<string>
+        storage: IAssetStorageAdapter,
+        blobUrls: SvelteSet<string>,
+        signal: AbortSignal
     ) {
         if (!(typeof asset.data === "string" && asset.data.startsWith("local:"))) return;
 
         try {
-            const url = await assetStorage.getAssetUrl(
+            const url = await storage.getAssetUrl(
                 new URL(asset.data),
                 IfNotExistBehavior.RETURN_NULL
             );
-            if (url) {
-                assetPreviews.set(asset.id, url);
-                blobUrls.add(url);
+            if (!url) return;
+
+            // The effect was cleaned up while loading: nobody will revoke this URL later.
+            if (signal.aborted) {
+                URL.revokeObjectURL(url);
+                return;
             }
+
+            assetPreviews.set(asset.id, url);
+            blobUrls.add(url);
         } catch (e) {
             Logger.error("Failed to load asset preview for avatar picker:", asset.id, e);
         }
@@ -54,17 +63,23 @@
     // Load image previews
     $effect(() => {
         const blobUrls = new SvelteSet<string>();
+        const abortController = new AbortController();
+
+        // Read synchronously: a derived must not be read after this effect may have been destroyed.
+        const assets = untrack(() => imageAssets);
 
         const loadPreviews = async () => {
             await assetStorage.init();
-            for (const asset of imageAssets) {
-                await getImage(asset, assetStorage, blobUrls);
+            for (const asset of assets) {
+                if (abortController.signal.aborted) return;
+                await getImage(asset, assetStorage, blobUrls, abortController.signal);
             }
         };
 
         void loadPreviews();
 
         return () => {
+            abortController.abort();
             for (const url of blobUrls) URL.revokeObjectURL(url);
         };
     });
@@ -77,19 +92,43 @@
         return asset ? assetPreviews.get(asset.id) || "" : character.avatarUrl;
     });
 
+    /**
+     * Falls back to a generated avatar when the preview fails to load.
+     * A load can fail after the component was torn down; reading state then would be stale.
+     */
+    function onAvatarError(e: Event) {
+        const img = e.currentTarget;
+        if (!(img instanceof HTMLImageElement) || !img.isConnected) return;
+        img.src = `https://api.dicebear.com/7.x/initials/svg?seed=${character.name}`;
+    }
+
     function updateField<const K extends keyof Character>(field: K, value: Character[K]) {
         onCharacterChange(merge({}, character, { [field]: value }));
     }
 
     const findCharacter = (c: Character) => c.id === character.id;
 
-    function onCharacterRemove() {
+    /** Blocks re-entry while a deletion is in flight (a second call would splice the same index again). */
+    let isRemoving = $state(false);
+
+    async function onCharacterRemove() {
+        if (isRemoving) return;
+
         const index = characterStore.characters.findIndex(findCharacter);
 
         if (index < 0) return;
 
-        characterStore.remove(index);
+        isRemoving = true;
+        try {
+            await characterStore.remove(index);
+        } catch (e) {
+            Logger.error("Failed to remove character", e);
+            toastStore.error(`Failed to remove character: ${String(e)}`);
+            isRemoving = false;
+            return;
+        }
 
+        isRemoving = false;
         onCharacterChange(null);
     }
 
@@ -143,9 +182,7 @@
                             src={avatarPreviewSrc}
                             alt="Avatar preview"
                             class="object-cover"
-                            onerror={(e) =>
-                                ((e.currentTarget as HTMLImageElement).src =
-                                    `https://api.dicebear.com/7.x/initials/svg?seed=${character?.name ?? "unknown"}`)}
+                            onerror={onAvatarError}
                         />
                     </div>
                 </div>
@@ -249,11 +286,12 @@
             bind:value={inputCharName}
             class="input input-sm w-full bg-base-100 {isValidCharName ? '' : 'input-error'}"
             placeholder={character.name}
+            disabled={isRemoving}
             onkeydown={(e) => {
                 if (e.key !== "Enter") return;
 
                 if (e.currentTarget?.value === character.name) {
-                    onCharacterRemove();
+                    void onCharacterRemove();
                 }
             }}
         />

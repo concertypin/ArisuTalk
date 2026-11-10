@@ -1,4 +1,4 @@
-<script module>
+<script lang="ts" module>
     import { characterStore } from "@/features/character/stores/characterStore.svelte";
     import { Logger } from "@common/logger/Logger";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
@@ -21,7 +21,7 @@
     import CharacterMagicSettings from "./settingsSubpage/CharacterMagicSettings.svelte";
     import CharacterHooksSettings from "./settingsSubpage/CharacterHooksSettings.svelte";
 
-    import { preload } from "@/components/dialog/SettingsDialog.svelte";
+    import { preload } from "@/components/dialog/settingsPreload";
     import SettingsDialog from "@/components/dialog/SettingsDialog.svelte";
 
     import { getAppContext } from "@/context";
@@ -161,7 +161,7 @@
                 if (!editingCharacter) return;
 
                 const index = characterStore.characters.findIndex(
-                    (c) => c.id === editingCharacter!.id
+                    (c) => c.id === editingCharacter.id
                 );
                 if (index !== -1) {
                     // Extract ID before logging to avoid DataCloneError with Svelte proxies
@@ -171,7 +171,7 @@
                         characterId,
                     });
                 }
-            })();
+            })().catch((err) => Logger.error("Character autosave failed", err));
         }, 300);
     }
 

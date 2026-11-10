@@ -1,6 +1,6 @@
 /// <reference types="vitest/browser" />
 import { test, expect, describe, vi, afterEach, beforeEach } from "vitest";
-import { render } from "vitest-browser-svelte";
+import { renderWithAppContext } from "@test/utils/appContext.svelte";
 import CharacterLayoutTestWrapper from "../wrappers/CharacterLayoutTestWrapper.svelte";
 
 describe("Persona and Chat interactions", () => {
@@ -23,7 +23,7 @@ describe("Persona and Chat interactions", () => {
     });
 
     test("Manage Personas opens persona modal", async () => {
-        const { getByLabelText, getByRole } = render(CharacterLayoutTestWrapper);
+        const { getByLabelText, getByRole } = renderWithAppContext(CharacterLayoutTestWrapper, {});
 
         const personaBtn = getByLabelText("Manage Personas");
         await expect.element(personaBtn).toBeVisible();
@@ -52,7 +52,7 @@ describe("Persona and Chat interactions", () => {
         // Enable fake timers AFTER async initialization completes
         vi.useFakeTimers();
 
-        const { getByLabelText, getByText, getByRole } = render(CharacterLayoutTestWrapper);
+        const { getByLabelText, getByText, getByRole } = renderWithAppContext(CharacterLayoutTestWrapper, {});
 
         // Open Add Character modal
         const addCharButton = getByLabelText("Add Character");

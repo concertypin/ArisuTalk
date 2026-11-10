@@ -1,4 +1,4 @@
-<script module>
+<script lang="ts" module>
     export type TContext = {
         getCharacter: () => Character;
         onCharacterChange: (updatedCharacter: Character | null) => void;

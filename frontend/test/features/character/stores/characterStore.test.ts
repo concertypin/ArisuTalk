@@ -187,6 +187,44 @@ describe("CharacterStore", () => {
         expect(storedOrder).toEqual(["2", "3", "1"]);
     });
 
+    describe("isReorderable", () => {
+        const char1 = { ...defaultChar, id: "1", name: "One" };
+        const char2 = { ...defaultChar, id: "2", name: "Two" };
+        const char3 = { ...defaultChar, id: "3", name: "Three" };
+
+        beforeEach(() => {
+            store.characters = [char1, char2, char3];
+        });
+
+        it("uses its own instance rather than the global singleton", () => {
+            expect(store.isReorderable(0, 2)).toBe(true);
+        });
+
+        it("returns false for out-of-range indexes instead of throwing", () => {
+            expect(store.isReorderable(-1, 0)).toBe(false);
+            expect(store.isReorderable(0, 3)).toBe(false);
+            expect(store.isReorderable(5, 7)).toBe(false);
+        });
+
+        it("returns false between pinned and unpinned characters", () => {
+            store.togglePin("1");
+
+            const pinnedIndex = store.characters.findIndex((c) => c.id === "1");
+            const unpinnedIndex = store.characters.findIndex((c) => c.id === "2");
+
+            expect(store.isReorderable(pinnedIndex, unpinnedIndex)).toBe(false);
+        });
+
+        it("does not move characters across the pinned boundary", () => {
+            store.togglePin("1");
+            const before = store.characters.map((c) => c.id);
+
+            store.reorder(0, 2);
+
+            expect(store.characters.map((c) => c.id)).toEqual(before);
+        });
+    });
+
     it("should load characters in saved order", async () => {
         const char1 = { ...defaultChar, id: "1", name: "One" };
         const char2 = { ...defaultChar, id: "2", name: "Two" };

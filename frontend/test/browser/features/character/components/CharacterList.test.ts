@@ -43,7 +43,10 @@ describe("CharacterList Component", () => {
     let mockCharacters: Character[];
     const mockOnEdit = vi.fn() satisfies (index: number) => void;
 
-    beforeEach(() => {
+    beforeEach(async () => {
+        // The store loads from storage asynchronously and would overwrite the characters set below.
+        await characterStore.initPromise;
+
         mockOnEdit.mockClear();
 
         mockCharacters = [

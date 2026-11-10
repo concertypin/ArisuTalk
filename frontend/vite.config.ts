@@ -39,7 +39,7 @@ export default defineConfig(async (ctx) => {
                 "@langchain/core/language_models/chat_models",
                 "@langchain/core/messages",
                 "@langchain/core/outputs",
-                "phosphor-svelte",
+                "phosphor-svelte/lib/*",
             ],
             rolldownOptions: {
                 checks: {
@@ -64,9 +64,6 @@ export default defineConfig(async (ctx) => {
             },
             open: false,
             allowedHosts: process.env.npm_lifecycle_event?.includes("dev") ? true : undefined,
-            watch: {
-                ignored: /\.kate-swp$/,
-            },
         },
         define,
         build: {

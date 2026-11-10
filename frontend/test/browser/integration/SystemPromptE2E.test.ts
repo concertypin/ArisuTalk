@@ -10,6 +10,7 @@
 /// <reference types="vitest/browser" />
 import { test, expect, describe, vi, afterEach, beforeEach } from "vitest";
 import { render } from "vitest-browser-svelte";
+import { renderWithAppContext } from "@test/utils/appContext.svelte";
 import { apply } from "@arisutalk/character-spec/utils";
 import type { BaseMessage } from "@langchain/core/messages";
 import CharacterLayoutTestWrapper from "../wrappers/CharacterLayoutTestWrapper.svelte";
@@ -97,7 +98,7 @@ describe("System Prompt E2E", () => {
 
         // Create a chat for the character
         vi.useFakeTimers();
-        const { getByLabelText, getByText, getByRole } = render(CharacterLayoutTestWrapper);
+        const { getByLabelText, getByText, getByRole } = renderWithAppContext(CharacterLayoutTestWrapper, {});
 
         // Select the character
         const charBtn = getByRole("button", { name: "Arisu" });

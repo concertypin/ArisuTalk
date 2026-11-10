@@ -1,4 +1,4 @@
-<script module>
+<script lang="ts" module>
     import CharacterSidebar from "./CharacterSidebar.svelte";
     import CharacterForm from "./CharacterForm.svelte";
     import CharacterSettingsModal from "./CharacterSettingsModal.svelte";

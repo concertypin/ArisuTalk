@@ -1,20 +1,16 @@
-import { test, expect, describe, vi, beforeEach } from "vitest";
-import { render } from "vitest-browser-svelte";
+import { test, expect, describe, beforeEach } from "vitest";
+import { renderWithAppContext } from "@test/utils/appContext.svelte";
 import CharacterLayoutTestWrapper from "../../wrappers/CharacterLayoutTestWrapper.svelte";
 import { characterStore } from "@/features/character/stores/characterStore.svelte";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
 
-// Mock uiState
-vi.mock("@/lib/stores/ui.svelte", () => ({
-    uiState: {
-        openSettingsModal: vi.fn() satisfies () => void,
-    },
-}));
-
 describe("Character Sidebar Verification", () => {
     let mockCharacters: Character[];
 
-    beforeEach(() => {
+    beforeEach(async () => {
+        // The store loads from storage asynchronously and would overwrite the characters set below.
+        await characterStore.initPromise;
+
         mockCharacters = [
             {
                 id: "char-1",
@@ -46,7 +42,7 @@ describe("Character Sidebar Verification", () => {
     });
 
     test("Character Sidebar Verification", async () => {
-        const { getByLabelText, getByText } = render(CharacterLayoutTestWrapper);
+        const { getByLabelText, getByText } = renderWithAppContext(CharacterLayoutTestWrapper, {});
 
         // Check for Add Character button
         const addButton = getByLabelText("Add Character");

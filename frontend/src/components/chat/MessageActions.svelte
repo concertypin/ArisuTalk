@@ -1,4 +1,4 @@
-<script module>
+<script lang="ts" module>
     import PencilIcon from "phosphor-svelte/lib/PencilIcon";
     import TrashIcon from "phosphor-svelte/lib/TrashIcon";
     import ArrowClockwiseIcon from "phosphor-svelte/lib/ArrowClockwiseIcon";

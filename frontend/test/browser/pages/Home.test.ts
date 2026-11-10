@@ -1,16 +1,16 @@
 /// <reference types="vitest/browser" />
 import { test, expect, describe, vi } from "vitest";
-import { render } from "vitest-browser-svelte";
+import { renderWithAppContext } from "@test/utils/appContext.svelte";
 import Home from "@/routes/Home.svelte";
 
 describe("Home Component", () => {
     test("renders loading state initially", async () => {
-        const { getByText } = render(Home);
+        const { getByText } = renderWithAppContext(Home, {});
         await expect.element(getByText("Loading...")).toBeVisible();
     });
 
     test("loads and renders layout", async () => {
-        const { container } = render(Home);
+        const { container } = renderWithAppContext(Home, {});
 
         await vi.waitFor(
             () => {

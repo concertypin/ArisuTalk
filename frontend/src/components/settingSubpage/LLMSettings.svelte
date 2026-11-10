@@ -1,6 +1,6 @@
 <svelte:options runes={true} />
 
-<script lang="ts" module>
+<script lang="ts">
     import { settings } from "@/lib/stores/settings.svelte";
     import { LLMConfigSchema } from "@/lib/types/IDataModel";
     import Plus from "phosphor-svelte/lib/PlusIcon";
@@ -15,10 +15,6 @@
         });
         settings.value.llmConfigs.push(newConfig);
     }
-</script>
-
-<script lang="ts">
-    let {}: {} = $props();
 </script>
 
 <div class="space-y-6">

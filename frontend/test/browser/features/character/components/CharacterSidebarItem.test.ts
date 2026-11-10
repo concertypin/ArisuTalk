@@ -1,6 +1,6 @@
 /// <reference types="vitest/browser" />
 import { test, expect, describe, vi } from "vitest";
-import { render } from "vitest-browser-svelte";
+import { renderWithAppContext } from "@test/utils/appContext.svelte";
 import CharacterSidebarItem from "@/features/character/components/CharacterSidebarItem.svelte";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
 
@@ -33,7 +33,7 @@ describe("CharacterSidebarItem Component", () => {
     const mockOnClick = vi.fn() satisfies () => void;
 
     test("renders character initials when no avatar", async () => {
-        const { getByText } = render(CharacterSidebarItem, {
+        const { getByText } = renderWithAppContext(CharacterSidebarItem, {
             character: mockCharacter,
             active: false,
             onClick: mockOnClick,
@@ -48,7 +48,7 @@ describe("CharacterSidebarItem Component", () => {
             avatarUrl: "https://example.com/avatar.png",
         } satisfies Character;
 
-        const { getByRole } = render(CharacterSidebarItem, {
+        const { getByRole } = renderWithAppContext(CharacterSidebarItem, {
             character: characterWithAvatar,
             active: false,
             onClick: mockOnClick,
@@ -60,7 +60,7 @@ describe("CharacterSidebarItem Component", () => {
     });
 
     test("has correct aria-label", async () => {
-        const { getByLabelText } = render(CharacterSidebarItem, {
+        const { getByLabelText } = renderWithAppContext(CharacterSidebarItem, {
             character: mockCharacter,
             active: false,
             onClick: mockOnClick,
@@ -71,7 +71,7 @@ describe("CharacterSidebarItem Component", () => {
     });
 
     test("calls onClick when clicked", async () => {
-        const { getByLabelText } = render(CharacterSidebarItem, {
+        const { getByLabelText } = renderWithAppContext(CharacterSidebarItem, {
             character: mockCharacter,
             active: false,
             onClick: mockOnClick,
@@ -81,5 +81,20 @@ describe("CharacterSidebarItem Component", () => {
         await button.click();
 
         expect(mockOnClick).toHaveBeenCalledOnce();
+    });
+
+    test("opens the character settings of an active item instead of calling onClick", async () => {
+        const onClick = vi.fn() satisfies () => void;
+        const { getByLabelText, appContext } = renderWithAppContext(CharacterSidebarItem, {
+            character: mockCharacter,
+            active: true,
+            onClick,
+        });
+
+        await getByLabelText("Settings").click();
+
+        expect(appContext.characterSettingsOpen).toBe(true);
+        expect(appContext.editingCharacter?.id).toBe("char-1");
+        expect(onClick).not.toHaveBeenCalled();
     });
 });

@@ -1,9 +1,8 @@
-<script module>
-    import StickerIcon from "phosphor-svelte/lib/StickerIcon";
+<script lang="ts" module>
+    import SmileyIcon from "phosphor-svelte/lib/SmileyIcon";
     import XIcon from "phosphor-svelte/lib/XIcon";
     import MagnifyingGlassIcon from "phosphor-svelte/lib/MagnifyingGlassIcon";
     import { Logger } from "@common/logger/Logger";
-    import { type AssetEntity } from "@arisutalk/character-spec/v0/Character";
 
     type EmojiClass = {
         emoji: string;
@@ -27,16 +26,16 @@
 
 <!--
 @component StickerPicker
-Modal/panel for selecting stickers from packs, or picking emoji characters.
-Emits `onSelect` with the chosen Sticker object.
+Modal for picking an emoji character.
+Emits `onSelect` with the chosen emoji as plain text.
 -->
 <script lang="ts">
     let {
         onSelect,
         onClose,
     }: {
-        /** Callback invoked when a sticker or emoji is selected. */
-        onSelect: (sticker: AssetEntity) => void;
+        /** Callback invoked with the emoji character when one is selected. */
+        onSelect: (emoji: string) => void;
         /** Called when the modal is dismissed. */
         onClose: () => void;
     } = $props();
@@ -46,9 +45,6 @@ Emits `onSelect` with the chosen Sticker object.
 
     /** Query is valid? */
     let isFiltered = $derived(!!searchQuery.trim());
-
-    // Tabs: index 0 is always "Emoji", then each sticker pack gets a tab
-    let activeTab = $state<number>(0);
 
     $effect(() => {
         if (dialog && !dialog.open) {
@@ -68,15 +64,8 @@ Emits `onSelect` with the chosen Sticker object.
     }
 
     /** Called when the user clicks an emoji from the emoji grid. */
-    function selectEmoji(emojiChar: string, emojiName: string): void {
-        const emoji: AssetEntity = {
-            id: crypto.randomUUID(),
-            mimeType: "text/plain",
-            name: emojiName,
-            data: emojiChar,
-        };
-
-        onSelect(emoji);
+    function selectEmoji(emojiChar: string): void {
+        onSelect(emojiChar);
         close();
     }
 
@@ -118,16 +107,13 @@ Emits `onSelect` with the chosen Sticker object.
     });
 </script>
 
-{#snippet drawEmojiContainer(
-    emojis: EmojiClass[],
-    onSelect: (emojiChar: string, emojiName: string) => void
-)}
+{#snippet drawEmojiContainer(emojis: EmojiClass[], onSelect: (emojiChar: string) => void)}
     <div class="grid grid-cols-8 sm:grid-cols-10 gap-1">
         {#each emojis as c (c.slug)}
             <button
                 class="btn btn-ghost btn-sm p-0 h-10 w-10 text-xl flex items-center justify-center rounded-lg hover:bg-base-300/50"
                 title={c.slug}
-                onclick={() => onSelect(c.emoji, c.slug)}
+                onclick={() => onSelect(c.emoji)}
             >
                 {c.emoji}
             </button>
@@ -164,7 +150,7 @@ Emits `onSelect` with the chosen Sticker object.
     class="modal"
     onclose={close}
     onclick={handleBackdropClick}
-    aria-label="Sticker Picker"
+    aria-label="Emoji Picker"
 >
     <div
         class="modal-box w-11/12 max-w-lg h-[70vh] p-0 flex flex-col overflow-hidden bg-base-100 text-base-content shadow-2xl"
@@ -174,7 +160,7 @@ Emits `onSelect` with the chosen Sticker object.
             class="flex items-center justify-between p-3 border-b border-base-300/50 bg-base-200/80 shrink-0"
         >
             <h2 class="font-bold text-base flex items-center gap-2">
-                <StickerIcon size={20} /> Stickers
+                <SmileyIcon size={20} /> Emoji
             </h2>
             <button
                 class="btn btn-ghost btn-xs btn-square hover:bg-base-300/50"
@@ -194,7 +180,7 @@ Emits `onSelect` with the chosen Sticker object.
                 />
                 <input
                     type="text"
-                    placeholder="Search stickers or emoji..."
+                    placeholder="Search emoji..."
                     class="input input-sm input-bordered w-full pl-9 bg-base-100/60 border-base-300/40"
                     bind:value={searchQuery}
                 />
@@ -203,10 +189,7 @@ Emits `onSelect` with the chosen Sticker object.
 
         <!-- Content -->
         <div class="flex-1 overflow-y-auto p-3">
-            {#if activeTab === 0}
-                <!-- Emoji Grid -->
-                {@render drawEmojiGrid(isFiltered)}
-            {/if}
+            {@render drawEmojiGrid(isFiltered)}
         </div>
     </div>
     <form method="dialog" class="modal-backdrop">

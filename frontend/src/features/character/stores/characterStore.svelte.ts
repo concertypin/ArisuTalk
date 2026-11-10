@@ -114,11 +114,19 @@ export class CharacterStore {
         }
     }
 
+    /**
+     * Whether a character can be moved between two positions.
+     * Pinned and unpinned characters live in separate groups, so they cannot be swapped.
+     * @param fromIndex Index of the character to move.
+     * @param toIndex Index of the destination.
+     * @returns `false` when an index is out of range or the two characters are in different groups.
+     */
     isReorderable(fromIndex: number, toIndex: number): boolean {
-        const fromChar = characterStore.characters[fromIndex];
-        const toChar = characterStore.characters[toIndex];
+        const fromChar = this.characters[fromIndex];
+        const toChar = this.characters[toIndex];
+        if (!fromChar || !toChar) return false;
 
-        return characterStore.isPinned(fromChar.id) === characterStore.isPinned(toChar.id);
+        return this.isPinned(fromChar.id) === this.isPinned(toChar.id);
     }
 
     reorder(fromIndex: number, toIndex: number) {
@@ -145,7 +153,7 @@ export class CharacterStore {
      * and... Save pinned IDs to localStorage.
      */
     private updatePinnedIds(ids?: string[]): string[] {
-        if (ids != null) {
+        if (ids !== undefined) {
             this.pinnedIds = ids;
 
             if (typeof localStorage !== "undefined") {
@@ -174,7 +182,6 @@ export class CharacterStore {
      * @param characterId The character ID to check.
      */
     isPinned(characterId: string): boolean {
-        // return this.getPinnedIds().includes(characterId);
         return this.pinnedIds.includes(characterId);
     }
 
@@ -190,7 +197,6 @@ export class CharacterStore {
         } else {
             pinned.unshift(characterId);
         }
-        // this.savePinnedIds(pinned);
         this.updatePinnedIds(pinned);
         // Re-sort to reflect pinning
         this.sortByPinAndOrder();

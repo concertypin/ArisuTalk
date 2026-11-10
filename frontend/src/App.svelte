@@ -1,4 +1,8 @@
-<script module>
+<!--
+  @component App
+  Root Svelte 5 component with hash-based router, PWA support, and theming.
+-->
+<script lang="ts">
     import { initRouter, getCurrentPath } from "@/lib/router.svelte";
     import { Logger } from "@common/logger/Logger";
     import { routes } from "@/lib/routeConfig";
@@ -15,15 +19,6 @@
     import { memoryPlugin } from "@/features/memory/memoryPlugin";
     import { setAppContext, type AppContext } from "@/context";
 
-    const appSettingsModalPromise = import("@/components/AppSettingsModal.svelte");
-    const svAgentationPromise = import("sv-agentation");
-</script>
-
-<!--
-  @component App
-  Root Svelte 5 component with hash-based router, PWA support, and theming.
--->
-<script lang="ts">
     let appContext: AppContext = $state({
         appSettingsOpen: false,
         characterSettingsOpen: false,
@@ -107,7 +102,7 @@
         {/if}
 
         {#if isAppSettingsOpen()}
-            {#await appSettingsModalPromise}
+            {#await import("@/components/AppSettingsModal.svelte")}
                 <div
                     class="fixed inset-0 z-50 flex items-center justify-center bg-base-content/50 text-base-content/70 backdrop-blur-sm"
                 >
@@ -131,7 +126,7 @@
         {/if}
         <ToastContainer />
         {#if import.meta.env.DEV}
-            {#await svAgentationPromise then { Agentation }}
+            {#await import("sv-agentation") then { Agentation }}
                 <div style="position:relative;z-index:9999">
                     <Agentation toolbarPosition="top-right" />
                 </div>

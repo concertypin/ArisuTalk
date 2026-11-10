@@ -4,7 +4,7 @@
   Uses dynamic import for code-splitting with {#await} block.
   Deprecated. Use `marked` and must use `DOMPurify`.
 -->
-<script module>
+<script lang="ts" module>
     import { Logger } from "@common/logger/Logger";
 
     const svelteMarkdownPromise = import("@humanspeak/svelte-markdown").catch((err) => {

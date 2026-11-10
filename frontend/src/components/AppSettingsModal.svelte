@@ -1,4 +1,4 @@
-<script module>
+<script lang="ts" module>
     import { Logger } from "@common/logger/Logger";
 
     import { settings } from "@/lib/stores/settings.svelte";
@@ -16,7 +16,7 @@
     import AdvancedSettings from "./settingSubpage/AdvancedSettings.svelte";
     import AboutPage from "./settingSubpage/AboutPage.svelte";
 
-    import { preload } from "@/components/dialog/SettingsDialog.svelte";
+    import { preload } from "@/components/dialog/settingsPreload";
     import SettingsDialog from "@/components/dialog/SettingsDialog.svelte";
 
     import { getAppContext } from "@/context";
@@ -26,7 +26,7 @@
             icon: GearIcon,
             label: "General",
             contents: {
-                type: "component",
+                type: "static",
                 component: GeneralSettings,
             },
         },
@@ -34,7 +34,7 @@
             icon: CpuIcon,
             label: "LLM Configuration",
             contents: {
-                type: "component",
+                type: "static",
                 component: LLMSettings,
             },
         },
@@ -42,7 +42,7 @@
             icon: ChatCircleTextIcon,
             label: "Prompt",
             contents: {
-                type: "component",
+                type: "static",
                 component: PromptSettings,
             },
         },
@@ -50,7 +50,7 @@
             icon: SlidersHorizontalIcon,
             label: "Advanced",
             contents: {
-                type: "component",
+                type: "static",
                 component: AdvancedSettings,
             },
         },
@@ -58,7 +58,7 @@
             icon: InfoIcon,
             label: "About",
             contents: {
-                type: "component",
+                type: "static",
                 component: AboutPage,
             },
         },
@@ -87,7 +87,7 @@
         closeAppSettings();
 
         Logger.structured("modal.close", {
-            location: "characterSettings",
+            location: window.location.pathname,
             modalName: "AppSettingsModal",
         });
     }
@@ -100,7 +100,7 @@
 </script>
 
 <SettingsDialog
-    title="General"
+    title="App"
     {preloaded}
     {onOpen}
     {onClose}

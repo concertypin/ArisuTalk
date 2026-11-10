@@ -1,10 +1,10 @@
-<script module>
+<script lang="ts" module>
     import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
     import MessageActions from "./MessageActions.svelte";
     import TextArea from "@/components/input/TextArea.svelte";
+    import SanitizedHtml from "@/components/SanitizedHtml.svelte";
 
     import { marked } from "marked";
-    import DOMPurify from "dompurify";
 
     marked.setOptions({
         gfm: true,
@@ -16,7 +16,8 @@
     type Props = {
         message: Message;
         isEditing: boolean;
-        editingMessageId: string | null;
+        onEditStart: (id: string) => void;
+        onEditCancel: () => void;
         onMessageUpdate: (id: string, content: string) => void;
         onMessageDelete: (id: string) => void;
         onMessageRegenerate: (id: string) => void;
@@ -25,7 +26,8 @@
     let {
         message,
         isEditing,
-        editingMessageId = $bindable(),
+        onEditStart,
+        onEditCancel,
         onMessageUpdate,
         onMessageDelete,
         onMessageRegenerate,
@@ -44,7 +46,7 @@
     }
 
     function onEdit() {
-        editingMessageId = message.id;
+        onEditStart(message.id);
         editingContent = getMessageText(message);
     }
 
@@ -61,7 +63,7 @@
     }
 
     function onCancelEdit() {
-        editingMessageId = null;
+        onEditCancel();
         editingContent = "";
     }
 
@@ -76,11 +78,12 @@
 <div class="chat group {message.role === 'user' ? 'chat-end' : 'chat-start'}">
     <div class="chat-bubble shadow-lg max-w-[80ch]">
         {#if isEditing}
-            <TextArea bind:value={editingContent} {onSubmit} />
+            <TextArea bind:value={editingContent} {onSubmit} onCancel={onCancelEdit} />
         {:else}
-            <div class="prose prose-compact prose-invert prose-sm prose-gray max-w-[80ch]">
-                {@html DOMPurify.sanitize(html)}
-            </div>
+            <SanitizedHtml
+                class="prose prose-compact prose-invert prose-sm prose-gray max-w-[80ch]"
+                {html}
+            />
         {/if}
         <div class="flex items-center justify-between mt-1">
             <span class="text-xs opacity-60">

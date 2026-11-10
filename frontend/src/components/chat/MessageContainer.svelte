@@ -1,5 +1,4 @@
-<script module>
-    import type { Snippet } from "svelte";
+<script lang="ts" module>
     import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
     import MessageBubble from "./MessageBubble.svelte";
     import { chatStore } from "@/features/chat/stores/chatStore.svelte";
@@ -14,7 +13,6 @@
         messages,
         activeChat,
     }: {
-        children?: Snippet;
         messages: Message[];
         activeChat?: LocalChat;
     } = $props();
@@ -38,6 +36,14 @@
         if (container) {
             container.scrollTop = container.scrollHeight;
         }
+    }
+
+    function onEditStart(messageId: string) {
+        editingMessageId = messageId;
+    }
+
+    function onEditCancel() {
+        editingMessageId = null;
     }
 
     async function onMessageUpdate(messageId: string, editingContent: string) {
@@ -82,7 +88,8 @@
             <MessageBubble
                 {message}
                 {isEditing}
-                bind:editingMessageId
+                {onEditStart}
+                {onEditCancel}
                 {onMessageUpdate}
                 {onMessageDelete}
                 {onMessageRegenerate}

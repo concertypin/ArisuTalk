@@ -1,4 +1,4 @@
-<script module>
+<script lang="ts" module>
     import { chatStore } from "@/features/chat/stores/chatStore.svelte";
     import { characterStore } from "@/features/character/stores/characterStore.svelte";
     import GearIcon from "phosphor-svelte/lib/GearIcon";
@@ -61,5 +61,5 @@
 
     <MessageContainer {messages} {activeChat} />
 
-    <MessageInput {onSubmit} disabled={!activeChat} />
+    <MessageInput {onSubmit} disabled={!activeChat} isGenerating={chatStore.isGenerating} />
 </main>

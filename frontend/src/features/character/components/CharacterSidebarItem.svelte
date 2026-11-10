@@ -1,4 +1,4 @@
-<script module>
+<script lang="ts" module>
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import PencilSimple from "phosphor-svelte/lib/PencilSimpleIcon";
     import PushPin from "phosphor-svelte/lib/PushPinIcon";
@@ -73,8 +73,8 @@
         };
     });
 
-    function openCharacterSettings(character: Character) {
-        appContext.editingCharacter = character;
+    function openCharacterSettings(target: Character) {
+        appContext.editingCharacter = target;
         appContext.characterSettingsOpen = true;
     }
 

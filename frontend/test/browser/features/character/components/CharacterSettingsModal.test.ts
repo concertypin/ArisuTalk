@@ -1,9 +1,8 @@
 /// <reference types="vitest/browser" />
 
 import { test, expect, describe, vi, beforeEach, afterEach } from "vitest";
-import { render } from "vitest-browser-svelte";
+import { createTestAppContext, renderWithAppContext } from "@test/utils/appContext.svelte";
 import CharacterSettingsModal from "@/features/character/components/CharacterSettingsModal.svelte";
-import { uiState } from "@/lib/stores/ui.svelte";
 import { characterStore } from "@/features/character/stores/characterStore.svelte";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
 import { Logger } from "@common/logger/Logger";
@@ -30,6 +29,16 @@ vi.mock("@common/logger/Logger", () => ({
 
 describe("CharacterSettingsModal Component", () => {
     let mockCharacter: Character;
+    let selectCharacter: (charId: string | null) => void;
+
+    /** Mounts the modal the way `CharacterLayout` does: while the app context marks it as open. */
+    function renderModal() {
+        return renderWithAppContext(
+            CharacterSettingsModal,
+            { character: mockCharacter, selectCharacter },
+            createTestAppContext({ characterSettingsOpen: true, editingCharacter: mockCharacter })
+        );
+    }
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -72,9 +81,7 @@ describe("CharacterSettingsModal Component", () => {
             },
         };
 
-        // Initialize uiState
-        uiState.characterSettingsOpen = true;
-        uiState.characterSettingsTarget = mockCharacter;
+        selectCharacter = vi.fn() satisfies (charId: string | null) => void;
 
         // Initialize characterStore.characters for the index lookups
         characterStore.characters = [mockCharacter];
@@ -87,7 +94,7 @@ describe("CharacterSettingsModal Component", () => {
     });
 
     test("renders modal when open", async () => {
-        const { getByRole } = render(CharacterSettingsModal);
+        const { getByRole } = renderModal();
 
         // Check header
         await expect
@@ -105,13 +112,13 @@ describe("CharacterSettingsModal Component", () => {
     });
 
     test("switches tabs correctly", async () => {
-        const { getByRole, getByText, getByLabelText } = render(CharacterSettingsModal);
+        const { getByRole, getByText, getByLabelText } = renderModal();
 
         // Initial tab is basic
-        await expect.element(getByLabelText(/Name/i)).toBeInTheDocument();
+        await expect.element(getByLabelText("Name", { exact: true })).toBeInTheDocument();
 
         // Switch to Prompt tab
-        const promptTab = getByRole("button", { name: /Prompt Settings/i });
+        const promptTab = getByRole("button", { name: /^Prompt$/i });
         await promptTab.click();
 
         // Wait for tab content
@@ -119,25 +126,26 @@ describe("CharacterSettingsModal Component", () => {
         await expect.element(getByLabelText(/Character Prompt Description/i)).toBeVisible();
 
         // Switch to Lorebook tab
-        const lorebookTab = getByRole("button", { name: /Lorebook Settings/i });
+        const lorebookTab = getByRole("button", { name: /^Lorebook$/i });
         await lorebookTab.click();
         await expect.element(getByRole("heading", { name: "Lorebook", level: 3 })).toBeVisible();
         await expect.element(getByText(/Entries \(1\)/i)).toBeVisible();
     });
 
     test("closes modal when close button is clicked", async () => {
-        const { getByText } = render(CharacterSettingsModal);
+        const { getByText, appContext } = renderModal();
 
-        const closeButton = getByText('Close', { exact: true })
+        const closeButton = getByText("Close", { exact: true });
         await closeButton.click();
 
-        expect(uiState.characterSettingsOpen).toBe(false);
+        expect(appContext.characterSettingsOpen).toBe(false);
+        expect(appContext.editingCharacter).toBeNull();
     });
 
     test("autosaves when changes are made", async () => {
-        const { getByLabelText } = render(CharacterSettingsModal);
+        const { getByLabelText } = renderModal();
 
-        const nameInput = getByLabelText(/Name/i);
+        const nameInput = getByLabelText("Name", { exact: true });
         await nameInput.fill("Updated Name");
 
         // Wait for debounce (300ms) + buffer
@@ -154,10 +162,10 @@ describe("CharacterSettingsModal Component", () => {
     });
 
     test("handles lorebook entry addition", async () => {
-        const { getByRole } = render(CharacterSettingsModal);
+        const { getByRole } = renderModal();
 
         // Switch to Lorebook tab
-        await getByRole("button", { name: /Lorebook Settings/i }).click();
+        await getByRole("button", { name: /^Lorebook$/i }).click();
 
         // Click Add Entry
         const addButton = getByRole("button", { name: /Add Entry/i });
