@@ -15,7 +15,7 @@
     type LorebookEntry = Character["prompt"]["lorebook"]["data"][number];
     type ConditionType = LorebookEntry["condition"][number]["type"];
 
-    import type { TContext, TProps } from "./types.ts";
+    import type { TContext, TProps } from "./types";
 
     let { context }: TProps<TContext> = $props();
 

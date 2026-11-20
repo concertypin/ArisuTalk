@@ -119,8 +119,6 @@
     /** Debounce timer for autosave */
     let saveTimeout: ReturnType<typeof setTimeout> | null = null;
 
-    let dialog = $state<HTMLDialogElement>();
-
     function onOpen() {
         Logger.structured("modal.open", {
             location: "characterSettings",
@@ -129,11 +127,16 @@
         });
     }
 
-    function onClose() {
+    /** Drops the pending autosave. */
+    function cancelAutosave() {
         if (saveTimeout) {
             clearTimeout(saveTimeout);
             saveTimeout = null;
         }
+    }
+
+    function onClose() {
+        cancelAutosave();
 
         appContext.characterSettingsOpen = false;
         appContext.editingCharacter = null;
@@ -181,6 +184,7 @@
 
     let context = $state({
         getCharacter: () => editingCharacter,
+        cancelAutosave,
         /**
          * Handle character update from subpages.
          * Triggers autosave automatically.
@@ -203,7 +207,6 @@
 
 <SettingsDialog
     id="character"
-    bind:self={dialog}
     {title}
     {preloaded}
     {onTabChange}

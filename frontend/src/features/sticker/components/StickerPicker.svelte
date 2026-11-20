@@ -21,7 +21,24 @@
 
     let BUILTIN_EMOJIS = $state<EmojiGroup[]>([]);
 
-    const emojisLoadPromise = import("unicode-emoji-json/data-by-group.json");
+    /** Shared load of the emoji data. `null` until the first picker opens, and again after a failure. */
+    let emojisLoadPromise: Promise<void> | null = null;
+
+    /**
+     * Loads the emoji data once, the first time a picker is opened (not at module evaluation).
+     * A failed load clears the cached promise, so the next picker retries.
+     */
+    function loadEmojis(): Promise<void> {
+        emojisLoadPromise ??= import("unicode-emoji-json/data-by-group.json")
+            .then((v) => {
+                BUILTIN_EMOJIS = v.default;
+            })
+            .catch((e) => {
+                emojisLoadPromise = null;
+                Logger.error("Failed to load emoji data.", e);
+            });
+        return emojisLoadPromise;
+    }
 </script>
 
 <!--
@@ -69,13 +86,7 @@ Emits `onSelect` with the chosen emoji as plain text.
         close();
     }
 
-    emojisLoadPromise
-        .then((v) => {
-            BUILTIN_EMOJIS = v.default;
-        })
-        .catch((e) => {
-            Logger.error("Failed to load emoji data.", e);
-        });
+    void loadEmojis();
 
     /** Flattened emoji items for search. */
     let flattenedEmojis = $derived.by(() => {

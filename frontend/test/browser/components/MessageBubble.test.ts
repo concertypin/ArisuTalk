@@ -34,6 +34,23 @@ describe("MessageBubble Component", () => {
         expect(screen.container.querySelector("strong")?.textContent).toBe("world");
     });
 
+    test("keeps a single newline as a line break (chat-style markdown)", async () => {
+        const multiline = apply(MessageSchema, {
+            id: "msg-3",
+            role: "user",
+            content: { type: "text", data: "first\nsecond" },
+            chatId: "chat-1",
+        });
+        const screen = render(MessageBubble, {
+            message: multiline,
+            isEditing: false,
+            ...createHandlers(),
+        });
+
+        await expect.element(screen.getByText("second")).toBeVisible();
+        expect(screen.container.querySelectorAll(".prose br")).toHaveLength(1);
+    });
+
     test("does not keep event handler attributes from HTML embedded in a message", async () => {
         const evil = apply(MessageSchema, {
             id: "msg-2",
@@ -150,10 +167,13 @@ describe("MessageBubble typography follows the theme", () => {
         const bubble = screen.container.querySelector(".chat-bubble");
         const prose = screen.container.querySelector(".prose");
         if (!bubble || !prose) throw new Error("bubble or markdown element missing");
+        // The message is "Hello **world**": a missing <strong> must fail, not fall back to `prose`.
+        const strong = prose.querySelector("strong");
+        if (!strong) throw new Error("bold text element missing");
         return {
             background: getComputedStyle(bubble).backgroundColor,
             body: getComputedStyle(prose).color,
-            bold: getComputedStyle(prose.querySelector("strong") ?? prose).color,
+            bold: getComputedStyle(strong).color,
         };
     }
 

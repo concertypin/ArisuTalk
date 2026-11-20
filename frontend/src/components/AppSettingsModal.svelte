@@ -70,6 +70,44 @@
 
     let appContext = getAppContext();
 
+    /** Debounce before a change of the settings is persisted. */
+    const AUTOSAVE_DELAY_MS = 300;
+    let saveTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    function cancelAutosave() {
+        if (saveTimeout) {
+            clearTimeout(saveTimeout);
+            saveTimeout = null;
+        }
+    }
+
+    // Autosave: persist the settings shortly after any change, so the footer's claim holds.
+    let isFirstRun = true;
+    $effect(() => {
+        // Reading the whole tree subscribes the effect to every nested setting.
+        $state.snapshot(settings.value);
+
+        // The first run only subscribes; nothing changed yet.
+        if (isFirstRun) {
+            isFirstRun = false;
+            return;
+        }
+
+        cancelAutosave();
+        saveTimeout = setTimeout(() => {
+            saveTimeout = null;
+            void settings.save();
+        }, AUTOSAVE_DELAY_MS);
+    });
+
+    // Do not lose a pending change if the modal is torn down without going through `onClose`.
+    $effect(() => () => {
+        if (saveTimeout) {
+            cancelAutosave();
+            void settings.save();
+        }
+    });
+
     function closeAppSettings() {
         appContext.appSettingsOpen = false;
     }
@@ -82,6 +120,7 @@
     }
 
     function onClose() {
+        cancelAutosave();
         void settings.save();
 
         closeAppSettings();

@@ -4,9 +4,10 @@
     import TextArea from "@/components/input/TextArea.svelte";
     import SanitizedHtml from "@/components/SanitizedHtml.svelte";
 
-    import { marked } from "marked";
+    import { Marked } from "marked";
 
-    marked.setOptions({
+    /** Chat-specific markdown settings. A private instance, so the global `marked` stays untouched. */
+    const chatMarkdown = new Marked({
         gfm: true,
         breaks: true,
     });
@@ -88,7 +89,7 @@
         }
     }
 
-    let html = $derived(marked.parse(getMessageText(message), { async: false }));
+    let html = $derived(chatMarkdown.parse(getMessageText(message), { async: false }));
 </script>
 
 <div class="chat group {message.role === 'user' ? 'chat-end' : 'chat-start'}">
@@ -96,7 +97,7 @@
         {#if isEditing}
             <TextArea bind:value={editingContent} {onSubmit} onCancel={onCancelEdit} />
         {:else}
-            <SanitizedHtml class="prose prose-compact prose-sm max-w-[80ch]" {html} />
+            <SanitizedHtml class="prose prose-sm max-w-[80ch]" {html} />
         {/if}
         <div class="flex items-center justify-between mt-1">
             <span class="text-xs opacity-60">

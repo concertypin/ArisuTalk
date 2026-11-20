@@ -77,18 +77,30 @@
     }
 </script>
 
-{#snippet Button(onclick: () => void, title: string, Icon: Component, textType?: string)}
-    <button class="btn btn-xs btn-ghost btn-circle" {onclick} {title}>
+{#snippet Button(
+    onclick: () => void,
+    title: string,
+    Icon: Component,
+    textType?: string,
+    buttonType: string = "btn-ghost"
+)}
+    <button class="btn btn-xs btn-circle {buttonType}" {onclick} {title}>
         <Icon class="w-3.5 h-3.5 {textType ?? ''}" />
     </button>
 {/snippet}
 
 <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
     {#if isEditing}
-        {@render Button(onConfirmEdit, "Save edit (Ctrl+Enter)", CheckIcon, "text-success")}
+        {@render Button(onConfirmEdit, "Save edit (Enter)", CheckIcon, "text-success")}
         {@render Button(onCancelEdit, "Cancel edit (Esc)", XIcon, "text-error")}
     {:else if isConfirmingDelete}
-        {@render Button(handleDeleteClick, "Click again to confirm delete", TrashIcon)}
+        {@render Button(
+            handleDeleteClick,
+            "Click again to confirm delete",
+            TrashIcon,
+            undefined,
+            "btn-error animate-pulse"
+        )}
         {@render Button(cancelDelete, "Cancel delete", XIcon)}
     {:else}
         {@render Button(onEdit, "Edit message", PencilIcon)}

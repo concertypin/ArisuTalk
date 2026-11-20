@@ -1,7 +1,7 @@
 <script lang="ts" generics="TContext = never">
     import GearIcon from "phosphor-svelte/lib/GearIcon";
     import XIcon from "phosphor-svelte/lib/XIcon";
-    import type { Component } from "svelte";
+    import { untrack, type Component } from "svelte";
     import SanitizedHtml from "@/components/SanitizedHtml.svelte";
     import type { Page, SubpageProps } from "./settingsPreload";
 
@@ -43,9 +43,16 @@
         }
     }
 
+    /**
+     * Opens the dialog once on mount.
+     * Attachments re-run whenever state read inside them changes, so the whole body is untracked:
+     * `onOpen` reads the caller's state (e.g. the character being edited) and must not re-open the dialog on every edit.
+     */
     function onAttach(dialog: HTMLDialogElement) {
-        dialog.showModal();
-        onOpen();
+        untrack(() => {
+            dialog.showModal();
+            onOpen();
+        });
     }
 </script>
 
@@ -53,7 +60,7 @@
     <li>
         <button
             class="flex gap-2 rounded-lg"
-            class:active={isActive}
+            class:menu-active={isActive}
             onclick={() => onTabChange(id)}
             aria-label={label}
         >
@@ -64,9 +71,8 @@
 {/snippet}
 
 {#snippet Panel(Comp: Component<SubpageProps<TContext>>)}
+    <!-- The subpage renders its own section heading. -->
     <div class="space-y-6">
-        <h3 class="text-lg font-semibold">{title}</h3>
-
         <Comp context={settingsModalContext} />
     </div>
 {/snippet}
@@ -118,10 +124,7 @@
                 {#if page.type === "none"}
                     <div></div>
                 {:else if page.type === "markdown"}
-                    <SanitizedHtml
-                        class="prose prose-compact prose-sm max-w-[80ch]"
-                        html={page.text}
-                    />
+                    <SanitizedHtml class="prose prose-sm max-w-[80ch]" html={page.text} />
                 {:else if page.type === "component"}
                     {@render Panel(page.component)}
                 {:else}

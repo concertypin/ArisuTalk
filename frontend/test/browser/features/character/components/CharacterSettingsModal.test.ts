@@ -172,4 +172,58 @@ describe("CharacterSettingsModal Component", () => {
             .element(getByRole("heading", { level: 4, name: /Entries \(2\)/i }))
             .toBeInTheDocument();
     });
+
+    test("opens the dialog once, however often the character is edited", async () => {
+        const showModalSpy = vi.spyOn(HTMLDialogElement.prototype, "showModal");
+        try {
+            const { getByLabelText } = renderModal();
+            const nameInput = getByLabelText("Name", { exact: true });
+
+            await nameInput.fill("Updated Name");
+            await nameInput.fill("Updated Name Again");
+            await expect.element(nameInput).toHaveValue("Updated Name Again");
+
+            const openLogs = vi
+                .mocked(Logger.structured)
+                .mock.calls.filter(([event]) => event === "modal.open");
+            expect(openLogs).toHaveLength(1);
+            expect(showModalSpy).toHaveBeenCalledTimes(1);
+        } finally {
+            showModalSpy.mockRestore();
+        }
+    });
+
+    test("shows only the subpage heading as an h3, without a duplicate character-name heading", async () => {
+        const { getByRole } = renderModal();
+
+        await expect
+            .element(getByRole("heading", { level: 3, name: "Basic Information" }))
+            .toBeVisible();
+
+        const h3Texts = Array.from(document.querySelectorAll("h3")).map((h) =>
+            h.textContent.trim()
+        );
+        expect(h3Texts).toEqual(["Basic Information"]);
+
+        await getByRole("button", { name: /^Prompt$/i }).click();
+        await expect
+            .element(getByRole("heading", { level: 3, name: /Prompt Configuration/i }))
+            .toBeVisible();
+        expect(document.querySelectorAll("h3").length).toBe(1);
+    });
+
+    test("highlights the active tab with menu-active and moves it on click", async () => {
+        const { getByRole } = renderModal();
+
+        const basic = getByRole("button", { name: /^Basic$/i });
+        const prompt = getByRole("button", { name: /^Prompt$/i });
+
+        await expect.element(basic).toHaveClass("menu-active");
+        await expect.element(prompt).not.toHaveClass("menu-active");
+
+        await prompt.click();
+
+        await expect.element(prompt).toHaveClass("menu-active");
+        await expect.element(basic).not.toHaveClass("menu-active");
+    });
 });

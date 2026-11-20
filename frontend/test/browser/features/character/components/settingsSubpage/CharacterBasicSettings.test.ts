@@ -262,6 +262,11 @@ describe("CharacterBasicSettings Component", () => {
     });
 
     describe("character removal", () => {
+        beforeEach(async () => {
+            // The initial load would otherwise overwrite the characters assigned by a test.
+            await characterStore.initPromise;
+        });
+
         afterEach(() => {
             vi.restoreAllMocks();
             characterStore.characters = [];
@@ -325,13 +330,159 @@ describe("CharacterBasicSettings Component", () => {
 
             await vi.waitFor(() => expect(removeSpy).toHaveBeenCalledTimes(1));
             await expect.element(input).toBeEnabled();
-            expect(onChangeSpy).not.toHaveBeenCalled();
+            expect(onChangeSpy).not.toHaveBeenCalledWith(null);
 
             // A retry must be possible after a failure (disabling dropped the focus).
             await input.click();
             await userEvent.keyboard("{Enter}");
             await vi.waitFor(() => expect(onChangeSpy).toHaveBeenCalledWith(null));
             expect(removeSpy).toHaveBeenCalledTimes(2);
+        });
+
+        function renderBasic() {
+            return render(CharacterBasicSettings, {
+                props: {
+                    context: () => ({
+                        getCharacter: () => mockCharacter,
+                        onCharacterChange: onChangeSpy,
+                    }),
+                },
+            });
+        }
+
+        test("does not remove on the Enter that commits an IME composition", async () => {
+            characterStore.characters = [mockCharacter];
+            const removeSpy = vi.spyOn(characterStore, "remove").mockResolvedValue(undefined);
+            const { getByLabelText } = renderBasic();
+
+            const input = getByLabelText("Enter the character's name exactly");
+            await input.fill(mockCharacter.name);
+            input
+                .element()
+                .dispatchEvent(
+                    new KeyboardEvent("keydown", { key: "Enter", isComposing: true, bubbles: true })
+                );
+
+            // Give a (wrong) async removal the chance to show up.
+            await new Promise((r) => setTimeout(r, 50));
+            expect(removeSpy).not.toHaveBeenCalled();
+            expect(onChangeSpy).not.toHaveBeenCalled();
+
+            // The same Enter after the composition ended removes.
+            await userEvent.keyboard("{Enter}");
+            await vi.waitFor(() => expect(removeSpy).toHaveBeenCalledTimes(1));
+        });
+
+        test("does not remove on Enter when the typed name differs", async () => {
+            characterStore.characters = [mockCharacter];
+            const removeSpy = vi.spyOn(characterStore, "remove").mockResolvedValue(undefined);
+            const { getByLabelText } = renderBasic();
+
+            await getByLabelText("Enter the character's name exactly").fill("Test Characte");
+            await userEvent.keyboard("{Enter}");
+
+            await new Promise((r) => setTimeout(r, 50));
+            expect(removeSpy).not.toHaveBeenCalled();
+        });
+
+        test("the Remove button stays disabled until the name matches, then removes", async () => {
+            characterStore.characters = [mockCharacter];
+            const removeSpy = vi.spyOn(characterStore, "remove").mockResolvedValue(undefined);
+            const { getByLabelText, getByRole } = renderBasic();
+
+            const removeButton = getByRole("button", { name: "Remove", exact: true });
+            await expect.element(removeButton).toBeDisabled();
+
+            const input = getByLabelText("Enter the character's name exactly");
+            await input.fill("wrong name");
+            await expect.element(removeButton).toBeDisabled();
+
+            await input.fill(mockCharacter.name);
+            await expect.element(removeButton).toBeEnabled();
+            await removeButton.click();
+
+            await vi.waitFor(() => expect(onChangeSpy).toHaveBeenCalledWith(null));
+            expect(removeSpy).toHaveBeenCalledTimes(1);
+        });
+
+        test("an empty character name never matches an empty confirmation field", async () => {
+            const unnamed = { ...cloneDeep(mockCharacter), name: "" };
+            characterStore.characters = [unnamed];
+            const removeSpy = vi.spyOn(characterStore, "remove").mockResolvedValue(undefined);
+            const { getByLabelText, getByRole } = render(CharacterBasicSettings, {
+                props: {
+                    context: () => ({
+                        getCharacter: () => unnamed,
+                        onCharacterChange: onChangeSpy,
+                    }),
+                },
+            });
+
+            await expect
+                .element(getByRole("button", { name: "Remove", exact: true }))
+                .toBeDisabled();
+
+            await getByLabelText("Enter the character's name exactly").click();
+            await userEvent.keyboard("{Enter}");
+
+            await new Promise((r) => setTimeout(r, 50));
+            expect(removeSpy).not.toHaveBeenCalled();
+            expect(onChangeSpy).not.toHaveBeenCalled();
+        });
+
+        test("re-arms the autosave when the deletion fails after it was cancelled", async () => {
+            vi.spyOn(Logger, "error").mockImplementation(() => {});
+            characterStore.characters = [mockCharacter];
+            const cancelAutosave = vi.fn();
+            vi.spyOn(characterStore, "remove").mockRejectedValue(new Error("boom"));
+            const { getByLabelText } = render(CharacterBasicSettings, {
+                props: {
+                    context: () => ({
+                        getCharacter: () => mockCharacter,
+                        onCharacterChange: onChangeSpy,
+                        cancelAutosave,
+                    }),
+                },
+            });
+
+            await getByLabelText("Enter the character's name exactly").fill(mockCharacter.name);
+            await userEvent.keyboard("{Enter}");
+
+            await vi.waitFor(() => expect(onChangeSpy).toHaveBeenCalledWith(mockCharacter));
+            expect(cancelAutosave).toHaveBeenCalledTimes(1);
+            expect(onChangeSpy).not.toHaveBeenCalledWith(null);
+        });
+
+        test("the label says that Enter or the Remove button removes", async () => {
+            const { getByLabelText } = renderBasic();
+
+            await expect.element(getByLabelText(/press Enter or click Remove/)).toBeVisible();
+        });
+
+        test("cancels the pending autosave before the deletion starts", async () => {
+            characterStore.characters = [mockCharacter];
+            const order: string[] = [];
+            const cancelAutosave = vi.fn(() => {
+                order.push("cancel");
+            });
+            vi.spyOn(characterStore, "remove").mockImplementation(async () => {
+                order.push("remove");
+            });
+            const { getByLabelText } = render(CharacterBasicSettings, {
+                props: {
+                    context: () => ({
+                        getCharacter: () => mockCharacter,
+                        onCharacterChange: onChangeSpy,
+                        cancelAutosave,
+                    }),
+                },
+            });
+
+            await getByLabelText("Enter the character's name exactly").fill(mockCharacter.name);
+            await userEvent.keyboard("{Enter}");
+
+            await vi.waitFor(() => expect(onChangeSpy).toHaveBeenCalledWith(null));
+            expect(order).toEqual(["cancel", "remove"]);
         });
     });
 });

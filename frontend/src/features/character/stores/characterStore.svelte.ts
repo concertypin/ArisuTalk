@@ -101,17 +101,32 @@ export class CharacterStore {
             const id = char.id;
             await this.adapter.deleteCharacter(id);
             this.characters.splice(index, 1);
+            if (this.isPinned(id)) {
+                this.updatePinnedIds(this.pinnedIds.filter((pinnedId) => pinnedId !== id));
+            }
             this.saveOrder();
         }
     }
 
+    /**
+     * Saves an edited character and replaces it in the list.
+     * The position is looked up by id again after the save: the list may have changed while it was in flight.
+     * @param index Position of the character when the call was made. Out of range means there is nothing to update.
+     * @param updated The edited character.
+     */
     async update(index: number, updated: Character) {
-        if (index >= 0 && index < this.characters.length) {
-            await this.adapter.saveCharacter(updated);
-            this.characters[index] = updated;
-            // Order doesn't change on update usually, unless we want to move to top?
-            // No, keep position.
+        if (index < 0 || index >= this.characters.length) return;
+        // A character that was removed in the meantime must not be saved again.
+        if (!this.characters.some((c) => c.id === updated.id)) return;
+
+        await this.adapter.saveCharacter(updated);
+
+        const currentIndex = this.characters.findIndex((c) => c.id === updated.id);
+        if (currentIndex !== -1) {
+            this.characters[currentIndex] = updated;
         }
+        // Order doesn't change on update usually, unless we want to move to top?
+        // No, keep position.
     }
 
     /**
@@ -165,7 +180,11 @@ export class CharacterStore {
 
         try {
             const item = localStorage.getItem(PINNED_KEY);
-            if (!item) return this.updatePinnedIds([]);
+            // Nothing stored yet: a read must not write.
+            if (!item) {
+                this.pinnedIds = [];
+                return this.pinnedIds;
+            }
             const parsed: unknown = JSON.parse(item);
             const isValid = Array.isArray(parsed) && parsed.every((v) => typeof v === "string");
 

@@ -14,7 +14,7 @@
     import { getAssetStorage } from "@/features/character/adapters/assetStorage/assetStorageResolver";
     import { Logger } from "@common/logger/Logger";
     import CharacterSettings from "./CharacterSettings.svelte";
-    import type { TContext, TProps } from "./types.ts";
+    import type { TContext, TProps } from "./types";
 
     let { context }: TProps<TContext> = $props();
 

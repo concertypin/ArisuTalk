@@ -1,17 +1,5 @@
-<script lang="ts" module>
-    export type TContext = {
-        getCharacter: () => Character;
-        onCharacterChange: (updatedCharacter: Character | null) => void;
-    };
-
-    export type TProps<T> = {
-        context: () => T;
-    };
-</script>
-
 <script lang="ts">
     import type { Snippet } from "svelte";
-    import type { Character } from "@arisutalk/character-spec/types/v0/index";
 
     let {
         subpageName,

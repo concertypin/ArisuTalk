@@ -2,6 +2,9 @@
 import { test, expect, describe, vi, beforeEach, afterEach } from "vitest";
 import type { BaseMessage } from "@langchain/core/messages";
 import { chatStore } from "@/features/chat/stores/chatStore.svelte";
+import { characterStore } from "@/features/character/stores/characterStore.svelte";
+import { StorageResolver } from "@/lib/adapters/storage/storageResolver";
+import { CharacterSchema } from "@arisutalk/character-spec/v0/Character";
 import { MessageSchema } from "@arisutalk/character-spec/v0/Character/Message";
 import { apply } from "@arisutalk/character-spec/utils";
 import { Logger } from "@common/logger/Logger";
@@ -50,15 +53,12 @@ describe("ChatStore Streaming", () => {
 
         // Character store is also a module-level singleton; reset its list
         // to prevent cross-test participants from leaking into group chat tests.
-        const { characterStore } =
-            await import("@/features/character/stores/characterStore.svelte");
         characterStore.characters = [];
 
         // Storage adapters are also module-level singletons cached on
         // StorageResolver. Reset them so the next test rebuilds against a
         // clean localStorage state (defensive against any adapter cache
         // leaking between tests).
-        const { StorageResolver } = await import("@/lib/adapters/storage/storageResolver");
         StorageResolver.reset();
     });
     afterEach(() => {
@@ -379,10 +379,6 @@ describe("ChatStore Streaming", () => {
             chatStore["activeProvider"].disconnect = vi.fn().mockResolvedValue(undefined);
         }
         await chatStore.setProvider("MOCK", { responses: ["Reply"] });
-        const { characterStore } =
-            await import("@/features/character/stores/characterStore.svelte");
-        // apply and CharacterSchema are already imported at the top
-        const { CharacterSchema } = await import("@arisutalk/character-spec/v0/Character");
         characterStore.characters.push(
             apply(CharacterSchema, {
                 id: "group-char",

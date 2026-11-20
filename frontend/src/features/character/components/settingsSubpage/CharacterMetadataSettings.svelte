@@ -7,7 +7,7 @@
     import { merge } from "lodash-es";
     import CharacterSettings from "./CharacterSettings.svelte";
 
-    import type { TContext, TProps } from "./types.ts";
+    import type { TContext, TProps } from "./types";
 
     let { context }: TProps<TContext> = $props();
 

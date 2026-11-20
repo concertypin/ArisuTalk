@@ -3,12 +3,10 @@ import { test, expect, describe, vi } from "vitest";
 import { renderWithAppContext } from "@test/utils/appContext.svelte";
 import Home from "@/routes/Home.svelte";
 
+// The loading state is covered in Home.loading.test.ts. Home caches its lazily loaded components
+// in module scope, and `vi.resetModules()` cannot clear that in browser mode, so a test that needs
+// a cold cache needs a test file of its own (every browser test file gets a fresh module registry).
 describe("Home Component", () => {
-    test("renders loading state initially", async () => {
-        const { getByText } = renderWithAppContext(Home, {});
-        await expect.element(getByText("Loading...")).toBeVisible();
-    });
-
     test("loads and renders layout", async () => {
         const { container } = renderWithAppContext(Home, {});
 

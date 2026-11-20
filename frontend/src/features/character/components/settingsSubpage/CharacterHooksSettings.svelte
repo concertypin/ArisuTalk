@@ -17,7 +17,7 @@
     type HookType = keyof ReplaceHook;
     type HookEntity = ReplaceHook[HookType][number];
 
-    import type { TContext, TProps } from "./types.ts";
+    import type { TContext, TProps } from "./types";
 
     let { context }: TProps<TContext> = $props();
 

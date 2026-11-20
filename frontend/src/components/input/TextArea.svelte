@@ -15,6 +15,21 @@
         | "error"
         | null;
 
+    /**
+     * Full class names are spelled out so Tailwind's source scan can generate them.
+     * A template such as `textarea-${color}` would never be detected.
+     */
+    const colorClass = {
+        neutral: "textarea-neutral",
+        primary: "textarea-primary",
+        secondary: "textarea-secondary",
+        accent: "textarea-accent",
+        info: "textarea-info",
+        success: "textarea-success",
+        warning: "textarea-warning",
+        error: "textarea-error",
+    } as const satisfies Record<NonNullable<Color>, string>;
+
     let {
         value = $bindable(""),
         element = $bindable(null),
@@ -58,9 +73,11 @@
 <textarea
     bind:value
     bind:this={element}
-    class="font-sans textarea {color ? `textarea-${color}` : ''} flex-1 min-h-[1em] {autosize
+    class="font-sans textarea {color
+        ? colorClass[color]
+        : ''} flex-1 min-w-0 min-h-[1em] max-h-[40vh] {autosize
         ? 'field-sizing-content'
-        : ''} resize-none outline-none overflow-hidden contain-layout text-optimize-speed break-all line-clamp-none"
+        : ''} resize-none outline-none overflow-y-auto contain-layout wrap-anywhere line-clamp-none"
     oninput={(event) => onInput(event.currentTarget.value)}
     spellcheck="false"
     {placeholder}

@@ -16,11 +16,11 @@
     import { characterStore } from "@/features/character/stores/characterStore.svelte";
     import type { AssetEntity } from "@arisutalk/character-spec/v0/Character";
     import CharacterSettings from "./CharacterSettings.svelte";
-    import type { TContext, TProps } from "./types.ts";
+    import type { TContext, TProps } from "./types";
 
     let { context }: TProps<TContext> = $props();
 
-    let { getCharacter, onCharacterChange } = $derived(context());
+    let { getCharacter, onCharacterChange, cancelAutosave } = $derived(context());
 
     let character = $derived(getCharacter());
 
@@ -118,6 +118,9 @@
 
         if (index < 0) return;
 
+        // A debounced autosave firing mid-deletion would save the deleted character again.
+        cancelAutosave?.();
+
         isRemoving = true;
         try {
             await characterStore.remove(index);
@@ -125,6 +128,8 @@
             Logger.error("Failed to remove character", e);
             toastStore.error(`Failed to remove character: ${String(e)}`);
             isRemoving = false;
+            // The character stays: re-arm the autosave that was dropped before the deletion.
+            onCharacterChange(character);
             return;
         }
 
@@ -134,6 +139,17 @@
 
     let inputCharName = $state("");
     let isValidCharName = $derived(inputCharName.trim() ? character.name === inputCharName : true);
+    // An empty name (the user cleared the Name field) must not match an empty confirmation.
+    let canRemove = $derived(character.name !== "" && inputCharName === character.name);
+
+    function onRemoveKeydown(e: KeyboardEvent) {
+        // Enter that commits an IME composition (Korean, Japanese, Chinese) must not delete.
+        if (e.key !== "Enter" || e.isComposing) return;
+
+        if (canRemove) {
+            void onCharacterRemove();
+        }
+    }
 </script>
 
 <CharacterSettings subpageName="Basic Information">
@@ -278,7 +294,7 @@
             <span>Remove Character</span>
         </h4>
         <label for="remove-character" class="fieldset-legend">
-            Enter the character's name exactly
+            Enter the character's name exactly, then press Enter or click Remove
         </label>
         <input
             type="text"
@@ -287,13 +303,7 @@
             class="input input-sm w-full bg-base-100 {isValidCharName ? '' : 'input-error'}"
             placeholder={character.name}
             disabled={isRemoving}
-            onkeydown={(e) => {
-                if (e.key !== "Enter") return;
-
-                if (e.currentTarget?.value === character.name) {
-                    void onCharacterRemove();
-                }
-            }}
+            onkeydown={onRemoveKeydown}
         />
         {#if !isValidCharName}
             <div class="label">
@@ -303,5 +313,13 @@
         <div class="label">
             <span class="label-text-alt">All data will be removed. It cannot be recovered!</span>
         </div>
+        <button
+            type="button"
+            class="btn btn-error btn-sm self-start"
+            disabled={isRemoving || !canRemove}
+            onclick={() => void onCharacterRemove()}
+        >
+            Remove
+        </button>
     </fieldset>
 </CharacterSettings>

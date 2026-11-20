@@ -169,6 +169,147 @@ describe("CharacterStore", () => {
         await expect(store.update(0, updated)).rejects.toThrow("Update failed");
     });
 
+    describe("update", () => {
+        it("keeps the neighbour intact when the list shifted while the save was in flight", async () => {
+            const char1 = { ...defaultChar, id: "1", name: "One" };
+            const char2 = { ...defaultChar, id: "2", name: "Two" };
+            const char3 = { ...defaultChar, id: "3", name: "Three" };
+            store.characters = [char1, char2, char3];
+
+            let finishSave: () => void = () => {};
+            mockAdapter.saveCharacter.mockImplementationOnce(
+                () =>
+                    new Promise<void>((resolve) => {
+                        finishSave = resolve;
+                    })
+            );
+
+            const pending = store.update(0, { ...char1, name: "One edited" });
+            // The first character is removed while its save is still running.
+            await store.remove(0);
+            finishSave();
+            await pending;
+
+            // A stale index 0 would have replaced "Two" with the edited "One".
+            expect(store.characters.map((c) => c.name)).toEqual(["Two", "Three"]);
+        });
+
+        it("replaces the character at its current position when the list shifted", async () => {
+            const char1 = { ...defaultChar, id: "1", name: "One" };
+            const char2 = { ...defaultChar, id: "2", name: "Two" };
+            const char3 = { ...defaultChar, id: "3", name: "Three" };
+            store.characters = [char1, char2, char3];
+
+            let finishSave: () => void = () => {};
+            mockAdapter.saveCharacter.mockImplementationOnce(
+                () =>
+                    new Promise<void>((resolve) => {
+                        finishSave = resolve;
+                    })
+            );
+
+            const pending = store.update(2, { ...char3, name: "Three edited" });
+            await store.remove(0);
+            finishSave();
+            await pending;
+
+            expect(store.characters.map((c) => c.name)).toEqual(["Two", "Three edited"]);
+        });
+
+        it("does not save a character that is no longer in the list", async () => {
+            const char1 = { ...defaultChar, id: "1", name: "One" };
+            const char2 = { ...defaultChar, id: "2", name: "Two" };
+            store.characters = [char1, char2];
+            await store.remove(0);
+            mockAdapter.saveCharacter.mockClear();
+
+            await store.update(0, { ...char1, name: "One edited" });
+
+            expect(mockAdapter.saveCharacter).not.toHaveBeenCalled();
+            expect(store.characters.map((c) => c.name)).toEqual(["Two"]);
+        });
+
+        it("ignores an out-of-range index", async () => {
+            store.characters = [{ ...defaultChar, id: "1" }];
+
+            await store.update(5, { ...defaultChar, id: "1", name: "x" });
+            await store.update(-1, { ...defaultChar, id: "1", name: "x" });
+
+            expect(mockAdapter.saveCharacter).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("pinned characters", () => {
+        const PINNED_KEY = "pinned_characters";
+
+        it("does not write to localStorage when loading without a stored pin list", async () => {
+            const setItemSpy = vi.spyOn(Storage.prototype, "setItem");
+            try {
+                const freshStore = new CharacterStore(mockAdapter);
+                await freshStore.initPromise;
+
+                expect(localStorage.getItem(PINNED_KEY)).toBeNull();
+                expect(setItemSpy).not.toHaveBeenCalledWith(PINNED_KEY, expect.anything());
+            } finally {
+                setItemSpy.mockRestore();
+            }
+        });
+
+        it("keeps stored pins across a load", async () => {
+            const char1 = { ...defaultChar, id: "1", name: "One" };
+            const char2 = { ...defaultChar, id: "2", name: "Two" };
+            mockAdapter.getAllCharacters.mockResolvedValue([char1, char2]);
+            localStorage.setItem(PINNED_KEY, JSON.stringify(["2"]));
+
+            const freshStore = new CharacterStore(mockAdapter);
+            await freshStore.initPromise;
+
+            expect(freshStore.isPinned("2")).toBe(true);
+            expect(freshStore.characters[0].id).toBe("2");
+        });
+
+        it("unpins a character when it is removed", async () => {
+            const char1 = { ...defaultChar, id: "1", name: "One" };
+            const char2 = { ...defaultChar, id: "2", name: "Two" };
+            store.characters = [char1, char2];
+            store.togglePin("1");
+            expect(store.isPinned("1")).toBe(true);
+
+            await store.remove(store.characters.findIndex((c) => c.id === "1"));
+
+            expect(store.isPinned("1")).toBe(false);
+            expect(JSON.parse(localStorage.getItem(PINNED_KEY) ?? "null")).toEqual([]);
+        });
+
+        it("keeps the other pins when a pinned character is removed", async () => {
+            const char1 = { ...defaultChar, id: "1", name: "One" };
+            const char2 = { ...defaultChar, id: "2", name: "Two" };
+            store.characters = [char1, char2];
+            store.togglePin("1");
+            store.togglePin("2");
+
+            await store.remove(store.characters.findIndex((c) => c.id === "1"));
+
+            expect(store.isPinned("2")).toBe(true);
+            expect(JSON.parse(localStorage.getItem(PINNED_KEY) ?? "null")).toEqual(["2"]);
+        });
+
+        it("leaves the stored pins untouched when an unpinned character is removed", async () => {
+            const char1 = { ...defaultChar, id: "1", name: "One" };
+            const char2 = { ...defaultChar, id: "2", name: "Two" };
+            store.characters = [char1, char2];
+            store.togglePin("1");
+            const setItemSpy = vi.spyOn(Storage.prototype, "setItem");
+            try {
+                await store.remove(store.characters.findIndex((c) => c.id === "2"));
+
+                expect(setItemSpy).not.toHaveBeenCalledWith(PINNED_KEY, expect.anything());
+            } finally {
+                setItemSpy.mockRestore();
+            }
+        });
+    });
+
     it("should reorder characters", async () => {
         const char1 = { ...defaultChar, id: "1", name: "One" };
         const char2 = { ...defaultChar, id: "2", name: "Two" };
