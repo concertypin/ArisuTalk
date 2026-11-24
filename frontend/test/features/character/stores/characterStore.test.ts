@@ -1,4 +1,4 @@
-// @vitest-environment happy-dom
+// @vitest-environment jsdom
 import "fake-indexeddb/auto";
 import { describe, it, expect, beforeEach, vi, type Mocked } from "vitest";
 import { CharacterStore } from "@/features/character/stores/characterStore.svelte";

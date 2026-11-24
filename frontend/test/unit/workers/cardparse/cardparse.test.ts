@@ -1,5 +1,3 @@
-// @vitest-environment happy-dom
-
 import { describe, it, expect, vi } from "vitest";
 import { parseCharacter } from "@worker/cardparse/parse";
 import { exportCharacter } from "@worker/cardparse/encode";

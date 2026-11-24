@@ -1,4 +1,4 @@
-// @vitest-environment happy-dom
+// @vitest-environment jsdom
 import { describe, it, expect, beforeEach, expectTypeOf, vi } from "vitest";
 import { Logger } from "@common/logger/Logger";
 import { createLogBridgeSender, createLogBridgeReceiver } from "@common/logger/LogBridge";

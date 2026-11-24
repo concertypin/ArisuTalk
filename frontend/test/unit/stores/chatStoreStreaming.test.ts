@@ -1,4 +1,4 @@
-// @vitest-environment happy-dom
+// @vitest-environment jsdom
 import { test, expect, describe, vi, beforeEach, afterEach } from "vitest";
 import type { BaseMessage } from "@langchain/core/messages";
 import { chatStore } from "@/features/chat/stores/chatStore.svelte";

@@ -4,7 +4,7 @@
 import { beforeEach, vi } from "vitest";
 import { createLocalStorageMock } from "@test/utils/localStorageMock";
 
-// Ensure LocalStorage-based adapters start from a clean state for browser tests.
+// Ensure LocalStorage-based adapters start from a clean state for component and adapter tests.
 // Remove only the keys used by LocalStorageAdapter so other globals are preserved.
 beforeEach(() => {
     try {
@@ -40,9 +40,6 @@ beforeEach(() => {
             };
         }
     } catch {
-        // ignore in non-browser environments
+        // ignore in environments without a window
     }
 });
-if (import.meta.env.VITEST_BROWSER_MODE === "true") {
-    await import("@/global.css");
-}

@@ -34,11 +34,6 @@ export default defineConfig(async (ctx) => {
         optimizeDeps: {
             include: [
                 "cbor-x",
-                // Pre-include these to prevent Vite from re-optimizing during tests
-                // which causes flaky test failures due to unexpected reloads
-                "@langchain/core/language_models/chat_models",
-                "@langchain/core/messages",
-                "@langchain/core/outputs",
                 "phosphor-svelte/lib/*",
                 // Dev-only tool imported lazily by App.svelte; pre-bundle it so the dev server does not reload on first use
                 "sv-agentation",
