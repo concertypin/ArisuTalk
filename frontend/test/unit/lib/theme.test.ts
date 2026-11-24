@@ -8,11 +8,7 @@ const appliedTheme = () => document.documentElement.getAttribute("data-theme");
 /** Handler shape `applyTheme` registers for `(prefers-color-scheme: dark)` changes. */
 type ChangeListener = (event: { matches: boolean }) => void;
 
-/**
- * Stubs `window.matchMedia` for the current test only (`afterEach` unstubs it), with a query whose
- * result can be flipped like an OS theme switch.
- * @param prefersDark - Initial value of `(prefers-color-scheme: dark)`.
- */
+/** Stubs `window.matchMedia` for one test, with a query that can be flipped like an OS switch. */
 function stubMatchMedia(prefersDark: boolean) {
     const listeners = new Set<ChangeListener>();
     const query = {
@@ -38,7 +34,8 @@ function stubMatchMedia(prefersDark: boolean) {
     };
 }
 
-describe("applyTheme", () => {
+// Each test body is synchronous and sets up its own `matchMedia`, so the tests can run concurrently.
+describe.concurrent("applyTheme", () => {
     afterEach(() => {
         // Drops a system-preference listener left by the test and the stubbed `matchMedia`.
         applyTheme("light");
@@ -133,7 +130,7 @@ describe("applyTheme", () => {
         });
 
         test("falls back to night when the browser has no matchMedia", () => {
-            expect("matchMedia" in window).toBe(false);
+            Reflect.deleteProperty(window, "matchMedia");
 
             applyTheme("system");
 

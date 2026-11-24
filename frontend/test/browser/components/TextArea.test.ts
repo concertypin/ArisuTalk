@@ -60,7 +60,7 @@ describe("TextArea Component", () => {
             bubbles: true,
             cancelable: true,
         });
-        // Guard against an environment that drops `isComposing`, which would make this test vacuous.
+        // Fails if the environment drops `isComposing`, which would make this test vacuous.
         expect(event.isComposing).toBe(true);
         textarea.dispatchEvent(event);
 
@@ -89,10 +89,8 @@ describe("TextArea Component", () => {
         expect(onInput).toHaveBeenLastCalledWith("abc");
     });
 
-    // jsdom does no layout, so the sizing behavior (field-sizing, overflow, wrapping) cannot be
-    // measured. These tests pin the classes that produce it instead; the real rendering is not checked.
+    // jsdom does no layout, so these tests pin the classes, not the rendered size.
     describe("sizing and wrapping", () => {
-        /** The element under test, narrowed for DOM assertions. */
         function textareaOf(): HTMLTextAreaElement {
             const element = screen.getByRole("textbox");
             if (!(element instanceof HTMLTextAreaElement)) throw new Error("textarea expected");
@@ -118,8 +116,7 @@ describe("TextArea Component", () => {
         test("does not break Latin words in the middle of a word", () => {
             render(TextArea, {});
 
-            // `wrap-anywhere` wraps at spaces first and only splits a token that cannot fit on a
-            // line at all. A forced `break-all` would split words mid-word.
+            // `break-all` splits words mid-word; `wrap-anywhere` splits only a token that cannot fit.
             expect(textareaOf()).toHaveClass("wrap-anywhere");
             expect(textareaOf()).not.toHaveClass("break-all");
             expect(textareaOf()).not.toHaveClass("break-words");
@@ -132,12 +129,7 @@ describe("TextArea Component", () => {
             expect(textareaOf()).toHaveClass("wrap-anywhere", "min-w-0");
         });
 
-        // Soft check: a color class on the element does not prove that Tailwind generated its CSS,
-        // and the color itself cannot be seen without a real browser. A mismatch is reported as a
-        // CI warning, not a failure. (`test/unit/components/TextAreaColorClasses.test.ts` reads the
-        // source for the complete class names, which Tailwind's scan needs.)
-        // The class is built from a template here on purpose: a spelled-out `textarea-primary` in
-        // this file would make Tailwind generate the class and hide a component that forgot to.
+        // Template on purpose: a literal class name here would make Tailwind generate it.
         softTest.for([
             "neutral",
             "primary",

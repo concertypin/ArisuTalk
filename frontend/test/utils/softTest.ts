@@ -1,39 +1,16 @@
-/**
- * @fileoverview A `test` with a `warn` fixture, for checks that are too unreliable to fail CI.
- *
- * Without a real browser, a few signals cannot be trusted (for example whether a Tailwind color
- * class really produces a color). Wrap such a check in `warn(() => expect(...))` to get a normal
- * `expect` that reports a failure as a `"warning"` test annotation instead of failing the test.
- * The `github-actions` reporter turns the annotation into a warning on the PR; the default
- * reporter shows it only if the test fails for another reason (use `--reporter=verbose` to see it).
- * See https://vitest.dev/guide/test-annotations.
- */
+/** @fileoverview `softTest`: a `test` whose `warn` fixture turns failed checks into warnings. */
 import { stripVTControlCharacters } from "node:util";
-import { test as baseTest } from "vitest";
+import { test as baseTest, type TestContext } from "vitest";
 
-/** The part of Vitest's `annotate` that `warn` needs. */
-export type AnnotateFn = (message: string, type: string) => Promise<unknown>;
-
-/**
- * Runs a check and reports a failed assertion as a warning annotation.
- *
- * - A synchronous check runs synchronously and returns `void`.
- * - An asynchronous check (a function returning a promise) returns a promise to await.
- * - Only assertion errors become warnings. Any other error (a `TypeError` from broken test code,
- *   a failed `findBy*` lookup that is not an assertion, ...) is rethrown and fails the test.
- */
+/** Reports a failed check as a warning annotation instead of failing the test. */
 export interface Warn {
+    /** Awaits an async check. A failed assertion becomes a warning; any other error rejects. */
     (check: () => Promise<void>): Promise<void>;
+    /** Runs a sync check. A failed assertion becomes a warning; any other error is rethrown. */
     (check: () => void): void;
 }
 
-/**
- * Whether an error comes from a failed `expect`. Vitest's own matchers throw chai's
- * `AssertionError`; custom matchers added with `expect.extend` (jest-dom's `toHaveClass`, ...)
- * throw Vitest's `JestExtendError`, whose `name` is a plain "Error", so its class name is checked.
- * @param error - The thrown value.
- * @returns True for an assertion error.
- */
+// jest-dom matchers throw `JestExtendError` with a plain "Error" name, so the class name is checked.
 function isAssertionError(error: unknown): error is Error {
     return (
         error instanceof Error &&
@@ -41,16 +18,10 @@ function isAssertionError(error: unknown): error is Error {
     );
 }
 
-/**
- * Builds the `warn` function for one test.
- * @param annotate - The `annotate` function of the test context.
- * @returns The `warn` function.
- */
-export function createWarn(annotate: AnnotateFn): Warn {
+function createWarn(annotate: TestContext["annotate"]): Warn {
     function report(error: unknown): void {
         if (!isAssertionError(error)) throw error;
-        // Vitest awaits annotations that are still pending when the test finishes. Matcher messages
-        // carry terminal color codes, which would show up as noise in a CI annotation.
+        // Terminal color codes would show up as noise in a CI annotation.
         void annotate(stripVTControlCharacters(error.message), "warning");
     }
 
@@ -67,8 +38,5 @@ export function createWarn(annotate: AnnotateFn): Warn {
     return warn;
 }
 
-/**
- * `test` extended with the `warn` fixture:
- * `softTest("...", ({ warn }) => { warn(() => expect(el).toHaveClass("textarea-primary")); })`.
- */
+/** `test` extended with the `warn` fixture. */
 export const softTest = baseTest.extend("warn", ({ annotate }) => createWarn(annotate));

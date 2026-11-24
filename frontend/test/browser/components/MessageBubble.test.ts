@@ -155,10 +155,7 @@ describe("MessageBubble Component", () => {
 });
 
 describe("MessageBubble typography follows the theme", () => {
-    // Soft check: jsdom loads no stylesheet, so the contrast of the text on the bubble cannot be
-    // measured. DaisyUI maps `prose` to the theme's `base-content` color, so markdown text stays
-    // readable on every theme as long as the elements use plain `prose` and pin no text color of
-    // their own. Class names only hint at that, so a mismatch is a CI warning, not a failure.
+    // DaisyUI's `prose` follows the theme; a fixed text color would break contrast on some themes.
     softTest(
         "soft color check: markdown text uses theme-aware `prose` with no fixed colors",
         ({ warn }) => {

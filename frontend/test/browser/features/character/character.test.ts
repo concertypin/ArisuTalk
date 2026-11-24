@@ -55,8 +55,7 @@ describe("Character Sidebar Verification", () => {
         await user.click(addButton);
 
         // Check if modal opens
-        // jsdom evaluates the `open` attribute of <dialog> (hidden until `showModal()` runs), so
-        // this fails if the modal never opened. A plain text query would not notice.
+        // jsdom hides a <dialog> without `open`, so this fails if `showModal()` never ran.
         const modalTitle = screen.getByText("New Character");
         expect(modalTitle).toBeVisible();
     });

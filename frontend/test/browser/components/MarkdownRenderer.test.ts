@@ -2,8 +2,7 @@ import { test, expect, describe } from "vitest";
 import { softTest } from "@test/utils/softTest";
 import { render, screen, waitFor } from "@testing-library/svelte";
 import MarkdownRenderer from "@/components/MarkdownRenderer.svelte";
-// The component loads this lazily. Importing it here puts it in the module cache before the first
-// test, so the first render does not wait for a cold transform of the library.
+// Preloaded: the component imports it lazily, and a cold first render would be slow.
 import "@humanspeak/svelte-markdown";
 
 describe("MarkdownRenderer Component", () => {
@@ -52,10 +51,7 @@ describe("MarkdownRenderer Component", () => {
         });
     });
 
-    // Soft check: jsdom loads no stylesheet, so the contrast of the text on the theme background
-    // cannot be measured. DaisyUI maps `prose` to the theme's `base-content` color, so text stays
-    // readable on every theme as long as the element uses plain `prose` and pins no color of its
-    // own. Class names only hint at that, so a mismatch is a CI warning, not a failure.
+    // DaisyUI's `prose` follows the theme; a fixed text color would break contrast on some themes.
     softTest("soft color check: plain `prose`, no fixed text color", async ({ warn }) => {
         const { container } = render(MarkdownRenderer, { props: { source: "Hello **World**" } });
 

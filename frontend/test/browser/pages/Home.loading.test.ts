@@ -11,8 +11,8 @@ vi.mock("@/components/ChatArea.svelte", async (importOriginal) => {
     return await importOriginal();
 });
 
-// Keep this the only test in the file: Home caches its lazily loaded components in module scope,
-// so any earlier render in the same module registry would skip the loading state.
+// Keep this the only test here: Home caches its lazy components in module scope, so an earlier render
+// skips the loading state.
 test("shows the loading state until the lazy components arrive", async () => {
     const { container } = renderWithAppContext(Home, {});
 

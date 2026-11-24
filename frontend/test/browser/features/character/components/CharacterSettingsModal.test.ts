@@ -1,5 +1,5 @@
 import { test, expect, describe, vi, beforeEach } from "vitest";
-import { screen, waitFor } from "@testing-library/svelte";
+import { screen, waitFor, within } from "@testing-library/svelte";
 import { userEvent } from "@testing-library/user-event";
 import { fillText } from "@test/utils/user";
 import { createTestAppContext, renderWithAppContext } from "@test/utils/appContext.svelte";
@@ -91,22 +91,23 @@ describe("CharacterSettingsModal Component", () => {
     test("renders modal when open", () => {
         renderModal();
 
-        // The dialog is open: jsdom evaluates the `open` attribute through its built-in dialog
-        // styles, so a modal that never called `showModal()` would be hidden here.
+        // jsdom hides a <dialog> without `open`, so this fails if `showModal()` never ran.
         expect(screen.getByRole("dialog")).toBeVisible();
         // Check header
         expect(
             screen.getByRole("heading", { level: 2, name: "Test Character Settings" })
         ).toBeInTheDocument();
 
-        // Check sidebar tabs
-        expect(screen.getByRole("button", { name: /Basic/i })).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /Prompt/i })).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /Lorebook/i })).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /Assets/i })).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /Metadata/i })).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /Magic/i })).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /Advanced/i })).toBeInTheDocument();
+        const tabs = within(screen.getByRole("list")).getAllByRole("button");
+        expect(tabs.map((tab) => tab.getAttribute("aria-label"))).toEqual([
+            "Basic",
+            "Prompt",
+            "Lorebook",
+            "Assets",
+            "Metadata",
+            "Magic",
+            "Advanced",
+        ]);
     });
 
     test("switches tabs correctly", async () => {

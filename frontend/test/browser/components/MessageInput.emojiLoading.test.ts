@@ -35,9 +35,7 @@ vi.mock("unicode-emoji-json/data-by-group.json", () => {
     };
 });
 
-// The picker's loading state lives in module scope on purpose (one download for every picker).
-// The "never requested while closed" case is in MessageInput.emojiClosed.test.ts so that this file's
-// opening of the picker cannot affect it.
+// "Never requested while closed" lives in MessageInput.emojiClosed.test.ts; opening the picker here would affect it.
 describe("emoji data loading", () => {
     test("a failed load is not cached: reopening the picker attempts it again", async () => {
         const user = userEvent.setup();
@@ -50,8 +48,7 @@ describe("emoji data loading", () => {
         await user.click(screen.getByRole("button", { name: "Close" }));
         await user.click(screen.getByRole("button", { name: "Pick emoji" }));
 
-        // A cached rejection would never be attempted (and so never logged) a second time.
-        // A new attempt is what proves the failure was not remembered.
+        // A cached rejection would never be attempted, and so never logged, a second time.
         await waitFor(() => expect(logged).toHaveBeenCalledTimes(2));
         expect(screen.queryByRole("button", { name: GRINNING })).not.toBeInTheDocument();
         logged.mockRestore();

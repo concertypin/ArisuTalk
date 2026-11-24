@@ -127,9 +127,7 @@ describe("CharacterBasicSettings Component", () => {
         );
     });
 
-    // jsdom loads no DaisyUI stylesheet, so whether the collapsed content is visible cannot be
-    // measured. DaisyUI opens a `.collapse` through its checkbox (the checkbox must be a child of
-    // `.collapse`, before `.collapse-content`), so that wiring and the default state are asserted.
+    // DaisyUI opens `.collapse` via a checkbox before `.collapse-content`; jsdom has no CSS to show it.
     test("the manual URL input sits in a collapse that is closed by default", () => {
         render(CharacterBasicSettings, {
             props: {
@@ -173,8 +171,7 @@ describe("CharacterBasicSettings Component", () => {
 
     test("falls back to a generated avatar when the preview fails to load", async () => {
         const character = cloneDeep(mockCharacter);
-        // jsdom never loads images, so the `error` event a browser fires for an undecodable image
-        // is dispatched by hand below.
+        // jsdom never loads images, so the `error` event is dispatched by hand below.
         character.avatarUrl = "data:image/png;base64,AAAA";
 
         render(CharacterBasicSettings, {

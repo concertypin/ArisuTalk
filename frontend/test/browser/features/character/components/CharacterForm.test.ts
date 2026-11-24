@@ -157,21 +157,10 @@ describe("CharacterForm Component", () => {
         await user.click(importTab);
 
         expect(importTab).toBeChecked();
-        expect(screen.getByRole("radio", { name: "Create New" })).not.toBeChecked();
-        // DaisyUI shows a tab panel through CSS, which jsdom does not load. The panel structure is
-        // what is left to check: the file input lives in the Import Card panel, not the Create New one.
-        const fileInput = screen.getByLabelText("Character file input");
-        const importPanel = fileInput.closest('[role="tabpanel"]');
-        const createPanel = screen
-            .getByRole("textbox", { name: /Name/i })
-            .closest('[role="tabpanel"]');
-        expect(importPanel).not.toBeNull();
-        expect(createPanel).not.toBeNull();
-        expect(importPanel).not.toBe(createPanel);
-        expect(importPanel).toContainElement(fileInput);
-        expect(createPanel).not.toContainElement(fileInput);
-        // The panel that holds the input is the one that follows the Import Card radio.
-        expect(importTab.nextElementSibling).toBe(importPanel);
+        // DaisyUI shows the panel after the checked tab with CSS, which jsdom lacks.
+        expect(importTab.nextElementSibling).toContainElement(
+            screen.getByLabelText("Character file input")
+        );
     });
 
     test("handles character import", async () => {

@@ -201,7 +201,7 @@ First visit seeds 3 default templates. Subsequent visits don't re-seed.
 
 ### 7.4 Existing Tests
 - [ ] Run `pnpm vitest run --project unit` — all 542+ tests pass
-- [ ] Run `pnpm vitest run --project dom` — all component tests pass
+- [ ] Run `pnpm vitest run --project browser` — all component tests pass
 - [ ] Run `pnpm run check:types` — no new type errors (PhonebookPanel error is pre-existing)
 
 ### 7.5 Regeneration Preserves System Context

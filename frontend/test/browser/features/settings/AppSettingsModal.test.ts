@@ -71,8 +71,7 @@ describe("AppSettingsModal Component", () => {
     test("renders correctly", () => {
         renderModal();
 
-        // The dialog is open: jsdom evaluates the `open` attribute through its built-in dialog
-        // styles, so a modal that never called `showModal()` would be hidden here.
+        // jsdom hides a <dialog> without `open`, so this fails if `showModal()` never ran.
         expect(screen.getByRole("dialog")).toBeVisible();
         expect(screen.getByRole("heading", { name: "App Settings", level: 2 })).toBeInTheDocument();
         // General is the first tab, so its page is shown initially.
@@ -135,8 +134,7 @@ describe("AppSettingsModal Component", () => {
         test("does not save before anything changed", async () => {
             renderModal();
 
-            // A sleep is the only way to show that nothing happens. It must outlast the 300ms
-            // autosave debounce, or a wrongly scheduled save would not have fired yet.
+            // A sleep is the only way to show nothing happens; it must outlast the 300ms debounce.
             await new Promise((r) => setTimeout(r, 500));
 
             expect(settings.save).not.toHaveBeenCalled();
@@ -159,16 +157,14 @@ describe("AppSettingsModal Component", () => {
         test("debounces rapid changes into one save", async () => {
             renderModal();
 
-            // Both changes happen within one task, so the test cannot race the debounce delay
-            // (real clicks yield to the event loop between steps and can take longer than it under load).
-            // `flushSync` runs the autosave effect once per change instead of once for both.
+            // One task, so slow real clicks cannot outlast the debounce; `flushSync` runs the effect per change.
             settings.value.fontFamily = "Roboto";
             flushSync();
             settings.value.fontFamily = "Lato";
             flushSync();
 
             await waitFor(() => expect(settings.save).toHaveBeenCalled());
-            // Negative check: no second save may follow. Waits longer than the 300ms debounce.
+            // Negative check: wait longer than the 300ms debounce.
             await new Promise((r) => setTimeout(r, 500));
 
             expect(settings.save).toHaveBeenCalledOnce();
@@ -186,7 +182,7 @@ describe("AppSettingsModal Component", () => {
             if (!(closeButton instanceof HTMLElement))
                 throw new Error("Close is not an HTML element");
             closeButton.click();
-            // Negative check: a leaked debounce timer would fire within 300ms, so wait longer.
+            // Negative check: wait longer than the 300ms debounce.
             await new Promise((r) => setTimeout(r, 500));
 
             // One save from closing; the debounce timer must not save a second time.

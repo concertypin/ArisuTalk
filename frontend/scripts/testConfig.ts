@@ -46,18 +46,17 @@ export const testConfig: TestConfig = {
 
     projects: [
         {
-            // Svelte component tests. jsdom + Testing Library, no real browser.
+            // Svelte component tests in jsdom with Testing Library (no Chromium).
             plugins: [
-                // Auto cleanup between tests, and the `browser` resolve condition so that
-                // Svelte's client build (with `mount`) is used instead of the server build.
-                // Scoped to this project so the Node-based unit tests keep Svelte's default resolution.
+                // Adds auto cleanup and the `browser` condition (Svelte's client build, with `mount`).
+                // Scoped here so the Node-based unit tests keep the default resolution.
                 svelteTesting(),
             ],
             test: {
-                name: "dom",
+                name: "browser",
                 environment: "jsdom",
                 include: ["test/browser/**/*.test.ts"],
-                setupFiles: ["./test/setup.dom.ts"],
+                setupFiles: ["./test/setup.browser.ts"],
                 sequence: {
                     groupOrder: 0,
                 },

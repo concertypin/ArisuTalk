@@ -98,7 +98,7 @@ Worker logic should be tested via unit tests in `test/workers/`. Note that real 
     - Component tests run in jsdom, which does no layout and loads no stylesheet, so these values are always empty or `0`.
     - Fix: Assert the classes or attributes that produce the behavior, e.g. `expect(el).toHaveClass('max-h-[40vh]', 'overflow-y-auto')`.
 - Using browser-mode APIs (`vitest-browser-svelte`, `vitest/browser`, `expect.element`, Playwright locators) in tests.
-    - There is no browser mode. Component tests live in `test/browser/` (an old name; they run in jsdom) and use `@testing-library/svelte`, `@testing-library/user-event` and `@testing-library/jest-dom`.
+    - There is no Vitest browser mode (no Chromium). Component tests live in `test/browser/` and run in the `browser` project, which emulates a browser with jsdom. They use `@testing-library/svelte`, `@testing-library/user-event` and `@testing-library/jest-dom`.
     - Fix: Use `render` and `screen` from `@testing-library/svelte`, `userEvent.setup()` for interactions, and `findBy*`/`waitFor` for async UI. See [Test Rules](../docs/rule/tests.md).
 
 ## Documentation of Other Libraries

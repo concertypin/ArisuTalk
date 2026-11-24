@@ -35,8 +35,7 @@ describe("Telemetry Service", () => {
     it("should register global unhandledrejection listener and log error.uncaught", () => {
         const reason = new Error("Test promise rejection");
         const promise = Promise.reject(reason);
-        // The event is dispatched by hand. Handle the real rejection so it is not reported as an
-        // unhandled error of the test run.
+        // Handle the real rejection so the run does not report it; the event is dispatched by hand.
         promise.catch(() => undefined);
         const event = new PromiseRejectionEvent("unhandledrejection", {
             reason,

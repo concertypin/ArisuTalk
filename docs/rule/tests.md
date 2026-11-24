@@ -84,32 +84,23 @@ describe('User List', () => {
 
 ## 2. Component Tests (jsdom + Testing Library)
 
-Use these for `.svelte` files. They run in [jsdom](https://github.com/jsdom/jsdom) (a DOM implementation in Node.js) through the `dom` Vitest project. There is no real browser in tests or CI.
+Use these for `.svelte` files. The `browser` Vitest project emulates a browser with [jsdom](https://github.com/jsdom/jsdom) (a DOM implementation in Node.js); no real browser runs in tests or CI.
 
 ### Guidelines:
 
-- File Extension: Use `.test.ts` on `test/browser/` files. The `dom` project (see `scripts/testConfig.ts`) picks up `test/browser/**/*.test.ts` and sets the jsdom environment, so no `@vitest-environment` pragma is needed there. The directory keeps its old name from browser mode; the tests run in jsdom.
-- Tooling: Use `render`, `screen`, `within`, `waitFor` and `fireEvent` from `@testing-library/svelte`, and `userEvent.setup()` from `@testing-library/user-event` for interactions. Matchers such as `toBeVisible()`, `toBeDisabled()`, `toHaveClass()` and `toHaveValue()` come from `@testing-library/jest-dom`, registered in `test/setup.dom.ts`. Rendered components are cleaned up after each test automatically (the `svelteTesting()` Vite plugin).
-- Setup file: `test/setup.dom.ts` also fills the few jsdom gaps the tests hit (`<dialog>.showModal()`, `URL.createObjectURL`, `navigator.storage`). Add a polyfill there, with a comment saying why, only when a test really needs one.
+- File Extension: Use `.test.ts` on `test/browser/` files. The `browser` project (see `scripts/testConfig.ts`) picks up `test/browser/**/*.test.ts` and sets the jsdom environment, so no `@vitest-environment` pragma is needed there.
+- Tooling: Use `render`, `screen`, `within`, `waitFor` and `fireEvent` from `@testing-library/svelte`, and `userEvent.setup()` from `@testing-library/user-event` for interactions. Matchers such as `toBeVisible()`, `toBeDisabled()`, `toHaveClass()` and `toHaveValue()` come from `@testing-library/jest-dom`, registered in `test/setup.browser.ts`. Rendered components are cleaned up after each test automatically (the `svelteTesting()` Vite plugin).
+- Setup file: `test/setup.browser.ts` also fills the few jsdom gaps the tests hit (`<dialog>.showModal()`, `URL.createObjectURL`, `navigator.storage`). Add a polyfill there, with a comment saying why, only when a test really needs one.
 - Props: Pass them as `render(Component, { props: { ... } })`. Props passed directly clash with Testing Library's own options when a prop is named `context`, `target` or `props`.
 - Interactions: `await` every `user.click`, `user.type`, `user.keyboard`, ... call. `user.type` parses `{` and `[` as key descriptors, so use the `fillText(user, element, text)` helper from `@test/utils/user` (or `user.paste`) to put literal text such as JSON into a field. `user-event` cannot drive `<input type="range">`; dispatch the event with `await fireEvent.input(slider, { target: { value: "20" } })`.
 - Async UI: Use `await screen.findBy*(...)` or `await waitFor(() => expect(...))` for anything that appears after a promise or a lazy import. Use `queryBy*` to assert that something is absent. A string `name` or text matches exactly and case-sensitively; use a regular expression for a partial match.
 - Concurrency: Do not use `it.concurrent` here. All tests of a file share one `document`.
-- A11y First: Prioritize `getByRole` above all else.
-    - ❌ Avoid: `getByLabelText`, `getByText`, `getByTestId` (Use only as a last resort).
-    - ✅ Prefer: `screen.getByRole('button', { name: 'Save' })` (Explicit selection based on the Accessibility Tree).
+- A11y First: Prioritize `getByRole` above all else, for example `screen.getByRole('button', { name: 'Save' })`, which selects through the accessibility tree. Use `getByLabelText`, `getByText` or `getByTestId` only as a last resort.
 - Upgrade Selectors: Even if the user's provided example uses simple selectors, you must upgrade them to Accessibility (Role) based selectors in your final code.
 
-### What jsdom cannot test
+### What jsdom Cannot DOMinate
 
-jsdom does no layout and loads no stylesheet. Anything that only means something in a real rendering engine cannot be measured:
-
-- `getBoundingClientRect()`, `scrollHeight`, `clientWidth`, ... are always `0`.
-- `getComputedStyle()` returns no Tailwind or DaisyUI styles, so colors, contrast and visibility that come from CSS are not computed.
-- Images are never loaded, so `load`/`error` events never fire on their own. Dispatch them with `fireEvent.error(img)` when the handler is what is under test.
-- There is no `Worker`, `Canvas`, `IntersectionObserver` or `ResizeObserver`.
-
-Assert the classes and attributes that produce the behavior instead:
+jsdom does no layout, loads no stylesheet and leaves out parts of the web platform; see [Unimplemented parts of the web platform](https://github.com/jsdom/jsdom#unimplemented-parts-of-the-web-platform). Anything that only means something in a real rendering engine cannot be measured. Assert the classes and attributes that produce the behavior instead:
 
 ```typescript
 // Don't (measures layout; always 0 in jsdom)
@@ -164,24 +155,27 @@ describe('Button Component', () => {
 
 ## 3. Advanced Rune Testing (Universal State)
 
-If your component depends on a shared `$state` defined in a `.svelte.ts` file, you may need `flushSync` from `svelte` to ensure the DOM updates immediately during a test.
+If your component reads `$state` defined in a `.svelte.ts` file, use `flushSync` from `svelte` to apply a state change to the DOM immediately during a test.
+
+Create that state inside the test and hand it to the component, rather than mutating a module-level singleton. A singleton keeps its value from one test to the next, so tests start depending on their order. When a component can only read a singleton store, reset the store in `beforeEach`.
 
 ```typescript
 import { flushSync } from 'svelte';
-import { render, screen } from '@testing-library/svelte';
-import { sharedState } from './store.svelte.ts';
+import { render } from '@testing-library/svelte';
+import { createCounter } from '@/lib/stores/counter.svelte';
+import Counter from '@/components/Counter.svelte';
 
-it('updates UI when shared rune changes', () => {
-    render(MyComponent);
-    
-    // Wrap state changes in flushSync to force immediate DOM update
+it('updates the UI when the state changes', () => {
+    const counter = createCounter(); // fresh state for this test only
+    const { getByText } = render(Counter, { props: { counter } });
+
+    // flushSync applies the change to the DOM before the assertion
     flushSync(() => {
-        sharedState.value = 'new data';
+        counter.value = 1;
     });
-  
-    expect(screen.getByText('new data')).toBeInTheDocument();
-});
 
+    expect(getByText('1')).toBeInTheDocument();
+});
 ```
 ## 4. Advanced Testing & Mocking Guidelines
 

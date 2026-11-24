@@ -1,9 +1,9 @@
 import * as Comlink from "comlink";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-type CallbackReceiver = {
+interface CallbackReceiver {
     receive(message: string): void;
-};
+}
 
 type SerializationPayload = {
     createdAt: Date;
@@ -11,11 +11,11 @@ type SerializationPayload = {
     message: { content: string; metadata: { nested: { count: number } } };
 };
 
-type SerializationApi = {
+interface SerializationApi {
     echo(value: SerializationPayload): Promise<SerializationPayload>;
     echoAnything(value: unknown): Promise<unknown>;
     callReceiver(receiver: CallbackReceiver): Promise<void>;
-};
+}
 
 /** The API a worker would expose through Comlink. */
 const api: SerializationApi = {
@@ -32,9 +32,7 @@ const api: SerializationApi = {
     },
 };
 
-// A real Worker needs a browser, and jsdom has none. A MessageChannel is the same boundary as far
-// as these tests care: every message crosses it by structured clone, and only values wrapped in
-// `Comlink.proxy` are forwarded as references. Node's MessageChannel uses the same algorithm.
+// No Worker in Node; a MessageChannel has the same structured-clone boundary.
 describe("Comlink serialization boundary", () => {
     let channel: MessageChannel | null = null;
 
