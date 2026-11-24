@@ -88,7 +88,7 @@ Use these for `.svelte` files. They run in [jsdom](https://github.com/jsdom/jsdo
 
 ### Guidelines:
 
-- File Extension: Use `.test.ts` on `test/dom/` files. The `dom` project (see `scripts/testConfig.ts`) picks up `test/dom/**/*.test.ts` and sets the jsdom environment, so no `@vitest-environment` pragma is needed there.
+- File Extension: Use `.test.ts` on `test/browser/` files. The `dom` project (see `scripts/testConfig.ts`) picks up `test/browser/**/*.test.ts` and sets the jsdom environment, so no `@vitest-environment` pragma is needed there. The directory keeps its old name from browser mode; the tests run in jsdom.
 - Tooling: Use `render`, `screen`, `within`, `waitFor` and `fireEvent` from `@testing-library/svelte`, and `userEvent.setup()` from `@testing-library/user-event` for interactions. Matchers such as `toBeVisible()`, `toBeDisabled()`, `toHaveClass()` and `toHaveValue()` come from `@testing-library/jest-dom`, registered in `test/setup.dom.ts`. Rendered components are cleaned up after each test automatically (the `svelteTesting()` Vite plugin).
 - Setup file: `test/setup.dom.ts` also fills the few jsdom gaps the tests hit (`<dialog>.showModal()`, `URL.createObjectURL`, `navigator.storage`). Add a polyfill there, with a comment saying why, only when a test really needs one.
 - Props: Pass them as `render(Component, { props: { ... } })`. Props passed directly clash with Testing Library's own options when a prop is named `context`, `target` or `props`.

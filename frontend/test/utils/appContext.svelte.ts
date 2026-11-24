@@ -4,7 +4,7 @@
 import type { Component } from "svelte";
 import { render, type RenderResult } from "@testing-library/svelte";
 import { type AppContext } from "@/context";
-import AppContextWrapper from "@test/dom/wrappers/AppContextWrapper.svelte";
+import AppContextWrapper from "@test/browser/wrappers/AppContextWrapper.svelte";
 
 /** Props of `AppContextWrapper` for a component under test taking `TProps`. */
 type WrapperProps<TProps extends Record<string, unknown>> = {

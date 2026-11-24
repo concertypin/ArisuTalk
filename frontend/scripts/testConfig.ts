@@ -56,7 +56,7 @@ export const testConfig: TestConfig = {
             test: {
                 name: "dom",
                 environment: "jsdom",
-                include: ["test/dom/**/*.test.ts"],
+                include: ["test/browser/**/*.test.ts"],
                 setupFiles: ["./test/setup.dom.ts"],
                 sequence: {
                     groupOrder: 0,
