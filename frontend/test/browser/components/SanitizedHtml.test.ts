@@ -1,41 +1,49 @@
 import { test, expect, describe } from "vitest";
 import { render } from "vitest-browser-svelte";
 import SanitizedHtml from "@/components/SanitizedHtml.svelte";
+import { MARKDOWN_SANITIZER } from "@/lib/utils/markdownSanitizer";
+import { withoutSetHTML, withStubbedSetHTML } from "@test/utils/setHTML";
 
 describe("SanitizedHtml Component", () => {
-    test("renders safe markup", async () => {
-        const screen = render(SanitizedHtml, {
-            html: "<p>Hello <strong>world</strong></p>",
-        });
+    test("renders through setHTML with the markdown allowlist", async () => {
+        const setHTML = withStubbedSetHTML();
 
-        await expect.element(screen.getByText("world")).toBeVisible();
-        expect(screen.container.querySelector("strong")).not.toBeNull();
+        const screen = render(SanitizedHtml, { html: "<p>hi</p>" });
+
+        await expect.element(screen.getByText("sanitized:<p>hi</p>")).toBeVisible();
+        expect(setHTML).toHaveBeenCalledExactlyOnceWith("<p>hi</p>", {
+            sanitizer: MARKDOWN_SANITIZER,
+        });
     });
 
-    test("strips scripts and event handlers", async () => {
-        const screen = render(SanitizedHtml, {
-            html: '<img src="x" onerror="window.__xss = true"><script>window.__xss = true</script><p>ok</p>',
-        });
+    test("renders again through setHTML when html changes", async () => {
+        const setHTML = withStubbedSetHTML();
+        const screen = render(SanitizedHtml, { html: "first" });
+        await expect.element(screen.getByText("sanitized:first")).toBeVisible();
 
-        await expect.element(screen.getByText("ok")).toBeVisible();
-        expect(screen.container.querySelector("script")).toBeNull();
-        expect(screen.container.querySelector("img")?.hasAttribute("onerror")).toBe(false);
-        expect("__xss" in window).toBe(false);
+        await screen.rerender({ html: "second" });
+
+        await expect.element(screen.getByText("sanitized:second")).toBeVisible();
+        await expect.element(screen.getByText("sanitized:first")).not.toBeInTheDocument();
+        expect(setHTML).toHaveBeenLastCalledWith("second", { sanitizer: MARKDOWN_SANITIZER });
     });
 
     test("applies the class to its wrapper", async () => {
-        const screen = render(SanitizedHtml, { html: "<p>x</p>", class: "prose" });
+        withStubbedSetHTML();
 
-        expect(screen.container.querySelector(".prose p")).not.toBeNull();
+        const screen = render(SanitizedHtml, { html: "x", class: "prose" });
+
+        await expect.element(screen.getByText("sanitized:x")).toHaveClass("prose");
     });
 
-    test("re-renders when html changes", async () => {
-        const screen = render(SanitizedHtml, { html: "<p>first</p>" });
-        await expect.element(screen.getByText("first")).toBeVisible();
+    test("shows the HTML as plain text when the browser has no setHTML", async () => {
+        withoutSetHTML();
 
-        await screen.rerender({ html: "<p>second</p>" });
+        const screen = render(SanitizedHtml, { html: `<img src="x" alt="pic" onerror="x()">hi` });
 
-        await expect.element(screen.getByText("second")).toBeVisible();
-        expect(screen.container.textContent).not.toContain("first");
+        await expect
+            .element(screen.getByText(`<img src="x" alt="pic" onerror="x()">hi`))
+            .toBeVisible();
+        await expect.element(screen.getByRole("img")).not.toBeInTheDocument();
     });
 });

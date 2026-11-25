@@ -1,13 +1,13 @@
-<script lang="ts" module>
+<script lang="ts">
     import { toastStore } from "@/lib/stores/toast.svelte";
     import XIcon from "phosphor-svelte/lib/XIcon";
 
-    const alertClass: Record<string, string> = {
+    const alertClass = {
         info: "alert-info",
         success: "alert-success",
         warning: "alert-warning",
         error: "alert-error",
-    };
+    } as const satisfies Record<string, string>;
 </script>
 
 <!--

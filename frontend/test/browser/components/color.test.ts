@@ -1,7 +1,7 @@
 import { test, expect, describe } from "vitest";
 import { contrastRatio } from "@test/utils/color";
 
-describe("contrastRatio test helper", () => {
+describe.concurrent("contrastRatio test helper", () => {
     test("black on white is the maximum ratio of 21", () => {
         expect(contrastRatio("#000", "#fff")).toBeCloseTo(21, 5);
     });

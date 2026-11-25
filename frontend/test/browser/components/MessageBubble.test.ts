@@ -1,18 +1,25 @@
-import { test, expect, describe, vi, afterEach } from "vitest";
+import { test, expect, describe, vi, onTestFinished } from "vitest";
 import { userEvent } from "vitest/browser";
 import { render } from "vitest-browser-svelte";
+import type { ComponentProps } from "svelte";
 import MessageBubble from "@/components/chat/MessageBubble.svelte";
 import { MessageSchema } from "@arisutalk/character-spec/v0/Character/Message";
 import { apply } from "@arisutalk/character-spec/utils";
 import { applyTheme } from "@/lib/theme.svelte";
 import { contrastRatio } from "@test/utils/color";
+import { recordSubmitEvents } from "@test/utils/submitEvents";
 
-const message = apply(MessageSchema, {
-    id: "msg-1",
-    role: "user",
-    content: { type: "text", data: "Hello **world**" },
-    chatId: "chat-1",
-});
+/** Builds a text message with the id the tests expect the parent to receive. */
+function textMessage(data: string, role: "user" | "assistant" = "user") {
+    return apply(MessageSchema, {
+        id: "msg-1",
+        role,
+        content: { type: "text", data },
+        chatId: "chat-1",
+    });
+}
+
+const message = textMessage("Hello **world**");
 
 function createHandlers() {
     return {
@@ -23,56 +30,52 @@ function createHandlers() {
         ),
         onMessageDelete: vi.fn(),
         onMessageRegenerate: vi.fn(),
-    };
+    } satisfies Partial<ComponentProps<typeof MessageBubble>>;
 }
 
 describe("MessageBubble Component", () => {
-    test("renders markdown as sanitized HTML", async () => {
+    test("renders markdown", async () => {
         const screen = render(MessageBubble, { message, isEditing: false, ...createHandlers() });
 
-        await expect.element(screen.getByText("world")).toBeVisible();
-        expect(screen.container.querySelector("strong")?.textContent).toBe("world");
+        await expect.element(screen.getByRole("strong")).toHaveTextContent("world");
     });
 
     test("keeps a single newline as a line break (chat-style markdown)", async () => {
-        const multiline = apply(MessageSchema, {
-            id: "msg-3",
-            role: "user",
-            content: { type: "text", data: "first\nsecond" },
-            chatId: "chat-1",
-        });
         const screen = render(MessageBubble, {
-            message: multiline,
+            message: textMessage("first\nsecond"),
             isEditing: false,
             ...createHandlers(),
         });
 
-        await expect.element(screen.getByText("second")).toBeVisible();
-        expect(screen.container.querySelectorAll(".prose br")).toHaveLength(1);
+        await expect.element(screen.getByRole("paragraph")).toContainHTML("first<br>second");
     });
 
-    test("does not keep event handler attributes from HTML embedded in a message", async () => {
-        const evil = apply(MessageSchema, {
-            id: "msg-2",
-            role: "assistant",
-            content: { type: "text", data: `<img src="x" onerror="window.__xss = 1">hi` },
-            chatId: "chat-1",
-        });
+    test("shows raw HTML in a message as text", async () => {
         const screen = render(MessageBubble, {
-            message: evil,
+            message: textMessage("<thinking>plan</thinking>", "assistant"),
             isEditing: false,
             ...createHandlers(),
         });
 
-        await expect.element(screen.getByText("hi")).toBeVisible();
-        expect(screen.container.querySelector("img")?.hasAttribute("onerror")).toBe(false);
+        await expect.element(screen.getByText("<thinking>plan</thinking>")).toBeVisible();
+    });
+
+    test("drops javascript: URLs from links in a message", async () => {
+        const screen = render(MessageBubble, {
+            message: textMessage("[link](javascript:window.__xss=1)", "assistant"),
+            isEditing: false,
+            ...createHandlers(),
+        });
+
+        await expect.element(screen.getByText("link")).toBeVisible();
+        await expect.element(screen.getByText("link")).not.toHaveAttribute("href");
     });
 
     test("tells the parent to start editing when Edit is clicked", async () => {
         const handlers = createHandlers();
         const screen = render(MessageBubble, { message, isEditing: false, ...handlers });
 
-        await screen.getByTitle("Edit message").click();
+        await screen.getByRole("button", { name: "Edit message" }).click();
 
         expect(handlers.onEditStart).toHaveBeenCalledExactlyOnceWith("msg-1");
     });
@@ -92,7 +95,7 @@ describe("MessageBubble Component", () => {
         const handlers = createHandlers();
         const screen = render(MessageBubble, { message, isEditing: true, ...handlers });
 
-        await screen.getByTitle("Cancel edit (Esc)").click();
+        await screen.getByRole("button", { name: "Cancel edit (Esc)" }).click();
 
         expect(handlers.onEditCancel).toHaveBeenCalledOnce();
     });
@@ -105,6 +108,54 @@ describe("MessageBubble Component", () => {
         await userEvent.keyboard("{Enter}");
 
         expect(handlers.onMessageUpdate).toHaveBeenCalledExactlyOnceWith("msg-1", "edited");
+    });
+
+    test("the save button saves the edited text", async () => {
+        const handlers = createHandlers();
+        const screen = render(MessageBubble, { message, isEditing: true, ...handlers });
+
+        await screen.getByRole("textbox").fill("edited");
+        await screen.getByRole("button", { name: "Save edit (Enter)" }).click();
+
+        expect(handlers.onMessageUpdate).toHaveBeenCalledExactlyOnceWith("msg-1", "edited");
+    });
+
+    test("prevents the browser's default form submission", async () => {
+        const submitEvents = recordSubmitEvents();
+        const screen = render(MessageBubble, {
+            message,
+            isEditing: true,
+            ...createHandlers(),
+        });
+
+        await screen.getByRole("textbox").fill("edited");
+        await userEvent.keyboard("{Enter}");
+
+        expect(submitEvents).toHaveLength(1);
+        expect(submitEvents[0].defaultPrevented).toBe(true);
+    });
+
+    test("tells the parent to delete after the confirmation click", async () => {
+        const handlers = createHandlers();
+        const screen = render(MessageBubble, { message, isEditing: false, ...handlers });
+
+        await screen.getByRole("button", { name: "Delete message" }).click();
+        await screen.getByRole("button", { name: "Click again to confirm delete" }).click();
+
+        expect(handlers.onMessageDelete).toHaveBeenCalledExactlyOnceWith("msg-1");
+    });
+
+    test("tells the parent to regenerate an assistant message", async () => {
+        const handlers = createHandlers();
+        const screen = render(MessageBubble, {
+            message: textMessage("Hello", "assistant"),
+            isEditing: false,
+            ...handlers,
+        });
+
+        await screen.getByRole("button", { name: "Regenerate response" }).click();
+
+        expect(handlers.onMessageRegenerate).toHaveBeenCalledExactlyOnceWith("msg-1");
     });
 
     test("clears the draft once the parent reports the save succeeded", async () => {
@@ -151,28 +202,25 @@ describe("MessageBubble Component", () => {
 });
 
 describe("MessageBubble typography follows the theme", () => {
-    afterEach(() => {
-        document.documentElement.removeAttribute("data-theme");
-        document.documentElement.style.colorScheme = "";
-    });
-
     /** Renders a bubble under the given theme and returns its background and the markdown text colors. */
     function colorsUnder(mode: "light" | "dark") {
         applyTheme(mode);
+        onTestFinished(() => {
+            document.documentElement.removeAttribute("data-theme");
+            document.documentElement.style.colorScheme = "";
+        });
         const screen = render(MessageBubble, {
             message,
             isEditing: false,
             ...createHandlers(),
         });
-        const bubble = screen.container.querySelector(".chat-bubble");
-        const prose = screen.container.querySelector(".prose");
-        if (!bubble || !prose) throw new Error("bubble or markdown element missing");
-        // The message is "Hello **world**": a missing <strong> must fail, not fall back to `prose`.
-        const strong = prose.querySelector("strong");
-        if (!strong) throw new Error("bold text element missing");
+        // The message is "Hello **world**": a missing <strong> or paragraph must fail the locator.
+        const bubble = screen.getByTestId("message-bubble").element();
+        const paragraph = screen.getByRole("paragraph").element();
+        const strong = screen.getByRole("strong").element();
         return {
             background: getComputedStyle(bubble).backgroundColor,
-            body: getComputedStyle(prose).color,
+            body: getComputedStyle(paragraph).color,
             bold: getComputedStyle(strong).color,
         };
     }

@@ -25,6 +25,18 @@
     /** Drop target index */
     let dropTargetIndex = $state<number | null>(null);
 
+    /**
+     * Where the drop line is drawn on the item at `index` while another item is dragged over it.
+     * The line sits on the side the dragged item comes from, so it marks the slot the item lands in.
+     * @param index Position of the item in the list.
+     * @returns `"above"` or `"below"` the item, or `undefined` when no drop line is shown there.
+     */
+    function getDropLine(index: number): "above" | "below" | undefined {
+        if (draggedIndex === null || dropTargetIndex !== index) return undefined;
+        if (!characterStore.isReorderable(draggedIndex, index)) return undefined;
+        return draggedIndex > index ? "above" : "below";
+    }
+
     function handleDragStart(e: DragEvent, index: number) {
         draggedIndex = index;
         if (e.dataTransfer) {
@@ -82,22 +94,17 @@
     <div class="flex flex-col items-center gap-1 w-full" role="listbox" aria-label="Characters">
         {#each characterStore.characters as character, index (character.id)}
             {@const dragged = draggedIndex === index}
-            {@const dropTarget = dropTargetIndex === index}
             {@const selected = selectedCharacterId === character.id}
-            {@const isReorderable =
-                draggedIndex !== null ? characterStore.isReorderable(draggedIndex, index) : false}
+            {@const dropLine = getDropLine(index)}
             <div
-                class="relative"
-                class:opacity-50={dragged}
-                class:border-t-2={dropTarget &&
-                    draggedIndex !== null &&
-                    draggedIndex > index &&
-                    isReorderable}
-                class:border-b-2={dropTarget &&
-                    draggedIndex !== null &&
-                    draggedIndex < index &&
-                    isReorderable}
-                class:border-primary={dropTarget}
+                class={[
+                    "relative",
+                    dragged && "opacity-50",
+                    dropLine && [
+                        "border-primary",
+                        dropLine === "above" ? "border-t-2" : "border-b-2",
+                    ],
+                ]}
                 role="option"
                 tabindex="0"
                 aria-selected={selected}

@@ -12,6 +12,7 @@
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import { merge } from "lodash-es";
     import { toastStore } from "@/lib/stores/toast.svelte";
+    import { isComposing } from "@/lib/utils/keyboard";
     import WarningIcon from "phosphor-svelte/lib/WarningIcon";
     import { characterStore } from "@/features/character/stores/characterStore.svelte";
     import type { AssetEntity } from "@arisutalk/character-spec/v0/Character";
@@ -144,7 +145,7 @@
 
     function onRemoveKeydown(e: KeyboardEvent) {
         // Enter that commits an IME composition (Korean, Japanese, Chinese) must not delete.
-        if (e.key !== "Enter" || e.isComposing) return;
+        if (e.key !== "Enter" || isComposing(e)) return;
 
         if (canRemove) {
             void onCharacterRemove();

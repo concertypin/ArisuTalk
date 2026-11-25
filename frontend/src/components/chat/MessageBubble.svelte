@@ -1,19 +1,15 @@
-<script lang="ts" module>
+<!--
+  @component MessageBubble
+  One chat message: its rendered Markdown, the time it was sent and the edit/delete/regenerate actions.
+  While editing, the text is replaced by a form with a text area that saves on Enter.
+-->
+<script lang="ts">
     import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
     import MessageActions from "./MessageActions.svelte";
     import TextArea from "@/components/input/TextArea.svelte";
     import SanitizedHtml from "@/components/SanitizedHtml.svelte";
+    import { parseChatMarkdown } from "@/lib/utils/markdown";
 
-    import { Marked } from "marked";
-
-    /** Chat-specific markdown settings. A private instance, so the global `marked` stays untouched. */
-    const chatMarkdown = new Marked({
-        gfm: true,
-        breaks: true,
-    });
-</script>
-
-<script lang="ts">
     type Props = {
         message: Message;
         isEditing: boolean;
@@ -38,14 +34,14 @@
         onMessageRegenerate,
     }: Props = $props();
 
-    let isAssistant = $derived(message.role === "assistant");
-
-    // Edit mode state
     let editingContent = $state("");
+    /** True while a save is in flight, so a repeated Enter/click cannot submit twice. */
+    let isSaving = false;
 
-    /**
-     * Extracts text content from a message safely.
-     */
+    let isAssistant = $derived(message.role === "assistant");
+    let html = $derived(parseChatMarkdown(getMessageText(message)));
+
+    /** The text of a message, or an empty string when the message is not text. */
     function getMessageText(msg: Message): string {
         return typeof msg.content.data === "string" ? msg.content.data : "";
     }
@@ -55,47 +51,37 @@
         editingContent = getMessageText(message);
     }
 
-    function onConfirmEdit() {
-        void onSubmit(editingContent);
-    }
-
-    function onDelete() {
-        onMessageDelete(message.id);
-    }
-
-    function onRegenerate() {
-        onMessageRegenerate(message.id);
-    }
-
     function onCancelEdit() {
         onEditCancel();
         editingContent = "";
     }
 
-    /** True while a save is in flight, so a repeated Enter/click cannot submit twice. */
-    let isSaving = false;
-
     /**
      * Saves the draft. The draft is cleared only when the parent reports success; on failure
      * the text stays in the box and editing stays open so the user can retry.
      */
-    async function onSubmit(s: string) {
+    async function save() {
         if (isSaving) return;
         isSaving = true;
         try {
-            if (await onMessageUpdate(message.id, s)) editingContent = "";
+            if (await onMessageUpdate(message.id, editingContent)) editingContent = "";
         } finally {
             isSaving = false;
         }
     }
 
-    let html = $derived(chatMarkdown.parse(getMessageText(message), { async: false }));
+    function handleSubmit(event: SubmitEvent) {
+        event.preventDefault();
+        void save();
+    }
 </script>
 
-<div class="chat group {message.role === 'user' ? 'chat-end' : 'chat-start'}">
-    <div class="chat-bubble shadow-lg max-w-[80ch]">
+<div class={["chat group", message.role === "user" ? "chat-end" : "chat-start"]}>
+    <div class="chat-bubble shadow-lg max-w-[80ch]" data-testid="message-bubble">
         {#if isEditing}
-            <TextArea bind:value={editingContent} {onSubmit} onCancel={onCancelEdit} />
+            <form class="flex" onsubmit={handleSubmit}>
+                <TextArea bind:value={editingContent} onCancel={onCancelEdit} enterkeyhint="done" />
+            </form>
         {:else}
             <SanitizedHtml class="prose prose-sm max-w-[80ch]" {html} />
         {/if}
@@ -107,9 +93,9 @@
                 {isEditing}
                 {isAssistant}
                 {onEdit}
-                {onDelete}
-                {onRegenerate}
-                {onConfirmEdit}
+                onDelete={() => onMessageDelete(message.id)}
+                onRegenerate={() => onMessageRegenerate(message.id)}
+                onConfirmEdit={save}
                 {onCancelEdit}
             />
         </div>

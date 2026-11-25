@@ -123,11 +123,7 @@ async function execute<ResultType = unknown>(
                 });
             }
 
-            // The invocation returns a plain value when the script settled synchronously, and a
-            // promise (raced against the timeout) when it is still waiting on a host call such as
-            // fetch. Awaiting it here is what turns a timeout or a rejected host call into a
-            // catchable error; otherwise the promise escapes with the result, ctx.dispose() below
-            // stops it from ever settling, and the timeout later surfaces as an unhandled rejection.
+            // Await the invocation: it may return a promise when the script is waiting on a host call.
             const result: ResultType = await (await fn)();
 
             // Extract modified context if it was mutated

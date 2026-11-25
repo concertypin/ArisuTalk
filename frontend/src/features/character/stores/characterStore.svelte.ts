@@ -125,8 +125,6 @@ export class CharacterStore {
         if (currentIndex !== -1) {
             this.characters[currentIndex] = updated;
         }
-        // Order doesn't change on update usually, unless we want to move to top?
-        // No, keep position.
     }
 
     /**

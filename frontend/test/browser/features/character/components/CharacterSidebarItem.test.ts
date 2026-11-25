@@ -30,7 +30,7 @@ describe("CharacterSidebarItem Component", () => {
         },
     } satisfies Character;
 
-    const mockOnClick = vi.fn() satisfies () => void;
+    const mockOnClick = vi.fn<() => void>();
 
     test("renders character initials when no avatar", async () => {
         const { getByText } = renderWithAppContext(CharacterSidebarItem, {
@@ -84,7 +84,7 @@ describe("CharacterSidebarItem Component", () => {
     });
 
     test("opens the character settings of an active item instead of calling onClick", async () => {
-        const onClick = vi.fn() satisfies () => void;
+        const onClick = vi.fn<() => void>();
         const { getByLabelText, appContext } = renderWithAppContext(CharacterSidebarItem, {
             character: mockCharacter,
             active: true,
@@ -96,5 +96,18 @@ describe("CharacterSidebarItem Component", () => {
         expect(appContext.characterSettingsOpen).toBe(true);
         expect(appContext.editingCharacter?.id).toBe("char-1");
         expect(onClick).not.toHaveBeenCalled();
+    });
+
+    // The pill's pixel size is Tailwind's concern. This only checks that it follows the `active` prop.
+    test.each([true, false])("marks the pill when active is %s", async (active) => {
+        const { getByTestId } = renderWithAppContext(CharacterSidebarItem, {
+            character: mockCharacter,
+            active,
+            onClick: mockOnClick,
+        });
+
+        await expect
+            .element(getByTestId("active-pill"))
+            .toHaveAttribute("data-active", String(active));
     });
 });

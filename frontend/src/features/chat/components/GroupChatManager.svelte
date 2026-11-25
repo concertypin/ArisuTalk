@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { characterStore } from "../../character/stores/characterStore.svelte";
+    import { characterStore } from "@/features/character/stores/characterStore.svelte";
     import XCircleIcon from "phosphor-svelte/lib/XCircleIcon";
 
     type Props = {

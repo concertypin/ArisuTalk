@@ -1,7 +1,7 @@
 /// <reference types="vitest/browser" />
 import { test, expect, describe, vi, afterEach, beforeEach } from "vitest";
 import { renderWithAppContext } from "@test/utils/appContext.svelte";
-import CharacterLayoutTestWrapper from "../wrappers/CharacterLayoutTestWrapper.svelte";
+import CharacterLayoutTestWrapper from "@test/browser/wrappers/CharacterLayoutTestWrapper.svelte";
 
 describe("Persona and Chat interactions", () => {
     beforeEach(async () => {

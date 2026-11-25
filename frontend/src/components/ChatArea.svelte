@@ -1,17 +1,15 @@
-<script lang="ts" module>
+<!--
+  @component ChatArea
+  Main chat content area.
+-->
+<script lang="ts">
     import { chatStore } from "@/features/chat/stores/chatStore.svelte";
     import { characterStore } from "@/features/character/stores/characterStore.svelte";
     import GearIcon from "phosphor-svelte/lib/GearIcon";
     import MessageContainer from "@/components/chat/MessageContainer.svelte";
     import MessageInput from "@/components/chat/MessageInput.svelte";
     import { getAppContext } from "@/context";
-</script>
 
-<!--
-  @component ChatArea
-  Main chat content area.
--->
-<script lang="ts">
     let activeChat = $derived(chatStore.chats.find((c) => c.id === chatStore.activeChatId));
     let messages = $derived(chatStore.activeMessages);
 
@@ -28,10 +26,6 @@
         if (!s.trim() || !activeChat) return;
 
         await chatStore.sendMessage(s);
-    }
-
-    function onSubmit(s: string) {
-        void sendMessage(s);
     }
 
     function openCharacterSettings() {
@@ -61,5 +55,9 @@
 
     <MessageContainer {messages} {activeChat} />
 
-    <MessageInput {onSubmit} disabled={!activeChat} isGenerating={chatStore.isGenerating} />
+    <MessageInput
+        onSubmit={sendMessage}
+        disabled={!activeChat}
+        isGenerating={chatStore.isGenerating}
+    />
 </main>

@@ -1,26 +1,21 @@
-<script lang="ts" module>
-    import TextArea from "@/components/input/TextArea.svelte";
-    import SmileyIcon from "phosphor-svelte/lib/SmileyIcon";
-    import StickerPicker from "@/features/sticker/components/StickerPicker.svelte";
-</script>
-
 <!--
   @component MessageInput
   Message composer with a send button and an emoji picker.
 -->
 <script lang="ts">
-    let {
-        onSubmit,
-        disabled = false,
-        isGenerating = false,
-    }: {
+    import TextArea from "@/components/input/TextArea.svelte";
+    import SmileyIcon from "phosphor-svelte/lib/SmileyIcon";
+    import StickerPicker from "@/features/sticker/components/StickerPicker.svelte";
+
+    type Props = {
         /** Called with the message text when the user sends a non-empty message. */
-        onSubmit: (s: string) => void;
+        onSubmit: (s: string) => void | Promise<void>;
         /** Disables the whole composer. */
         disabled?: boolean;
         /** While true, typing stays enabled but sending is blocked. */
         isGenerating?: boolean;
-    } = $props();
+    };
+    let { onSubmit, disabled = false, isGenerating = false }: Props = $props();
 
     let inputValue = $state("");
     let showEmojiPicker = $state(false);
@@ -28,21 +23,23 @@
 
     let canSend = $derived(!disabled && !isGenerating && inputValue.trim() !== "");
 
-    /** Sends the message and clears the input. Shared by the Enter key and the Send button. */
-    function send(text: string) {
-        if (disabled || isGenerating || !text.trim()) return;
+    /** Sends the draft and clears the input. */
+    function handleSubmit(event: SubmitEvent) {
+        event.preventDefault();
+        if (!canSend) return;
 
+        const text = inputValue;
         inputValue = "";
-        onSubmit(text);
+        void onSubmit(text);
     }
 
     /** Inserts the emoji at the cursor (or replaces the selection) of the text area. */
-    function onSelect(emoji: string): void {
+    function handleEmojiSelect(emoji: string): void {
         const start = textArea?.selectionStart ?? inputValue.length;
         const end = textArea?.selectionEnd ?? inputValue.length;
 
         inputValue = inputValue.slice(0, start) + emoji + inputValue.slice(end);
-        showEmojiPicker = false;
+        closeEmojiPicker();
 
         const caret = start + emoji.length;
         requestAnimationFrame(() => {
@@ -51,24 +48,28 @@
         });
     }
 
-    function onClose() {
+    function openEmojiPicker() {
+        showEmojiPicker = true;
+    }
+
+    function closeEmojiPicker() {
         showEmojiPicker = false;
     }
 </script>
 
 <footer class="p-4 border-t border-base-300/50 bg-base-200/80">
-    <div class="flex gap-2">
+    <form class="flex gap-2" onsubmit={handleSubmit}>
         <TextArea
             bind:value={inputValue}
             bind:element={textArea}
             placeholder="Type a message..."
-            onSubmit={send}
+            enterkeyhint="send"
             {disabled}
-            color={null}
         />
         <button
+            type="button"
             class="btn btn-ghost btn-sm btn-square hover:bg-base-300/50"
-            onclick={() => (showEmojiPicker = true)}
+            onclick={openEmojiPicker}
             {disabled}
             aria-label="Pick emoji"
             title="Emoji"
@@ -76,13 +77,13 @@
             <SmileyIcon size={20} />
         </button>
         <button
+            type="submit"
             class="btn btn-primary shadow-md hover:shadow-lg transition-shadow"
-            onclick={() => send(inputValue)}
             disabled={!canSend}>Send</button
         >
-    </div>
+    </form>
 
     {#if showEmojiPicker}
-        <StickerPicker {onSelect} {onClose} />
+        <StickerPicker onSelect={handleEmojiSelect} onClose={closeEmojiPicker} />
     {/if}
 </footer>

@@ -350,28 +350,34 @@ describe("CharacterBasicSettings Component", () => {
             });
         }
 
-        test("does not remove on the Enter that commits an IME composition", async () => {
-            characterStore.characters = [mockCharacter];
-            const removeSpy = vi.spyOn(characterStore, "remove").mockResolvedValue(undefined);
-            const { getByLabelText } = renderBasic();
+        test.each<{ browser: string; init: KeyboardEventInit }>([
+            { browser: "Chrome and Firefox (isComposing)", init: { isComposing: true } },
+            { browser: "Safari (keyCode 229 after compositionend)", init: { keyCode: 229 } },
+        ])(
+            "does not remove on the Enter that commits an IME composition in $browser",
+            async ({ init }) => {
+                characterStore.characters = [mockCharacter];
+                const removeSpy = vi.spyOn(characterStore, "remove").mockResolvedValue(undefined);
+                const { getByLabelText } = renderBasic();
 
-            const input = getByLabelText("Enter the character's name exactly");
-            await input.fill(mockCharacter.name);
-            input
-                .element()
-                .dispatchEvent(
-                    new KeyboardEvent("keydown", { key: "Enter", isComposing: true, bubbles: true })
-                );
+                const input = getByLabelText("Enter the character's name exactly");
+                await input.fill(mockCharacter.name);
+                input
+                    .element()
+                    .dispatchEvent(
+                        new KeyboardEvent("keydown", { key: "Enter", bubbles: true, ...init })
+                    );
 
-            // Give a (wrong) async removal the chance to show up.
-            await new Promise((r) => setTimeout(r, 50));
-            expect(removeSpy).not.toHaveBeenCalled();
-            expect(onChangeSpy).not.toHaveBeenCalled();
+                // Give a (wrong) async removal the chance to show up.
+                await new Promise((r) => setTimeout(r, 50));
+                expect(removeSpy).not.toHaveBeenCalled();
+                expect(onChangeSpy).not.toHaveBeenCalled();
 
-            // The same Enter after the composition ended removes.
-            await userEvent.keyboard("{Enter}");
-            await vi.waitFor(() => expect(removeSpy).toHaveBeenCalledTimes(1));
-        });
+                // The same Enter after the composition ended removes.
+                await userEvent.keyboard("{Enter}");
+                await vi.waitFor(() => expect(removeSpy).toHaveBeenCalledTimes(1));
+            }
+        );
 
         test("does not remove on Enter when the typed name differs", async () => {
             characterStore.characters = [mockCharacter];

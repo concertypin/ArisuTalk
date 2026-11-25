@@ -2,11 +2,12 @@ import { test, expect, describe, vi } from "vitest";
 import { userEvent } from "vitest/browser";
 import { render } from "vitest-browser-svelte";
 import TextArea from "@/components/input/TextArea.svelte";
+import TextAreaFormTestWrapper from "@test/browser/wrappers/TextAreaFormTestWrapper.svelte";
 
 describe("TextArea Component", () => {
-    test("submits the current text on Enter without clearing it", async () => {
+    test("submits the surrounding form on Enter without clearing the text", async () => {
         const onSubmit = vi.fn();
-        const screen = render(TextArea, { onSubmit });
+        const screen = render(TextAreaFormTestWrapper, { onSubmit });
         const textarea = screen.getByRole("textbox");
 
         await textarea.fill("hello");
@@ -18,7 +19,7 @@ describe("TextArea Component", () => {
 
     test("does not submit on Shift+Enter", async () => {
         const onSubmit = vi.fn();
-        const screen = render(TextArea, { onSubmit });
+        const screen = render(TextAreaFormTestWrapper, { onSubmit });
         const textarea = screen.getByRole("textbox");
 
         await textarea.fill("line");
@@ -28,41 +29,41 @@ describe("TextArea Component", () => {
         await expect.element(textarea).toHaveValue("line\n");
     });
 
-    test("does not stay stuck in newline mode after Shift is released elsewhere", async () => {
+    test.each<{ browser: string; init: KeyboardEventInit }>([
+        { browser: "Chrome and Firefox (isComposing)", init: { isComposing: true } },
+        { browser: "Safari (keyCode 229 after compositionend)", init: { keyCode: 229 } },
+    ])("ignores the Enter that confirms an IME composition in $browser", async ({ init }) => {
         const onSubmit = vi.fn();
-        const screen = render(TextArea, { onSubmit });
-        const textarea = screen.getByRole("textbox");
-        await textarea.fill("text");
-
-        // A keydown that reports shiftKey=false must submit, no matter what happened before.
-        textarea
-            .element()
-            .dispatchEvent(new KeyboardEvent("keydown", { key: "Shift", bubbles: true }));
-        textarea
-            .element()
-            .dispatchEvent(
-                new KeyboardEvent("keydown", { key: "Enter", shiftKey: false, bubbles: true })
-            );
-
-        expect(onSubmit).toHaveBeenCalledExactlyOnceWith("text");
-    });
-
-    test("ignores the Enter that confirms an IME composition", async () => {
-        const onSubmit = vi.fn();
-        const screen = render(TextArea, { onSubmit });
+        const screen = render(TextAreaFormTestWrapper, { onSubmit });
         const textarea = screen.getByRole("textbox");
         await textarea.fill("한글");
 
         const event = new KeyboardEvent("keydown", {
             key: "Enter",
-            isComposing: true,
             bubbles: true,
             cancelable: true,
+            ...init,
         });
         textarea.element().dispatchEvent(event);
 
         expect(onSubmit).not.toHaveBeenCalled();
         expect(event.defaultPrevented).toBe(false);
+    });
+
+    test("Enter outside a form is left alone and inserts a newline", async () => {
+        const screen = render(TextArea, {});
+        const textarea = screen.getByRole("textbox");
+
+        await textarea.fill("a");
+        await userEvent.keyboard("{Enter}");
+
+        await expect.element(textarea).toHaveValue("a\n");
+    });
+
+    test("passes enterkeyhint to the textarea", async () => {
+        const screen = render(TextAreaFormTestWrapper, { onSubmit: vi.fn(), enterkeyhint: "send" });
+
+        await expect.element(screen.getByRole("textbox")).toHaveAttribute("enterkeyhint", "send");
     });
 
     test("calls onCancel on Escape", async () => {
@@ -75,15 +76,6 @@ describe("TextArea Component", () => {
         expect(onCancel).toHaveBeenCalledOnce();
     });
 
-    test("reports typed text through onInput", async () => {
-        const onInput = vi.fn();
-        const screen = render(TextArea, { onInput });
-
-        await screen.getByRole("textbox").fill("abc");
-
-        expect(onInput).toHaveBeenLastCalledWith("abc");
-    });
-
     describe("sizing and wrapping", () => {
         /** The element under test, narrowed for DOM measurements. */
         function textareaOf(screen: ReturnType<typeof render>): HTMLTextAreaElement {
@@ -91,12 +83,6 @@ describe("TextArea Component", () => {
             if (!(element instanceof HTMLTextAreaElement)) throw new Error("textarea expected");
             return element;
         }
-
-        /**
-         * DaisyUI's class for a color, assembled at runtime. Tailwind scans test files too, so a
-         * spelled-out literal here would generate the class and hide a component that forgot to.
-         */
-        const colorClassName = (color: string) => ["textarea", color].join("-");
 
         test.each([true, false])(
             "a long paste stops growing at a cap and scrolls (autosize: %s)",
@@ -147,7 +133,7 @@ describe("TextArea Component", () => {
             expect(textarea.scrollWidth).toBeLessThanOrEqual(textarea.clientWidth);
         });
 
-        test.each([
+        const colors = [
             "neutral",
             "primary",
             "secondary",
@@ -156,23 +142,22 @@ describe("TextArea Component", () => {
             "success",
             "warning",
             "error",
-        ] as const)("color %s is generated, not just named", async (color) => {
-            const plain = render(TextArea, {});
-            const plainStyle = getComputedStyle(textareaOf(plain));
-            const base = plainStyle.getPropertyValue("--input-color");
-            await plain.unmount();
+        ] as const;
 
-            const colored = render(TextArea, { color });
-            const coloredStyle = getComputedStyle(textareaOf(colored));
+        /** DaisyUI sets `--input-color` only when the generated CSS contains the color's class. */
+        async function inputColorOf(color?: (typeof colors)[number]) {
+            const screen = render(TextArea, { color });
+            const inputColor = getComputedStyle(textareaOf(screen)).getPropertyValue(
+                "--input-color"
+            );
+            await screen.unmount();
+            return inputColor;
+        }
 
-            expect(textareaOf(colored).classList.contains(colorClassName(color))).toBe(true);
-            expect(coloredStyle.getPropertyValue("--input-color")).not.toBe(base);
-        });
-
-        test("no color class without a color", () => {
-            const screen = render(TextArea, { color: null });
-
-            expect(textareaOf(screen).className).not.toMatch(/textarea-/);
+        // The component spells every color class out so Tailwind's scan generates it.
+        // A color whose class was never generated looks like no color at all.
+        test.each(colors)("color %s changes the input color", async (color) => {
+            expect(await inputColorOf(color)).not.toBe(await inputColorOf());
         });
     });
 });

@@ -1,4 +1,4 @@
-<script lang="ts" module>
+<script lang="ts">
     import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
     import MessageBubble from "./MessageBubble.svelte";
     import { chatStore } from "@/features/chat/stores/chatStore.svelte";
@@ -6,9 +6,7 @@
     import { tick } from "svelte";
     import { Logger } from "@common/logger/Logger";
     import type { LocalChat } from "@/lib/interfaces";
-</script>
 
-<script lang="ts">
     let {
         messages,
         activeChat,

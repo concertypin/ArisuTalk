@@ -1,8 +1,4 @@
 <script lang="ts" module>
-    import { Logger } from "@common/logger/Logger";
-
-    import { settings } from "@/lib/stores/settings.svelte";
-
     import GearIcon from "phosphor-svelte/lib/GearIcon";
     import CpuIcon from "phosphor-svelte/lib/CpuIcon";
     import ChatCircleTextIcon from "phosphor-svelte/lib/ChatCircleTextIcon";
@@ -17,55 +13,48 @@
     import AboutPage from "./settingSubpage/AboutPage.svelte";
 
     import { preload } from "@/components/dialog/settingsPreload";
-    import SettingsDialog from "@/components/dialog/SettingsDialog.svelte";
-
-    import { getAppContext } from "@/context";
 
     const preloaded = preload([
         {
             icon: GearIcon,
             label: "General",
-            contents: {
-                type: "static",
-                component: GeneralSettings,
-            },
+            type: "static",
+            component: GeneralSettings,
         },
         {
             icon: CpuIcon,
             label: "LLM Configuration",
-            contents: {
-                type: "static",
-                component: LLMSettings,
-            },
+            type: "static",
+            component: LLMSettings,
         },
         {
             icon: ChatCircleTextIcon,
             label: "Prompt",
-            contents: {
-                type: "static",
-                component: PromptSettings,
-            },
+            type: "static",
+            component: PromptSettings,
         },
         {
             icon: SlidersHorizontalIcon,
             label: "Advanced",
-            contents: {
-                type: "static",
-                component: AdvancedSettings,
-            },
+            type: "static",
+            component: AdvancedSettings,
         },
         {
             icon: InfoIcon,
             label: "About",
-            contents: {
-                type: "static",
-                component: AboutPage,
-            },
+            type: "static",
+            component: AboutPage,
         },
     ]);
 </script>
 
 <script lang="ts">
+    import { Logger } from "@common/logger/Logger";
+
+    import { settings } from "@/lib/stores/settings.svelte";
+    import SettingsDialog from "@/components/dialog/SettingsDialog.svelte";
+    import { getAppContext } from "@/context";
+
     let activeId = $state(preloaded.tabList[0]?.id ?? "");
 
     let appContext = getAppContext();
@@ -81,7 +70,7 @@
         }
     }
 
-    // Autosave: persist the settings shortly after any change, so the footer's claim holds.
+    /** Autosave: persist the settings shortly after any change, so the footer's claim holds. */
     let isFirstRun = true;
     $effect(() => {
         // Reading the whole tree subscribes the effect to every nested setting.

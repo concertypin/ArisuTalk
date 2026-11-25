@@ -1,23 +1,29 @@
 import { test, expect } from "vitest";
-import { marked } from "marked";
+import PlaceholderIcon from "phosphor-svelte/lib/PlaceholderIcon";
+import GearIcon from "phosphor-svelte/lib/GearIcon";
 import { preload } from "@/components/dialog/settingsPreload";
-// Imported on purpose: loading MessageBubble must not change how other markdown is compiled.
-import "@/components/chat/MessageBubble.svelte";
+import { parseMarkdown } from "@/lib/utils/markdown";
 
-/** Preloads one markdown page and returns its compiled HTML. */
-function compile(text: string): string {
-    const { tabList, pageMap } = preload([{ contents: { type: "markdown", text } }]);
+/** Preloads one markdown template and returns the HTML of its page. */
+function preloadMarkdownHtml(text: string): string {
+    const { tabList, pageMap } = preload([{ type: "markdown", text }]);
     const page = pageMap[tabList[0].id];
     if (page.type !== "markdown") throw new Error("markdown page expected");
-    return page.text;
+    return page.html;
 }
 
-test("markdown pages keep standard line handling after MessageBubble is loaded", () => {
-    // MessageBubble turns single newlines into <br>. That is its own setting, not a global one.
-    expect(compile("a\nb")).not.toContain("<br");
-    expect(marked.defaults.breaks).toBe(false);
+test("markdown pages are compiled with the shared markdown module", () => {
+    const text = "<thinking>x</thinking> ~~y~~";
+
+    expect(preloadMarkdownHtml(text)).toBe(parseMarkdown(text));
 });
 
-test("markdown pages still render GFM", () => {
-    expect(compile("| h |\n| - |\n| c |")).toContain("<table>");
+test("tabs get the given label and icon, or the placeholder defaults", () => {
+    const { tabList } = preload([
+        { type: "markdown", text: "# A", label: "First", icon: GearIcon },
+        { type: "markdown", text: "# B" },
+    ]);
+
+    expect(tabList.map((tab) => tab.label)).toEqual(["First", "Untitled"]);
+    expect(tabList.map((tab) => tab.icon)).toEqual([GearIcon, PlaceholderIcon]);
 });

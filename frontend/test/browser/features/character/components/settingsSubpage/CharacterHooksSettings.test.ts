@@ -4,6 +4,7 @@ import { test, expect, describe, vi, beforeEach, type Mock } from "vitest";
 import { render } from "vitest-browser-svelte";
 import CharacterHooksSettings from "@/features/character/components/settingsSubpage/CharacterHooksSettings.svelte";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
+import { createTestCharacter } from "@test/utils/character";
 
 describe("CharacterHooksSettings Component", () => {
     let mockCharacter: Character;
@@ -11,38 +12,14 @@ describe("CharacterHooksSettings Component", () => {
 
     beforeEach(() => {
         onChangeSpy = vi.fn(() => {});
-        mockCharacter = {
-            id: "char-1",
-            specVersion: 0,
-            name: "Test Character",
-            description: "A test character",
-            avatarUrl: "",
-            assets: { assets: [] },
-            prompt: {
-                description: "",
-                authorsNote: "",
-                lorebook: { config: { tokenLimit: 0 }, data: [] },
-            },
-            executables: {
-                runtimeSetting: { mem: undefined, timeout: 30000 },
-                replaceHooks: {
-                    display: [],
-                    input: [],
-                    output: [],
-                    request: [],
-                },
-            },
-            metadata: {
-                author: "",
-                license: "",
-                version: "1.0.0",
-                distributedOn: "",
-                additionalInfo: "",
-            },
-        };
+        mockCharacter = createTestCharacter();
     });
 
     test("renders runtime settings correctly", async () => {
+        mockCharacter = createTestCharacter({
+            executables: { runtimeSetting: { timeout: 30000 } },
+        });
+
         const screen = render(CharacterHooksSettings, {
             props: {
                 context: () => ({

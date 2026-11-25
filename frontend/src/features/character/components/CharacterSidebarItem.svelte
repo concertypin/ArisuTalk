@@ -1,4 +1,4 @@
-<script lang="ts" module>
+<script lang="ts">
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import PencilSimple from "phosphor-svelte/lib/PencilSimpleIcon";
     import PushPin from "phosphor-svelte/lib/PushPinIcon";
@@ -6,9 +6,7 @@
     import { IfNotExistBehavior } from "@/lib/interfaces";
 
     import { getAppContext } from "@/context";
-</script>
 
-<script lang="ts">
     let {
         character,
         active,
@@ -111,26 +109,26 @@
     >
         <!-- Active Pill -->
         <span
-            class="absolute left-0 w-1 bg-white rounded-r-full transition-all duration-200"
-            class:h-8={active}
-            class:h-2={!active}
-            class:opacity-100={active}
-            class:opacity-0={!active}
-            class:group-hover:h-5={!active}
-            class:group-hover:opacity-100={!active}
+            data-testid="active-pill"
+            data-active={active}
+            aria-hidden="true"
+            class={[
+                "absolute left-0 w-1 bg-white rounded-r-full transition-all duration-200",
+                active
+                    ? "h-8 opacity-100"
+                    : "h-2 opacity-0 group-hover:h-5 group-hover:opacity-100",
+            ]}
         ></span>
 
         <!-- Icon/Avatar Swap -->
         <div
-            class="swap swap-rotate w-12 h-12 overflow-hidden transition-all duration-200"
-            class:swap-active={active && isHovered}
-            class:rounded-xl={active}
-            class:rounded-3xl={!active}
-            class:group-hover:rounded-xl={!active}
-            class:bg-primary={active}
-            class:text-primary-content={active}
-            class:bg-neutral={!active}
-            class:text-neutral-content={!active}
+            class={[
+                "swap swap-rotate w-12 h-12 overflow-hidden transition-all duration-200",
+                active && isHovered && "swap-active",
+                active
+                    ? "rounded-xl bg-primary text-primary-content"
+                    : "rounded-3xl group-hover:rounded-xl bg-neutral text-neutral-content",
+            ]}
         >
             <!-- Start State: Settings Icon (when active & hovered) -->
             <div class="swap-on flex items-center justify-center w-full h-full">

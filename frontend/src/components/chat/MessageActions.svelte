@@ -1,4 +1,9 @@
-<script lang="ts" module>
+<!--
+  @component MessageActions
+  Action buttons for message edit/delete/regenerate.
+  Shows on hover and provides controls for message manipulation.
+-->
+<script lang="ts">
     import PencilIcon from "phosphor-svelte/lib/PencilIcon";
     import TrashIcon from "phosphor-svelte/lib/TrashIcon";
     import ArrowClockwiseIcon from "phosphor-svelte/lib/ArrowClockwiseIcon";
@@ -7,14 +12,7 @@
     import type { Component } from "svelte";
 
     const noOp = () => undefined;
-</script>
 
-<!--
-  @component MessageActions
-  Action buttons for message edit/delete/regenerate.
-  Shows on hover and provides controls for message manipulation.
--->
-<script lang="ts">
     let {
         isEditing = false,
         isAssistant = false,

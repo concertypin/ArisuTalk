@@ -13,7 +13,7 @@ import { render } from "vitest-browser-svelte";
 import { renderWithAppContext } from "@test/utils/appContext.svelte";
 import { apply } from "@arisutalk/character-spec/utils";
 import type { BaseMessage } from "@langchain/core/messages";
-import CharacterLayoutTestWrapper from "../wrappers/CharacterLayoutTestWrapper.svelte";
+import CharacterLayoutTestWrapper from "@test/browser/wrappers/CharacterLayoutTestWrapper.svelte";
 
 // Capture what the chat store passes to the provider
 let capturedMessages: BaseMessage[] = [];
@@ -29,7 +29,7 @@ describe("System Prompt E2E", () => {
         await chatStore.setProvider("MOCK", {
             // No per-character stream delay, so replies render within the expect.element poll timeout.
             mockDelay: 0,
-            responses: ["I am Arisu the maid. 御主人様, how can I help?"],
+            responses: ["I am Arisu the maid. 주인님, how can I help?"],
             generationParameters: {},
         });
 
@@ -71,7 +71,7 @@ describe("System Prompt E2E", () => {
                 description: "A maid",
                 specVersion: 0,
                 prompt: {
-                    description: "You are Arisu, a loyal maid. Call the user 御主人様.",
+                    description: "You are Arisu, a loyal maid. Call the user 주인님.",
                     authorsNote: "",
                     lorebook: { config: {}, data: [] },
                 },
@@ -87,8 +87,8 @@ describe("System Prompt E2E", () => {
         // Set up a persona
         const testPersona = {
             id: "persona-e2e",
-            name: "メスガキ",
-            description: "Bratty girl. Call user ザコ♡.",
+            name: "꼬마 악당",
+            description: "Bratty girl. Call user 허접♡.",
         };
         personaStore.personas = [testPersona];
         personaStore.activePersonaId = "persona-e2e";
@@ -124,7 +124,7 @@ describe("System Prompt E2E", () => {
         await expect.element(userMsg).toBeVisible();
 
         // Verify the AI response appears (real timers; expect.element polls until it renders)
-        const aiResponse = getByText("御主人様");
+        const aiResponse = getByText("주인님");
         await expect.element(aiResponse).toBeVisible();
 
         // Verify the system prompt was assembled correctly
@@ -138,7 +138,7 @@ describe("System Prompt E2E", () => {
 
         // System prompt should contain all sections
         expect(systemMsg.content).toContain("You are a helpful assistant."); // generation prompt
-        expect(systemMsg.content).toContain("御主人様"); // character prompt
+        expect(systemMsg.content).toContain("주인님"); // character prompt
         expect(systemMsg.content).toContain("Bratty girl"); // persona description
     });
 

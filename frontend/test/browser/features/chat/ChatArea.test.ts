@@ -1,4 +1,4 @@
-import { test, expect, describe, vi, beforeEach } from "vitest";
+import { test, expect, describe, vi, beforeEach, type Mocked } from "vitest";
 import { renderWithAppContext } from "@test/utils/appContext.svelte";
 import ChatArea from "@/components/ChatArea.svelte";
 import { chatStore } from "@/features/chat/stores/chatStore.svelte";
@@ -20,7 +20,7 @@ vi.mock("@/features/chat/stores/chatStore.svelte", () => {
         deleteMessage: vi.fn(),
         regenerateMessage: vi.fn(),
         initPromise: Promise.resolve(),
-    };
+    } satisfies Partial<Mocked<typeof chatStore>>;
     return {
         chatStore: mockStore,
         ChatStore: vi.fn(),

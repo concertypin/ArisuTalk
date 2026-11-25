@@ -9,7 +9,7 @@
 import { test, expect, describe, vi, afterEach, beforeEach } from "vitest";
 import { renderWithAppContext } from "@test/utils/appContext.svelte";
 import { apply } from "@arisutalk/character-spec/utils";
-import CharacterLayoutTestWrapper from "../wrappers/CharacterLayoutTestWrapper.svelte";
+import CharacterLayoutTestWrapper from "@test/browser/wrappers/CharacterLayoutTestWrapper.svelte";
 import { StorageResolver } from "@/lib/adapters/storage/storageResolver";
 import type { IChatStorageAdapter, LocalChat, ChatType } from "@/lib/interfaces";
 import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
