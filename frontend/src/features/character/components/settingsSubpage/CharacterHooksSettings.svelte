@@ -11,13 +11,13 @@
     import CaretUp from "phosphor-svelte/lib/CaretUpIcon";
     import Warning from "phosphor-svelte/lib/WarningIcon";
     import { merge, cloneDeep } from "lodash-es";
+    import type { AssertNever } from "@/lib/types/assert";
     import CharacterSettings from "./CharacterSettings.svelte";
+    import type { TContext, TProps } from "./types";
 
     type ReplaceHook = Character["executables"]["replaceHooks"];
     type HookType = keyof ReplaceHook;
     type HookEntity = ReplaceHook[HookType][number];
-
-    import type { TContext, TProps } from "./types";
 
     let { context }: TProps<TContext> = $props();
 
@@ -28,7 +28,7 @@
     let activeHookType = $state<HookType>("display");
     let expandedHookIndex = $state<number | null>(null);
 
-    const hookTypes: { type: HookType; label: string; description: string }[] = [
+    const hookTypes = [
         {
             type: "display",
             label: "Display",
@@ -37,7 +37,14 @@
         { type: "input", label: "Input", description: "Transform user input before processing" },
         { type: "output", label: "Output", description: "Transform AI output after generation" },
         { type: "request", label: "Request", description: "Transform text before sending to AI" },
-    ];
+    ] as const satisfies { type: HookType; label: string; description: string }[];
+
+    const _hookTypesCovered: AssertNever<Exclude<HookType, (typeof hookTypes)[number]["type"]>> =
+        true;
+
+    let activeHookDescription = $derived(
+        hookTypes.find((hookType) => hookType.type === activeHookType)?.description
+    );
 
     function updateRuntimeSetting<K extends keyof Character["executables"]["runtimeSetting"]>(
         field: K,
@@ -154,7 +161,7 @@
     </div>
 
     <p class="text-sm text-base-content/60">
-        {hookTypes.find((h) => h.type === activeHookType)?.description}
+        {activeHookDescription}
     </p>
 
     <div class="flex justify-end">

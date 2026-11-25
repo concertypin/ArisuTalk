@@ -3,7 +3,7 @@ import { screen } from "@testing-library/svelte";
 import { userEvent } from "@testing-library/user-event";
 import { fillText } from "@test/utils/user";
 import { renderWithAppContext } from "@test/utils/appContext.svelte";
-import CharacterLayoutTestWrapper from "../wrappers/CharacterLayoutTestWrapper.svelte";
+import CharacterLayoutTestWrapper from "@test/browser/wrappers/CharacterLayoutTestWrapper.svelte";
 import { chatStore } from "@/features/chat/stores/chatStore.svelte";
 
 describe("Persona and Chat interactions", () => {

@@ -1,5 +1,4 @@
 import { test, expect, vi } from "vitest";
-import { screen, waitFor } from "@testing-library/svelte";
 import { renderWithAppContext } from "@test/utils/appContext.svelte";
 import Home from "@/routes/Home.svelte";
 
@@ -14,18 +13,14 @@ vi.mock("@/components/ChatArea.svelte", async (importOriginal) => {
 // Keep this the only test here: Home caches its lazy components in module scope, so an earlier render
 // skips the loading state.
 test("shows the loading state until the lazy components arrive", async () => {
-    const { container } = renderWithAppContext(Home, {});
+    const { getByText, queryByText, queryByRole, findByRole } = renderWithAppContext(Home, {});
 
-    expect(screen.getByText("Loading...")).toBeInTheDocument();
-    expect(container.querySelector(".home-layout > div")).toBeNull();
+    expect(getByText("Loading...")).toBeVisible();
+    // The sidebar is rendered by the lazily loaded CharacterLayout, never by Home itself.
+    expect(queryByRole("button", { name: "Home" })).not.toBeInTheDocument();
 
     chatAreaGate.resolve();
 
-    await waitFor(
-        () => {
-            expect(container.querySelector(".home-layout > div")).not.toBeNull();
-        },
-        { timeout: 5000 }
-    );
-    expect(container.textContent).not.toContain("Loading...");
+    expect(await findByRole("button", { name: "Home" }, { timeout: 5000 })).toBeVisible();
+    expect(queryByText("Loading...")).not.toBeInTheDocument();
 });

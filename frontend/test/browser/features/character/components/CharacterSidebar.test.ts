@@ -1,5 +1,5 @@
-import { test, expect, describe, vi, beforeEach } from "vitest";
-import { screen, waitFor, within } from "@testing-library/svelte";
+import { test, expect, describe, vi, beforeEach, onTestFinished } from "vitest";
+import { fireEvent, screen, within } from "@testing-library/svelte";
 import { userEvent } from "@testing-library/user-event";
 import { renderWithAppContext } from "@test/utils/appContext.svelte";
 import CharacterSidebar from "@/features/character/components/CharacterSidebar.svelte";
@@ -149,23 +149,78 @@ describe("CharacterSidebar Component", () => {
         expect(mockOnPersona).toHaveBeenCalled();
     });
 
-    test("highlights selected character", async () => {
-        const { container } = renderWithAppContext(CharacterSidebar, {
+    test("highlights selected character", () => {
+        renderWithAppContext(CharacterSidebar, {
             selectedCharacterId: "char-1",
             onSelect: mockOnSelect,
             onAdd: mockOnAdd,
             onPersona: mockOnPersona,
         });
 
-        // Wait for rendering
-        await waitFor(() => {
-            expect(container.querySelectorAll('[role="option"]').length).toEqual(2);
+        const options = screen.getAllByRole("option");
+        expect(options).toHaveLength(2);
+        expect(screen.getAllByRole("option", { selected: true })).toEqual([options[0]]);
+    });
+
+    describe("dragging one character over another", () => {
+        /** Renders the sidebar and starts dragging the option at `from` over the option at `to`. */
+        async function dragOver(from: number, to: number) {
+            renderWithAppContext(CharacterSidebar, {
+                selectedCharacterId: null,
+                onSelect: mockOnSelect,
+                onAdd: mockOnAdd,
+                onPersona: mockOnPersona,
+            });
+            const options = screen.getAllByRole("option");
+            // Every character of the fixture is rendered before the drag starts.
+            expect(options).toHaveLength(mockCharacters.length);
+            const dragged = options[from];
+            const target = options[to];
+
+            await fireEvent.dragStart(dragged);
+            await fireEvent.dragOver(target);
+            return { dragged, target };
+        }
+
+        test("shows the drop line below the target when dragging downward", async () => {
+            const { dragged, target } = await dragOver(0, 1);
+
+            expect(target).toHaveClass("border-b-2", "border-primary");
+            expect(target).not.toHaveClass("border-t-2");
+            expect(dragged).toHaveClass("opacity-50");
         });
 
-        const options = container.querySelectorAll('[role="option"]');
-        const selectedOptions = container.querySelectorAll('[aria-selected="true"]');
-        expect(selectedOptions.length).toEqual(1);
-        expect(selectedOptions[0]).toBe(options[0]);
+        test("shows the drop line above the target when dragging upward", async () => {
+            const { dragged, target } = await dragOver(1, 0);
+
+            expect(target).toHaveClass("border-t-2", "border-primary");
+            expect(target).not.toHaveClass("border-b-2");
+            expect(dragged).toHaveClass("opacity-50");
+        });
+
+        test("removes the drop line when the drag ends", async () => {
+            const { dragged, target } = await dragOver(0, 1);
+            expect(target).toHaveClass("border-b-2");
+
+            await fireEvent.dragEnd(dragged);
+
+            expect(target).not.toHaveClass("border-b-2");
+            expect(target).not.toHaveClass("border-primary");
+            expect(dragged).not.toHaveClass("opacity-50");
+        });
+
+        test("shows no drop line between a pinned and an unpinned character", async () => {
+            characterStore.togglePin("char-1");
+            onTestFinished(() => characterStore.togglePin("char-1"));
+
+            const { dragged, target } = await dragOver(0, 1);
+
+            // The dragged item is dimmed, so the drag has started and the drop line is withheld on purpose.
+            expect(dragged).toHaveClass("opacity-50");
+            expect(target).not.toHaveClass("border-b-2");
+            expect(target).not.toHaveClass("border-t-2");
+            expect(target).not.toHaveClass("border-primary");
+        });
     });
 
     test("renders divider before action buttons", () => {

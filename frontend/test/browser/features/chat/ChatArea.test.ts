@@ -1,4 +1,4 @@
-import { test, expect, describe, vi, beforeEach } from "vitest";
+import { test, expect, describe, vi, beforeEach, type Mocked } from "vitest";
 import { screen } from "@testing-library/svelte";
 import { userEvent } from "@testing-library/user-event";
 import { fillText } from "@test/utils/user";
@@ -23,7 +23,7 @@ vi.mock("@/features/chat/stores/chatStore.svelte", () => {
         deleteMessage: vi.fn(),
         regenerateMessage: vi.fn(),
         initPromise: Promise.resolve(),
-    };
+    } satisfies Partial<Mocked<typeof chatStore>>;
     return {
         chatStore: mockStore,
         ChatStore: vi.fn(),

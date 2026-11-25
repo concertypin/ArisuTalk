@@ -2,6 +2,7 @@ import { test, expect, describe, vi, beforeEach, type Mock } from "vitest";
 import { render, screen } from "@testing-library/svelte";
 import { userEvent } from "@testing-library/user-event";
 import { fillText } from "@test/utils/user";
+import { createTestCharacter } from "@test/utils/character";
 import CharacterHooksSettings from "@/features/character/components/settingsSubpage/CharacterHooksSettings.svelte";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
 
@@ -11,39 +12,16 @@ describe("CharacterHooksSettings Component", () => {
 
     beforeEach(() => {
         onChangeSpy = vi.fn(() => {});
-        mockCharacter = {
-            id: "char-1",
-            specVersion: 0,
-            name: "Test Character",
-            description: "A test character",
-            avatarUrl: "",
-            assets: { assets: [] },
-            prompt: {
-                description: "",
-                authorsNote: "",
-                lorebook: { config: { tokenLimit: 0 }, data: [] },
-            },
-            executables: {
-                runtimeSetting: { mem: undefined, timeout: 30000 },
-                replaceHooks: {
-                    display: [],
-                    input: [],
-                    output: [],
-                    request: [],
-                },
-            },
-            metadata: {
-                author: "",
-                license: "",
-                version: "1.0.0",
-                distributedOn: "",
-                additionalInfo: "",
-            },
-        };
+        mockCharacter = createTestCharacter();
     });
 
-    test("renders runtime settings correctly", () => {
-        const view = render(CharacterHooksSettings, {
+    test("renders runtime settings correctly", async () => {
+        const user = userEvent.setup();
+        mockCharacter = createTestCharacter({
+            executables: { runtimeSetting: { timeout: 30000 } },
+        });
+
+        render(CharacterHooksSettings, {
             props: {
                 context: () => ({
                     getCharacter: () => mockCharacter,
@@ -53,10 +31,7 @@ describe("CharacterHooksSettings Component", () => {
         });
 
         // Expand Runtime Settings - DaisyUI collapse uses a hidden checkbox
-        const collapseCheckbox = view.container.querySelector(
-            ".collapse input[type='checkbox']"
-        ) as HTMLInputElement;
-        collapseCheckbox.click();
+        await user.click(screen.getByRole("checkbox"));
 
         const memInput = screen.getByLabelText(/Memory \(MB\)/i);
         const timeoutInput = screen.getByLabelText(/Timeout \(ms\)/i);
@@ -68,7 +43,7 @@ describe("CharacterHooksSettings Component", () => {
 
     test("updates runtime settings", async () => {
         const user = userEvent.setup();
-        const view = render(CharacterHooksSettings, {
+        render(CharacterHooksSettings, {
             props: {
                 context: () => ({
                     getCharacter: () => mockCharacter,
@@ -78,10 +53,7 @@ describe("CharacterHooksSettings Component", () => {
         });
 
         // Expand Runtime Settings - DaisyUI collapse uses a hidden checkbox
-        const collapseCheckbox = view.container.querySelector(
-            ".collapse input[type='checkbox']"
-        ) as HTMLInputElement;
-        collapseCheckbox.click();
+        await user.click(screen.getByRole("checkbox"));
 
         const memInput = screen.getByLabelText(/Memory \(MB\)/i);
         expect(memInput).toBeInTheDocument();

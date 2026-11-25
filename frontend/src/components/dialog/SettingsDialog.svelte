@@ -3,8 +3,22 @@
     import XIcon from "phosphor-svelte/lib/XIcon";
     import { untrack, type Component } from "svelte";
     import SanitizedHtml from "@/components/SanitizedHtml.svelte";
-    import type { Page, SubpageProps } from "./settingsPreload";
+    import type { Page, SubpageProps, Tab } from "./settingsPreload";
 
+    type Props = {
+        id?: string;
+        title?: string;
+        preloaded: {
+            tabList: Tab[];
+            pageMap: Record<string, Page<TContext>>;
+        };
+        onOpen?: () => void;
+        onClose?: () => void;
+        onTabChange: (id: string) => void;
+        activeId: string;
+        settingsModalContext: () => TContext;
+        self?: HTMLDialogElement;
+    };
     let {
         id = `untitled-${crypto.randomUUID()}`,
         title = "Untitled",
@@ -15,24 +29,7 @@
         activeId,
         settingsModalContext,
         self = $bindable(),
-    }: {
-        id?: string;
-        title?: string;
-        preloaded: {
-            tabList: {
-                id: string;
-                label: string;
-                icon: Component;
-            }[];
-            pageMap: Record<string, Page<TContext>>;
-        };
-        onOpen?: () => void;
-        onClose?: () => void;
-        onTabChange: (kind: string) => void;
-        activeId: string;
-        settingsModalContext: () => TContext;
-        self?: HTMLDialogElement;
-    } = $props();
+    }: Props = $props();
 
     let { tabList, pageMap } = $derived(preloaded);
     let page = $derived(pageMap[activeId]);
@@ -56,22 +53,20 @@
     }
 </script>
 
-{#snippet Tab(id: string, Icon: Component, label: string, isActive: boolean)}
+{#snippet TabButton(tab: Tab, isActive: boolean)}
     <li>
         <button
-            class="flex gap-2 rounded-lg"
-            class:menu-active={isActive}
-            onclick={() => onTabChange(id)}
-            aria-label={label}
+            class={["flex gap-2 rounded-lg", isActive && "menu-active"]}
+            onclick={() => onTabChange(tab.id)}
+            aria-label={tab.label}
         >
-            <Icon size={18} />
-            {label}
+            <tab.icon size={18} />
+            {tab.label}
         </button>
     </li>
 {/snippet}
 
 {#snippet Panel(Comp: Component<SubpageProps<TContext>>)}
-    <!-- The subpage renders its own section heading. -->
     <div class="space-y-6">
         <Comp context={settingsModalContext} />
     </div>
@@ -114,20 +109,18 @@
                 <ul class="menu w-full p-0 gap-1">
                     {#each tabList as tab (tab.id)}
                         {@const isActive = tab.id === activeId}
-                        {@render Tab(tab.id, tab.icon, tab.label, isActive)}
+                        {@render TabButton(tab, isActive)}
                     {/each}
                 </ul>
             </aside>
 
             <!-- Main Panel -->
             <main class="flex-1 p-6 overflow-y-auto bg-base-100">
-                {#if page.type === "none"}
-                    <div></div>
-                {:else if page.type === "markdown"}
-                    <SanitizedHtml class="prose prose-sm max-w-[80ch]" html={page.text} />
+                {#if page.type === "markdown"}
+                    <SanitizedHtml class="prose prose-sm max-w-[80ch]" html={page.html} />
                 {:else if page.type === "component"}
                     {@render Panel(page.component)}
-                {:else}
+                {:else if page.type === "static"}
                     <page.component />
                 {/if}
             </main>

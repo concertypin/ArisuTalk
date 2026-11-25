@@ -32,7 +32,7 @@
 
     // Load asset preview URLs
     $effect(() => {
-        const loadPreviews = async () => {
+        async function loadPreviews() {
             if (!character) return;
 
             for (const asset of character.assets.assets) {
@@ -46,7 +46,7 @@
                     }
                 }
             }
-        };
+        }
         void loadPreviews();
     });
 

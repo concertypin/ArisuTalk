@@ -2,6 +2,7 @@ import { test, expect, describe, vi } from "vitest";
 import { render, screen } from "@testing-library/svelte";
 import { userEvent } from "@testing-library/user-event";
 import MessageInput from "@/components/chat/MessageInput.svelte";
+import { recordSubmitEvents } from "@test/utils/submitEvents";
 
 describe("MessageInput Component", () => {
     test("Send button submits the text and clears the input", async () => {
@@ -20,6 +21,50 @@ describe("MessageInput Component", () => {
     test("Enter submits the text and clears the input like the Send button", async () => {
         const user = userEvent.setup();
         const onSubmit = vi.fn();
+        render(MessageInput, { props: { onSubmit } });
+        const input = screen.getByRole("textbox");
+
+        await user.type(input, "Hello");
+        await user.keyboard("{Enter}");
+
+        expect(onSubmit).toHaveBeenCalledExactlyOnceWith("Hello");
+        expect(input).toHaveValue("");
+    });
+
+    test("labels the Enter key of virtual keyboards as Send", () => {
+        render(MessageInput, { props: { onSubmit: vi.fn() } });
+
+        expect(screen.getByRole("textbox")).toHaveAttribute("enterkeyhint", "send");
+    });
+
+    test("opening the emoji picker does not send the draft", async () => {
+        const user = userEvent.setup();
+        const onSubmit = vi.fn();
+        render(MessageInput, { props: { onSubmit } });
+        const input = screen.getByPlaceholderText("Type a message...");
+        await user.type(input, "draft");
+
+        await user.click(screen.getByRole("button", { name: "Pick emoji" }));
+
+        expect(onSubmit).not.toHaveBeenCalled();
+        expect(input).toHaveValue("draft");
+    });
+
+    test("prevents the browser's default form submission", async () => {
+        const user = userEvent.setup();
+        const submitEvents = recordSubmitEvents();
+        render(MessageInput, { props: { onSubmit: vi.fn() } });
+
+        await user.type(screen.getByRole("textbox"), "Hello");
+        await user.click(screen.getByRole("button", { name: "Send" }));
+
+        expect(submitEvents).toHaveLength(1);
+        expect(submitEvents[0].defaultPrevented).toBe(true);
+    });
+
+    test("clears the input right away, without waiting for the submit handler", async () => {
+        const user = userEvent.setup();
+        const onSubmit = vi.fn(() => new Promise<void>(() => undefined));
         render(MessageInput, { props: { onSubmit } });
         const input = screen.getByRole("textbox");
 

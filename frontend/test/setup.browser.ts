@@ -1,6 +1,7 @@
 // Setup for the `browser` project: jest-dom matchers, and stand-ins for what jsdom lacks and the components use.
 import "@testing-library/jest-dom/vitest";
 import { beforeEach } from "vitest";
+import { installSetHTMLPolyfill } from "@/lib/polyfills/setHTML";
 
 // <dialog> methods only toggle `open`: no top layer, and Escape or `form method="dialog"` does not close.
 HTMLDialogElement.prototype.show = function show(this: HTMLDialogElement): void {
@@ -18,6 +19,10 @@ HTMLDialogElement.prototype.close = function close(
     if (returnValue !== undefined) this.returnValue = returnValue;
     this.dispatchEvent(new Event("close"));
 };
+
+// jsdom has no `Element.setHTML`, so components render through the polyfill. `test/setup.ts` runs
+// first and records the missing native method before this installs it.
+await installSetHTMLPolyfill();
 
 let objectUrlCount = 0;
 URL.createObjectURL = () => `blob:jsdom/${++objectUrlCount}`;

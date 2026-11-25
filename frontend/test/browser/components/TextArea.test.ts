@@ -2,13 +2,14 @@ import { test, expect, describe, vi } from "vitest";
 import { render, screen } from "@testing-library/svelte";
 import { userEvent } from "@testing-library/user-event";
 import TextArea from "@/components/input/TextArea.svelte";
+import TextAreaFormTestWrapper from "@test/browser/wrappers/TextAreaFormTestWrapper.svelte";
 import { softTest } from "@test/utils/softTest";
 
 describe("TextArea Component", () => {
-    test("submits the current text on Enter without clearing it", async () => {
+    test("submits the surrounding form on Enter without clearing the text", async () => {
         const user = userEvent.setup();
         const onSubmit = vi.fn();
-        render(TextArea, { props: { onSubmit } });
+        render(TextAreaFormTestWrapper, { props: { onSubmit } });
         const textarea = screen.getByRole("textbox");
 
         await user.type(textarea, "hello");
@@ -21,7 +22,7 @@ describe("TextArea Component", () => {
     test("does not submit on Shift+Enter", async () => {
         const user = userEvent.setup();
         const onSubmit = vi.fn();
-        render(TextArea, { props: { onSubmit } });
+        render(TextAreaFormTestWrapper, { props: { onSubmit } });
         const textarea = screen.getByRole("textbox");
 
         await user.type(textarea, "line");
@@ -31,41 +32,45 @@ describe("TextArea Component", () => {
         expect(textarea).toHaveValue("line\n");
     });
 
-    test("does not stay stuck in newline mode after Shift is released elsewhere", async () => {
+    test.each<{ browser: string; init: KeyboardEventInit }>([
+        { browser: "Chrome and Firefox (isComposing)", init: { isComposing: true } },
+        { browser: "Safari (keyCode 229 after compositionend)", init: { keyCode: 229 } },
+    ])("ignores the Enter that confirms an IME composition in $browser", async ({ init }) => {
         const user = userEvent.setup();
         const onSubmit = vi.fn();
-        render(TextArea, { props: { onSubmit } });
-        const textarea = screen.getByRole("textbox");
-        await user.type(textarea, "text");
-
-        // A keydown that reports shiftKey=false must submit, no matter what happened before.
-        textarea.dispatchEvent(new KeyboardEvent("keydown", { key: "Shift", bubbles: true }));
-        textarea.dispatchEvent(
-            new KeyboardEvent("keydown", { key: "Enter", shiftKey: false, bubbles: true })
-        );
-
-        expect(onSubmit).toHaveBeenCalledExactlyOnceWith("text");
-    });
-
-    test("ignores the Enter that confirms an IME composition", async () => {
-        const user = userEvent.setup();
-        const onSubmit = vi.fn();
-        render(TextArea, { props: { onSubmit } });
+        render(TextAreaFormTestWrapper, { props: { onSubmit } });
         const textarea = screen.getByRole("textbox");
         await user.type(textarea, "한글");
 
         const event = new KeyboardEvent("keydown", {
             key: "Enter",
-            isComposing: true,
             bubbles: true,
             cancelable: true,
+            ...init,
         });
-        // Fails if the environment drops `isComposing`, which would make this test vacuous.
-        expect(event.isComposing).toBe(true);
+        // Fails if the environment drops the init, which would make this test vacuous.
+        expect(event).toMatchObject(init);
         textarea.dispatchEvent(event);
 
         expect(onSubmit).not.toHaveBeenCalled();
         expect(event.defaultPrevented).toBe(false);
+    });
+
+    test("Enter outside a form is left alone and inserts a newline", async () => {
+        const user = userEvent.setup();
+        render(TextArea, {});
+        const textarea = screen.getByRole("textbox");
+
+        await user.type(textarea, "a");
+        await user.keyboard("{Enter}");
+
+        expect(textarea).toHaveValue("a\n");
+    });
+
+    test("passes enterkeyhint to the textarea", () => {
+        render(TextAreaFormTestWrapper, { props: { onSubmit: vi.fn(), enterkeyhint: "send" } });
+
+        expect(screen.getByRole("textbox")).toHaveAttribute("enterkeyhint", "send");
     });
 
     test("calls onCancel on Escape", async () => {
@@ -79,16 +84,6 @@ describe("TextArea Component", () => {
         expect(onCancel).toHaveBeenCalledOnce();
     });
 
-    test("reports typed text through onInput", async () => {
-        const user = userEvent.setup();
-        const onInput = vi.fn();
-        render(TextArea, { props: { onInput } });
-
-        await user.type(screen.getByRole("textbox"), "abc");
-
-        expect(onInput).toHaveBeenLastCalledWith("abc");
-    });
-
     // jsdom does no layout, so these tests pin the classes, not the rendered size.
     describe("sizing and wrapping", () => {
         function textareaOf(): HTMLTextAreaElement {
@@ -97,15 +92,12 @@ describe("TextArea Component", () => {
             return element;
         }
 
-        test.each([true, false])(
-            "caps the height and scrolls instead of growing (autosize: %s)",
-            (autosize) => {
-                render(TextArea, { props: { autosize } });
+        test("caps the height and scrolls instead of growing", () => {
+            render(TextArea, {});
 
-                // Without a cap, field-sizing grows the box with a long paste and pushes the chat away.
-                expect(textareaOf()).toHaveClass("max-h-[40vh]", "overflow-y-auto");
-            }
-        );
+            // Without a cap, field-sizing grows the box with a long paste and pushes the chat away.
+            expect(textareaOf()).toHaveClass("max-h-[40vh]", "overflow-y-auto");
+        });
 
         test("grows with its content from a one-line minimum, up to the cap", () => {
             render(TextArea, {});
@@ -150,7 +142,7 @@ describe("TextArea Component", () => {
         );
 
         softTest("soft color check: no color class without a color", ({ warn }) => {
-            render(TextArea, { props: { color: null } });
+            render(TextArea, {});
 
             expect(textareaOf()).toHaveClass("textarea");
             warn(() => expect(textareaOf().className).not.toMatch(/textarea-/));

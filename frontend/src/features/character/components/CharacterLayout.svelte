@@ -1,4 +1,4 @@
-<script lang="ts" module>
+<script lang="ts">
     import CharacterSidebar from "./CharacterSidebar.svelte";
     import CharacterForm from "./CharacterForm.svelte";
     import CharacterSettingsModal from "./CharacterSettingsModal.svelte";
@@ -14,9 +14,7 @@
     import type { Snippet } from "svelte";
     import { cloneDeep } from "lodash-es";
     import { getAppContext } from "@/context";
-</script>
 
-<script lang="ts">
     let {
         children,
     }: {

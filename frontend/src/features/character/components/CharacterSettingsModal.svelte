@@ -1,8 +1,4 @@
 <script lang="ts" module>
-    import { characterStore } from "@/features/character/stores/characterStore.svelte";
-    import { Logger } from "@common/logger/Logger";
-    import type { Character } from "@arisutalk/character-spec/v0/Character";
-
     // Tab Icons
     import UserIcon from "phosphor-svelte/lib/UserIcon";
     import ChatCircleTextIcon from "phosphor-svelte/lib/ChatCircleTextIcon";
@@ -22,64 +18,47 @@
     import CharacterHooksSettings from "./settingsSubpage/CharacterHooksSettings.svelte";
 
     import { preload } from "@/components/dialog/settingsPreload";
-    import SettingsDialog from "@/components/dialog/SettingsDialog.svelte";
-
-    import { getAppContext } from "@/context";
 
     const preloaded = preload([
         {
-            contents: {
-                type: "component",
-                component: CharacterBasicSettings,
-            },
+            type: "component",
+            component: CharacterBasicSettings,
             icon: UserIcon,
             label: "Basic",
         },
         {
-            contents: {
-                type: "component",
-                component: CharacterPromptSettings,
-            },
+            type: "component",
+            component: CharacterPromptSettings,
             icon: ChatCircleTextIcon,
             label: "Prompt",
         },
         {
-            contents: {
-                type: "component",
-                component: CharacterLorebookSettings,
-            },
+            type: "component",
+            component: CharacterLorebookSettings,
             icon: BookOpenIcon,
             label: "Lorebook",
         },
         {
-            contents: {
-                type: "component",
-                component: CharacterAssetsSettings,
-            },
+            type: "component",
+            component: CharacterAssetsSettings,
             icon: ImageIcon,
             label: "Assets",
         },
         {
-            contents: {
-                type: "component",
-                component: CharacterMetadataSettings,
-            },
+            type: "component",
+            component: CharacterMetadataSettings,
             icon: FileTextIcon,
             label: "Metadata",
         },
         {
-            contents: {
-                type: "component",
-                component: CharacterMagicSettings,
-            },
+            type: "component",
+            component: CharacterMagicSettings,
             icon: MagicWandIcon,
             label: "Magic",
         },
         {
-            contents: {
-                type: "component",
-                component: CharacterHooksSettings,
-            },
+            type: "component",
+            component: CharacterHooksSettings,
             icon: GearIcon,
             label: "Advanced",
         },
@@ -87,6 +66,12 @@
 </script>
 
 <script lang="ts">
+    import { characterStore } from "@/features/character/stores/characterStore.svelte";
+    import { Logger } from "@common/logger/Logger";
+    import type { Character } from "@arisutalk/character-spec/v0/Character";
+    import SettingsDialog from "@/components/dialog/SettingsDialog.svelte";
+    import { getAppContext } from "@/context";
+
     /**
      * @component CharacterSettingsModal
      * Multi-tab modal for editing detailed character preferences.

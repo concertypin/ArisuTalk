@@ -1,7 +1,4 @@
 <script lang="ts" module>
-    import SmileyIcon from "phosphor-svelte/lib/SmileyIcon";
-    import XIcon from "phosphor-svelte/lib/XIcon";
-    import MagnifyingGlassIcon from "phosphor-svelte/lib/MagnifyingGlassIcon";
     import { Logger } from "@common/logger/Logger";
 
     type EmojiClass = {
@@ -47,6 +44,10 @@ Modal for picking an emoji character.
 Emits `onSelect` with the chosen emoji as plain text.
 -->
 <script lang="ts">
+    import SmileyIcon from "phosphor-svelte/lib/SmileyIcon";
+    import XIcon from "phosphor-svelte/lib/XIcon";
+    import MagnifyingGlassIcon from "phosphor-svelte/lib/MagnifyingGlassIcon";
+
     let {
         onSelect,
         onClose,

@@ -2,7 +2,7 @@ import { test, expect, describe, beforeEach } from "vitest";
 import { screen } from "@testing-library/svelte";
 import { userEvent } from "@testing-library/user-event";
 import { renderWithAppContext } from "@test/utils/appContext.svelte";
-import CharacterLayoutTestWrapper from "../../wrappers/CharacterLayoutTestWrapper.svelte";
+import CharacterLayoutTestWrapper from "@test/browser/wrappers/CharacterLayoutTestWrapper.svelte";
 import { characterStore } from "@/features/character/stores/characterStore.svelte";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
 

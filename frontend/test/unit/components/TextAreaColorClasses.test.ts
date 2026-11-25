@@ -8,30 +8,26 @@ const source = readFileSync(
     "utf8"
 );
 
-/** The members of the component's `Color` union, read from its `type Color = ...;` declaration. */
-const colors = [...(/type Color =([^;]*);/.exec(source)?.[1] ?? "").matchAll(/"([a-z]+)"/g)].map(
-    (match) => match[1]
-);
+/** The `color: "class"` entries of the component's `colorClass` map. */
+const entries = [
+    ...(/const colorClass = \{([^}]*)\}/.exec(source)?.[1] ?? "").matchAll(
+        /([a-z]+):\s*"([^"]*)"/g
+    ),
+].map((match) => ({ color: match[1], className: match[2] }));
 
 describe("TextArea color classes in the source", () => {
-    softTest("the Color union could be read from the component", () => {
+    softTest("the colorClass map could be read from the component", () => {
         // Hard check: the soft checks below would otherwise check nothing.
-        expect(colors).toContain("primary");
-        expect(colors).toContain("error");
+        expect(entries.map((entry) => entry.color)).toContain("primary");
+        expect(entries.map((entry) => entry.color)).toContain("error");
     });
 
     softTest(
         "soft color check: every color class is spelled out as a complete literal",
         ({ warn }) => {
-            for (const color of colors) {
+            for (const { color, className } of entries) {
                 // Template on purpose: a literal here would make Tailwind generate the class.
-                const className = `textarea-${color}`;
-                warn(() =>
-                    expect(
-                        source.includes(`"${className}"`),
-                        `"${className}" is not a complete literal in TextArea.svelte`
-                    ).toBe(true)
-                );
+                warn(() => expect(className).toBe(`textarea-${color}`));
             }
         }
     );

@@ -27,6 +27,6 @@ pnpm run -F backend dev   # Backend dev server
 
 ## Core Rules
 1. Svelte 5: Use Runes (`$state`, `$derived`). No Svelte 4 syntax.
-2. TypeScript: Use `type`, `import type`, and absolute imports (`src/...`).
+2. TypeScript: Use `type`, `import type`, and alias imports (`@/`, `@test/`, ...) instead of relative paths. See [TypeScript rules](./docs/rule/typescript.md).
 3. JSDoc: Document all exports and complex logic.
 4. Consistency: Check existing patterns and `/docs/rule/` before coding.

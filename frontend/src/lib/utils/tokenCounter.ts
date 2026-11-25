@@ -5,7 +5,7 @@
  *
  * ## Token estimation
  * Uses a byte-length heuristic (~1 token per 4 bytes via `TextEncoder`).
- * This is a **rough approximation** — actual tokenization depends on the model's
+ * This is a rough approximation — actual tokenization depends on the model's
  * specific tokenizer (BPE, WordPiece, etc.). For production-level accuracy,
  * swap in a real tokenizer via the {@link TokenCountProvider} interface.
  *
@@ -57,7 +57,7 @@ export function setTokenProvider(provider: TokenCountProvider): void {
  * Uses the active {@link TokenCountProvider} (default: byte-length heuristic
  * of ~1 token per 4 bytes via `TextEncoder`).
  *
- * **Limitations:**
+ * Limitations:
  * - The default heuristic assumes ~4 bytes/token, which varies by language and model.
  * - CJK characters average 1–2 tokens each (not ~1 token/4 bytes).
  * - Code, numbers, and special tokens (e.g. `<|endoftext|>`) are not handled.

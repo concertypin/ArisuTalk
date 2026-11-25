@@ -1,4 +1,4 @@
-import { test, expect, describe, vi, beforeEach } from "vitest";
+import { test, expect, describe, vi, beforeEach, onTestFinished } from "vitest";
 import { screen, waitFor, within } from "@testing-library/svelte";
 import { userEvent } from "@testing-library/user-event";
 import { fillText } from "@test/utils/user";
@@ -82,7 +82,7 @@ describe("CharacterSettingsModal Component", () => {
             },
         };
 
-        selectCharacter = vi.fn() satisfies (charId: string | null) => void;
+        selectCharacter = vi.fn<(charId: string | null) => void>();
 
         // Initialize characterStore.characters for the index lookups
         characterStore.characters = [mockCharacter];
@@ -183,22 +183,20 @@ describe("CharacterSettingsModal Component", () => {
     test("opens the dialog once, however often the character is edited", async () => {
         const user = userEvent.setup();
         const showModalSpy = vi.spyOn(HTMLDialogElement.prototype, "showModal");
-        try {
-            renderModal();
-            const nameInput = screen.getByLabelText("Name", { exact: true });
+        onTestFinished(() => showModalSpy.mockRestore());
 
-            await fillText(user, nameInput, "Updated Name");
-            await fillText(user, nameInput, "Updated Name Again");
-            expect(nameInput).toHaveValue("Updated Name Again");
+        renderModal();
+        const nameInput = screen.getByLabelText("Name", { exact: true });
 
-            const openLogs = vi
-                .mocked(Logger.structured)
-                .mock.calls.filter(([event]) => event === "modal.open");
-            expect(openLogs).toHaveLength(1);
-            expect(showModalSpy).toHaveBeenCalledTimes(1);
-        } finally {
-            showModalSpy.mockRestore();
-        }
+        await fillText(user, nameInput, "Updated Name");
+        await fillText(user, nameInput, "Updated Name Again");
+        expect(nameInput).toHaveValue("Updated Name Again");
+
+        const openLogs = vi
+            .mocked(Logger.structured)
+            .mock.calls.filter(([event]) => event === "modal.open");
+        expect(openLogs).toHaveLength(1);
+        expect(showModalSpy).toHaveBeenCalledTimes(1);
     });
 
     test("shows only the subpage heading as an h3, without a duplicate character-name heading", async () => {
