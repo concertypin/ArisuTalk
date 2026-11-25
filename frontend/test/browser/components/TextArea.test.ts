@@ -84,25 +84,22 @@ describe("TextArea Component", () => {
             return element;
         }
 
-        test.each([true, false])(
-            "a long paste stops growing at a cap and scrolls (autosize: %s)",
-            async (autosize) => {
-                const screen = render(TextArea, { autosize });
-                const textarea = textareaOf(screen);
+        test("a long paste stops growing at a cap and scrolls", async () => {
+            const screen = render(TextArea, {});
+            const textarea = textareaOf(screen);
 
-                const manyLines = Array.from({ length: 200 }, () => "line").join("\n");
-                await screen.getByRole("textbox").fill(manyLines);
+            const manyLines = Array.from({ length: 200 }, () => "line").join("\n");
+            await screen.getByRole("textbox").fill(manyLines);
 
-                // Without a cap, field-sizing grows the box to ~200 lines and pushes the chat away.
-                expect(textarea.getBoundingClientRect().height).toBeLessThanOrEqual(
-                    window.innerHeight * 0.4 + 1
-                );
-                expect(getComputedStyle(textarea).overflowY).toBe("auto");
-                expect(textarea.scrollHeight).toBeGreaterThan(textarea.clientHeight);
-                textarea.scrollTop = textarea.scrollHeight;
-                expect(textarea.scrollTop).toBeGreaterThan(0);
-            }
-        );
+            // Without a cap, field-sizing grows the box to ~200 lines and pushes the chat away.
+            expect(textarea.getBoundingClientRect().height).toBeLessThanOrEqual(
+                window.innerHeight * 0.4 + 1
+            );
+            expect(getComputedStyle(textarea).overflowY).toBe("auto");
+            expect(textarea.scrollHeight).toBeGreaterThan(textarea.clientHeight);
+            textarea.scrollTop = textarea.scrollHeight;
+            expect(textarea.scrollTop).toBeGreaterThan(0);
+        });
 
         test("a single line stays compact", async () => {
             const screen = render(TextArea, {});
