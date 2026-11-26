@@ -149,6 +149,7 @@ describe("CharacterList Component", () => {
         await user.click(confirmButton);
 
         await waitFor(() => expect(characterStore.remove).toHaveBeenCalled());
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
 
     test("exports character when export button is clicked", async () => {

@@ -3,7 +3,7 @@ import "@testing-library/jest-dom/vitest";
 import { beforeEach } from "vitest";
 import { installSetHTMLPolyfill } from "@/lib/polyfills/setHTML";
 
-// <dialog> methods only toggle `open`: no top layer, and Escape or `form method="dialog"` does not close.
+// <dialog> methods only toggle `open`: no top layer, and Escape does not close.
 HTMLDialogElement.prototype.show = function show(this: HTMLDialogElement): void {
     this.setAttribute("open", "");
 };
@@ -20,6 +20,18 @@ HTMLDialogElement.prototype.close = function close(
     this.dispatchEvent(new Event("close"));
 };
 
+// jsdom fires `submit` but does not implement `form method="dialog"`: close the dialog like a browser.
+window.addEventListener("submit", (event) => {
+    const form = event.target;
+    if (event.defaultPrevented || !(form instanceof HTMLFormElement) || form.method !== "dialog")
+        return;
+    event.preventDefault();
+    const submitter = event.submitter;
+    form.closest("dialog")?.close(
+        submitter instanceof HTMLButtonElement ? submitter.value : undefined
+    );
+});
+
 // jsdom has no `Element.setHTML`, so components render through the polyfill. `test/setup.ts` runs
 // first and records the missing native method before this installs it.
 await installSetHTMLPolyfill();
@@ -27,6 +39,12 @@ await installSetHTMLPolyfill();
 let objectUrlCount = 0;
 URL.createObjectURL = () => `blob:jsdom/${++objectUrlCount}`;
 URL.revokeObjectURL = () => undefined;
+
+// A browser downloads an `<a download>` click; jsdom would try to navigate to it instead.
+window.addEventListener("click", (event) => {
+    const link = event.target;
+    if (link instanceof HTMLAnchorElement && link.hasAttribute("download")) event.preventDefault();
+});
 
 // In-memory OPFS root with only what `OpFSAssetStorageAdapter` uses.
 const opfsFiles = new Map<string, File>();
