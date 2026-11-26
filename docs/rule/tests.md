@@ -253,6 +253,8 @@ Do not write tests that only exercise a library: a zod enum accepts one of its v
 
 Use `.concurrent` only for tests that share no state: no global spies or stubs (`vi.spyOn(globalThis, "fetch")`, `vi.stubGlobal`, `localStorage`), no shared stores or singletons, no `let` variable assigned in a `beforeEach`, no module-level mock objects whose calls are asserted. Concurrent tests interleave at every `await`, so any shared state is a race. Put `.concurrent` in one place only: on the `describe`, or on each `test`, not both.
 
+Exception: tests whose bodies are fully synchronous (no `await`) cannot interleave, so they may share state if each test sets up the state it reads at its start (for example `test/unit/lib/theme.test.ts`, which stubs its own `matchMedia`). Drop `.concurrent` as soon as such a test gains an `await`.
+
 ### Cleanup
 
 Restore global state with `onTestFinished()` right where the state is changed, instead of `try`/`finally`. The cleanup then sits next to the change, and it still runs when an assertion fails.

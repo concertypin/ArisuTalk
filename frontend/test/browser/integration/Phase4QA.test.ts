@@ -1,6 +1,6 @@
 /**
  * @fileoverview Phase 4 Integration & E2E Testing.
- * Covers both functional flows (system prompt assembly, toggle, magic patterns, template seeding, cleanup)
+ * Covers both functional flows (system prompt assembly, toggle, template seeding, cleanup)
  * and visual styling guidelines (button layout wrap prevention, button alignment, empty state button classes)
  * in a single sequential test to prevent race conditions on the global singleton chatStore.
  */
@@ -26,23 +26,10 @@ import { buildSystemPrompt } from "@/lib/prompts/systemPromptBuilder";
 
 let capturedMessages: unknown[] = [];
 
-// Mock MagicPatternParser to avoid loading web worker (QuickJS sandbox) in jsdom testing
+// Keep the QuickJS scripting worker out of jsdom; the real parser is covered in test/unit.
 vi.mock("@/lib/parsers/magicPatternParser", () => {
     return {
-        parseMagicPatterns: vi
-            .fn()
-            .mockImplementation(
-                async (text: string, context?: { character?: { name: string } }) => {
-                    let replaced = text;
-                    if (context?.character?.name) {
-                        replaced = replaced.replace(
-                            /\{\|\s*character\.name\s*\|\}/g,
-                            context.character.name
-                        );
-                    }
-                    return replaced;
-                }
-            ),
+        parseMagicPatterns: vi.fn(async (text: string) => text),
         default: vi.fn(),
     };
 });
@@ -289,24 +276,6 @@ describe("Phase 4 E2E & Visual Verification (Sequential Suite)", () => {
         expect(resultToggle).toContain("System instruction.");
         expect(resultToggle).toContain("Bratty traits.");
         expect(resultToggle).not.toContain("Loyal maid traits.");
-
-        // Magic pattern evaluation (using apply with static CharacterSchema to safely build Character type)
-        const characterNameMock = apply(CharacterSchema, {
-            ...testChar,
-            id: "c-magic",
-            name: "Nexon Blue Archive Arisu",
-            prompt: {
-                ...testChar.prompt,
-                description: "You are Nexon Blue Archive Arisu.",
-            },
-        });
-
-        const resultMagic = await buildSystemPrompt({
-            generationPrompt: "My character name is {| character.name |}.",
-            character: characterNameMock,
-            persona: undefined,
-        });
-        expect(resultMagic).toContain("My character name is Nexon Blue Archive Arisu.");
 
         // --- SCENARIO 8: Provider Error & Empty message cleanup ---
         // Setup provider to fail on stream

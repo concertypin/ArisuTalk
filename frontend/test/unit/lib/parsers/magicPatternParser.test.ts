@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { parseMagicPatterns, type MagicPatternContext } from "@/lib/parsers/magicPatternParser";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
+import { createTestCharacter } from "@test/utils/character";
 
 // Mock the scripting worker
 const mockExecute = vi.fn();
@@ -15,7 +16,7 @@ vi.mock("@/lib/workers/workerClient", () => ({
     ),
 }));
 
-describe.concurrent("magicPatternParser", () => {
+describe("magicPatternParser", () => {
     const mockContext: MagicPatternContext = {
         character: {
             id: "char-1",
@@ -59,5 +60,25 @@ describe.concurrent("magicPatternParser", () => {
 
         expect(result).toBe("Hello test world");
         expect(mockExecute).toHaveBeenCalled();
+    });
+});
+
+describe("magicPatternParser sandbox context", () => {
+    it("hands the character to the sandbox code and its id to the worker", async () => {
+        mockExecute.mockReset();
+        mockExecute.mockResolvedValue({ result: "Arisu", logs: [] });
+        const context: MagicPatternContext = {
+            character: createTestCharacter({ id: "char-ctx", name: "Arisu" }),
+            persona: { name: "Test User" },
+            chat: () => [],
+        };
+
+        const result = await parseMagicPatterns("Hi {| return character.name |}", context);
+
+        expect(result).toBe("Hi Arisu");
+        expect(mockExecute).toHaveBeenCalledWith(
+            expect.stringContaining(`const character = ${JSON.stringify(context.character)};`),
+            { characterId: "char-ctx", timeout: 5000 }
+        );
     });
 });

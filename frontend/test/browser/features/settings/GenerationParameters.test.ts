@@ -1,5 +1,5 @@
 import { test, expect, describe, vi, beforeEach, assert } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/svelte";
+import { render, screen, fireEvent, waitFor } from "@testing-library/svelte";
 import { userEvent } from "@testing-library/user-event";
 import { fillText } from "@test/utils/user";
 import { tick } from "svelte";
@@ -318,28 +318,24 @@ describe("GenerationParameters Component", () => {
     });
 
     test("unchecking model checkbox deletes the model field on the parent config", async () => {
-        const { container } = render(Wrapper, {
+        const user = userEvent.setup();
+        render(Wrapper, {
             props: {
                 config: mockConfig,
                 id: 0,
             },
         });
 
-        // The Model label has both a checkbox (presence toggle) and a text
-        // input (the model value). Identify the checkbox by its containing label.
-        function isHtmlInputElement(node: Element): node is HTMLInputElement {
-            return node.tagName === "INPUT";
-        }
-        const checkboxes = Array.from(container.querySelectorAll('input[type="checkbox"]')).filter(
-            isHtmlInputElement
-        );
-        const modelToggle = checkboxes.find((cb) => {
-            const label = cb.closest("label");
-            return label?.textContent?.includes("Model") ?? false;
-        });
-        assert(modelToggle, "Model presence checkbox not found");
-        modelToggle.click();
-        await tick();
+        const modelToggle = screen.getByRole("checkbox", { name: "Include Model" });
+        const modelInput = screen.getByRole("textbox", { name: /model/i });
+        expect(modelToggle).toBeChecked();
+        expect(modelInput).toBeEnabled();
+
+        await user.click(modelToggle);
+
+        expect(modelToggle).not.toBeChecked();
+        expect(modelInput).toBeDisabled();
+        await waitFor(() => expect(mockConfig).not.toHaveProperty("model"));
     });
 
     test("repeated field edits settle cleanly (no reactive thrash)", async () => {

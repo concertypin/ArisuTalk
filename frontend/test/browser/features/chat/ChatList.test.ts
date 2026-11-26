@@ -84,6 +84,7 @@ describe("ChatList Component", () => {
         });
 
         expect(screen.getByText("Chat 1")).toBeInTheDocument();
+        expect(screen.queryByText("Chat 2")).not.toBeInTheDocument();
     });
 
     test("highlights active chat", () => {

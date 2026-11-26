@@ -239,29 +239,21 @@ describe("CharacterHooksSettings Component", () => {
 
         await user.click(screen.getByText("test → (empty)"));
 
-        const caseSensitiveCheckbox = screen.getByLabelText("Case Sensitive");
-        expect(caseSensitiveCheckbox).toBeInTheDocument();
+        // The mocked context never feeds the change back, so each action is judged on its own.
+        await user.click(screen.getByRole("checkbox", { name: "Case Sensitive" }));
 
-        const typeSelect = screen.getByLabelText("Type");
-        expect(typeSelect).toBeInTheDocument();
+        const afterToggle = onChangeSpy.mock.lastCall?.[0];
+        expect(afterToggle?.executables.replaceHooks.display[0].meta).toMatchObject({
+            type: "string",
+            caseSensitive: true,
+        });
 
-        // Use selectOptions (plural)
-        await user.selectOptions(typeSelect, "regex");
+        await user.selectOptions(screen.getByRole("combobox", { name: "Type" }), "regex");
 
-        expect(onChangeSpy).toHaveBeenCalledWith(
-            expect.objectContaining({
-                /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-                executables: expect.objectContaining({
-                    replaceHooks: expect.objectContaining({
-                        display: expect.arrayContaining([
-                            expect.objectContaining({
-                                meta: expect.objectContaining({ type: "regex" }),
-                            }),
-                        ]),
-                    }),
-                }),
-                /* eslint-enable @typescript-eslint/no-unsafe-assignment */
-            })
-        );
+        const afterType = onChangeSpy.mock.lastCall?.[0];
+        expect(afterType?.executables.replaceHooks.display[0].meta).toMatchObject({
+            type: "regex",
+            flag: "g",
+        });
     });
 });

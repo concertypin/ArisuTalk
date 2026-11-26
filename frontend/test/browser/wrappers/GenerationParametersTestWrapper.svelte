@@ -16,7 +16,12 @@
     let reactiveConfig = $state(structuredClone($state.snapshot(config)));
 
     $effect(() => {
-        Object.assign(config, $state.snapshot(reactiveConfig));
+        const snapshot = $state.snapshot(reactiveConfig);
+        Object.assign(config, snapshot);
+        // Object.assign cannot remove a field, so mirror the deletions of the optional ones.
+        if (snapshot.model === undefined) delete config.model;
+        if (snapshot.apiKey === undefined) delete config.apiKey;
+        if (snapshot.baseURL === undefined) delete config.baseURL;
     });
 </script>
 

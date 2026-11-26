@@ -4,15 +4,6 @@ import { userEvent } from "@testing-library/user-event";
 import ButtonTestWrapper from "../wrappers/ButtonTestWrapper.svelte";
 
 describe("Button Component", () => {
-    test("renders with accessible name and is visible", () => {
-        // Arrange
-        render(ButtonTestWrapper, { props: { label: "Click me" } });
-
-        // Act / Assert
-        const button = screen.getByRole("button", { name: "Click me" });
-        expect(button).toBeInTheDocument();
-    });
-
     test("calls onclick handler when clicked", async () => {
         // Arrange
         const user = userEvent.setup();
