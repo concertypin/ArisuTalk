@@ -1,6 +1,7 @@
-/// <reference types="vitest/browser" />
 import { test, expect, describe, vi, beforeEach } from "vitest";
-import { render } from "vitest-browser-svelte";
+import { render, screen, waitFor, within } from "@testing-library/svelte";
+import { userEvent } from "@testing-library/user-event";
+import { fillText } from "@test/utils/user";
 import CharacterForm from "@/features/character/components/CharacterForm.svelte";
 import { characterStore } from "@/features/character/stores/characterStore.svelte";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
@@ -60,36 +61,45 @@ describe("CharacterForm Component", () => {
         characterStore.importCharacter = vi.fn();
     });
 
-    test("renders create form when no character is provided", async () => {
-        const { getByLabelText } = render(CharacterForm, {
-            onSave: mockOnSave,
-            onCancel: mockOnCancel,
+    test("renders create form when no character is provided", () => {
+        render(CharacterForm, {
+            props: {
+                onSave: mockOnSave,
+                onCancel: mockOnCancel,
+            },
         });
 
-        await expect.element(getByLabelText(/Name/i)).toBeVisible();
-        await expect.element(getByLabelText(/Description/i)).toBeVisible();
+        expect(screen.getByRole("textbox", { name: /Name/i })).toBeInTheDocument();
+        expect(screen.getByRole("textbox", { name: /Description/i })).toBeInTheDocument();
     });
 
-    test("renders edit form when character is provided", async () => {
-        const { getByLabelText } = render(CharacterForm, {
-            character: mockCharacter,
-            onSave: mockOnSave,
-            onCancel: mockOnCancel,
+    test("renders edit form when character is provided", () => {
+        render(CharacterForm, {
+            props: {
+                character: mockCharacter,
+                onSave: mockOnSave,
+                onCancel: mockOnCancel,
+            },
         });
 
-        await expect.element(getByLabelText(/Name/i)).toHaveValue("Test Character");
-        await expect.element(getByLabelText(/Description/i)).toHaveValue("A test character");
+        expect(screen.getByRole("textbox", { name: /Name/i })).toHaveValue("Test Character");
+        expect(screen.getByRole("textbox", { name: /Description/i })).toHaveValue(
+            "A test character"
+        );
     });
 
     test("calls onSubmit when form is submitted", async () => {
-        const { getByRole } = render(CharacterForm, {
-            character: mockCharacter,
-            onSubmit: mockOnSubmit,
-            onSave: mockOnSave,
+        const user = userEvent.setup();
+        render(CharacterForm, {
+            props: {
+                character: mockCharacter,
+                onSubmit: mockOnSubmit,
+                onSave: mockOnSave,
+            },
         });
 
-        const submitButton = getByRole("button", { name: /Save/i });
-        await submitButton.click();
+        const submitButton = screen.getByRole("button", { name: /Save/i });
+        await user.click(submitButton);
 
         expect(mockOnSubmit).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -100,15 +110,18 @@ describe("CharacterForm Component", () => {
     });
 
     test("shows error message when name is empty", async () => {
-        const { getByLabelText, getByText, container } = render(CharacterForm, {
-            onCancel: mockOnCancel,
+        const user = userEvent.setup();
+        const { container } = render(CharacterForm, {
+            props: {
+                onCancel: mockOnCancel,
+            },
         });
 
-        const nameInput = getByLabelText(/Name/i);
-        await nameInput.fill(""); // Clear name
+        const nameInput = screen.getByRole("textbox", { name: /Name/i });
+        await fillText(user, nameInput, ""); // Clear name
 
-        const submitButton = getByText(/Save/i);
-        await submitButton.click();
+        const submitButton = screen.getByRole("button", { name: /Save/i });
+        await user.click(submitButton);
 
         const errorMessage = container.querySelector(".alert-error");
         expect(errorMessage).toBeTruthy();
@@ -116,80 +129,102 @@ describe("CharacterForm Component", () => {
     });
 
     test("calls onCancel when cancel button is clicked", async () => {
-        const { getByRole } = render(CharacterForm, {
-            onCancel: mockOnCancel,
+        const user = userEvent.setup();
+        render(CharacterForm, {
+            props: {
+                onCancel: mockOnCancel,
+            },
         });
 
         // Click cancel button in the active tab (Create New)
-        const cancelButton = getByRole("button", { name: /Cancel/i }).first();
-        await cancelButton.click();
+        const cancelButton = screen.getAllByRole("button", { name: /Cancel/i })[0];
+        await user.click(cancelButton);
 
         expect(mockOnCancel).toHaveBeenCalledOnce();
     });
 
     test("has file upload input for importing", async () => {
-        const { getByLabelText } = render(CharacterForm, {
-            onSave: mockOnSave,
-            onCancel: mockOnCancel,
+        const user = userEvent.setup();
+        render(CharacterForm, {
+            props: {
+                onSave: mockOnSave,
+                onCancel: mockOnCancel,
+            },
         });
 
         // Switch to the Import Card tab first, file input is inside that tab panel
-        const importTab = getByLabelText("Import Card");
-        await importTab.click();
+        const importTab = screen.getByRole("radio", { name: "Import Card" });
+        await user.click(importTab);
 
-        const fileInput = getByLabelText("Character file input");
-        await expect.element(fileInput).toBeVisible();
+        expect(importTab).toBeChecked();
+        // DaisyUI shows the panel after the checked tab with CSS, which jsdom lacks.
+        expect(importTab.nextElementSibling).toContainElement(
+            screen.getByLabelText("Character file input")
+        );
     });
 
     test("handles character import", async () => {
+        const user = userEvent.setup();
         characterStore.importCharacter = vi.fn().mockResolvedValue({
             success: true,
             character: mockCharacter,
         });
 
-        const { getByLabelText } = render(CharacterForm, {
-            onSave: mockOnSave,
-            onCancel: mockOnCancel,
+        render(CharacterForm, {
+            props: {
+                onSave: mockOnSave,
+                onCancel: mockOnCancel,
+            },
         });
 
         // Switch to the Import Card tab first
-        const importTab = getByLabelText("Import Card");
-        await importTab.click();
+        const importTab = screen.getByRole("radio", { name: "Import Card" });
+        await user.click(importTab);
 
-        const fileInput = getByLabelText("Character file input");
-        await fileInput.upload(
+        const fileInput = screen.getByLabelText("Character file input");
+        await user.upload(
+            fileInput,
             new File(['{"name":"Imported Char","specVersion":0}'], "character.arisc", {
                 type: "application/json",
             })
         );
 
-        await vi.waitFor(() => {
-            expect(characterStore.importCharacter).toHaveBeenCalled();
-        });
+        await waitFor(() => expect(mockOnSave).toHaveBeenCalledOnce());
+        expect(characterStore.importCharacter).toHaveBeenCalledOnce();
+        const importedFile = vi.mocked(characterStore.importCharacter).mock.calls[0]?.[0];
+        expect(importedFile?.name).toBe("character.arisc");
+        expect(screen.queryByText(/Import failed|Invalid file format/)).not.toBeInTheDocument();
     });
 
     test("shows import error when import fails", async () => {
+        const user = userEvent.setup();
         characterStore.importCharacter = vi.fn().mockResolvedValue({
             success: false,
             error: "Invalid file format",
         });
 
-        const { getByLabelText } = render(CharacterForm, {
-            onSave: mockOnSave,
-            onCancel: mockOnCancel,
+        render(CharacterForm, {
+            props: {
+                onSave: mockOnSave,
+                onCancel: mockOnCancel,
+            },
         });
 
         // Switch to the Import Card tab first
-        const importTab = getByLabelText("Import Card");
-        await importTab.click();
+        const importTab = screen.getByRole("radio", { name: "Import Card" });
+        await user.click(importTab);
 
-        const fileInput = getByLabelText("Character file input");
-        await fileInput.upload(
+        const fileInput = screen.getByLabelText("Character file input");
+        await user.upload(
+            fileInput,
             new File(['{"name":"Bad Char"}'], "bad.arisc", { type: "application/json" })
         );
 
-        await vi.waitFor(() => {
-            expect(characterStore.importCharacter).toHaveBeenCalled();
-        });
+        // The error is rendered in the Import Card panel, next to the file input.
+        const importPanel = fileInput.closest<HTMLElement>('[role="tabpanel"]');
+        expect(importPanel).not.toBeNull();
+        expect(await within(importPanel!).findByText("Invalid file format")).toBeInTheDocument();
+        expect(characterStore.importCharacter).toHaveBeenCalledOnce();
+        expect(mockOnSave).not.toHaveBeenCalled();
     });
 });

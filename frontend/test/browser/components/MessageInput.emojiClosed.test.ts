@@ -1,5 +1,6 @@
 import { test, expect, vi } from "vitest";
-import { render } from "vitest-browser-svelte";
+import { render, screen } from "@testing-library/svelte";
+import { userEvent } from "@testing-library/user-event";
 import MessageInput from "@/components/chat/MessageInput.svelte";
 
 const emojiModule = vi.hoisted(() => ({
@@ -12,12 +13,11 @@ vi.mock("unicode-emoji-json/data-by-group.json", () => {
     return { default: [] };
 });
 
-// This lives in its own file: the picker's loading state is module-scoped and shared by every test of
-// a file, so "never requested" only holds when nothing else in the file has opened the picker. Browser
-// mode gives each test file a fresh module registry, which keeps this independent of test order.
+// Own file: the picker's loading is module-scoped, so another test opening it breaks "never requested".
 test("emoji data is not requested while the picker stays closed", async () => {
-    const screen = render(MessageInput, { onSubmit: vi.fn() });
-    await screen.getByRole("textbox").fill("typing without opening the picker");
+    const user = userEvent.setup();
+    render(MessageInput, { props: { onSubmit: vi.fn() } });
+    await user.type(screen.getByRole("textbox"), "typing without opening the picker");
 
     expect(emojiModule.evaluations).toBe(0);
 });

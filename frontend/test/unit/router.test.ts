@@ -1,4 +1,4 @@
-// @vitest-environment happy-dom
+// @vitest-environment jsdom
 import { describe, it, expect, beforeEach, beforeAll, expectTypeOf, vi } from "vitest";
 import { navigate, getCurrentPath, isActive, initRouter } from "@/lib/router.svelte";
 import { Logger } from "@common/logger/Logger";

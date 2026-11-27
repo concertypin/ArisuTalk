@@ -38,9 +38,6 @@ jobs:
       fail-fast: false # Don't stop other jobs if one fails, we want to see all fails
       matrix:
         index: ${{ fromJson(needs.setup-matrix.outputs.indices) }}
-    container: 
-      image: mcr.microsoft.com/playwright:v1.57.0
-      options: --user 1001
     steps:
       - uses: actions/checkout@v4
 

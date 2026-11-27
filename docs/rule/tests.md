@@ -47,7 +47,7 @@ const mockStore = {
 Use these for your `.svelte.ts` files or pure TypeScript utility files. These tests run in Node.js for maximum speed. Since Svelte 5 runes are "universal," they can be tested without a browser if they don't touch the DOM.
 
 - File Extension: Use `.test.ts`.
-- Environment: Default (Node.js).
+- Environment: Default (Node.js). A test that only needs `window` or `localStorage` (not a rendered component) can opt in to jsdom with a `// @vitest-environment jsdom` comment on its first line.
 - Concurrency: Use `.concurrent` only for tests that share no state. See [Concurrency](#concurrency) for what counts as shared state.
 
 ```typescript
@@ -100,45 +100,73 @@ describe('User List', () => {
 
 ---
 
-## Browser Component Tests (Playwright)
+## Browser Component Tests (jsdom + Testing Library)
 
-Use these for `.svelte` files. These tests run in a real browser, allowing you to test layout, real event bubbling, and browser-only APIs (like `IntersectionObserver`).
+Use these for `.svelte` files. The `browser` Vitest project emulates a browser with [jsdom](https://github.com/jsdom/jsdom) (a DOM implementation in Node.js); no real browser runs in tests or CI.
 
-- File Extension: Use `.test.ts` on `test/browser/` files.
-- Tooling: Use `vitest-browser-svelte` for rendering and `page` from `vitest/browser` for interactions.
-- Concurrency: Follow [Concurrency](#concurrency). `vitest-browser-svelte` isolates `render()`, but if you manipulate the global `window` object, use serial tests.
-- A11y First: Pick locators in this order, and move to the next only when the previous one cannot identify the element.
+- File Extension: Use `.test.ts` on `test/browser/` files. The `browser` project (see `scripts/testConfig.ts`) picks up `test/browser/**/*.test.ts` and sets the jsdom environment, so no `@vitest-environment` pragma is needed there.
+- Tooling: Use `render`, `screen`, `within`, `waitFor` and `fireEvent` from `@testing-library/svelte`, and `userEvent.setup()` from `@testing-library/user-event` for interactions. Matchers such as `toBeVisible()`, `toBeDisabled()`, `toHaveClass()` and `toHaveValue()` come from `@testing-library/jest-dom`, registered in `test/setup.browser.ts`. Rendered components are cleaned up after each test automatically (the `svelteTesting()` Vite plugin).
+- Setup file: `test/setup.browser.ts` also fills the few jsdom gaps the tests hit (`<dialog>.showModal()`, `URL.createObjectURL`, `navigator.storage`) and installs the `setHTML` polyfill, because jsdom has no HTML Sanitizer API. Add a polyfill there, with a comment saying why, only when a test really needs one.
+- Props: Pass them as `render(Component, { props: { ... } })`. Props passed directly clash with Testing Library's own options when a prop is named `context`, `target` or `props`.
+- Interactions: `await` every `user.click`, `user.type`, `user.keyboard`, ... call. `user.type` parses `{` and `[` as key descriptors, so use the `fillText(user, element, text)` helper from `@test/utils/user` (or `user.paste`) to put literal text such as JSON into a field. `user-event` cannot drive `<input type="range">`; dispatch the event with `await fireEvent.input(slider, { target: { value: "20" } })`.
+- Async UI: Use `await screen.findBy*(...)` or `await waitFor(() => expect(...))` for anything that appears after a promise or a lazy import. Use `queryBy*` to assert that something is absent. A string `name` or text matches exactly and case-sensitively; use a regular expression for a partial match.
+- Concurrency: Follow [Concurrency](#concurrency). All tests of a file share one `document`, and rendered components are cleaned up between tests, so do not use `.concurrent` here.
+- A11y First: Pick queries in this order, and move to the next only when the previous one cannot identify the element.
   1. `getByRole('button', { name: 'Save' })`: explicit selection based on the Accessibility Tree.
   2. `getByLabelText` / `getByText`: for elements without a useful role, such as plain text.
   3. `getByTestId`: last resort, for elements that have no role, label or text, such as a decorative element (add `data-testid` to the component).
-- Locators, not the DOM: do not reach into the DOM with `container.querySelector`. Use locators and `expect.element(...)`, which retry until the page settles. `container.querySelector(...)` returns a snapshot, forces `as` casts, and needs hand-written `vi.waitFor` loops.
-- Selecting by tag or class (as some older tests and examples do) is not a locator. Rewrite it to one of the above.
+- Queries, not the DOM: do not reach into the DOM with `container.querySelector`. Use Testing Library queries (`screen.getBy*`, `within(...)`) and `findBy*` / `waitFor(...)`, which retry until the page settles. `container.querySelector(...)` returns a snapshot, forces `as` casts, and needs hand-written polling loops.
+- Selecting by tag or class (as some older tests and examples do) is not a query. Rewrite it to one of the above, even when the example you were given uses a simple selector.
+
+### What jsdom Cannot DOMinate
+
+jsdom does no layout, loads no stylesheet and leaves out parts of the web platform; see [Unimplemented parts of the web platform](https://github.com/jsdom/jsdom#unimplemented-parts-of-the-web-platform). Anything that only means something in a real rendering engine cannot be measured. Assert the classes and attributes that produce the behavior instead:
+
+```typescript
+// Don't (measures layout; always 0 in jsdom)
+expect(textarea.getBoundingClientRect().height).toBeLessThanOrEqual(window.innerHeight * 0.4);
+
+// Do (pins the classes that cap the height and make it scroll)
+expect(textarea).toHaveClass('max-h-[40vh]', 'overflow-y-auto');
+```
+
+- Visibility: `toBeVisible()` cannot see elements hidden by CSS classes (DaisyUI tabs, collapse, `hidden` utilities), so it passes for them. Use `toBeInTheDocument()` for "is rendered", and keep `toBeVisible()` only where the `hidden` attribute, an inline style or `<dialog open>` decides visibility.
+- Native `setHTML`: jsdom has no HTML Sanitizer API, so only the polyfill runs there. Tests of the native sanitizer skip themselves when `hasNativeSetHTML` from `@test/utils/setHTML` is false, instead of failing or faking the native API.
+- Soft checks: for a signal that is unreliable without a real browser (colors, for example), use `softTest` from `@test/utils/softTest` and wrap the `expect` in `warn`. A failed assertion is reported as a "warning" annotation (a warning on the PR in CI) instead of failing the test; any other error still fails it. Keep the other assertions as plain `expect`, and start the test name with "soft color check".
+
+```typescript
+softTest('soft color check: primary color class', ({ warn }) => {
+    render(TextArea, { props: { color: 'primary' } });
+    expect(screen.getByRole('textbox')).toHaveClass('textarea'); // hard: fails the test
+    warn(() => expect(screen.getByRole('textbox')).toHaveClass('textarea-primary')); // soft: warns only
+});
+```
 
 ```typescript
 // Button.svelte.test.ts (The Component Test)
-import { render } from 'vitest-browser-svelte';
-import { page } from 'vitest/browser';
+import { render, screen } from '@testing-library/svelte';
+import { userEvent } from '@testing-library/user-event';
 import { it, expect, describe } from 'vitest';
 import Button from './Button.svelte';
 
 describe('Button Component', () => {
-    it.concurrent('should render with snippet content and handle clicks', async () => {
+    it('should render with snippet content and handle clicks', async () => {
+        const user = userEvent.setup();
+
         // 1. Render the component
-        const { getByRole, getByText } = render(Button, { 
-          props: { label: 'Click Me' } 
-        });
-        
+        render(Button, { props: { label: 'Click Me' } });
+
         // 2. Locate using ARIA roles (best practice)
-        const btn = getByRole('button', { name: /click me/i });
-        
-        // 3. Assert visibility and state
-        await expect.element(btn).toBeVisible();
-        
-        // 4. Perform real browser interaction
-        await btn.click();
-        
+        const btn = screen.getByRole('button', { name: /click me/i });
+
+        // 3. Assert its state (getByRole already throws when the button is missing)
+        expect(btn).toBeEnabled();
+
+        // 4. Perform the interaction
+        await user.click(btn);
+
         // 5. Assert result (assuming it changes text on click)
-        await expect.element(getByText('Clicked')).toBeInTheDocument();
+        expect(await screen.findByText('Clicked')).toBeVisible();
     });
 });
 
@@ -148,27 +176,28 @@ describe('Button Component', () => {
 
 ## Advanced Rune Testing (Universal State)
 
-If your component depends on a shared `$state` defined in a `.svelte.ts` file, you may need `flushSync` from `svelte` to ensure the DOM updates immediately during a test.
+If your component reads `$state` defined in a `.svelte.ts` file, use `flushSync` from `svelte` to apply a state change to the DOM immediately during a test.
+
+Create that state inside the test and hand it to the component, rather than mutating a module-level singleton. A singleton keeps its value from one test to the next, so tests start depending on their order. When a component can only read a singleton store, reset the store in `beforeEach`.
 
 ```typescript
 import { it, expect } from 'vitest';
 import { flushSync } from 'svelte';
-import { render } from 'vitest-browser-svelte';
-import { page } from 'vitest/browser';
-import MyComponent from './MyComponent.svelte';
-import { sharedState } from './store.svelte';
+import { render, screen } from '@testing-library/svelte';
+import { createCounter } from '@/lib/stores/counter.svelte';
+import Counter from '@/components/Counter.svelte';
 
-it('updates UI when shared rune changes', async () => {
-    render(MyComponent);
-    
-    // Wrap state changes in flushSync to force immediate DOM update
+it('updates the UI when the state changes', () => {
+    const counter = createCounter(); // fresh state for this test only
+    render(Counter, { props: { counter } });
+
+    // flushSync applies the change to the DOM before the assertion
     flushSync(() => {
-        sharedState.value = 'new data';
+        counter.value = 1;
     });
-  
-    await expect.element(page.getByText('new data')).toBeVisible();
-});
 
+    expect(screen.getByText('1')).toBeVisible();
+});
 ```
 
 ## Advanced Testing & Mocking Guidelines
@@ -178,7 +207,7 @@ it('updates UI when shared rune changes', async () => {
 If your stores rely on async initialization (`await store.initPromise`), do NOT use `vi.useFakeTimers()` early in `beforeEach` or before stores resolve. Doing so pauses microtask queues, preventing promises from resolving and triggering a test timeout.
 
 - Rule: Safe loading defaults to real timers first. Enable `vi.useFakeTimers()` only _after_ all stores have resolved their init promises.
-- Browser tests: do not combine fake timers with `expect.element` or locator polling. Polling retries on timers, so with fake timers it stalls until the test timeout on slow runners (as in CI). To make a mocked LLM reply fast, pass `mockDelay: 0` to the `MOCK` provider (the delay is per streamed character) instead of advancing fake timers.
+- Component tests: do not combine `vi.useFakeTimers()` with `waitFor` or `findBy*`. Testing Library polls on a timer, so with fake timers the poll never fires and the test stalls until its timeout. To make a mocked LLM reply fast, pass `mockDelay: 0` to the `MOCK` provider (the delay is per streamed character) instead of advancing fake timers.
 
 ### Preserve Svelte 5 Runes Reactivity on Arrays
 
@@ -223,6 +252,8 @@ Do not write tests that only exercise a library: a zod enum accepts one of its v
 ### Concurrency
 
 Use `.concurrent` only for tests that share no state: no global spies or stubs (`vi.spyOn(globalThis, "fetch")`, `vi.stubGlobal`, `localStorage`), no shared stores or singletons, no `let` variable assigned in a `beforeEach`, no module-level mock objects whose calls are asserted. Concurrent tests interleave at every `await`, so any shared state is a race. Put `.concurrent` in one place only: on the `describe`, or on each `test`, not both.
+
+Exception: tests whose bodies are fully synchronous (no `await`) cannot interleave, so they may share state if each test sets up the state it reads at its start (for example `test/unit/lib/theme.test.ts`, which stubs its own `matchMedia`). Drop `.concurrent` as soon as such a test gains an `await`.
 
 ### Cleanup
 

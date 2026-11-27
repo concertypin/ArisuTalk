@@ -1,5 +1,6 @@
 import { test, expect, describe, vi } from "vitest";
-import { render } from "vitest-browser-svelte";
+import { render, screen, waitFor } from "@testing-library/svelte";
+import { userEvent } from "@testing-library/user-event";
 import { Logger } from "@common/logger/Logger";
 import MessageInput from "@/components/chat/MessageInput.svelte";
 
@@ -34,27 +35,22 @@ vi.mock("unicode-emoji-json/data-by-group.json", () => {
     };
 });
 
-// The picker's loading state lives in module scope on purpose (one download for every picker).
-// The "never requested while closed" case is in MessageInput.emojiClosed.test.ts so that this file's
-// opening of the picker cannot affect it.
+// "Never requested while closed" lives in MessageInput.emojiClosed.test.ts; opening the picker here would affect it.
 describe("emoji data loading", () => {
     test("a failed load is not cached: reopening the picker attempts it again", async () => {
+        const user = userEvent.setup();
         emojiModule.fail = true;
         const logged = vi.spyOn(Logger, "error").mockImplementation(() => {});
-        const screen = render(MessageInput, { onSubmit: vi.fn() });
+        render(MessageInput, { props: { onSubmit: vi.fn() } });
 
-        await screen.getByRole("button", { name: "Pick emoji" }).click();
-        await vi.waitFor(() => expect(logged).toHaveBeenCalledTimes(1));
-        await screen.getByRole("button", { name: "Close", exact: true }).click();
-        await screen.getByRole("button", { name: "Pick emoji" }).click();
+        await user.click(screen.getByRole("button", { name: "Pick emoji" }));
+        await waitFor(() => expect(logged).toHaveBeenCalledTimes(1));
+        await user.click(screen.getByRole("button", { name: "Close" }));
+        await user.click(screen.getByRole("button", { name: "Pick emoji" }));
 
-        // A cached rejection would never be attempted (and so never logged) a second time.
-        // The browser keeps a module that failed while evaluating, so success on retry cannot be
-        // simulated here; a new attempt is what proves the failure was not remembered.
-        await vi.waitFor(() => expect(logged).toHaveBeenCalledTimes(2));
-        await expect
-            .element(screen.getByRole("button", { name: GRINNING }))
-            .not.toBeInTheDocument();
+        // A cached rejection would never be attempted, and so never logged, a second time.
+        await waitFor(() => expect(logged).toHaveBeenCalledTimes(2));
+        expect(screen.queryByRole("button", { name: GRINNING })).not.toBeInTheDocument();
         logged.mockRestore();
     });
 });

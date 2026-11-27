@@ -1,128 +1,138 @@
 import { test, expect, describe, vi } from "vitest";
-import { userEvent } from "vitest/browser";
-import { render } from "vitest-browser-svelte";
+import { render, screen } from "@testing-library/svelte";
+import { userEvent } from "@testing-library/user-event";
 import MessageInput from "@/components/chat/MessageInput.svelte";
 import { recordSubmitEvents } from "@test/utils/submitEvents";
 
 describe("MessageInput Component", () => {
     test("Send button submits the text and clears the input", async () => {
+        const user = userEvent.setup();
         const onSubmit = vi.fn();
-        const screen = render(MessageInput, { onSubmit });
+        render(MessageInput, { props: { onSubmit } });
         const input = screen.getByRole("textbox");
 
-        await input.fill("Hello");
-        await screen.getByRole("button", { name: "Send" }).click();
+        await user.type(input, "Hello");
+        await user.click(screen.getByRole("button", { name: "Send" }));
 
         expect(onSubmit).toHaveBeenCalledExactlyOnceWith("Hello");
-        await expect.element(input).toHaveValue("");
+        expect(input).toHaveValue("");
     });
 
     test("Enter submits the text and clears the input like the Send button", async () => {
+        const user = userEvent.setup();
         const onSubmit = vi.fn();
-        const screen = render(MessageInput, { onSubmit });
+        render(MessageInput, { props: { onSubmit } });
         const input = screen.getByRole("textbox");
 
-        await input.fill("Hello");
-        await userEvent.keyboard("{Enter}");
+        await user.type(input, "Hello");
+        await user.keyboard("{Enter}");
 
         expect(onSubmit).toHaveBeenCalledExactlyOnceWith("Hello");
-        await expect.element(input).toHaveValue("");
+        expect(input).toHaveValue("");
     });
 
-    test("labels the Enter key of virtual keyboards as Send", async () => {
-        const screen = render(MessageInput, { onSubmit: vi.fn() });
+    test("labels the Enter key of virtual keyboards as Send", () => {
+        render(MessageInput, { props: { onSubmit: vi.fn() } });
 
-        await expect.element(screen.getByRole("textbox")).toHaveAttribute("enterkeyhint", "send");
+        expect(screen.getByRole("textbox")).toHaveAttribute("enterkeyhint", "send");
     });
 
     test("opening the emoji picker does not send the draft", async () => {
+        const user = userEvent.setup();
         const onSubmit = vi.fn();
-        const screen = render(MessageInput, { onSubmit });
-        const input = screen.getByPlaceholder("Type a message...");
-        await input.fill("draft");
+        render(MessageInput, { props: { onSubmit } });
+        const input = screen.getByPlaceholderText("Type a message...");
+        await user.type(input, "draft");
 
-        await screen.getByRole("button", { name: "Pick emoji" }).click();
+        await user.click(screen.getByRole("button", { name: "Pick emoji" }));
 
         expect(onSubmit).not.toHaveBeenCalled();
-        await expect.element(input).toHaveValue("draft");
+        expect(input).toHaveValue("draft");
     });
 
     test("prevents the browser's default form submission", async () => {
+        const user = userEvent.setup();
         const submitEvents = recordSubmitEvents();
-        const screen = render(MessageInput, { onSubmit: vi.fn() });
+        render(MessageInput, { props: { onSubmit: vi.fn() } });
 
-        await screen.getByRole("textbox").fill("Hello");
-        await screen.getByRole("button", { name: "Send" }).click();
+        await user.type(screen.getByRole("textbox"), "Hello");
+        await user.click(screen.getByRole("button", { name: "Send" }));
 
         expect(submitEvents).toHaveLength(1);
         expect(submitEvents[0].defaultPrevented).toBe(true);
     });
 
     test("clears the input right away, without waiting for the submit handler", async () => {
+        const user = userEvent.setup();
         const onSubmit = vi.fn(() => new Promise<void>(() => undefined));
-        const screen = render(MessageInput, { onSubmit });
+        render(MessageInput, { props: { onSubmit } });
         const input = screen.getByRole("textbox");
 
-        await input.fill("Hello");
-        await userEvent.keyboard("{Enter}");
+        await user.type(input, "Hello");
+        await user.keyboard("{Enter}");
 
         expect(onSubmit).toHaveBeenCalledExactlyOnceWith("Hello");
-        await expect.element(input).toHaveValue("");
+        expect(input).toHaveValue("");
     });
 
     test("Send button is disabled for blank text", async () => {
-        const screen = render(MessageInput, { onSubmit: vi.fn() });
+        const user = userEvent.setup();
+        render(MessageInput, { props: { onSubmit: vi.fn() } });
 
-        await expect.element(screen.getByRole("button", { name: "Send" })).toBeDisabled();
+        expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
 
-        await screen.getByRole("textbox").fill("   ");
+        await user.type(screen.getByRole("textbox"), "   ");
 
-        await expect.element(screen.getByRole("button", { name: "Send" })).toBeDisabled();
+        expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
     });
 
     test("cannot send while generating, and keeps the draft", async () => {
+        const user = userEvent.setup();
         const onSubmit = vi.fn();
-        const screen = render(MessageInput, { onSubmit, isGenerating: true });
+        render(MessageInput, { props: { onSubmit, isGenerating: true } });
         const input = screen.getByRole("textbox");
 
-        await input.fill("draft");
-        await expect.element(screen.getByRole("button", { name: "Send" })).toBeDisabled();
+        await user.type(input, "draft");
+        expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
 
-        await userEvent.keyboard("{Enter}");
+        await user.keyboard("{Enter}");
 
         expect(onSubmit).not.toHaveBeenCalled();
-        await expect.element(input).toHaveValue("draft");
+        expect(input).toHaveValue("draft");
     });
 
-    test("is fully disabled when disabled", async () => {
-        const screen = render(MessageInput, { onSubmit: vi.fn(), disabled: true });
+    test("is fully disabled when disabled", () => {
+        render(MessageInput, { props: { onSubmit: vi.fn(), disabled: true } });
 
-        await expect.element(screen.getByRole("textbox")).toBeDisabled();
-        await expect.element(screen.getByRole("button", { name: "Send" })).toBeDisabled();
+        expect(screen.getByRole("textbox")).toBeDisabled();
+        expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
     });
 
     test("inserts the picked emoji at the cursor", async () => {
-        const screen = render(MessageInput, { onSubmit: vi.fn() });
+        const user = userEvent.setup();
+        render(MessageInput, { props: { onSubmit: vi.fn() } });
         const input = screen.getByRole("textbox");
-        await input.fill("ab");
-        const textarea = input.element();
-        if (!(textarea instanceof HTMLTextAreaElement)) throw new Error("textarea expected");
-        textarea.setSelectionRange(1, 1);
+        await user.type(input, "ab");
+        if (!(input instanceof HTMLTextAreaElement)) throw new Error("textarea expected");
+        input.setSelectionRange(1, 1);
 
-        await screen.getByRole("button", { name: "Pick emoji" }).click();
-        await screen.getByPlaceholder("Search emoji...").fill("grinning face");
-        await screen.getByRole("button", { name: "😀" }).first().click();
+        await user.click(screen.getByRole("button", { name: "Pick emoji" }));
+        await user.type(await screen.findByPlaceholderText("Search emoji..."), "grinning face");
+        const [emojiButton] = await screen.findAllByRole("button", { name: "😀" });
+        await user.click(emojiButton);
 
-        await expect.element(input).toHaveValue("a😀b");
+        expect(input).toHaveValue("a😀b");
     });
 
     test("appends the picked emoji when nothing was typed", async () => {
-        const screen = render(MessageInput, { onSubmit: vi.fn() });
+        const user = userEvent.setup();
+        render(MessageInput, { props: { onSubmit: vi.fn() } });
 
-        await screen.getByRole("button", { name: "Pick emoji" }).click();
-        await screen.getByPlaceholder("Search emoji...").fill("grinning face");
-        await screen.getByRole("button", { name: "😀" }).first().click();
+        await user.click(screen.getByRole("button", { name: "Pick emoji" }));
+        await user.type(await screen.findByPlaceholderText("Search emoji..."), "grinning face");
+        const [emojiButton] = await screen.findAllByRole("button", { name: "😀" });
+        await user.click(emojiButton);
 
-        await expect.element(screen.getByRole("textbox")).toHaveValue("😀");
+        expect(screen.getByRole("textbox")).toHaveValue("😀");
     });
 });

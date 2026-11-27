@@ -7,7 +7,7 @@ import { createLocalStorageMock } from "@test/utils/localStorageMock";
 // happen before the polyfill is installed at the bottom of this file.
 import "@test/utils/setHTML";
 
-// Ensure LocalStorage-based adapters start from a clean state for browser tests.
+// Ensure LocalStorage-based adapters start from a clean state for component and adapter tests.
 // Remove only the keys used by LocalStorageAdapter so other globals are preserved.
 beforeEach(() => {
     try {
@@ -43,12 +43,6 @@ beforeEach(() => {
             };
         }
     } catch {
-        // ignore in non-browser environments
+        // ignore in environments without a window
     }
 });
-if (import.meta.env.VITEST_BROWSER_MODE === "true") {
-    await import("@/global.css");
-    // Components call `setHTML`. Browsers without it get the polyfill, so tests can rely on it.
-    const { installSetHTMLPolyfill } = await import("@/lib/polyfills/setHTML");
-    await installSetHTMLPolyfill();
-}

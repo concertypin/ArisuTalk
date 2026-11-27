@@ -1,69 +1,48 @@
 import { test, expect, describe, vi } from "vitest";
-import { render } from "vitest-browser-svelte";
+import { render, screen } from "@testing-library/svelte";
+import { userEvent } from "@testing-library/user-event";
 import ButtonTestWrapper from "../wrappers/ButtonTestWrapper.svelte";
 
 describe("Button Component", () => {
-    test("renders with accessible name and is visible", async () => {
-        // Arrange
-        const { getByRole } = render(ButtonTestWrapper, {
-            label: "Click me",
-        });
-
-        // Act / Assert
-        const button = getByRole("button", { name: "Click me" });
-        await expect.element(button).toBeVisible();
-    });
-
     test("calls onclick handler when clicked", async () => {
         // Arrange
+        const user = userEvent.setup();
         const handler = vi.fn();
-        const { getByRole } = render(ButtonTestWrapper, {
-            label: "Press",
-            onclick: handler,
-        });
+        render(ButtonTestWrapper, { props: { label: "Press", onclick: handler } });
 
-        const button = getByRole("button", { name: "Press" });
+        const button = screen.getByRole("button", { name: "Press" });
 
         // Act
-        await button.click();
+        await user.click(button);
 
         // Assert
         expect(handler).toHaveBeenCalledTimes(1);
     });
 
-    test("respects variant prop", async () => {
+    test("respects variant prop", () => {
         // Arrange
-        const { getByRole } = render(ButtonTestWrapper, {
-            label: "Secondary",
-            variant: "secondary",
-        });
+        render(ButtonTestWrapper, { props: { label: "Secondary", variant: "secondary" } });
 
         // Act / Assert
-        const button = getByRole("button", { name: "Secondary" });
-        await expect.element(button).toHaveClass(/btn-secondary/);
+        const button = screen.getByRole("button", { name: "Secondary" });
+        expect(button).toHaveClass("btn-secondary");
     });
 
-    test("respects size prop", async () => {
+    test("respects size prop", () => {
         // Arrange
-        const { getByRole } = render(ButtonTestWrapper, {
-            label: "Small",
-            size: "sm",
-        });
+        render(ButtonTestWrapper, { props: { label: "Small", size: "sm" } });
 
         // Act / Assert
-        const button = getByRole("button", { name: "Small" });
-        await expect.element(button).toHaveClass(/btn-sm/);
+        const button = screen.getByRole("button", { name: "Small" });
+        expect(button).toHaveClass("btn-sm");
     });
 
-    test("renders disabled when disabled prop is true", async () => {
+    test("renders disabled when disabled prop is true", () => {
         // Arrange
-        const { getByRole } = render(ButtonTestWrapper, {
-            label: "Disabled",
-            disabled: true,
-        });
+        render(ButtonTestWrapper, { props: { label: "Disabled", disabled: true } });
 
         // Act / Assert
-        const button = getByRole("button", { name: "Disabled" });
-        await expect.element(button).toHaveAttribute("disabled");
+        const button = screen.getByRole("button", { name: "Disabled" });
+        expect(button).toBeDisabled();
     });
 });

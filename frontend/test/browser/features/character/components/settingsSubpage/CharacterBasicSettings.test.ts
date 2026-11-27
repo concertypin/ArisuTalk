@@ -1,6 +1,7 @@
 import { test, expect, describe, vi, beforeEach, afterEach, type Mock } from "vitest";
-import { render } from "vitest-browser-svelte";
-import { userEvent } from "vitest/browser";
+import { render, screen, waitFor, fireEvent } from "@testing-library/svelte";
+import { userEvent } from "@testing-library/user-event";
+import { fillText } from "@test/utils/user";
 import CharacterBasicSettings from "@/features/character/components/settingsSubpage/CharacterBasicSettings.svelte";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
 import type { IAssetStorageAdapter } from "@/lib/interfaces";
@@ -58,8 +59,8 @@ describe("CharacterBasicSettings Component", () => {
         };
     });
 
-    test("renders basic fields", async () => {
-        const { getByLabelText } = render(CharacterBasicSettings, {
+    test("renders basic fields", () => {
+        render(CharacterBasicSettings, {
             props: {
                 context: () => ({
                     getCharacter: () => mockCharacter,
@@ -68,11 +69,11 @@ describe("CharacterBasicSettings Component", () => {
             },
         });
 
-        await expect.element(getByLabelText("Name", { exact: true })).toBeVisible();
-        await expect.element(getByLabelText("Description")).toBeVisible();
+        expect(screen.getByLabelText("Name", { exact: true })).toBeInTheDocument();
+        expect(screen.getByLabelText("Description")).toBeInTheDocument();
     });
 
-    test("shows asset picker when image assets exist", async () => {
+    test("shows asset picker when image assets exist", () => {
         mockCharacter.assets.assets = [
             {
                 id: "asset-1",
@@ -82,7 +83,7 @@ describe("CharacterBasicSettings Component", () => {
             },
         ];
 
-        const { getByLabelText, getByText } = render(CharacterBasicSettings, {
+        render(CharacterBasicSettings, {
             props: {
                 context: () => ({
                     getCharacter: () => mockCharacter,
@@ -91,11 +92,12 @@ describe("CharacterBasicSettings Component", () => {
             },
         });
 
-        await expect.element(getByText("Select from assets:")).toBeVisible();
-        await expect.element(getByLabelText("Select avatar.png as avatar")).toBeVisible();
+        expect(screen.getByText("Select from assets:")).toBeInTheDocument();
+        expect(screen.getByLabelText("Select avatar.png as avatar")).toBeInTheDocument();
     });
 
     test("calls onChange when an asset is clicked", async () => {
+        const user = userEvent.setup();
         const assetData = "local://opfs/avatar.png";
         mockCharacter.assets.assets = [
             {
@@ -106,7 +108,7 @@ describe("CharacterBasicSettings Component", () => {
             },
         ];
 
-        const { getByLabelText } = render(CharacterBasicSettings, {
+        render(CharacterBasicSettings, {
             props: {
                 context: () => ({
                     getCharacter: () => mockCharacter,
@@ -115,8 +117,8 @@ describe("CharacterBasicSettings Component", () => {
             },
         });
 
-        const assetButton = getByLabelText("Select avatar.png as avatar");
-        await assetButton.click();
+        const assetButton = screen.getByLabelText("Select avatar.png as avatar");
+        await user.click(assetButton);
 
         expect(onChangeSpy).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -125,8 +127,9 @@ describe("CharacterBasicSettings Component", () => {
         );
     });
 
-    test("manual URL settings is hidden by default but can be toggled", async () => {
-        const screen = render(CharacterBasicSettings, {
+    // DaisyUI opens `.collapse` via a checkbox before `.collapse-content`; jsdom has no CSS to show it.
+    test("the manual URL input sits in a collapse that is closed by default", () => {
+        render(CharacterBasicSettings, {
             props: {
                 context: () => ({
                     getCharacter: () => mockCharacter,
@@ -137,28 +140,22 @@ describe("CharacterBasicSettings Component", () => {
 
         const manualUrlInput = screen.getByRole("textbox", {
             name: "Avatar External URL / Storage Key",
-            includeHidden: true,
-            //includeHidden: true, // vitest-browser might handle this differently, but let's keep it safe
         });
+        const content = manualUrlInput.closest(".collapse-content");
+        const collapse = content?.parentElement;
+        expect(collapse).toHaveClass("collapse");
+        const collapseCheckbox = collapse?.querySelector(":scope > input[type='checkbox']");
+        expect(collapseCheckbox).not.toBeNull();
 
-        // Wait for potential async rendering (though not usually needed for initial render)
-        // Check visibility.
-        // Note: DaisyUI collapse uses checkbox. If not checked, content has max-height: 0 etc.
-        await expect.element(manualUrlInput).not.toBeVisible();
-
-        const collapseCheckbox = screen.container.querySelector(
-            ".collapse input[type='checkbox']"
-        ) as HTMLInputElement;
-        collapseCheckbox.click();
-
-        await expect.element(manualUrlInput).toBeVisible();
+        expect(collapseCheckbox).not.toBeChecked();
+        expect(collapse).toHaveTextContent("Manual URL Settings");
     });
 
-    test("shows avatar preview when avatarUrl is set", async () => {
+    test("shows avatar preview when avatarUrl is set", () => {
         const character = cloneDeep(mockCharacter);
         character.avatarUrl = "https://example.com/avatar.png";
 
-        const { getByAltText } = render(CharacterBasicSettings, {
+        render(CharacterBasicSettings, {
             props: {
                 context: () => ({
                     getCharacter: () => character,
@@ -167,17 +164,17 @@ describe("CharacterBasicSettings Component", () => {
             },
         });
 
-        const preview = getByAltText("Avatar preview");
-        await expect.element(preview).toBeVisible();
-        await expect.element(preview).toHaveAttribute("src", character.avatarUrl);
+        const preview = screen.getByAltText("Avatar preview");
+        expect(preview).toBeInTheDocument();
+        expect(preview).toHaveAttribute("src", character.avatarUrl);
     });
 
     test("falls back to a generated avatar when the preview fails to load", async () => {
         const character = cloneDeep(mockCharacter);
-        // Not a decodable image, so the browser fires `error` on the preview deterministically.
+        // jsdom never loads images, so the `error` event is dispatched by hand below.
         character.avatarUrl = "data:image/png;base64,AAAA";
 
-        const { getByAltText } = render(CharacterBasicSettings, {
+        render(CharacterBasicSettings, {
             props: {
                 context: () => ({
                     getCharacter: () => character,
@@ -186,9 +183,12 @@ describe("CharacterBasicSettings Component", () => {
             },
         });
 
-        await expect
-            .element(getByAltText("Avatar preview"))
-            .toHaveAttribute("src", expect.stringContaining("dicebear.com"));
+        await fireEvent.error(screen.getByAltText("Avatar preview"));
+
+        expect(screen.getByAltText("Avatar preview")).toHaveAttribute(
+            "src",
+            expect.stringContaining("dicebear.com")
+        );
     });
 
     describe("avatar preview loading", () => {
@@ -223,13 +223,13 @@ describe("CharacterBasicSettings Component", () => {
             });
 
             // The first preview is now pending; tear the component down before it resolves.
-            await vi.waitFor(() => expect(getAssetUrlMock).toHaveBeenCalledTimes(1));
-            await unmount();
+            await waitFor(() => expect(getAssetUrlMock).toHaveBeenCalledTimes(1));
+            unmount();
             expect(revokeSpy).not.toHaveBeenCalled();
 
             resolveFirst("blob:late-url");
 
-            await vi.waitFor(() => expect(revokeSpy).toHaveBeenCalledWith("blob:late-url"));
+            await waitFor(() => expect(revokeSpy).toHaveBeenCalledWith("blob:late-url"));
             // Once aborted, the remaining assets must not be loaded at all.
             expect(getAssetUrlMock).toHaveBeenCalledTimes(1);
             expect(revokeSpy).toHaveBeenCalledTimes(1);
@@ -241,7 +241,7 @@ describe("CharacterBasicSettings Component", () => {
                 { id: "a-1", name: "one.png", mimeType: "image/png", data: "local://opfs/one.png" },
             ];
 
-            const { getByLabelText, unmount } = render(CharacterBasicSettings, {
+            const { unmount } = render(CharacterBasicSettings, {
                 props: {
                     context: () => ({
                         getCharacter: () => mockCharacter,
@@ -250,13 +250,13 @@ describe("CharacterBasicSettings Component", () => {
                 },
             });
 
-            await expect.element(getByLabelText("Select one.png as avatar")).toBeVisible();
-            await vi.waitFor(() =>
+            expect(screen.getByLabelText("Select one.png as avatar")).toBeInTheDocument();
+            await waitFor(() =>
                 expect(document.querySelector("img[src='blob:mock-url-one.png']")).not.toBeNull()
             );
             expect(revokeSpy).not.toHaveBeenCalled();
 
-            await unmount();
+            unmount();
             expect(revokeSpy).toHaveBeenCalledWith("blob:mock-url-one.png");
         });
     });
@@ -273,6 +273,7 @@ describe("CharacterBasicSettings Component", () => {
         });
 
         test("ignores a repeated Enter while deletion is still in flight", async () => {
+            const user = userEvent.setup();
             const other = { ...cloneDeep(mockCharacter), id: "char-0", name: "Other" };
             const next = { ...cloneDeep(mockCharacter), id: "char-2", name: "Next" };
             characterStore.characters = [mockCharacter, other, next];
@@ -285,7 +286,7 @@ describe("CharacterBasicSettings Component", () => {
                     })
             );
 
-            const { getByLabelText } = render(CharacterBasicSettings, {
+            render(CharacterBasicSettings, {
                 props: {
                     context: () => ({
                         getCharacter: () => mockCharacter,
@@ -294,20 +295,23 @@ describe("CharacterBasicSettings Component", () => {
                 },
             });
 
-            const input = getByLabelText("Enter the character's name exactly");
-            await input.fill(mockCharacter.name);
-            await userEvent.keyboard("{Enter}");
-            await userEvent.keyboard("{Enter}");
+            const input = screen.getByRole("textbox", {
+                name: /Enter the character's name exactly/,
+            });
+            await fillText(user, input, mockCharacter.name);
+            await user.keyboard("{Enter}");
+            await user.keyboard("{Enter}");
 
             expect(removeSpy).toHaveBeenCalledTimes(1);
-            await expect.element(input).toBeDisabled();
+            expect(input).toBeDisabled();
             expect(onChangeSpy).not.toHaveBeenCalled();
 
             finishRemoval();
-            await vi.waitFor(() => expect(onChangeSpy).toHaveBeenCalledWith(null));
+            await waitFor(() => expect(onChangeSpy).toHaveBeenCalledWith(null));
         });
 
         test("re-enables the input and reports the error when deletion fails", async () => {
+            const user = userEvent.setup();
             vi.spyOn(Logger, "error").mockImplementation(() => {});
             characterStore.characters = [mockCharacter];
             const removeSpy = vi
@@ -315,7 +319,7 @@ describe("CharacterBasicSettings Component", () => {
                 .mockRejectedValueOnce(new Error("boom"))
                 .mockResolvedValue(undefined);
 
-            const { getByLabelText } = render(CharacterBasicSettings, {
+            render(CharacterBasicSettings, {
                 props: {
                     context: () => ({
                         getCharacter: () => mockCharacter,
@@ -324,18 +328,20 @@ describe("CharacterBasicSettings Component", () => {
                 },
             });
 
-            const input = getByLabelText("Enter the character's name exactly");
-            await input.fill(mockCharacter.name);
-            await userEvent.keyboard("{Enter}");
+            const input = screen.getByRole("textbox", {
+                name: /Enter the character's name exactly/,
+            });
+            await fillText(user, input, mockCharacter.name);
+            await user.keyboard("{Enter}");
 
-            await vi.waitFor(() => expect(removeSpy).toHaveBeenCalledTimes(1));
-            await expect.element(input).toBeEnabled();
+            await waitFor(() => expect(removeSpy).toHaveBeenCalledTimes(1));
+            expect(input).toBeEnabled();
             expect(onChangeSpy).not.toHaveBeenCalledWith(null);
 
             // A retry must be possible after a failure (disabling dropped the focus).
-            await input.click();
-            await userEvent.keyboard("{Enter}");
-            await vi.waitFor(() => expect(onChangeSpy).toHaveBeenCalledWith(null));
+            await user.click(input);
+            await user.keyboard("{Enter}");
+            await waitFor(() => expect(onChangeSpy).toHaveBeenCalledWith(null));
             expect(removeSpy).toHaveBeenCalledTimes(2);
         });
 
@@ -356,17 +362,23 @@ describe("CharacterBasicSettings Component", () => {
         ])(
             "does not remove on the Enter that commits an IME composition in $browser",
             async ({ init }) => {
+                const user = userEvent.setup();
                 characterStore.characters = [mockCharacter];
                 const removeSpy = vi.spyOn(characterStore, "remove").mockResolvedValue(undefined);
-                const { getByLabelText } = renderBasic();
+                renderBasic();
 
-                const input = getByLabelText("Enter the character's name exactly");
-                await input.fill(mockCharacter.name);
-                input
-                    .element()
-                    .dispatchEvent(
-                        new KeyboardEvent("keydown", { key: "Enter", bubbles: true, ...init })
-                    );
+                const input = screen.getByRole("textbox", {
+                    name: /Enter the character's name exactly/,
+                });
+                await fillText(user, input, mockCharacter.name);
+                const event = new KeyboardEvent("keydown", {
+                    key: "Enter",
+                    bubbles: true,
+                    ...init,
+                });
+                // Fails if the environment drops the init, which would make this test vacuous.
+                expect(event).toMatchObject(init);
+                input.dispatchEvent(event);
 
                 // Give a (wrong) async removal the chance to show up.
                 await new Promise((r) => setTimeout(r, 50));
@@ -374,48 +386,57 @@ describe("CharacterBasicSettings Component", () => {
                 expect(onChangeSpy).not.toHaveBeenCalled();
 
                 // The same Enter after the composition ended removes.
-                await userEvent.keyboard("{Enter}");
-                await vi.waitFor(() => expect(removeSpy).toHaveBeenCalledTimes(1));
+                await user.keyboard("{Enter}");
+                await waitFor(() => expect(removeSpy).toHaveBeenCalledTimes(1));
             }
         );
 
         test("does not remove on Enter when the typed name differs", async () => {
+            const user = userEvent.setup();
             characterStore.characters = [mockCharacter];
             const removeSpy = vi.spyOn(characterStore, "remove").mockResolvedValue(undefined);
-            const { getByLabelText } = renderBasic();
+            renderBasic();
 
-            await getByLabelText("Enter the character's name exactly").fill("Test Characte");
-            await userEvent.keyboard("{Enter}");
+            await fillText(
+                user,
+                screen.getByRole("textbox", { name: /Enter the character's name exactly/ }),
+                "Test Characte"
+            );
+            await user.keyboard("{Enter}");
 
             await new Promise((r) => setTimeout(r, 50));
             expect(removeSpy).not.toHaveBeenCalled();
         });
 
         test("the Remove button stays disabled until the name matches, then removes", async () => {
+            const user = userEvent.setup();
             characterStore.characters = [mockCharacter];
             const removeSpy = vi.spyOn(characterStore, "remove").mockResolvedValue(undefined);
-            const { getByLabelText, getByRole } = renderBasic();
+            renderBasic();
 
-            const removeButton = getByRole("button", { name: "Remove", exact: true });
-            await expect.element(removeButton).toBeDisabled();
+            const removeButton = screen.getByRole("button", { name: "Remove" });
+            expect(removeButton).toBeDisabled();
 
-            const input = getByLabelText("Enter the character's name exactly");
-            await input.fill("wrong name");
-            await expect.element(removeButton).toBeDisabled();
+            const input = screen.getByRole("textbox", {
+                name: /Enter the character's name exactly/,
+            });
+            await fillText(user, input, "wrong name");
+            expect(removeButton).toBeDisabled();
 
-            await input.fill(mockCharacter.name);
-            await expect.element(removeButton).toBeEnabled();
-            await removeButton.click();
+            await fillText(user, input, mockCharacter.name);
+            expect(removeButton).toBeEnabled();
+            await user.click(removeButton);
 
-            await vi.waitFor(() => expect(onChangeSpy).toHaveBeenCalledWith(null));
+            await waitFor(() => expect(onChangeSpy).toHaveBeenCalledWith(null));
             expect(removeSpy).toHaveBeenCalledTimes(1);
         });
 
         test("an empty character name never matches an empty confirmation field", async () => {
+            const user = userEvent.setup();
             const unnamed = { ...cloneDeep(mockCharacter), name: "" };
             characterStore.characters = [unnamed];
             const removeSpy = vi.spyOn(characterStore, "remove").mockResolvedValue(undefined);
-            const { getByLabelText, getByRole } = render(CharacterBasicSettings, {
+            render(CharacterBasicSettings, {
                 props: {
                     context: () => ({
                         getCharacter: () => unnamed,
@@ -424,12 +445,12 @@ describe("CharacterBasicSettings Component", () => {
                 },
             });
 
-            await expect
-                .element(getByRole("button", { name: "Remove", exact: true }))
-                .toBeDisabled();
+            expect(screen.getByRole("button", { name: "Remove" })).toBeDisabled();
 
-            await getByLabelText("Enter the character's name exactly").click();
-            await userEvent.keyboard("{Enter}");
+            await user.click(
+                screen.getByRole("textbox", { name: /Enter the character's name exactly/ })
+            );
+            await user.keyboard("{Enter}");
 
             await new Promise((r) => setTimeout(r, 50));
             expect(removeSpy).not.toHaveBeenCalled();
@@ -437,11 +458,12 @@ describe("CharacterBasicSettings Component", () => {
         });
 
         test("re-arms the autosave when the deletion fails after it was cancelled", async () => {
+            const user = userEvent.setup();
             vi.spyOn(Logger, "error").mockImplementation(() => {});
             characterStore.characters = [mockCharacter];
             const cancelAutosave = vi.fn();
             vi.spyOn(characterStore, "remove").mockRejectedValue(new Error("boom"));
-            const { getByLabelText } = render(CharacterBasicSettings, {
+            render(CharacterBasicSettings, {
                 props: {
                     context: () => ({
                         getCharacter: () => mockCharacter,
@@ -451,21 +473,26 @@ describe("CharacterBasicSettings Component", () => {
                 },
             });
 
-            await getByLabelText("Enter the character's name exactly").fill(mockCharacter.name);
-            await userEvent.keyboard("{Enter}");
+            await fillText(
+                user,
+                screen.getByRole("textbox", { name: /Enter the character's name exactly/ }),
+                mockCharacter.name
+            );
+            await user.keyboard("{Enter}");
 
-            await vi.waitFor(() => expect(onChangeSpy).toHaveBeenCalledWith(mockCharacter));
+            await waitFor(() => expect(onChangeSpy).toHaveBeenCalledWith(mockCharacter));
             expect(cancelAutosave).toHaveBeenCalledTimes(1);
             expect(onChangeSpy).not.toHaveBeenCalledWith(null);
         });
 
-        test("the label says that Enter or the Remove button removes", async () => {
-            const { getByLabelText } = renderBasic();
+        test("the label says that Enter or the Remove button removes", () => {
+            renderBasic();
 
-            await expect.element(getByLabelText(/press Enter or click Remove/)).toBeVisible();
+            expect(screen.getByLabelText(/press Enter or click Remove/)).toBeInTheDocument();
         });
 
         test("cancels the pending autosave before the deletion starts", async () => {
+            const user = userEvent.setup();
             characterStore.characters = [mockCharacter];
             const order: string[] = [];
             const cancelAutosave = vi.fn(() => {
@@ -474,7 +501,7 @@ describe("CharacterBasicSettings Component", () => {
             vi.spyOn(characterStore, "remove").mockImplementation(async () => {
                 order.push("remove");
             });
-            const { getByLabelText } = render(CharacterBasicSettings, {
+            render(CharacterBasicSettings, {
                 props: {
                     context: () => ({
                         getCharacter: () => mockCharacter,
@@ -484,10 +511,14 @@ describe("CharacterBasicSettings Component", () => {
                 },
             });
 
-            await getByLabelText("Enter the character's name exactly").fill(mockCharacter.name);
-            await userEvent.keyboard("{Enter}");
+            await fillText(
+                user,
+                screen.getByRole("textbox", { name: /Enter the character's name exactly/ }),
+                mockCharacter.name
+            );
+            await user.keyboard("{Enter}");
 
-            await vi.waitFor(() => expect(onChangeSpy).toHaveBeenCalledWith(null));
+            await waitFor(() => expect(onChangeSpy).toHaveBeenCalledWith(null));
             expect(order).toEqual(["cancel", "remove"]);
         });
     });

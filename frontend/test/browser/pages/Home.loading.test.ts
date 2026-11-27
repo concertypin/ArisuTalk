@@ -1,4 +1,3 @@
-/// <reference types="vitest/browser" />
 import { test, expect, vi } from "vitest";
 import { renderWithAppContext } from "@test/utils/appContext.svelte";
 import Home from "@/routes/Home.svelte";
@@ -11,18 +10,17 @@ vi.mock("@/components/ChatArea.svelte", async (importOriginal) => {
     return await importOriginal();
 });
 
-// Keep this the only test in the file: Home caches its lazily loaded components in module scope,
-// so any earlier render in the same module registry would skip the loading state.
+// Keep this the only test here: Home caches its lazy components in module scope, so an earlier render
+// skips the loading state.
 test("shows the loading state until the lazy components arrive", async () => {
-    const { getByText, getByRole } = renderWithAppContext(Home, {});
-    // The sidebar is rendered by the lazily loaded CharacterLayout, never by Home itself.
-    const homeButton = getByRole("button", { name: "Home" });
+    const { getByText, queryByText, queryByRole, findByRole } = renderWithAppContext(Home, {});
 
-    await expect.element(getByText("Loading...")).toBeVisible();
-    await expect.element(homeButton).not.toBeInTheDocument();
+    expect(getByText("Loading...")).toBeVisible();
+    // The sidebar is rendered by the lazily loaded CharacterLayout, never by Home itself.
+    expect(queryByRole("button", { name: "Home" })).not.toBeInTheDocument();
 
     chatAreaGate.resolve();
 
-    await expect.element(homeButton, { timeout: 5000 }).toBeVisible();
-    await expect.element(getByText("Loading...")).not.toBeInTheDocument();
+    expect(await findByRole("button", { name: "Home" }, { timeout: 5000 })).toBeVisible();
+    expect(queryByText("Loading...")).not.toBeInTheDocument();
 });

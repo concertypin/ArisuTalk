@@ -1,4 +1,4 @@
-// @vitest-environment happy-dom
+// @vitest-environment jsdom
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { LocalStorageSettingsAdapter } from "@/lib/adapters/storage/settings/LocalStorageSettingsAdapter";
 import { SettingsSchema } from "@/lib/types/IDataModel";

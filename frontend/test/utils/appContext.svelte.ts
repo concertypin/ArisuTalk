@@ -2,7 +2,7 @@
  * @fileoverview Test helpers for components that read the app context via `getAppContext()`.
  */
 import type { Component } from "svelte";
-import { render } from "vitest-browser-svelte";
+import { render, type RenderResult } from "@testing-library/svelte";
 import { type AppContext } from "@/context";
 import AppContextWrapper from "@test/browser/wrappers/AppContextWrapper.svelte";
 
@@ -39,7 +39,7 @@ export function renderWithAppContext<TProps extends Record<string, unknown>>(
     component: Component<TProps>,
     props: TProps,
     appContext: AppContext = createTestAppContext()
-): ReturnType<typeof render> & { appContext: AppContext } {
+): RenderResult<Component<WrapperProps<TProps>>> & { appContext: AppContext } {
     // Instantiate the generic wrapper for this component's props, so `render` does not fall back
     // to inferring `Record<string, unknown>` (components are contravariant in their props).
     const Wrapper: Component<WrapperProps<TProps>> = AppContextWrapper;

@@ -1,5 +1,5 @@
-import { describe, test, expect, expectTypeOf, beforeEach, onTestFinished } from "vitest";
-import { page } from "vitest/browser";
+import { describe, test, expect, expectTypeOf, beforeEach } from "vitest";
+import { within } from "@testing-library/svelte";
 import { installSetHTMLPolyfill } from "@/lib/polyfills/setHTML";
 import type { SanitizerConfigDictionary } from "@/lib/types/sanitizer";
 import {
@@ -8,14 +8,6 @@ import {
     withPolyfilledSetHTML,
     withStubbedSetHTML,
 } from "@test/utils/setHTML";
-
-/** Creates an element that is attached to the page, so locators can find what is inside it. */
-function createHost() {
-    const host = document.createElement("div");
-    document.body.append(host);
-    onTestFinished(() => host.remove());
-    return host;
-}
 
 describe("installSetHTMLPolyfill", () => {
     test("leaves a browser that already has setHTML alone", async () => {
@@ -48,16 +40,14 @@ describe("installSetHTMLPolyfill", () => {
 describe("the polyfilled setHTML", () => {
     beforeEach(withPolyfilledSetHTML);
 
-    test("allows data attributes when the config asks for them", async () => {
-        const host = createHost();
+    test("allows data attributes when the config asks for them", () => {
+        const host = document.createElement("div");
 
         callSetHTML(host, `<p data-id="7">text</p>`, {
             sanitizer: { elements: ["p"], attributes: [], dataAttributes: true },
         });
 
-        await expect
-            .element(page.elementLocator(host).getByText("text"))
-            .toHaveAttribute("data-id", "7");
+        expect(within(host).getByText("text")).toHaveAttribute("data-id", "7");
     });
 
     test("replaces the existing children", () => {
@@ -69,13 +59,13 @@ describe("the polyfilled setHTML", () => {
         expect(host.innerHTML).toBe("<p>new</p>");
     });
 
-    test("keeps the per-element attributes of one config out of another", async () => {
+    test("keeps the per-element attributes of one config out of another", () => {
         const linkWithHref = { elements: [{ name: "a", attributes: ["href"] }], attributes: [] };
         const linkWithTitle = { elements: [{ name: "a", attributes: ["title"] }], attributes: [] };
         const html = `<a href="/x" title="t">link</a>`;
-        const first = createHost();
-        const second = createHost();
-        const firstAgain = createHost();
+        const first = document.createElement("div");
+        const second = document.createElement("div");
+        const firstAgain = document.createElement("div");
 
         callSetHTML(first, html, { sanitizer: linkWithHref });
         callSetHTML(second, html, { sanitizer: linkWithTitle });
@@ -86,9 +76,9 @@ describe("the polyfilled setHTML", () => {
             [second, "title", "href"],
             [firstAgain, "href", "title"],
         ] as const) {
-            const link = page.elementLocator(host).getByText("link");
-            await expect.element(link).toHaveAttribute(kept);
-            await expect.element(link).not.toHaveAttribute(dropped);
+            const link = within(host).getByText("link");
+            expect(link).toHaveAttribute(kept);
+            expect(link).not.toHaveAttribute(dropped);
         }
     });
 });

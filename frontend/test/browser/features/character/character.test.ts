@@ -1,4 +1,6 @@
 import { test, expect, describe, beforeEach } from "vitest";
+import { screen } from "@testing-library/svelte";
+import { userEvent } from "@testing-library/user-event";
 import { renderWithAppContext } from "@test/utils/appContext.svelte";
 import CharacterLayoutTestWrapper from "@test/browser/wrappers/CharacterLayoutTestWrapper.svelte";
 import { characterStore } from "@/features/character/stores/characterStore.svelte";
@@ -42,17 +44,19 @@ describe("Character Sidebar Verification", () => {
     });
 
     test("Character Sidebar Verification", async () => {
-        const { getByLabelText, getByText } = renderWithAppContext(CharacterLayoutTestWrapper, {});
+        const user = userEvent.setup();
+        renderWithAppContext(CharacterLayoutTestWrapper, {});
 
         // Check for Add Character button
-        const addButton = getByLabelText("Add Character");
-        await expect.element(addButton).toBeVisible();
+        const addButton = screen.getByLabelText("Add Character");
+        expect(addButton).toBeInTheDocument();
 
         // Click add
-        await addButton.click();
+        await user.click(addButton);
 
         // Check if modal opens
-        const modalTitle = getByText("New Character");
-        await expect.element(modalTitle).toBeVisible();
+        // jsdom hides a <dialog> without `open`, so this fails if `showModal()` never ran.
+        const modalTitle = screen.getByText("New Character");
+        expect(modalTitle).toBeVisible();
     });
 });

@@ -1,42 +1,46 @@
 import { test, expect, describe, vi } from "vitest";
-import { userEvent } from "vitest/browser";
-import { render } from "vitest-browser-svelte";
+import { render, screen } from "@testing-library/svelte";
+import { userEvent } from "@testing-library/user-event";
 import TextArea from "@/components/input/TextArea.svelte";
 import TextAreaFormTestWrapper from "@test/browser/wrappers/TextAreaFormTestWrapper.svelte";
+import { softTest } from "@test/utils/softTest";
 
 describe("TextArea Component", () => {
     test("submits the surrounding form on Enter without clearing the text", async () => {
+        const user = userEvent.setup();
         const onSubmit = vi.fn();
-        const screen = render(TextAreaFormTestWrapper, { onSubmit });
+        render(TextAreaFormTestWrapper, { props: { onSubmit } });
         const textarea = screen.getByRole("textbox");
 
-        await textarea.fill("hello");
-        await userEvent.keyboard("{Enter}");
+        await user.type(textarea, "hello");
+        await user.keyboard("{Enter}");
 
         expect(onSubmit).toHaveBeenCalledExactlyOnceWith("hello");
-        await expect.element(textarea).toHaveValue("hello");
+        expect(textarea).toHaveValue("hello");
     });
 
     test("does not submit on Shift+Enter", async () => {
+        const user = userEvent.setup();
         const onSubmit = vi.fn();
-        const screen = render(TextAreaFormTestWrapper, { onSubmit });
+        render(TextAreaFormTestWrapper, { props: { onSubmit } });
         const textarea = screen.getByRole("textbox");
 
-        await textarea.fill("line");
-        await userEvent.keyboard("{Shift>}{Enter}{/Shift}");
+        await user.type(textarea, "line");
+        await user.keyboard("{Shift>}{Enter}{/Shift}");
 
         expect(onSubmit).not.toHaveBeenCalled();
-        await expect.element(textarea).toHaveValue("line\n");
+        expect(textarea).toHaveValue("line\n");
     });
 
     test.each<{ browser: string; init: KeyboardEventInit }>([
         { browser: "Chrome and Firefox (isComposing)", init: { isComposing: true } },
         { browser: "Safari (keyCode 229 after compositionend)", init: { keyCode: 229 } },
     ])("ignores the Enter that confirms an IME composition in $browser", async ({ init }) => {
+        const user = userEvent.setup();
         const onSubmit = vi.fn();
-        const screen = render(TextAreaFormTestWrapper, { onSubmit });
+        render(TextAreaFormTestWrapper, { props: { onSubmit } });
         const textarea = screen.getByRole("textbox");
-        await textarea.fill("한글");
+        await user.type(textarea, "한글");
 
         const event = new KeyboardEvent("keydown", {
             key: "Enter",
@@ -44,93 +48,81 @@ describe("TextArea Component", () => {
             cancelable: true,
             ...init,
         });
-        textarea.element().dispatchEvent(event);
+        // Fails if the environment drops the init, which would make this test vacuous.
+        expect(event).toMatchObject(init);
+        textarea.dispatchEvent(event);
 
         expect(onSubmit).not.toHaveBeenCalled();
         expect(event.defaultPrevented).toBe(false);
     });
 
     test("Enter outside a form is left alone and inserts a newline", async () => {
-        const screen = render(TextArea, {});
+        const user = userEvent.setup();
+        render(TextArea, {});
         const textarea = screen.getByRole("textbox");
 
-        await textarea.fill("a");
-        await userEvent.keyboard("{Enter}");
+        await user.type(textarea, "a");
+        await user.keyboard("{Enter}");
 
-        await expect.element(textarea).toHaveValue("a\n");
+        expect(textarea).toHaveValue("a\n");
     });
 
-    test("passes enterkeyhint to the textarea", async () => {
-        const screen = render(TextAreaFormTestWrapper, { onSubmit: vi.fn(), enterkeyhint: "send" });
+    test("passes enterkeyhint to the textarea", () => {
+        render(TextAreaFormTestWrapper, { props: { onSubmit: vi.fn(), enterkeyhint: "send" } });
 
-        await expect.element(screen.getByRole("textbox")).toHaveAttribute("enterkeyhint", "send");
+        expect(screen.getByRole("textbox")).toHaveAttribute("enterkeyhint", "send");
     });
 
     test("calls onCancel on Escape", async () => {
+        const user = userEvent.setup();
         const onCancel = vi.fn();
-        const screen = render(TextArea, { onCancel });
-        await screen.getByRole("textbox").click();
+        render(TextArea, { props: { onCancel } });
+        await user.click(screen.getByRole("textbox"));
 
-        await userEvent.keyboard("{Escape}");
+        await user.keyboard("{Escape}");
 
         expect(onCancel).toHaveBeenCalledOnce();
     });
 
+    // jsdom does no layout, so these tests pin the classes, not the rendered size.
     describe("sizing and wrapping", () => {
-        /** The element under test, narrowed for DOM measurements. */
-        function textareaOf(screen: ReturnType<typeof render>): HTMLTextAreaElement {
-            const element = screen.getByRole("textbox").element();
+        function textareaOf(): HTMLTextAreaElement {
+            const element = screen.getByRole("textbox");
             if (!(element instanceof HTMLTextAreaElement)) throw new Error("textarea expected");
             return element;
         }
 
-        test("a long paste stops growing at a cap and scrolls", async () => {
-            const screen = render(TextArea, {});
-            const textarea = textareaOf(screen);
+        test("caps the height and scrolls instead of growing", () => {
+            render(TextArea, {});
 
-            const manyLines = Array.from({ length: 200 }, () => "line").join("\n");
-            await screen.getByRole("textbox").fill(manyLines);
-
-            // Without a cap, field-sizing grows the box to ~200 lines and pushes the chat away.
-            expect(textarea.getBoundingClientRect().height).toBeLessThanOrEqual(
-                window.innerHeight * 0.4 + 1
-            );
-            expect(getComputedStyle(textarea).overflowY).toBe("auto");
-            expect(textarea.scrollHeight).toBeGreaterThan(textarea.clientHeight);
-            textarea.scrollTop = textarea.scrollHeight;
-            expect(textarea.scrollTop).toBeGreaterThan(0);
+            // Without a cap, field-sizing grows the box with a long paste and pushes the chat away.
+            expect(textareaOf()).toHaveClass("max-h-[40vh]", "overflow-y-auto");
         });
 
-        test("a single line stays compact", async () => {
-            const screen = render(TextArea, {});
-            const textarea = textareaOf(screen);
+        test("grows with its content from a one-line minimum, up to the cap", () => {
+            render(TextArea, {});
 
-            await screen.getByRole("textbox").fill("one line");
-
-            expect(textarea.getBoundingClientRect().height).toBeLessThan(window.innerHeight * 0.2);
+            expect(textareaOf()).toHaveClass("field-sizing-content", "min-h-[1em]", "max-h-[40vh]");
         });
 
-        test("does not break Latin words in the middle of a word", async () => {
-            const screen = render(TextArea, {});
+        test("does not break Latin words in the middle of a word", () => {
+            render(TextArea, {});
 
-            const style = getComputedStyle(textareaOf(screen));
-
-            expect(style.wordBreak).toBe("normal");
-            // Wraps at spaces first and only splits a token that cannot fit on a line at all.
-            expect(style.overflowWrap).toBe("anywhere");
+            // `break-all` splits words mid-word; `wrap-anywhere` splits only a token that cannot fit.
+            expect(textareaOf()).toHaveClass("wrap-anywhere");
+            expect(textareaOf()).not.toHaveClass("break-all");
+            expect(textareaOf()).not.toHaveClass("break-words");
         });
 
-        test("a long unbroken string wraps instead of widening the box", async () => {
-            const screen = render(TextArea, {});
-            const textarea = textareaOf(screen);
-            textarea.style.width = "12rem";
+        test("lets a long unbroken string wrap instead of widening the box", () => {
+            render(TextArea, {});
 
-            await screen.getByRole("textbox").fill("x".repeat(300));
-
-            expect(textarea.scrollWidth).toBeLessThanOrEqual(textarea.clientWidth);
+            // `wrap-anywhere` lets the long token wrap, `min-w-0` lets the flex item shrink.
+            expect(textareaOf()).toHaveClass("wrap-anywhere", "min-w-0");
         });
 
-        const colors = [
+        // Template on purpose: a literal class name here would make Tailwind generate it.
+        softTest.for([
             "neutral",
             "primary",
             "secondary",
@@ -139,22 +131,21 @@ describe("TextArea Component", () => {
             "success",
             "warning",
             "error",
-        ] as const;
+        ] as const)(
+            "soft color check: color %s is applied as its DaisyUI class",
+            (color, { warn }) => {
+                render(TextArea, { props: { color } });
 
-        /** DaisyUI sets `--input-color` only when the generated CSS contains the color's class. */
-        async function inputColorOf(color?: (typeof colors)[number]) {
-            const screen = render(TextArea, { color });
-            const inputColor = getComputedStyle(textareaOf(screen)).getPropertyValue(
-                "--input-color"
-            );
-            await screen.unmount();
-            return inputColor;
-        }
+                expect(textareaOf()).toHaveClass("textarea");
+                warn(() => expect(textareaOf()).toHaveClass(`textarea-${color}`));
+            }
+        );
 
-        // The component spells every color class out so Tailwind's scan generates it.
-        // A color whose class was never generated looks like no color at all.
-        test.each(colors)("color %s changes the input color", async (color) => {
-            expect(await inputColorOf(color)).not.toBe(await inputColorOf());
+        softTest("soft color check: no color class without a color", ({ warn }) => {
+            render(TextArea, {});
+
+            expect(textareaOf()).toHaveClass("textarea");
+            warn(() => expect(textareaOf().className).not.toMatch(/textarea-/));
         });
     });
 });

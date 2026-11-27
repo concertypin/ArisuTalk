@@ -1,6 +1,6 @@
-/// <reference types="vitest/browser" />
 import { test, expect, describe, vi, beforeEach } from "vitest";
-import { render } from "vitest-browser-svelte";
+import { render, screen, waitFor, within } from "@testing-library/svelte";
+import { userEvent } from "@testing-library/user-event";
 import PersonaList from "@/features/persona/components/PersonaList.svelte";
 import { personaStore } from "@/features/persona/stores/personaStore.svelte";
 import type { Persona } from "@/features/persona/schema";
@@ -50,29 +50,35 @@ describe("PersonaList Component", () => {
         personaStore.reorder = vi.fn();
     });
 
-    test("renders all personas", async () => {
-        const { getByText } = render(PersonaList, {
-            onEdit: mockOnEdit,
+    test("renders all personas", () => {
+        render(PersonaList, {
+            props: {
+                onEdit: mockOnEdit,
+            },
         });
 
-        await expect.element(getByText("User-kun")).toBeVisible();
-        await expect.element(getByText("Admin-san")).toBeVisible();
+        expect(screen.getByText("User-kun")).toBeInTheDocument();
+        expect(screen.getByText("Admin-san")).toBeInTheDocument();
     });
 
-    test("shows persona description", async () => {
-        const { getByText } = render(PersonaList, {
-            onEdit: mockOnEdit,
+    test("shows persona description", () => {
+        render(PersonaList, {
+            props: {
+                onEdit: mockOnEdit,
+            },
         });
 
-        await expect.element(getByText("A friendly user")).toBeVisible();
-        await expect.element(getByText("An admin persona")).toBeVisible();
+        expect(screen.getByText("A friendly user")).toBeInTheDocument();
+        expect(screen.getByText("An admin persona")).toBeInTheDocument();
     });
 
-    test("highlights active persona", async () => {
+    test("highlights active persona", () => {
         personaStore.activePersonaId = "persona-1";
 
         const { container } = render(PersonaList, {
-            onEdit: mockOnEdit,
+            props: {
+                onEdit: mockOnEdit,
+            },
         });
 
         // Find the first persona item
@@ -81,99 +87,106 @@ describe("PersonaList Component", () => {
     });
 
     test("selects persona when clicked", async () => {
-        const { container } = render(PersonaList, {
-            onEdit: mockOnEdit,
+        const user = userEvent.setup();
+        render(PersonaList, {
+            props: {
+                onEdit: mockOnEdit,
+            },
         });
 
-        // Find the persona item in the DOM
-        await vi.waitFor(() => {
-            const personaItem = container.querySelector('div[role="button"]');
-            expect(personaItem).toBeTruthy();
-        });
-
-        const personaItem = container.querySelector('div[role="button"]') as HTMLDivElement;
-        personaItem.click();
+        await user.click(screen.getByRole("button", { name: /User-kun/i }));
 
         expect(personaStore.select).toHaveBeenCalledWith("persona-1");
     });
 
     test("calls onEdit when edit button is clicked", async () => {
-        const { getByRole } = render(PersonaList, {
-            onEdit: mockOnEdit,
+        const user = userEvent.setup();
+        render(PersonaList, {
+            props: {
+                onEdit: mockOnEdit,
+            },
         });
 
         // Scope to the first persona item
-        const firstPersona = getByRole("button", { name: /User-kun/i });
-        const editButton = firstPersona.getByLabelText("Edit");
+        const firstPersona = screen.getByRole("button", { name: /User-kun/i });
+        const editButton = within(firstPersona).getByLabelText("Edit");
 
-        // Manual click bypasses some visibility checks in Playwright
-        const element = editButton.element() as HTMLElement;
-        element.click();
+        await user.click(editButton);
         expect(mockOnEdit).toHaveBeenCalled();
     });
 
     test("deletes persona when delete button is clicked", async () => {
+        const user = userEvent.setup();
         const originalConfirm = window.confirm;
         window.confirm = vi.fn(() => true);
 
-        const { getByRole } = render(PersonaList, {
-            onEdit: mockOnEdit,
+        render(PersonaList, {
+            props: {
+                onEdit: mockOnEdit,
+            },
         });
 
-        const firstPersona = getByRole("button", { name: /User-kun/i });
-        const deleteButton = firstPersona.getByLabelText("Delete");
+        const firstPersona = screen.getByRole("button", { name: /User-kun/i });
+        const deleteButton = within(firstPersona).getByLabelText("Delete");
 
-        const element = deleteButton.element() as HTMLElement;
-        element.click();
+        await user.click(deleteButton);
         expect(window.confirm).toHaveBeenCalledWith("Delete this persona?");
         expect(personaStore.remove).toHaveBeenCalledWith("persona-1");
 
         window.confirm = originalConfirm;
     });
 
-    test("disables move up button for first persona", async () => {
-        const { getByRole } = render(PersonaList, {
-            onEdit: mockOnEdit,
+    test("disables move up button for first persona", () => {
+        render(PersonaList, {
+            props: {
+                onEdit: mockOnEdit,
+            },
         });
 
-        const firstPersona = getByRole("button", { name: /User-kun/i });
-        const moveUpButton = firstPersona.getByLabelText("Move Up");
-        await expect.element(moveUpButton).toBeDisabled();
+        const firstPersona = screen.getByRole("button", { name: /User-kun/i });
+        const moveUpButton = within(firstPersona).getByLabelText("Move Up");
+        expect(moveUpButton).toBeDisabled();
     });
 
-    test("disables move down button for last persona", async () => {
-        const { getByRole } = render(PersonaList, {
-            onEdit: mockOnEdit,
+    test("disables move down button for last persona", () => {
+        render(PersonaList, {
+            props: {
+                onEdit: mockOnEdit,
+            },
         });
 
-        const lastPersona = getByRole("button", { name: /Admin-san/i });
-        const moveDownButton = lastPersona.getByLabelText("Move Down");
-        await expect.element(moveDownButton).toBeDisabled();
+        const lastPersona = screen.getByRole("button", { name: /Admin-san/i });
+        const moveDownButton = within(lastPersona).getByLabelText("Move Down");
+        expect(moveDownButton).toBeDisabled();
     });
 
     test("calls reorder when move buttons are clicked", async () => {
-        const { getByRole } = render(PersonaList, {
-            onEdit: mockOnEdit,
+        const user = userEvent.setup();
+        render(PersonaList, {
+            props: {
+                onEdit: mockOnEdit,
+            },
         });
 
-        const firstPersona = getByRole("button", { name: /User-kun/i });
-        const moveDownButton = firstPersona.getByLabelText("Move Down");
+        const firstPersona = screen.getByRole("button", { name: /User-kun/i });
+        const moveDownButton = within(firstPersona).getByLabelText("Move Down");
 
-        const element = moveDownButton.element() as HTMLElement;
-        element.click();
+        await user.click(moveDownButton);
         expect(personaStore.reorder).toHaveBeenCalled();
     });
 
-    test("renders initials when no avatar", async () => {
-        const { getByRole } = render(PersonaList, {
-            onEdit: mockOnEdit,
+    test("renders initials when no avatar", () => {
+        render(PersonaList, {
+            props: {
+                onEdit: mockOnEdit,
+            },
         });
 
-        const firstPersona = getByRole("button", { name: /User-kun/i });
-        await expect.element(firstPersona.getByText("US", { exact: true })).toBeVisible();
+        const firstPersona = screen.getByRole("button", { name: /User-kun/i });
+        expect(within(firstPersona).getByText("US", { exact: true })).toBeInTheDocument();
 
-        const secondPersona = getByRole("button", { name: /Admin-san/i });
-        await expect.element(secondPersona.getByText("AD", { exact: true })).toBeVisible();
+        const secondPersona = screen.getByRole("button", { name: /Admin-san/i });
+        expect(within(secondPersona).getByText("AD", { exact: true })).toBeInTheDocument();
     });
 
     test("auto-selects first persona when none selected", async () => {
@@ -182,10 +195,12 @@ describe("PersonaList Component", () => {
         personaStore.select = vi.fn();
 
         render(PersonaList, {
-            onEdit: mockOnEdit,
+            props: {
+                onEdit: mockOnEdit,
+            },
         });
 
-        await vi.waitFor(() => {
+        await waitFor(() => {
             expect(personaStore.select).toHaveBeenCalledWith("persona-1");
         });
     });

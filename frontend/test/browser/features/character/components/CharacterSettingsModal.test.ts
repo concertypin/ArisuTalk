@@ -1,6 +1,7 @@
-/// <reference types="vitest/browser" />
-
 import { test, expect, describe, vi, beforeEach, onTestFinished } from "vitest";
+import { screen, waitFor, within } from "@testing-library/svelte";
+import { userEvent } from "@testing-library/user-event";
+import { fillText } from "@test/utils/user";
 import { createTestAppContext, renderWithAppContext } from "@test/utils/appContext.svelte";
 import CharacterSettingsModal from "@/features/character/components/CharacterSettingsModal.svelte";
 import { characterStore } from "@/features/character/stores/characterStore.svelte";
@@ -87,102 +88,109 @@ describe("CharacterSettingsModal Component", () => {
         characterStore.characters = [mockCharacter];
     });
 
-    test("renders modal when open", async () => {
-        const { getByRole } = renderModal();
+    test("renders modal when open", () => {
+        renderModal();
 
+        // jsdom hides a <dialog> without `open`, so this fails if `showModal()` never ran.
+        expect(screen.getByRole("dialog")).toBeVisible();
         // Check header
-        await expect
-            .element(
-                getByRole("heading", { level: 2, name: "Test Character Settings", exact: true })
-            )
-            .toBeInTheDocument();
+        expect(
+            screen.getByRole("heading", { level: 2, name: "Test Character Settings" })
+        ).toBeInTheDocument();
 
-        // Check sidebar tabs
-        await expect.element(getByRole("button", { name: /Basic/i })).toBeInTheDocument();
-        await expect.element(getByRole("button", { name: /Prompt/i })).toBeInTheDocument();
-        await expect.element(getByRole("button", { name: /Lorebook/i })).toBeInTheDocument();
-        await expect.element(getByRole("button", { name: /Assets/i })).toBeInTheDocument();
-        await expect.element(getByRole("button", { name: /Metadata/i })).toBeInTheDocument();
-        await expect.element(getByRole("button", { name: /Magic/i })).toBeInTheDocument();
-        await expect.element(getByRole("button", { name: /Advanced/i })).toBeInTheDocument();
+        const tabs = within(screen.getByRole("list")).getAllByRole("button");
+        expect(tabs.map((tab) => tab.getAttribute("aria-label"))).toEqual([
+            "Basic",
+            "Prompt",
+            "Lorebook",
+            "Assets",
+            "Metadata",
+            "Magic",
+            "Advanced",
+        ]);
     });
 
     test("switches tabs correctly", async () => {
-        const { getByRole, getByText, getByLabelText } = renderModal();
+        const user = userEvent.setup();
+        renderModal();
 
         // Initial tab is basic
-        await expect.element(getByLabelText("Name", { exact: true })).toBeInTheDocument();
+        expect(screen.getByLabelText("Name", { exact: true })).toBeInTheDocument();
 
         // Switch to Prompt tab
-        const promptTab = getByRole("button", { name: /^Prompt$/i });
-        await promptTab.click();
+        const promptTab = screen.getByRole("button", { name: /^Prompt$/i });
+        await user.click(promptTab);
 
         // Wait for tab content
-        await expect.element(getByRole("heading", { name: /Prompt Configuration/i })).toBeVisible();
-        await expect.element(getByLabelText(/Character Prompt Description/i)).toBeVisible();
+        expect(screen.getByRole("heading", { name: /Prompt Configuration/i })).toBeInTheDocument();
+        expect(screen.getByLabelText(/Character Prompt Description/i)).toBeInTheDocument();
 
         // Switch to Lorebook tab
-        const lorebookTab = getByRole("button", { name: /^Lorebook$/i });
-        await lorebookTab.click();
-        await expect.element(getByRole("heading", { name: "Lorebook", level: 3 })).toBeVisible();
-        await expect.element(getByText(/Entries \(1\)/i)).toBeVisible();
+        const lorebookTab = screen.getByRole("button", { name: /^Lorebook$/i });
+        await user.click(lorebookTab);
+        expect(screen.getByRole("heading", { name: "Lorebook", level: 3 })).toBeInTheDocument();
+        expect(screen.getByText(/Entries \(1\)/i)).toBeInTheDocument();
     });
 
     test("closes modal when close button is clicked", async () => {
-        const { getByText, appContext } = renderModal();
+        const user = userEvent.setup();
+        const { appContext } = renderModal();
 
-        const closeButton = getByText("Close", { exact: true });
-        await closeButton.click();
+        const closeButton = screen.getByText("Close", { exact: true });
+        await user.click(closeButton);
 
         expect(appContext.characterSettingsOpen).toBe(false);
         expect(appContext.editingCharacter).toBeNull();
     });
 
     test("autosaves when changes are made", async () => {
-        const { getByLabelText } = renderModal();
+        const user = userEvent.setup();
+        renderModal();
 
-        const nameInput = getByLabelText("Name", { exact: true });
-        await nameInput.fill("Updated Name");
+        const nameInput = screen.getByLabelText("Name", { exact: true });
+        await fillText(user, nameInput, "Updated Name");
 
-        // Wait for debounce (300ms) + buffer
-        await new Promise((r) => setTimeout(r, 600));
-
-        expect(characterStore.update).toHaveBeenCalledWith(
-            0,
-            expect.objectContaining({
-                name: "Updated Name",
-            })
+        // The save runs after the 300ms debounce; `waitFor` polls up to its 1000ms default timeout.
+        await waitFor(() =>
+            expect(characterStore.update).toHaveBeenCalledWith(
+                0,
+                expect.objectContaining({
+                    name: "Updated Name",
+                })
+            )
         );
 
         expect(Logger.structured).toHaveBeenCalledWith("character.autosave", expect.anything());
     });
 
     test("handles lorebook entry addition", async () => {
-        const { getByRole } = renderModal();
+        const user = userEvent.setup();
+        renderModal();
 
         // Switch to Lorebook tab
-        await getByRole("button", { name: /^Lorebook$/i }).click();
+        await user.click(screen.getByRole("button", { name: /^Lorebook$/i }));
 
         // Click Add Entry
-        const addButton = getByRole("button", { name: /Add Entry/i });
-        await addButton.click();
+        const addButton = screen.getByRole("button", { name: /Add Entry/i });
+        await user.click(addButton);
 
         // Check if new entry appears
-        await expect
-            .element(getByRole("heading", { level: 4, name: /Entries \(2\)/i }))
-            .toBeInTheDocument();
+        expect(
+            screen.getByRole("heading", { level: 4, name: /Entries \(2\)/i })
+        ).toBeInTheDocument();
     });
 
     test("opens the dialog once, however often the character is edited", async () => {
+        const user = userEvent.setup();
         const showModalSpy = vi.spyOn(HTMLDialogElement.prototype, "showModal");
         onTestFinished(() => showModalSpy.mockRestore());
 
-        const { getByLabelText } = renderModal();
-        const nameInput = getByLabelText("Name", { exact: true });
+        renderModal();
+        const nameInput = screen.getByLabelText("Name", { exact: true });
 
-        await nameInput.fill("Updated Name");
-        await nameInput.fill("Updated Name Again");
-        await expect.element(nameInput).toHaveValue("Updated Name Again");
+        await fillText(user, nameInput, "Updated Name");
+        await fillText(user, nameInput, "Updated Name Again");
+        expect(nameInput).toHaveValue("Updated Name Again");
 
         const openLogs = vi
             .mocked(Logger.structured)
@@ -192,36 +200,38 @@ describe("CharacterSettingsModal Component", () => {
     });
 
     test("shows only the subpage heading as an h3, without a duplicate character-name heading", async () => {
-        const { getByRole } = renderModal();
+        const user = userEvent.setup();
+        renderModal();
 
-        await expect
-            .element(getByRole("heading", { level: 3, name: "Basic Information" }))
-            .toBeVisible();
+        expect(
+            screen.getByRole("heading", { level: 3, name: "Basic Information" })
+        ).toBeInTheDocument();
 
         const h3Texts = Array.from(document.querySelectorAll("h3")).map((h) =>
             h.textContent.trim()
         );
         expect(h3Texts).toEqual(["Basic Information"]);
 
-        await getByRole("button", { name: /^Prompt$/i }).click();
-        await expect
-            .element(getByRole("heading", { level: 3, name: /Prompt Configuration/i }))
-            .toBeVisible();
+        await user.click(screen.getByRole("button", { name: /^Prompt$/i }));
+        expect(
+            screen.getByRole("heading", { level: 3, name: /Prompt Configuration/i })
+        ).toBeInTheDocument();
         expect(document.querySelectorAll("h3").length).toBe(1);
     });
 
     test("highlights the active tab with menu-active and moves it on click", async () => {
-        const { getByRole } = renderModal();
+        const user = userEvent.setup();
+        renderModal();
 
-        const basic = getByRole("button", { name: /^Basic$/i });
-        const prompt = getByRole("button", { name: /^Prompt$/i });
+        const basic = screen.getByRole("button", { name: /^Basic$/i });
+        const prompt = screen.getByRole("button", { name: /^Prompt$/i });
 
-        await expect.element(basic).toHaveClass("menu-active");
-        await expect.element(prompt).not.toHaveClass("menu-active");
+        expect(basic).toHaveClass("menu-active");
+        expect(prompt).not.toHaveClass("menu-active");
 
-        await prompt.click();
+        await user.click(prompt);
 
-        await expect.element(prompt).toHaveClass("menu-active");
-        await expect.element(basic).not.toHaveClass("menu-active");
+        expect(prompt).toHaveClass("menu-active");
+        expect(basic).not.toHaveClass("menu-active");
     });
 });

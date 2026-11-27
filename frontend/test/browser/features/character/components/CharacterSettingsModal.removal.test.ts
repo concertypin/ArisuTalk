@@ -1,6 +1,7 @@
-/// <reference types="vitest/browser" />
-
 import { test, expect, describe, vi, beforeEach } from "vitest";
+import { screen, waitFor } from "@testing-library/svelte";
+import { userEvent } from "@testing-library/user-event";
+import { fillText } from "@test/utils/user";
 import { createTestAppContext, renderWithAppContext } from "@test/utils/appContext.svelte";
 import CharacterSettingsModal from "@/features/character/components/CharacterSettingsModal.svelte";
 import { characterStore } from "@/features/character/stores/characterStore.svelte";
@@ -75,6 +76,7 @@ describe("CharacterSettingsModal removal", () => {
     });
 
     test("an edit shortly before removal neither re-saves the deleted character nor overwrites its neighbour", async () => {
+        const user = userEvent.setup();
         const removed = createCharacter("char-1", "Removed");
         const neighbour = createCharacter("char-2", "Neighbour");
         const neighbourBefore = cloneDeep(neighbour);
@@ -94,23 +96,27 @@ describe("CharacterSettingsModal removal", () => {
         });
 
         const selectCharacter = vi.fn() satisfies (charId: string | null) => void;
-        const { getByLabelText, getByRole, appContext } = renderWithAppContext(
+        const { appContext } = renderWithAppContext(
             CharacterSettingsModal,
             { character: removed, selectCharacter },
             createTestAppContext({ characterSettingsOpen: true, editingCharacter: removed })
         );
 
         // Type the confirmation first, so the edit and the removal are less than 300ms apart.
-        await getByLabelText("Enter the character's name exactly").fill("Removed");
-        await getByLabelText("Description").fill("edited just before removal");
-        await getByRole("button", { name: "Remove", exact: true }).click();
-        await vi.waitFor(() => expect(adapter.deleteCharacter).toHaveBeenCalledWith("char-1"));
+        await fillText(
+            user,
+            screen.getByRole("textbox", { name: /Enter the character's name exactly/ }),
+            "Removed"
+        );
+        await fillText(user, screen.getByLabelText("Description"), "edited just before removal");
+        await user.click(screen.getByRole("button", { name: "Remove" }));
+        await waitFor(() => expect(adapter.deleteCharacter).toHaveBeenCalledWith("char-1"));
 
         // Let the autosave debounce (300ms) elapse while the deletion is still in flight.
         await new Promise((r) => setTimeout(r, 500));
         finishDelete();
 
-        await vi.waitFor(() => expect(selectCharacter).toHaveBeenCalledWith(null));
+        await waitFor(() => expect(selectCharacter).toHaveBeenCalledWith(null));
         expect(savedDuringDeletion).toEqual([]);
         expect(characterStore.characters.map((c) => c.id)).toEqual(["char-2"]);
         expect(characterStore.characters[0]).toEqual(neighbourBefore);

@@ -1,96 +1,87 @@
-/// <reference types="vitest/browser" />
 import { test, expect, describe, vi, afterEach, beforeEach } from "vitest";
+import { screen } from "@testing-library/svelte";
+import { userEvent } from "@testing-library/user-event";
+import { fillText } from "@test/utils/user";
 import { renderWithAppContext } from "@test/utils/appContext.svelte";
 import CharacterLayoutTestWrapper from "@test/browser/wrappers/CharacterLayoutTestWrapper.svelte";
+import { chatStore } from "@/features/chat/stores/chatStore.svelte";
 
 describe("Persona and Chat interactions", () => {
-    beforeEach(async () => {
+    beforeEach(() => {
         // Reset chatStore state so each test starts clean
-        try {
-            const { chatStore } = await import("@/features/chat/stores/chatStore.svelte");
-            if (chatStore["activeProvider"]) {
-                chatStore["activeProvider"].disconnect = vi.fn().mockResolvedValue(undefined);
-            }
-            chatStore["activeProvider"] = null;
-            chatStore.isGenerating = false;
-        } catch {
-            // chatStore may not load in all environments
+        if (chatStore["activeProvider"]) {
+            chatStore["activeProvider"].disconnect = vi.fn().mockResolvedValue(undefined);
         }
+        chatStore["activeProvider"] = null;
+        chatStore.isGenerating = false;
     });
     afterEach(() => {
         vi.restoreAllMocks();
     });
 
     test("Manage Personas opens persona modal", async () => {
-        const { getByLabelText, getByRole } = renderWithAppContext(CharacterLayoutTestWrapper, {});
+        const user = userEvent.setup();
+        renderWithAppContext(CharacterLayoutTestWrapper, {});
 
-        const personaBtn = getByLabelText("Manage Personas");
-        await expect.element(personaBtn).toBeVisible();
-        await personaBtn.click();
+        const personaBtn = screen.getByLabelText("Manage Personas");
+        expect(personaBtn).toBeInTheDocument();
+        await user.click(personaBtn);
 
         // Look for the modal heading specifically (h3 in the dialog)
-        const header = getByRole("heading", { name: "Manage Personas", level: 3 });
-        await expect.element(header).toBeVisible();
+        const header = screen.getByRole("heading", { name: "Manage Personas", level: 3 });
+        expect(header).toBeInTheDocument();
     });
 
     test("Create character and send chat message", async () => {
-        // Import and configure chatStore with Mock provider for testing
-        // Mock chatStore.waitForSettings to avoid delays
-
-        const { chatStore } = await import("@/features/chat/stores/chatStore.svelte");
+        const user = userEvent.setup();
+        // Configure chatStore with Mock provider for testing
         // Mock chatStore.waitForSettings to avoid delays
         vi.spyOn(chatStore, "waitForSettings").mockResolvedValue(undefined);
         await chatStore.initPromise;
         await chatStore.setProvider("MOCK", {
-            // No per-character stream delay, so replies render within the expect.element poll timeout.
+            // No per-character stream delay, so replies render within the findBy timeout.
             mockDelay: 0,
             responses: ["Response 1", "Response 2"],
             generationParameters: {},
         });
 
-        const { getByLabelText, getByText, getByRole } = renderWithAppContext(
-            CharacterLayoutTestWrapper,
-            {}
-        );
+        renderWithAppContext(CharacterLayoutTestWrapper, {});
 
         // Open Add Character modal
-        const addCharButton = getByLabelText("Add Character");
-        await addCharButton.click();
+        const addCharButton = screen.getByLabelText("Add Character");
+        await user.click(addCharButton);
 
-        const nameInput = getByLabelText("Name");
-        await expect.element(nameInput).toBeVisible();
-        await nameInput.fill("TestBot");
+        const nameInput = screen.getByLabelText("Name");
+        expect(nameInput).toBeInTheDocument();
+        await fillText(user, nameInput, "TestBot");
 
-        const saveBtn = getByText("Save Character");
-        await saveBtn.click();
+        const saveBtn = screen.getByRole("button", { name: /Save Character/ });
+        await user.click(saveBtn);
 
         // Select the created character from the sidebar
-        const charBtn = getByRole("button", { name: "TestBot" });
-        await expect.element(charBtn).toBeVisible();
-        await charBtn.click();
+        const charBtn = screen.getByRole("button", { name: "TestBot" });
+        expect(charBtn).toBeInTheDocument();
+        await user.click(charBtn);
 
         // Create a new chat for the character so ChatArea becomes active
-        const newChatBtn = getByLabelText("New Direct Chat");
-        await expect.element(newChatBtn).toBeVisible();
-        await newChatBtn.click();
+        const newChatBtn = screen.getByLabelText("New Direct Chat");
+        expect(newChatBtn).toBeInTheDocument();
+        await user.click(newChatBtn);
 
         // Send a user message (chat input uses placeholder)
-        const input = getByRole("textbox", { name: "Type a message..." });
-        await expect.element(input).toBeVisible();
-        await input.fill("Hello there");
+        const input = screen.getByPlaceholderText("Type a message...");
+        expect(input).toBeInTheDocument();
+        await fillText(user, input, "Hello there");
 
-        // Use getByRole for more robust button selection - Svelte Inspector can intercept getByText
-        const sendBtn = getByRole("button", { name: "Send" });
-        // Use element() to get the raw element and click it directly to bypass Svelte Inspector interference
-        const buttonElement = sendBtn.element() as HTMLButtonElement;
-        buttonElement.click();
+        const sendBtn = screen.getByRole("button", { name: "Send" });
+        await user.click(sendBtn);
 
         // User message appears
-        const userMsg = getByText("Hello there");
-        await expect.element(userMsg).toBeVisible();
+        const userMsg = await screen.findByText("Hello there");
+        expect(userMsg).toBeInTheDocument();
 
-        // Wait for the mocked bot response (real timers; expect.element polls until it renders)
-        const botMsg = getByText("Response 1");
-        await expect.element(botMsg).toBeVisible();
+        // Wait for the mocked bot response (real timers; findBy polls until it renders)
+        const botMsg = await screen.findByText("Response 1", {}, { timeout: 5000 });
+        expect(botMsg).toBeInTheDocument();
     });
 });

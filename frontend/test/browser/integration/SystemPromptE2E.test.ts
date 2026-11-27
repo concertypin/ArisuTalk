@@ -7,27 +7,33 @@
  * Regression defense for the system prompt builder integration.
  */
 
-/// <reference types="vitest/browser" />
 import { test, expect, describe, vi, afterEach, beforeEach } from "vitest";
-import { render } from "vitest-browser-svelte";
+import { render, screen } from "@testing-library/svelte";
+import { userEvent } from "@testing-library/user-event";
+import { fillText } from "@test/utils/user";
 import { renderWithAppContext } from "@test/utils/appContext.svelte";
 import { apply } from "@arisutalk/character-spec/utils";
 import type { BaseMessage } from "@langchain/core/messages";
 import CharacterLayoutTestWrapper from "@test/browser/wrappers/CharacterLayoutTestWrapper.svelte";
+import { SystemMessage } from "@langchain/core/messages";
+import { CharacterSchema } from "@arisutalk/character-spec/v0/Character";
+import { chatStore } from "@/features/chat/stores/chatStore.svelte";
+import { characterStore } from "@/features/character/stores/characterStore.svelte";
+import { personaStore } from "@/features/persona/stores/personaStore.svelte";
+import { settings } from "@/lib/stores/settings.svelte";
+import PromptSettings from "@/components/settingSubpage/PromptSettings.svelte";
+import { buildSystemPrompt } from "@/lib/prompts/systemPromptBuilder";
 
 // Capture what the chat store passes to the provider
 let capturedMessages: BaseMessage[] = [];
 describe("System Prompt E2E", () => {
-    let chatStore: Awaited<typeof import("@/features/chat/stores/chatStore.svelte")>["chatStore"];
-
     beforeEach(async () => {
         capturedMessages = [];
-        chatStore = (await import("@/features/chat/stores/chatStore.svelte")).chatStore;
         await chatStore.initPromise;
 
         // Set up a mock provider that captures the messages it receives
         await chatStore.setProvider("MOCK", {
-            // No per-character stream delay, so replies render within the expect.element poll timeout.
+            // No per-character stream delay, so replies render within the findBy timeout.
             mockDelay: 0,
             responses: ["I am Arisu the maid. 주인님, how can I help?"],
             generationParameters: {},
@@ -54,34 +60,24 @@ describe("System Prompt E2E", () => {
         }
     });
     test("system prompt includes character, persona, and generation prompt", async () => {
-        // Import stores
-        // chatStore is used in beforeEach via module import
-        await import("@/features/chat/stores/chatStore.svelte");
-        const { characterStore } =
-            await import("@/features/character/stores/characterStore.svelte");
-        const { personaStore } = await import("@/features/persona/stores/personaStore.svelte");
-        const { settings } = await import("@/lib/stores/settings.svelte");
-
+        const user = userEvent.setup();
         // Set up a character with a system prompt
-        const testChar = apply(
-            (await import("@arisutalk/character-spec/v0/Character")).CharacterSchema,
-            {
-                id: "char-e2e",
-                name: "Arisu",
-                description: "A maid",
-                specVersion: 0,
-                prompt: {
-                    description: "You are Arisu, a loyal maid. Call the user 주인님.",
-                    authorsNote: "",
-                    lorebook: { config: {}, data: [] },
-                },
-                executables: {
-                    runtimeSetting: { timeout: 30000 },
-                    replaceHooks: { display: [], input: [], output: [], request: [] },
-                },
-                assets: { assets: [] },
-            }
-        );
+        const testChar = apply(CharacterSchema, {
+            id: "char-e2e",
+            name: "Arisu",
+            description: "A maid",
+            specVersion: 0,
+            prompt: {
+                description: "You are Arisu, a loyal maid. Call the user 주인님.",
+                authorsNote: "",
+                lorebook: { config: {}, data: [] },
+            },
+            executables: {
+                runtimeSetting: { timeout: 30000 },
+                replaceHooks: { display: [], input: [], output: [], request: [] },
+            },
+            assets: { assets: [] },
+        });
         characterStore.characters = [testChar];
 
         // Set up a persona
@@ -97,41 +93,37 @@ describe("System Prompt E2E", () => {
         settings.value.prompt.generationPrompt = "You are a helpful assistant.";
 
         // Create a chat for the character
-        const { getByLabelText, getByText, getByRole } = renderWithAppContext(
-            CharacterLayoutTestWrapper,
-            {}
-        );
+        renderWithAppContext(CharacterLayoutTestWrapper, {});
 
         // Select the character
-        const charBtn = getByRole("button", { name: "Arisu" });
-        await expect.element(charBtn).toBeVisible();
-        await charBtn.click();
+        const charBtn = screen.getByRole("button", { name: "Arisu" });
+        expect(charBtn).toBeInTheDocument();
+        await user.click(charBtn);
         // Create a new chat
-        const newChatBtn = getByLabelText("New Direct Chat");
-        await expect.element(newChatBtn).toBeVisible();
-        await newChatBtn.click();
+        const newChatBtn = screen.getByLabelText("New Direct Chat");
+        expect(newChatBtn).toBeInTheDocument();
+        await user.click(newChatBtn);
 
         // Send a message
-        const input = getByRole("textbox", { name: "Type a message..." });
-        await expect.element(input).toBeVisible();
-        await input.fill("Hello");
+        const input = screen.getByPlaceholderText("Type a message...");
+        expect(input).toBeInTheDocument();
+        await fillText(user, input, "Hello");
 
-        const sendBtn = getByRole("button", { name: "Send" });
-        await sendBtn.click();
+        const sendBtn = screen.getByRole("button", { name: "Send" });
+        await user.click(sendBtn);
 
         // Verify the user message appears
-        const userMsg = getByText("Hello");
-        await expect.element(userMsg).toBeVisible();
+        const userMsg = await screen.findByText("Hello");
+        expect(userMsg).toBeInTheDocument();
 
-        // Verify the AI response appears (real timers; expect.element polls until it renders)
-        const aiResponse = getByText("주인님");
-        await expect.element(aiResponse).toBeVisible();
+        // Verify the AI response appears (real timers; findBy polls until it renders)
+        const aiResponse = await screen.findByText(/주인님/, {}, { timeout: 5000 });
+        expect(aiResponse).toBeInTheDocument();
 
         // Verify the system prompt was assembled correctly
         // The first message should be a SystemMessage containing all sections
         expect(capturedMessages.length).toBeGreaterThanOrEqual(2);
 
-        const { SystemMessage } = await import("@langchain/core/messages");
         const systemMsg = capturedMessages[0];
         // Use instanceof check (avoids deprecated _getType)
         expect(systemMsg).toBeInstanceOf(SystemMessage);
@@ -143,31 +135,28 @@ describe("System Prompt E2E", () => {
     });
 
     test("toggling a section in PromptSettings updates settings.value.prompt.promptSections", async () => {
+        const user = userEvent.setup();
         // Render PromptSettings directly and toggle the "Character" section off.
         // Verifies the UI → settings store flow (replaces the prior tautological
         // direct buildSystemPrompt call).
-        const { settings } = await import("@/lib/stores/settings.svelte");
-        const PromptSettings = (await import("@/components/settingSubpage/PromptSettings.svelte"))
-            .default;
-
         // Reset settings to a known state
         settings.value.prompt.promptSections = [];
 
-        const { getByRole } = render(PromptSettings);
+        render(PromptSettings);
 
         // Find the Character section toggle (aria-label="Character")
-        const characterToggle = getByRole("checkbox", { name: "Character" });
-        await expect.element(characterToggle).toBeVisible();
+        const characterToggle = screen.getByRole("checkbox", { name: "Character" });
+        expect(characterToggle).toBeInTheDocument();
 
         // Initially enabled (default)
-        const initialEl = characterToggle.element();
+        const initialEl = characterToggle;
         if (!(initialEl instanceof HTMLInputElement)) {
             throw new Error("Expected HTMLInputElement for checkbox toggle");
         }
         expect(initialEl.checked).toBe(true);
 
         // Click to disable
-        await characterToggle.click();
+        await user.click(characterToggle);
 
         // After clicking, the settings store should reflect the toggle
         const characterOverride = settings.value.prompt.promptSections?.find(
@@ -186,7 +175,6 @@ describe("System Prompt E2E", () => {
         // the settings store override actually excludes the character section.
         // This catches integration bugs where chatStore reads overrides from
         // a stale copy of settings.
-        const { buildSystemPrompt } = await import("@/lib/prompts/systemPromptBuilder");
         const result = await buildSystemPrompt(
             {
                 generationPrompt: "Base prompt.",

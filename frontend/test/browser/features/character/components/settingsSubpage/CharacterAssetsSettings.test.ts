@@ -1,7 +1,5 @@
-/// <reference types="vitest/browser" />
-
 import { test, expect, describe, vi, beforeEach, type Mock } from "vitest";
-import { render } from "vitest-browser-svelte";
+import { render, screen, waitFor } from "@testing-library/svelte";
 import CharacterAssetsSettings from "@/features/character/components/settingsSubpage/CharacterAssetsSettings.svelte";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
 import { createTestCharacter } from "@test/utils/character";
@@ -29,8 +27,8 @@ describe("CharacterAssetsSettings Component", () => {
         mockCharacter = createTestCharacter();
     });
 
-    test("renders empty state correctly", async () => {
-        const { getByText } = render(CharacterAssetsSettings, {
+    test("renders empty state correctly", () => {
+        render(CharacterAssetsSettings, {
             props: {
                 context: () => ({
                     getCharacter: () => mockCharacter,
@@ -39,10 +37,10 @@ describe("CharacterAssetsSettings Component", () => {
             },
         });
 
-        await expect.element(getByText("No assets yet.")).toBeVisible();
+        expect(screen.getByText("No assets yet.")).toBeInTheDocument();
     });
 
-    test("renders upload section", async () => {
+    test("renders upload section", () => {
         const { container } = render(CharacterAssetsSettings, {
             props: {
                 context: () => ({
@@ -59,7 +57,7 @@ describe("CharacterAssetsSettings Component", () => {
         expect(uploadButton).toBeTruthy();
     });
 
-    test("shows image assets section when image exists", async () => {
+    test("shows image assets section when image exists", () => {
         mockCharacter.assets.assets = [
             {
                 id: "asset-1",
@@ -69,7 +67,7 @@ describe("CharacterAssetsSettings Component", () => {
             },
         ];
 
-        const { getByText } = render(CharacterAssetsSettings, {
+        render(CharacterAssetsSettings, {
             props: {
                 context: () => ({
                     getCharacter: () => mockCharacter,
@@ -78,10 +76,10 @@ describe("CharacterAssetsSettings Component", () => {
             },
         });
 
-        await expect.element(getByText("Images")).toBeVisible();
+        expect(screen.getByText("Images")).toBeInTheDocument();
     });
 
-    test("shows other assets section when non-image exists", async () => {
+    test("shows other assets section when non-image exists", () => {
         mockCharacter.assets.assets = [
             {
                 id: "asset-2",
@@ -91,7 +89,7 @@ describe("CharacterAssetsSettings Component", () => {
             },
         ];
 
-        const { getByText } = render(CharacterAssetsSettings, {
+        render(CharacterAssetsSettings, {
             props: {
                 context: () => ({
                     getCharacter: () => mockCharacter,
@@ -100,7 +98,7 @@ describe("CharacterAssetsSettings Component", () => {
             },
         });
 
-        await expect.element(getByText("Other Assets (1)")).toBeVisible();
+        expect(screen.getByText("Other Assets (1)")).toBeInTheDocument();
     });
 
     test("calls onChange when deleting asset", async () => {
@@ -123,7 +121,7 @@ describe("CharacterAssetsSettings Component", () => {
         });
 
         // Find the delete button (should be only one since we have only one asset)
-        await vi.waitFor(() => {
+        await waitFor(() => {
             const deleteButton = container.querySelector('button[aria-label="Delete asset"]');
             expect(deleteButton).toBeTruthy();
         });
@@ -133,7 +131,7 @@ describe("CharacterAssetsSettings Component", () => {
         ) as HTMLButtonElement;
         deleteButton.click();
 
-        await vi.waitFor(() => {
+        await waitFor(() => {
             expect(onChangeSpy).toHaveBeenCalled();
         });
     });
@@ -163,7 +161,7 @@ describe("CharacterAssetsSettings Component", () => {
             },
         });
 
-        await vi.waitFor(() => {
+        await waitFor(() => {
             const draggables = container.querySelectorAll('[draggable="true"]');
             expect(draggables).toHaveLength(2);
         });

@@ -1,22 +1,21 @@
-/// <reference types="vitest/browser" />
 import { test, expect, describe } from "vitest";
-import { render } from "vitest-browser-svelte";
+import { render, screen } from "@testing-library/svelte";
 import AboutPage from "@/components/settingSubpage/AboutPage.svelte";
 
 describe("AboutPage Component", () => {
-    test("renders correctly", async () => {
-        const { getByText, getByRole } = render(AboutPage);
+    test("renders correctly", () => {
+        render(AboutPage);
 
-        await expect.element(getByText("ArisuTalk")).toBeVisible();
-        await expect.element(getByText("Made with 💖 by concertypin")).toBeVisible();
+        expect(screen.getByText("ArisuTalk")).toBeInTheDocument();
+        expect(screen.getByText("Made with 💖 by concertypin")).toBeInTheDocument();
 
         // Use regex for version text since it depends on env vars which might be undefined/different in test
-        await expect.element(getByText(/Version .* on channel .*/)).toBeVisible();
+        expect(screen.getByText(/Version .* on channel .*/)).toBeInTheDocument();
 
-        const githubLink = getByRole("link", { name: "GitHub" });
-        await expect.element(githubLink).toBeVisible();
+        const githubLink = screen.getByRole("link", { name: "GitHub" });
+        expect(githubLink).toBeInTheDocument();
 
-        const reportLink = getByRole("link", { name: "Report Issue" });
-        await expect.element(reportLink).toBeVisible();
+        const reportLink = screen.getByRole("link", { name: "Report Issue" });
+        expect(reportLink).toBeInTheDocument();
     });
 });
