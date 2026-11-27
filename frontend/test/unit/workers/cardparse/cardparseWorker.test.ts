@@ -106,7 +106,7 @@ describe("cardparse worker entry point", () => {
     });
 });
 
-describe("iterableToStream with async iterables", () => {
+describe.concurrent("iterableToStream with async iterables", () => {
     async function* chunksOf(...parts: Uint8Array[]) {
         for (const part of parts) yield part;
     }

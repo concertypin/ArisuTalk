@@ -4,7 +4,7 @@ import GearIcon from "phosphor-svelte/lib/GearIcon";
 import { preload } from "@/components/dialog/settingsPreload";
 
 // Markdown pages and the label and icon defaults are covered in test/browser/components/settingsPreload.test.ts.
-describe("settings dialog preload", () => {
+describe.concurrent("settings dialog preload", () => {
     it("returns empty collections for no templates", () => {
         expect(preload([])).toEqual({ tabList: [], pageMap: {} });
     });

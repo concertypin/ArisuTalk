@@ -3,7 +3,7 @@ import { Logger, type AnyLogEntry } from "@common/logger/Logger";
 import { ReplaceHookManager } from "@worker/regex/ReplaceHookManager";
 
 describe("ReplaceHookManager", () => {
-    describe("rule management", () => {
+    describe.concurrent("rule management", () => {
         it("applies the rules given to the constructor in order", () => {
             const manager = new ReplaceHookManager([
                 { pattern: "a", replacement: "b" },
@@ -42,7 +42,7 @@ describe("ReplaceHookManager", () => {
         });
     });
 
-    describe("apply", () => {
+    describe.concurrent("apply", () => {
         it("replaces every match by default", () => {
             const manager = new ReplaceHookManager([{ pattern: "o", replacement: "0" }]);
 
