@@ -6,11 +6,11 @@
     import InfoIcon from "phosphor-svelte/lib/InfoIcon";
 
     // Subpage components
-    import GeneralSettings from "./settingSubpage/GeneralSettings.svelte";
-    import LLMSettings from "./settingSubpage/LLMSettings.svelte";
-    import PromptSettings from "./settingSubpage/PromptSettings.svelte";
-    import AdvancedSettings from "./settingSubpage/AdvancedSettings.svelte";
-    import AboutPage from "./settingSubpage/AboutPage.svelte";
+    import GeneralSettings from "@/components/settingSubpage/GeneralSettings.svelte";
+    import LLMSettings from "@/components/settingSubpage/LLMSettings.svelte";
+    import PromptSettings from "@/components/settingSubpage/PromptSettings.svelte";
+    import AdvancedSettings from "@/components/settingSubpage/AdvancedSettings.svelte";
+    import AboutPage from "@/components/settingSubpage/AboutPage.svelte";
 
     import { preload } from "@/components/dialog/settingsPreload";
 
@@ -70,13 +70,18 @@
         }
     }
 
-    /** Autosave: persist the settings shortly after any change, so the footer's claim holds. */
+    /**
+     * Autosave: persist the settings shortly after any change, so the footer's claim holds.
+     * Nothing is saved before the stored settings are loaded: saving then would overwrite them
+     * with defaults, and the load itself is not a change.
+     */
     let isFirstRun = true;
     $effect(() => {
         // Reading the whole tree subscribes the effect to every nested setting.
         $state.snapshot(settings.value);
+        if (!settings.isLoaded) return;
 
-        // The first run only subscribes; nothing changed yet.
+        // The first run after loading only subscribes; nothing changed yet.
         if (isFirstRun) {
             isFirstRun = false;
             return;
@@ -110,7 +115,7 @@
 
     function onClose() {
         cancelAutosave();
-        void settings.save();
+        if (settings.isLoaded) void settings.save();
 
         closeAppSettings();
 
@@ -135,4 +140,5 @@
     {activeId}
     {onTabChange}
     {settingsModalContext}
+    disabled={!settings.isLoaded}
 />

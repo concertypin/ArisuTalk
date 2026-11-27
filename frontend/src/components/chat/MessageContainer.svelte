@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
-    import MessageBubble from "./MessageBubble.svelte";
+    import MessageBubble from "@/components/chat/MessageBubble.svelte";
     import { chatStore } from "@/features/chat/stores/chatStore.svelte";
     import { toastStore } from "@/lib/stores/toast.svelte";
     import { tick } from "svelte";
@@ -15,8 +15,14 @@
         activeChat?: LocalChat;
     } = $props();
 
-    // Edit mode state
-    let editingMessageId = $state<string | null>(null);
+    /**
+     * The message being edited. An edit belongs to one chat: switching chats recomputes this
+     * writable derived to `null`, so coming back never reopens an editor with an empty draft.
+     */
+    let editingMessageId = $derived.by((): string | null => {
+        void activeChat?.id;
+        return null;
+    });
 
     let isTyping = $derived(chatStore.isGenerating);
 

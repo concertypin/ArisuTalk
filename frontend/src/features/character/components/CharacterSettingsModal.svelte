@@ -9,13 +9,13 @@
     import GearIcon from "phosphor-svelte/lib/GearIcon";
 
     // Subpage components
-    import CharacterBasicSettings from "./settingsSubpage/CharacterBasicSettings.svelte";
-    import CharacterPromptSettings from "./settingsSubpage/CharacterPromptSettings.svelte";
-    import CharacterLorebookSettings from "./settingsSubpage/CharacterLorebookSettings.svelte";
-    import CharacterAssetsSettings from "./settingsSubpage/CharacterAssetsSettings.svelte";
-    import CharacterMetadataSettings from "./settingsSubpage/CharacterMetadataSettings.svelte";
-    import CharacterMagicSettings from "./settingsSubpage/CharacterMagicSettings.svelte";
-    import CharacterHooksSettings from "./settingsSubpage/CharacterHooksSettings.svelte";
+    import CharacterBasicSettings from "@/features/character/components/settingsSubpage/CharacterBasicSettings.svelte";
+    import CharacterPromptSettings from "@/features/character/components/settingsSubpage/CharacterPromptSettings.svelte";
+    import CharacterLorebookSettings from "@/features/character/components/settingsSubpage/CharacterLorebookSettings.svelte";
+    import CharacterAssetsSettings from "@/features/character/components/settingsSubpage/CharacterAssetsSettings.svelte";
+    import CharacterMetadataSettings from "@/features/character/components/settingsSubpage/CharacterMetadataSettings.svelte";
+    import CharacterMagicSettings from "@/features/character/components/settingsSubpage/CharacterMagicSettings.svelte";
+    import CharacterHooksSettings from "@/features/character/components/settingsSubpage/CharacterHooksSettings.svelte";
 
     import { preload } from "@/components/dialog/settingsPreload";
 

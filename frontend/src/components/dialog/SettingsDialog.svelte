@@ -18,6 +18,8 @@
         activeId: string;
         settingsModalContext: () => TContext;
         self?: HTMLDialogElement;
+        /** Disables every control in the pages, e.g. while the data they edit is still loading. */
+        disabled?: boolean;
     };
     let {
         id = `untitled-${crypto.randomUUID()}`,
@@ -29,6 +31,7 @@
         activeId,
         settingsModalContext,
         self = $bindable(),
+        disabled = false,
     }: Props = $props();
 
     let { tabList, pageMap } = $derived(preloaded);
@@ -116,19 +119,24 @@
 
             <!-- Main Panel -->
             <main class="flex-1 p-6 overflow-y-auto bg-base-100">
-                {#if page.type === "markdown"}
-                    <SanitizedHtml class="prose prose-sm max-w-[80ch]" html={page.html} />
-                {:else if page.type === "component"}
-                    {@render Panel(page.component)}
-                {:else if page.type === "static"}
-                    <page.component />
-                {/if}
+                <!-- A disabled fieldset disables every form control inside it. -->
+                <fieldset class="contents" {disabled}>
+                    {#if page.type === "markdown"}
+                        <SanitizedHtml class="prose prose-sm max-w-[80ch]" html={page.html} />
+                    {:else if page.type === "component"}
+                        {@render Panel(page.component)}
+                    {:else if page.type === "static"}
+                        <page.component />
+                    {/if}
+                </fieldset>
             </main>
         </div>
 
         <!-- Footer -->
         <div class="modal-action p-4 border-t border-base-300/50 bg-base-200/60 m-0">
-            <span class="text-sm text-base-content/50 flex-1">Changes are saved automatically</span>
+            <span class="text-sm text-base-content/50 flex-1">
+                {disabled ? "Loading..." : "Changes are saved automatically"}
+            </span>
             <button class="btn btn-primary shadow-md" onclick={onClose}>Close</button>
         </div>
     </div>

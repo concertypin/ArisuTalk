@@ -24,8 +24,9 @@ describe("AppSettingsModal Component", () => {
     });
 
     beforeEach(() => {
-        // Reset stores
+        // Reset stores; most tests open the modal after the stored settings are loaded.
         settings.value = SettingsSchema.parse({});
+        settings.isLoaded = true;
         // Avoid touching the storage adapter, the tests only care about the call.
         vi.spyOn(settings, "save").mockResolvedValue(undefined);
         vi.spyOn(Logger, "structured").mockImplementation(() => {});
@@ -187,6 +188,46 @@ describe("AppSettingsModal Component", () => {
 
             // One save from closing; the debounce timer must not save a second time.
             expect(settings.save).toHaveBeenCalledOnce();
+        });
+    });
+
+    describe("before the stored settings are loaded", () => {
+        beforeEach(() => {
+            settings.isLoaded = false;
+        });
+
+        test("disables the controls until the settings are loaded", async () => {
+            renderModal();
+
+            expect(screen.getByRole("combobox", { name: "Font Family" })).toBeDisabled();
+            expect(screen.getByText("Loading...")).toBeInTheDocument();
+
+            settings.isLoaded = true;
+            flushSync();
+
+            expect(screen.getByRole("combobox", { name: "Font Family" })).toBeEnabled();
+        });
+
+        test("closing does not save, so the defaults cannot overwrite the stored settings", async () => {
+            const user = userEvent.setup();
+            renderModal();
+
+            await user.click(screen.getByLabelText("Close"));
+
+            expect(settings.save).not.toHaveBeenCalled();
+        });
+
+        test("loading the stored settings is not treated as a change", async () => {
+            renderModal();
+
+            // What `settings.init()` does when the stored settings arrive.
+            settings.value = SettingsSchema.parse({ fontFamily: "Lato" });
+            settings.isLoaded = true;
+            flushSync();
+            // Negative check: wait longer than the 300ms debounce.
+            await new Promise((r) => setTimeout(r, 500));
+
+            expect(settings.save).not.toHaveBeenCalled();
         });
     });
 });
