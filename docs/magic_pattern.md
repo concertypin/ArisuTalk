@@ -24,10 +24,17 @@ The following variables/functions are available in the context of magic patterns
 - `persona`: The user's persona object.
 - `user`: Alias for `persona.name`.
 - `chat(a, b)`: Function to access current chatting log from `a`-th to `b`-th. (0-indexed, start and end are inclusive)
-  - 0 means the newest element, 1 means second newest element, and so on.
-  - negative index is allowed, like python. -1 means oldest element, -2 means second oldest element, and so on.
-  - `a` can be greater than `b`, in that case, it means reverse order.
-  - if `a` or `b` is out of range, it will be clamped to the valid range.
+  - Index 0 is always the **newest** message: 0 means the newest message, 1 means the second newest message, and so on.
+  - Negative indexes count from the other end: -1 means the oldest message, -2 means the second oldest message, and so on.
+  - The result lists the messages in the order the indexes go from `a` to `b`, so `a` greater than `b` gives the reverse order.
+  - If `a` or `b` is out of range, it is clamped to the valid range.
+  - Examples, for a history of `m1` (oldest) … `m5` (newest):
+    - `chat(0, 0)` → `[m5]`
+    - `chat(0, 2)` → `[m5, m4, m3]` (newest first)
+    - `chat(2, 0)` → `[m3, m4, m5]` (oldest first)
+    - `chat(-1, -2)` → `[m1, m2]`
+    - `chat(-1, 0)` → `[m1, m2, m3, m4, m5]` (the whole history, oldest first)
+    - `chat(0, 99)` → `[m5, m4, m3, m2, m1]`
 - `sessionStorage`: `Record<string,string>` typed temporary storage, saved on [`window.sessionStorage`](https://developer.mozilla.org/docs/Web/API/Window/sessionStorage).
   - Doesn't provide any collision protection, so use unique keys.
     - This is intended to be used for communicating with other magic patterns in the same prompt, or even other prompts in the same session.

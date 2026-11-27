@@ -1,6 +1,11 @@
+import { runInNewContext } from "node:vm";
 import { vi } from "vitest";
 import type { WorkerApi } from "@/lib/workers/workerClient";
-import type { ScriptingWorkerApi } from "@worker/scripting/types";
+import type {
+    ExecutionOptions,
+    ExecutionResult,
+    ScriptingWorkerApi,
+} from "@worker/scripting/types";
 
 /**
  * Creates a mock WorkerApi for testing.
@@ -28,4 +33,23 @@ export function mockScriptingWorker<const T extends ScriptingWorkerApi["execute"
         execute,
         setLogReceiver: vi.fn(),
     });
+}
+
+/**
+ * Evaluates scripting worker code with Node's `vm`, a stand-in for the QuickJS worker.
+ * Follows the worker's rule: code with a statement or a leading `return` is a function body,
+ * anything else is an expression whose value is returned. Failures come back as `error`, not a throw.
+ * @param code - The script source.
+ * @param _options - Ignored; accepted so this fits `ScriptingWorkerApi["execute"]`.
+ * @returns The result or the error message, with no logs.
+ */
+export async function runInVm(code: string, _options?: ExecutionOptions): Promise<ExecutionResult> {
+    try {
+        const hasStatements = /[;]|^\s*return\s+/.test(code);
+        const body = hasStatements ? code : `return (${code});`;
+        const result: unknown = runInNewContext(`(function () {\n${body}\n})()`);
+        return { result, logs: [] };
+    } catch (error) {
+        return { error: error instanceof Error ? error.message : String(error), logs: [] };
+    }
 }

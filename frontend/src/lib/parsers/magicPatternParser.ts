@@ -35,10 +35,10 @@ export type MagicPatternContext = {
         description?: string;
     };
     /**
-     * Access chat history.
-     * @param a - Start index (0 = newest, -1 = oldest)
-     * @param b - End index (inclusive)
-     * @returns Array of messages in the specified range.
+     * Access chat history. Index 0 is always the newest message; see docs/magic_pattern.md.
+     * @param a - Start index (inclusive). 0 = newest, 1 = second newest; -1 = oldest, -2 = second oldest.
+     * @param b - End index (inclusive), same indexing as `a`. Out-of-range indexes are clamped.
+     * @returns The messages from `a` to `b`, in that order: `chat(0, 2)` is newest first, `chat(2, 0)` oldest first.
      */
     chat: (a: number, b: number) => Message[];
 };
@@ -83,10 +83,11 @@ function buildSandboxCode(
             `const chat = (a, b) => {`,
             `  const len = _messages.length;`,
             `  if (len === 0) return [];`,
-            `  const idx = (i) => (i === -1 ? 0 : Math.max(0, len - 1 - i));`,
-            `  const s = idx(Math.min(a, b));`,
-            `  const e = idx(Math.max(a, b));`,
-            `  return _messages.slice(s, e + 1);`,
+            `  // 0 = newest, 1 = second newest; -1 = oldest, -2 = second oldest. Clamped to the history.`,
+            `  const pos = (i) => Math.min(len - 1, Math.max(0, i < 0 ? -i - 1 : len - 1 - i));`,
+            `  const from = pos(a);`,
+            `  const to = pos(b);`,
+            `  return from >= to ? _messages.slice(to, from + 1).reverse() : _messages.slice(from, to + 1);`,
             `};`,
         ].join("\n"),
         code,
