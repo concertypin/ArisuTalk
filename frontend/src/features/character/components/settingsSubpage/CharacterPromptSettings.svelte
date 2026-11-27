@@ -11,9 +11,9 @@
     import { merge } from "lodash-es";
     import PromptTemplateManager from "@/features/promptTemplate/components/PromptTemplateManager.svelte";
     import { estimateTokens } from "@/lib/utils/tokenCounter";
-    import CharacterSettings from "./CharacterSettings.svelte";
+    import CharacterSettings from "@/features/character/components/settingsSubpage/CharacterSettings.svelte";
 
-    import type { TContext, TProps } from "./types";
+    import type { TContext, TProps } from "@/features/character/components/settingsSubpage/types";
 
     let { context }: TProps<TContext> = $props();
 

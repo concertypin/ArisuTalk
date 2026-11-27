@@ -10,12 +10,12 @@
     import CaretDown from "phosphor-svelte/lib/CaretDownIcon";
     import CaretUp from "phosphor-svelte/lib/CaretUpIcon";
     import { merge } from "lodash-es";
-    import CharacterSettings from "./CharacterSettings.svelte";
+    import CharacterSettings from "@/features/character/components/settingsSubpage/CharacterSettings.svelte";
 
     type LorebookEntry = Character["prompt"]["lorebook"]["data"][number];
     type ConditionType = LorebookEntry["condition"][number]["type"];
 
-    import type { TContext, TProps } from "./types";
+    import type { TContext, TProps } from "@/features/character/components/settingsSubpage/types";
 
     let { context }: TProps<TContext> = $props();
 

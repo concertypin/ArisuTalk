@@ -13,8 +13,8 @@
     import DotsSixVertical from "phosphor-svelte/lib/DotsSixVerticalIcon";
     import { getAssetStorage } from "@/features/character/adapters/assetStorage/assetStorageResolver";
     import { Logger } from "@common/logger/Logger";
-    import CharacterSettings from "./CharacterSettings.svelte";
-    import type { TContext, TProps } from "./types";
+    import CharacterSettings from "@/features/character/components/settingsSubpage/CharacterSettings.svelte";
+    import type { TContext, TProps } from "@/features/character/components/settingsSubpage/types";
 
     let { context }: TProps<TContext> = $props();
 

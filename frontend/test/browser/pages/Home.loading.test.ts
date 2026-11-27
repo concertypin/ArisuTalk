@@ -1,4 +1,4 @@
-import { test, expect, vi } from "vitest";
+import { test, expect, vi, beforeAll } from "vitest";
 import { renderWithAppContext } from "@test/utils/appContext.svelte";
 import Home from "@/routes/Home.svelte";
 
@@ -8,6 +8,14 @@ const chatAreaGate = vi.hoisted(() => Promise.withResolvers<void>());
 vi.mock("@/components/ChatArea.svelte", async (importOriginal) => {
     await chatAreaGate.promise;
     return await importOriginal();
+});
+
+// Load the layout and ChatArea's children up front, so opening the gate does not wait on a cold
+// transform of the app's largest module graph. ChatArea itself stays behind the gate.
+beforeAll(async () => {
+    await import("@/features/character/components/CharacterLayout.svelte");
+    await import("@/components/chat/MessageContainer.svelte");
+    await import("@/components/chat/MessageInput.svelte");
 });
 
 // Keep this the only test here: Home caches its lazy components in module scope, so an earlier render

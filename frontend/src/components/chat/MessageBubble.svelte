@@ -5,7 +5,7 @@
 -->
 <script lang="ts">
     import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
-    import MessageActions from "./MessageActions.svelte";
+    import MessageActions from "@/components/chat/MessageActions.svelte";
     import TextArea from "@/components/input/TextArea.svelte";
     import SanitizedHtml from "@/components/SanitizedHtml.svelte";
     import { parseChatMarkdown } from "@/lib/utils/markdown";

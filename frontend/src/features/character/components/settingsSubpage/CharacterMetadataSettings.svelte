@@ -5,9 +5,9 @@
      */
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import { merge } from "lodash-es";
-    import CharacterSettings from "./CharacterSettings.svelte";
+    import CharacterSettings from "@/features/character/components/settingsSubpage/CharacterSettings.svelte";
 
-    import type { TContext, TProps } from "./types";
+    import type { TContext, TProps } from "@/features/character/components/settingsSubpage/types";
 
     let { context }: TProps<TContext> = $props();
 

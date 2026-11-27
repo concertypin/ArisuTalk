@@ -12,8 +12,8 @@
     import Warning from "phosphor-svelte/lib/WarningIcon";
     import { merge, cloneDeep } from "lodash-es";
     import type { AssertNever } from "@/lib/types/assert";
-    import CharacterSettings from "./CharacterSettings.svelte";
-    import type { TContext, TProps } from "./types";
+    import CharacterSettings from "@/features/character/components/settingsSubpage/CharacterSettings.svelte";
+    import type { TContext, TProps } from "@/features/character/components/settingsSubpage/types";
 
     type ReplaceHook = Character["executables"]["replaceHooks"];
     type HookType = keyof ReplaceHook;

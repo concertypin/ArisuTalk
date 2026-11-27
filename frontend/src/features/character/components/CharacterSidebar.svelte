@@ -4,8 +4,8 @@
     import Gear from "phosphor-svelte/lib/GearIcon";
     import House from "phosphor-svelte/lib/HouseIcon";
     import { flip } from "svelte/animate";
-    import CharacterSidebarItem from "./CharacterSidebarItem.svelte";
-    import { characterStore } from "../stores/characterStore.svelte";
+    import CharacterSidebarItem from "@/features/character/components/CharacterSidebarItem.svelte";
+    import { characterStore } from "@/features/character/stores/characterStore.svelte";
 
     import { getAppContext } from "@/context";
 

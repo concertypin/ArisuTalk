@@ -2,7 +2,7 @@
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import PencilSimple from "phosphor-svelte/lib/PencilSimpleIcon";
     import PushPin from "phosphor-svelte/lib/PushPinIcon";
-    import { opfsAdapter } from "../adapters/assetStorage/OpFSAssetStorageAdapter";
+    import { opfsAdapter } from "@/features/character/adapters/assetStorage/OpFSAssetStorageAdapter";
     import { IfNotExistBehavior } from "@/lib/interfaces";
 
     import { getAppContext } from "@/context";

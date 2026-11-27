@@ -3,7 +3,7 @@
     import XIcon from "phosphor-svelte/lib/XIcon";
     import { untrack, type Component } from "svelte";
     import SanitizedHtml from "@/components/SanitizedHtml.svelte";
-    import type { Page, SubpageProps, Tab } from "./settingsPreload";
+    import type { Page, SubpageProps, Tab } from "@/components/dialog/settingsPreload";
 
     type Props = {
         id?: string;
