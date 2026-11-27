@@ -50,7 +50,11 @@
     /** Find chats that branched from this chat's root */
     let branchChats = $derived(
         allChats.filter(
-            (c) => c.branchRootId === chatId || c.branchRootId === activeChat?.branchRootId
+            (c) =>
+                c.branchRootId === chatId ||
+                // Chats without a root must not match each other (`undefined === undefined`).
+                (activeChat?.branchRootId !== undefined &&
+                    c.branchRootId === activeChat.branchRootId)
         )
     );
 
@@ -77,15 +81,13 @@
     }
 
     /** Build a tree structure from flat messages with branching info */
-    function buildBranchTree(messages: typeof activeMessages): BranchNode[] {
+    function buildBranchTree(messages: ChatMessage[]): BranchNode[] {
         const nodes: BranchNode[] = [];
         const childrenMap = new SvelteMap<string | null, BranchNode[]>();
 
         for (const msg of messages) {
-            const branchMsg: ChatMessage = Object.assign(msg, {
-                branchFromId: undefined,
-                branchRootId: undefined,
-            });
+            // Read the branching fields only. Writing to `msg` here would mutate the store's reactive
+            // messages inside a `$derived`, which Svelte rejects with `state_unsafe_mutation`.
             const node: BranchNode = {
                 id: msg.id,
                 content:
@@ -94,12 +96,12 @@
                         : JSON.stringify(msg.content.data),
                 role: msg.role,
                 timestamp: msg.timestamp,
-                branchFromId: branchMsg.branchFromId,
-                branchRootId: branchMsg.branchRootId,
+                branchFromId: msg.branchFromId,
+                branchRootId: msg.branchRootId,
                 children: [],
             };
 
-            const parentId = branchMsg.branchFromId || null;
+            const parentId = msg.branchFromId || null;
             if (!childrenMap.has(parentId)) {
                 childrenMap.set(parentId, []);
             }
