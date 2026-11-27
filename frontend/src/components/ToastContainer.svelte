@@ -17,10 +17,15 @@
 -->
 <div class="toast toast-end toast-bottom z-50">
     {#each toastStore.toasts as toast (toast.id)}
-        <div class="alert {alertClass[toast.type]} shadow-lg">
+        <!-- An error interrupts the screen reader (alert); the other types wait their turn (status). -->
+        <div
+            class="alert {alertClass[toast.type]} shadow-lg"
+            role={toast.type === "error" ? "alert" : "status"}
+        >
             <span>{toast.message}</span>
             <button
                 class="btn btn-ghost btn-xs btn-circle"
+                aria-label="Close"
                 onclick={() => toastStore.dismiss(toast.id)}
             >
                 <XIcon class="w-4 h-4" size={16} />
