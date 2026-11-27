@@ -60,13 +60,10 @@
 
 `frontend/src/lib/utils/tokenCounter.ts` (신규, DevTools agent)
 
-- **`countTokens(text)`**: TextEncoder 기반 바이트 길이 측정 → 4바이트당 1토큰 근사
+- **`estimateTokens(text)`**: TextEncoder 기반 바이트 길이 측정 → 4바이트당 1토큰 근사. `setTokenProvider()`로 실제 토크나이저를 주입할 수 있음
 > [!NOTE]
 > 근사치 말고 실제 계산할 것, 안 되면 근사 provider로 사용자가 선택 가능하게 할 것
-- **`estimateTokenCost(text, model?)`**: 모델별 가격표로 예상 비용 계산
-- 지원 모델: GPT-4o, GPT-4o-mini, GPT-4, Claude 3, Gemini 1.5 등
-> [!NOTE]
-> 그 모델 죽은 지가 언젠데... 코드에 직접 모델명 넣지 말고, 동적 모델 가격표를 가져오거나 최소한 유저 입력으로라도 할 것
+- 비용 추정(`estimateTokenCost`, 모델별 가격표)은 제거됨. 동적 가격표는 프로젝트 백로그에서 추적
 
 `frontend/src/features/character/components/settingsSubpage/CharacterPromptSettings.svelte` (수정)
 

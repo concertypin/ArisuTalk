@@ -1,24 +1,27 @@
 <script lang="ts">
-    import CharacterSidebar from "./CharacterSidebar.svelte";
-    import CharacterForm from "./CharacterForm.svelte";
-    import CharacterSettingsModal from "./CharacterSettingsModal.svelte";
-    import ChatList from "../../chat/components/ChatList.svelte";
-    import GroupChatManager from "../../chat/components/GroupChatManager.svelte";
-    import PersonaList from "../../persona/components/PersonaList.svelte";
-    import PersonaForm from "../../persona/components/PersonaForm.svelte";
-    import type { Persona } from "../../persona/schema";
-    import { characterStore } from "../stores/characterStore.svelte";
-    import { chatStore } from "../../chat/stores/chatStore.svelte";
-    import { uiState } from "@/lib/stores/ui.svelte";
+    import CharacterSidebar from "@/features/character/components/CharacterSidebar.svelte";
+    import CharacterForm from "@/features/character/components/CharacterForm.svelte";
+    import CharacterSettingsModal from "@/features/character/components/CharacterSettingsModal.svelte";
+    import ChatList from "@/features/chat/components/ChatList.svelte";
+    import GroupChatManager from "@/features/chat/components/GroupChatManager.svelte";
+    import PersonaList from "@/features/persona/components/PersonaList.svelte";
+    import PersonaForm from "@/features/persona/components/PersonaForm.svelte";
+    import type { Persona } from "@/features/persona/schema";
+    import { characterStore } from "@/features/character/stores/characterStore.svelte";
+    import { chatStore } from "@/features/chat/stores/chatStore.svelte";
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import { Logger } from "@common/logger/Logger";
     import type { Snippet } from "svelte";
+    import { cloneDeep } from "lodash-es";
+    import { getAppContext } from "@/context";
 
-    type Props = {
+    let {
+        children,
+    }: {
         children?: Snippet;
-    };
+    } = $props();
 
-    let { children }: Props = $props();
+    let appContext = getAppContext();
 
     let selectedCharacterId = $state<string | null>(null);
     let dialog = $state<HTMLDialogElement>();
@@ -246,7 +249,10 @@
         </form>
     </dialog>
     <!-- Character Settings Modal -->
-    {#if uiState.characterSettingsOpen}
-        <CharacterSettingsModal />
+    {#if appContext.characterSettingsOpen}
+        {@const character = cloneDeep(appContext.editingCharacter)}
+        {#if character}
+            <CharacterSettingsModal selectCharacter={handleSelect} {character} />
+        {/if}
     {/if}
 </div>

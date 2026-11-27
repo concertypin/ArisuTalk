@@ -1,4 +1,3 @@
-/// <reference types="vitest/browser" />
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Logger } from "@common/logger/Logger";
 import "@/lib/services/telemetry"; // This should register the event listeners
@@ -35,9 +34,12 @@ describe("Telemetry Service", () => {
 
     it("should register global unhandledrejection listener and log error.uncaught", () => {
         const reason = new Error("Test promise rejection");
+        const promise = Promise.reject(reason);
+        // Handle the real rejection so the run does not report it; the event is dispatched by hand.
+        promise.catch(() => undefined);
         const event = new PromiseRejectionEvent("unhandledrejection", {
             reason,
-            promise: Promise.reject(reason),
+            promise,
         });
 
         window.dispatchEvent(event);

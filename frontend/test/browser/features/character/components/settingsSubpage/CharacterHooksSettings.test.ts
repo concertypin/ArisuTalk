@@ -1,87 +1,64 @@
-/// <reference types="vitest/browser" />
-
 import { test, expect, describe, vi, beforeEach, type Mock } from "vitest";
-import { render } from "vitest-browser-svelte";
+import { render, screen } from "@testing-library/svelte";
+import { userEvent } from "@testing-library/user-event";
+import { fillText } from "@test/utils/user";
+import { createTestCharacter } from "@test/utils/character";
 import CharacterHooksSettings from "@/features/character/components/settingsSubpage/CharacterHooksSettings.svelte";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
 
 describe("CharacterHooksSettings Component", () => {
     let mockCharacter: Character;
-    let onChangeSpy: Mock<(character: Character) => void>;
+    let onChangeSpy: Mock<(character: Character | null) => void>;
 
     beforeEach(() => {
         onChangeSpy = vi.fn(() => {});
-        mockCharacter = {
-            id: "char-1",
-            specVersion: 0,
-            name: "Test Character",
-            description: "A test character",
-            avatarUrl: "",
-            assets: { assets: [] },
-            prompt: {
-                description: "",
-                authorsNote: "",
-                lorebook: { config: { tokenLimit: 0 }, data: [] },
-            },
-            executables: {
-                runtimeSetting: { mem: undefined, timeout: 30000 },
-                replaceHooks: {
-                    display: [],
-                    input: [],
-                    output: [],
-                    request: [],
-                },
-            },
-            metadata: {
-                author: "",
-                license: "",
-                version: "1.0.0",
-                distributedOn: "",
-                additionalInfo: "",
-            },
-        };
+        mockCharacter = createTestCharacter();
     });
 
     test("renders runtime settings correctly", async () => {
-        const screen = render(CharacterHooksSettings, {
-            character: mockCharacter,
-            onChange: onChangeSpy,
+        const user = userEvent.setup();
+        mockCharacter = createTestCharacter({
+            executables: { runtimeSetting: { timeout: 30000 } },
+        });
+
+        render(CharacterHooksSettings, {
+            props: {
+                context: () => ({
+                    getCharacter: () => mockCharacter,
+                    onCharacterChange: onChangeSpy,
+                }),
+            },
         });
 
         // Expand Runtime Settings - DaisyUI collapse uses a hidden checkbox
-        const collapseCheckbox = screen.container.querySelector(
-            ".collapse input[type='checkbox']"
-        ) as HTMLInputElement;
-        collapseCheckbox.click();
+        await user.click(screen.getByRole("checkbox"));
 
-        const { getByLabelText } = screen;
+        const memInput = screen.getByLabelText(/Memory \(MB\)/i);
+        const timeoutInput = screen.getByLabelText(/Timeout \(ms\)/i);
 
-        const memInput = getByLabelText(/Memory \(MB\)/i);
-        const timeoutInput = getByLabelText(/Timeout \(ms\)/i);
-
-        await expect.element(memInput).toBeVisible();
-        await expect.element(memInput).toHaveValue(null);
-        await expect.element(timeoutInput).toHaveValue(30000);
+        expect(memInput).toBeInTheDocument();
+        expect(memInput).toHaveValue(null);
+        expect(timeoutInput).toHaveValue(30000);
     });
 
     test("updates runtime settings", async () => {
-        const screen = render(CharacterHooksSettings, {
-            character: mockCharacter,
-            onChange: onChangeSpy,
+        const user = userEvent.setup();
+        render(CharacterHooksSettings, {
+            props: {
+                context: () => ({
+                    getCharacter: () => mockCharacter,
+                    onCharacterChange: onChangeSpy,
+                }),
+            },
         });
 
         // Expand Runtime Settings - DaisyUI collapse uses a hidden checkbox
-        const collapseCheckbox = screen.container.querySelector(
-            ".collapse input[type='checkbox']"
-        ) as HTMLInputElement;
-        collapseCheckbox.click();
+        await user.click(screen.getByRole("checkbox"));
 
-        const { getByLabelText } = screen;
+        const memInput = screen.getByLabelText(/Memory \(MB\)/i);
+        expect(memInput).toBeInTheDocument();
 
-        const memInput = getByLabelText(/Memory \(MB\)/i);
-        await expect.element(memInput).toBeVisible();
-
-        await memInput.fill("1024");
+        await fillText(user, memInput, "1024");
         /* eslint-disable @typescript-eslint/no-unsafe-assignment */
         expect(onChangeSpy).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -96,6 +73,7 @@ describe("CharacterHooksSettings Component", () => {
     });
 
     test("switches between hook tabs", async () => {
+        const user = userEvent.setup();
         mockCharacter.executables.replaceHooks.input = [
             {
                 input: "hi",
@@ -110,33 +88,43 @@ describe("CharacterHooksSettings Component", () => {
             },
         ];
 
-        const { getByRole, getByText } = render(CharacterHooksSettings, {
-            character: mockCharacter,
-            onChange: onChangeSpy,
+        render(CharacterHooksSettings, {
+            props: {
+                context: () => ({
+                    getCharacter: () => mockCharacter,
+                    onCharacterChange: onChangeSpy,
+                }),
+            },
         });
 
-        await expect.element(getByText("No display hooks.")).toBeVisible();
+        expect(screen.getByText("No display hooks.")).toBeInTheDocument();
 
-        const tab = getByRole("tab", { name: /Input/i });
-        await tab.click();
+        const tab = screen.getByRole("tab", { name: /Input/i });
+        await user.click(tab);
 
-        await expect.element(getByText("hi → hello")).toBeVisible();
+        expect(screen.getByText("hi → hello")).toBeInTheDocument();
     });
 
     test("adds a new hook", async () => {
-        const { getByRole } = render(CharacterHooksSettings, {
-            character: mockCharacter,
-            onChange: onChangeSpy,
+        const user = userEvent.setup();
+        render(CharacterHooksSettings, {
+            props: {
+                context: () => ({
+                    getCharacter: () => mockCharacter,
+                    onCharacterChange: onChangeSpy,
+                }),
+            },
         });
 
-        await getByRole("button", { name: /Add Hook/i }).click();
+        await user.click(screen.getByRole("button", { name: /Add Hook/i }));
 
         expect(onChangeSpy).toHaveBeenCalled();
         const calledArg = onChangeSpy.mock.calls[0][0];
-        expect(calledArg.executables.replaceHooks.display).toHaveLength(1);
+        expect(calledArg?.executables.replaceHooks.display).toHaveLength(1);
     });
 
     test("edits a hook", async () => {
+        const user = userEvent.setup();
         mockCharacter.executables.replaceHooks.display = [
             {
                 input: "foo",
@@ -151,16 +139,20 @@ describe("CharacterHooksSettings Component", () => {
             },
         ];
 
-        const { getByText, getByLabelText } = render(CharacterHooksSettings, {
-            character: mockCharacter,
-            onChange: onChangeSpy,
+        render(CharacterHooksSettings, {
+            props: {
+                context: () => ({
+                    getCharacter: () => mockCharacter,
+                    onCharacterChange: onChangeSpy,
+                }),
+            },
         });
 
-        await getByText("foo → bar").click();
+        await user.click(screen.getByText("foo → bar"));
 
-        const inputField = getByLabelText("Input Pattern");
-        await expect.element(inputField).toBeVisible();
-        await inputField.fill("baz");
+        const inputField = screen.getByLabelText("Input Pattern");
+        expect(inputField).toBeInTheDocument();
+        await fillText(user, inputField, "baz");
         /* eslint-disable @typescript-eslint/no-unsafe-assignment */
         expect(onChangeSpy).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -177,6 +169,7 @@ describe("CharacterHooksSettings Component", () => {
     });
 
     test("deletes a hook", async () => {
+        const user = userEvent.setup();
         mockCharacter.executables.replaceHooks.display = [
             {
                 input: "hookToRemove",
@@ -191,16 +184,20 @@ describe("CharacterHooksSettings Component", () => {
             },
         ];
 
-        const { getByText, getByRole } = render(CharacterHooksSettings, {
-            character: mockCharacter,
-            onChange: onChangeSpy,
+        render(CharacterHooksSettings, {
+            props: {
+                context: () => ({
+                    getCharacter: () => mockCharacter,
+                    onCharacterChange: onChangeSpy,
+                }),
+            },
         });
 
-        await getByText("hookToRemove → (empty)").click();
+        await user.click(screen.getByText("hookToRemove → (empty)"));
 
-        const delBtn = getByRole("button", { name: /Delete/i });
-        await expect.element(delBtn).toBeVisible();
-        await delBtn.click();
+        const delBtn = screen.getByRole("button", { name: /Delete/i });
+        expect(delBtn).toBeInTheDocument();
+        await user.click(delBtn);
 
         expect(onChangeSpy).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -216,6 +213,7 @@ describe("CharacterHooksSettings Component", () => {
     });
 
     test("handles regex type and case sensitive toggle", async () => {
+        const user = userEvent.setup();
         mockCharacter.executables.replaceHooks.display = [
             {
                 input: "test",
@@ -230,36 +228,32 @@ describe("CharacterHooksSettings Component", () => {
             },
         ];
 
-        const { getByText, getByLabelText } = render(CharacterHooksSettings, {
-            character: mockCharacter,
-            onChange: onChangeSpy,
+        render(CharacterHooksSettings, {
+            props: {
+                context: () => ({
+                    getCharacter: () => mockCharacter,
+                    onCharacterChange: onChangeSpy,
+                }),
+            },
         });
 
-        await getByText("test → (empty)").click();
+        await user.click(screen.getByText("test → (empty)"));
 
-        const caseSensitiveCheckbox = getByLabelText("Case Sensitive");
-        await expect.element(caseSensitiveCheckbox).toBeVisible();
+        // The mocked context never feeds the change back, so each action is judged on its own.
+        await user.click(screen.getByRole("checkbox", { name: "Case Sensitive" }));
 
-        const typeSelect = getByLabelText("Type");
-        await expect.element(typeSelect).toBeVisible();
+        const afterToggle = onChangeSpy.mock.lastCall?.[0];
+        expect(afterToggle?.executables.replaceHooks.display[0].meta).toMatchObject({
+            type: "string",
+            caseSensitive: true,
+        });
 
-        // Use selectOptions (plural)
-        await typeSelect.selectOptions("regex");
+        await user.selectOptions(screen.getByRole("combobox", { name: "Type" }), "regex");
 
-        expect(onChangeSpy).toHaveBeenCalledWith(
-            expect.objectContaining({
-                /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-                executables: expect.objectContaining({
-                    replaceHooks: expect.objectContaining({
-                        display: expect.arrayContaining([
-                            expect.objectContaining({
-                                meta: expect.objectContaining({ type: "regex" }),
-                            }),
-                        ]),
-                    }),
-                }),
-                /* eslint-enable @typescript-eslint/no-unsafe-assignment */
-            })
-        );
+        const afterType = onChangeSpy.mock.lastCall?.[0];
+        expect(afterType?.executables.replaceHooks.display[0].meta).toMatchObject({
+            type: "regex",
+            flag: "g",
+        });
     });
 });

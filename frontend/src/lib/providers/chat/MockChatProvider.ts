@@ -25,7 +25,7 @@ export class MockChatProvider extends ChatProvider<"MOCK"> {
                 "This is a mock response.",
                 "How can I help you?",
             ],
-            sleep: settings.mockDelay || 100,
+            sleep: settings.mockDelay ?? 100,
         });
     }
 

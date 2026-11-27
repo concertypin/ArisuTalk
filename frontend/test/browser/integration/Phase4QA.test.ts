@@ -1,40 +1,35 @@
 /**
  * @fileoverview Phase 4 Integration & E2E Testing.
- * Covers both functional flows (system prompt assembly, toggle, magic patterns, template seeding, cleanup)
+ * Covers both functional flows (system prompt assembly, toggle, template seeding, cleanup)
  * and visual styling guidelines (button layout wrap prevention, button alignment, empty state button classes)
  * in a single sequential test to prevent race conditions on the global singleton chatStore.
  */
 
-/// <reference types="vitest/browser" />
 import { test, expect, describe, vi, afterEach, beforeEach } from "vitest";
-import { render } from "vitest-browser-svelte";
+import { screen, waitFor } from "@testing-library/svelte";
+import { userEvent } from "@testing-library/user-event";
+import { fillText } from "@test/utils/user";
+import { renderWithAppContext } from "@test/utils/appContext.svelte";
 import { apply } from "@arisutalk/character-spec/utils";
-import CharacterLayoutTestWrapper from "../wrappers/CharacterLayoutTestWrapper.svelte";
+import CharacterLayoutTestWrapper from "@test/browser/wrappers/CharacterLayoutTestWrapper.svelte";
 import { StorageResolver } from "@/lib/adapters/storage/storageResolver";
 import type { IChatStorageAdapter, LocalChat, ChatType } from "@/lib/interfaces";
 import type { Message } from "@arisutalk/character-spec/v0/Character/Message";
 import { CharacterSchema } from "@arisutalk/character-spec/v0/Character";
+import type { BaseMessage } from "@langchain/core/messages";
+import { PromptTemplateStore } from "@/features/promptTemplate/stores/promptTemplateStore.svelte";
+import { chatStore } from "@/features/chat/stores/chatStore.svelte";
+import { characterStore } from "@/features/character/stores/characterStore.svelte";
+import { personaStore } from "@/features/persona/stores/personaStore.svelte";
+import { settings } from "@/lib/stores/settings.svelte";
+import { buildSystemPrompt } from "@/lib/prompts/systemPromptBuilder";
 
 let capturedMessages: unknown[] = [];
-const nextTick = () => new Promise((resolve) => setTimeout(resolve, 10));
 
-// Mock MagicPatternParser to avoid loading web worker (QuickJS sandbox) in browser testing
+// Keep the QuickJS scripting worker out of jsdom; the real parser is covered in test/unit.
 vi.mock("@/lib/parsers/magicPatternParser", () => {
     return {
-        parseMagicPatterns: vi
-            .fn()
-            .mockImplementation(
-                async (text: string, context?: { character?: { name: string } }) => {
-                    let replaced = text;
-                    if (context?.character?.name) {
-                        replaced = replaced.replace(
-                            /\{\|\s*character\.name\s*\|\}/g,
-                            context.character.name
-                        );
-                    }
-                    return replaced;
-                }
-            ),
+        parseMagicPatterns: vi.fn(async (text: string) => text),
         default: vi.fn(),
     };
 });
@@ -89,11 +84,10 @@ describe("Phase 4 E2E & Visual Verification (Sequential Suite)", () => {
     });
 
     test("Execute Full QA E2E & Visual Verification Scenarios Sequentially", async () => {
+        const user = userEvent.setup();
         // --- SCENARIO 1: Default templates seeding initialization ---
         localStorage.removeItem("arisutalk_prompt_templates");
 
-        const { PromptTemplateStore } =
-            await import("@/features/promptTemplate/stores/promptTemplateStore.svelte");
         const tempStore = new PromptTemplateStore();
         await tempStore.initPromise;
 
@@ -121,7 +115,6 @@ describe("Phase 4 E2E & Visual Verification (Sequential Suite)", () => {
         const mockChatAdapter = new MockChatStorageAdapter([chatObj]);
         StorageResolver["chatAdapter"] = mockChatAdapter;
 
-        const { chatStore } = await import("@/features/chat/stores/chatStore.svelte");
         vi.spyOn(chatStore, "waitForSettings").mockResolvedValue(undefined);
         await chatStore.initPromise;
 
@@ -134,11 +127,6 @@ describe("Phase 4 E2E & Visual Verification (Sequential Suite)", () => {
 
         // Manually override chatStore's adapter reference as well to ensure total mock coverage
         chatStore["adapter"] = mockChatAdapter;
-
-        const { characterStore } =
-            await import("@/features/character/stores/characterStore.svelte");
-        const { personaStore } = await import("@/features/persona/stores/personaStore.svelte");
-        const { settings } = await import("@/lib/stores/settings.svelte");
 
         // Seed Character using statically imported CharacterSchema
         const testChar = apply(CharacterSchema, {
@@ -172,11 +160,13 @@ describe("Phase 4 E2E & Visual Verification (Sequential Suite)", () => {
         // Let the store resolve its init promise safely
         await chatStore.initPromise;
 
-        const { getByRole, getByText } = render(CharacterLayoutTestWrapper);
+        renderWithAppContext(CharacterLayoutTestWrapper, {});
 
         // --- SCENARIO 3: Empty state UI styling verification ---
-        const emptyStateText = getByText("Select a character from the sidebar to start chatting");
-        await expect.element(emptyStateText).toBeVisible();
+        const emptyStateText = screen.getByText(
+            "Select a character from the sidebar to start chatting"
+        );
+        expect(emptyStateText).toBeInTheDocument();
 
         const mainElement = document.querySelector("main");
         expect(mainElement).not.toBeNull();
@@ -198,20 +188,20 @@ describe("Phase 4 E2E & Visual Verification (Sequential Suite)", () => {
         expect(btnCreateGroup?.className).toContain("btn-outline");
 
         // --- SCENARIO 4: Character Selection ---
-        const charBtn = getByRole("button", { name: "Arisu" });
-        await charBtn.click();
-        await nextTick();
+        const charBtn = screen.getByRole("button", { name: "Arisu" });
+        await user.click(charBtn);
 
         // --- SCENARIO 5: Header wrap prevention & Sidebar hover alignment ---
-        const chatHeaderButtons = getByRole("button", { name: "Character Settings" });
-        await expect.element(chatHeaderButtons).toBeVisible();
-        const buttonGroupContainer = chatHeaderButtons.element().parentElement;
+        // The chat header appears once the selection has loaded the character's chat.
+        const chatHeaderButtons = await screen.findByRole("button", {
+            name: "Character Settings",
+        });
+        expect(chatHeaderButtons).toBeInTheDocument();
+        const buttonGroupContainer = chatHeaderButtons.parentElement;
         expect(buttonGroupContainer?.className).toContain("flex");
 
-        const chatListItem = getByRole("button", { name: "Chat 1" });
-        await expect.element(chatListItem).toBeVisible();
-        await chatListItem.hover();
-        await nextTick();
+        const chatListItem = await screen.findByRole("button", { name: /Chat 1/ });
+        await user.hover(chatListItem);
 
         const sidebarElement = document.querySelector("nav");
         expect(sidebarElement).not.toBeNull();
@@ -223,8 +213,8 @@ describe("Phase 4 E2E & Visual Verification (Sequential Suite)", () => {
         expect(deleteBtnElement).not.toBeNull();
 
         // --- SCENARIO 6: Functional System Prompt Assembly ---
-        const input = getByRole("textbox", { name: "Type a message..." });
-        await input.fill("Hello, how are you?");
+        const input = screen.getByPlaceholderText("Type a message...");
+        await fillText(user, input, "Hello, how are you?");
 
         // Re-inject mock provider and spy immediately before message dispatch
         // Use mockDelay: 0 to progress immediately without fake timers
@@ -234,18 +224,15 @@ describe("Phase 4 E2E & Visual Verification (Sequential Suite)", () => {
             generationParameters: {},
         });
         const liveStream = chatStore["activeProvider"]!.stream.bind(chatStore["activeProvider"]);
-        chatStore["activeProvider"]!.stream = async function* (
-            msgs: import("@langchain/core/messages").BaseMessage[]
-        ) {
+        chatStore["activeProvider"]!.stream = async function* (msgs: BaseMessage[]) {
             capturedMessages = msgs;
             yield* liveStream(msgs);
         };
 
-        const sendBtn = getByRole("button", { name: "Send" });
-        await sendBtn.click();
-        await nextTick();
+        const sendBtn = screen.getByRole("button", { name: "Send" });
+        await user.click(sendBtn);
 
-        expect(capturedMessages.length).toBeGreaterThanOrEqual(2);
+        await waitFor(() => expect(capturedMessages.length).toBeGreaterThanOrEqual(2));
         const systemMsg = capturedMessages[0] as { _getType: () => string; content: string };
         expect(systemMsg._getType()).toBe("system");
 
@@ -254,13 +241,14 @@ describe("Phase 4 E2E & Visual Verification (Sequential Suite)", () => {
         expect(systemMsg.content).toContain("bratty"); // persona description (inner marker removed in 3rd review)
         expect(systemMsg.content).toContain("ザコ♡");
 
-        // Fast forward stream resolution
-        await nextTick();
-        const responseText = getByText("御主人様, how can I help? (Bratty smile) ♡");
-        await expect.element(responseText).toBeVisible();
+        const responseText = await screen.findByText(
+            "御主人様, how can I help? (Bratty smile) ♡",
+            {},
+            { timeout: 5000 }
+        );
+        expect(responseText).toBeInTheDocument();
 
         // --- SCENARIO 7: Functional System Prompt Builder Unit Tests ---
-        const { buildSystemPrompt } = await import("@/lib/prompts/systemPromptBuilder");
 
         // Section Toggle exclusion (using apply with static CharacterSchema to safely build Character type)
         const mockCharacterToggle = apply(CharacterSchema, {
@@ -288,24 +276,6 @@ describe("Phase 4 E2E & Visual Verification (Sequential Suite)", () => {
         expect(resultToggle).toContain("System instruction.");
         expect(resultToggle).toContain("Bratty traits.");
         expect(resultToggle).not.toContain("Loyal maid traits.");
-
-        // Magic pattern evaluation (using apply with static CharacterSchema to safely build Character type)
-        const characterNameMock = apply(CharacterSchema, {
-            ...testChar,
-            id: "c-magic",
-            name: "Nexon Blue Archive Arisu",
-            prompt: {
-                ...testChar.prompt,
-                description: "You are Nexon Blue Archive Arisu.",
-            },
-        });
-
-        const resultMagic = await buildSystemPrompt({
-            generationPrompt: "My character name is {| character.name |}.",
-            character: characterNameMock,
-            persona: undefined,
-        });
-        expect(resultMagic).toContain("My character name is Nexon Blue Archive Arisu.");
 
         // --- SCENARIO 8: Provider Error & Empty message cleanup ---
         // Setup provider to fail on stream
@@ -343,5 +313,5 @@ describe("Phase 4 E2E & Visual Verification (Sequential Suite)", () => {
         const aiMessages = chatStore.activeMessages.filter((m) => m.role === "assistant");
         expect(aiMessages.length).toBe(0);
         expect(chatStore.isGenerating).toBe(false);
-    }, 30000); // 30s: covers 8 sequential E2E scenarios under browser Vitest
+    }, 30000); // 30s: covers 8 sequential E2E scenarios in one test
 });

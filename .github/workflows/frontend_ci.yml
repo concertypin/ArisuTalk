@@ -31,21 +31,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
         working-directory: frontend
-      - name: Cache Playwright
-        id: pw-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ hashFiles('pnpm-lock.yaml') }}
-      - name: Install Playwright Chromium
-        if: steps.pw-cache.outputs.cache-hit != 'true'
-        run: timeout 300 pnpm exec playwright install chromium
-        working-directory: frontend
-      - name: Install system deps
-        if: steps.pw-cache.outputs.cache-hit != 'true'
-        run: timeout 120 pnpm exec playwright install-deps chromium
-        working-directory: frontend
-
 
   lint:
     name: Frontend Lint
@@ -117,8 +102,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shardIndex: [1, 2, 3, 4, 5]
-        shardTotal: [5]
+        # jsdom runs the whole suite in about two minutes, so two shards are enough.
+        shardIndex: [1, 2]
+        shardTotal: [2]
     steps:
       - uses: actions/checkout@v4
 
@@ -137,15 +123,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        working-directory: frontend
-
-      - name: Restore Playwright
-        uses: actions/cache/restore@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ hashFiles('pnpm-lock.yaml') }}
-      - name: Install Playwright system deps
-        run: pnpm exec playwright install-deps chromium
         working-directory: frontend
 
       - name: Run tests

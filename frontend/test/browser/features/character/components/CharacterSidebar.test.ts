@@ -1,17 +1,10 @@
-/// <reference types="vitest/browser" />
-import { test, expect, describe, vi, beforeEach } from "vitest";
-import { render } from "vitest-browser-svelte";
+import { test, expect, describe, vi, beforeEach, onTestFinished } from "vitest";
+import { fireEvent, screen, within } from "@testing-library/svelte";
+import { userEvent } from "@testing-library/user-event";
+import { renderWithAppContext } from "@test/utils/appContext.svelte";
 import CharacterSidebar from "@/features/character/components/CharacterSidebar.svelte";
 import { characterStore } from "@/features/character/stores/characterStore.svelte";
-import { uiState } from "@/lib/stores/ui.svelte";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
-
-// Mock uiState
-vi.mock("@/lib/stores/ui.svelte", () => ({
-    uiState: {
-        openSettingsModal: vi.fn() satisfies () => void,
-    },
-}));
 
 describe("CharacterSidebar Component", () => {
     let mockCharacters: Character[];
@@ -20,7 +13,10 @@ describe("CharacterSidebar Component", () => {
     let mockOnAdd: () => void;
     let mockOnPersona: () => void;
 
-    beforeEach(() => {
+    beforeEach(async () => {
+        // The store loads from storage asynchronously and would overwrite the characters set below.
+        await characterStore.initPromise;
+
         vi.clearAllMocks();
         mockOnSelect = vi.fn();
         mockOnAdd = vi.fn();
@@ -80,102 +76,155 @@ describe("CharacterSidebar Component", () => {
         characterStore.characters = mockCharacters;
     });
 
-    test("renders all character items", async () => {
-        const { getByLabelText } = render(CharacterSidebar, {
+    test("renders all character items", () => {
+        renderWithAppContext(CharacterSidebar, {
             selectedCharacterId: null,
             onSelect: mockOnSelect,
             onAdd: mockOnAdd,
             onPersona: mockOnPersona,
         });
 
-        await expect.element(getByLabelText("Character 1")).toBeVisible();
-        await expect.element(getByLabelText("Character 2")).toBeVisible();
+        expect(screen.getByLabelText("Character 1")).toBeInTheDocument();
+        expect(screen.getByLabelText("Character 2")).toBeInTheDocument();
     });
 
     test("calls onSelect when character is clicked", async () => {
-        const { container } = render(CharacterSidebar, {
+        const user = userEvent.setup();
+        renderWithAppContext(CharacterSidebar, {
             selectedCharacterId: null,
             onSelect: mockOnSelect,
             onAdd: mockOnAdd,
             onPersona: mockOnPersona,
         });
 
-        // Wait for rendering and click the button directly
-        await vi.waitFor(() => {
-            const characterButton = container.querySelector('button[aria-label="Character 1"]');
-            expect(characterButton).toBeTruthy();
-        });
-
-        const characterButton = container.querySelector(
-            'button[aria-label="Character 1"]'
-        ) as HTMLButtonElement;
-        characterButton.click();
+        await user.click(screen.getByRole("button", { name: "Character 1" }));
 
         expect(mockOnSelect).toHaveBeenCalledWith("char-1");
     });
 
     test("calls onAdd when add character button is clicked", async () => {
-        const { getByLabelText } = render(CharacterSidebar, {
+        const user = userEvent.setup();
+        renderWithAppContext(CharacterSidebar, {
             selectedCharacterId: null,
             onSelect: mockOnSelect,
             onAdd: mockOnAdd,
             onPersona: mockOnPersona,
         });
 
-        const addButton = getByLabelText("Add Character");
-        await addButton.click();
+        const addButton = screen.getByLabelText("Add Character");
+        await user.click(addButton);
 
         expect(mockOnAdd).toHaveBeenCalled();
     });
 
     test("opens settings modal when settings button is clicked", async () => {
-        const { getByLabelText } = render(CharacterSidebar, {
+        const user = userEvent.setup();
+        const { appContext } = renderWithAppContext(CharacterSidebar, {
             selectedCharacterId: null,
             onSelect: mockOnSelect,
             onAdd: mockOnAdd,
             onPersona: mockOnPersona,
         });
 
-        const settingsButton = getByLabelText("Settings");
-        await settingsButton.click();
+        expect(appContext.appSettingsOpen).toBe(false);
 
-        expect(uiState.openSettingsModal).toHaveBeenCalled();
+        const settingsButton = screen.getByLabelText("Settings");
+        await user.click(settingsButton);
+
+        expect(appContext.appSettingsOpen).toBe(true);
     });
 
     test("calls onPersona when personas button is clicked", async () => {
-        const { getByLabelText } = render(CharacterSidebar, {
+        const user = userEvent.setup();
+        renderWithAppContext(CharacterSidebar, {
             selectedCharacterId: null,
             onSelect: mockOnSelect,
             onAdd: mockOnAdd,
             onPersona: mockOnPersona,
         });
 
-        const personasButton = getByLabelText("Manage Personas");
-        await personasButton.click();
+        const personasButton = screen.getByLabelText("Manage Personas");
+        await user.click(personasButton);
 
         expect(mockOnPersona).toHaveBeenCalled();
     });
 
-    test("highlights selected character", async () => {
-        const { container } = render(CharacterSidebar, {
+    test("highlights selected character", () => {
+        renderWithAppContext(CharacterSidebar, {
             selectedCharacterId: "char-1",
             onSelect: mockOnSelect,
             onAdd: mockOnAdd,
             onPersona: mockOnPersona,
         });
 
-        //Wait for rendering
-        await vi.waitFor(() => {
-            const items = container.querySelectorAll('[role="option"]');
-            expect(items.length).toBeGreaterThan(0);
-        });
-
-        const selectedOption = container.querySelector('[aria-selected="true"]');
-        expect(selectedOption).toBeTruthy();
+        const options = screen.getAllByRole("option");
+        expect(options).toHaveLength(2);
+        expect(screen.getAllByRole("option", { selected: true })).toEqual([options[0]]);
     });
 
-    test("renders divider before action buttons", async () => {
-        const { container } = render(CharacterSidebar, {
+    describe("dragging one character over another", () => {
+        /** Renders the sidebar and starts dragging the option at `from` over the option at `to`. */
+        async function dragOver(from: number, to: number) {
+            renderWithAppContext(CharacterSidebar, {
+                selectedCharacterId: null,
+                onSelect: mockOnSelect,
+                onAdd: mockOnAdd,
+                onPersona: mockOnPersona,
+            });
+            const options = screen.getAllByRole("option");
+            // Every character of the fixture is rendered before the drag starts.
+            expect(options).toHaveLength(mockCharacters.length);
+            const dragged = options[from];
+            const target = options[to];
+
+            await fireEvent.dragStart(dragged);
+            await fireEvent.dragOver(target);
+            return { dragged, target };
+        }
+
+        test("shows the drop line below the target when dragging downward", async () => {
+            const { dragged, target } = await dragOver(0, 1);
+
+            expect(target).toHaveClass("border-b-2", "border-primary");
+            expect(target).not.toHaveClass("border-t-2");
+            expect(dragged).toHaveClass("opacity-50");
+        });
+
+        test("shows the drop line above the target when dragging upward", async () => {
+            const { dragged, target } = await dragOver(1, 0);
+
+            expect(target).toHaveClass("border-t-2", "border-primary");
+            expect(target).not.toHaveClass("border-b-2");
+            expect(dragged).toHaveClass("opacity-50");
+        });
+
+        test("removes the drop line when the drag ends", async () => {
+            const { dragged, target } = await dragOver(0, 1);
+            expect(target).toHaveClass("border-b-2");
+
+            await fireEvent.dragEnd(dragged);
+
+            expect(target).not.toHaveClass("border-b-2");
+            expect(target).not.toHaveClass("border-primary");
+            expect(dragged).not.toHaveClass("opacity-50");
+        });
+
+        test("shows no drop line between a pinned and an unpinned character", async () => {
+            characterStore.togglePin("char-1");
+            onTestFinished(() => characterStore.togglePin("char-1"));
+
+            const { dragged, target } = await dragOver(0, 1);
+
+            // The dragged item is dimmed, so the drag has started and the drop line is withheld on purpose.
+            expect(dragged).toHaveClass("opacity-50");
+            expect(target).not.toHaveClass("border-b-2");
+            expect(target).not.toHaveClass("border-t-2");
+            expect(target).not.toHaveClass("border-primary");
+        });
+    });
+
+    test("renders divider before action buttons", () => {
+        const { container } = renderWithAppContext(CharacterSidebar, {
             selectedCharacterId: null,
             onSelect: mockOnSelect,
             onAdd: mockOnAdd,
@@ -186,24 +235,24 @@ describe("CharacterSidebar Component", () => {
         expect(divider).toBeTruthy();
     });
 
-    test("displays initials for characters without avatars", async () => {
+    test("displays initials for characters without avatars", () => {
         const charNoAvatar = [
             { ...mockCharacters[0], avatarUrl: undefined },
             { ...mockCharacters[1], avatarUrl: undefined },
         ];
         characterStore.characters = charNoAvatar;
 
-        const { getByLabelText } = render(CharacterSidebar, {
+        renderWithAppContext(CharacterSidebar, {
             selectedCharacterId: null,
             onSelect: mockOnSelect,
             onAdd: mockOnAdd,
             onPersona: mockOnPersona,
         });
 
-        const char1 = getByLabelText("Character 1");
-        await expect.element(char1.getByText("CH", { exact: true })).toBeVisible();
+        const char1 = screen.getByRole("button", { name: "Character 1" });
+        expect(within(char1).getByText("CH", { exact: true })).toBeInTheDocument();
 
-        const char2 = getByLabelText("Character 2");
-        await expect.element(char2.getByText("CH", { exact: true })).toBeVisible();
+        const char2 = screen.getByRole("button", { name: "Character 2" });
+        expect(within(char2).getByText("CH", { exact: true })).toBeInTheDocument();
     });
 });

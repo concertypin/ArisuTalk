@@ -1,5 +1,8 @@
-import { test, expect, describe, vi, beforeEach } from "vitest";
-import { render } from "vitest-browser-svelte";
+import { test, expect, describe, vi, beforeEach, type Mocked } from "vitest";
+import { screen } from "@testing-library/svelte";
+import { userEvent } from "@testing-library/user-event";
+import { fillText } from "@test/utils/user";
+import { renderWithAppContext } from "@test/utils/appContext.svelte";
 import ChatArea from "@/components/ChatArea.svelte";
 import { chatStore } from "@/features/chat/stores/chatStore.svelte";
 import type { LocalChat } from "@/lib/interfaces";
@@ -20,7 +23,7 @@ vi.mock("@/features/chat/stores/chatStore.svelte", () => {
         deleteMessage: vi.fn(),
         regenerateMessage: vi.fn(),
         initPromise: Promise.resolve(),
-    };
+    } satisfies Partial<Mocked<typeof chatStore>>;
     return {
         chatStore: mockStore,
         ChatStore: vi.fn(),
@@ -37,15 +40,15 @@ describe("ChatArea Component", () => {
         chatStore.activeMessages = [];
     });
 
-    test("renders select chat prompt when no chat is active", async () => {
+    test("renders select chat prompt when no chat is active", () => {
         chatStore.activeChatId = null;
-        const { getByText } = render(ChatArea);
-        await expect
-            .element(getByText("Select a chat or create a new one to start messaging."))
-            .toBeVisible();
+        renderWithAppContext(ChatArea, {});
+        expect(
+            screen.getByText("Select a chat or create a new one to start messaging.")
+        ).toBeInTheDocument();
     });
 
-    test("renders empty messages prompt when chat is empty", async () => {
+    test("renders empty messages prompt when chat is empty", () => {
         chatStore.activeChatId = "chat-1";
         chatStore.chats = [
             {
@@ -60,13 +63,13 @@ describe("ChatArea Component", () => {
         ] satisfies LocalChat[];
         chatStore.activeMessages = [];
 
-        const { getByText, getByRole } = render(ChatArea);
+        renderWithAppContext(ChatArea, {});
 
-        await expect.element(getByRole("heading", { name: "Test Chat" })).toBeVisible();
-        await expect.element(getByText("No messages yet. Say hello!")).toBeVisible();
+        expect(screen.getByRole("heading", { name: "Test Chat" })).toBeInTheDocument();
+        expect(screen.getByText("No messages yet. Say hello!")).toBeInTheDocument();
     });
 
-    test("renders messages correctly", async () => {
+    test("renders messages correctly", () => {
         chatStore.activeChatId = "chat-1";
         chatStore.chats = [
             {
@@ -94,12 +97,13 @@ describe("ChatArea Component", () => {
             }),
         ] satisfies Message[]; // Casting partially correct objects
 
-        const { getByText } = render(ChatArea);
+        renderWithAppContext(ChatArea, {});
 
-        await expect.element(getByText("Hello")).toBeVisible();
-        await expect.element(getByText("Hi there!")).toBeVisible();
+        expect(screen.getByText("Hello")).toBeInTheDocument();
+        expect(screen.getByText("Hi there!")).toBeInTheDocument();
     });
     test("sends message when clicking send button", async () => {
+        const user = userEvent.setup();
         chatStore.activeChatId = "chat-1";
         chatStore.chats = [
             {
@@ -113,18 +117,18 @@ describe("ChatArea Component", () => {
             } satisfies LocalChat,
         ];
 
-        const { getByRole } = render(ChatArea);
+        renderWithAppContext(ChatArea, {});
 
-        const input = getByRole("textbox");
-        await input.fill("Hello World");
+        const input = screen.getByRole("textbox");
+        await fillText(user, input, "Hello World");
 
-        const sendBtn = getByRole("button", { name: "Send" });
-        await sendBtn.click();
+        const sendBtn = screen.getByRole("button", { name: "Send" });
+        await user.click(sendBtn);
 
         expect(chatStore.sendMessage).toHaveBeenCalledWith("Hello World");
     });
 
-    test("shows typing indicator when generating", async () => {
+    test("shows typing indicator when generating", () => {
         chatStore.activeChatId = "chat-1";
         chatStore.chats = [
             {
@@ -139,14 +143,14 @@ describe("ChatArea Component", () => {
         ];
         chatStore.isGenerating = true;
 
-        const { container } = render(ChatArea);
+        const { container } = renderWithAppContext(ChatArea, {});
 
         // DaisyUI loading-dots class on span element
         const loader = container.querySelector(".loading-dots");
         expect(loader).not.toBeNull();
     });
 
-    test("renders action buttons on messages", async () => {
+    test("renders action buttons on messages", () => {
         chatStore.activeChatId = "chat-1";
         chatStore.chats = [
             {
@@ -168,14 +172,15 @@ describe("ChatArea Component", () => {
             }),
         ] satisfies Message[];
 
-        const { getByTitle } = render(ChatArea);
+        renderWithAppContext(ChatArea, {});
 
         // Action buttons should exist (hidden until hover via CSS)
-        await expect.element(getByTitle("Edit message")).toBeInTheDocument();
-        await expect.element(getByTitle("Delete message")).toBeInTheDocument();
+        expect(screen.getByTitle("Edit message")).toBeInTheDocument();
+        expect(screen.getByTitle("Delete message")).toBeInTheDocument();
     });
 
     test("calls deleteMessage when delete button is clicked", async () => {
+        const user = userEvent.setup();
         chatStore.activeChatId = "chat-1";
         chatStore.chats = [
             {
@@ -197,20 +202,20 @@ describe("ChatArea Component", () => {
             }),
         ] satisfies Message[];
 
-        const { getByTitle } = render(ChatArea);
+        renderWithAppContext(ChatArea, {});
 
         // First click shows confirm button
-        const deleteBtn = getByTitle("Delete message");
-        await deleteBtn.click();
+        const deleteBtn = screen.getByTitle("Delete message");
+        await user.click(deleteBtn);
 
         // After first click, button changes to confirm state with different title
-        const confirmBtn = getByTitle("Click again to confirm delete");
-        await confirmBtn.click();
+        const confirmBtn = screen.getByTitle("Click again to confirm delete");
+        await user.click(confirmBtn);
 
         expect(chatStore.deleteMessage).toHaveBeenCalledWith("msg-1");
     });
 
-    test("shows regenerate button only on assistant messages", async () => {
+    test("shows regenerate button only on assistant messages", () => {
         chatStore.activeChatId = "chat-1";
         chatStore.chats = [
             {
@@ -238,14 +243,15 @@ describe("ChatArea Component", () => {
             }),
         ] satisfies Message[];
 
-        const { getByTitle } = render(ChatArea);
+        renderWithAppContext(ChatArea, {});
 
         // Should have 2 messages, only assistant should have regenerate button
         // getByTitle returns the single element, if multiple exist it would throw
-        await expect.element(getByTitle("Regenerate response")).toBeInTheDocument();
+        expect(screen.getByTitle("Regenerate response")).toBeInTheDocument();
     });
 
     test("calls regenerateMessage when regenerate button is clicked", async () => {
+        const user = userEvent.setup();
         chatStore.activeChatId = "chat-1";
         chatStore.chats = [
             {
@@ -273,10 +279,10 @@ describe("ChatArea Component", () => {
             }),
         ] satisfies Message[];
 
-        const { getByTitle } = render(ChatArea);
+        renderWithAppContext(ChatArea, {});
 
-        const regenerateBtn = getByTitle("Regenerate response");
-        await regenerateBtn.click();
+        const regenerateBtn = screen.getByTitle("Regenerate response");
+        await user.click(regenerateBtn);
 
         expect(chatStore.regenerateMessage).toHaveBeenCalledWith("msg-2");
     });

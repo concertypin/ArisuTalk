@@ -11,22 +11,24 @@
     import CaretUp from "phosphor-svelte/lib/CaretUpIcon";
     import Warning from "phosphor-svelte/lib/WarningIcon";
     import { merge, cloneDeep } from "lodash-es";
+    import type { AssertNever } from "@/lib/types/assert";
+    import CharacterSettings from "@/features/character/components/settingsSubpage/CharacterSettings.svelte";
+    import type { TContext, TProps } from "@/features/character/components/settingsSubpage/types";
 
     type ReplaceHook = Character["executables"]["replaceHooks"];
     type HookType = keyof ReplaceHook;
     type HookEntity = ReplaceHook[HookType][number];
 
-    type Props = {
-        character: Character;
-        onChange: (character: Character) => void;
-    };
+    let { context }: TProps<TContext> = $props();
 
-    let { character, onChange }: Props = $props();
+    let { getCharacter, onCharacterChange } = $derived(context());
+
+    let character = $derived(getCharacter());
 
     let activeHookType = $state<HookType>("display");
     let expandedHookIndex = $state<number | null>(null);
 
-    const hookTypes: { type: HookType; label: string; description: string }[] = [
+    const hookTypes = [
         {
             type: "display",
             label: "Display",
@@ -35,7 +37,14 @@
         { type: "input", label: "Input", description: "Transform user input before processing" },
         { type: "output", label: "Output", description: "Transform AI output after generation" },
         { type: "request", label: "Request", description: "Transform text before sending to AI" },
-    ];
+    ] as const satisfies { type: HookType; label: string; description: string }[];
+
+    const _hookTypesCovered: AssertNever<Exclude<HookType, (typeof hookTypes)[number]["type"]>> =
+        true;
+
+    let activeHookDescription = $derived(
+        hookTypes.find((hookType) => hookType.type === activeHookType)?.description
+    );
 
     function updateRuntimeSetting<K extends keyof Character["executables"]["runtimeSetting"]>(
         field: K,
@@ -43,7 +52,7 @@
     ) {
         const newChar = cloneDeep(character);
         newChar.executables.runtimeSetting[field] = value;
-        onChange(newChar);
+        onCharacterChange(newChar);
     }
 
     function getHooks(type: HookType): HookEntity[] {
@@ -64,7 +73,7 @@
         };
         const newChar = cloneDeep(character);
         newChar.executables.replaceHooks[type].push(newHook);
-        onChange(newChar);
+        onCharacterChange(newChar);
         expandedHookIndex = character.executables.replaceHooks[type].length;
     }
 
@@ -72,13 +81,13 @@
         const newChar = cloneDeep(character);
         const hook = newChar.executables.replaceHooks[type][index];
         newChar.executables.replaceHooks[type][index] = merge(hook, updates);
-        onChange(newChar);
+        onCharacterChange(newChar);
     }
 
     function deleteHook(type: HookType, index: number) {
         const newChar = cloneDeep(character);
         newChar.executables.replaceHooks[type].splice(index, 1);
-        onChange(newChar);
+        onCharacterChange(newChar);
         expandedHookIndex = null;
     }
 
@@ -87,9 +96,7 @@
     }
 </script>
 
-<div class="space-y-6">
-    <h3 class="text-lg font-semibold">Advanced Settings</h3>
-
+<CharacterSettings subpageName="Advanced Settings">
     <div class="alert alert-warning">
         <Warning size={18} />
         <span
@@ -154,7 +161,7 @@
     </div>
 
     <p class="text-sm text-base-content/60">
-        {hookTypes.find((h) => h.type === activeHookType)?.description}
+        {activeHookDescription}
     </p>
 
     <div class="flex justify-end">
@@ -330,4 +337,4 @@
             {/each}
         </div>
     {/if}
-</div>
+</CharacterSettings>

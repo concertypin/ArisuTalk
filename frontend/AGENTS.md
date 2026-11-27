@@ -48,7 +48,7 @@ The production-ready files will be in the `ArisuTalk/frontend/dist` directory.
 
 ```bash
 pnpm run -F frontend check      # Format + lint + test (full CI suite)
-pnpm run -F frontend test       # Run all tests (unit + browser)
+pnpm run -F frontend test       # Run all tests (unit + jsdom component tests)
 pnpm run -F frontend test:ui    # Run tests with Vitest UI
 pnpm vitest -k 'pattern'        # Run specific tests matching pattern
 ```
@@ -94,15 +94,21 @@ Worker logic should be tested via unit tests in `test/workers/`. Note that real 
     - Fix: Remove `.ts` from import statements.
 - Using `lucide-svelte` instead of `@lucide/svelte`.
     - Fix: Replace `lucide-svelte` with `@lucide/svelte`.
-- Using `@testing-library/svelte` instead of `vitest-browser-svelte`.
-    - This makes tests run in Node.js instead of the browser. It might not work as intended, since some APIs differ from the browser environment.
-    - Fix: Replace `@testing-library/svelte` with `vitest-browser-svelte`.
+- Measuring layout or computed styles in component tests (`getBoundingClientRect()`, `scrollHeight`, `getComputedStyle()` colors).
+    - Component tests run in jsdom, which does no layout and loads no stylesheet, so these values are always empty or `0`.
+    - Fix: Assert the classes or attributes that produce the behavior, e.g. `expect(el).toHaveClass('max-h-[40vh]', 'overflow-y-auto')`.
+- Using browser-mode APIs (`vitest-browser-svelte`, `vitest/browser`, `expect.element`, Playwright locators) in tests.
+    - There is no Vitest browser mode (no Chromium). Component tests live in `test/browser/` and run in the `browser` project, which emulates a browser with jsdom. They use `@testing-library/svelte`, `@testing-library/user-event` and `@testing-library/jest-dom`.
+    - Fix: Use `render` and `screen` from `@testing-library/svelte`, `userEvent.setup()` for interactions, and `findBy*`/`waitFor` for async UI. See [Test Rules](../docs/rule/tests.md).
 
 ## Documentation of Other Libraries
 
 - DaisyUI: https://daisyui.com/llms.txt
 - Svelte: https://svelte.dev/llms.txt
 - Vitest: https://vitest.dev/llms.txt
+- Testing Library (Svelte): https://testing-library.com/docs/svelte-testing-library/intro
+- user-event: https://testing-library.com/docs/user-event/intro
+- jest-dom matchers: https://github.com/testing-library/jest-dom
 
 ## AI Coding Agent Setup
 

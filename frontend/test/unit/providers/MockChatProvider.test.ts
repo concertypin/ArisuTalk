@@ -68,6 +68,24 @@ describe.concurrent("MockChatProvider", () => {
         expect(result).toBe("Stream");
     });
 
+    it("treats mockDelay 0 as no per-character delay", async () => {
+        // 50 characters: the 100ms default would take 5 seconds.
+        const response = "x".repeat(50);
+        const provider = await MockChatProvider.factory.connect({
+            ...commonSettings,
+            mockDelay: 0,
+            responses: [response],
+        });
+
+        const start = performance.now();
+        let result = "";
+        for await (const chunk of provider.stream([new HumanMessage("hi")])) {
+            result += chunk;
+        }
+        expect(result).toBe(response);
+        expect(performance.now() - start).toBeLessThan(1000);
+    });
+
     it("handles abort", async () => {
         const provider = await MockChatProvider.factory.connect({
             ...commonSettings,

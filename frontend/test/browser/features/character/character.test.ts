@@ -1,20 +1,18 @@
-import { test, expect, describe, vi, beforeEach } from "vitest";
-import { render } from "vitest-browser-svelte";
-import CharacterLayoutTestWrapper from "../../wrappers/CharacterLayoutTestWrapper.svelte";
+import { test, expect, describe, beforeEach } from "vitest";
+import { screen } from "@testing-library/svelte";
+import { userEvent } from "@testing-library/user-event";
+import { renderWithAppContext } from "@test/utils/appContext.svelte";
+import CharacterLayoutTestWrapper from "@test/browser/wrappers/CharacterLayoutTestWrapper.svelte";
 import { characterStore } from "@/features/character/stores/characterStore.svelte";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
-
-// Mock uiState
-vi.mock("@/lib/stores/ui.svelte", () => ({
-    uiState: {
-        openSettingsModal: vi.fn() satisfies () => void,
-    },
-}));
 
 describe("Character Sidebar Verification", () => {
     let mockCharacters: Character[];
 
-    beforeEach(() => {
+    beforeEach(async () => {
+        // The store loads from storage asynchronously and would overwrite the characters set below.
+        await characterStore.initPromise;
+
         mockCharacters = [
             {
                 id: "char-1",
@@ -46,17 +44,19 @@ describe("Character Sidebar Verification", () => {
     });
 
     test("Character Sidebar Verification", async () => {
-        const { getByLabelText, getByText } = render(CharacterLayoutTestWrapper);
+        const user = userEvent.setup();
+        renderWithAppContext(CharacterLayoutTestWrapper, {});
 
         // Check for Add Character button
-        const addButton = getByLabelText("Add Character");
-        await expect.element(addButton).toBeVisible();
+        const addButton = screen.getByLabelText("Add Character");
+        expect(addButton).toBeInTheDocument();
 
         // Click add
-        await addButton.click();
+        await user.click(addButton);
 
         // Check if modal opens
-        const modalTitle = getByText("New Character");
-        await expect.element(modalTitle).toBeVisible();
+        // jsdom hides a <dialog> without `open`, so this fails if `showModal()` never ran.
+        const modalTitle = screen.getByText("New Character");
+        expect(modalTitle).toBeVisible();
     });
 });

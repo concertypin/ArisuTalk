@@ -41,7 +41,7 @@ The server will start at `http://localhost:5173` 🚀
 We take testing seriously! 🧪
 
 - **Unit Tests:** `pnpm run test`
-- **Browser Tests:** `pnpm run test:browser`
+- **Component Tests (browser, emulated with jsdom):** `pnpm exec vitest run --project browser`
 - **Coverage:** `pnpm run test:coverage`
 
 ### Linting & Formatting

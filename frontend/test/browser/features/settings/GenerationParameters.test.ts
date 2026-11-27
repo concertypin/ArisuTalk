@@ -1,6 +1,7 @@
-/// <reference types="vitest/browser" />
 import { test, expect, describe, vi, beforeEach, assert } from "vitest";
-import { render } from "vitest-browser-svelte";
+import { render, screen, fireEvent, waitFor } from "@testing-library/svelte";
+import { userEvent } from "@testing-library/user-event";
+import { fillText } from "@test/utils/user";
 import { tick } from "svelte";
 import Wrapper from "../../wrappers/GenerationParametersTestWrapper.svelte";
 import { settings } from "@/lib/stores/settings.svelte";
@@ -57,77 +58,91 @@ describe("GenerationParameters Component", () => {
         settings.value.activeLLMConfigId = "config-1";
     });
 
-    test("renders config name", async () => {
-        const { getByRole } = render(Wrapper, {
-            config: mockConfig,
-            id: 0,
+    test("renders config name", () => {
+        render(Wrapper, {
+            props: {
+                config: mockConfig,
+                id: 0,
+            },
         });
 
-        const nameInput = getByRole("textbox").first();
-        await expect.element(nameInput).toHaveValue("Test Config");
+        const nameInput = screen.getAllByRole("textbox")[0];
+        expect(nameInput).toHaveValue("Test Config");
     });
 
-    test("shows active badge when config is active", async () => {
-        const { getByText } = render(Wrapper, {
-            config: mockConfig,
-            id: 0,
+    test("shows active badge when config is active", () => {
+        render(Wrapper, {
+            props: {
+                config: mockConfig,
+                id: 0,
+            },
         });
 
-        const activeBadge = getByText("Active");
-        await expect.element(activeBadge).toBeVisible();
+        const activeBadge = screen.getByText("Active");
+        expect(activeBadge).toBeInTheDocument();
     });
 
-    test("disables set as active button when config is already active", async () => {
-        const { getByRole } = render(Wrapper, {
-            config: mockConfig,
-            id: 0,
+    test("disables set as active button when config is already active", () => {
+        render(Wrapper, {
+            props: {
+                config: mockConfig,
+                id: 0,
+            },
         });
 
-        const setActiveButton = getByRole("button", { name: /Use this config/i });
-        await expect.element(setActiveButton).toBeDisabled();
+        const setActiveButton = screen.getByRole("button", { name: /Use this config/i });
+        expect(setActiveButton).toBeDisabled();
     });
 
-    test("shows model when configured", async () => {
-        const { getByLabelText } = render(Wrapper, {
-            config: mockConfig,
-            id: 0,
+    test("shows model when configured", () => {
+        render(Wrapper, {
+            props: {
+                config: mockConfig,
+                id: 0,
+            },
         });
 
-        const modelInput = getByLabelText(/model/i);
-        await expect.element(modelInput).toHaveValue("gpt-4");
+        const modelInput = screen.getByRole("textbox", { name: /model/i });
+        expect(modelInput).toHaveValue("gpt-4");
     });
 
-    test("shows temperature value when configured", async () => {
-        const { getByLabelText } = render(Wrapper, {
-            config: mockConfig,
-            id: 0,
+    test("shows temperature value when configured", () => {
+        render(Wrapper, {
+            props: {
+                config: mockConfig,
+                id: 0,
+            },
         });
 
-        const temperatureInput = getByLabelText(/temperature value/i);
-        await expect.element(temperatureInput).toHaveValue("0.7");
+        const temperatureInput = screen.getByLabelText(/temperature value/i);
+        expect(temperatureInput).toHaveValue("0.7");
     });
 
-    test("shows max tokens values when configured", async () => {
-        const { getByLabelText } = render(Wrapper, {
-            config: mockConfig,
-            id: 0,
+    test("shows max tokens values when configured", () => {
+        render(Wrapper, {
+            props: {
+                config: mockConfig,
+                id: 0,
+            },
         });
 
-        const maxInputTokens = getByLabelText(/max input tokens value/i);
-        await expect.element(maxInputTokens).toHaveValue(4096);
+        const maxInputTokens = screen.getByLabelText(/max input tokens value/i);
+        expect(maxInputTokens).toHaveValue(4096);
 
-        const maxOutputTokens = getByLabelText(/max output tokens value/i);
-        await expect.element(maxOutputTokens).toHaveValue(2048);
+        const maxOutputTokens = screen.getByLabelText(/max output tokens value/i);
+        expect(maxOutputTokens).toHaveValue(2048);
     });
 
-    test("calls removeLLMConfig when delete button is clicked", async () => {
-        const { getByLabelText } = render(Wrapper, {
-            config: mockConfig,
-            id: 0,
+    test("calls removeLLMConfig when delete button is clicked", () => {
+        render(Wrapper, {
+            props: {
+                config: mockConfig,
+                id: 0,
+            },
         });
 
-        const deleteButton = getByLabelText("Delete config");
-        const element = deleteButton.element();
+        const deleteButton = screen.getByLabelText("Delete config");
+        const element = deleteButton;
         assert(element instanceof HTMLElement, "delete button must be HTMLElement");
         element.click();
         element.click();
@@ -136,7 +151,7 @@ describe("GenerationParameters Component", () => {
         expect(settings.value.activeLLMConfigId).toBeNull();
     });
 
-    test("calls setAsActive when set as active button is clicked", async () => {
+    test("calls setAsActive when set as active button is clicked", () => {
         const inactiveConfig = {
             ...mockConfig,
             id: "config-2",
@@ -144,101 +159,117 @@ describe("GenerationParameters Component", () => {
         settings.value.llmConfigs = [mockConfig, inactiveConfig];
         settings.value.activeLLMConfigId = "config-1";
 
-        const { getByLabelText } = render(Wrapper, {
-            config: inactiveConfig,
-            id: 1,
+        render(Wrapper, {
+            props: {
+                config: inactiveConfig,
+                id: 1,
+            },
         });
 
-        const setActiveButton = getByLabelText("Use this config");
-        const element = setActiveButton.element();
+        const setActiveButton = screen.getByLabelText("Use this config");
+        const element = setActiveButton;
         assert(element instanceof HTMLElement, "set-active button must be HTMLElement");
         element.click();
 
         expect(settings.value.activeLLMConfigId).toBe("config-2");
     });
 
-    test("toggles enabled state when checkbox is changed", async () => {
-        const { getByLabelText } = render(Wrapper, {
-            config: mockConfig,
-            id: 0,
+    test("toggles enabled state when checkbox is changed", () => {
+        render(Wrapper, {
+            props: {
+                config: mockConfig,
+                id: 0,
+            },
         });
 
-        const toggleButton = getByLabelText("Toggle enabled");
+        const toggleButton = screen.getByLabelText("Toggle enabled");
         // Start checked
-        await expect.element(toggleButton).toBeChecked();
+        expect(toggleButton).toBeChecked();
 
-        const element = toggleButton.element();
+        const element = toggleButton;
         assert(element instanceof HTMLElement, "toggle button must be HTMLElement");
         element.click();
 
         // Verify UI change
-        await expect.element(toggleButton).not.toBeChecked();
+        expect(toggleButton).not.toBeChecked();
     });
 
     test("updates config name when input changes", async () => {
-        const { getByRole } = render(Wrapper, {
-            config: mockConfig,
-            id: 0,
+        const user = userEvent.setup();
+        render(Wrapper, {
+            props: {
+                config: mockConfig,
+                id: 0,
+            },
         });
 
-        const nameInput = getByRole("textbox").first();
-        await nameInput.fill("Updated Config");
+        const nameInput = screen.getAllByRole("textbox")[0];
+        await fillText(user, nameInput, "Updated Config");
 
-        await expect.element(nameInput).toHaveValue("Updated Config");
+        expect(nameInput).toHaveValue("Updated Config");
     });
 
     test("updates model when input changes", async () => {
-        const { getByLabelText } = render(Wrapper, {
-            config: mockConfig,
-            id: 0,
+        const user = userEvent.setup();
+        render(Wrapper, {
+            props: {
+                config: mockConfig,
+                id: 0,
+            },
         });
 
-        const modelInput = getByLabelText(/model/i);
-        await modelInput.fill("gpt-4-turbo");
+        const modelInput = screen.getByRole("textbox", { name: /model/i });
+        await fillText(user, modelInput, "gpt-4-turbo");
 
-        await expect.element(modelInput).toHaveValue("gpt-4-turbo");
+        expect(modelInput).toHaveValue("gpt-4-turbo");
     });
 
-    test("shows checkboxes for optional parameters", async () => {
-        const { getByLabelText } = render(Wrapper, {
-            config: mockConfig,
-            id: 0,
+    test("shows checkboxes for optional parameters", () => {
+        render(Wrapper, {
+            props: {
+                config: mockConfig,
+                id: 0,
+            },
         });
 
-        const temperatureCheckbox = getByLabelText(/Temperature/i).first();
-        const topPCheckbox = getByLabelText(/Top P/i).first();
-        const topKCheckbox = getByLabelText("Top K", { exact: true });
+        const temperatureCheckbox = screen.getAllByLabelText(/Temperature/i)[0];
+        const topPCheckbox = screen.getAllByLabelText(/Top P/i)[0];
+        const topKCheckbox = screen.getByLabelText("Top K", { exact: true });
 
-        await expect.element(temperatureCheckbox).toBeChecked();
-        await expect.element(topPCheckbox).toBeChecked();
-        await expect.element(topKCheckbox).toBeChecked();
+        expect(temperatureCheckbox).toBeChecked();
+        expect(topPCheckbox).toBeChecked();
+        expect(topKCheckbox).toBeChecked();
     });
 
-    test("unchecks optional parameter when checkbox is toggled", async () => {
-        const { getByLabelText } = render(Wrapper, {
-            config: mockConfig,
-            id: 0,
+    test("unchecks optional parameter when checkbox is toggled", () => {
+        render(Wrapper, {
+            props: {
+                config: mockConfig,
+                id: 0,
+            },
         });
 
-        const temperatureCheckbox = getByLabelText(/Temperature/i).first();
-        await expect.element(temperatureCheckbox).toBeChecked();
-        const element = temperatureCheckbox.element();
+        const temperatureCheckbox = screen.getAllByLabelText(/Temperature/i)[0];
+        expect(temperatureCheckbox).toBeChecked();
+        const element = temperatureCheckbox;
         assert(element instanceof HTMLElement, "temperature checkbox must be HTMLElement");
         element.click();
 
         // Verify UI change (Label will change to "Temperature (Off)")
-        const offCheckbox = getByLabelText(/Temperature/i).first();
-        await expect.element(offCheckbox).not.toBeChecked();
+        const offCheckbox = screen.getAllByLabelText(/Temperature/i)[0];
+        expect(offCheckbox).not.toBeChecked();
     });
 
-    test("clears active config when active config is deleted", async () => {
-        const { getByLabelText } = render(Wrapper, {
-            config: mockConfig,
-            id: 0,
+    test("clears active config when active config is deleted", () => {
+        render(Wrapper, {
+            props: {
+                config: mockConfig,
+                id: 0,
+            },
         });
 
-        const deleteButton = getByLabelText("Delete config");
-        const element = deleteButton.element();
+        const deleteButton = screen.getByLabelText("Delete config");
+        const element = deleteButton;
         assert(element instanceof HTMLElement, "delete button must be HTMLElement");
         element.click();
 
@@ -255,77 +286,84 @@ describe("GenerationParameters Component", () => {
     // `config` prop in place.
 
     test("local UI edits propagate to the parent config prop", async () => {
-        const { getByRole } = render(Wrapper, {
-            config: mockConfig,
-            id: 0,
+        const user = userEvent.setup();
+        render(Wrapper, {
+            props: {
+                config: mockConfig,
+                id: 0,
+            },
         });
 
-        const nameInput = getByRole("textbox").first();
-        await nameInput.fill("Renamed Config");
+        const nameInput = screen.getAllByRole("textbox")[0];
+        await fillText(user, nameInput, "Renamed Config");
         await tick();
 
         expect(mockConfig.name).toBe("Renamed Config");
     });
 
     test("temperature slider change propagates to the parent config prop", async () => {
-        const { getByLabelText } = render(Wrapper, {
-            config: mockConfig,
-            id: 0,
+        render(Wrapper, {
+            props: {
+                config: mockConfig,
+                id: 0,
+            },
         });
 
-        const temperatureInput = getByLabelText(/temperature value/i);
-        await temperatureInput.fill("1.5");
+        // user-event cannot drive a range input, so dispatch the input event directly.
+        const temperatureInput = screen.getByLabelText(/temperature value/i);
+        await fireEvent.input(temperatureInput, { target: { value: "1.5" } });
         await tick();
 
         expect(mockConfig.generationParameters.temperature).toBe(1.5);
     });
 
     test("unchecking model checkbox deletes the model field on the parent config", async () => {
-        const { container } = render(Wrapper, {
-            config: mockConfig,
-            id: 0,
+        const user = userEvent.setup();
+        render(Wrapper, {
+            props: {
+                config: mockConfig,
+                id: 0,
+            },
         });
 
-        // The Model label has both a checkbox (presence toggle) and a text
-        // input (the model value). Identify the checkbox by its containing label.
-        function isHtmlInputElement(node: Element): node is HTMLInputElement {
-            return node.tagName === "INPUT";
-        }
-        const checkboxes = Array.from(container.querySelectorAll('input[type="checkbox"]')).filter(
-            isHtmlInputElement
-        );
-        const modelToggle = checkboxes.find((cb) => {
-            const label = cb.closest("label");
-            return label?.textContent?.includes("Model") ?? false;
-        });
-        assert(modelToggle, "Model presence checkbox not found");
-        modelToggle.click();
-        await tick();
+        const modelToggle = screen.getByRole("checkbox", { name: "Include Model" });
+        const modelInput = screen.getByRole("textbox", { name: /model/i });
+        expect(modelToggle).toBeChecked();
+        expect(modelInput).toBeEnabled();
+
+        await user.click(modelToggle);
+
+        expect(modelToggle).not.toBeChecked();
+        expect(modelInput).toBeDisabled();
+        await waitFor(() => expect(mockConfig).not.toHaveProperty("model"));
     });
 
     test("repeated field edits settle cleanly (no reactive thrash)", async () => {
-        const { getByRole, getByLabelText } = render(Wrapper, {
-            config: mockConfig,
-            id: 0,
+        const user = userEvent.setup();
+        render(Wrapper, {
+            props: {
+                config: mockConfig,
+                id: 0,
+            },
         });
 
-        const nameInput = getByRole("textbox").first();
-        const modelInput = getByLabelText(/model/i);
+        const nameInput = screen.getAllByRole("textbox")[0];
+        const modelInput = screen.getByRole("textbox", { name: /model/i });
 
-        await nameInput.fill("Round 1");
+        await fillText(user, nameInput, "Round 1");
         await tick();
         expect(mockConfig.name).toBe("Round 1");
 
-        await nameInput.fill("Round 2");
+        await fillText(user, nameInput, "Round 2");
         await tick();
         expect(mockConfig.name).toBe("Round 2");
 
-        await modelInput.fill("claude-4.5");
+        await fillText(user, modelInput, "claude-4.5");
         await tick();
         expect(mockConfig.model).toBe("claude-4.5");
 
         // Sanity: subsequent settle should be a no-op (no thrash).
         await tick();
-        await expect.element(nameInput).toHaveValue("Round 2");
+        expect(nameInput).toHaveValue("Round 2");
     });
 });

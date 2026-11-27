@@ -2,19 +2,31 @@
     import type { Character } from "@arisutalk/character-spec/v0/Character";
     import PencilSimple from "phosphor-svelte/lib/PencilSimpleIcon";
     import PushPin from "phosphor-svelte/lib/PushPinIcon";
-    import { uiState } from "@/lib/stores/ui.svelte";
-    import { opfsAdapter } from "../adapters/assetStorage/OpFSAssetStorageAdapter";
+    import { opfsAdapter } from "@/features/character/adapters/assetStorage/OpFSAssetStorageAdapter";
     import { IfNotExistBehavior } from "@/lib/interfaces";
 
-    type Props = {
-        character: Character;
-        active: boolean;
-        isPinned?: boolean;
-        onClick: () => void;
-        onTogglePin?: () => void;
-    };
+    import { getAppContext } from "@/context";
 
-    let { character, active, isPinned = false, onClick, onTogglePin }: Props = $props();
+    let {
+        character,
+        active,
+        isPinned = false,
+        onClick,
+        onTogglePin = () => undefined,
+    }: {
+        /** Character object referenced by the UI element */
+        character: Character;
+        /** Specifies whether the element is enabled. This primarily affects its visual appearance. */
+        active: boolean;
+        /** Whether the element is pinned. This primarily affects its visual appearance and updates the aria-label to reflect the available action. */
+        isPinned?: boolean;
+        /** Event handler called when the element is clicked. */
+        onClick: () => void;
+        /** Specifies the event handler to run when the toggle pin button is clicked. Defaults to no action. */
+        onTogglePin?: () => void;
+    } = $props();
+
+    let appContext = getAppContext();
 
     // Generate initials from name
     let initials = $derived(character.name.substring(0, 2).toUpperCase());
@@ -59,10 +71,15 @@
         };
     });
 
+    function openCharacterSettings(target: Character) {
+        appContext.editingCharacter = target;
+        appContext.characterSettingsOpen = true;
+    }
+
     function handleButtonClick(e: MouseEvent) {
         if (active) {
             e.stopPropagation();
-            uiState.openCharacterSettings(character);
+            openCharacterSettings(character);
         } else {
             onClick();
         }
@@ -92,26 +109,26 @@
     >
         <!-- Active Pill -->
         <span
-            class="absolute left-0 w-1 bg-white rounded-r-full transition-all duration-200"
-            class:h-8={active}
-            class:h-2={!active}
-            class:opacity-100={active}
-            class:opacity-0={!active}
-            class:group-hover:h-5={!active}
-            class:group-hover:opacity-100={!active}
+            data-testid="active-pill"
+            data-active={active}
+            aria-hidden="true"
+            class={[
+                "absolute left-0 w-1 bg-white rounded-r-full transition-all duration-200",
+                active
+                    ? "h-8 opacity-100"
+                    : "h-2 opacity-0 group-hover:h-5 group-hover:opacity-100",
+            ]}
         ></span>
 
         <!-- Icon/Avatar Swap -->
         <div
-            class="swap swap-rotate w-12 h-12 overflow-hidden transition-all duration-200"
-            class:swap-active={active && isHovered}
-            class:rounded-xl={active}
-            class:rounded-3xl={!active}
-            class:group-hover:rounded-xl={!active}
-            class:bg-primary={active}
-            class:text-primary-content={active}
-            class:bg-neutral={!active}
-            class:text-neutral-content={!active}
+            class={[
+                "swap swap-rotate w-12 h-12 overflow-hidden transition-all duration-200",
+                active && isHovered && "swap-active",
+                active
+                    ? "rounded-xl bg-primary text-primary-content"
+                    : "rounded-3xl group-hover:rounded-xl bg-neutral text-neutral-content",
+            ]}
         >
             <!-- Start State: Settings Icon (when active & hovered) -->
             <div class="swap-on flex items-center justify-center w-full h-full">

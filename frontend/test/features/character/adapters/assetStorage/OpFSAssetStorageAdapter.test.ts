@@ -1,4 +1,4 @@
-// @vitest-environment happy-dom
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, type Mocked } from "vitest";
 import { OpFSAssetStorageAdapter } from "@/features/character/adapters/assetStorage/OpFSAssetStorageAdapter";
 import { IfNotExistBehavior } from "@/lib/interfaces";

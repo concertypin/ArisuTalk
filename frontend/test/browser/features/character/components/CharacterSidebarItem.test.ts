@@ -1,6 +1,7 @@
-/// <reference types="vitest/browser" />
 import { test, expect, describe, vi } from "vitest";
-import { render } from "vitest-browser-svelte";
+import { screen } from "@testing-library/svelte";
+import { userEvent } from "@testing-library/user-event";
+import { renderWithAppContext } from "@test/utils/appContext.svelte";
 import CharacterSidebarItem from "@/features/character/components/CharacterSidebarItem.svelte";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
 
@@ -30,56 +31,84 @@ describe("CharacterSidebarItem Component", () => {
         },
     } satisfies Character;
 
-    const mockOnClick = vi.fn() satisfies () => void;
+    const mockOnClick = vi.fn<() => void>();
 
-    test("renders character initials when no avatar", async () => {
-        const { getByText } = render(CharacterSidebarItem, {
+    test("renders character initials when no avatar", () => {
+        renderWithAppContext(CharacterSidebarItem, {
             character: mockCharacter,
             active: false,
             onClick: mockOnClick,
         });
 
-        await expect.element(getByText("TE")).toBeVisible();
+        expect(screen.getByText("TE")).toBeInTheDocument();
     });
 
-    test("renders avatar image when avatarUrl is provided", async () => {
+    test("renders avatar image when avatarUrl is provided", () => {
         const characterWithAvatar = {
             ...mockCharacter,
             avatarUrl: "https://example.com/avatar.png",
         } satisfies Character;
 
-        const { getByRole } = render(CharacterSidebarItem, {
+        renderWithAppContext(CharacterSidebarItem, {
             character: characterWithAvatar,
             active: false,
             onClick: mockOnClick,
         });
 
-        const image = getByRole("img", { name: "Test Character" });
-        await expect.element(image).toBeVisible();
-        await expect.element(image).toHaveAttribute("src", "https://example.com/avatar.png");
+        const image = screen.getByRole("img", { name: "Test Character" });
+        expect(image).toBeInTheDocument();
+        expect(image).toHaveAttribute("src", "https://example.com/avatar.png");
     });
 
-    test("has correct aria-label", async () => {
-        const { getByLabelText } = render(CharacterSidebarItem, {
+    test("has correct aria-label", () => {
+        renderWithAppContext(CharacterSidebarItem, {
             character: mockCharacter,
             active: false,
             onClick: mockOnClick,
         });
 
-        const button = getByLabelText("Test Character");
-        await expect.element(button).toBeVisible();
+        const button = screen.getByLabelText("Test Character");
+        expect(button).toBeInTheDocument();
     });
 
     test("calls onClick when clicked", async () => {
-        const { getByLabelText } = render(CharacterSidebarItem, {
+        const user = userEvent.setup();
+        renderWithAppContext(CharacterSidebarItem, {
             character: mockCharacter,
             active: false,
             onClick: mockOnClick,
         });
 
-        const button = getByLabelText("Test Character");
-        await button.click();
+        const button = screen.getByLabelText("Test Character");
+        await user.click(button);
 
         expect(mockOnClick).toHaveBeenCalledOnce();
+    });
+
+    test("opens the character settings of an active item instead of calling onClick", async () => {
+        const user = userEvent.setup();
+        const onClick = vi.fn<() => void>();
+        const { appContext } = renderWithAppContext(CharacterSidebarItem, {
+            character: mockCharacter,
+            active: true,
+            onClick,
+        });
+
+        await user.click(screen.getByLabelText("Settings"));
+
+        expect(appContext.characterSettingsOpen).toBe(true);
+        expect(appContext.editingCharacter?.id).toBe("char-1");
+        expect(onClick).not.toHaveBeenCalled();
+    });
+
+    // The pill's pixel size is Tailwind's concern. This only checks that it follows the `active` prop.
+    test.each([true, false])("marks the pill when active is %s", (active) => {
+        renderWithAppContext(CharacterSidebarItem, {
+            character: mockCharacter,
+            active,
+            onClick: mockOnClick,
+        });
+
+        expect(screen.getByTestId("active-pill")).toHaveAttribute("data-active", String(active));
     });
 });

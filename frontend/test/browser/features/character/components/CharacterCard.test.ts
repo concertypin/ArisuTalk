@@ -1,6 +1,6 @@
-/// <reference types="vitest/browser" />
 import { test, expect, describe, vi, beforeEach } from "vitest";
-import { render } from "vitest-browser-svelte";
+import { render, screen } from "@testing-library/svelte";
+import { userEvent } from "@testing-library/user-event";
 import CharacterCard from "@/features/character/components/CharacterCard.svelte";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
 
@@ -51,45 +51,51 @@ describe("CharacterCard Component", () => {
         mockOnMove.mockClear();
     });
 
-    test("renders character name and description", async () => {
-        const { getByRole, getByText } = render(CharacterCard, {
-            character: mockCharacter,
-            onEdit: mockOnEdit,
-            onDelete: mockOnDelete,
-            onExport: mockOnExport,
+    test("renders character name and description", () => {
+        render(CharacterCard, {
+            props: {
+                character: mockCharacter,
+                onEdit: mockOnEdit,
+                onDelete: mockOnDelete,
+                onExport: mockOnExport,
+            },
         });
 
-        const heading = getByRole("heading", { name: "Test Character", level: 2 });
-        await expect.element(heading).toBeVisible();
+        const heading = screen.getByRole("heading", { name: "Test Character", level: 2 });
+        expect(heading).toBeInTheDocument();
 
-        const description = getByText("A test character description");
-        await expect.element(description).toBeVisible();
+        const description = screen.getByText("A test character description");
+        expect(description).toBeInTheDocument();
     });
 
-    test("renders avatar image when avatarUrl is provided", async () => {
-        const { getByRole } = render(CharacterCard, {
-            character: mockCharacter,
-            onEdit: mockOnEdit,
-            onDelete: mockOnDelete,
-            onExport: mockOnExport,
+    test("renders avatar image when avatarUrl is provided", () => {
+        render(CharacterCard, {
+            props: {
+                character: mockCharacter,
+                onEdit: mockOnEdit,
+                onDelete: mockOnDelete,
+                onExport: mockOnExport,
+            },
         });
 
-        const image = getByRole("img", { name: "Test Character" });
-        await expect.element(image).toBeVisible();
-        await expect.element(image).toHaveAttribute("src", "https://example.com/avatar.png");
+        const image = screen.getByRole("img", { name: "Test Character" });
+        expect(image).toBeInTheDocument();
+        expect(image).toHaveAttribute("src", "https://example.com/avatar.png");
     });
 
-    test("renders initials as fallback when no avatar", async () => {
+    test("renders initials as fallback when no avatar", () => {
         const characterWithoutAvatar = {
             ...mockCharacter,
             avatarUrl: undefined,
         };
 
         const { container } = render(CharacterCard, {
-            character: characterWithoutAvatar,
-            onEdit: mockOnEdit,
-            onDelete: mockOnDelete,
-            onExport: mockOnExport,
+            props: {
+                character: characterWithoutAvatar,
+                onEdit: mockOnEdit,
+                onDelete: mockOnDelete,
+                onExport: mockOnExport,
+            },
         });
 
         // Search specifically for the initials container
@@ -98,110 +104,128 @@ describe("CharacterCard Component", () => {
         expect(initials?.textContent?.trim()).toBe("TE");
     });
 
-    test("shows action buttons on hover", async () => {
-        const { getByLabelText } = render(CharacterCard, {
-            character: mockCharacter,
-            onEdit: mockOnEdit,
-            onDelete: mockOnDelete,
-            onExport: mockOnExport,
-            onMove: mockOnMove,
+    test("shows action buttons on hover", () => {
+        render(CharacterCard, {
+            props: {
+                character: mockCharacter,
+                onEdit: mockOnEdit,
+                onDelete: mockOnDelete,
+                onExport: mockOnExport,
+                onMove: mockOnMove,
+            },
         });
 
-        const editButton = getByLabelText("Edit");
-        await expect.element(editButton).toBeVisible();
+        const editButton = screen.getByLabelText("Edit");
+        expect(editButton).toBeInTheDocument();
 
-        const deleteButton = getByLabelText("Delete");
-        await expect.element(deleteButton).toBeVisible();
+        const deleteButton = screen.getByLabelText("Delete");
+        expect(deleteButton).toBeInTheDocument();
 
-        const exportButton = getByLabelText("Export");
-        await expect.element(exportButton).toBeVisible();
+        const exportButton = screen.getByLabelText("Export");
+        expect(exportButton).toBeInTheDocument();
     });
 
     test("calls onEdit when edit button is clicked", async () => {
-        const { getByLabelText } = render(CharacterCard, {
-            character: mockCharacter,
-            onEdit: mockOnEdit,
-            onDelete: mockOnDelete,
-            onExport: mockOnExport,
+        const user = userEvent.setup();
+        render(CharacterCard, {
+            props: {
+                character: mockCharacter,
+                onEdit: mockOnEdit,
+                onDelete: mockOnDelete,
+                onExport: mockOnExport,
+            },
         });
 
-        const editButton = getByLabelText("Edit");
-        await editButton.click();
+        const editButton = screen.getByLabelText("Edit");
+        await user.click(editButton);
 
         expect(mockOnEdit).toHaveBeenCalledOnce();
     });
 
     test("calls onDelete when delete button is clicked", async () => {
-        const { getByLabelText } = render(CharacterCard, {
-            character: mockCharacter,
-            onEdit: mockOnEdit,
-            onDelete: mockOnDelete,
-            onExport: mockOnExport,
+        const user = userEvent.setup();
+        render(CharacterCard, {
+            props: {
+                character: mockCharacter,
+                onEdit: mockOnEdit,
+                onDelete: mockOnDelete,
+                onExport: mockOnExport,
+            },
         });
 
-        const deleteButton = getByLabelText("Delete");
-        await deleteButton.click();
+        const deleteButton = screen.getByLabelText("Delete");
+        await user.click(deleteButton);
 
         expect(mockOnDelete).toHaveBeenCalledOnce();
     });
 
     test("calls onExport when export button is clicked", async () => {
-        const { getByLabelText } = render(CharacterCard, {
-            character: mockCharacter,
-            onEdit: mockOnEdit,
-            onDelete: mockOnDelete,
-            onExport: mockOnExport,
+        const user = userEvent.setup();
+        render(CharacterCard, {
+            props: {
+                character: mockCharacter,
+                onEdit: mockOnEdit,
+                onDelete: mockOnDelete,
+                onExport: mockOnExport,
+            },
         });
 
-        const exportButton = getByLabelText("Export");
-        await exportButton.click();
+        const exportButton = screen.getByLabelText("Export");
+        await user.click(exportButton);
 
         expect(mockOnExport).toHaveBeenCalledOnce();
     });
 
-    test("disables move left button when isFirst is true", async () => {
-        const { getByLabelText } = render(CharacterCard, {
-            character: mockCharacter,
-            onEdit: mockOnEdit,
-            onDelete: mockOnDelete,
-            onExport: mockOnExport,
-            onMove: mockOnMove,
-            isFirst: true,
+    test("disables move left button when isFirst is true", () => {
+        render(CharacterCard, {
+            props: {
+                character: mockCharacter,
+                onEdit: mockOnEdit,
+                onDelete: mockOnDelete,
+                onExport: mockOnExport,
+                onMove: mockOnMove,
+                isFirst: true,
+            },
         });
 
-        const moveLeftButton = getByLabelText("Move Backward");
-        await expect.element(moveLeftButton).toBeDisabled();
+        const moveLeftButton = screen.getByLabelText("Move Backward");
+        expect(moveLeftButton).toBeDisabled();
     });
 
-    test("disables move right button when isLast is true", async () => {
-        const { getByLabelText } = render(CharacterCard, {
-            character: mockCharacter,
-            onEdit: mockOnEdit,
-            onDelete: mockOnDelete,
-            onExport: mockOnExport,
-            onMove: mockOnMove,
-            isLast: true,
+    test("disables move right button when isLast is true", () => {
+        render(CharacterCard, {
+            props: {
+                character: mockCharacter,
+                onEdit: mockOnEdit,
+                onDelete: mockOnDelete,
+                onExport: mockOnExport,
+                onMove: mockOnMove,
+                isLast: true,
+            },
         });
 
-        const moveRightButton = getByLabelText("Move Forward");
-        await expect.element(moveRightButton).toBeDisabled();
+        const moveRightButton = screen.getByLabelText("Move Forward");
+        expect(moveRightButton).toBeDisabled();
     });
 
     test("calls onMove with correct direction when move buttons are clicked", async () => {
-        const { getByLabelText } = render(CharacterCard, {
-            character: mockCharacter,
-            onEdit: mockOnEdit,
-            onDelete: mockOnDelete,
-            onExport: mockOnExport,
-            onMove: mockOnMove,
+        const user = userEvent.setup();
+        render(CharacterCard, {
+            props: {
+                character: mockCharacter,
+                onEdit: mockOnEdit,
+                onDelete: mockOnDelete,
+                onExport: mockOnExport,
+                onMove: mockOnMove,
+            },
         });
 
-        const moveLeftButton = getByLabelText("Move Backward");
-        await moveLeftButton.click();
+        const moveLeftButton = screen.getByLabelText("Move Backward");
+        await user.click(moveLeftButton);
         expect(mockOnMove).toHaveBeenCalledWith(-1);
 
-        const moveRightButton = getByLabelText("Move Forward");
-        await moveRightButton.click();
+        const moveRightButton = screen.getByLabelText("Move Forward");
+        await user.click(moveRightButton);
         expect(mockOnMove).toHaveBeenCalledWith(1);
     });
 });

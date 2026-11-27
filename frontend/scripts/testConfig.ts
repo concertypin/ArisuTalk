@@ -1,30 +1,11 @@
 import "vitest/config";
 import { type UserConfig } from "vite";
-import { playwright } from "@vitest/browser-playwright";
+import { svelteTesting } from "@testing-library/svelte/vite";
 import type { TestProjectInlineConfiguration as TestProject } from "vitest/config";
 type Presence<T> = T extends undefined ? never : T;
 
 type TestConfig = Presence<UserConfig["test"]>;
 
-const browserTestConfig: TestConfig["browser"] = {
-    enabled: true,
-    provider: playwright(),
-    instances: [
-        {
-            hideSkippedTests: true,
-            browser: "chromium",
-            testTimeout: 20 * 1000,
-            expect: {
-                poll: {
-                    timeout: 500,
-                },
-            },
-        },
-    ],
-
-    headless: true,
-    screenshotFailures: false, // Speed up by not taking screenshots
-};
 const coverage: TestConfig["coverage"] & { provider: "v8" } = {
     provider: "v8",
     reporter: ["html", "text", "json-summary"],
@@ -65,13 +46,17 @@ export const testConfig: TestConfig = {
 
     projects: [
         {
+            // Svelte component tests in jsdom with Testing Library (no Chromium).
+            plugins: [
+                // Adds auto cleanup and the `browser` condition (Svelte's client build, with `mount`).
+                // Scoped here so the Node-based unit tests keep the default resolution.
+                svelteTesting(),
+            ],
             test: {
                 name: "browser",
-                browser: browserTestConfig,
+                environment: "jsdom",
                 include: ["test/browser/**/*.test.ts"],
-                env: {
-                    VITEST_BROWSER_MODE: "true",
-                },
+                setupFiles: ["./test/setup.browser.ts"],
                 sequence: {
                     groupOrder: 0,
                 },

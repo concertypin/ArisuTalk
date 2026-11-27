@@ -10,17 +10,25 @@ It describes TypeScript rules for the project for readability.
   - [Anyone Dislikes `Any` as Much `as any`one](#anyone-dislikes-any-as-much-as-anyone)
   - [Lazy Dog Than The Quick Brown Fox](#lazy-dog-than-the-quick-brown-fox)
   - [Brain Can StackOverflow](#brain-can-stackoverflow)
+  - [Constants Keep Their Shape](#constants-keep-their-shape)
+  - [Leave No Case Behind](#leave-no-case-behind)
+  - [Declare Functions, Don't Assign Them](#declare-functions-dont-assign-them)
+  - [Comments](#comments)
 
 ## TL;DR
 
 - Use `import type` when importing only types. [^1]
-- Use absolute path imports starting from `src/` folder. [^1] "../../../some.ts" is hard to read.
+- Use alias imports (`@/` for `src/`, `@test/` for `test/`, `@worker/`, `@common/`) instead of relative paths. [^1] "../../../some.ts" is hard to read.
+- [Write JSDoc comments for all exported functions and classes!](#write-essay-for-code)
 - [Use `type` instead of `interface` where possible. `type` means type, `interface` means sometimes interface and sometimes type.](#interface-is-not-interface-but-interface)
 - [Avoid using `any` type.](#anyone-dislikes-any-as-much-as-anyone)
-- [Use `satisfies` instead of `as` for type assertions where possible.](#anyone-dislikes-any-as-much-as-anyone)
-- [Write JSDoc comments for all exported functions and classes!](#write-essay-for-code)
-- [Use named types instead of inline types on destructured parameters.](#brain-can-stackoverflow)
+- [Do not use `as` to make a type error go away. Annotate, fix the source type, narrow, or parse instead.](#anyone-dislikes-any-as-much-as-anyone)
 - [Use `await import()`](#lazy-dog-than-the-quick-brown-fox) to lazy-load large modules.
+- [Use named types instead of inline types on destructured parameters.](#brain-can-stackoverflow)
+- [Write constant maps and lists with `as const satisfies T`, not a type annotation.](#constants-keep-their-shape)
+- [Close `if`/`else` chains over a union with `x satisfies never`. Prefer `Record<Union, ...>` with `satisfies` over a list, and use `AssertNever` only when a list or its order matters.](#leave-no-case-behind)
+- [Use `function` declarations for named functions, not arrow-function constants.](#declare-functions-dont-assign-them)
+- [Use `/** */` for comments on declarations, no bold markup in JSDoc, and no thinking aloud in comments.](#comments)
 
 ## Detail
 
@@ -104,7 +112,13 @@ type User = {
 ### Anyone Dislikes `Any` as Much `as any`one
 
 Who knows what it really is? It's a mystery! Using `any` defeats the purpose of TypeScript, which is to provide type safety. Instead of `any`, use `unknown` when the type is not known at compile time. This forces you to perform type checks before using the value, enhancing code safety.
-Also, `as` defeats the purpose of TypeScript's type safety. Use `satisfies` instead, which ensures that the value conforms to the specified type without losing type information.
+Also, `as` defeats the purpose of TypeScript's type safety: it tells the compiler to stop checking. Instead of casting, make the compiler verify the type:
+
+- Annotate the variable, so the assignment is checked.
+- Fix the return type of the function that produces the value.
+- Parse external or untrusted data with a zod schema.
+- Narrow with a type guard or `assert()`.
+- Use `satisfies` for an object literal that must match a type. It only checks the value and keeps its narrow type. It never converts a value, so `doSomething() satisfies SomeType` does not make `data` a `SomeType`.
 
 ```ts
 function doSomething(): OtherType {}
@@ -118,11 +132,19 @@ type OtherType = {
 // Don't(It uses any type.)
 const data = doSomething() as any;
 
-// Don't(Declares type, but still uses `as`.)
+// Don't(Declares type, but still uses `as`. Compiles even when the types do not match.)
 const data = doSomething() as SomeType;
 
-// Do(Uses `satisfies` to ensure type compatibility without losing type information.)
-const data = doSomething() satisfies SomeType; // Will cause compile error if incompatible. Good!
+// Do(Annotation checks the assignment. Compile error if `OtherType` is not assignable to `SomeType`.)
+const data: SomeType = doSomething();
+
+// Do(External data: parse it. The type comes from the schema, not from a promise.)
+import * as z from "zod";
+const SomeSchema = z.object({ value: z.string() });
+const parsed = SomeSchema.parse(JSON.parse(text));
+
+// Do(Object literal: `satisfies` checks it and keeps the literal types.)
+const options = { value: "a" } satisfies SomeType;
 ```
 
 ### Lazy Dog Than The Quick Brown Fox
@@ -223,6 +245,119 @@ function processData(userData: UserData) {
     userData.email,
   );
 }
+```
+
+### Constants Keep Their Shape
+
+A type annotation on a constant widens it: the literal keys and values are forgotten, so `alertClass.info` is just a `string`, and a typo in a key is not an error. `as const satisfies T` checks the constant against `T` and keeps the narrow type.
+
+```ts
+// Don't(Widened to Record<string, string>. Every key is accepted, and no autocomplete.)
+const alertClass: Record<string, string> = {
+  info: "alert-info",
+  error: "alert-error",
+};
+
+// Do(Checked against the type, but `alertClass.info` is still the literal "alert-info".)
+const alertClass = {
+  info: "alert-info",
+  error: "alert-error",
+} as const satisfies Record<string, string>;
+```
+
+### Leave No Case Behind
+
+When code branches over every member of a union, make the compiler tell you when a new member shows up. End the `if`/`else` chain with `x satisfies never;`: it compiles only when all members were handled. oxlint and eslint accept it as a bare statement. Don't use `as never` or `as` anywhere here.
+
+```ts
+type Page = { type: "none" } | { type: "markdown"; text: string } | { type: "static" };
+
+// Don't(`else` silently swallows the members that were added later.)
+function render(page: Page) {
+  if (page.type === "markdown") return page.text;
+  else return "";
+}
+
+// Do(Adding a member to `Page` makes `page satisfies never` fail until it is handled.)
+function render(page: Page) {
+  if (page.type === "markdown") return page.text;
+  if (page.type === "none" || page.type === "static") return "";
+  page satisfies never;
+  return "";
+}
+```
+
+The same guarantee is wanted when a constant has to cover every member of a union. Prefer a `Record<Union, ...>` with `satisfies`: it fails to compile when a key is missing or unknown, and it needs no helper.
+
+```ts
+type HookType = "display" | "input" | "output" | "request";
+
+// Do(Adding a member to `HookType` makes this fail until the new key is added.)
+const hookLabel = {
+  display: "Display",
+  input: "Input",
+  output: "Output",
+  request: "Request",
+} as const satisfies Record<HookType, string>;
+```
+
+Use `AssertNever` only when a list, or the order of its items, is what matters (e.g. a list of tabs for every hook type, shown in that order). `satisfies` on a list does not do it, since it accepts a list that misses members. `AssertNever` comes from [`@/lib/types/assert`](../../frontend/src/lib/types/assert.ts): give it the members the list leaves out. It resolves to `true` when there are none, so assigning `true` compiles. Otherwise the error names the missing members. Without a cast, and without a lint-disable comment:
+
+```ts
+import type { AssertNever } from "@/lib/types/assert";
+
+// `HookType` is the union declared above.
+const hookTypes = [
+  { type: "display", label: "Display" },
+  { type: "input", label: "Input" },
+  { type: "output", label: "Output" },
+  { type: "request", label: "Request" },
+] as const satisfies { type: HookType; label: string }[];
+
+// Fails with "Type 'true' is not assignable to type '"request"'" when `request` is removed above.
+const _hookTypesCovered: AssertNever<Exclude<HookType, (typeof hookTypes)[number]["type"]>> = true;
+```
+
+### Declare Functions, Don't Assign Them
+
+Declare named functions with `function`. They are hoisted, show their name in stack traces and are shorter. Keep arrow functions for inline callbacks.
+
+```ts
+// Don't
+const loadPreviews = async () => {
+  // ...
+};
+
+// Do
+async function loadPreviews() {
+  // ...
+}
+
+// Fine(Inline callback)
+items.map((item) => item.id);
+```
+
+### Comments
+
+- Write a comment that describes a declaration (a variable, function, type, field) as `/** ... */`, so IDEs show it on hover. A `//` comment is for a note about the code that follows it, such as why a workaround is needed.
+- Don't use bold markup (`**Limitations:**`) in JSDoc. Plain text and lists are enough, and the markup is noise in IDE hovers.
+- Don't think aloud in comments ("Maybe we should move it to top? No, keep the position."). Comments state what the code does and why, not the path the author took to it. Settle the question, then write down the result or nothing.
+
+```ts
+// Don't
+// Order doesn't change on update usually, unless we want to move to top?
+// No, keep position.
+
+// Do(Only when the reader needs to know)
+// An update keeps the character's position in the list.
+
+// Don't
+// Autosave: persist the settings shortly after any change.
+let isFirstRun = true;
+
+// Do
+/** Autosave: persist the settings shortly after any change. */
+let isFirstRun = true;
 ```
 
 [^1]: This is automatically applied when you use VSCode with project settings.

@@ -1,18 +1,21 @@
-/// <reference types="vitest/browser" />
-import { test, expect, describe, vi } from "vitest";
-import { render } from "vitest-browser-svelte";
+import { test, expect, describe, beforeAll } from "vitest";
+import { waitFor } from "@testing-library/svelte";
+import { renderWithAppContext } from "@test/utils/appContext.svelte";
 import Home from "@/routes/Home.svelte";
 
+// The loading state is in Home.loading.test.ts: Home caches its lazy components in module scope.
 describe("Home Component", () => {
-    test("renders loading state initially", async () => {
-        const { getByText } = render(Home);
-        await expect.element(getByText("Loading...")).toBeVisible();
+    // Load the lazily imported modules up front, so the test does not depend on how long a cold
+    // transform of the app's largest module graph takes on a busy machine.
+    beforeAll(async () => {
+        await import("@/features/character/components/CharacterLayout.svelte");
+        await import("@/components/ChatArea.svelte");
     });
 
     test("loads and renders layout", async () => {
-        const { container } = render(Home);
+        const { container } = renderWithAppContext(Home, {});
 
-        await vi.waitFor(
+        await waitFor(
             () => {
                 const loadedContent = container.querySelector(".home-layout > div");
                 expect(loadedContent).not.toBeNull();

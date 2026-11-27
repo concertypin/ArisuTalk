@@ -28,11 +28,6 @@ interface ImportMetaEnv {
      */
     readonly VITEST?: boolean;
     /**
-     * Indicates if Vitest is running in browser mode.
-     * "false" on non-testing or node mode.
-     */
-    readonly VITEST_BROWSER_MODE: "true" | "false";
-    /**
      * Git commit hash injected at build time.
      */
     readonly VITE_COMMIT_HASH?: string;

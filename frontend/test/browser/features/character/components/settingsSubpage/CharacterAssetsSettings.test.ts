@@ -1,9 +1,8 @@
-/// <reference types="vitest/browser" />
-
 import { test, expect, describe, vi, beforeEach, type Mock } from "vitest";
-import { render } from "vitest-browser-svelte";
+import { render, screen, waitFor } from "@testing-library/svelte";
 import CharacterAssetsSettings from "@/features/character/components/settingsSubpage/CharacterAssetsSettings.svelte";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
+import { createTestCharacter } from "@test/utils/character";
 import type { IAssetStorageAdapter } from "@/lib/interfaces";
 
 // Mock the asset storage resolver
@@ -21,54 +20,34 @@ vi.mock("@/features/character/adapters/assetStorage/assetStorageResolver", () =>
 
 describe("CharacterAssetsSettings Component", () => {
     let mockCharacter: Character;
-    let onChangeSpy: Mock<(character: Character) => void>;
+    let onChangeSpy: Mock<(character: Character | null) => void>;
 
     beforeEach(() => {
         onChangeSpy = vi.fn(() => {});
-        mockCharacter = {
-            id: "char-1",
-            specVersion: 0,
-            name: "Test Character",
-            description: "A test character",
-            avatarUrl: "",
-            assets: { assets: [] },
-            prompt: {
-                description: "",
-                authorsNote: "",
-                lorebook: { config: { tokenLimit: 0 }, data: [] },
-            },
-            executables: {
-                runtimeSetting: { mem: undefined, timeout: 30000 },
-                replaceHooks: {
-                    display: [],
-                    input: [],
-                    output: [],
-                    request: [],
-                },
-            },
-            metadata: {
-                author: "",
-                license: "",
-                version: "1.0.0",
-                distributedOn: "",
-                additionalInfo: "",
-            },
-        };
+        mockCharacter = createTestCharacter();
     });
 
-    test("renders empty state correctly", async () => {
-        const { getByText } = render(CharacterAssetsSettings, {
-            character: mockCharacter,
-            onChange: onChangeSpy,
+    test("renders empty state correctly", () => {
+        render(CharacterAssetsSettings, {
+            props: {
+                context: () => ({
+                    getCharacter: () => mockCharacter,
+                    onCharacterChange: onChangeSpy,
+                }),
+            },
         });
 
-        await expect.element(getByText("No assets yet.")).toBeVisible();
+        expect(screen.getByText("No assets yet.")).toBeInTheDocument();
     });
 
-    test("renders upload section", async () => {
+    test("renders upload section", () => {
         const { container } = render(CharacterAssetsSettings, {
-            character: mockCharacter,
-            onChange: onChangeSpy,
+            props: {
+                context: () => ({
+                    getCharacter: () => mockCharacter,
+                    onCharacterChange: onChangeSpy,
+                }),
+            },
         });
 
         const uploadInput = container.querySelector("#asset-upload");
@@ -78,7 +57,7 @@ describe("CharacterAssetsSettings Component", () => {
         expect(uploadButton).toBeTruthy();
     });
 
-    test("shows image assets section when image exists", async () => {
+    test("shows image assets section when image exists", () => {
         mockCharacter.assets.assets = [
             {
                 id: "asset-1",
@@ -88,15 +67,19 @@ describe("CharacterAssetsSettings Component", () => {
             },
         ];
 
-        const { getByText } = render(CharacterAssetsSettings, {
-            character: mockCharacter,
-            onChange: onChangeSpy,
+        render(CharacterAssetsSettings, {
+            props: {
+                context: () => ({
+                    getCharacter: () => mockCharacter,
+                    onCharacterChange: onChangeSpy,
+                }),
+            },
         });
 
-        await expect.element(getByText("Images")).toBeVisible();
+        expect(screen.getByText("Images")).toBeInTheDocument();
     });
 
-    test("shows other assets section when non-image exists", async () => {
+    test("shows other assets section when non-image exists", () => {
         mockCharacter.assets.assets = [
             {
                 id: "asset-2",
@@ -106,12 +89,16 @@ describe("CharacterAssetsSettings Component", () => {
             },
         ];
 
-        const { getByText } = render(CharacterAssetsSettings, {
-            character: mockCharacter,
-            onChange: onChangeSpy,
+        render(CharacterAssetsSettings, {
+            props: {
+                context: () => ({
+                    getCharacter: () => mockCharacter,
+                    onCharacterChange: onChangeSpy,
+                }),
+            },
         });
 
-        await expect.element(getByText("Other Assets (1)")).toBeVisible();
+        expect(screen.getByText("Other Assets (1)")).toBeInTheDocument();
     });
 
     test("calls onChange when deleting asset", async () => {
@@ -125,12 +112,16 @@ describe("CharacterAssetsSettings Component", () => {
         ];
 
         const { container } = render(CharacterAssetsSettings, {
-            character: mockCharacter,
-            onChange: onChangeSpy,
+            props: {
+                context: () => ({
+                    getCharacter: () => mockCharacter,
+                    onCharacterChange: onChangeSpy,
+                }),
+            },
         });
 
         // Find the delete button (should be only one since we have only one asset)
-        await vi.waitFor(() => {
+        await waitFor(() => {
             const deleteButton = container.querySelector('button[aria-label="Delete asset"]');
             expect(deleteButton).toBeTruthy();
         });
@@ -140,7 +131,7 @@ describe("CharacterAssetsSettings Component", () => {
         ) as HTMLButtonElement;
         deleteButton.click();
 
-        await vi.waitFor(() => {
+        await waitFor(() => {
             expect(onChangeSpy).toHaveBeenCalled();
         });
     });
@@ -162,11 +153,15 @@ describe("CharacterAssetsSettings Component", () => {
         ];
 
         const { container } = render(CharacterAssetsSettings, {
-            character: mockCharacter,
-            onChange: onChangeSpy,
+            props: {
+                context: () => ({
+                    getCharacter: () => mockCharacter,
+                    onCharacterChange: onChangeSpy,
+                }),
+            },
         });
 
-        await vi.waitFor(() => {
+        await waitFor(() => {
             const draggables = container.querySelectorAll('[draggable="true"]');
             expect(draggables).toHaveLength(2);
         });

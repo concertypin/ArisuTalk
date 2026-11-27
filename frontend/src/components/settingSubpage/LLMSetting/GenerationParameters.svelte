@@ -209,6 +209,7 @@
                         type="checkbox"
                         class="checkbox checkbox-xs checkbox-primary"
                         bind:checked={modelProxy.checked}
+                        aria-label="Include Model"
                     />
                 </label>
                 <input
@@ -228,6 +229,7 @@
                         type="checkbox"
                         class="checkbox checkbox-xs checkbox-primary"
                         bind:checked={keyProxy.checked}
+                        aria-label="Include API Key"
                     />
                 </label>
                 <input
@@ -247,6 +249,7 @@
                         type="checkbox"
                         class="checkbox checkbox-xs checkbox-primary"
                         bind:checked={urlProxy.checked}
+                        aria-label="Include Base URL"
                     />
                 </label>
                 <input

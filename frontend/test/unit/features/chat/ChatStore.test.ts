@@ -1,4 +1,4 @@
-// @vitest-environment happy-dom
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
 import { ChatStore } from "@/features/chat/stores/chatStore.svelte";
 import type { IChatStorageAdapter, LocalChat } from "@/lib/interfaces";

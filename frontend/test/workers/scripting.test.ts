@@ -1,6 +1,6 @@
-// @vitest-environment happy-dom
+// @vitest-environment jsdom
 
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, onTestFinished, vi } from "vitest";
 
 // Mock Comlink before importing main.ts
 vi.mock("comlink", () => ({
@@ -148,6 +148,71 @@ describe("Scripting Worker Logic", () => {
             expect(response).toBeDefined();
             // Without network access, fetch should not return actual data
             expect(response.result).not.toBe("https://example.com");
+        });
+
+        it("should await results that depend on a pending host call", async () => {
+            const fetchMock = vi.fn<typeof fetch>(async () => {
+                await new Promise((resolve) => setTimeout(resolve, 10));
+                return new Response("remote body");
+            });
+            vi.stubGlobal("fetch", fetchMock);
+            onTestFinished(() => {
+                vi.unstubAllGlobals();
+            });
+
+            const response = await api.execute('return fetch("https://example.com");', {
+                allowNetwork: true,
+            });
+
+            expect(response.error).toBeUndefined();
+            expect(response.result).toBe("remote body");
+            expect(fetchMock).toHaveBeenCalledOnce();
+        });
+
+        it("should report an async script that never settles as a timeout error", async () => {
+            const response = await api.execute("return new Promise(() => {});", { timeout: 50 });
+            expect(response.result).toBeUndefined();
+            expect(response.error).toContain("execute function timeout");
+        });
+
+        it("should report a denied fetch as an error result", async () => {
+            const response = await api.execute('fetch("https://example.com")', {
+                allowNetwork: false,
+                timeout: 50,
+            });
+            expect(response.result).toBeUndefined();
+            expect(response.error).toContain("Network access denied");
+        });
+
+        it("should not leak an unhandled rejection after the timeout elapses", async () => {
+            const unhandled: unknown[] = [];
+            const onUnhandled = (reason: unknown) => {
+                unhandled.push(reason);
+            };
+            process.on("unhandledRejection", onUnhandled);
+            onTestFinished(() => {
+                vi.unstubAllGlobals();
+                process.off("unhandledRejection", onUnhandled);
+            });
+
+            // The sandbox promise is never settled, so only the timeout path can finish it.
+            const timedOut = await api.execute("return new Promise(() => {});", {
+                timeout: 30,
+            });
+            expect(timedOut.error).toContain("execute function timeout");
+            // Settles before the timeout, but define-function keeps its timer armed afterwards.
+            vi.stubGlobal(
+                "fetch",
+                vi.fn<typeof fetch>(async () => new Response("ok"))
+            );
+            const settled = await api.execute('return fetch("https://example.com");', {
+                allowNetwork: true,
+                timeout: 30,
+            });
+            expect(settled.result).toBe("ok");
+            // Wait past both timers so a stray rejection has surfaced.
+            await new Promise((resolve) => setTimeout(resolve, 150));
+            expect(unhandled).toEqual([]);
         });
 
         it("should provide isolated storage per character", async () => {

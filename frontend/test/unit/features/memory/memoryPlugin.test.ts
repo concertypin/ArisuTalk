@@ -3,11 +3,13 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { CharacterPlugin } from "@/lib/plugins/types";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
+import { memoryPlugin as plugin } from "@/features/memory/memoryPlugin";
 
-const mockAddMemory = vi.fn();
-const mockLoadMemories = vi.fn();
+const { mockAddMemory, mockLoadMemories } = vi.hoisted(() => ({
+    mockAddMemory: vi.fn(),
+    mockLoadMemories: vi.fn(),
+}));
 
 vi.mock("@/features/memory/stores/memoryStore.svelte", () => ({
     memoryStore: {
@@ -18,13 +20,12 @@ vi.mock("@/features/memory/stores/memoryStore.svelte", () => ({
     },
 }));
 
+// The plugin is imported statically on purpose. A dynamic import inside a hook runs under the 10s
+// hookTimeout, and on a cold, CPU-starved CI shard the Vite transform can exceed it. A static import
+// is resolved while the file is collected, so the hook has nothing slow left to wait for.
 describe.concurrent("memoryPlugin", () => {
-    let plugin: CharacterPlugin;
-
-    beforeEach(async () => {
+    beforeEach(() => {
         vi.clearAllMocks();
-        const mod = await import("@/features/memory/memoryPlugin");
-        plugin = mod.memoryPlugin;
     });
 
     it("should have correct metadata", () => {

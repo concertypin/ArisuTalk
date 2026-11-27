@@ -1,40 +1,30 @@
 {
-	"include": [
-		"test/**/*.ts",
-		"test/*.ts",
-		"test/**/*.svelte",
-	],
-	"exclude": [
-		"node_modules",
-		"dist",
-		"dist-ts",
-		"coverage",
-	],
-	"compilerOptions": {
-		"tsBuildInfoFile": "./node_modules/.cache/test.tsbuildinfo",
-		"lib": [
-			"ESNext",
-			"DOM"
-		],
-		"types": [
-			"vite/client",
-			"svelte",
-		] /* Specify type package names to be included without being referenced in a source file. */,
-		"noEmit": false /* Disable emitting files from a compilation. */,
-		"declarationDir": "./dist-ts/test" /* Specify an output folder for all emitted files. */,
-		/* Type Checking */
-		"noImplicitAny": true
-	},
-	"extends": "./tsconfig.base.json",
-	"references": [
-		{
-			"path": "./tsconfig.worker.json"
-		},
-		{
-			"path": "./tsconfig.common.json"
-		},
-		{
-			"path": "./tsconfig.app.json"
-		},
-	]
+    "include": ["test/**/*.ts", "test/*.ts", "test/**/*.svelte"],
+    "exclude": ["node_modules", "dist", "dist-ts", "coverage"],
+    "compilerOptions": {
+        "tsBuildInfoFile": "./node_modules/.cache/test.tsbuildinfo",
+        "lib": ["ESNext", "DOM"],
+        "types": [
+            "vite/client",
+            "svelte"
+        ] /* Specify type package names to be included without being referenced in a source file. */,
+        "noEmit": false /* Disable emitting files from a compilation. */,
+        "declarationDir": "./dist-ts/test" /* Specify an output folder for all emitted files. */,
+        /* Type Checking */
+        "rootDir": "." /* Otherwise TS infers ./test and fails with TS5011 */,
+        "composite": false /* Nothing references this project */,
+        "noImplicitAny": true
+    },
+    "extends": "./tsconfig.base.json",
+    "references": [
+        {
+            "path": "./tsconfig.worker.json"
+        },
+        {
+            "path": "./tsconfig.common.json"
+        },
+        {
+            "path": "./tsconfig.app.json"
+        }
+    ]
 }

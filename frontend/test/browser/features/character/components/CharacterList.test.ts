@@ -1,6 +1,6 @@
-/// <reference types="vitest/browser" />
 import { test, expect, describe, vi, beforeEach } from "vitest";
-import { render } from "vitest-browser-svelte";
+import { render, screen, waitFor } from "@testing-library/svelte";
+import { userEvent } from "@testing-library/user-event";
 import CharacterList from "@/features/character/components/CharacterList.svelte";
 import { characterStore } from "@/features/character/stores/characterStore.svelte";
 import type { AssetEntity, Character } from "@arisutalk/character-spec/v0/Character";
@@ -43,7 +43,10 @@ describe("CharacterList Component", () => {
     let mockCharacters: Character[];
     const mockOnEdit = vi.fn() satisfies (index: number) => void;
 
-    beforeEach(() => {
+    beforeEach(async () => {
+        // The store loads from storage asynchronously and would overwrite the characters set below.
+        await characterStore.initPromise;
+
         mockOnEdit.mockClear();
 
         mockCharacters = [
@@ -102,70 +105,72 @@ describe("CharacterList Component", () => {
         characterStore.remove = vi.fn().mockResolvedValue(undefined);
     });
 
-    test("renders character cards for all characters", async () => {
-        const { getByRole } = render(CharacterList, {
-            onEdit: mockOnEdit,
+    test("renders character cards for all characters", () => {
+        render(CharacterList, {
+            props: {
+                onEdit: mockOnEdit,
+            },
         });
 
-        const character1 = getByRole("heading", { name: "Character 1", level: 2 });
-        await expect.element(character1).toBeVisible();
+        const character1 = screen.getByRole("heading", { name: "Character 1", level: 2 });
+        expect(character1).toBeInTheDocument();
 
-        const character2 = getByRole("heading", { name: "Character 2", level: 2 });
-        await expect.element(character2).toBeVisible();
+        const character2 = screen.getByRole("heading", { name: "Character 2", level: 2 });
+        expect(character2).toBeInTheDocument();
     });
 
     test("calls onEdit with correct index", async () => {
-        const { getByRole } = render(CharacterList, {
-            onEdit: mockOnEdit,
+        const user = userEvent.setup();
+        render(CharacterList, {
+            props: {
+                onEdit: mockOnEdit,
+            },
         });
 
-        // Use direct click since it's hidden by opacity
-        const editButton = getByRole("button", { name: "Edit" }).first();
-        const element = editButton.element() as HTMLElement;
-        element.click();
+        const editButton = screen.getAllByRole("button", { name: "Edit" })[0];
+        await user.click(editButton);
 
-        expect(mockOnEdit).toHaveBeenCalled();
+        expect(mockOnEdit).toHaveBeenCalledWith(0);
     });
 
     test("deletes character when delete action is confirmed", async () => {
-        const { container, getByText } = render(CharacterList, {
-            onEdit: mockOnEdit,
+        const user = userEvent.setup();
+        render(CharacterList, {
+            props: {
+                onEdit: mockOnEdit,
+            },
         });
 
         // Click delete button on the first card to open modal
-        await vi.waitFor(() => {
-            const deleteButton = container.querySelector('button[aria-label="Delete"]');
-            expect(deleteButton).toBeTruthy();
-        });
-
-        const deleteButton = container.querySelector(
-            'button[aria-label="Delete"]'
-        ) as HTMLButtonElement;
-        deleteButton.click();
+        await user.click(screen.getAllByRole("button", { name: "Delete" })[0]);
 
         // Find and click the confirmation button in the modal
-        const confirmButton = getByText("Delete", { exact: true });
-        await confirmButton.click();
+        const confirmButton = await screen.findByText("Delete", { exact: true });
+        await user.click(confirmButton);
 
-        expect(characterStore.remove).toHaveBeenCalled();
+        await waitFor(() => expect(characterStore.remove).toHaveBeenCalled());
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
 
     test("exports character when export button is clicked", async () => {
+        const user = userEvent.setup();
         const mockCreateElement = vi.spyOn(document, "createElement");
         const mockCreateObjectURL = vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:url");
         const mockAppendChild = vi.spyOn(document.body, "appendChild");
         const mockRemoveChild = vi.spyOn(document.body, "removeChild");
 
-        const { getByLabelText } = render(CharacterList, {
-            onEdit: mockOnEdit,
+        render(CharacterList, {
+            props: {
+                onEdit: mockOnEdit,
+            },
         });
 
-        const exportButton = getByLabelText("Export").nth(0);
-        expect(exportButton).not.toBeDisabled()
-        await exportButton.click({ force: true });
+        const exportButton = screen.getAllByRole("button", { name: "Export" })[0];
+        expect(exportButton).not.toBeDisabled();
+        await user.click(exportButton);
 
         // Verify download link was created
-        expect(mockCreateElement).toHaveBeenCalledWith("a");
+        await waitFor(() => expect(mockCreateElement).toHaveBeenCalledWith("a"));
         expect(mockCreateObjectURL).toHaveBeenCalled();
 
         mockCreateElement.mockRestore();
@@ -174,14 +179,16 @@ describe("CharacterList Component", () => {
         mockRemoveChild.mockRestore();
     });
 
-    test("displays empty state when no characters", async () => {
+    test("displays empty state when no characters", () => {
         characterStore.characters = [];
 
-        const { getByText } = render(CharacterList, {
-            onEdit: mockOnEdit,
+        render(CharacterList, {
+            props: {
+                onEdit: mockOnEdit,
+            },
         });
 
-        const emptyMessage = getByText(/No characters/i);
-        await expect.element(emptyMessage).toBeVisible();
+        const emptyMessage = screen.getByText(/No characters/i);
+        expect(emptyMessage).toBeInTheDocument();
     });
 });

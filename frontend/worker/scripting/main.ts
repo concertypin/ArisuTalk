@@ -123,7 +123,8 @@ async function execute<ResultType = unknown>(
                 });
             }
 
-            const result: ResultType = (await fn)();
+            // Await the invocation: it may return a promise when the script is waiting on a host call.
+            const result: ResultType = await (await fn)();
 
             // Extract modified context if it was mutated
             let modifiedContext: ScriptContext | undefined = undefined;
