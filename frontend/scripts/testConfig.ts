@@ -22,6 +22,14 @@ const coverage: TestConfig["coverage"] & { provider: "v8" } = {
         // Example worker is a template reference, not actual production code.
         // Kept as a reference for creating new workers; excluded from coverage.
         "worker/example/**",
+        // Deprecated sticker code, removed together with stickers. The image generation store and panel
+        // save results into sticker packs and are rewritten to save chat inlays at the same time.
+        // Remove these entries when those files are deleted or rewritten.
+        "src/features/sticker/components/StickerPackManager.svelte",
+        "src/features/sticker/stores/stickerStore.svelte.ts",
+        "src/lib/adapters/storage/sticker/IDBStickerAdapter.ts",
+        "src/features/imagegen/components/ImageGenerator.svelte",
+        "src/features/imagegen/stores/imageGenStore.svelte.ts",
     ],
     enabled: true,
 };
