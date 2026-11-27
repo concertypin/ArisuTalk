@@ -19,7 +19,7 @@ export function setLogger(l: Logger) {
 }
 
 export function iterableToStream(
-    chunks: Iterable<Uint8Array | Blob | AsyncIterable<Buffer>>
+    chunks: Iterable<Uint8Array | Blob | AsyncIterable<Uint8Array>>
 ): ReadableStream {
     const iterator = chunks[Symbol.iterator]();
     return new ReadableStream({
