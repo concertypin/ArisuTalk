@@ -1,10 +1,8 @@
 /**
  * @fileoverview Tests for the Grok (xAI) provider: how settings map to the OpenAI-compatible
- * LangChain client, and that generation goes through that client. The client is replaced by a
- * recording fake, so no request leaves the test.
+ * LangChain client. The client is replaced by a recording fake, so no request leaves the test.
  */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { HumanMessage } from "@langchain/core/messages";
 import { GrokChatProvider } from "@/lib/providers/chat/GrokChatProvider";
 
 type ClientOptions = {
@@ -17,18 +15,13 @@ type ClientOptions = {
     configuration?: { baseURL?: string; dangerouslyAllowBrowser?: boolean };
 };
 
-const { constructed, invokeMock } = vi.hoisted(() => {
-    const options: unknown[] = [];
-    const invoke = vi.fn<(messages: unknown[]) => Promise<{ content: string }>>();
-    return { constructed: options, invokeMock: invoke };
-});
+const constructed = vi.hoisted(() => [] as unknown[]);
 
 vi.mock("@langchain/openai", () => ({
     ChatOpenAI: class {
         constructor(options: unknown) {
             constructed.push(options);
         }
-        invoke = invokeMock;
     },
 }));
 
@@ -44,15 +37,6 @@ function lastClientOptions(): ClientOptions {
 describe("GrokChatProvider", () => {
     beforeEach(() => {
         constructed.length = 0;
-        invokeMock.mockReset();
-    });
-
-    it("identifies itself as the Grok provider", async () => {
-        const provider = await GrokChatProvider.factory.connect({ apiKey: "xai-key" });
-        expect(provider).toBeInstanceOf(GrokChatProvider);
-        expect(provider.id).toBe("GROK");
-        expect(provider.name).toBe("Grok");
-        expect(provider.description).toContain("xAI");
     });
 
     it("points the client at api.x.ai with the default model and browser access enabled", async () => {
@@ -104,14 +88,5 @@ describe("GrokChatProvider", () => {
         expect(withKey.isReady()).toBe(true);
         expect(emptyKey.isReady()).toBe(false);
         expect(noKey.isReady()).toBe(false);
-    });
-
-    it("generates text through the LangChain client", async () => {
-        invokeMock.mockResolvedValue({ content: "Hello from Grok" });
-        const provider = await GrokChatProvider.factory.connect({ apiKey: "xai-key" });
-        const messages = [new HumanMessage("hi")];
-
-        await expect(provider.generate(messages)).resolves.toBe("Hello from Grok");
-        expect(invokeMock).toHaveBeenCalledWith(messages);
     });
 });

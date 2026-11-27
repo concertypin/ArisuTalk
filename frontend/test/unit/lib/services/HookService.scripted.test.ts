@@ -1,15 +1,17 @@
 /**
- * HookService tests with the real regex worker logic and a vm-backed scripting worker.
+ * HookService tests with the real regex worker logic and a Node `vm` stand-in for the scripting worker.
  *
  * Only the worker construction (`workerClient`) is mocked. The regex worker is the real `api` of
- * `worker/regex/main` and the scripting worker evaluates scripts with Node's `vm`, so patterns,
- * replacements and flags go through real regex handling instead of a mock re-implementation.
+ * `worker/regex/main`, so patterns, replacements and flags go through real regex handling instead
+ * of a mock re-implementation. Scripts run in `runInVm`, which is not the QuickJS sandbox; the
+ * "real scripting worker" block at the end calls the real `api` of `worker/scripting/main`.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Logger, type AnyLogEntry } from "@common/logger/Logger";
 import { HookService } from "@/lib/services/HookService";
 import { getRegexWorker, getScriptingWorker } from "@/lib/workers/workerClient";
 import { api as regexApi } from "@worker/regex/main";
+import { api as scriptingApi } from "@worker/scripting/main";
 import type { Character } from "@arisutalk/character-spec/v0/Character";
 import { apply } from "@arisutalk/character-spec/utils";
 import { PersonaSchema, type Persona } from "@/features/persona/schema";
@@ -71,6 +73,8 @@ describe("HookService with scripted hooks", () => {
     const execute = vi.fn(runInVm);
 
     beforeEach(() => {
+        // The worker getters are module mocks, so call history from earlier tests would leak into not.toHaveBeenCalled().
+        vi.clearAllMocks();
         service = new HookService();
         execute.mockReset();
         execute.mockImplementation(runInVm);
@@ -331,6 +335,50 @@ describe("HookService with scripted hooks", () => {
             });
 
             await expect(service.process("[a]", character, "output")).resolves.toMatch(/^\[.+\]$/);
+        });
+    });
+
+    describe("with the real scripting worker", () => {
+        beforeEach(() => {
+            vi.mocked(getScriptingWorker).mockResolvedValue(
+                mockScriptingWorker(scriptingApi.execute)
+            );
+        });
+
+        it("evaluates a scripted pattern and a scripted replacement in the sandbox", async () => {
+            const character = characterWith({
+                input: [hook("'ap' + 'ple'", "fruit", { scriptedInput: true })],
+                output: [hook("[0-9]+", "'#' + (6 * 7)", { scriptedOutput: true })],
+            });
+
+            expect(await service.process("an apple", character, "input")).toBe("an fruit");
+            expect(await service.process("n=1", character, "output")).toBe("n=#42");
+        });
+
+        it("hands the message and the persona to the script", async () => {
+            const persona: Persona = apply(PersonaSchema, {
+                id: "persona-1",
+                name: "아리스",
+                description: "",
+            });
+            const character = characterWith({
+                input: [
+                    hook("context.message.role + '/' + context.persona.name", "hit", {
+                        scriptedInput: true,
+                    }),
+                ],
+            });
+
+            expect(await service.process("user/아리스", character, "input", persona)).toBe("hit");
+        });
+
+        it("logs a script error and applies the hook with the literal pattern", async () => {
+            const character = characterWith({
+                input: [hook("cat", "dog", { type: "string", scriptedInput: true })],
+            });
+
+            expect(await service.process("a cat", character, "input")).toBe("a dog");
+            expect(logs.some((e) => e.level === "script.hook.error")).toBe(true);
         });
     });
 

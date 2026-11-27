@@ -2,7 +2,7 @@
  * @fileoverview Tests for the NovelAI image generation request. `fetch` is stubbed, so the real
  * API is never contacted.
  */
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { beforeEach, describe, expect, test, vi, onTestFinished } from "vitest";
 import { generateImage } from "@/lib/services/ImageGenService";
 import { ImageGenConfigSchema, type ImageGenConfig } from "@/lib/types/IDataModel";
 import { Logger } from "@common/logger/Logger";
@@ -37,11 +37,10 @@ describe("generateImage", () => {
         vi.stubGlobal("fetch", fetchMock);
         vi.spyOn(Logger, "debug").mockImplementation(() => {});
         vi.spyOn(Logger, "error").mockImplementation(() => {});
-    });
-
-    afterEach(() => {
-        vi.unstubAllGlobals();
-        vi.restoreAllMocks();
+        onTestFinished(() => {
+            vi.unstubAllGlobals();
+            vi.restoreAllMocks();
+        });
     });
 
     test("rejects before any request when the API key is empty", async () => {

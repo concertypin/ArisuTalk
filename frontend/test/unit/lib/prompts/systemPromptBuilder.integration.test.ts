@@ -1,8 +1,9 @@
 /**
  * System prompt assembly with the real magic pattern parser.
  *
- * Only the scripting worker is replaced (by a Node `vm` runner), so the builder's wiring of
- * `character`, `persona` and the chat history into the sandbox is exercised end to end.
+ * Only the scripting worker is replaced (by `runInVm`, a Node `vm` stand-in for QuickJS), so the
+ * builder's wiring of `character`, `persona` and the chat history into the pattern scripts is
+ * exercised end to end.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Logger, type AnyLogEntry } from "@common/logger/Logger";

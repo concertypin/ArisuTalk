@@ -3,6 +3,7 @@
  * @fileoverview Provider selection and initialization of `ChatStore`: which LLM config becomes the provider, and how loading chats and waiting for settings behave.
  */
 import { describe, it, expect, vi } from "vitest";
+import { tick } from "svelte";
 import { HumanMessage } from "@langchain/core/messages";
 import { ChatStore } from "@/features/chat/stores/chatStore.svelte";
 import { settings } from "@/lib/stores/settings.svelte";
@@ -82,6 +83,18 @@ describe("provider selection", () => {
         await store.initPromise;
 
         expect(store["activeProvider"]).toBeInstanceOf(MockChatProvider);
+    });
+
+    it("forgets the active config id when the active config is disabled later", async () => {
+        settings.value.llmConfigs = [makeConfig("on", "Anthropic")];
+        settings.value.activeLLMConfigId = "on";
+        const store = new ChatStore(new InMemoryChatAdapter());
+        await store.initPromise;
+        expect(store.activeConfigId).toBe("on");
+
+        settings.value.llmConfigs = [makeConfig("on", "Anthropic", false)];
+
+        await vi.waitFor(() => expect(store["activeProvider"]).toBeInstanceOf(MockChatProvider));
         expect(store.activeConfigId).toBeNull();
     });
 
@@ -120,15 +133,17 @@ describe("provider selection", () => {
 
     it("refreshProvider reloads the provider from the current configs on demand", async () => {
         const { store } = await createStore();
-        expect(store.activeConfigId).toBeNull();
+        const reload = vi.spyOn(store, "loadProviderFromSettings");
         // While settings are not loaded the automatic reload is paused, so only the explicit call can switch.
         settings.isLoaded = false;
         settings.value.llmConfigs = [makeConfig("late", "Anthropic")];
-        await Promise.resolve();
-        expect(store.activeConfigId).toBeNull();
+        await tick();
+        expect(reload).not.toHaveBeenCalled();
+        expect(store["activeProvider"]).toBeInstanceOf(MockChatProvider);
 
         await store.refreshProvider();
 
+        expect(reload).toHaveBeenCalledOnce();
         expect(store["activeProvider"]).toBeInstanceOf(AnthropicChatProvider);
         expect(store.activeConfigId).toBe("late");
     });
@@ -176,12 +191,14 @@ describe("initialization and settings wait", () => {
         settings.isLoaded = false;
         const warn = vi.spyOn(Logger, "warn").mockImplementation(() => {});
 
-        const waiting = store.waitForSettings();
+        let settled = false;
+        const waiting = store.waitForSettings().then(() => (settled = true));
         await vi.advanceTimersByTimeAsync(250);
+        expect(settled).toBe(false);
         settings.isLoaded = true;
         await vi.advanceTimersByTimeAsync(100);
 
-        await expect(waiting).resolves.toBeUndefined();
+        await expect(waiting).resolves.toBe(true);
         expect(warn).not.toHaveBeenCalled();
     });
 

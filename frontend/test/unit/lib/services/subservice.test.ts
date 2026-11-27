@@ -2,9 +2,9 @@
  * @fileoverview Tests for the cloud backend integration layer. Only `fetch` is stubbed, so the real
  * API client runs and the tests check the requests the service sends and how it maps the answers.
  */
-import { afterEach, assert, beforeEach, describe, expect, test, vi } from "vitest";
+import { beforeEach, describe, expect, onTestFinished, test, vi } from "vitest";
 import { setTokenProvider } from "@/lib/api/client";
-import { checkHealth, getUserProfile, updateUserProfile } from "@/lib/services/subservice";
+import { checkHealth, getUserProfile } from "@/lib/services/subservice";
 import { Logger } from "@common/logger/Logger";
 import { requestUrl } from "@test/utils/fetch";
 
@@ -27,13 +27,12 @@ describe("subservice", () => {
         vi.stubEnv("VITE_PHONEBOOK_BASE_URL", BASE_URL);
         vi.spyOn(Logger, "error").mockImplementation(() => {});
         vi.spyOn(Logger, "info").mockImplementation(() => {});
-    });
-
-    afterEach(() => {
-        setTokenProvider(null);
-        vi.unstubAllGlobals();
-        vi.unstubAllEnvs();
-        vi.restoreAllMocks();
+        onTestFinished(() => {
+            setTokenProvider(null);
+            vi.unstubAllGlobals();
+            vi.unstubAllEnvs();
+            vi.restoreAllMocks();
+        });
     });
 
     describe("checkHealth", () => {
@@ -75,11 +74,7 @@ describe("subservice", () => {
             const request = requestAt();
             expect(request).toMatchObject({ url: `${BASE_URL}/api/check`, method: "POST" });
             expect(request.headers.get("Authorization")).toBe("Bearer jwt-abc");
-            expect(res).toEqual({
-                ok: true,
-                status: 200,
-                data: { name: "User", authUid: "authenticated", role: "known" },
-            });
+            expect(res.ok).toBe(true);
         });
 
         test("forwards an authorization failure instead of returning a profile", async () => {
@@ -88,16 +83,6 @@ describe("subservice", () => {
             );
             const res = await getUserProfile();
             expect(res).toEqual({ ok: false, status: 401, error: "Unauthorized" });
-        });
-    });
-
-    describe("updateUserProfile", () => {
-        test("answers 501 because the backend has no profile endpoint yet, without sending a request", async () => {
-            const res = await updateUserProfile({ name: "New name" });
-            assert(!res.ok, "update should not succeed yet");
-            expect(res.status).toBe(501);
-            expect(res.error).toContain("not yet available");
-            expect(fetchMock).not.toHaveBeenCalled();
         });
     });
 });

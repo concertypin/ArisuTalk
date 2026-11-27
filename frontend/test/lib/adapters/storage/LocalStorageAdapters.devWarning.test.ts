@@ -1,11 +1,10 @@
 // @vitest-environment jsdom
-import { describe, it, expect, afterEach, beforeEach, vi } from "vitest";
+import { describe, it, expect, afterEach, beforeEach, onTestFinished, vi } from "vitest";
 import { Logger, type AnyLogEntry } from "@common/logger/Logger";
 import { LocalStorageChatAdapter } from "@/lib/adapters/storage/chat/LocalStorageChatAdapter";
 import { LocalStorageCharacterAdapter } from "@/lib/adapters/storage/character/LocalStorageCharacterAdapter";
 import { LocalStoragePersonaAdapter } from "@/lib/adapters/storage/persona/LocalStoragePersonaAdapter";
 import { LocalStorageSettingsAdapter } from "@/lib/adapters/storage/settings/LocalStorageSettingsAdapter";
-import { LocalStorageAdapter } from "@/features/character/adapters/storage/LocalStorageAdapter";
 
 type InitAdapter = { init(): Promise<void> };
 type Case = { name: string; create: () => InitAdapter };
@@ -15,7 +14,6 @@ const cases: Case[] = [
     { name: "LocalStorageCharacterAdapter", create: () => new LocalStorageCharacterAdapter() },
     { name: "LocalStoragePersonaAdapter", create: () => new LocalStoragePersonaAdapter() },
     { name: "LocalStorageSettingsAdapter", create: () => new LocalStorageSettingsAdapter() },
-    { name: "LocalStorageAdapter", create: () => new LocalStorageAdapter() },
 ];
 
 describe("LocalStorage adapters: development-only warning on init", () => {
@@ -29,12 +27,14 @@ describe("LocalStorage adapters: development-only warning on init", () => {
 
     afterEach(() => {
         detach();
-        vi.unstubAllEnvs();
     });
 
     describe.each(cases)("$name", ({ name, create }) => {
         it("warns that it is for development/testing only outside dev mode", async () => {
             vi.stubEnv("DEV", false);
+            onTestFinished(() => {
+                vi.unstubAllEnvs();
+            });
 
             await create().init();
 
@@ -46,6 +46,9 @@ describe("LocalStorage adapters: development-only warning on init", () => {
 
         it("stays silent in dev mode", async () => {
             vi.stubEnv("DEV", true);
+            onTestFinished(() => {
+                vi.unstubAllEnvs();
+            });
 
             await create().init();
 

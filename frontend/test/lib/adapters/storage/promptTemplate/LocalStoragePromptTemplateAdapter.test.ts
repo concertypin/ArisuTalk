@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, vi, onTestFinished } from "vitest";
 import { LocalStoragePromptTemplateAdapter } from "@/lib/adapters/storage/promptTemplate/LocalStoragePromptTemplateAdapter";
 import type { PromptTemplate } from "@/lib/types/promptTemplate";
 import { Logger } from "@common/logger/Logger";
@@ -27,12 +27,11 @@ describe("LocalStoragePromptTemplateAdapter", () => {
         storage = createLocalStorageMock(vi);
         vi.stubGlobal("localStorage", storage);
         adapter = new LocalStoragePromptTemplateAdapter();
-    });
-
-    afterEach(() => {
-        vi.unstubAllGlobals();
-        vi.unstubAllEnvs();
-        vi.restoreAllMocks();
+        onTestFinished(() => {
+            vi.unstubAllGlobals();
+            vi.unstubAllEnvs();
+            vi.restoreAllMocks();
+        });
     });
 
     describe("init", () => {

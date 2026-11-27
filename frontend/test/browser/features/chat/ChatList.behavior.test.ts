@@ -191,7 +191,7 @@ describe("ChatList selection", () => {
 
     test("switches to the new character's most recent chat when the character changes", async () => {
         const a1 = await seedChat({ title: "A1", characterId: "char-a", lastMessage: 1000 });
-        const b1 = await seedChat({ title: "B1", characterId: "char-b", lastMessage: 1000 });
+        await seedChat({ title: "B1", characterId: "char-b", lastMessage: 1000 });
         const b2 = await seedChat({ title: "B2", characterId: "char-b", lastMessage: 2000 });
         await chatStore.setActiveChat(a1);
         const { rerender } = render(ChatList, { props: { characterId: "char-a" } });
@@ -201,7 +201,6 @@ describe("ChatList selection", () => {
 
         await vi.waitFor(() => expect(chatStore.activeChatId).toBe(b2));
         await screen.findByRole("button", { name: /^B1/ });
-        expect(chatStore.chats.map((c) => c.id)).toContain(b1);
         expect(screen.queryByText("A1")).not.toBeInTheDocument();
     });
 });

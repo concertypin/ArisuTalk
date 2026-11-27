@@ -3,7 +3,7 @@
  * on top of a stubbed `fetch`, so each test drives the UI and checks what the user sees and which
  * requests are sent.
  */
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { beforeEach, describe, expect, test, vi, onTestFinished } from "vitest";
 import { render, screen } from "@testing-library/svelte";
 import { userEvent } from "@testing-library/user-event";
 import PhonebookPanel from "@/features/phonebook/components/PhonebookPanel.svelte";
@@ -78,13 +78,12 @@ describe("PhonebookPanel", () => {
             createTestCharacter({ id: "char-1", name: "앨리스" }),
             createTestCharacter({ id: "char-2", name: "밥" })
         );
-    });
-
-    afterEach(() => {
-        phonebookStore.destroy();
-        setTokenProvider(null);
-        vi.unstubAllGlobals();
-        vi.restoreAllMocks();
+        onTestFinished(() => {
+            phonebookStore.destroy();
+            setTokenProvider(null);
+            vi.unstubAllGlobals();
+            vi.restoreAllMocks();
+        });
     });
 
     describe("connection", () => {
@@ -105,7 +104,7 @@ describe("PhonebookPanel", () => {
             expect(sentRequests()).toEqual(["GET /"]);
         });
 
-        test("disables Connect and swaps the status label while the request is pending", async () => {
+        test("disables Connect and hides the Idle label while the request is pending", async () => {
             const user = userEvent.setup();
             let release: (response: Response) => void = () => {};
             fetchMock.mockImplementation(
@@ -195,9 +194,9 @@ describe("PhonebookPanel", () => {
 
             await vi.waitFor(() => expect(sentRequests()).toContain("POST /api/characters"));
             expect(publishedBody).toMatchObject({ id: "char-2", name: "밥" });
-            expect(
-                await screen.findByRole("button", { name: "Publish to Phonebook" })
-            ).toBeEnabled();
+            await vi.waitFor(() =>
+                expect(screen.getByRole("button", { name: "Publish to Phonebook" })).toBeEnabled()
+            );
         });
 
         test("logs the failure and re-enables Publish when the backend rejects the upload", async () => {
@@ -213,9 +212,9 @@ describe("PhonebookPanel", () => {
                     expect.objectContaining({ message: "Name already taken" })
                 )
             );
-            expect(
-                await screen.findByRole("button", { name: "Publish to Phonebook" })
-            ).toBeEnabled();
+            await vi.waitFor(() =>
+                expect(screen.getByRole("button", { name: "Publish to Phonebook" })).toBeEnabled()
+            );
         });
     });
 

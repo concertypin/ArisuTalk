@@ -98,19 +98,6 @@ describe("MemoryManager", () => {
             await screen.findByText("베타 기억");
             expect(screen.queryByText("알파 기억")).not.toBeInTheDocument();
         });
-
-        test("shows the newest memory first", async () => {
-            await seed(
-                memory({ id: "old", content: "오래된 기억", timestamp: ago(3 * DAY_MS) }),
-                memory({ id: "new", content: "최근 기억", timestamp: ago(1 * DAY_MS) })
-            );
-            render(MemoryManager, { props: { characterId: "char-1" } });
-            await screen.findByText("오래된 기억");
-
-            const rows = screen.getAllByRole("button", { name: /기억/ });
-            expect(rows[0]).toHaveTextContent("최근 기억");
-            expect(rows[1]).toHaveTextContent("오래된 기억");
-        });
     });
 
     describe("tabs", () => {

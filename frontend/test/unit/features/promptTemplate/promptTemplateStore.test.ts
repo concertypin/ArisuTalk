@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, vi, onTestFinished } from "vitest";
 import { PromptTemplateStore } from "@/features/promptTemplate/stores/promptTemplateStore.svelte";
 import type { PromptTemplate, IPromptTemplateStorageAdapter } from "@/features/promptTemplate";
 import { Logger } from "@common/logger/Logger";
@@ -45,11 +45,10 @@ describe("PromptTemplateStore", () => {
         vi.spyOn(Logger, "error").mockImplementation(() => {});
         vi.spyOn(Logger, "warn").mockImplementation(() => {});
         vi.spyOn(Logger, "info").mockImplementation(() => {});
-    });
-
-    afterEach(() => {
-        vi.unstubAllGlobals();
-        vi.restoreAllMocks();
+        onTestFinished(() => {
+            vi.unstubAllGlobals();
+            vi.restoreAllMocks();
+        });
     });
 
     describe("initialization", () => {

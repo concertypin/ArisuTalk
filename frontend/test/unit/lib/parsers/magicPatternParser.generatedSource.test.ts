@@ -1,9 +1,10 @@
 /**
- * Magic pattern tests that run the generated sandbox source for real.
+ * Magic pattern tests that evaluate the source string the parser generates.
  *
- * The scripting worker (QuickJS in a Web Worker) is the only mocked boundary. Its `execute` is
- * replaced with a Node `vm` runner that evaluates the exact source string the parser sends, so
- * `character`, `persona` and `chat()` inside the sandbox are the parser's own code.
+ * The scripting worker (QuickJS in a Web Worker) is replaced with `runInVm`, a Node `vm` stand-in.
+ * It is not the sandbox: isolation and QuickJS behavior are covered by the tests that call the real
+ * worker API (`magicPatternParser.worker.test.ts`). What is under test here is the parser's own code:
+ * the `character`, `persona` and `chat()` it injects into the script, and how it renders results.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Logger, type AnyLogEntry } from "@common/logger/Logger";
@@ -26,16 +27,24 @@ const history: Message[] = [
     makeMessage("m4", "four", { role: "assistant", timestamp: 4 }),
 ];
 
+/**
+ * A `chat` that returns `messages` only for a request covering the whole history (oldest to newest),
+ * and nothing for any other range, so a parser asking for a different range gets no history.
+ */
+function wholeHistory(messages: Message[]): MagicPatternContext["chat"] {
+    return (a, b) => (a < 0 && b >= 0 ? messages : []);
+}
+
 function makeContext(overrides: Partial<MagicPatternContext> = {}): MagicPatternContext {
     return {
         character: { ...exampleCharacter, id: "char-ctx", name: "Anella" },
         persona: { name: "Arisu", description: "A curious user" },
-        chat: () => history,
+        chat: wholeHistory(history),
         ...overrides,
     };
 }
 
-describe("parseMagicPatterns with the generated sandbox code", () => {
+describe("parseMagicPatterns with the generated source (Node vm stand-in)", () => {
     let logs: AnyLogEntry[];
     let detach: () => void;
     const execute = vi.fn(runInVm);
@@ -74,6 +83,14 @@ describe("parseMagicPatterns with the generated sandbox code", () => {
             });
         });
 
+        it("reads the history from the context once, however many patterns the text has", async () => {
+            const chat = vi.fn(wholeHistory(history));
+
+            await parseMagicPatterns("{| return 1 |}{| return 2 |}", makeContext({ chat }));
+
+            expect(chat).toHaveBeenCalledTimes(1);
+        });
+
         it("snapshots message id, role, text and timestamp for chat()", async () => {
             const out = await parseMagicPatterns("{| return chat(0, 0) |}", makeContext());
 
@@ -90,10 +107,42 @@ describe("parseMagicPatterns with the generated sandbox code", () => {
 
             const out = await parseMagicPatterns(
                 "{| return chat(0, 0)[0].content === '' |}",
-                makeContext({ chat: () => [imageMessage] })
+                makeContext({ chat: wholeHistory([imageMessage]) })
             );
 
             expect(out).toBe("true");
+        });
+    });
+
+    describe("hostile data stays data", () => {
+        // JSON.stringify leaves U+2028 and U+2029 as they are, which older JavaScript rejected inside string literals.
+        const hostile =
+            '따옴표" 작은\'따옴표 `백틱` 줄\n바꿈\u2028\u2029\\ ";globalThis.injected = 1;//';
+
+        it("passes quotes, newlines and line separators in the character name through unchanged", async () => {
+            const out = await parseMagicPatterns(
+                "{| return character.name |}",
+                makeContext({ character: { ...exampleCharacter, id: "char-ctx", name: hostile } })
+            );
+
+            expect(out).toBe(hostile);
+            expect(await parseMagicPatterns("{| return typeof injected |}", makeContext())).toBe(
+                "undefined"
+            );
+        });
+
+        it("passes the same characters in a persona and in message text through unchanged", async () => {
+            const message = makeMessage("m1", hostile, { role: "user", timestamp: 1 });
+
+            const out = await parseMagicPatterns(
+                "{| return [persona.description, chat(0, 0)[0].content] |}",
+                makeContext({
+                    persona: { name: "Arisu", description: hostile },
+                    chat: wholeHistory([message]),
+                })
+            );
+
+            expect(JSON.parse(out)).toEqual([hostile, hostile]);
         });
     });
 
@@ -137,7 +186,7 @@ describe("parseMagicPatterns with the generated sandbox code", () => {
         it("returns an empty list when there is no history", async () => {
             const out = await parseMagicPatterns(
                 "{| return chat(0, 5).length |}",
-                makeContext({ chat: () => [] })
+                makeContext({ chat: wholeHistory([]) })
             );
 
             expect(out).toBe("0");

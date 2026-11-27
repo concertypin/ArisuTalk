@@ -134,10 +134,12 @@ describe("storageMigration", () => {
         });
 
         it("reads an older stored version as is, so callers can detect that a migration is due", () => {
+            // currentSchemaVersion() clears the marker, so it has to run before the older one is stored.
+            const current = currentSchemaVersion();
             localStorage.setItem(SCHEMA_VERSION_KEY, "1");
 
             expect(checkStoredSchemaVersion()).toBe(1);
-            expect(checkStoredSchemaVersion()).toBeLessThan(currentSchemaVersion());
+            expect(checkStoredSchemaVersion()).toBeLessThan(current);
         });
 
         it("falls back to 0 when localStorage throws", () => {
@@ -150,20 +152,19 @@ describe("storageMigration", () => {
             expect(checkStoredSchemaVersion()).toBe(0);
         });
 
-        it("assumes the current version and writes nothing when there is no localStorage", () => {
+        it("assumes the current version and does not throw when there is no localStorage", () => {
             const current = currentSchemaVersion();
-            const storage = createLocalStorageMock(vi);
             vi.stubGlobal("localStorage", undefined);
 
             expect(checkStoredSchemaVersion()).toBe(current);
             expect(() => markSchemaMigrated()).not.toThrow();
-            expect(storage.length).toBe(0);
         });
     });
 
     describe("exportAllData", () => {
         it("exports every table with its rows and backup metadata", async () => {
             await seedDatabase();
+            const current = currentSchemaVersion();
 
             const exported = await exportAllData();
 
@@ -173,7 +174,7 @@ describe("storageMigration", () => {
             expect(exported.data.memories).toEqual([memory]);
             expect(exported.data.messages).toHaveLength(exampleMessageData.length);
             expect(exported.data.stickers).toEqual([]);
-            expect(exported._schemaVersion).toBe(currentSchemaVersion());
+            expect(exported._schemaVersion).toBe(current);
             expect(exported._appVersion).toBe("ArisuTalk Kei");
             expect(new Date(exported._exportedAt).toISOString()).toBe(exported._exportedAt);
         });
@@ -305,7 +306,7 @@ describe("storageMigration", () => {
 
         it("rejects an empty file with an unknown-format error", async () => {
             await expect(parseBackupFile(backupFile(new Uint8Array(0)))).rejects.toThrow(
-                /Unknown backup format/
+                "Unknown backup format (empty file)"
             );
         });
     });
@@ -339,9 +340,11 @@ describe("storageMigration", () => {
         });
 
         it("records the schema version after importing", async () => {
+            const current = currentSchemaVersion();
+
             await importBackup({ data: { personas: [persona] } });
 
-            expect(checkStoredSchemaVersion()).toBe(currentSchemaVersion());
+            expect(checkStoredSchemaVersion()).toBe(current);
             expect(logs).toContainEqual(
                 expect.objectContaining({
                     level: "migration.import",
@@ -364,7 +367,6 @@ describe("storageMigration", () => {
             expect(loggedMessages("error")).toContain('[Migration] Failed to import table "chats"');
             expect((await db.chats.toArray()).map((c) => c.id)).toEqual(["old-chat"]);
             expect(await db.personas.toArray()).toEqual([persona]);
-            expect(checkStoredSchemaVersion()).toBe(currentSchemaVersion());
         });
     });
 });

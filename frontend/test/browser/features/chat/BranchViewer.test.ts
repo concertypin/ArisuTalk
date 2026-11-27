@@ -188,6 +188,7 @@ describe("BranchViewer branch navigation", () => {
     });
 
     test("does not claim a plain chat is a branch and shows no branch list when there are none", async () => {
+        // Two chats that were never branched both have `branchRootId === undefined`, and must not match each other.
         const chatId = await seedChat({ title: "일반 채팅" });
         await seedChat({ title: "다른 일반 채팅" });
         await chatStore.setActiveChat(chatId);
@@ -197,6 +198,7 @@ describe("BranchViewer branch navigation", () => {
         screen.getByText("No messages yet.");
         expect(screen.queryByText(/Branches \(/)).not.toBeInTheDocument();
         expect(screen.queryByText(/This chat is a branch/)).not.toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: /다른 일반 채팅/ })).not.toBeInTheDocument();
     });
 
     test("clicking a branch switches the active chat to it and closes the viewer", async () => {
@@ -217,17 +219,6 @@ describe("BranchViewer branch navigation", () => {
             ])
         );
         expect(onClose).toHaveBeenCalledOnce();
-    });
-
-    test("chats without any root do not appear as each other's branches", async () => {
-        // Two chats that were never branched both have `branchRootId === undefined`.
-        const chatId = await seedChat({ title: "일반 채팅" });
-        await seedChat({ title: "다른 일반 채팅" });
-        await chatStore.setActiveChat(chatId);
-
-        render(BranchViewer, { props: { chatId, onClose: vi.fn() } });
-
-        expect(screen.queryByRole("button", { name: /다른 일반 채팅/ })).not.toBeInTheDocument();
     });
 });
 

@@ -108,12 +108,13 @@ describe("chat management", () => {
         expect(adapter.chats.get(id)?.name).toBe("Renamed");
     });
 
-    it("updateChat on a chat missing from the adapter rejects without touching the list", async () => {
-        const { store } = await createStore();
+    it("updateChat rejects without touching the listed chat when storage no longer has it", async () => {
+        const { store, adapter } = await createStore();
         const id = await store.createChat("char-1", "Keep");
+        adapter.chats.delete(id);
 
-        await expect(store.updateChat("missing", { name: "x" })).rejects.toThrow(
-            "Chat not found: missing"
+        await expect(store.updateChat(id, { name: "Lost" })).rejects.toThrow(
+            `Chat not found: ${id}`
         );
 
         expect(store.chats.find((c) => c.id === id)?.name).toBe("Keep");

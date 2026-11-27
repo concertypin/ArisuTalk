@@ -423,17 +423,49 @@ describe("regenerateMessage", () => {
         expect(store.activeMessages).toHaveLength(4);
     });
 
-    it("does nothing without an active chat or a provider", async () => {
-        const { store, adapter } = await createStore();
+    it("does nothing without an active chat even when the messages are loaded", async () => {
+        const { store, adapter } = await conversation();
+        store.activeChatId = null;
+        const remove = vi.spyOn(adapter, "deleteMessage");
+        const provider = replying("x");
+        await useProvider(store, provider);
+
+        await store.regenerateMessage("a2");
+
+        expect(remove).not.toHaveBeenCalled();
+        expect(provider.received).toEqual([]);
+        expect(store.activeMessages).toHaveLength(4);
+    });
+
+    it("does nothing without a provider even when the message exists", async () => {
+        const { store, adapter } = await conversation();
+        store["activeProvider"] = null;
         const remove = vi.spyOn(adapter, "deleteMessage");
 
-        await store.regenerateMessage("a1");
-        expect(remove).not.toHaveBeenCalled();
+        await store.regenerateMessage("a2");
 
-        await openChat(store);
-        store["activeProvider"] = null;
-        await store.regenerateMessage("a1");
         expect(remove).not.toHaveBeenCalled();
+        expect(store.activeMessages).toHaveLength(4);
+        expect(store.isGenerating).toBe(false);
+    });
+
+    it("regenerating a middle reply drops every later message from the list and from storage", async () => {
+        const { store, adapter, id } = await conversation();
+        const provider = replying("fresh");
+        await useProvider(store, provider);
+
+        await store.regenerateMessage("a1");
+
+        expect(transcript(store.activeMessages)).toEqual([
+            ["user", "first question"],
+            ["assistant", "fresh"],
+        ]);
+        expect(transcript(adapter.messages.get(id) ?? [])).toEqual([
+            ["user", "first question"],
+            ["assistant", "fresh"],
+        ]);
+        const history = provider.received[0].filter((m) => !(m instanceof SystemMessage));
+        expect(history.map((m) => textOf(m))).toEqual(["first question"]);
     });
 
     it("rethrows provider failures, leaves no empty reply and resets isGenerating", async () => {

@@ -271,6 +271,9 @@ describe("LocalStorageChatAdapter edge cases", () => {
 
             await adapter.importData(streamOf(payload));
 
+            // Read the raw value: the getters filter again, so they would hide an unfiltered import.
+            expect(JSON.parse(localStorage.getItem(CHATS_KEY) ?? "null")).toEqual([chat]);
+            expect(JSON.parse(localStorage.getItem(MESSAGES_KEY) ?? "null")).toEqual([message]);
             expect(await adapter.getAllChats()).toEqual([chat]);
             expect(await adapter.getMessages("new")).toEqual([message]);
         });

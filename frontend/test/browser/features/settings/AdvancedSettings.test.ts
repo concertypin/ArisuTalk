@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach, onTestFinished } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/svelte";
 import { userEvent } from "@testing-library/user-event";
 import AdvancedSettings from "@/components/settingSubpage/AdvancedSettings.svelte";
@@ -88,6 +88,12 @@ describe("AdvancedSettings", () => {
         });
 
         it("downloads the backup as a dated .aribackup file", async () => {
+            // Only Date is faked, so user-event and waitFor keep their real timers; mid-day UTC is the same date in every zone.
+            vi.useFakeTimers({ toFake: ["Date"] });
+            vi.setSystemTime(new Date("2026-03-15T12:00:00Z"));
+            onTestFinished(() => {
+                vi.useRealTimers();
+            });
             const user = userEvent.setup();
             const blob = new Blob(["backup bytes"]);
             migration.exportDataAsBlob.mockResolvedValue(blob);
@@ -99,8 +105,7 @@ describe("AdvancedSettings", () => {
             expect(URL.createObjectURL).toHaveBeenCalledWith(blob);
             const [anchor] = clickedAnchors;
             expect(anchor.href).toBe("blob:backup-url");
-            const today = new Date().toISOString().slice(0, 10);
-            expect(anchor.download).toBe(`arisutalk-backup-${today}.aribackup`);
+            expect(anchor.download).toBe("arisutalk-backup-2026-03-15.aribackup");
         });
 
         it("releases the temporary blob URL after starting the download", async () => {

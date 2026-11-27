@@ -2,7 +2,7 @@
  * @fileoverview Behavior of the Phonebook API client: URL building, auth header, body encoding and
  * response/error mapping. `fetch` is stubbed, so nothing reaches the network.
  */
-import { afterEach, assert, beforeEach, describe, expect, test, vi } from "vitest";
+import { assert, beforeEach, describe, expect, test, vi, onTestFinished } from "vitest";
 import * as apiClient from "@/lib/api/client";
 import { Logger } from "@common/logger/Logger";
 import { requestUrl } from "@test/utils/fetch";
@@ -39,13 +39,12 @@ describe("api client requests", () => {
         vi.stubEnv("VITE_PHONEBOOK_BASE_URL", BASE_URL);
         vi.spyOn(Logger, "warn").mockImplementation(() => {});
         vi.spyOn(Logger, "error").mockImplementation(() => {});
-    });
-
-    afterEach(() => {
-        apiClient.setTokenProvider(null);
-        vi.unstubAllGlobals();
-        vi.unstubAllEnvs();
-        vi.restoreAllMocks();
+        onTestFinished(() => {
+            apiClient.setTokenProvider(null);
+            vi.unstubAllGlobals();
+            vi.unstubAllEnvs();
+            vi.restoreAllMocks();
+        });
     });
 
     describe("URL and method", () => {
@@ -65,10 +64,10 @@ describe("api client requests", () => {
         });
 
         test.each([
-            ["post", () => apiClient.post("/p", { a: 1 }), "POST"],
-            ["patch", () => apiClient.patch("/p", { a: 1 }), "PATCH"],
-            ["del", () => apiClient.del("/p"), "DELETE"],
-        ])("%s sends a %s request", async (_name, send, method) => {
+            ["post", "POST", () => apiClient.post("/p", { a: 1 })],
+            ["patch", "PATCH", () => apiClient.patch("/p", { a: 1 })],
+            ["del", "DELETE", () => apiClient.del("/p")],
+        ])("%s sends a %s request", async (_name, method, send) => {
             fetchMock.mockResolvedValue(jsonResponse({}));
             await send();
             expect(callAt(fetchMock).init.method).toBe(method);

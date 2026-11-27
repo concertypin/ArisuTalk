@@ -3,7 +3,7 @@
  * `fetch`, so the tests check the requests that leave the store and how it reacts to answers.
  * Only the character store (another feature's persistence) is replaced.
  */
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, onTestFinished, vi, type Mocked } from "vitest";
 import { cloneDeep } from "lodash-es";
 import {
     phonebookStore,
@@ -16,7 +16,7 @@ import { Logger } from "@common/logger/Logger";
 import { requestUrl } from "@test/utils/fetch";
 
 vi.mock("@/features/character/stores/characterStore.svelte", () => ({
-    characterStore: { add: vi.fn() },
+    characterStore: { add: vi.fn() } satisfies Partial<Mocked<typeof characterStore>>,
 }));
 
 const BASE_URL = "https://phonebook.test";
@@ -72,15 +72,14 @@ describe("PhonebookStore", () => {
         phonebookStore.featuredCharacters = [];
         phonebookStore.searchResults = [];
         vi.mocked(characterStore.add).mockReset();
-    });
-
-    afterEach(() => {
-        phonebookStore.destroy();
-        setTokenProvider(null);
-        vi.useRealTimers();
-        vi.unstubAllGlobals();
-        vi.unstubAllEnvs();
-        vi.restoreAllMocks();
+        onTestFinished(() => {
+            phonebookStore.destroy();
+            setTokenProvider(null);
+            vi.useRealTimers();
+            vi.unstubAllGlobals();
+            vi.unstubAllEnvs();
+            vi.restoreAllMocks();
+        });
     });
 
     describe("init", () => {
@@ -391,10 +390,10 @@ describe("PhonebookStore", () => {
             await connectStore();
             fetchMock.mockImplementation(async () => json([entry("1")]));
 
-            await phonebookStore.search("cat girl&x=1/é");
+            await phonebookStore.search("고양이 소녀&x=1/");
 
             expect(sentRequests()).toEqual([
-                `GET ${BASE_URL}/api/characters/search?q=cat%20girl%26x%3D1%2F%C3%A9`,
+                `GET ${BASE_URL}/api/characters/search?q=%EA%B3%A0%EC%96%91%EC%9D%B4%20%EC%86%8C%EB%85%80%26x%3D1%2F`,
             ]);
             expect(phonebookStore.searchResults.map((e) => e.id)).toEqual(["1"]);
         });

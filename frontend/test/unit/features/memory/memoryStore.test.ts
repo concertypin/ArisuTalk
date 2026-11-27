@@ -5,7 +5,7 @@
  * current time with margins of hours or days.
  */
 import "fake-indexeddb/auto";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi, onTestFinished } from "vitest";
 import { MemoryStore } from "@/features/memory/stores/memoryStore.svelte";
 import { IDBMemoryAdapter } from "@/lib/adapters/storage/memory/IDBMemoryAdapter";
 import { getArisuDB } from "@/lib/adapters/storage/IndexedDBHelper";
@@ -60,10 +60,9 @@ describe("MemoryStore", () => {
         store = new MemoryStore();
         await store.initPromise;
         await db.memories.clear();
-    });
-
-    afterEach(() => {
-        vi.restoreAllMocks();
+        onTestFinished(() => {
+            vi.restoreAllMocks();
+        });
     });
 
     describe("loadMemories", () => {

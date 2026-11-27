@@ -36,7 +36,10 @@ export function mockScriptingWorker<const T extends ScriptingWorkerApi["execute"
 }
 
 /**
- * Evaluates scripting worker code with Node's `vm`, a stand-in for the QuickJS worker.
+ * Evaluates scripting worker code with Node's `vm`, a lightweight stand-in for the QuickJS worker.
+ * It is not the sandbox: there is no isolation, no `storage`, `console` or `fetch`, and no timeout, so
+ * use it to test the code that builds scripts and consumes their results. To test the real sandbox,
+ * call `api.execute` from `@worker/scripting/main` (see `test/workers/scripting.test.ts`).
  * Follows the worker's rule: code with a statement or a leading `return` is a function body,
  * anything else is an expression whose value is returned. Failures come back as `error`, not a throw.
  * @param code - The script source.
