@@ -118,6 +118,7 @@ export async function parseBackupFile(file: File): Promise<{ data: Record<string
             !result ||
             typeof result !== "object" ||
             !("data" in result) ||
+            !result.data ||
             typeof result.data !== "object"
         ) {
             throw new Error("Invalid backup file: missing 'data' property");
@@ -143,10 +144,10 @@ export async function parseBackupFile(file: File): Promise<{ data: Record<string
         return { data: result.data as Record<string, unknown[]> };
     }
 
-    // Unknown format
-    throw new Error(
-        `Unknown backup format (first byte: 0x${firstByte.toString(16)}). Expected CBOR or JSON.`
-    );
+    // Unknown format (an empty file has no first byte)
+    const found =
+        firstByte === undefined ? "empty file" : `first byte: 0x${firstByte.toString(16)}`;
+    throw new Error(`Unknown backup format (${found}). Expected CBOR or JSON.`);
 }
 
 /**
@@ -166,8 +167,12 @@ export async function importBackup(backup: { data: Record<string, unknown[]> }):
             continue;
         }
         try {
-            await table.clear();
-            await table.bulkAdd(rows as never[]);
+            // One transaction per table: a failing bulkAdd rolls back the clear, so a bad
+            // backup cannot wipe the rows that are already stored.
+            await db.transaction("rw", table, async () => {
+                await table.clear();
+                await table.bulkAdd(rows as never[]);
+            });
         } catch (e) {
             Logger.error(`[Migration] Failed to import table "${table.name}"`, e);
         }
