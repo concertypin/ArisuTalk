@@ -9,7 +9,6 @@
     import Trash from "phosphor-svelte/lib/TrashIcon";
     import CaretDown from "phosphor-svelte/lib/CaretDownIcon";
     import CaretUp from "phosphor-svelte/lib/CaretUpIcon";
-    import { merge } from "lodash-es";
     import CharacterSettings from "@/features/character/components/settingsSubpage/CharacterSettings.svelte";
 
     type LorebookEntry = Character["prompt"]["lorebook"]["data"][number];
@@ -25,15 +24,25 @@
 
     let expandedEntryId = $state<string | null>(null);
 
+    /**
+     * Builds the character with a replaced lorebook.
+     * Not a deep merge: merging arrays works by index, so a shorter list (a deleted entry) or an entry
+     * with fewer fields (a changed condition) would keep the stale items and fields.
+     * @param lorebook - Fields of the lorebook to replace.
+     */
+    function withLorebook(lorebook: Partial<Character["prompt"]["lorebook"]>): Character {
+        return {
+            ...character,
+            prompt: {
+                ...character.prompt,
+                lorebook: { ...character.prompt.lorebook, ...lorebook },
+            },
+        };
+    }
+
     function updateTokenLimit(limit: number) {
         onCharacterChange(
-            merge({}, character, {
-                prompt: {
-                    lorebook: {
-                        config: { tokenLimit: limit },
-                    },
-                },
-            })
+            withLorebook({ config: { ...character.prompt.lorebook.config, tokenLimit: limit } })
         );
     }
 
@@ -47,40 +56,20 @@
             enabled: true,
             priority: 0,
         };
-        onCharacterChange(
-            merge({}, character, {
-                prompt: {
-                    lorebook: {
-                        data: [...character.prompt.lorebook.data, newEntry],
-                    },
-                },
-            })
-        );
+        onCharacterChange(withLorebook({ data: [...character.prompt.lorebook.data, newEntry] }));
         expandedEntryId = newEntry.id;
     }
 
     function updateEntry(entryId: string, updates: Partial<LorebookEntry>) {
         const data = character.prompt.lorebook.data.map((e) =>
-            e.id === entryId ? merge({}, e, updates) : e
+            e.id === entryId ? { ...e, ...updates } : e
         );
-        onCharacterChange(
-            merge({}, character, {
-                prompt: {
-                    lorebook: { data },
-                },
-            })
-        );
+        onCharacterChange(withLorebook({ data }));
     }
 
     function deleteEntry(entryId: string) {
         const data = character.prompt.lorebook.data.filter((e) => e.id !== entryId);
-        onCharacterChange(
-            merge({}, character, {
-                prompt: {
-                    lorebook: { data },
-                },
-            })
-        );
+        onCharacterChange(withLorebook({ data }));
     }
 
     function toggleExpand(entryId: string) {

@@ -8,7 +8,6 @@
     import CornersOut from "phosphor-svelte/lib/CornersOutIcon";
     import CornersIn from "phosphor-svelte/lib/CornersInIcon";
     import BookOpen from "phosphor-svelte/lib/BookOpenIcon";
-    import { merge } from "lodash-es";
     import PromptTemplateManager from "@/features/promptTemplate/components/PromptTemplateManager.svelte";
     import { estimateTokens } from "@/lib/utils/tokenCounter";
     import CharacterSettings from "@/features/character/components/settingsSubpage/CharacterSettings.svelte";
@@ -28,14 +27,15 @@
     let showTemplateManager = $state(false);
 
     function onApplyTemplate(prompts: { system: string; generation: string; lore?: string }) {
-        onCharacterChange(
-            merge({}, character, {
-                prompt: {
-                    description: prompts.system,
-                    authorsNote: prompts.lore || undefined,
-                },
-            })
-        );
+        // Not a deep merge: merging skips `undefined`, so a template without lore would keep the old note.
+        onCharacterChange({
+            ...character,
+            prompt: {
+                ...character.prompt,
+                description: prompts.system,
+                authorsNote: prompts.lore || undefined,
+            },
+        });
     }
     let isAuthorsNoteExpanded = $state(false);
 
@@ -43,11 +43,11 @@
         field: K,
         value: Character["prompt"][K]
     ) {
-        onCharacterChange(
-            merge({}, character, {
-                prompt: { [field]: value },
-            })
-        );
+        // Not a deep merge: merging skips `undefined`, so a cleared field would keep its old value.
+        onCharacterChange({
+            ...character,
+            prompt: { ...character.prompt, [field]: value },
+        });
     }
 </script>
 

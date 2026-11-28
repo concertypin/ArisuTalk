@@ -26,6 +26,8 @@
             const a = document.createElement("a");
             a.href = url;
             a.download = `arisutalk-backup-${new Date().toISOString().slice(0, 10)}.aribackup`;
+            a.click();
+            URL.revokeObjectURL(url);
         } catch (e) {
             toastStore.error("Failed to export data");
             Logger.error("Export failed", e);

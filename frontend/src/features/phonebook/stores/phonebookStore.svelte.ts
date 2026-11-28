@@ -97,7 +97,7 @@ class PhonebookStore {
         try {
             const res = await get("/");
             if (res.ok) {
-                if (this.connection === "error" || this.connection === "idle") {
+                if (this.connection !== "connected") {
                     this.connection = "connected";
                     this.error = null;
                 }

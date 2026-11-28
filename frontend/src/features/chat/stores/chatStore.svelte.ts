@@ -461,6 +461,10 @@ export class ChatStore {
     private async finalizeMessage(chatId: string, message: Message, content: string) {
         message.content = { type: "text", data: content };
         await this.adapter.addMessage(chatId, message);
+        // `message` is the raw object behind the reactive entry, so mutating it alone does not notify
+        // the UI. Write the final (hook-processed) content through the reactive list as well.
+        const index = this.activeMessages.findIndex((m) => m.id === message.id);
+        if (index !== -1) this.activeMessages[index].content = message.content;
         this.updateChatTimestamps(chatId);
     }
 
@@ -738,7 +742,10 @@ export class ChatStore {
         if (this.activeChatId) {
             const chat = this.chats.find((c) => c.id === this.activeChatId);
             if (chat) {
-                const existingAffection = chat.affection ?? [];
+                // Attach the list to the reactive chat first, so entries of other characters
+                // survive the next update and `getAffection` sees the stored values.
+                chat.affection ??= [];
+                const existingAffection = chat.affection;
                 const existingIndex = existingAffection.findIndex(
                     (a) => a.characterId === characterId
                 );

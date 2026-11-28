@@ -4,7 +4,6 @@
      * Metadata fields: author, license (with autocomplete), version, distribution URL.
      */
     import type { Character } from "@arisutalk/character-spec/v0/Character";
-    import { merge } from "lodash-es";
     import CharacterSettings from "@/features/character/components/settingsSubpage/CharacterSettings.svelte";
 
     import type { TContext, TProps } from "@/features/character/components/settingsSubpage/types";
@@ -30,11 +29,11 @@
         field: K,
         value: NonNullable<Character["metadata"]>[K]
     ) {
-        onCharacterChange(
-            merge({}, character, {
-                metadata: { [field]: value },
-            })
-        );
+        // Not a deep merge: merging skips `undefined`, so a cleared field would keep its old value.
+        onCharacterChange({
+            ...character,
+            metadata: { ...character.metadata, [field]: value },
+        });
     }
 </script>
 
